@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-06-27T13:00:23.816Z",
+      "error_message": "CSS fix: font-size, color",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "font-size: 12px → 22px; color: var(--text2) → var(--green)",
+      "fix": "Changed font-size: 12px → 22px; color: var(--text2) → var(--green)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-27T13:00:23.816Z"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-06-27T13:25:24.248Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/LoginPage.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-27T13:25:24.248Z"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-06-27T13:28:48.547Z",
+      "error_message": "CSS fix: color",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "color: rgba(255,255,255,0.55) → rgba(255,255,255,0.88)",
+      "fix": "Changed color: rgba(255,255,255,0.55) → rgba(255,255,255,0.88)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-27T13:28:48.547Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-06-29T13:40:22.373Z",
+      "error_message": "CSS fix: label",
+      "file": "quran-hifz/src/quran/pages/LoginPage.tsx",
+      "root_cause": "label: \"طالب\",  email: \"abdullah@quran-hifz.sa\", password: \"student123\", icon: \"ti-user-circle\" → \"ولي أمر\",  email: \"parent@quran-hifz.sa\",   password: \"parent123\",  icon: \"ti-users\"",
+      "fix": "Changed label: \"طالب\",  email: \"abdullah@quran-hifz.sa\", password: \"student123\", icon: \"ti-user-circle\" → \"ولي أمر\",  email: \"parent@quran-hifz.sa\",   password: \"parent123\",  icon: \"ti-users\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T13:40:22.373Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-06-29T14:16:07.066Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/QuranApp.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T14:16:07.066Z"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-06-29T14:20:50.401Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/parent/ParentMessages.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T14:20:50.401Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-06-29T14:21:52.736Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/parent/ParentHomeworkView.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T14:21:52.736Z"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-06-29T14:22:15.431Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz-server/src/controllers/parent.controller.ts",
+      "root_cause": "Had 'name path juz halqa'",
+      "fix": "Changed to 'name path juz halqa attendancePct progressPct pro",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T14:22:15.431Z"
+    }
+  ]
+}
