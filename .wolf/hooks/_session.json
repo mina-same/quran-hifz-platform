@@ -1,18 +1,9 @@
 {
-  "session_id": "session-2026-06-30-0032",
-  "started": "2026-06-30T21:32:04.672Z",
+  "session_id": "session-2026-06-30-0036",
+  "started": "2026-06-30T21:36:42.122Z",
   "files_read": {},
-  "files_written": [
-    {
-      "file": "/Volumes/Data/work/quran hifz platform/.gitignore",
-      "action": "create",
-      "tokens": 140,
-      "at": "2026-06-30T21:33:06.687Z"
-    }
-  ],
-  "edit_counts": {
-    ".gitignore": 1
-  },
+  "files_written": [],
+  "edit_counts": {},
   "anatomy_hits": 0,
   "anatomy_misses": 0,
   "repeated_reads_warned": 0,
