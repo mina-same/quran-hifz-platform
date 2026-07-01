@@ -388,6 +388,54 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-01T11:50:02.928Z"
+    },
+    {
+      "id": "bug-025",
+      "timestamp": "2026-07-01T12:04:48.178Z",
+      "error_message": "CSS fix: title, meetLink, teacher",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "title: \"\", type: \"\", timeSlot: \"\", location: \"\", isOnline: false, meetLink: \"\", → \"\", type: \"\", timeSlot: \"\", locationSelect: \"\", locationCustom: \"\", isOnline: false,; meetLink: string → \"\", teacher: \"\", maxStudents: \"\", startDate: \"\", endDate: \"\", daysPerWeek: \"\", status: \"upcoming\",; teacher: \"\", maxStudents: \"\", startDate: \"\", endDate: \"\", daysPerWeek: \"\", status: \"upcoming\", → string",
+      "fix": "Changed title: \"\", type: \"\", timeSlot: \"\", location: \"\", isOnline: false, meetLink: \"\", → \"\", type: \"\", timeSlot: \"\", locationSelect: \"\", locationCustom: \"\", isOnline: false,; meetLink: string → \"\", teacher: \"\", maxStudents: \"\", startDate: \"\", endDate: \"\", daysPerWeek: \"\", status: \"upcoming\",; teacher: \"\", maxStudents: \"\", startDate: \"\", endDate: \"\", daysPerWeek: \"\", status: \"upcoming\", → string",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T12:04:54.015Z"
+    },
+    {
+      "id": "bug-026",
+      "timestamp": "2026-07-01T12:05:04.750Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "12 lines replaced/restructured",
+      "fix": "Rewrote 19→22 lines (12 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:05:04.750Z"
+    },
+    {
+      "id": "bug-027",
+      "timestamp": "2026-07-01T12:05:21.025Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:05:21.025Z"
     }
   ]
 }

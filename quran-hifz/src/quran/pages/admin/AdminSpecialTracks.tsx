@@ -8,6 +8,7 @@ import {
   type SpecialTrack,
 } from "../../api/special-tracks";
 import { useTeachers } from "../../api/teachers";
+import { useMasajid } from "../../api/masajid";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 
@@ -26,7 +27,8 @@ type FormFields = {
   title: string;
   type: string;
   timeSlot: string;
-  location: string;
+  locationSelect: string;  // masjid._id | "custom"
+  locationCustom: string;
   isOnline: boolean;
   meetLink: string;
   teacher: string;
@@ -38,8 +40,8 @@ type FormFields = {
 };
 
 const EMPTY_FORM: FormFields = {
-  title: "", type: "", timeSlot: "", location: "", isOnline: false, meetLink: "",
-  teacher: "", maxStudents: "", startDate: "", endDate: "", daysPerWeek: "", status: "upcoming",
+  title: "", type: "", timeSlot: "", locationSelect: "", locationCustom: "", isOnline: false,
+  meetLink: "", teacher: "", maxStudents: "", startDate: "", endDate: "", daysPerWeek: "", status: "upcoming",
 };
 
 type ModalState = null | { mode: "add" } | { mode: "edit"; item: SpecialTrack };
@@ -68,6 +70,7 @@ function getTeacherId(v: unknown): string {
 export function AdminSpecialTracks() {
   const { data: tracks, isLoading } = useSpecialTracks();
   const { data: teachers = [] } = useTeachers();
+  const { data: masajid = [] } = useMasajid();
   const createTrack = useCreateTrack();
   const updateTrack = useUpdateTrack();
   const deleteTrack = useDeleteTrack();
@@ -85,19 +88,22 @@ export function AdminSpecialTracks() {
 
   function openEdit(item: SpecialTrack) {
     const d = (s: string) => s ? new Date(s).toISOString().split("T")[0] : "";
+    // Try to match existing location to a masjid name
+    const matchedMasjid = masajid.find((m) => m.name === item.location);
     setForm({
-      title:       item.title,
-      type:        item.type,
-      timeSlot:    item.timeSlot,
-      location:    item.isOnline ? "" : item.location,
-      isOnline:    item.isOnline ?? false,
-      meetLink:    item.meetLink ?? "",
-      teacher:     getTeacherId(item.teacher),
-      maxStudents: String(item.maxStudents),
-      startDate:   d(item.startDate),
-      endDate:     d(item.endDate),
-      daysPerWeek: item.daysPerWeek,
-      status:      item.status,
+      title:          item.title,
+      type:           item.type,
+      timeSlot:       item.timeSlot,
+      locationSelect: item.isOnline ? "" : (matchedMasjid ? matchedMasjid._id : "custom"),
+      locationCustom: item.isOnline ? "" : (matchedMasjid ? "" : item.location),
+      isOnline:       item.isOnline ?? false,
+      meetLink:       item.meetLink ?? "",
+      teacher:        getTeacherId(item.teacher),
+      maxStudents:    String(item.maxStudents),
+      startDate:      d(item.startDate),
+      endDate:        d(item.endDate),
+      daysPerWeek:    item.daysPerWeek,
+      status:         item.status,
     });
     setFormError("");
     setModal({ mode: "edit", item });
@@ -108,7 +114,7 @@ export function AdminSpecialTracks() {
   }
 
   async function handleSubmit() {
-    const { title, type, timeSlot, isOnline, location, meetLink, teacher, maxStudents, startDate, endDate, daysPerWeek } = form;
+    const { title, type, timeSlot, isOnline, locationSelect, locationCustom, meetLink, teacher, maxStudents, startDate, endDate, daysPerWeek } = form;
     if (!title.trim()) { setFormError("اسم المسار مطلوب"); return; }
     if (!type.trim())  { setFormError("نوع المسار مطلوب"); return; }
     if (!teacher)      { setFormError("يرجى اختيار المعلم"); return; }
@@ -116,7 +122,16 @@ export function AdminSpecialTracks() {
     if (!daysPerWeek.trim()) { setFormError("الأيام مطلوبة"); return; }
     if (!startDate || !endDate) { setFormError("التواريخ مطلوبة"); return; }
     if (isOnline && !meetLink.trim()) { setFormError("رابط Google Meet مطلوب للحلقات الإلكترونية"); return; }
-    if (!isOnline && !location.trim()) { setFormError("الموقع مطلوب للحلقات الحضورية"); return; }
+    if (!isOnline && !locationSelect) { setFormError("يرجى اختيار المسجد أو الموقع"); return; }
+    if (!isOnline && locationSelect === "custom" && !locationCustom.trim()) {
+      setFormError("يرجى كتابة اسم الموقع"); return;
+    }
+
+    const resolvedLocation = isOnline
+      ? "عبر الإنترنت"
+      : locationSelect === "custom"
+        ? locationCustom.trim()
+        : (masajid.find((m) => m._id === locationSelect)?.name ?? locationCustom.trim());
 
     setFormError("");
     const body = {
@@ -124,7 +139,7 @@ export function AdminSpecialTracks() {
       type:        type.trim(),
       status:      form.status,
       timeSlot:    timeSlot.trim(),
-      location:    isOnline ? "عبر الإنترنت" : location.trim(),
+      location:    resolvedLocation,
       isOnline,
       meetLink:    isOnline ? meetLink.trim() : "",
       teacher,

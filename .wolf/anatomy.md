@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T12:03:37.860Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T12:05:21.014Z
 > Files: 334 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
@@ -470,7 +470,7 @@
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~2685 tok)
 - `AdminRegister.tsx` — schema — renders form (~2062 tok)
 - `AdminReports.tsx` — REPORTS — renders chart (~419 tok)
-- `AdminSpecialTracks.tsx` — STATUS_TONE — renders form, modal (~5259 tok)
+- `AdminSpecialTracks.tsx` — STATUS_TONE — renders form, modal (~5489 tok)
 - `AdminStudents.tsx` — PATH_TONE — renders table (~3902 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~3031 tok)
 
