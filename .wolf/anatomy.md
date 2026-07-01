@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T14:06:12.082Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T14:10:56.993Z
 > Files: 348 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
@@ -469,7 +469,7 @@
 
 - `AuthContext.tsx` — AuthContext (~690 tok)
 - `ParentContext.tsx` — ParentContext (~206 tok)
-- `PortalContext.tsx` — PortalContext (~483 tok)
+- `PortalContext.tsx` — readHash (~780 tok)
 - `ThemeContext.tsx` — ThemeContext (~307 tok)
 - `useTopbar.ts` — Declarative topbar setter for a page component. (~106 tok)
 
