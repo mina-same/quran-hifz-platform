@@ -77,7 +77,7 @@ export async function updateTeacher(req: Request, res: Response, next: NextFunct
     const teacher = await Teacher.findByIdAndUpdate(req.params.id, teacherData, { new: true, runValidators: true });
     if (!teacher) throw new AppError('المعلم غير موجود', 404);
 
-    if (email || newPassword) {
+    if (email || newPassword || password) {
       const userDoc = await User.findOne({ role: 'teacher', profileId: teacher._id });
       if (userDoc) {
         if (email && email !== userDoc.email) {
@@ -87,6 +87,12 @@ export async function updateTeacher(req: Request, res: Response, next: NextFunct
         }
         if (newPassword) userDoc.password = newPassword;
         await userDoc.save();
+      } else if (email && (newPassword || password)) {
+        // Teacher was created without credentials — create User now
+        const initialPassword = (newPassword || password)!;
+        const existing = await User.findOne({ email });
+        if (existing) throw new AppError('البريد الإلكتروني مستخدم بالفعل', 400);
+        await User.create({ name: teacher.name, email, password: initialPassword, role: 'teacher', profileId: teacher._id });
       }
     }
 

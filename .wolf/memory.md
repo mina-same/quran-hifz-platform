@@ -532,3 +532,27 @@
 | 16:22 | Session end: 15 writes across 6 files (LandingPage.tsx, quran.css, __root.tsx, robots.txt, sitemap.xml) | 6 reads | ~19593 tok |
 | 16:23 | Edited quran-hifz/src/quran/pages/LandingPage.tsx | 2→2 lines | ~26 |
 | 16:24 | Edited quran-hifz/src/quran/pages/LandingPage.tsx | expanded (+8 lines) | ~92 |
+| 16:26 | Session end: 17 writes across 6 files (LandingPage.tsx, quran.css, __root.tsx, robots.txt, sitemap.xml) | 6 reads | ~19696 tok |
+| 16:37 | Edited quran-hifz-server/src/controllers/special-track.controller.ts | added 1 condition(s) | ~158 |
+| 16:37 | Edited quran-hifz-server/src/controllers/special-track.controller.ts | added 1 condition(s) | ~279 |
+| 16:37 | Edited quran-hifz-server/src/routes/special-track.routes.ts | inline fix | ~40 |
+| 16:37 | Edited quran-hifz-server/src/controllers/teacher.controller.ts | added 2 condition(s) | ~275 |
+| 16:38 | Edited quran-hifz-server/src/routes/special-track.routes.ts | 2→3 lines | ~62 |
+| 16:38 | Edited quran-hifz-server/src/controllers/student.controller.ts | added nullish coalescing | ~162 |
+| 16:38 | Created quran-hifz/src/quran/api/special-tracks.ts | — | ~765 |
+| 16:38 | Edited quran-hifz-server/src/controllers/student.controller.ts | added optional chaining | ~399 |
+| 16:38 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | 13→17 lines | ~157 |
+| 16:38 | Edited quran-hifz/src/quran/api/students.ts | 16→17 lines | ~131 |
+| 16:38 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | modified getEnrolledId() | ~98 |
+| 16:38 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | CSS: email, password | ~56 |
+| 16:38 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | modified AdminSpecialTracks() | ~215 |
+| 16:38 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | CSS: email, password | ~84 |
+| 16:38 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | added nullish coalescing | ~93 |
+| 16:38 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | CSS: mode, item | ~410 |
+| 16:38 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | added optional chaining | ~220 |
+| 16:39 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | added optional chaining | ~497 |
+| 16:39 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | added optional chaining | ~1633 |
+| 16:39 | Created quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | — | ~2012 |
+| 16:39 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | 3→3 lines | ~46 |
+| 13:30 | Fixed bugs 049+050: teacher/student edit never created User accounts; fixed updateTeacher else-if, rewrote updateStudent, enriched getStudents with email, added email/password to student edit form | teacher.controller.ts, student.controller.ts, students.ts, AdminStudents.tsx | complete | ~1200 |
+| 16:41 | Session end: 38 writes across 15 files (LandingPage.tsx, quran.css, __root.tsx, robots.txt, sitemap.xml) | 22 reads | ~49854 tok |

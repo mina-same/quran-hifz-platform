@@ -21,9 +21,10 @@ const trackSchema = z.object({
 
 export async function getTracks(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { status } = req.query;
+    const { status, teacher } = req.query;
     const filter: Record<string, unknown> = {};
-    if (status) filter.status = status;
+    if (status)  filter.status  = status;
+    if (teacher) filter.teacher = teacher;
     const tracks = await SpecialTrack.find(filter)
       .populate('teacher', 'name')
       .populate('enrolledStudents', 'name')
@@ -69,7 +70,22 @@ export async function enrollStudent(req: Request, res: Response, next: NextFunct
       req.params.id,
       { $addToSet: { enrolledStudents: studentId } },
       { new: true },
-    );
+    ).populate('enrolledStudents', 'name');
+    if (!track) throw new AppError('المسار غير موجود', 404);
+    res.json({ success: true, data: track });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function unenrollStudent(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { studentId } = req.body;
+    const track = await SpecialTrack.findByIdAndUpdate(
+      req.params.id,
+      { $pull: { enrolledStudents: studentId } },
+      { new: true },
+    ).populate('enrolledStudents', 'name');
     if (!track) throw new AppError('المسار غير موجود', 404);
     res.json({ success: true, data: track });
   } catch (err) {

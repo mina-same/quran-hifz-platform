@@ -34,6 +34,8 @@ type EditFormFields = {
   masjid: string;
   guardianPhone: string;
   status: "active" | "inactive" | "new";
+  email: string;
+  password: string;
 };
 
 const OVERLAY: React.CSSProperties = {
@@ -62,7 +64,7 @@ export function AdminStudents() {
   const [pathFilter, setPathFilter] = useState("");
   const [editItem, setEditItem] = useState<Student | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [form, setForm] = useState<EditFormFields>({ name: "", path: "", halqa: "", masjid: "", guardianPhone: "", status: "active" });
+  const [form, setForm] = useState<EditFormFields>({ name: "", path: "", halqa: "", masjid: "", guardianPhone: "", status: "active", email: "", password: "" });
   const [formError, setFormError] = useState("");
   const [selectedParentId, setSelectedParentId] = useState<string>("");
 
@@ -76,6 +78,8 @@ export function AdminStudents() {
       masjid:        getObjId(s.masjid),
       guardianPhone: s.guardianPhone,
       status:        s.status,
+      email:         s.email ?? "",
+      password:      "",
     });
     setSelectedParentId("");
     setFormError("");
@@ -88,6 +92,10 @@ export function AdminStudents() {
 
   async function handleUpdate() {
     if (!form.name.trim()) { setFormError("الاسم مطلوب"); return; }
+    if (form.email.trim() && !form.password && !editItem?.email) {
+      setFormError("يرجى إدخال كلمة المرور لمنح الطالب حساباً جديداً");
+      return;
+    }
     setFormError("");
     try {
       await updateStudent.mutateAsync({
@@ -98,6 +106,8 @@ export function AdminStudents() {
         masjid:        form.masjid || undefined,
         guardianPhone: form.guardianPhone.trim(),
         status:        form.status,
+        ...(form.email.trim()  && { email:    form.email.trim() }),
+        ...(form.password      && { password: form.password }),
       });
       if (selectedParentId !== "") {
         await setStudentParent.mutateAsync({
@@ -305,6 +315,24 @@ export function AdminStudents() {
               <div className="form-group" style={{ gridColumn: "1 / -1" }}>
                 <label className="form-label">جوال ولي الأمر</label>
                 <input className="form-input" type="tel" dir="ltr" placeholder="05XXXXXXXX" value={form.guardianPhone} onChange={(e) => setField("guardianPhone", e.target.value)} />
+              </div>
+
+              <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+                <div style={{ borderTop: "1px solid var(--border)", margin: "4px 0 12px", paddingTop: 12 }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text2)", fontWeight: 600 }}>
+                    <i className="ti ti-lock" style={{ marginLeft: 4 }} />
+                    بيانات الدخول
+                    {!form.email && <span style={{ fontWeight: 400, marginRight: 6 }}>— لا يوجد حساب بعد</span>}
+                  </p>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">البريد الإلكتروني</label>
+                <input className="form-input" type="email" placeholder="student@example.com" dir="ltr" value={form.email} onChange={(e) => setField("email", e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">{editItem?.email ? "كلمة مرور جديدة" : "كلمة المرور"}</label>
+                <input className="form-input" type="password" placeholder={editItem?.email ? "اتركه فارغاً إن لم تُرد تغييرها" : "6 أحرف على الأقل"} dir="ltr" value={form.password} onChange={(e) => setField("password", e.target.value)} />
               </div>
 
               <div className="form-group" style={{ gridColumn: "1 / -1" }}>

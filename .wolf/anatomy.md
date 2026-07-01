@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T13:24:16.908Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T13:39:57.563Z
 > Files: 346 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
@@ -267,10 +267,10 @@
 - `masjid.controller.ts` — Zod schemas: masjidSchema (~698 tok)
 - `message.controller.ts` — Zod schemas: messageSchema (~526 tok)
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
-- `special-track.controller.ts` — Zod schemas: trackSchema (~908 tok)
+- `special-track.controller.ts` — Zod schemas: trackSchema (~1073 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
-- `student.controller.ts` — Zod schemas: studentSchema (~1043 tok)
-- `teacher.controller.ts` — Zod schemas: teacherSchema (~1267 tok)
+- `student.controller.ts` — Zod schemas: studentSchema (~1412 tok)
+- `teacher.controller.ts` — Zod schemas: teacherSchema (~1398 tok)
 
 ## quran-hifz-server/src/middleware/
 
@@ -310,7 +310,7 @@
 - `masjid.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~161 tok)
 - `message.routes.ts` — API routes: GET, POST, PATCH (3 endpoints) (~105 tok)
 - `parent.routes.ts` — API routes: GET (6 endpoints) (~239 tok)
-- `special-track.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~183 tok)
+- `special-track.routes.ts` — API routes: GET, POST, PUT, DELETE (6 endpoints) (~210 tok)
 - `stats.routes.ts` — API routes: GET (1 endpoints) (~79 tok)
 - `student.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~173 tok)
 - `teacher.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~166 tok)
@@ -437,9 +437,9 @@
 - `masajid.ts` — Exports Masjid, useMasajid, useMasjid, useCreateMasjid + 2 more (~461 tok)
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
-- `special-tracks.ts` — Exports SpecialTrack, useSpecialTracks, useCreateTrack, useUpdateTrack, useDeleteTrack (~493 tok)
+- `special-tracks.ts` — Exports EnrolledStudent, SpecialTrack, useSpecialTracks, useCreateTrack + 4 more (~765 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~166 tok)
-- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~730 tok)
+- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~737 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~504 tok)
 
 ## quran-hifz/src/quran/components/
@@ -487,8 +487,8 @@
 - `AdminParents.tsx` — EMPTY_ADD — renders table (~5192 tok)
 - `AdminRegister.tsx` — schema — renders form (~3078 tok)
 - `AdminReports.tsx` — REPORTS — renders chart (~419 tok)
-- `AdminSpecialTracks.tsx` — STATUS_TONE — renders form, modal (~5747 tok)
-- `AdminStudents.tsx` — PATH_TONE — renders table (~4602 tok)
+- `AdminSpecialTracks.tsx` — STATUS_TONE — renders form, modal (~7651 tok)
+- `AdminStudents.tsx` — PATH_TONE — renders table (~5093 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4599 tok)
 
 ## quran-hifz/src/quran/pages/parent/
@@ -522,7 +522,7 @@
 - `TeacherPlans.tsx` — ROWS — renders table (~436 tok)
 - `TeacherRecordLesson.tsx` — LESSON_TYPES (~4027 tok)
 - `TeacherReports.tsx` — TeacherReports — renders chart (~172 tok)
-- `TeacherStudents.tsx` — HW_TONE — renders table (~805 tok)
+- `TeacherStudents.tsx` — HW_TONE — renders table (~2005 tok)
 
 ## quran-hifz/src/quran/router/
 

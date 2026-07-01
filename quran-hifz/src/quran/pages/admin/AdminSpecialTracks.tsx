@@ -5,10 +5,14 @@ import {
   useCreateTrack,
   useUpdateTrack,
   useDeleteTrack,
+  useEnrollStudent,
+  useUnenrollStudent,
   type SpecialTrack,
+  type EnrolledStudent,
 } from "../../api/special-tracks";
 import { useTeachers } from "../../api/teachers";
 import { useMasajid } from "../../api/masajid";
+import { useStudents } from "../../api/students";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 
@@ -45,7 +49,14 @@ const EMPTY_FORM: FormFields = {
   startDate: "", endDate: "", daysPerWeek: "", status: "upcoming",
 };
 
-type ModalState = null | { mode: "add" } | { mode: "edit"; item: SpecialTrack };
+type ModalState = null | { mode: "add" } | { mode: "edit"; item: SpecialTrack } | { mode: "students"; item: SpecialTrack };
+
+function getEnrolledId(v: EnrolledStudent | string): string {
+  return typeof v === "object" ? v._id : v;
+}
+function getEnrolledName(v: EnrolledStudent | string): string {
+  return typeof v === "object" ? v.name : v;
+}
 
 const OVERLAY: React.CSSProperties = {
   position: "fixed", inset: 0, zIndex: 1000,
@@ -72,14 +83,18 @@ export function AdminSpecialTracks() {
   const { data: tracks, isLoading } = useSpecialTracks();
   const { data: teachers = [] } = useTeachers();
   const { data: masajid = [] } = useMasajid();
-  const createTrack = useCreateTrack();
-  const updateTrack = useUpdateTrack();
-  const deleteTrack = useDeleteTrack();
+  const { data: allStudents = [] } = useStudents();
+  const createTrack   = useCreateTrack();
+  const updateTrack   = useUpdateTrack();
+  const deleteTrack   = useDeleteTrack();
+  const enrollStudent   = useEnrollStudent();
+  const unenrollStudent = useUnenrollStudent();
 
   const [modal, setModal] = useState<ModalState>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<FormFields>(EMPTY_FORM);
   const [formError, setFormError] = useState("");
+  const [addStudentId, setAddStudentId] = useState("");
 
   function openAdd() {
     setForm(EMPTY_FORM);
@@ -241,6 +256,13 @@ export function AdminSpecialTracks() {
                 المسجّلون: <strong>{enrolled}/{t.maxStudents}</strong>
               </span>
               <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  className="topbar-btn btn-ghost"
+                  style={{ padding: "5px 12px", fontSize: 12, color: "var(--green)", borderColor: "rgba(26,92,42,0.25)" }}
+                  onClick={() => { setAddStudentId(""); setModal({ mode: "students", item: t }); }}
+                >
+                  <i className="ti ti-users" /> الطلاب
+                </button>
                 <button
                   className="topbar-btn btn-ghost"
                   style={{ padding: "5px 12px", fontSize: 12 }}
@@ -438,6 +460,121 @@ export function AdminSpecialTracks() {
           </div>
         </div>
       )}
+
+      {/* Students Management Modal */}
+      {modal?.mode === "students" && (() => {
+        const track = (tracks ?? []).find((t) => t._id === modal.item._id) ?? modal.item;
+        const enrolledIds = new Set(track.enrolledStudents.map(getEnrolledId));
+        const available = allStudents.filter((s) => !enrolledIds.has(s._id));
+        return (
+          <div style={OVERLAY} onClick={() => setModal(null)}>
+            <div style={{ ...DIALOG, maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
+              {/* Header */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text)" }}>
+                    <i className="ti ti-users" style={{ marginLeft: 6, color: "var(--green)" }} />
+                    طلاب المسار: {track.title}
+                  </h3>
+                  <span style={{ fontSize: 12, color: "var(--text2)" }}>
+                    {track.enrolledStudents.length} / {track.maxStudents} مسجّل
+                  </span>
+                </div>
+                <button className="topbar-btn btn-ghost" style={{ padding: "4px 8px" }} onClick={() => setModal(null)}>
+                  <i className="ti ti-x" />
+                </button>
+              </div>
+
+              {/* Add Student */}
+              {available.length > 0 && track.enrolledStudents.length < track.maxStudents && (
+                <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                  <select
+                    className="form-input"
+                    style={{ flex: 1, fontSize: 13 }}
+                    value={addStudentId}
+                    onChange={(e) => setAddStudentId(e.target.value)}
+                  >
+                    <option value="">— اختر طالباً للإضافة —</option>
+                    {available.map((s) => (
+                      <option key={s._id} value={s._id}>{s.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    className="topbar-btn btn-primary"
+                    style={{ padding: "8px 16px", whiteSpace: "nowrap" }}
+                    disabled={!addStudentId || enrollStudent.isPending}
+                    onClick={async () => {
+                      if (!addStudentId) return;
+                      await enrollStudent.mutateAsync({ id: track._id, studentId: addStudentId });
+                      setAddStudentId("");
+                    }}
+                  >
+                    <i className="ti ti-plus" /> إضافة
+                  </button>
+                </div>
+              )}
+
+              {track.enrolledStudents.length >= track.maxStudents && (
+                <div style={{ padding: "8px 12px", background: "#fef9c3", borderRadius: 8, fontSize: 12, color: "#92400e", marginBottom: 12 }}>
+                  <i className="ti ti-info-circle" style={{ marginLeft: 4 }} />
+                  وصل المسار للحد الأقصى ({track.maxStudents} طالب)
+                </div>
+              )}
+
+              {/* Enrolled List */}
+              {track.enrolledStudents.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "24px 0", color: "var(--text3)", fontSize: 13 }}>
+                  <i className="ti ti-user-off" style={{ fontSize: 28, display: "block", marginBottom: 8 }} />
+                  لا يوجد طلاب مسجّلون بعد
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {track.enrolledStudents.map((s) => (
+                    <div
+                      key={getEnrolledId(s)}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        padding: "10px 14px", background: "var(--surface)", borderRadius: 10,
+                        border: "1px solid var(--border)",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{
+                          width: 34, height: 34, borderRadius: "50%",
+                          background: "var(--green-pale)", color: "var(--green)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 14, fontWeight: 700,
+                        }}>
+                          <i className="ti ti-user" />
+                        </div>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text)" }}>
+                          {getEnrolledName(s)}
+                        </span>
+                      </div>
+                      <button
+                        className="topbar-btn btn-ghost"
+                        style={{ padding: "4px 10px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}
+                        disabled={unenrollStudent.isPending}
+                        onClick={() => unenrollStudent.mutate({ id: track._id, studentId: getEnrolledId(s) })}
+                      >
+                        <i className="ti ti-user-minus" /> إزالة
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <button
+                className="topbar-btn btn-ghost"
+                style={{ width: "100%", justifyContent: "center", marginTop: 16 }}
+                onClick={() => setModal(null)}
+              >
+                إغلاق
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Delete Confirmation */}
       {deleteId && (

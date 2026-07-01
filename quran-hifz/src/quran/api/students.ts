@@ -16,6 +16,7 @@ export type Student = {
   lastMemorization: string;
   status: "active" | "inactive" | "new";
   homeworkStatus: "submitted" | "pending" | "late";
+  email: string | null;
 };
 
 export type StudentFilters = {

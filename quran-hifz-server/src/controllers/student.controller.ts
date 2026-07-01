@@ -33,7 +33,11 @@ export async function getStudents(req: Request, res: Response, next: NextFunctio
       .populate('masjid', 'name location')
       .sort({ createdAt: -1 });
 
-    res.json({ success: true, count: students.length, data: students });
+    const userDocs = await User.find({ role: 'student', profileId: { $in: students.map((s) => s._id) } }).select('profileId email');
+    const emailMap = new Map(userDocs.map((u) => [String(u.profileId), u.email]));
+    const enriched = students.map((s) => ({ ...s.toObject(), email: emailMap.get(String(s._id)) ?? null }));
+
+    res.json({ success: true, count: enriched.length, data: enriched });
   } catch (err) {
     next(err);
   }
@@ -76,10 +80,29 @@ export async function createStudent(req: Request, res: Response, next: NextFunct
 
 export async function updateStudent(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const data = studentSchema.partial().parse(req.body);
-    const student = await Student.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true });
+    const { email, password, ...studentData } = studentSchema.partial().parse(req.body);
+    const student = await Student.findByIdAndUpdate(req.params.id, studentData, { new: true, runValidators: true });
     if (!student) throw new AppError('الطالب غير موجود', 404);
-    res.json({ success: true, data: student });
+
+    if (email || password) {
+      const userDoc = await User.findOne({ role: 'student', profileId: student._id });
+      if (userDoc) {
+        if (email && email !== userDoc.email) {
+          const conflict = await User.findOne({ email, _id: { $ne: userDoc._id } });
+          if (conflict) throw new AppError('البريد الإلكتروني مستخدم بالفعل', 400);
+          userDoc.email = email;
+        }
+        if (password) userDoc.password = password;
+        await userDoc.save();
+      } else if (email && password) {
+        const existing = await User.findOne({ email });
+        if (existing) throw new AppError('البريد الإلكتروني مستخدم بالفعل', 400);
+        await User.create({ name: student.name, email, password, role: 'student', profileId: student._id });
+      }
+    }
+
+    const userDoc = await User.findOne({ role: 'student', profileId: student._id }).select('email');
+    res.json({ success: true, data: { ...student.toObject(), email: userDoc?.email ?? null } });
   } catch (err) {
     next(err);
   }

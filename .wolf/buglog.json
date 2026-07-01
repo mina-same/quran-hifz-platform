@@ -678,6 +678,141 @@
       "related_bugs": [],
       "occurrences": 3,
       "last_seen": "2026-07-01T13:23:56.844Z"
+    },
+    {
+      "id": "bug-043",
+      "timestamp": "2026-07-01T13:38:00.665Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz-server/src/routes/special-track.routes.ts",
+      "root_cause": "Had '/:id'",
+      "fix": "Changed to '/:id/unenroll'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:38:00.665Z"
+    },
+    {
+      "id": "bug-044",
+      "timestamp": "2026-07-01T13:38:06.203Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz-server/src/controllers/student.controller.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: const { email, password, ...studentData } = studentSchema.pa; const student = await Student.findByIdAndUpdate(req.params.i",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T13:38:15.865Z"
+    },
+    {
+      "id": "bug-045",
+      "timestamp": "2026-07-01T13:38:31.541Z",
+      "error_message": "CSS fix: mode",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "mode: \"edit\" → \"students\"",
+      "fix": "Changed mode: \"edit\" → \"students\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T13:38:39.963Z"
+    },
+    {
+      "id": "bug-046",
+      "timestamp": "2026-07-01T13:38:43.685Z",
+      "error_message": "CSS fix: name",
+      "file": "quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+      "root_cause": "name: \"\", path: \"\", halqa: \"\", masjid: \"\", guardianPhone: \"\", status: \"active\" → \"\", path: \"\", halqa: \"\", masjid: \"\", guardianPhone: \"\", status: \"active\", email: \"\", password: \"\"",
+      "fix": "Changed name: \"\", path: \"\", halqa: \"\", masjid: \"\", guardianPhone: \"\", status: \"active\" → \"\", path: \"\", halqa: \"\", masjid: \"\", guardianPhone: \"\", status: \"active\", email: \"\", password: \"\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:38:43.685Z"
+    },
+    {
+      "id": "bug-047",
+      "timestamp": "2026-07-01T13:38:49.769Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: if (form.email.trim() && !form.password && !editItem?.email); setFormError(\"يرجى إدخال كلمة المرور لمنح الطالب حساباً جديد | Also: <p style={{ margin: \"0 0 10px\", fontSize: 12, color: \"var(--; <i className=\"ti ti-lock\" style={{ marginLeft: 4 }} />",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-07-01T13:39:10.888Z"
+    },
+    {
+      "id": "bug-048",
+      "timestamp": "2026-07-01T13:39:13.823Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:39:13.823Z"
+    },
+    {
+      "id": "bug-049",
+      "timestamp": "2026-07-01T13:30:00.000Z",
+      "error_message": "Editing a teacher to add email/password does not create a User account when teacher was originally created without credentials",
+      "file": "quran-hifz-server/src/controllers/teacher.controller.ts",
+      "root_cause": "updateTeacher only called userDoc.save() on existing User. If userDoc was null (teacher created without credentials) the else branch was missing — silently did nothing.",
+      "fix": "Added else-if branch: when userDoc is null but email + (newPassword || password) are provided, create a new User document for the teacher.",
+      "tags": [
+        "auth",
+        "user-creation",
+        "update",
+        "teacher"
+      ],
+      "related_bugs": [
+        "bug-050"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-01"
+    },
+    {
+      "id": "bug-050",
+      "timestamp": "2026-07-01T13:30:00.000Z",
+      "error_message": "Editing a student never creates/updates the User login account — email/password silently discarded",
+      "file": "quran-hifz-server/src/controllers/student.controller.ts",
+      "root_cause": "updateStudent passed the entire parsed body (including email and password) to Student.findByIdAndUpdate, which Mongoose silently ignores on unknown fields. The User model was never touched. AdminStudents.tsx edit form also had no email/password fields at all.",
+      "fix": "(1) Destructure email/password out before Student.findByIdAndUpdate. (2) Create or update User document when credentials provided (mirrors updateTeacher logic). (3) Enrich getStudents list with email from User collection. (4) Added email/password inputs to AdminStudents.tsx edit modal. (5) Added email field to Student TypeScript type.",
+      "tags": [
+        "auth",
+        "user-creation",
+        "update",
+        "student",
+        "frontend"
+      ],
+      "related_bugs": [
+        "bug-049"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-01"
     }
   ]
 }

@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { get, post, put, del } from "../../lib/api";
 
+export type EnrolledStudent = { _id: string; name: string };
+
 export type SpecialTrack = {
   _id: string;
   title: string;
@@ -15,17 +17,21 @@ export type SpecialTrack = {
   meetLink?: string;
   teacher: { _id: string; name: string } | string;
   maxStudents: number;
-  enrolledStudents: string[];
+  enrolledStudents: (EnrolledStudent | string)[];
   notes?: string;
 };
 
 type ListResponse = { success: boolean; count: number; data: SpecialTrack[] };
 type SingleResponse = { success: boolean; data: SpecialTrack };
 
-export function useSpecialTracks(status?: string) {
+export function useSpecialTracks(status?: string, teacherId?: string) {
+  const params = new URLSearchParams();
+  if (status)    params.set("status",  status);
+  if (teacherId) params.set("teacher", teacherId);
+  const qs = params.toString() ? `?${params.toString()}` : "";
   return useQuery({
-    queryKey: ["special-tracks", status],
-    queryFn: () => get<ListResponse>(`/special-tracks${status ? `?status=${status}` : ""}`).then((r) => r.data),
+    queryKey: ["special-tracks", status ?? "", teacherId ?? ""],
+    queryFn: () => get<ListResponse>(`/special-tracks${qs}`).then((r) => r.data),
   });
 }
 
@@ -50,6 +56,24 @@ export function useDeleteTrack() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => del(`/special-tracks/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["special-tracks"] }),
+  });
+}
+
+export function useEnrollStudent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, studentId }: { id: string; studentId: string }) =>
+      post<SingleResponse>(`/special-tracks/${id}/enroll`, { studentId }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["special-tracks"] }),
+  });
+}
+
+export function useUnenrollStudent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, studentId }: { id: string; studentId: string }) =>
+      post<SingleResponse>(`/special-tracks/${id}/unenroll`, { studentId }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["special-tracks"] }),
   });
 }
