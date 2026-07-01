@@ -877,6 +877,22 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-01T13:54:34.629Z"
+    },
+    {
+      "id": "bug-055",
+      "timestamp": "2026-07-01T14:05:35.340Z",
+      "error_message": "CSS fix: t",
+      "file": "quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+      "root_cause": "t: SpecialTrack[\"teacher\"]): string { → TrackTeacher | string): string {",
+      "fix": "Changed t: SpecialTrack[\"teacher\"]): string { → TrackTeacher | string): string {",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T14:05:35.341Z"
     }
   ]
 }

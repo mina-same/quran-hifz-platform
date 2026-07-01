@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T14:00:25.406Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T14:06:12.082Z
 > Files: 348 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
@@ -487,7 +487,7 @@
 - `AdminParents.tsx` — EMPTY_ADD — renders table (~5192 tok)
 - `AdminRegister.tsx` — schema — renders form (~3078 tok)
 - `AdminReports.tsx` — REPORTS — renders chart (~419 tok)
-- `AdminSpecialTracks.tsx` — STATUS_TONE — renders form, modal (~9559 tok)
+- `AdminSpecialTracks.tsx` — getEnrolledId — renders form, modal (~12420 tok)
 - `AdminStudents.tsx` — PATH_TONE — renders table (~5093 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4599 tok)
 
@@ -509,7 +509,7 @@
 - `StudentMessages.tsx` — StudentMessages (~758 tok)
 - `StudentPoints.tsx` — MY_POINTS (~1302 tok)
 - `StudentSchedule.tsx` — getId (~836 tok)
-- `StudentSpecialTracks.tsx` — STATUS_LABEL (~3341 tok)
+- `StudentSpecialTracks.tsx` — STATUS_LABEL (~3342 tok)
 - `StudentStore.tsx` — MY_POINTS (~874 tok)
 
 ## quran-hifz/src/quran/pages/teacher/
@@ -523,7 +523,7 @@
 - `TeacherPlans.tsx` — ROWS — renders table (~436 tok)
 - `TeacherRecordLesson.tsx` — LESSON_TYPES (~4027 tok)
 - `TeacherReports.tsx` — TeacherReports — renders chart (~172 tok)
-- `TeacherSpecialTracks.tsx` — STATUS_LABEL (~2856 tok)
+- `TeacherSpecialTracks.tsx` — getEnrolledName (~3684 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2053 tok)
 
 ## quran-hifz/src/quran/router/

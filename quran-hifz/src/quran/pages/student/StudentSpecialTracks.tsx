@@ -2,7 +2,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
-import { useSpecialTracks, type SpecialTrack } from "../../api/special-tracks";
+import { useSpecialTracks, type SpecialTrack, type TrackTeacher } from "../../api/special-tracks";
 
 const STATUS_LABEL: Record<string, string> = {
   active:   "نشط الآن",
@@ -14,25 +14,19 @@ const STATUS_TONE: Record<string, "green" | "gold" | "red"> = {
   upcoming: "gold",
   ended:    "red",
 };
+
 const TYPE_LABEL: Record<string, string> = {
-  revision:    "مراجعة مكثّفة",
-  tajweed:     "تجويد",
-  ijazah:      "إجازة",
-  khatmah:     "ختمة مسرّعة",
-  ramadan:     "برنامج رمضاني",
-  competition: "تحضير مسابقة",
-  other:       "أخرى",
+  "مراجعة مكثّفة": "مراجعة مكثّفة", "تجويد": "تجويد",
+  "إجازة": "إجازة", "ختمة مسرّعة": "ختمة مسرّعة",
+  "برنامج رمضاني": "برنامج رمضاني", "تحضير مسابقة": "تحضير مسابقة", "أخرى": "أخرى",
 };
 const DAYS_LABEL: Record<string, string> = {
-  daily:   "كل يوم",
-  "2":     "مرتين أسبوعياً",
-  "3":     "ثلاث مرات أسبوعياً",
-  "4":     "أربع مرات أسبوعياً",
-  "5":     "خمس مرات أسبوعياً",
-  weekend: "عطلة نهاية الأسبوع",
+  "يومياً": "يومياً", "مرتين أسبوعياً": "مرتين أسبوعياً",
+  "ثلاث مرات أسبوعياً": "ثلاث مرات أسبوعياً",
+  "عطلة نهاية الأسبوع": "عطلة نهاية الأسبوع",
 };
 
-function teacherName(t: SpecialTrack["teacher"]): string {
+function teacherName(t: TrackTeacher | string): string {
   return typeof t === "object" ? t.name : t;
 }
 function fmtDate(d: string) {
@@ -101,8 +95,8 @@ function TrackCard({ track }: { track: SpecialTrack }) {
               <i className="ti ti-user" />
             </span>
             <div>
-              <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>المعلم</div>
-              <div style={{ fontWeight: 600 }}>{teacherName(track.teacher)}</div>
+              <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>المعلمون</div>
+              <div style={{ fontWeight: 600 }}>{track.teachers.map(teacherName).join(" · ") || "—"}</div>
             </div>
           </div>
 
