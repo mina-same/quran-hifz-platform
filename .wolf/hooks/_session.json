@@ -1,7 +1,13 @@
 {
   "session_id": "session-2026-07-01-1504",
   "started": "2026-07-01T12:04:34.449Z",
-  "files_read": {},
+  "files_read": {
+    "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx": {
+      "count": 1,
+      "tokens": 5489,
+      "first_read": "2026-07-01T12:06:53.194Z"
+    }
+  },
   "files_written": [
     {
       "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
@@ -31,9 +37,9 @@
   "edit_counts": {
     "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx": 4
   },
-  "anatomy_hits": 0,
+  "anatomy_hits": 1,
   "anatomy_misses": 0,
   "repeated_reads_warned": 0,
   "cerebrum_warnings": 0,
-  "stop_count": 0
+  "stop_count": 1
 }
