@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T12:56:34.892Z
-> Files: 342 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T13:24:16.908Z
+> Files: 346 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
 
@@ -342,6 +342,12 @@
 
 - `project.json` (~36 tok)
 
+## quran-hifz/public/
+
+- `robots.txt` (~31 tok)
+- `robots.txt` — SEO: allow /, disallow portal paths, Sitemap pointer (~30 tok)
+- `sitemap.xml` (~64 tok)
+
 ## quran-hifz/src/
 
 - `router.tsx` — getRouter (~113 tok)
@@ -415,7 +421,7 @@
 
 ## quran-hifz/src/quran/
 
-- `quran.css` — Styles: 73 rules, 18 vars (~12927 tok)
+- `quran.css` — Styles: 73 rules, 18 vars (~15103 tok)
 - `QuranApp.tsx` — Quran Hifz platform — React entry. (~834 tok)
 
 ## quran-hifz/src/quran/api/
@@ -469,7 +475,7 @@
 
 ## quran-hifz/src/quran/pages/
 
-- `LandingPage.tsx` — LOGO_SRC (~2365 tok)
+- `LandingPage.tsx` — LOGO_SRC (~4826 tok)
 - `LoginPage.tsx` — schema — renders form (~1710 tok)
 
 ## quran-hifz/src/quran/pages/admin/
@@ -524,6 +530,7 @@
 
 ## quran-hifz/src/routes/
 
-- `__root.tsx` — NotFoundComponent — uses useRouter, useEffect (~1227 tok)
-- `index.tsx` — Route (~179 tok)
+- `__root.tsx` — Root: SEO head (Arabic OG, Twitter card, JSON-LD, favicon, lang=ar dir=rtl), RootShell, error/404 components (~1611 tok)
+- `index.tsx` — Landing page route with per-page Arabic SEO head overrides (~200 tok)
 - `README.md` — Project documentation (~207 tok)
+- `sitemap[.]xml.ts` — API route: serves /sitemap.xml dynamically from request origin (~159 tok)

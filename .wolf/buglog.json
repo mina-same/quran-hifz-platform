@@ -598,6 +598,86 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-01T00:00:00.000Z"
+    },
+    {
+      "id": "bug-038",
+      "timestamp": "2026-07-01T13:13:45.940Z",
+      "error_message": "CSS fix: transition",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "transition: background 0.3s, color 0.3s → opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1)",
+      "fix": "Changed transition: background 0.3s, color 0.3s → opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T13:16:10.387Z"
+    },
+    {
+      "id": "bug-039",
+      "timestamp": "2026-07-01T13:14:27.001Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/routes/__root.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:14:27.001Z"
+    },
+    {
+      "id": "bug-040",
+      "timestamp": "2026-07-01T13:14:31.823Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/routes/__root.tsx",
+      "root_cause": "Had \"en\"",
+      "fix": "Changed to \"ar\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:14:31.823Z"
+    },
+    {
+      "id": "bug-041",
+      "timestamp": "2026-07-01T13:15:49.996Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "215 lines replaced/restructured",
+      "fix": "Rewrote 297→292 lines (215 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:15:49.996Z"
+    },
+    {
+      "id": "bug-042",
+      "timestamp": "2026-07-01T13:21:04.659Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/LandingPage.tsx",
+      "root_cause": "Had \"https://images.unsplash.com/photo-1519817914152-2",
+      "fix": "Changed to \"https://images.unsplash.com/photo-1564121211835-e",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-07-01T13:23:56.844Z"
     }
   ]
 }

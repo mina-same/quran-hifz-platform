@@ -3,6 +3,7 @@
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
 | 2026-07-01 | Added dark mode system + sidebar toggle + landing page redesign | ThemeContext.tsx (new), QuranApp.tsx, Sidebar.tsx, PortalScreen.tsx, quran.css | complete | ~4800 |
+| 13:14 | SEO + social link preview: proper Arabic title/description, OG image, twitter:card, favicon, lang=ar dir=rtl, VITE_PUBLIC_URL env var | src/routes/__root.tsx, .env.example | complete | ~400 |
 | 15:53 | Created ../../../../Users/macbook/.claude/plans/joyful-growing-duckling.md | — | ~2293 |
 | 12:18 | Teacher creation now also creates User account (email+password); added admin parent management (create, list, link/unlink child); new AdminParents page + nav wired | teacher.controller.ts, admin.controller.ts, admin.routes.ts, app.ts, AdminTeachers.tsx, AdminParents.tsx, admin-parents.ts, portals.ts, pageRegistry.ts | completed | ~3500 |
 | 2026-07-01 | Added full CRUD to AdminMasajid + AdminHalqat; added deleteMasjid to server; added useDeleteMasjid + useDeleteHalqa hooks | masjid.controller.ts, masjid.routes.ts, masajid.ts, halqat.ts, AdminMasajid.tsx, AdminHalqat.tsx | complete | ~3000 |
@@ -500,3 +501,34 @@
 | 15:56 | Edited quran-hifz/src/quran/quran.css | inline fix | ~25 |
 | 15:56 | Edited quran-hifz/src/quran/quran.css | inline fix | ~16 |
 | 15:56 | Edited quran-hifz/src/quran/quran.css | 5→5 lines | ~33 |
+
+## Session: 2026-07-01 15:58
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-01 16:13
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:13 | Created quran-hifz/src/quran/pages/LandingPage.tsx | — | ~4806 |
+| 16:13 | Edited quran-hifz/src/quran/quran.css | modified child() | ~488 |
+| 16:14 | Edited quran-hifz/src/routes/__root.tsx | added nullish coalescing | ~512 |
+| 16:14 | Edited quran-hifz/src/routes/__root.tsx | "en" → "ar" | ~9 |
+| 16:14 | Session end: 4 writes across 3 files (LandingPage.tsx, quran.css, __root.tsx) | 4 reads | ~12255 tok |
+| 16:15 | Edited quran-hifz/src/quran/quran.css | 297→292 lines | ~5008 |
+| 16:16 | Edited quran-hifz/src/quran/quran.css | modified media() | ~334 |
+| 16:16 | Edited quran-hifz/src/quran/quran.css | modified media() | ~32 |
+| 16:16 | Edited quran-hifz/src/quran/quran.css | — | ~0 |
+| 16:20 | redesign landing page with rich animations, scroll reveal, Unsplash images, counter stats, feature rows, testimonials | LandingPage.tsx, quran.css | success | ~3200 |
+| 16:20 | Created quran-hifz/public/robots.txt | — | ~33 |
+| 16:20 | Created quran-hifz/public/sitemap.xml | — | ~64 |
+| 16:20 | Session end: 10 writes across 5 files (LandingPage.tsx, quran.css, __root.tsx, robots.txt, sitemap.xml) | 4 reads | ~17733 tok |
+| 16:21 | Edited quran-hifz/src/quran/pages/LandingPage.tsx | "https://images.unsplash.c" → "https://images.unsplash.c" | ~31 |
+| 16:21 | Created quran-hifz/src/routes/sitemap[.]xml.ts | — | ~159 |
+| 16:21 | Edited quran-hifz/src/quran/pages/LandingPage.tsx | "https://images.unsplash.c" → "https://images.unsplash.c" | ~31 |
+| 16:21 | Created quran-hifz/public/robots.txt | — | ~33 |
+| 16:21 | Edited quran-hifz/src/routes/__root.tsx | expanded (+19 lines) | ~684 |
+| 16:22 | Session end: 15 writes across 6 files (LandingPage.tsx, quran.css, __root.tsx, robots.txt, sitemap.xml) | 6 reads | ~19593 tok |
+| 16:23 | Edited quran-hifz/src/quran/pages/LandingPage.tsx | 2→2 lines | ~26 |
+| 16:24 | Edited quran-hifz/src/quran/pages/LandingPage.tsx | expanded (+8 lines) | ~92 |
