@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { get, post, put, del } from "../../lib/api";
 
 export type EnrolledStudent = { _id: string; name: string };
+export type TrackTeacher    = { _id: string; name: string };
 
 export type SpecialTrack = {
   _id: string;
@@ -15,22 +16,23 @@ export type SpecialTrack = {
   location: string;
   isOnline: boolean;
   meetLink?: string;
-  teacher: { _id: string; name: string } | string;
+  teachers: (TrackTeacher | string)[];
   maxStudents: number;
   enrolledStudents: (EnrolledStudent | string)[];
   notes?: string;
 };
 
-type ListResponse = { success: boolean; count: number; data: SpecialTrack[] };
+type ListResponse   = { success: boolean; count: number; data: SpecialTrack[] };
 type SingleResponse = { success: boolean; data: SpecialTrack };
 
-export function useSpecialTracks(status?: string, teacherId?: string) {
+export function useSpecialTracks(status?: string, teacherId?: string, studentId?: string) {
   const params = new URLSearchParams();
   if (status)    params.set("status",  status);
   if (teacherId) params.set("teacher", teacherId);
+  if (studentId) params.set("student", studentId);
   const qs = params.toString() ? `?${params.toString()}` : "";
   return useQuery({
-    queryKey: ["special-tracks", status ?? "", teacherId ?? ""],
+    queryKey: ["special-tracks", status ?? "", teacherId ?? "", studentId ?? ""],
     queryFn: () => get<ListResponse>(`/special-tracks${qs}`).then((r) => r.data),
   });
 }

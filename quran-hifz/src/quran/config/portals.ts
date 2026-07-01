@@ -28,8 +28,9 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "myhifz",   icon: "ti-book",            label: "خطة حفظي" },
       ]},
       { group: "الأنشطة", items: [
-        { id: "attendance", icon: "ti-calendar-check", label: "الحضور والغياب" },
-        { id: "schedule",   icon: "ti-clock",          label: "مواعيد حلقتي" },
+        { id: "attendance",    icon: "ti-calendar-check",  label: "الحضور والغياب" },
+        { id: "schedule",      icon: "ti-clock",           label: "مواعيد حلقتي" },
+        { id: "specialtracks", icon: "ti-calendar-event",  label: "مساراتي الاستثنائية" },
       ]},
       { group: "النقاط والمكافآت", items: [
         { id: "points", icon: "ti-star",          label: "نقاطي" },
@@ -49,6 +50,7 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
       ]},
       { group: "الحلقات", items: [
         { id: "myhalqa",       icon: "ti-school",          label: "حلقاتي" },
+        { id: "specialtracks", icon: "ti-calendar-event",  label: "مساراتي الاستثنائية" },
         { id: "students",      icon: "ti-users",           label: "طلابي" },
         { id: "attendance",    icon: "ti-calendar-check",  label: "الحضور اليومي",      dot: true },
         { id: "recordlesson",  icon: "ti-player-record",   label: "سجّل درس الحلقة",   dot: true },

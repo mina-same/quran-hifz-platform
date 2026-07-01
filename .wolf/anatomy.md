@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T13:49:38.471Z
-> Files: 346 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T14:00:25.406Z
+> Files: 348 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
 
@@ -267,7 +267,7 @@
 - `masjid.controller.ts` — Zod schemas: masjidSchema (~698 tok)
 - `message.controller.ts` — Zod schemas: messageSchema (~526 tok)
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
-- `special-track.controller.ts` — Zod schemas: trackSchema (~1073 tok)
+- `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
 - `student.controller.ts` — Zod schemas: studentSchema (~1412 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1398 tok)
@@ -291,7 +291,7 @@
 - `Masjid.model.ts` — Exports IMasjid, Masjid (~125 tok)
 - `Message.model.ts` — Exports IMessage, Message (~291 tok)
 - `ParentStudent.model.ts` — Exports IParentStudent, ParentStudent (~172 tok)
-- `SpecialTrack.model.ts` — Exports ISpecialTrack, SpecialTrack (~432 tok)
+- `SpecialTrack.model.ts` — Exports ISpecialTrack, SpecialTrack (~429 tok)
 - `Student.model.ts` — Exports IStudent, Student (~498 tok)
 - `Teacher.model.ts` — Exports ITeacher, Teacher (~289 tok)
 - `User.model.ts` — Exports UserRole, IUser, User (~383 tok)
@@ -437,7 +437,7 @@
 - `masajid.ts` — Exports Masjid, useMasajid, useMasjid, useCreateMasjid + 2 more (~461 tok)
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
-- `special-tracks.ts` — Exports EnrolledStudent, SpecialTrack, useSpecialTracks, useCreateTrack + 4 more (~765 tok)
+- `special-tracks.ts` — Exports EnrolledStudent, TrackTeacher, SpecialTrack, useSpecialTracks + 5 more (~805 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~166 tok)
 - `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~737 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~504 tok)
@@ -463,7 +463,7 @@
 ## quran-hifz/src/quran/config/
 
 - `masarMap.ts` — Exports MasarLevel, ServerPath, MasarInfo, MASAR_MAP, pickMasar (~416 tok)
-- `portals.ts` — Exports PortalKey, NavItem, NavGroup, PortalConfig, PORTALS (~1231 tok)
+- `portals.ts` — Exports PortalKey, NavItem, NavGroup, PortalConfig, PORTALS (~1286 tok)
 
 ## quran-hifz/src/quran/context/
 
@@ -509,6 +509,7 @@
 - `StudentMessages.tsx` — StudentMessages (~758 tok)
 - `StudentPoints.tsx` — MY_POINTS (~1302 tok)
 - `StudentSchedule.tsx` — getId (~836 tok)
+- `StudentSpecialTracks.tsx` — STATUS_LABEL (~3341 tok)
 - `StudentStore.tsx` — MY_POINTS (~874 tok)
 
 ## quran-hifz/src/quran/pages/teacher/
@@ -522,11 +523,12 @@
 - `TeacherPlans.tsx` — ROWS — renders table (~436 tok)
 - `TeacherRecordLesson.tsx` — LESSON_TYPES (~4027 tok)
 - `TeacherReports.tsx` — TeacherReports — renders chart (~172 tok)
+- `TeacherSpecialTracks.tsx` — STATUS_LABEL (~2856 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2053 tok)
 
 ## quran-hifz/src/quran/router/
 
-- `pageRegistry.ts` — Exports PAGE_REGISTRY (~1091 tok)
+- `pageRegistry.ts` — Exports PAGE_REGISTRY (~1178 tok)
 
 ## quran-hifz/src/routes/
 

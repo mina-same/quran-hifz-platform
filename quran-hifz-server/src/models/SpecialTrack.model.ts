@@ -11,7 +11,7 @@ export interface ISpecialTrack extends Document {
   location: string;
   isOnline: boolean;
   meetLink?: string;
-  teacher: Schema.Types.ObjectId;
+  teachers: Schema.Types.ObjectId[];
   maxStudents: number;
   enrolledStudents: Schema.Types.ObjectId[];
   notes?: string;
@@ -31,7 +31,7 @@ const specialTrackSchema = new Schema<ISpecialTrack>(
     location:         { type: String, required: true },
     isOnline:         { type: Boolean, default: false },
     meetLink:         { type: String },
-    teacher:          { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
+    teachers:         [{ type: Schema.Types.ObjectId, ref: 'Teacher' }],
     maxStudents:      { type: Number, required: true },
     enrolledStudents: [{ type: Schema.Types.ObjectId, ref: 'Student' }],
     notes:            { type: String },

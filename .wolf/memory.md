@@ -571,3 +571,29 @@
 | 16:49 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | inline fix | ~16 |
 | 16:50 | Session end: 3 writes across 1 files (TeacherStudents.tsx) | 0 reads | ~420 tok |
 | 16:51 | Session end: 3 writes across 1 files (TeacherStudents.tsx) | 0 reads | ~420 tok |
+| 16:52 | Edited quran-hifz-server/src/controllers/special-track.controller.ts | added 1 condition(s) | ~98 |
+| 16:52 | Edited quran-hifz/src/quran/api/special-tracks.ts | added 1 condition(s) | ~154 |
+| 16:53 | Created quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | — | ~2856 |
+| 16:54 | Created quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | — | ~3341 |
+| 16:54 | Edited quran-hifz/src/quran/config/portals.ts | 7→8 lines | ~165 |
+| 16:54 | Edited quran-hifz/src/quran/config/portals.ts | 4→5 lines | ~88 |
+| 16:54 | Edited quran-hifz/src/quran/router/pageRegistry.ts | added 1 import(s) | ~236 |
+| 16:54 | Edited quran-hifz/src/quran/router/pageRegistry.ts | added 1 import(s) | ~190 |
+| 16:54 | Edited quran-hifz/src/quran/router/pageRegistry.ts | 12→13 lines | ~121 |
+| 16:55 | Edited quran-hifz/src/quran/router/pageRegistry.ts | 10→11 lines | ~98 |
+| 16:55 | Session end: 13 writes across 7 files (TeacherStudents.tsx, special-track.controller.ts, special-tracks.ts, TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx) | 2 reads | ~10089 tok |
+| 16:56 | Edited quran-hifz/src/quran/config/portals.ts | 8→8 lines | ~165 |
+| 16:56 | Session end: 14 writes across 7 files (TeacherStudents.tsx, special-track.controller.ts, special-tracks.ts, TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx) | 2 reads | ~10309 tok |
+| 16:59 | Created quran-hifz-server/src/models/SpecialTrack.model.ts | — | ~429 |
+| 17:00 | Created quran-hifz-server/src/controllers/special-track.controller.ts | — | ~1132 |
+| 17:00 | Created quran-hifz/src/quran/api/special-tracks.ts | — | ~805 |
+
+## Session: 2026-07-01 17:01
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-01 17:01
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

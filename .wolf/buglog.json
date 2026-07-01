@@ -861,6 +861,22 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-01T13:49:38.482Z"
+    },
+    {
+      "id": "bug-054",
+      "timestamp": "2026-07-01T13:54:34.629Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/config/portals.ts",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 4→5 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:54:34.629Z"
     }
   ]
 }
