@@ -27,7 +27,7 @@ type FormFields = {
   title: string;
   type: string;
   timeSlot: string;
-  locationSelect: string;  // masjid._id | "custom"
+  locationSelect: string; // masjid._id | "custom"
   locationCustom: string;
   isOnline: boolean;
   meetLink: string;
@@ -40,8 +40,9 @@ type FormFields = {
 };
 
 const EMPTY_FORM: FormFields = {
-  title: "", type: "", timeSlot: "", locationSelect: "", locationCustom: "", isOnline: false,
-  meetLink: "", teacher: "", maxStudents: "", startDate: "", endDate: "", daysPerWeek: "", status: "upcoming",
+  title: "", type: "", timeSlot: "", locationSelect: "", locationCustom: "",
+  isOnline: false, meetLink: "", teacher: "", maxStudents: "",
+  startDate: "", endDate: "", daysPerWeek: "", status: "upcoming",
 };
 
 type ModalState = null | { mode: "add" } | { mode: "edit"; item: SpecialTrack };
@@ -88,7 +89,6 @@ export function AdminSpecialTracks() {
 
   function openEdit(item: SpecialTrack) {
     const d = (s: string) => s ? new Date(s).toISOString().split("T")[0] : "";
-    // Try to match existing location to a masjid name
     const matchedMasjid = masajid.find((m) => m.name === item.location);
     setForm({
       title:          item.title,
@@ -114,15 +114,24 @@ export function AdminSpecialTracks() {
   }
 
   async function handleSubmit() {
-    const { title, type, timeSlot, isOnline, locationSelect, locationCustom, meetLink, teacher, maxStudents, startDate, endDate, daysPerWeek } = form;
-    if (!title.trim()) { setFormError("اسم المسار مطلوب"); return; }
-    if (!type.trim())  { setFormError("نوع المسار مطلوب"); return; }
-    if (!teacher)      { setFormError("يرجى اختيار المعلم"); return; }
-    if (!timeSlot.trim()) { setFormError("وقت الحلقة مطلوب"); return; }
+    const {
+      title, type, timeSlot, isOnline,
+      locationSelect, locationCustom, meetLink,
+      teacher, maxStudents, startDate, endDate, daysPerWeek,
+    } = form;
+
+    if (!title.trim())       { setFormError("اسم المسار مطلوب"); return; }
+    if (!type.trim())        { setFormError("نوع المسار مطلوب"); return; }
+    if (!teacher)            { setFormError("يرجى اختيار المعلم"); return; }
+    if (!timeSlot.trim())    { setFormError("وقت الحلقة مطلوب"); return; }
     if (!daysPerWeek.trim()) { setFormError("الأيام مطلوبة"); return; }
     if (!startDate || !endDate) { setFormError("التواريخ مطلوبة"); return; }
-    if (isOnline && !meetLink.trim()) { setFormError("رابط Google Meet مطلوب للحلقات الإلكترونية"); return; }
-    if (!isOnline && !locationSelect) { setFormError("يرجى اختيار المسجد أو الموقع"); return; }
+    if (isOnline && !meetLink.trim()) {
+      setFormError("رابط Google Meet مطلوب للحلقات الإلكترونية"); return;
+    }
+    if (!isOnline && !locationSelect) {
+      setFormError("يرجى اختيار المسجد أو الموقع"); return;
+    }
     if (!isOnline && locationSelect === "custom" && !locationCustom.trim()) {
       setFormError("يرجى كتابة اسم الموقع"); return;
     }
@@ -292,7 +301,8 @@ export function AdminSpecialTracks() {
                     background: !form.isOnline ? "var(--green-pale)" : "white",
                     color: !form.isOnline ? "var(--green)" : "var(--text2)",
                     fontWeight: !form.isOnline ? 700 : 400,
-                    cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                    cursor: "pointer", fontSize: 13,
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                   }}
                 >
                   <i className="ti ti-building-mosque" /> حضوري
@@ -306,7 +316,8 @@ export function AdminSpecialTracks() {
                     background: form.isOnline ? "var(--green-pale)" : "white",
                     color: form.isOnline ? "var(--green)" : "var(--text2)",
                     fontWeight: form.isOnline ? 700 : 400,
-                    cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                    cursor: "pointer", fontSize: 13,
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                   }}
                 >
                   <i className="ti ti-video" /> إلكتروني (أونلاين)
@@ -349,7 +360,7 @@ export function AdminSpecialTracks() {
                 <input className="form-input" type="number" min={1} placeholder="٣٠" value={form.maxStudents} onChange={(e) => setField("maxStudents", e.target.value)} />
               </div>
 
-              {/* Conditional: location OR meet link */}
+              {/* Conditional: mosque select OR meet link */}
               {form.isOnline ? (
                 <div className="form-group" style={{ gridColumn: "1 / -1" }}>
                   <label className="form-label">رابط Google Meet <span>*</span></label>
@@ -363,8 +374,29 @@ export function AdminSpecialTracks() {
                 </div>
               ) : (
                 <div className="form-group" style={{ gridColumn: "1 / -1" }}>
-                  <label className="form-label">الموقع <span>*</span></label>
-                  <input className="form-input" placeholder="اسم المسجد أو القاعة" value={form.location} onChange={(e) => setField("location", e.target.value)} />
+                  <label className="form-label">الموقع (المسجد) <span>*</span></label>
+                  <select
+                    className="form-input"
+                    value={form.locationSelect}
+                    onChange={(e) => setField("locationSelect", e.target.value)}
+                  >
+                    <option value="">— اختر مسجداً —</option>
+                    {masajid.map((m) => (
+                      <option key={m._id} value={m._id}>
+                        {m.name} — {m.location}
+                      </option>
+                    ))}
+                    <option value="custom">📝 موقع آخر (أدخل يدوياً)</option>
+                  </select>
+                  {form.locationSelect === "custom" && (
+                    <input
+                      className="form-input"
+                      style={{ marginTop: 8 }}
+                      placeholder="اسم المسجد أو القاعة"
+                      value={form.locationCustom}
+                      onChange={(e) => setField("locationCustom", e.target.value)}
+                    />
+                  )}
                 </div>
               )}
 

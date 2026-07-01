@@ -27,6 +27,7 @@ export type StudentFilters = {
 
 type ListResponse = { success: boolean; count: number; data: Student[] };
 type SingleResponse = { success: boolean; data: Student };
+type CreateResponse = { success: boolean; data: Student; credentials?: { email: string; password: string } };
 
 function buildQuery(filters?: StudentFilters) {
   if (!filters) return "";
@@ -57,7 +58,7 @@ export function useStudent(id: string | undefined) {
 export function useCreateStudent() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: Record<string, unknown>) => post<SingleResponse>("/students", body),
+    mutationFn: (body: Record<string, unknown>) => post<CreateResponse>("/students", body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["students"] }),
   });
 }

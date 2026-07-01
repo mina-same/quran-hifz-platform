@@ -2,10 +2,13 @@
 
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
+| 2026-07-01 | Added dark mode system + sidebar toggle + landing page redesign | ThemeContext.tsx (new), QuranApp.tsx, Sidebar.tsx, PortalScreen.tsx, quran.css | complete | ~4800 |
 | 15:53 | Created ../../../../Users/macbook/.claude/plans/joyful-growing-duckling.md | — | ~2293 |
+| 12:18 | Teacher creation now also creates User account (email+password); added admin parent management (create, list, link/unlink child); new AdminParents page + nav wired | teacher.controller.ts, admin.controller.ts, admin.routes.ts, app.ts, AdminTeachers.tsx, AdminParents.tsx, admin-parents.ts, portals.ts, pageRegistry.ts | completed | ~3500 |
 | 2026-07-01 | Added full CRUD to AdminMasajid + AdminHalqat; added deleteMasjid to server; added useDeleteMasjid + useDeleteHalqa hooks | masjid.controller.ts, masjid.routes.ts, masajid.ts, halqat.ts, AdminMasajid.tsx, AdminHalqat.tsx | complete | ~3000 |
 | 00:00 | Fixed SSR hydration mismatch in AuthProvider — isLoading and user now start as true/null so server and client agree; useEffect restores stored user | quran-hifz/src/quran/context/AuthContext.tsx | bug-022 logged | ~600 |
 | 15:58 | Edited quran-hifz/vite.config.ts | expanded (+7 lines) | ~92 |
+| 2026-07-01 | Fixed Vercel 404 NOT_FOUND on server — created vercel.json + api/index.ts serverless entry point for Express | quran-hifz-server/vercel.json, quran-hifz-server/api/index.ts | complete | ~400 |
 | 15:58 | Created quran-hifz/src/lib/auth-storage.ts | — | ~243 |
 | 15:58 | Created quran-hifz/src/lib/api.ts | — | ~434 |
 | 15:59 | Created quran-hifz/src/quran/context/AuthContext.tsx | — | ~685 |
@@ -407,3 +410,80 @@
 | 15:05 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | CSS: locationSelect, _id, locationCustom | ~272 |
 | 15:05 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | added optional chaining | ~456 |
 | 15:06 | Session end: 4 writes across 1 files (AdminSpecialTracks.tsx) | 0 reads | ~937 tok |
+| 15:08 | Created quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | — | ~5747 |
+
+## Session: 2026-07-01 15:08
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:10 | Edited quran-hifz-server/src/controllers/teacher.controller.ts | 14→17 lines | ~206 |
+| 15:11 | Edited quran-hifz-server/src/controllers/teacher.controller.ts | added 2 condition(s) | ~242 |
+| 15:11 | Created quran-hifz-server/src/controllers/admin.controller.ts | — | ~834 |
+| 15:11 | Created quran-hifz-server/src/routes/admin.routes.ts | — | ~174 |
+| 15:11 | Edited quran-hifz-server/src/app.ts | added 1 import(s) | ~36 |
+| 15:11 | Edited quran-hifz-server/src/app.ts | 1→2 lines | ~30 |
+| 15:11 | Edited quran-hifz/src/quran/api/teachers.ts | 2→3 lines | ~70 |
+| 15:12 | Edited quran-hifz/src/quran/api/teachers.ts | modified useCreateTeacher() | ~75 |
+| 15:12 | Created quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | — | ~4118 |
+| 15:13 | Created quran-hifz/src/quran/api/admin-parents.ts | — | ~470 |
+| 15:18 | Created quran-hifz/src/quran/pages/admin/AdminParents.tsx | — | ~4023 |
+| 15:18 | Edited quran-hifz/src/quran/config/portals.ts | 5→6 lines | ~102 |
+| 15:18 | Edited quran-hifz/src/quran/router/pageRegistry.ts | added 1 import(s) | ~40 |
+| 15:18 | Edited quran-hifz/src/quran/router/pageRegistry.ts | 2→3 lines | ~23 |
+
+## Session: 2026-07-01 15:18
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:20 | Edited quran-hifz/src/quran/api/students.ts | 2→3 lines | ~70 |
+| 15:20 | Edited quran-hifz/src/quran/api/students.ts | modified useCreateStudent() | ~75 |
+| 15:20 | Edited quran-hifz-server/src/controllers/student.controller.ts | added 1 import(s) | ~65 |
+| 15:20 | Edited quran-hifz-server/src/controllers/student.controller.ts | 11→13 lines | ~197 |
+| 15:21 | Edited quran-hifz-server/src/controllers/student.controller.ts | added 2 condition(s) | ~242 |
+| 15:21 | Created quran-hifz/src/quran/pages/admin/AdminRegister.tsx | — | ~3078 |
+| 15:22 | Session end: 6 writes across 3 files (students.ts, student.controller.ts, AdminRegister.tsx) | 7 reads | ~15532 tok |
+| 15:23 | Created quran-hifz/src/quran/context/ThemeContext.tsx | — | ~307 |
+| 15:23 | Edited quran-hifz/src/quran/QuranApp.tsx | added 1 import(s) | ~95 |
+| 15:23 | Edited quran-hifz/src/quran/QuranApp.tsx | modified QuranApp() | ~83 |
+| 15:23 | Created quran-hifz/src/quran/components/Sidebar.tsx | — | ~666 |
+| 15:23 | Created quran-hifz/src/quran/components/PortalScreen.tsx | — | ~516 |
+| 15:23 | Edited quran-hifz-server/src/controllers/teacher.controller.ts | 9→10 lines | ~139 |
+| 15:24 | Edited quran-hifz-server/src/controllers/teacher.controller.ts | added optional chaining | ~159 |
+| 15:24 | Edited quran-hifz-server/src/controllers/teacher.controller.ts | added optional chaining | ~324 |
+| 15:24 | Edited quran-hifz-server/src/controllers/admin.controller.ts | expanded (+6 lines) | ~156 |
+| 15:24 | Edited quran-hifz-server/src/controllers/admin.controller.ts | added 7 condition(s) | ~641 |
+| 15:24 | Edited quran-hifz-server/src/routes/admin.routes.ts | expanded (+7 lines) | ~246 |
+| 15:25 | Edited quran-hifz/src/quran/api/teachers.ts | 10→11 lines | ~63 |
+| 15:25 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | CSS: newPassword, newPassword | ~95 |
+| 15:25 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | CSS: newPassword | ~110 |
+| 15:25 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | added 3 condition(s) | ~178 |
+| 15:25 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | CSS: marginRight | ~770 |
+| 15:25 | Created quran-hifz/src/quran/quran.css | — | ~7381 |
+| 15:25 | Edited quran-hifz/src/quran/api/admin-parents.ts | modified useUnlinkChild() | ~408 |
+| 15:25 | Edited quran-hifz/src/quran/api/admin-parents.ts | inline fix | ~15 |
+| 15:26 | Session end: 25 writes across 14 files (students.ts, student.controller.ts, AdminRegister.tsx, ThemeContext.tsx, QuranApp.tsx) | 9 reads | ~28671 tok |
+| 15:27 | Created quran-hifz/src/quran/pages/admin/AdminParents.tsx | — | ~5192 |
+| 15:27 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | added 1 import(s) | ~193 |
+| 15:27 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | added optional chaining | ~290 |
+| 15:27 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | modified openEdit() | ~97 |
+| 15:27 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | CSS: studentId, parentId | ~217 |
+| 15:27 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | expanded (+33 lines) | ~627 |
+| 15:28 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | CSS: null | ~61 |
+| 15:28 | Session end: 32 writes across 16 files (students.ts, student.controller.ts, AdminRegister.tsx, ThemeContext.tsx, QuranApp.tsx) | 9 reads | ~35348 tok |
+
+## Session: 2026-07-01 15:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:49 | Created quran-hifz/src/quran/pages/LandingPage.tsx | — | ~1238 |
+| 15:49 | Edited quran-hifz/src/quran/QuranApp.tsx | 7→7 lines | ~102 |
+| 15:49 | Edited quran-hifz/src/quran/QuranApp.tsx | setState() → setStep() | ~229 |
+| 15:50 | Created quran-hifz/src/quran/pages/LoginPage.tsx | — | ~1710 |
+| 15:52 | Edited quran-hifz/src/quran/quran.css | modified not() | ~4142 |
+| 15:53 | Created quran-hifz/src/quran/pages/LandingPage.tsx | — | ~2365 |
+| 15:53 | Edited quran-hifz/src/quran/quran.css | modified media() | ~1270 |
+| 15:53 | Created quran-hifz-server/api/index.ts | — | ~132 |
+| 15:53 | Session end: 8 writes across 5 files (LandingPage.tsx, QuranApp.tsx, LoginPage.tsx, quran.css, index.ts) | 7 reads | ~20177 tok |
+| 15:54 | Created quran-hifz-server/vercel.json | — | ~54 |
+| 15:55 | Session end: 9 writes across 6 files (LandingPage.tsx, QuranApp.tsx, LoginPage.tsx, quran.css, index.ts) | 8 reads | ~20231 tok |
+| 15:55 | Edited quran-hifz/src/quran/quran.css | CSS: background-image | ~77 |

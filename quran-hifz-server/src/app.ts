@@ -22,6 +22,7 @@ import parentRoutes          from './routes/parent.routes';
 import specialTrackRoutes    from './routes/special-track.routes';
 import lessonRecordingRoutes from './routes/lesson-recording.routes';
 import groupHomeworkRoutes   from './routes/group-homework.routes';
+import adminRoutes           from './routes/admin.routes';
 
 const app = express();
 
@@ -61,6 +62,7 @@ app.use('/api/parent',            parentRoutes);
 app.use('/api/special-tracks',    specialTrackRoutes);
 app.use('/api/lesson-recordings', lessonRecordingRoutes);
 app.use('/api/group-homework',    groupHomeworkRoutes);
+app.use('/api/admin',            adminRoutes);
 
 // ── 404 & error handler ───────────────────────────────────────────────────────
 app.use(notFound);

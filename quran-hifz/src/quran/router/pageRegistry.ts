@@ -10,6 +10,7 @@ import { AdminMasajid }       from "../pages/admin/AdminMasajid";
 import { AdminKpis }          from "../pages/admin/AdminKpis";
 import { AdminReports }       from "../pages/admin/AdminReports";
 import { AdminSpecialTracks } from "../pages/admin/AdminSpecialTracks";
+import { AdminParents }       from "../pages/admin/AdminParents";
 
 import { TeacherDashboard }     from "../pages/teacher/TeacherDashboard";
 import { TeacherHalqa }         from "../pages/teacher/TeacherHalqa";
@@ -49,6 +50,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     kpis:           AdminKpis,
     reports:        AdminReports,
     special_tracks: AdminSpecialTracks,
+    parents:        AdminParents,
   },
   teacher: {
     dashboard:     TeacherDashboard,

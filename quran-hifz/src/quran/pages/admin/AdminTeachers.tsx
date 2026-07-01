@@ -13,8 +13,13 @@ type FormFields = {
   phone: string;
   rating: string;
   status: "active" | "inactive";
+  email: string;
+  password: string;
+  newPassword: string;
 };
-const EMPTY_FORM: FormFields = { name: "", specialty: "", phone: "", rating: "", status: "active" };
+const EMPTY_FORM: FormFields = { name: "", specialty: "", phone: "", rating: "", status: "active", email: "", password: "", newPassword: "" };
+
+type CreatedCredentials = { email: string; password: string };
 
 const OVERLAY: React.CSSProperties = {
   position: "fixed", inset: 0, zIndex: 1000,
@@ -37,6 +42,7 @@ export function AdminTeachers() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<FormFields>(EMPTY_FORM);
   const [formError, setFormError] = useState("");
+  const [credentials, setCredentials] = useState<CreatedCredentials | null>(null);
 
   function openAdd() {
     setForm(EMPTY_FORM);
@@ -46,11 +52,14 @@ export function AdminTeachers() {
 
   function openEdit(item: Teacher) {
     setForm({
-      name:      item.name,
-      specialty: item.specialty ?? "",
-      phone:     item.phone ?? "",
-      rating:    item.rating ?? "",
-      status:    item.status,
+      name:        item.name,
+      specialty:   item.specialty ?? "",
+      phone:       item.phone ?? "",
+      rating:      item.rating ?? "",
+      status:      item.status,
+      email:       item.email ?? "",
+      password:    "",
+      newPassword: "",
     });
     setFormError("");
     setModal({ mode: "edit", item });
@@ -62,21 +71,34 @@ export function AdminTeachers() {
 
   async function handleSubmit() {
     if (!form.name.trim()) { setFormError("اسم المعلم مطلوب"); return; }
+    if (modal?.mode === "add" && form.email && !form.password) {
+      setFormError("يرجى إدخال كلمة المرور مع البريد الإلكتروني");
+      return;
+    }
     setFormError("");
-    const body = {
+    const body: Record<string, unknown> = {
       name:      form.name.trim(),
       specialty: form.specialty.trim() || undefined,
       phone:     form.phone.trim() || undefined,
       rating:    form.rating.trim() || undefined,
       status:    form.status,
     };
+    if (modal?.mode === "add") {
+      if (form.email.trim()) body.email    = form.email.trim();
+      if (form.password)     body.password = form.password;
+    } else if (modal?.mode === "edit") {
+      if (form.email.trim())      body.email       = form.email.trim();
+      if (form.newPassword.trim()) body.newPassword = form.newPassword.trim();
+    }
     try {
       if (modal?.mode === "add") {
-        await createTeacher.mutateAsync(body);
+        const res = await createTeacher.mutateAsync(body);
+        setModal(null);
+        if (res.credentials) setCredentials(res.credentials);
       } else if (modal?.mode === "edit") {
         await updateTeacher.mutateAsync({ id: modal.item._id, ...body });
+        setModal(null);
       }
-      setModal(null);
     } catch (e) {
       setFormError((e as Error).message);
     }
@@ -174,7 +196,7 @@ export function AdminTeachers() {
       {/* Add / Edit Modal */}
       {modal && (
         <div style={OVERLAY} onClick={() => setModal(null)}>
-          <div style={DIALOG} onClick={(e) => e.stopPropagation()}>
+          <div style={{ ...DIALOG, maxWidth: 480, maxHeight: "90vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text)" }}>
                 {modal.mode === "add" ? "إضافة معلم جديد" : "تعديل بيانات المعلم"}
@@ -214,6 +236,49 @@ export function AdminTeachers() {
                   <option value="inactive">غير نشط</option>
                 </select>
               </div>
+
+              {modal.mode === "add" && (
+                <>
+                  <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+                    <div style={{ borderTop: "1px solid var(--border)", margin: "4px 0 12px", paddingTop: 12 }}>
+                      <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text2)", fontWeight: 600 }}>
+                        <i className="ti ti-lock" style={{ marginLeft: 4 }} />
+                        بيانات الدخول (اختياري — لمنح المعلم حساباً في النظام)
+                      </p>
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">البريد الإلكتروني</label>
+                    <input className="form-input" type="email" placeholder="teacher@example.com" dir="ltr" value={form.email} onChange={(e) => setField("email", e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">كلمة المرور</label>
+                    <input className="form-input" type="password" placeholder="6 أحرف على الأقل" dir="ltr" value={form.password} onChange={(e) => setField("password", e.target.value)} />
+                  </div>
+                </>
+              )}
+
+              {modal.mode === "edit" && (
+                <>
+                  <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+                    <div style={{ borderTop: "1px solid var(--border)", margin: "4px 0 12px", paddingTop: 12 }}>
+                      <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text2)", fontWeight: 600 }}>
+                        <i className="ti ti-lock" style={{ marginLeft: 4 }} />
+                        بيانات الدخول
+                        {!form.email && <span style={{ fontWeight: 400, marginRight: 6 }}>— لا يوجد حساب بعد</span>}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">البريد الإلكتروني</label>
+                    <input className="form-input" type="email" placeholder="teacher@example.com" dir="ltr" value={form.email} onChange={(e) => setField("email", e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">كلمة مرور جديدة</label>
+                    <input className="form-input" type="password" placeholder="اتركه فارغاً إن لم تُرد تغييرها" dir="ltr" value={form.newPassword} onChange={(e) => setField("newPassword", e.target.value)} />
+                  </div>
+                </>
+              )}
             </div>
 
             <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
@@ -230,6 +295,38 @@ export function AdminTeachers() {
                 إلغاء
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Credentials Success Modal */}
+      {credentials && (
+        <div style={OVERLAY} onClick={() => setCredentials(null)}>
+          <div style={{ ...DIALOG, maxWidth: 400 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <i className="ti ti-circle-check" style={{ fontSize: 44, color: "#22c55e", display: "block" }} />
+              <h3 style={{ margin: "12px 0 4px", fontSize: 16 }}>تم إنشاء حساب المعلم</h3>
+              <p style={{ margin: 0, fontSize: 13, color: "var(--text2)" }}>
+                احتفظ ببيانات الدخول وأرسلها للمعلم
+              </p>
+            </div>
+            <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 10, padding: 16, marginBottom: 20 }}>
+              <div style={{ marginBottom: 10 }}>
+                <p style={{ margin: "0 0 4px", fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>البريد الإلكتروني</p>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, direction: "ltr", textAlign: "left" }}>{credentials.email}</p>
+              </div>
+              <div>
+                <p style={{ margin: "0 0 4px", fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>كلمة المرور</p>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, direction: "ltr", textAlign: "left" }}>{credentials.password}</p>
+              </div>
+            </div>
+            <button
+              className="topbar-btn btn-primary"
+              style={{ width: "100%", justifyContent: "center", padding: 10 }}
+              onClick={() => setCredentials(null)}
+            >
+              <i className="ti ti-check" /> حسناً
+            </button>
           </div>
         </div>
       )}

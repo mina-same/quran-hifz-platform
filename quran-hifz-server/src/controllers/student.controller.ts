@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { Student } from '../models/Student.model';
+import { User } from '../models/User.model';
 import { AppError } from '../middleware/error';
 
 const studentSchema = z.object({
@@ -13,6 +14,8 @@ const studentSchema = z.object({
   lastMemorization: z.string().optional(),
   totalPages:       z.number().optional(),
   status:           z.enum(['active', 'inactive', 'new']).optional(),
+  email:            z.string().email('البريد الإلكتروني غير صحيح').optional(),
+  password:         z.string().min(6, 'كلمة المرور 6 أحرف على الأقل').optional(),
 });
 
 export async function getStudents(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -51,9 +54,21 @@ export async function getStudent(req: Request, res: Response, next: NextFunction
 
 export async function createStudent(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const data = studentSchema.parse(req.body);
-    const student = await Student.create(data);
-    res.status(201).json({ success: true, data: student });
+    const { email, password, ...studentData } = studentSchema.parse(req.body);
+    const student = await Student.create(studentData);
+
+    let userCredentials: { email: string; password: string } | undefined;
+    if (email && password) {
+      const existing = await User.findOne({ email });
+      if (existing) {
+        await Student.findByIdAndDelete(student._id);
+        throw new AppError('البريد الإلكتروني مستخدم بالفعل', 400);
+      }
+      await User.create({ name: studentData.name, email, password, role: 'student', profileId: student._id });
+      userCredentials = { email, password };
+    }
+
+    res.status(201).json({ success: true, data: student, credentials: userCredentials });
   } catch (err) {
     next(err);
   }

@@ -436,6 +436,168 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-01T12:05:21.025Z"
+    },
+    {
+      "id": "bug-028",
+      "timestamp": "2026-07-01T12:11:07.074Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/controllers/teacher.controller.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 9→21 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:11:07.074Z"
+    },
+    {
+      "id": "bug-029",
+      "timestamp": "2026-07-01T12:18:29.399Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/config/portals.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→6 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:18:29.399Z"
+    },
+    {
+      "id": "bug-030",
+      "timestamp": "2026-07-01T12:21:04.956Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/controllers/student.controller.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 9→21 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:21:04.956Z"
+    },
+    {
+      "id": "bug-031",
+      "timestamp": "2026-07-01T12:24:04.610Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz-server/src/controllers/teacher.controller.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: const { email, password, newPassword, ...teacherData } = tea; const teacher = await Teacher.findByIdAndUpdate(req.params.i",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T12:24:14.136Z"
+    },
+    {
+      "id": "bug-032",
+      "timestamp": "2026-07-01T12:24:39.050Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz-server/src/controllers/admin.controller.ts",
+      "root_cause": "No early return/throw for edge case: !parent",
+      "fix": "Added guard clause: if (!parent)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:24:39.050Z"
+    },
+    {
+      "id": "bug-033",
+      "timestamp": "2026-07-01T12:25:07.077Z",
+      "error_message": "CSS fix: EMPTY_FORM",
+      "file": "quran-hifz/src/quran/pages/admin/AdminTeachers.tsx",
+      "root_cause": "EMPTY_FORM: FormFields = { name: \"\", specialty: \"\", phone: \"\", rating: \"\", status: \"active\", email: \"\", password: \"\" → FormFields = { name: \"\", specialty: \"\", phone: \"\", rating: \"\", status: \"active\", email: \"\", password: \"\", newPassword: \"\"",
+      "fix": "Changed EMPTY_FORM: FormFields = { name: \"\", specialty: \"\", phone: \"\", rating: \"\", status: \"active\", email: \"\", password: \"\" → FormFields = { name: \"\", specialty: \"\", phone: \"\", rating: \"\", status: \"active\", email: \"\", password: \"\", newPassword: \"\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T12:25:13.349Z"
+    },
+    {
+      "id": "bug-034",
+      "timestamp": "2026-07-01T12:27:27.572Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:27:27.572Z"
+    },
+    {
+      "id": "bug-035",
+      "timestamp": "2026-07-01T12:28:04.568Z",
+      "error_message": "Wrong operator: || should be ===",
+      "file": "quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+      "root_cause": "Used \"||\" instead of \"===\"",
+      "fix": "Changed operator || → ===",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:28:04.568Z"
+    },
+    {
+      "id": "bug-036",
+      "timestamp": "2026-07-01T12:53:34.460Z",
+      "error_message": "CSS fix: padding",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "padding: 28px 20px 22px → 56px 16px",
+      "fix": "Changed padding: 28px 20px 22px → 56px 16px",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T12:55:08.917Z"
+    },
+    {
+      "id": "bug-037",
+      "timestamp": "2026-07-01T00:00:00.000Z",
+      "error_message": "404: NOT_FOUND on Vercel — Code: NOT_FOUND",
+      "file": "quran-hifz-server/vercel.json",
+      "root_cause": "No vercel.json existed, so Vercel had no build config and no routing rules for the Express app — all requests returned NOT_FOUND.",
+      "fix": "Created vercel.json with @vercel/node builder routing all requests to api/index.ts; created api/index.ts as serverless entry point that caches the MongoDB connection and delegates to the Express app.",
+      "tags": [
+        "vercel",
+        "deployment",
+        "express",
+        "serverless",
+        "404"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T00:00:00.000Z"
     }
   ]
 }

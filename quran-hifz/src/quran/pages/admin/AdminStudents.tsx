@@ -7,6 +7,7 @@ import { ProgressBar } from "../../components/common/ProgressBar";
 import { useStudents, useUpdateStudent, useDeleteStudent, type Student } from "../../api/students";
 import { useHalqat } from "../../api/halqat";
 import { useMasajid } from "../../api/masajid";
+import { useAdminParents, useStudentParent, useSetStudentParent } from "../../api/admin-parents";
 import { toAr, pct } from "../../../lib/format";
 
 const PATH_TONE: Record<string, BadgeTone> = {
@@ -52,8 +53,10 @@ export function AdminStudents() {
   const { data: students = [], isLoading, error } = useStudents();
   const { data: halqat = [] } = useHalqat();
   const { data: masajid = [] } = useMasajid();
-  const updateStudent = useUpdateStudent();
-  const deleteStudent = useDeleteStudent();
+  const { data: parents = [] } = useAdminParents();
+  const updateStudent    = useUpdateStudent();
+  const deleteStudent    = useDeleteStudent();
+  const setStudentParent = useSetStudentParent();
 
   const [search, setSearch] = useState("");
   const [pathFilter, setPathFilter] = useState("");
@@ -61,6 +64,9 @@ export function AdminStudents() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<EditFormFields>({ name: "", path: "", halqa: "", masjid: "", guardianPhone: "", status: "active" });
   const [formError, setFormError] = useState("");
+  const [selectedParentId, setSelectedParentId] = useState<string>("");
+
+  const { data: currentParent, isLoading: parentLoading } = useStudentParent(editItem?._id ?? null);
 
   function openEdit(s: Student) {
     setForm({
@@ -71,6 +77,7 @@ export function AdminStudents() {
       guardianPhone: s.guardianPhone,
       status:        s.status,
     });
+    setSelectedParentId("");
     setFormError("");
     setEditItem(s);
   }
@@ -92,6 +99,12 @@ export function AdminStudents() {
         guardianPhone: form.guardianPhone.trim(),
         status:        form.status,
       });
+      if (selectedParentId !== "") {
+        await setStudentParent.mutateAsync({
+          studentId: editItem!._id,
+          parentId:  selectedParentId === "null" ? null : selectedParentId,
+        });
+      }
       setEditItem(null);
     } catch (e) {
       setFormError((e as Error).message);
@@ -292,6 +305,39 @@ export function AdminStudents() {
               <div className="form-group" style={{ gridColumn: "1 / -1" }}>
                 <label className="form-label">جوال ولي الأمر</label>
                 <input className="form-input" type="tel" dir="ltr" placeholder="05XXXXXXXX" value={form.guardianPhone} onChange={(e) => setField("guardianPhone", e.target.value)} />
+              </div>
+
+              <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+                <div style={{ borderTop: "1px solid var(--border)", margin: "4px 0 12px", paddingTop: 12 }}>
+                  <label className="form-label" style={{ fontWeight: 600 }}>
+                    <i className="ti ti-user-heart" style={{ marginLeft: 4 }} />
+                    ولي الأمر في النظام
+                  </label>
+                </div>
+                {parentLoading ? (
+                  <div style={{ fontSize: 12, color: "var(--text2)" }}>جارٍ التحميل...</div>
+                ) : (
+                  <>
+                    {currentParent && selectedParentId === "" && (
+                      <div style={{ marginBottom: 8, padding: "6px 10px", background: "var(--bg2)", borderRadius: 8, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+                        <i className="ti ti-user-check" style={{ color: "var(--green)" }} />
+                        <span>{currentParent.name}</span>
+                        <span style={{ fontSize: 11, color: "var(--text2)", direction: "ltr" }}>({currentParent.email})</span>
+                      </div>
+                    )}
+                    <select
+                      className="form-input"
+                      value={selectedParentId}
+                      onChange={(e) => setSelectedParentId(e.target.value)}
+                    >
+                      <option value="">— {currentParent ? "الإبقاء على الحالي" : "لا يوجد ولي أمر"} —</option>
+                      <option value="null">بدون ولي أمر</option>
+                      {parents.map((p) => (
+                        <option key={p._id} value={p._id}>{p.name} ({p.email})</option>
+                      ))}
+                    </select>
+                  </>
+                )}
               </div>
             </div>
 

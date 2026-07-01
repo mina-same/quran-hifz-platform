@@ -10,10 +10,12 @@ export type Teacher = {
   status: "active" | "inactive";
   halqatCount?: number;
   studentCount?: number;
+  email?: string | null;
 };
 
 type ListResponse = { success: boolean; count: number; data: Teacher[] };
 type SingleResponse = { success: boolean; data: Teacher };
+type CreateResponse = { success: boolean; data: Teacher; credentials?: { email: string; password: string } };
 
 export function useTeachers() {
   return useQuery({
@@ -33,7 +35,7 @@ export function useTeacher(id: string | undefined) {
 export function useCreateTeacher() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: Record<string, unknown>) => post<SingleResponse>("/teachers", body),
+    mutationFn: (body: Record<string, unknown>) => post<CreateResponse>("/teachers", body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["teachers"] }),
   });
 }

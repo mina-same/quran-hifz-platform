@@ -70,9 +70,10 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "dashboard", icon: "ti-layout-dashboard", label: "لوحة التحكم" },
       ]},
       { group: "الطلاب والمعلمون", items: [
-        { id: "students", icon: "ti-users", label: "إدارة الطلاب" },
-        { id: "register", icon: "ti-user-plus", label: "تسجيل طالب جديد" },
-        { id: "teachers", icon: "ti-chalkboard", label: "المعلمون" },
+        { id: "students", icon: "ti-users",        label: "إدارة الطلاب" },
+        { id: "register", icon: "ti-user-plus",    label: "تسجيل طالب جديد" },
+        { id: "teachers", icon: "ti-chalkboard",   label: "المعلمون" },
+        { id: "parents",  icon: "ti-user-heart",   label: "أولياء الأمور" },
       ]},
       { group: "الحلقات والمساجد", items: [
         { id: "halqat",         icon: "ti-school",          label: "الحلقات" },

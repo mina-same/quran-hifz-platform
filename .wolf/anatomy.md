@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T12:05:21.014Z
-> Files: 334 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T12:55:08.905Z
+> Files: 342 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
 
@@ -237,10 +237,15 @@
 - `package-lock.json` — npm lock file (~23821 tok)
 - `package.json` — Node.js package manifest (~291 tok)
 - `tsconfig.json` — TypeScript configuration (~128 tok)
+- `vercel.json` (~54 tok)
+
+## quran-hifz-server/api/
+
+- `index.ts` — ensureDB: handler (~132 tok)
 
 ## quran-hifz-server/src/
 
-- `app.ts` — API routes: GET (1 endpoints) (~788 tok)
+- `app.ts` — API routes: GET (1 endpoints) (~818 tok)
 - `server.ts` — Declares bootstrap (~198 tok)
 
 ## quran-hifz-server/src/config/
@@ -250,6 +255,7 @@
 
 ## quran-hifz-server/src/controllers/
 
+- `admin.controller.ts` — Zod schemas: updateParentSchema, createParentSchema (~1450 tok)
 - `attendance.controller.ts` — Zod schemas: recordSchema, bulkSchema (~985 tok)
 - `auth.controller.ts` — Zod schemas: loginSchema (~481 tok)
 - `group-homework.controller.ts` — Zod schemas: groupHomeworkSchema (~495 tok)
@@ -263,8 +269,8 @@
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~908 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
-- `student.controller.ts` — Zod schemas: studentSchema (~830 tok)
-- `teacher.controller.ts` — Zod schemas: teacherSchema (~792 tok)
+- `student.controller.ts` — Zod schemas: studentSchema (~1043 tok)
+- `teacher.controller.ts` — Zod schemas: teacherSchema (~1267 tok)
 
 ## quran-hifz-server/src/middleware/
 
@@ -292,6 +298,7 @@
 
 ## quran-hifz-server/src/routes/
 
+- `admin.routes.ts` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~246 tok)
 - `attendance.routes.ts` — API routes: GET, POST (3 endpoints) (~142 tok)
 - `auth.routes.ts` — API routes: POST, GET (3 endpoints) (~93 tok)
 - `group-homework.routes.ts` — API routes: GET, POST, DELETE (3 endpoints) (~149 tok)
@@ -408,11 +415,12 @@
 
 ## quran-hifz/src/quran/
 
-- `quran.css` — Styles: 87 rules, 17 vars (~5600 tok)
-- `QuranApp.tsx` — Quran Hifz platform — React entry. (~884 tok)
+- `quran.css` — Styles: 73 rules, 18 vars (~12716 tok)
+- `QuranApp.tsx` — Quran Hifz platform — React entry. (~834 tok)
 
 ## quran-hifz/src/quran/api/
 
+- `admin-parents.ts` — Exports ParentUser, useAdminParents, useCreateParent, useLinkChild + 4 more (~787 tok)
 - `attendance.ts` — Exports AttendanceRecord, AttendanceFilters, useAttendance, useRecordAttendance, useBulkAttendance (~543 tok)
 - `group-homework.ts` — Exports GroupHomework, useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework (~359 tok)
 - `halqat.ts` — Exports Halqa, HalqaFilters, useHalqat, useHalqa + 3 more (~589 tok)
@@ -425,15 +433,15 @@
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
 - `special-tracks.ts` — Exports SpecialTrack, useSpecialTracks, useCreateTrack, useUpdateTrack, useDeleteTrack (~493 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~166 tok)
-- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~698 tok)
-- `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~465 tok)
+- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~730 tok)
+- `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~504 tok)
 
 ## quran-hifz/src/quran/components/
 
 - `ChildSelector.tsx` — Post-login child picker for parent portal; fetches from useParentChildren(), calls setActiveChild from ParentContext (~900 tok)
 - `PageOutlet.tsx` — PageOutlet (~131 tok)
-- `PortalScreen.tsx` — LOGO_SRC (~470 tok)
-- `Sidebar.tsx` — LOGO_SRC (~543 tok)
+- `PortalScreen.tsx` — LOGO_SRC (~516 tok)
+- `Sidebar.tsx` — LOGO_SRC (~666 tok)
 - `Topbar.tsx` — Topbar (~105 tok)
 
 ## quran-hifz/src/quran/components/common/
@@ -449,18 +457,20 @@
 ## quran-hifz/src/quran/config/
 
 - `masarMap.ts` — Exports MasarLevel, ServerPath, MasarInfo, MASAR_MAP, pickMasar (~416 tok)
-- `portals.ts` — Exports PortalKey, NavItem, NavGroup, PortalConfig, PORTALS (~1206 tok)
+- `portals.ts` — Exports PortalKey, NavItem, NavGroup, PortalConfig, PORTALS (~1231 tok)
 
 ## quran-hifz/src/quran/context/
 
 - `AuthContext.tsx` — AuthContext (~690 tok)
 - `ParentContext.tsx` — ParentContext (~206 tok)
 - `PortalContext.tsx` — PortalContext (~483 tok)
+- `ThemeContext.tsx` — ThemeContext (~307 tok)
 - `useTopbar.ts` — Declarative topbar setter for a page component. (~106 tok)
 
 ## quran-hifz/src/quran/pages/
 
-- `LoginPage.tsx` — PORTAL_LABELS — renders form (~2034 tok)
+- `LandingPage.tsx` — LOGO_SRC (~2365 tok)
+- `LoginPage.tsx` — schema — renders form (~1710 tok)
 
 ## quran-hifz/src/quran/pages/admin/
 
@@ -468,11 +478,12 @@
 - `AdminHalqat.tsx` — EMPTY_FORM — renders form, modal (~3700 tok)
 - `AdminKpis.tsx` — RATING_TONE — renders table (~562 tok)
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~2685 tok)
-- `AdminRegister.tsx` — schema — renders form (~2062 tok)
+- `AdminParents.tsx` — EMPTY_ADD — renders table (~5192 tok)
+- `AdminRegister.tsx` — schema — renders form (~3078 tok)
 - `AdminReports.tsx` — REPORTS — renders chart (~419 tok)
-- `AdminSpecialTracks.tsx` — STATUS_TONE — renders form, modal (~5489 tok)
-- `AdminStudents.tsx` — PATH_TONE — renders table (~3902 tok)
-- `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~3031 tok)
+- `AdminSpecialTracks.tsx` — STATUS_TONE — renders form, modal (~5747 tok)
+- `AdminStudents.tsx` — PATH_TONE — renders table (~4602 tok)
+- `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4599 tok)
 
 ## quran-hifz/src/quran/pages/parent/
 
@@ -509,7 +520,7 @@
 
 ## quran-hifz/src/quran/router/
 
-- `pageRegistry.ts` — Exports PAGE_REGISTRY (~1062 tok)
+- `pageRegistry.ts` — Exports PAGE_REGISTRY (~1091 tok)
 
 ## quran-hifz/src/routes/
 
