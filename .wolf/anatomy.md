@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T13:39:57.563Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T13:49:38.471Z
 > Files: 346 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
@@ -487,7 +487,7 @@
 - `AdminParents.tsx` — EMPTY_ADD — renders table (~5192 tok)
 - `AdminRegister.tsx` — schema — renders form (~3078 tok)
 - `AdminReports.tsx` — REPORTS — renders chart (~419 tok)
-- `AdminSpecialTracks.tsx` — STATUS_TONE — renders form, modal (~7651 tok)
+- `AdminSpecialTracks.tsx` — STATUS_TONE — renders form, modal (~9559 tok)
 - `AdminStudents.tsx` — PATH_TONE — renders table (~5093 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4599 tok)
 
@@ -522,7 +522,7 @@
 - `TeacherPlans.tsx` — ROWS — renders table (~436 tok)
 - `TeacherRecordLesson.tsx` — LESSON_TYPES (~4027 tok)
 - `TeacherReports.tsx` — TeacherReports — renders chart (~172 tok)
-- `TeacherStudents.tsx` — HW_TONE — renders table (~2005 tok)
+- `TeacherStudents.tsx` — HW_TONE — renders table (~2053 tok)
 
 ## quran-hifz/src/quran/router/
 

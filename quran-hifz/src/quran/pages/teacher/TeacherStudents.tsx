@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
@@ -55,29 +55,34 @@ export function TeacherStudents() {
 
   useTopbar("ti-users", "طلابي");
 
-  const TAB_STYLE = (active: boolean): React.CSSProperties => ({
-    padding: "8px 20px", borderRadius: 8, border: "none", cursor: "pointer",
-    fontSize: 13, fontWeight: active ? 700 : 400,
-    background: active ? "var(--green)" : "transparent",
-    color: active ? "white" : "var(--text2)",
-    transition: "all .15s",
+  const TAB_BTN = (active: boolean): CSSProperties => ({
+    display: "flex", alignItems: "center", gap: 6,
+    padding: "10px 16px",
+    border: "none", borderBottom: `2.5px solid ${active ? "var(--green)" : "transparent"}`,
+    cursor: "pointer", background: "transparent",
+    fontSize: 13, fontWeight: active ? 700 : 500,
+    color: active ? "var(--green)" : "var(--text2)",
+    transition: "all .18s",
+    marginBottom: -1,
   });
 
   return (
     <Card>
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 18, borderBottom: "1px solid var(--border)", paddingBottom: 12 }}>
-        <button style={TAB_STYLE(tab === "halqa")}  onClick={() => setTab("halqa")}>
-          <i className="ti ti-school" style={{ marginLeft: 6 }} />
+      <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: "1px solid var(--border)" }}>
+        <button style={TAB_BTN(tab === "halqa")} onClick={() => setTab("halqa")}>
+          <i className="ti ti-school" />
           طلاب الحلقة
         </button>
-        <button style={TAB_STYLE(tab === "tracks")} onClick={() => setTab("tracks")}>
-          <i className="ti ti-calendar-event" style={{ marginLeft: 6 }} />
-          طلاب المسارات الاستثنائية
+        <button style={TAB_BTN(tab === "tracks")} onClick={() => setTab("tracks")}>
+          <i className="ti ti-star" />
+          المسارات الاستثنائية
           {trackStudents.length > 0 && (
             <span style={{
-              marginRight: 6, background: "rgba(255,255,255,0.3)",
-              borderRadius: 99, padding: "1px 7px", fontSize: 11,
+              background: tab === "tracks" ? "var(--green)" : "var(--border2)",
+              color: tab === "tracks" ? "#fff" : "var(--text2)",
+              borderRadius: 99, padding: "1px 8px", fontSize: 11, fontWeight: 700,
+              transition: "all .18s",
             }}>
               {trackStudents.length}
             </span>

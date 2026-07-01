@@ -95,6 +95,7 @@ export function AdminSpecialTracks() {
   const [form, setForm] = useState<FormFields>(EMPTY_FORM);
   const [formError, setFormError] = useState("");
   const [addStudentId, setAddStudentId] = useState("");
+  const [studentsSearch, setStudentsSearch] = useState("");
 
   function openAdd() {
     setForm(EMPTY_FORM);
@@ -259,9 +260,16 @@ export function AdminSpecialTracks() {
                 <button
                   className="topbar-btn btn-ghost"
                   style={{ padding: "5px 12px", fontSize: 12, color: "var(--green)", borderColor: "rgba(26,92,42,0.25)" }}
-                  onClick={() => { setAddStudentId(""); setModal({ mode: "students", item: t }); }}
+                  onClick={() => { setAddStudentId(""); setStudentsSearch(""); setModal({ mode: "students", item: t }); }}
                 >
                   <i className="ti ti-users" /> الطلاب
+                  {enrolled > 0 && (
+                    <span style={{
+                      background: "var(--green)", color: "#fff",
+                      borderRadius: 99, fontSize: 10, fontWeight: 700,
+                      padding: "1px 6px", marginRight: 4,
+                    }}>{enrolled}</span>
+                  )}
                 </button>
                 <button
                   className="topbar-btn btn-ghost"
@@ -464,110 +472,232 @@ export function AdminSpecialTracks() {
       {/* Students Management Modal */}
       {modal?.mode === "students" && (() => {
         const track = (tracks ?? []).find((t) => t._id === modal.item._id) ?? modal.item;
-        const enrolledIds = new Set(track.enrolledStudents.map(getEnrolledId));
-        const available = allStudents.filter((s) => !enrolledIds.has(s._id));
+        const enrolledCount = track.enrolledStudents.length;
+        const capacityPct   = Math.min(100, Math.round((enrolledCount / track.maxStudents) * 100));
+        const barColor      = capacityPct >= 90 ? "#ef4444" : capacityPct >= 70 ? "#f59e0b" : "var(--green)";
+        const isFull        = enrolledCount >= track.maxStudents;
+        const enrolledIds   = new Set(track.enrolledStudents.map(getEnrolledId));
+        const available     = allStudents.filter(
+          (s) => !enrolledIds.has(s._id) &&
+            (!studentsSearch.trim() || s.name.includes(studentsSearch.trim()))
+        );
+
+        function avatarInitials(name: string) {
+          return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0] ?? "").join("");
+        }
+
         return (
-          <div style={OVERLAY} onClick={() => setModal(null)}>
-            <div style={{ ...DIALOG, maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
-              {/* Header */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <div style={OVERLAY} onClick={() => { setModal(null); setStudentsSearch(""); }}>
+            <div
+              style={{ ...DIALOG, maxWidth: 500, background: "var(--surface)" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* ── Header ── */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text)" }}>
-                    <i className="ti ti-users" style={{ marginLeft: 6, color: "var(--green)" }} />
-                    طلاب المسار: {track.title}
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text)", display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{
+                      width: 32, height: 32, borderRadius: 8,
+                      background: "var(--green-pale)", color: "var(--green)",
+                      display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 15,
+                    }}>
+                      <i className="ti ti-users" />
+                    </span>
+                    إدارة طلاب المسار
                   </h3>
-                  <span style={{ fontSize: 12, color: "var(--text2)" }}>
-                    {track.enrolledStudents.length} / {track.maxStudents} مسجّل
-                  </span>
+                  <p style={{ margin: "4px 0 0 40px", fontSize: 13, color: "var(--text2)", fontWeight: 500 }}>
+                    {track.title}
+                  </p>
                 </div>
-                <button className="topbar-btn btn-ghost" style={{ padding: "4px 8px" }} onClick={() => setModal(null)}>
+                <button
+                  className="topbar-btn btn-ghost"
+                  style={{ padding: "5px 8px", flexShrink: 0 }}
+                  onClick={() => { setModal(null); setStudentsSearch(""); }}
+                  aria-label="إغلاق"
+                >
                   <i className="ti ti-x" />
                 </button>
               </div>
 
-              {/* Add Student */}
-              {available.length > 0 && track.enrolledStudents.length < track.maxStudents && (
-                <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                  <select
-                    className="form-input"
-                    style={{ flex: 1, fontSize: 13 }}
-                    value={addStudentId}
-                    onChange={(e) => setAddStudentId(e.target.value)}
-                  >
-                    <option value="">— اختر طالباً للإضافة —</option>
-                    {available.map((s) => (
-                      <option key={s._id} value={s._id}>{s.name}</option>
-                    ))}
-                  </select>
-                  <button
-                    className="topbar-btn btn-primary"
-                    style={{ padding: "8px 16px", whiteSpace: "nowrap" }}
-                    disabled={!addStudentId || enrollStudent.isPending}
-                    onClick={async () => {
-                      if (!addStudentId) return;
-                      await enrollStudent.mutateAsync({ id: track._id, studentId: addStudentId });
-                      setAddStudentId("");
-                    }}
-                  >
-                    <i className="ti ti-plus" /> إضافة
-                  </button>
+              {/* ── Capacity Bar ── */}
+              <div style={{
+                background: "var(--cream)", borderRadius: 10, padding: "12px 14px", marginBottom: 18,
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <span style={{ fontSize: 12, color: "var(--text2)", fontWeight: 600 }}>
+                    <i className="ti ti-user-check" style={{ marginLeft: 5 }} />
+                    طاقة المسار
+                  </span>
+                  <span style={{
+                    fontSize: 12, fontWeight: 700,
+                    color: capacityPct >= 90 ? "#ef4444" : capacityPct >= 70 ? "#f59e0b" : "var(--green)",
+                  }}>
+                    {enrolledCount} / {track.maxStudents} مسجّل
+                  </span>
                 </div>
-              )}
+                <div style={{ height: 8, background: "var(--border)", borderRadius: 99, overflow: "hidden" }}>
+                  <div style={{
+                    height: "100%", width: `${capacityPct}%`,
+                    background: barColor, borderRadius: 99,
+                    transition: "width .4s ease",
+                  }} />
+                </div>
+                {isFull && (
+                  <p style={{ margin: "8px 0 0", fontSize: 11, color: "#ef4444", fontWeight: 600 }}>
+                    <i className="ti ti-alert-circle" style={{ marginLeft: 4 }} />
+                    وصل المسار للحد الأقصى — لا يمكن إضافة طلاب جدد
+                  </p>
+                )}
+              </div>
 
-              {track.enrolledStudents.length >= track.maxStudents && (
-                <div style={{ padding: "8px 12px", background: "#fef9c3", borderRadius: 8, fontSize: 12, color: "#92400e", marginBottom: 12 }}>
-                  <i className="ti ti-info-circle" style={{ marginLeft: 4 }} />
-                  وصل المسار للحد الأقصى ({track.maxStudents} طالب)
-                </div>
-              )}
-
-              {/* Enrolled List */}
-              {track.enrolledStudents.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "24px 0", color: "var(--text3)", fontSize: 13 }}>
-                  <i className="ti ti-user-off" style={{ fontSize: 28, display: "block", marginBottom: 8 }} />
-                  لا يوجد طلاب مسجّلون بعد
-                </div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {track.enrolledStudents.map((s) => (
-                    <div
-                      key={getEnrolledId(s)}
-                      style={{
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        padding: "10px 14px", background: "var(--surface)", borderRadius: 10,
-                        border: "1px solid var(--border)",
+              {/* ── Add Student ── */}
+              {!isFull && available.length > 0 && (
+                <div style={{
+                  border: "1.5px dashed var(--border2)", borderRadius: 10,
+                  padding: "14px", marginBottom: 18,
+                }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 700, color: "var(--text2)" }}>
+                    <i className="ti ti-user-plus" style={{ marginLeft: 5, color: "var(--green)" }} />
+                    إضافة طالب جديد
+                  </p>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <select
+                      className="form-input"
+                      style={{ flex: 1, fontSize: 13 }}
+                      value={addStudentId}
+                      onChange={(e) => setAddStudentId(e.target.value)}
+                    >
+                      <option value="">— اختر طالباً —</option>
+                      {available.map((s) => (
+                        <option key={s._id} value={s._id}>{s.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      className="topbar-btn btn-primary"
+                      style={{ padding: "0 18px", whiteSpace: "nowrap", fontSize: 13 }}
+                      disabled={!addStudentId || enrollStudent.isPending}
+                      onClick={async () => {
+                        if (!addStudentId) return;
+                        await enrollStudent.mutateAsync({ id: track._id, studentId: addStudentId });
+                        setAddStudentId("");
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{
-                          width: 34, height: 34, borderRadius: "50%",
-                          background: "var(--green-pale)", color: "var(--green)",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: 14, fontWeight: 700,
-                        }}>
-                          <i className="ti ti-user" />
-                        </div>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text)" }}>
-                          {getEnrolledName(s)}
-                        </span>
-                      </div>
-                      <button
-                        className="topbar-btn btn-ghost"
-                        style={{ padding: "4px 10px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}
-                        disabled={unenrollStudent.isPending}
-                        onClick={() => unenrollStudent.mutate({ id: track._id, studentId: getEnrolledId(s) })}
-                      >
-                        <i className="ti ti-user-minus" /> إزالة
-                      </button>
-                    </div>
-                  ))}
+                      {enrollStudent.isPending
+                        ? <i className="ti ti-loader-2" style={{ animation: "spin 1s linear infinite" }} />
+                        : <><i className="ti ti-plus" /> إضافة</>
+                      }
+                    </button>
+                  </div>
                 </div>
               )}
 
+              {!isFull && available.length === 0 && enrolledCount < track.maxStudents && (
+                <div style={{
+                  border: "1.5px dashed var(--border)", borderRadius: 10,
+                  padding: "12px 14px", marginBottom: 18,
+                  fontSize: 12, color: "var(--text3)", textAlign: "center",
+                }}>
+                  <i className="ti ti-users-group" style={{ fontSize: 20, display: "block", marginBottom: 6 }} />
+                  جميع الطلاب مسجّلون في هذا المسار
+                </div>
+              )}
+
+              {/* ── Enrolled List ── */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text2)" }}>
+                  الطلاب المسجّلون
+                </span>
+                {enrolledCount > 0 && (
+                  <input
+                    className="form-input"
+                    style={{ width: 150, fontSize: 12, padding: "5px 10px" }}
+                    placeholder="بحث..."
+                    value={studentsSearch}
+                    onChange={(e) => setStudentsSearch(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {enrolledCount === 0 ? (
+                <div style={{
+                  textAlign: "center", padding: "28px 0",
+                  background: "var(--cream)", borderRadius: 10,
+                }}>
+                  <i className="ti ti-user-off" style={{ fontSize: 30, color: "var(--text3)", display: "block", marginBottom: 8 }} />
+                  <p style={{ margin: 0, fontSize: 13, color: "var(--text3)" }}>لا يوجد طلاب مسجّلون بعد</p>
+                  <p style={{ margin: "4px 0 0", fontSize: 11, color: "var(--text3)" }}>أضف طالباً من الأعلى</p>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 280, overflowY: "auto" }}>
+                  {track.enrolledStudents
+                    .filter((s) => !studentsSearch.trim() || getEnrolledName(s).includes(studentsSearch.trim()))
+                    .map((s, idx) => {
+                      const name = getEnrolledName(s);
+                      const id   = getEnrolledId(s);
+                      const colors = [
+                        { bg: "var(--green-pale)", fg: "var(--green)" },
+                        { bg: "var(--gold-pale)",  fg: "var(--brown)" },
+                        { bg: "#eff6ff",            fg: "#1d4ed8" },
+                        { bg: "#fdf0e8",            fg: "var(--brown)" },
+                      ];
+                      const c = colors[idx % colors.length];
+                      return (
+                        <div
+                          key={id}
+                          style={{
+                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            padding: "10px 12px",
+                            background: "var(--cream)", borderRadius: 10,
+                            border: "1px solid var(--border)",
+                            transition: "background .15s",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            {/* Initials avatar */}
+                            <div style={{
+                              width: 36, height: 36, borderRadius: "50%",
+                              background: c.bg, color: c.fg,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              fontSize: 12, fontWeight: 800, flexShrink: 0,
+                              fontFamily: "system-ui, sans-serif",
+                            }}>
+                              {avatarInitials(name)}
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{name}</div>
+                              <div style={{ fontSize: 11, color: "var(--text3)" }}>#{idx + 1} · مسجّل</div>
+                            </div>
+                          </div>
+                          <button
+                            className="topbar-btn btn-ghost"
+                            style={{
+                              padding: "5px 12px", fontSize: 12,
+                              color: "#ef4444", borderColor: "rgba(239,68,68,0.25)",
+                            }}
+                            disabled={unenrollStudent.isPending}
+                            onClick={() => unenrollStudent.mutate({ id: track._id, studentId: id })}
+                          >
+                            <i className="ti ti-user-minus" />
+                            <span style={{ marginRight: 4 }}>إزالة</span>
+                          </button>
+                        </div>
+                      );
+                    })}
+                  {track.enrolledStudents.filter(
+                    (s) => !studentsSearch.trim() || getEnrolledName(s).includes(studentsSearch.trim())
+                  ).length === 0 && studentsSearch && (
+                    <div style={{ textAlign: "center", padding: 16, color: "var(--text3)", fontSize: 12 }}>
+                      لا نتائج لـ «{studentsSearch}»
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── Footer ── */}
               <button
                 className="topbar-btn btn-ghost"
-                style={{ width: "100%", justifyContent: "center", marginTop: 16 }}
-                onClick={() => setModal(null)}
+                style={{ width: "100%", justifyContent: "center", marginTop: 18, padding: 10 }}
+                onClick={() => { setModal(null); setStudentsSearch(""); }}
               >
                 إغلاق
               </button>
