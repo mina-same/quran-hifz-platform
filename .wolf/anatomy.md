@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T12:55:08.905Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T12:56:34.892Z
 > Files: 342 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
@@ -415,7 +415,7 @@
 
 ## quran-hifz/src/quran/
 
-- `quran.css` — Styles: 73 rules, 18 vars (~12716 tok)
+- `quran.css` — Styles: 73 rules, 18 vars (~12927 tok)
 - `QuranApp.tsx` — Quran Hifz platform — React entry. (~834 tok)
 
 ## quran-hifz/src/quran/api/
