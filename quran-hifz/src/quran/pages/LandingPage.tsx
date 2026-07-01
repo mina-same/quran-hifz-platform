@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 
 const LOGO_SRC = "/quran/logo.png";
-const IMG_HERO    = "https://images.unsplash.com/photo-1609743522653-52354461eb27?w=1600&q=80&auto=format";
+const VIDEO_HERO  = "/10661535-hd_1920_1080_30fps.mp4";
 const IMG_STUDY   = "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=900&q=80&auto=format";
 const IMG_QURAN   = "https://images.unsplash.com/photo-1585036156171-384164a8c675?w=900&q=80&auto=format";
 
@@ -162,7 +162,15 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
       {/* ── HERO ── */}
       <section className="lnd-hero">
         <div className="lnd-hero-bg" aria-hidden="true">
-          <img src={IMG_HERO} alt="" className="lnd-hero-img" loading="eager" />
+          <video
+            src={VIDEO_HERO}
+            className="lnd-hero-img"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+          />
           <div className="lnd-hero-overlay" />
         </div>
         <div className="lnd-orb lnd-orb-1" aria-hidden="true" />
