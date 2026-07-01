@@ -1,95 +1,114 @@
 import { useTopbar } from "../../context/useTopbar";
+import { AyahBar } from "../../components/common/AyahBar";
 import { Card } from "../../components/common/Card";
 import { StatsRow } from "../../components/common/StatsRow";
-import { ProgressBar } from "../../components/common/ProgressBar";
 
 const MY_POINTS = 740;
-const NEXT_LEVEL = 1000;
 
-const LEADERBOARD = [
-  { rank: 1, name: "عبدالله الحميداني",  pts: 740, initials: "عح" },
-  { rank: 2, name: "يوسف الشمري",        pts: 680, initials: "يش" },
-  { rank: 3, name: "محمد القحطاني",      pts: 620, initials: "مق" },
-  { rank: 4, name: "عمر العتيبي",        pts: 550, initials: "عع" },
-  { rank: 5, name: "خالد الدوسري",       pts: 490, initials: "خد" },
+const LEVELS: { label: string; range: string; pct: number; active: boolean }[] = [
+  { label: "مبتدئ",    range: "0–200",   pct: 100, active: false },
+  { label: "ناشط",     range: "200–450",  pct: 100, active: false },
+  { label: "متميز",    range: "450–700",  pct: 100, active: false },
+  { label: "نجم ⭐",   range: "700–1000", pct: 57,  active: true  },
+  { label: "حافظ 🏆",  range: "1000+",    pct: 0,   active: false },
 ];
 
 const HISTORY = [
-  { date: "اليوم",    reason: "واجب يومي",              pts: "+٨٥٠" },
-  { date: "أمس",     reason: "تقييم ممتاز من الأستاذ", pts: "+٦٠٠" },
-  { date: "الأحد",   reason: "حضور منتظم",              pts: "+١٠٠" },
-  { date: "السبت",   reason: "حفظ جزء جديد",           pts: "+٢٠٠" },
+  { date: "اليوم",    text: "واجب حفظ جديد — البقرة آيات ٢٤٠-٢٤٥",  pts: "+٨٠",  tone: "green" },
+  { date: "أمس",     text: "واجب مراجعة بعيدة — سورة الكهف",          pts: "+٦٠",  tone: "green" },
+  { date: "الاثنين", text: "حضور حلقة الفجر",                           pts: "+٢٠",  tone: "blue"  },
+  { date: "الأحد",   text: "تقييم الأستاذ: ممتاز",                     pts: "+١٠٠", tone: "gold"  },
+  { date: "السبت",   text: "واجب تحسين تلاوة",                          pts: "+٥٠",  tone: "green" },
+  { date: "الخميس",  text: "حضور حلقة الفجر",                           pts: "+٢٠",  tone: "blue"  },
+  { date: "الأربعاء",text: "واجب حفظ جديد",                             pts: "+٨٠",  tone: "green" },
 ];
 
 export function StudentPoints() {
-  useTopbar("ti-star", "نقاطي والمتصدرون", <></>);
-
-  const pct = Math.round((MY_POINTS / NEXT_LEVEL) * 100);
+  useTopbar("ti-star", "نقاطي ومستواي");
 
   return (
     <>
+      <AyahBar />
       <StatsRow
         items={[
-          { num: String(MY_POINTS), label: "نقطة مكتسبة",         icon: "ti-star" },
-          { num: `${NEXT_LEVEL - MY_POINTS}`, label: "نقطة للمستوى التالي", icon: "ti-arrow-up", variant: "gold" },
-          { num: "١", label: "مرتبتك في الحلقة", icon: "ti-trophy", variant: "blue" },
-          { num: "نجم ⭐", label: "مستواك الحالي", icon: "ti-award" },
+          { num: String(MY_POINTS), label: "إجمالي النقاط",       icon: "ti-star",      variant: "gold" },
+          { num: "٣",               label: "أسابيع متتالية",       icon: "ti-trophy" },
+          { num: "١٢",              label: "واجب مسلَّم",           icon: "ti-microphone", variant: "blue" },
+          { num: "نجم",             label: "المستوى الحالي",        icon: "ti-award" },
         ]}
       />
-
-      <Card icon="ti-chart-bar" title={`مسار النقاط — المستوى التالي: ${NEXT_LEVEL}`}>
-        <div style={{ marginBottom: 8, display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-          <span style={{ color: "var(--text2)" }}>{MY_POINTS} / {NEXT_LEVEL} نقطة</span>
-          <span style={{ fontWeight: 700, color: "var(--green)" }}>{pct}٪</span>
-        </div>
-        <ProgressBar pct={pct} />
-      </Card>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-        <Card icon="ti-trophy" title="المتصدرون — حلقتي">
-          {LEADERBOARD.map((r, i) => (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "8px 0",
-                borderTop: i ? "1px solid var(--border)" : undefined,
-                background: r.name === "عبدالله الحميداني" ? "var(--green-pale)" : undefined,
-                borderRadius: 6,
-                paddingRight: r.name === "عبدالله الحميداني" ? 8 : undefined,
-              }}
-            >
-              <span style={{ fontSize: 16, fontWeight: 700, color: i < 3 ? "var(--gold)" : "var(--text3)", minWidth: 22 }}>
-                {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${r.rank}`}
-              </span>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--green-pale)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "var(--green)", flexShrink: 0 }}>
-                {r.initials}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 18 }}>
+        <Card icon="ti-chart-bar" title="المستويات">
+          <div style={{ fontSize: 13 }}>
+            {LEVELS.map((lv) => (
+              <div
+                key={lv.label}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 10,
+                  padding: 8,
+                  borderRadius: 8,
+                  background: lv.active ? "var(--gold-pale, #fef9ec)" : "var(--cream, #f9f6f2)",
+                }}
+              >
+                <span
+                  style={{
+                    minWidth: 70,
+                    fontSize: 12,
+                    fontWeight: lv.active ? 700 : undefined,
+                    color: lv.active ? "var(--brown, #7c5c2a)" : undefined,
+                  }}
+                >
+                  {lv.label}
+                </span>
+                <div className="progress-bar" style={{ flex: 1 }}>
+                  <div
+                    className="progress-fill"
+                    style={{
+                      width: `${lv.pct}%`,
+                      background: lv.active ? "var(--gold)" : undefined,
+                    }}
+                  />
+                </div>
+                <span style={{ fontSize: 11, color: "var(--text2)", minWidth: 65, textAlign: "right" }}>
+                  {lv.range}
+                </span>
               </div>
-              <span style={{ flex: 1, fontSize: 13, fontWeight: r.name === "عبدالله الحميداني" ? 700 : undefined }}>{r.name}</span>
-              <span style={{ fontWeight: 700, color: "var(--gold)", fontSize: 13 }}>{r.pts}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </Card>
 
-        <Card icon="ti-clock" title="آخر النقاط المكتسبة">
-          {HISTORY.map((h, i) => (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "8px 0",
-                borderTop: i ? "1px solid var(--border)" : undefined,
-              }}
-            >
-              <span style={{ color: "var(--text3)", fontSize: 11, minWidth: 42 }}>{h.date}</span>
-              <span style={{ flex: 1, fontSize: 12 }}>{h.reason}</span>
-              <span style={{ fontWeight: 700, color: "var(--green)", fontSize: 13 }}>{h.pts}</span>
-            </div>
-          ))}
+        <Card icon="ti-history" title="تاريخ النقاط">
+          <div style={{ fontSize: 12 }}>
+            {HISTORY.map((h, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "8px 0",
+                  borderBottom: "1px solid var(--border)",
+                }}
+              >
+                <span style={{ color: "var(--text3)", fontSize: 11, minWidth: 52 }}>{h.date}</span>
+                <span style={{ flex: 1 }}>{h.text}</span>
+                <span
+                  style={{
+                    fontWeight: 700,
+                    color:
+                      h.tone === "gold" ? "var(--gold)" :
+                      h.tone === "blue" ? "var(--text2)" :
+                      "var(--green)",
+                  }}
+                >
+                  {h.pts}
+                </span>
+              </div>
+            ))}
+          </div>
         </Card>
       </div>
     </>

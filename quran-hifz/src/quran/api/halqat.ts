@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { get, post, put } from "../../lib/api";
+import { get, post, put, del } from "../../lib/api";
 
 export type Halqa = {
   _id: string;
@@ -56,6 +56,14 @@ export function useUpdateHalqa() {
   return useMutation({
     mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) =>
       put<SingleResponse>(`/halqat/${id}`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["halqat"] }),
+  });
+}
+
+export function useDeleteHalqa() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => del(`/halqat/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["halqat"] }),
   });
 }

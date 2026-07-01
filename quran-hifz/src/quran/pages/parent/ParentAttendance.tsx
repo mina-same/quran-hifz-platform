@@ -45,6 +45,7 @@ export function ParentAttendance() {
                   <th>اليوم</th>
                   <th>الوقت</th>
                   <th>الحالة</th>
+                  <th>ملاحظة</th>
                 </tr>
               </thead>
               <tbody>
@@ -54,6 +55,9 @@ export function ParentAttendance() {
                     <td>{r.day}</td>
                     <td>{r.time}</td>
                     <td><Badge tone={STATUS_TONE[r.status] ?? "green"}>{r.status}</Badge></td>
+                    <td style={{ fontSize: 12, color: "var(--text2)" }}>
+                      {(r as { note?: string }).note ?? "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

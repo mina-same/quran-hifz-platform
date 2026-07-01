@@ -58,17 +58,26 @@ export function StudentSchedule() {
               >
                 <div style={{ fontSize: 15, fontWeight: 700, color: "var(--green)" }}>{day}</div>
                 {halqa?.time && (
-                  <div style={{ fontSize: 13, color: "var(--text)", marginTop: 4, fontWeight: 600 }} dir="ltr">
-                    {halqa.time}
-                  </div>
+                  <>
+                    <div style={{ fontSize: 12, color: "var(--text2)", marginTop: 4 }}>
+                      بعد صلاة الفجر
+                    </div>
+                    <div style={{ fontSize: 13, color: "var(--text)", marginTop: 2, fontWeight: 600 }} dir="ltr">
+                      {halqa.time}
+                    </div>
+                  </>
                 )}
               </div>
             ))}
           </div>
         )}
+        <HalqaRow label="الموقع" value={getName(halqa?.masjid)} />
         <HalqaRow label="المعلم" value={getName(halqa?.teacher)} />
-        <HalqaRow label="المسجد" value={getName(halqa?.masjid)} />
-        {halqa?.days && <HalqaRow label="الأيام" value={halqa.days} />}
+        <HalqaRow
+          label="الموعد القادم"
+          value="الثلاثاء — بعد غد"
+          valueStyle={{ color: "var(--green)", fontWeight: 700 }}
+        />
       </Card>
       <div style={{ marginTop: 14 }}>
         <Alert tone="info" icon="ti-bell">

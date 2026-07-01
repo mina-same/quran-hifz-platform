@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T09:38:26.024Z
-> Files: 333 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T11:58:50.839Z
+> Files: 334 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
 
@@ -14,6 +14,7 @@
 - `.gitignore` — Git ignore rules (~131 tok)
 - `CLAUDE.md` — OpenWolf (~57 tok)
 - `quran hifz platform.html` — جمعية تحفيظ القرآن الكريم بالعماير (~59157 tok)
+- `quran_hifz_v2 (7).html` — جمعية تحفيظ القرآن الكريم بالعماير (~81255 tok)
 
 ## .claude/
 
@@ -257,7 +258,7 @@
 - `homework.controller.ts` — Zod schemas: homeworkSchema, reviewSchema (~750 tok)
 - `kpi.controller.ts` — Zod schemas: kpiSchema (~389 tok)
 - `lesson-recording.controller.ts` — Zod schemas: recordingSchema (~559 tok)
-- `masjid.controller.ts` — Zod schemas: masjidSchema (~600 tok)
+- `masjid.controller.ts` — Zod schemas: masjidSchema (~698 tok)
 - `message.controller.ts` — Zod schemas: messageSchema (~526 tok)
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~875 tok)
@@ -299,7 +300,7 @@
 - `homework.routes.ts` — API routes: GET, POST, PATCH, DELETE (4 endpoints) (~164 tok)
 - `kpi.routes.ts` — API routes: GET, POST, PUT (3 endpoints) (~122 tok)
 - `lesson-recording.routes.ts` — API routes: GET, POST, DELETE (3 endpoints) (~143 tok)
-- `masjid.routes.ts` — API routes: GET, POST, PUT (4 endpoints) (~140 tok)
+- `masjid.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~161 tok)
 - `message.routes.ts` — API routes: GET, POST, PATCH (3 endpoints) (~105 tok)
 - `parent.routes.ts` — API routes: GET (6 endpoints) (~239 tok)
 - `special-track.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~183 tok)
@@ -309,7 +310,7 @@
 
 ## quran-hifz-server/src/seeds/
 
-- `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~3212 tok)
+- `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~3398 tok)
 
 ## quran-hifz-server/src/types/
 
@@ -398,7 +399,7 @@
 ## quran-hifz/src/lib/
 
 - `api.ts` — Exports ApiError, get, post, put + 2 more (~443 tok)
-- `auth-storage.ts` — Exports StoredUser, getToken, setToken, clearToken + 3 more (~243 tok)
+- `auth-storage.ts` — Exports StoredUser, getToken, setToken, clearToken + 3 more (~308 tok)
 - `error-capture.ts` — Captures the original Error out-of-band so server.ts can recover the stack (~259 tok)
 - `error-page.ts` — Exports renderErrorPage (~392 tok)
 - `format.ts` — Exports toAr, pct (~67 tok)
@@ -414,12 +415,12 @@
 
 - `attendance.ts` — Exports AttendanceRecord, AttendanceFilters, useAttendance, useRecordAttendance, useBulkAttendance (~543 tok)
 - `group-homework.ts` — Exports GroupHomework, useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework (~359 tok)
-- `halqat.ts` — Exports Halqa, HalqaFilters, useHalqat, useHalqa + 2 more (~524 tok)
+- `halqat.ts` — Exports Halqa, HalqaFilters, useHalqat, useHalqa + 3 more (~589 tok)
 - `hifz.ts` — Exports HifzEntry, useHifz, useUpsertHifz, useDeleteHifz (~388 tok)
 - `homework.ts` — Exports Homework, HomeworkFilters, useHomework, useCreateHomework + 2 more (~628 tok)
 - `kpis.ts` — Exports Kpi, useKpis, useCreateKpi, useUpdateKpi (~314 tok)
 - `lesson-recordings.ts` — Exports LessonRecording, useRecordings, useCreateRecording, useDeleteRecording (~488 tok)
-- `masajid.ts` — Exports Masjid, useMasajid, useMasjid, useCreateMasjid, useUpdateMasjid (~386 tok)
+- `masajid.ts` — Exports Masjid, useMasajid, useMasjid, useCreateMasjid + 2 more (~461 tok)
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
 - `special-tracks.ts` — Exports SpecialTrack, useSpecialTracks, useCreateTrack, useUpdateTrack, useDeleteTrack (~481 tok)
@@ -447,12 +448,12 @@
 
 ## quran-hifz/src/quran/config/
 
-- `masarMap.ts` — Exports MasarLevel, MasarInfo, MASAR_MAP, pickMasar (~323 tok)
-- `portals.ts` — Exports PortalKey, NavItem, NavGroup, PortalConfig, PORTALS (~1184 tok)
+- `masarMap.ts` — Exports MasarLevel, ServerPath, MasarInfo, MASAR_MAP, pickMasar (~416 tok)
+- `portals.ts` — Exports PortalKey, NavItem, NavGroup, PortalConfig, PORTALS (~1206 tok)
 
 ## quran-hifz/src/quran/context/
 
-- `AuthContext.tsx` — AuthContext (~685 tok)
+- `AuthContext.tsx` — AuthContext (~690 tok)
 - `ParentContext.tsx` — ParentContext (~206 tok)
 - `PortalContext.tsx` — PortalContext (~483 tok)
 - `useTopbar.ts` — Declarative topbar setter for a page component. (~106 tok)
@@ -463,10 +464,10 @@
 
 ## quran-hifz/src/quran/pages/admin/
 
-- `AdminDashboard.tsx` — PageLoading (~1271 tok)
-- `AdminHalqat.tsx` — PATH_TONE (~659 tok)
-- `AdminKpis.tsx` — RATING_TONE — renders table (~551 tok)
-- `AdminMasajid.tsx` — AdminMasajid (~546 tok)
+- `AdminDashboard.tsx` — PageLoading (~1209 tok)
+- `AdminHalqat.tsx` — EMPTY_FORM — renders form, modal (~3700 tok)
+- `AdminKpis.tsx` — RATING_TONE — renders table (~562 tok)
+- `AdminMasajid.tsx` — OVERLAY — renders modal (~2685 tok)
 - `AdminRegister.tsx` — schema — renders form (~2062 tok)
 - `AdminReports.tsx` — REPORTS — renders chart (~419 tok)
 - `AdminSpecialTracks.tsx` — STATUS_TONE (~1988 tok)
@@ -475,8 +476,8 @@
 
 ## quran-hifz/src/quran/pages/parent/
 
-- `ParentAttendance.tsx` — STATUS_TONE — renders table (~725 tok)
-- `ParentDashboard.tsx` — ParentDashboard (~938 tok)
+- `ParentAttendance.tsx` — STATUS_TONE — renders table (~780 tok)
+- `ParentDashboard.tsx` — NOTIFICATIONS (~1180 tok)
 - `ParentHomeworkView.tsx` — ParentHomeworkView (~1020 tok)
 - `ParentMessages.tsx` — ParentMessages (~545 tok)
 - `ParentRecordings.tsx` — ParentRecordings — renders table (~570 tok)
@@ -485,26 +486,26 @@
 ## quran-hifz/src/quran/pages/student/
 
 - `StudentAttendance.tsx` — STATUS_TONE — renders table (~793 tok)
-- `StudentDashboard.tsx` — getName (~1048 tok)
+- `StudentDashboard.tsx` — getName (~1636 tok)
 - `StudentHifz.tsx` — tone — renders table (~1059 tok)
 - `StudentHomework.tsx` — AR_DIGITS — uses useState, useEffect (~1000 tok)
 - `StudentMessages.tsx` — StudentMessages (~758 tok)
-- `StudentPoints.tsx` — MY_POINTS (~1192 tok)
-- `StudentSchedule.tsx` — getId (~752 tok)
+- `StudentPoints.tsx` — MY_POINTS (~1302 tok)
+- `StudentSchedule.tsx` — getId (~836 tok)
 - `StudentStore.tsx` — MY_POINTS (~874 tok)
 
 ## quran-hifz/src/quran/pages/teacher/
 
 - `TeacherAttendance.tsx` — getName — renders table (~1138 tok)
-- `TeacherDashboard.tsx` — getName (~940 tok)
+- `TeacherDashboard.tsx` — getName — renders table (~1300 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
-- `TeacherGroupHomework.tsx` — DAYS (~1327 tok)
+- `TeacherGroupHomework.tsx` — STUDENTS (~2396 tok)
 - `TeacherHalqa.tsx` — getName (~793 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1011 tok)
 - `TeacherPlans.tsx` — ROWS — renders table (~436 tok)
-- `TeacherRecordLesson.tsx` — TYPES (~1395 tok)
+- `TeacherRecordLesson.tsx` — LESSON_TYPES (~4027 tok)
 - `TeacherReports.tsx` — TeacherReports — renders chart (~172 tok)
-- `TeacherStudents.tsx` — HW_TONE — renders table (~820 tok)
+- `TeacherStudents.tsx` — HW_TONE — renders table (~805 tok)
 
 ## quran-hifz/src/quran/router/
 

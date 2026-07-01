@@ -24,18 +24,19 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
     user: { name: "عبدالله الحميداني", role: "طالب — حلقة عمر بن الخطاب", initials: "عح" },
     nav: [
       { group: "الرئيسية", items: [
-        { id: "dashboard", icon: "ti-home", label: "لوحتي" },
-        { id: "myhifz", icon: "ti-book", label: "خطة حفظي" },
+        { id: "dashboard", icon: "ti-home",           label: "لوحتي" },
+        { id: "myhifz",   icon: "ti-book",            label: "خطة حفظي" },
       ]},
       { group: "الأنشطة", items: [
-        { id: "homework", icon: "ti-microphone", label: "تسجيل الواجب", dot: true },
         { id: "attendance", icon: "ti-calendar-check", label: "الحضور والغياب" },
-        { id: "schedule", icon: "ti-clock", label: "مواعيد حلقتي" },
+        { id: "schedule",   icon: "ti-clock",          label: "مواعيد حلقتي" },
       ]},
-      { group: "التواصل والتحفيز", items: [
+      { group: "النقاط والمكافآت", items: [
+        { id: "points", icon: "ti-star",          label: "نقاطي" },
+        { id: "store",  icon: "ti-shopping-cart", label: "متجر الأدوات" },
+      ]},
+      { group: "التواصل", items: [
         { id: "messages", icon: "ti-message", label: "الرسائل" },
-        { id: "points",   icon: "ti-star", label: "نقاطي والمتصدرون" },
-        { id: "store",    icon: "ti-gift", label: "متجر المكافآت" },
       ]},
     ],
   },
@@ -47,17 +48,17 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "dashboard", icon: "ti-layout-dashboard", label: "لوحة التحكم" },
       ]},
       { group: "الحلقات", items: [
-        { id: "myhalqa",    icon: "ti-school", label: "حلقاتي" },
-        { id: "students",   icon: "ti-users", label: "طلابي" },
-        { id: "attendance", icon: "ti-calendar-check", label: "الحضور اليومي", dot: true },
+        { id: "myhalqa",       icon: "ti-school",          label: "حلقاتي" },
+        { id: "students",      icon: "ti-users",           label: "طلابي" },
+        { id: "attendance",    icon: "ti-calendar-check",  label: "الحضور اليومي",      dot: true },
+        { id: "recordlesson",  icon: "ti-player-record",   label: "سجّل درس الحلقة",   dot: true },
+        { id: "grouphomework", icon: "ti-list-check",      label: "واجبات الحلقة" },
       ]},
       { group: "التقييم", items: [
-        { id: "homework",      icon: "ti-microphone", label: "مراجعة الواجبات", dot: true },
-        { id: "evaluate",      icon: "ti-star", label: "تقييم الجلسة" },
-        { id: "recordlesson",  icon: "ti-video", label: "تسجيل الدرس" },
-        { id: "grouphomework", icon: "ti-list-check", label: "واجب جماعي" },
-        { id: "plans",         icon: "ti-target", label: "الخطط الفردية" },
-        { id: "reports",       icon: "ti-chart-bar", label: "تقارير الطلاب" },
+        { id: "homework", icon: "ti-microphone", label: "مراجعة الواجبات", dot: true },
+        { id: "evaluate", icon: "ti-star",       label: "التقييم والنقاط", dot: true },
+        { id: "plans",    icon: "ti-target",     label: "الخطط الفردية" },
+        { id: "reports",  icon: "ti-chart-bar",  label: "تقارير الطلاب" },
       ]},
     ],
   },
@@ -74,13 +75,13 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "teachers", icon: "ti-chalkboard", label: "المعلمون" },
       ]},
       { group: "الحلقات والمساجد", items: [
-        { id: "halqat",  icon: "ti-school", label: "الحلقات" },
-        { id: "masajid", icon: "ti-building-arch", label: "المساجد" },
+        { id: "halqat",         icon: "ti-school",          label: "الحلقات" },
+        { id: "masajid",        icon: "ti-building-arch",   label: "المساجد" },
+        { id: "special_tracks", icon: "ti-calendar-event",  label: "المسارات الاستثنائية", dot: true },
       ]},
-      { group: "التقارير والبرامج", items: [
-        { id: "kpis",           icon: "ti-target", label: "مؤشرات الأداء" },
-        { id: "reports",        icon: "ti-chart-bar", label: "التقارير" },
-        { id: "special_tracks", icon: "ti-calendar-event", label: "المسارات الاستثنائية", dot: true },
+      { group: "التقارير", items: [
+        { id: "kpis",    icon: "ti-target",    label: "مؤشرات الأداء" },
+        { id: "reports", icon: "ti-chart-bar", label: "التقارير" },
       ]},
     ],
   },

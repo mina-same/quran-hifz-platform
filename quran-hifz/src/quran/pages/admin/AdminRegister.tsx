@@ -59,7 +59,7 @@ export function AdminRegister() {
       guardianPhone: data.guardianPhone,
       halqa: data.halqa,
       masjid: data.masjid,
-      path: masar?.name ?? "حفظ كامل",
+      path: masar?.path ?? "حفظ كامل",
       status: "new",
     });
     reset();

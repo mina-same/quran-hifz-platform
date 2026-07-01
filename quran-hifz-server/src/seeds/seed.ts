@@ -13,6 +13,7 @@ import { HifzEntry } from '../models/HifzEntry.model';
 import { Attendance } from '../models/Attendance.model';
 import { Homework } from '../models/Homework.model';
 import { KPI } from '../models/KPI.model';
+import { ParentStudent } from '../models/ParentStudent.model';
 
 async function seed(): Promise<void> {
   await mongoose.connect(ENV.MONGO_URI);
@@ -29,6 +30,7 @@ async function seed(): Promise<void> {
     Attendance.deleteMany({}),
     Homework.deleteMany({}),
     KPI.deleteMany({}),
+    ParentStudent.deleteMany({}),
   ]);
   console.log('🗑   Cleared existing collections');
 
@@ -133,18 +135,28 @@ async function seed(): Promise<void> {
   ]);
   console.log(`📊  Seeded ${7} KPIs`);
 
-  // ── Users (admin + one teacher + one student account) ─────────────────────
-  await Promise.all([
+  // ── Users (admin + teacher + student + parent) ────────────────────────────
+  const [, , , parentUser] = await Promise.all([
     new User({ name: 'مدير النظام',       email: 'admin@quran-hifz.sa',    password: 'admin123',   role: 'admin',   isActive: true }).save(),
     new User({ name: 'ناصر الحميداني',   email: 'nasir@quran-hifz.sa',    password: 'teacher123', role: 'teacher', profileId: tNasir._id,    isActive: true }).save(),
     new User({ name: 'عبدالله الحميداني', email: 'abdullah@quran-hifz.sa', password: 'student123', role: 'student', profileId: students[0]._id, isActive: true }).save(),
+    new User({ name: 'محمد الحميداني',   email: 'parent@quran-hifz.sa',   password: 'parent123',  role: 'parent',  isActive: true }).save(),
   ]);
-  console.log(`👤  Seeded 3 user accounts`);
+  console.log(`👤  Seeded 4 user accounts`);
+
+  // ── Parent → Student links ─────────────────────────────────────────────────
+  await ParentStudent.create([
+    { parent: parentUser._id, student: students[0]._id },
+    { parent: parentUser._id, student: students[1]._id },
+  ]);
+  console.log(`🔗  Linked parent to ${students[0].name} and ${students[1].name}`);
+
   console.log('\n──────────────────────────────────────────');
   console.log('🔑  Login credentials:');
   console.log('   Admin:   admin@quran-hifz.sa   / admin123');
   console.log('   Teacher: nasir@quran-hifz.sa   / teacher123');
   console.log('   Student: abdullah@quran-hifz.sa / student123');
+  console.log('   Parent:  parent@quran-hifz.sa  / parent123');
   console.log('──────────────────────────────────────────\n');
 
   await mongoose.disconnect();

@@ -6,6 +6,15 @@ import { AyahBar } from "../../components/common/AyahBar";
 import { StatsRow } from "../../components/common/StatsRow";
 import { Card } from "../../components/common/Card";
 import { ProgressBar } from "../../components/common/ProgressBar";
+import { HalqaRow } from "../../components/common/HalqaRow";
+import { toAr } from "../../../lib/format";
+
+const NOTIFICATIONS = [
+  { date: "اليوم",  text: "أرسل الواجب اليومي بنجاح ✓",          tone: "green" as const },
+  { date: "أمس",   text: "تقييم الأستاذ: ممتاز",                  tone: "gold"  as const },
+  { date: "الأحد", text: "حضر حلقة الفجر ✓",                      tone: "green" as const },
+  { date: "السبت", text: "الواجب القادم: مراجعة",                  tone: "blue"  as const },
+];
 
 export function ParentDashboard() {
   const { showPage } = usePortal();
@@ -13,7 +22,7 @@ export function ParentDashboard() {
   const childId = activeChild?._id;
   const { data: hifzEntries } = useChildHifz(childId);
 
-  const childName = activeChild?.name ?? "—";
+  const childName   = activeChild?.name ?? "—";
   const progressPct = activeChild?.progressPct ?? 0;
   const progressPages = activeChild?.progressPages ?? 0;
   const attendancePct = activeChild?.attendancePct ?? 0;
@@ -23,7 +32,11 @@ export function ParentDashboard() {
       : activeChild.halqa
     : "—";
 
-  const totalJuz = hifzEntries ? Math.floor(progressPages / 20) : Math.round((progressPct / 100) * 30);
+  const totalJuz = hifzEntries
+    ? Math.floor(progressPages / 20)
+    : Math.round((progressPct / 100) * 30);
+
+  const level = progressPct >= 80 ? "نجم ⭐" : progressPct >= 50 ? "متميز" : "ناشط";
 
   useTopbar(
     "ti-home",
@@ -38,13 +51,14 @@ export function ParentDashboard() {
       <AyahBar />
       <StatsRow
         items={[
-          { num: `${totalJuz}`,          label: "جزءاً محفوظاً",  icon: "ti-book" },
-          { num: `${attendancePct}٪`,    label: "نسبة الحضور",      icon: "ti-calendar-check", variant: "gold" },
-          { num: `${progressPages}`,     label: "صفحة محفوظة",      icon: "ti-star",            variant: "blue" },
-          { num: activeChild?.path ?? "—", label: "المسار",          icon: "ti-award" },
+          { num: toAr(totalJuz),         label: "جزءاً محفوظاً",  icon: "ti-book" },
+          { num: `${attendancePct}٪`,    label: "نسبة الحضور",     icon: "ti-calendar-check", variant: "gold" },
+          { num: toAr(progressPages),    label: "نقطة مكتسبة",     icon: "ti-star",            variant: "blue" },
+          { num: level,                  label: "المستوى",          icon: "ti-award" },
         ]}
       />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+        {/* خطة الحفظ الفردية */}
         <Card icon="ti-book" title="خطة الحفظ الفردية">
           <div style={{ textAlign: "center", padding: "8px 0" }}>
             <div style={{ fontSize: 11, color: "var(--text2)", marginBottom: 4 }}>
@@ -54,20 +68,30 @@ export function ParentDashboard() {
             <div style={{ margin: "10px auto", maxWidth: 220 }}>
               <ProgressBar pct={progressPct} />
             </div>
-            <span className="badge badge-green">{totalJuz} جزء من ٣٠</span>
+            <span className="badge badge-green">{toAr(totalJuz)} جزء من ٣٠</span>
           </div>
           <hr className="divider" />
           <div style={{ fontSize: 12 }}>
-            <div className="halqa-row"><span className="lbl">الحلقة</span><span className="val">{halqaName}</span></div>
+            <HalqaRow label="الحلقة" value={halqaName} />
+            <HalqaRow label="الجلسة القادمة" value="الثلاثاء بعد الفجر" valueStyle={{ color: "var(--green)", fontWeight: 700 }} />
           </div>
         </Card>
-        <Card icon="ti-bell" title="ملخص الأداء">
-          <div style={{ padding: "8px 0", fontSize: 13, color: "var(--text2)", lineHeight: 2 }}>
-            <div>📚 الصفحات المحفوظة: <strong>{progressPages}</strong></div>
-            <div>📅 نسبة الحضور: <strong>{attendancePct}٪</strong></div>
-            <div>🏫 الحلقة: <strong>{halqaName}</strong></div>
-            <div>🛤️ المسار: <strong>{activeChild?.path ?? "—"}</strong></div>
-          </div>
+
+        {/* آخر إشعارات */}
+        <Card icon="ti-bell" title="آخر الإشعارات">
+          {NOTIFICATIONS.map((n, i) => (
+            <div
+              key={i}
+              style={{
+                display: "flex", gap: 10, alignItems: "flex-start",
+                padding: "8px 0",
+                borderTop: i > 0 ? "1px solid var(--border)" : "none",
+              }}
+            >
+              <span style={{ color: "var(--text3)", fontSize: 11, minWidth: 42, marginTop: 2 }}>{n.date}</span>
+              <span style={{ fontSize: 12, flex: 1 }}>{n.text}</span>
+            </div>
+          ))}
         </Card>
       </div>
     </>

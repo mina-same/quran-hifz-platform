@@ -77,6 +77,38 @@ export function TeacherDashboard() {
           </button>
         </Card>
       </div>
+
+      {/* أفضل الطلاب هذا الأسبوع */}
+      <Card icon="ti-trophy" title="أفضل الطلاب هذا الأسبوع">
+        <div className="tbl-wrap">
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>الطالب</th>
+                <th>الحلقة</th>
+                <th>صفحات الحفظ</th>
+                <th>الحضور</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { rank: "١", name: "عبدالله الحميداني", halqa: "عمر بن الخطاب", pages: "٥ صفحات", attend: "١٠٠٪" },
+                { rank: "٢", name: "فيصل العمري",       halqa: "عثمان بن عفان", pages: "٤ صفحات", attend: "١٠٠٪" },
+                { rank: "٣", name: "سعد الشهري",        halqa: "عمر بن الخطاب", pages: "٣ صفحات", attend: "٧٥٪"  },
+              ].map((s) => (
+                <tr key={s.rank}>
+                  <td style={{ fontWeight: 700, color: "var(--gold)" }}>{s.rank}</td>
+                  <td style={{ fontWeight: 600 }}>{s.name}</td>
+                  <td>حلقة {s.halqa}</td>
+                  <td><Badge tone="gold">{s.pages}</Badge></td>
+                  <td>{s.attend}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </>
   );
 }

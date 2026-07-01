@@ -5,9 +5,16 @@ import { useKpis } from "../../api/kpis";
 
 const RATING_TONE: Record<string, BadgeTone> = {
   ممتاز: "green",
-  جيد: "blue",
+  جيد: "green",
   مقبول: "gold",
   ضعيف: "red",
+};
+
+const RATING_LABEL: Record<string, string> = {
+  ممتاز: "محقق",
+  جيد: "محقق",
+  مقبول: "قريب من الهدف",
+  ضعيف: "دون الهدف",
 };
 
 export function AdminKpis() {
@@ -41,7 +48,6 @@ export function AdminKpis() {
                 <th>المؤشر</th>
                 <th>المستهدف</th>
                 <th>الفعلي</th>
-                <th>الفترة</th>
                 <th>التقييم</th>
               </tr>
             </thead>
@@ -51,9 +57,8 @@ export function AdminKpis() {
                   <td>{k.indicator}</td>
                   <td style={{ color: "var(--text2)" }}>{k.target}</td>
                   <td style={{ fontWeight: 700, color: "var(--green)" }}>{k.actual}</td>
-                  <td style={{ fontSize: 12, color: "var(--text3)" }}>{k.period}</td>
                   <td>
-                    <Badge tone={RATING_TONE[k.rating] ?? "blue"}>{k.rating}</Badge>
+                    <Badge tone={RATING_TONE[k.rating] ?? "green"}>{RATING_LABEL[k.rating] ?? "محقق"}</Badge>
                   </td>
                 </tr>
               ))}

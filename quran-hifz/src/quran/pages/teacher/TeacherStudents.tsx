@@ -2,10 +2,8 @@ import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
 import { Badge, type BadgeTone } from "../../components/common/Badge";
-import { ProgressBar } from "../../components/common/ProgressBar";
 import { useStudents } from "../../api/students";
 import { useHalqat } from "../../api/halqat";
-import { pct } from "../../../lib/format";
 
 const HW_TONE: Record<string, BadgeTone> = {
   submitted: "green",
@@ -13,9 +11,9 @@ const HW_TONE: Record<string, BadgeTone> = {
   late: "red",
 };
 const HW_LABEL: Record<string, string> = {
-  submitted: "مُسلَّم",
-  pending: "معلق",
-  late: "متأخر",
+  submitted: "سُجِّل",
+  pending: "لم يُسجَّل",
+  late: "لم يُسجَّل",
 };
 
 function getName(v: unknown): string {
@@ -47,9 +45,9 @@ export function TeacherStudents() {
                 <th>الطالب</th>
                 <th>الحلقة</th>
                 <th>آخر حفظ</th>
-                <th>التقدم</th>
-                <th>الحضور</th>
-                <th>الواجب</th>
+                <th>الواجب القادم</th>
+                <th>الدرس</th>
+                <th>إجراء</th>
               </tr>
             </thead>
             <tbody>
@@ -58,15 +56,16 @@ export function TeacherStudents() {
                   <td style={{ fontWeight: 600 }}>{s.name}</td>
                   <td>{getName(s.halqa)}</td>
                   <td style={{ fontSize: 12, color: "var(--text2)" }}>{s.lastMemorization || "—"}</td>
-                  <td style={{ minWidth: 100 }}>
-                    <ProgressBar pct={s.progressPct} />
-                    <span style={{ fontSize: 10, color: "var(--text2)" }}>{pct(s.progressPct)}</span>
-                  </td>
-                  <td>{pct(s.attendancePct)}</td>
+                  <td style={{ fontSize: 12, color: "var(--text2)" }}>—</td>
                   <td>
-                    <Badge tone={HW_TONE[s.homeworkStatus] ?? "gray"}>
-                      {HW_LABEL[s.homeworkStatus] ?? s.homeworkStatus}
+                    <Badge tone={HW_TONE[s.homeworkStatus] ?? "gold"}>
+                      {HW_LABEL[s.homeworkStatus] ?? "لم يُسجَّل"}
                     </Badge>
+                  </td>
+                  <td>
+                    <button className="topbar-btn btn-primary" style={{ fontSize: 11, padding: "5px 10px" }}>
+                      <i className="ti ti-microphone" /> سجّل
+                    </button>
                   </td>
                 </tr>
               ))}

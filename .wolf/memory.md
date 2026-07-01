@@ -3,6 +3,8 @@
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
 | 15:53 | Created ../../../../Users/macbook/.claude/plans/joyful-growing-duckling.md | — | ~2293 |
+| 2026-07-01 | Added full CRUD to AdminMasajid + AdminHalqat; added deleteMasjid to server; added useDeleteMasjid + useDeleteHalqa hooks | masjid.controller.ts, masjid.routes.ts, masajid.ts, halqat.ts, AdminMasajid.tsx, AdminHalqat.tsx | complete | ~3000 |
+| 00:00 | Fixed SSR hydration mismatch in AuthProvider — isLoading and user now start as true/null so server and client agree; useEffect restores stored user | quran-hifz/src/quran/context/AuthContext.tsx | bug-022 logged | ~600 |
 | 15:58 | Edited quran-hifz/vite.config.ts | expanded (+7 lines) | ~92 |
 | 15:58 | Created quran-hifz/src/lib/auth-storage.ts | — | ~243 |
 | 15:58 | Created quran-hifz/src/lib/api.ts | — | ~434 |
@@ -293,3 +295,92 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-07-01 13:56
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:00 | Edited quran-hifz/src/lib/auth-storage.ts | 2→4 lines | ~31 |
+| 14:00 | Edited quran-hifz/src/lib/auth-storage.ts | added 6 condition(s) | ~238 |
+| 14:01 | Session end: 2 writes across 1 files (auth-storage.ts) | 5 reads | ~4570 tok |
+| 14:04 | Session end: 2 writes across 1 files (auth-storage.ts) | 5 reads | ~4570 tok |
+| 14:07 | Session end: 2 writes across 1 files (auth-storage.ts) | 6 reads | ~4570 tok |
+| 14:08 | Session end: 2 writes across 1 files (auth-storage.ts) | 7 reads | ~4897 tok |
+| 14:11 | Edited quran-hifz/src/quran/config/masarMap.ts | 12→14 lines | ~347 |
+| 14:12 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | inline fix | ~11 |
+| 14:12 | Session end: 4 writes across 3 files (auth-storage.ts, masarMap.ts, AdminRegister.tsx) | 14 reads | ~11696 tok |
+| 14:17 | Edited quran-hifz/src/quran/config/portals.ts | 20→21 lines | ~247 |
+| 14:17 | Edited quran-hifz/src/quran/config/portals.ts | 22→22 lines | ~324 |
+| 14:17 | Edited quran-hifz/src/quran/config/portals.ts | 9→9 lines | ~144 |
+| 14:18 | Session end: 7 writes across 4 files (auth-storage.ts, masarMap.ts, AdminRegister.tsx, portals.ts) | 18 reads | ~15432 tok |
+
+## Session: 2026-07-01 14:21
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:23 | Created quran-hifz/src/quran/pages/student/StudentDashboard.tsx | — | ~1636 |
+| 14:23 | Edited quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | expanded (+32 lines) | ~368 |
+| 14:24 | Created quran-hifz/src/quran/pages/parent/ParentDashboard.tsx | — | ~1180 |
+
+## Session: 2026-07-01 14:26
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:27 | Edited quran-hifz/src/quran/pages/admin/AdminDashboard.tsx | reduced (-6 lines) | ~116 |
+| 14:31 | Edited quran-hifz/src/quran/api/masajid.ts | inline fix | ~29 |
+| 14:31 | Edited quran-hifz/src/quran/pages/admin/AdminKpis.tsx | CSS: RATING_LABEL | ~71 |
+| 14:31 | Edited quran-hifz/src/quran/pages/admin/AdminKpis.tsx | 7→6 lines | ~49 |
+| 14:31 | Edited quran-hifz/src/quran/pages/admin/AdminKpis.tsx | 4→3 lines | ~45 |
+| 14:31 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | added 3 condition(s) | ~230 |
+| 14:31 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | getName() → getLevel() | ~106 |
+| 14:31 | Edited quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | CSS: fontSize | ~141 |
+| 14:32 | Edited quran-hifz/src/quran/pages/student/StudentSchedule.tsx | 18→23 lines | ~244 |
+| 14:32 | Edited quran-hifz/src/quran/pages/student/StudentSchedule.tsx | CSS: color, fontWeight | ~85 |
+| 14:32 | Created quran-hifz/src/quran/pages/student/StudentPoints.tsx | — | ~1267 |
+| 14:32 | Edited quran-hifz/src/quran/pages/student/StudentPoints.tsx | CSS: width, background | ~100 |
+| 14:32 | Edited quran-hifz/src/quran/pages/student/StudentPoints.tsx | 5→4 lines | ~65 |
+| 14:33 | Edited quran-hifz/src/quran/pages/parent/ParentAttendance.tsx | CSS: fontSize, color | ~231 |
+| 14:33 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | 19→17 lines | ~158 |
+| 14:33 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | 8→8 lines | ~68 |
+| 14:33 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | CSS: padding | ~215 |
+| 14:33 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | inline fix | ~33 |
+| 14:33 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | inline fix | ~30 |
+| 14:34 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | added 1 condition(s) | ~1186 |
+| 14:34 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | "ti-list-check" → "ti-users" | ~16 |
+| 14:34 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | 4→5 lines | ~18 |
+| 14:34 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | 9→9 lines | ~79 |
+| 14:34 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | 2→2 lines | ~41 |
+| 14:34 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | inline fix | ~20 |
+| 14:36 | Edited quran-hifz/src/quran/context/AuthContext.tsx | 2→2 lines | ~34 |
+14:36 | Fixed 9 pages to match HTML reference | AdminDashboard AdminKpis AdminHalqat AdminMasajid StudentSchedule StudentPoints ParentAttendance TeacherStudents TeacherGroupHomework | All TS errors pre-existing | ~3200
+| 14:36 | Edited quran-hifz/src/quran/context/AuthContext.tsx | modified if() | ~51 |
+| 14:36 | Session end: 27 writes across 11 files (AdminDashboard.tsx, masajid.ts, AdminKpis.tsx, AdminHalqat.tsx, AdminMasajid.tsx) | 11 reads | ~14175 tok |
+| 14:37 | Session end: 27 writes across 11 files (AdminDashboard.tsx, masajid.ts, AdminKpis.tsx, AdminHalqat.tsx, AdminMasajid.tsx) | 11 reads | ~14175 tok |
+| 14:40 | Edited quran-hifz-server/src/seeds/seed.ts | added 1 import(s) | ~147 |
+| 14:40 | Edited quran-hifz-server/src/seeds/seed.ts | 11→12 lines | ~89 |
+| 14:41 | Edited quran-hifz-server/src/seeds/seed.ts | expanded (+10 lines) | ~441 |
+| 14:41 | Edited quran-hifz/src/lib/auth-storage.ts | 6→6 lines | ~38 |
+| 14:41 | Session end: 31 writes across 13 files (AdminDashboard.tsx, masajid.ts, AdminKpis.tsx, AdminHalqat.tsx, AdminMasajid.tsx) | 16 reads | ~19714 tok |
+
+## Session: 2026-07-01 14:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-01 14:48
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:50 | Edited quran_hifz_v2 (7).html | added 40 condition(s) | ~2834 |
+| 14:50 | Replaced teacherRecordLesson in HTML — now a full form page (student picker, lesson type, segment, points, note, voice recorder) matching React TeacherRecordLesson.tsx | quran_hifz_v2 (7).html | done | ~300 |
+| 14:50 | Session end: 1 writes across 1 files (quran_hifz_v2 (7).html) | 2 reads | ~85686 tok |
+| 14:56 | Edited quran-hifz-server/src/controllers/masjid.controller.ts | added 1 condition(s) | ~218 |
+| 14:56 | Edited quran-hifz-server/src/routes/masjid.routes.ts | inline fix | ~33 |
+| 14:56 | Edited quran-hifz-server/src/routes/masjid.routes.ts | 1→2 lines | ~33 |
+| 14:57 | Edited quran-hifz/src/quran/api/masajid.ts | 2→2 lines | ~38 |
+| 14:57 | Edited quran-hifz/src/quran/api/masajid.ts | modified useUpdateMasjid() | ~152 |
+| 14:57 | Edited quran-hifz/src/quran/api/halqat.ts | 2→2 lines | ~38 |
+| 14:57 | Edited quran-hifz/src/quran/api/halqat.ts | modified useUpdateHalqa() | ~148 |
+| 14:57 | Created quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | — | ~2685 |
+| 14:58 | Created quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx | — | ~4027 |
+| 14:58 | Created quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | — | ~3700 |
