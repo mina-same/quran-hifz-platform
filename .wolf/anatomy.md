@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T09:29:09.399Z
-> Files: 322 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T09:38:26.024Z
+> Files: 333 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
 
@@ -206,7 +206,18 @@
 
 ## quran-hifz-mobile/lib/queries/
 
+- `attendance.ts` — Exports AttendanceRecord, AttendanceFilters, useAttendance (~325 tok)
+- `halqat.ts` — Exports Halqa, HalqaFilters, useHalqat, useHalqa (~366 tok)
+- `hifz.ts` — Exports HifzEntry, useHifz (~155 tok)
+- `homework.ts` — Exports Homework, HomeworkFilters, useHomework (~368 tok)
+- `kpis.ts` — Exports KPI, useKpis (~132 tok)
+- `masajid.ts` — Exports Masjid, useMasajid, useMasjid (~189 tok)
+- `messages.ts` — Exports Message, useMessages (~154 tok)
 - `parent.ts` — Exports ParentChild, ChildHifzEntry, ChildAttendanceRecord, ChildHomework + 9 more (~896 tok)
+- `specialTracks.ts` — Exports SpecialTrack, useSpecialTracks (~207 tok)
+- `stats.ts` — Exports DashboardStats, useStats (~165 tok)
+- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent (~458 tok)
+- `teachers.ts` — Exports Teacher, useTeachers, useTeacher (~225 tok)
 
 ## quran-hifz-mobile/lib/store/
 

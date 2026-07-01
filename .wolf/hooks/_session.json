@@ -173,7 +173,7 @@
       "first_read": "2026-07-01T09:01:14.145Z"
     },
     "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/students.ts": {
-      "count": 1,
+      "count": 2,
       "tokens": 698,
       "first_read": "2026-07-01T09:01:14.652Z"
     },
@@ -188,7 +188,7 @@
       "first_read": "2026-07-01T09:01:14.886Z"
     },
     "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/attendance.ts": {
-      "count": 1,
+      "count": 2,
       "tokens": 543,
       "first_read": "2026-07-01T09:01:15.104Z"
     },
@@ -466,6 +466,21 @@
       "count": 1,
       "tokens": 724,
       "first_read": "2026-07-01T09:36:49.920Z"
+    },
+    "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/parent.ts": {
+      "count": 1,
+      "tokens": 896,
+      "first_read": "2026-07-01T09:37:31.522Z"
+    },
+    "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/SpecialTrack.model.ts": {
+      "count": 1,
+      "tokens": 392,
+      "first_read": "2026-07-01T09:37:36.410Z"
+    },
+    "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/api.ts": {
+      "count": 1,
+      "tokens": 451,
+      "first_read": "2026-07-01T09:37:36.789Z"
     }
   },
   "files_written": [
@@ -546,6 +561,78 @@
       "action": "edit",
       "tokens": 28,
       "at": "2026-07-01T09:29:09.418Z"
+    },
+    {
+      "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/stats.ts",
+      "action": "create",
+      "tokens": 165,
+      "at": "2026-07-01T09:37:51.610Z"
+    },
+    {
+      "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/students.ts",
+      "action": "create",
+      "tokens": 458,
+      "at": "2026-07-01T09:37:55.794Z"
+    },
+    {
+      "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/teachers.ts",
+      "action": "create",
+      "tokens": 225,
+      "at": "2026-07-01T09:37:58.342Z"
+    },
+    {
+      "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/halqat.ts",
+      "action": "create",
+      "tokens": 366,
+      "at": "2026-07-01T09:38:01.958Z"
+    },
+    {
+      "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/masajid.ts",
+      "action": "create",
+      "tokens": 189,
+      "at": "2026-07-01T09:38:04.138Z"
+    },
+    {
+      "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/attendance.ts",
+      "action": "create",
+      "tokens": 325,
+      "at": "2026-07-01T09:38:07.540Z"
+    },
+    {
+      "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/hifz.ts",
+      "action": "create",
+      "tokens": 155,
+      "at": "2026-07-01T09:38:09.622Z"
+    },
+    {
+      "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/homework.ts",
+      "action": "create",
+      "tokens": 368,
+      "at": "2026-07-01T09:38:13.626Z"
+    },
+    {
+      "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/messages.ts",
+      "action": "create",
+      "tokens": 154,
+      "at": "2026-07-01T09:38:15.469Z"
+    },
+    {
+      "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/kpis.ts",
+      "action": "create",
+      "tokens": 132,
+      "at": "2026-07-01T09:38:17.366Z"
+    },
+    {
+      "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/specialTracks.ts",
+      "action": "create",
+      "tokens": 198,
+      "at": "2026-07-01T09:38:19.281Z"
+    },
+    {
+      "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/specialTracks.ts",
+      "action": "edit",
+      "tokens": 110,
+      "at": "2026-07-01T09:38:26.041Z"
     }
   ],
   "edit_counts": {
@@ -559,11 +646,22 @@
     "quran-hifz-mobile/app/(portal)/_layout.tsx": 1,
     "quran-hifz-mobile/lib/queries/parent.ts": 1,
     "quran-hifz-mobile/app/index.tsx": 2,
-    "quran-hifz-mobile/tsconfig.json": 1
+    "quran-hifz-mobile/tsconfig.json": 1,
+    "quran-hifz-mobile/lib/queries/stats.ts": 1,
+    "quran-hifz-mobile/lib/queries/students.ts": 1,
+    "quran-hifz-mobile/lib/queries/teachers.ts": 1,
+    "quran-hifz-mobile/lib/queries/halqat.ts": 1,
+    "quran-hifz-mobile/lib/queries/masajid.ts": 1,
+    "quran-hifz-mobile/lib/queries/attendance.ts": 1,
+    "quran-hifz-mobile/lib/queries/hifz.ts": 1,
+    "quran-hifz-mobile/lib/queries/homework.ts": 1,
+    "quran-hifz-mobile/lib/queries/messages.ts": 1,
+    "quran-hifz-mobile/lib/queries/kpis.ts": 1,
+    "quran-hifz-mobile/lib/queries/specialTracks.ts": 2
   },
-  "anatomy_hits": 88,
+  "anatomy_hits": 91,
   "anatomy_misses": 2,
-  "repeated_reads_warned": 6,
+  "repeated_reads_warned": 8,
   "cerebrum_warnings": 0,
-  "stop_count": 4
+  "stop_count": 7
 }
