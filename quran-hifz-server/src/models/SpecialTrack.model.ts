@@ -9,6 +9,8 @@ export interface ISpecialTrack extends Document {
   daysPerWeek: string;
   timeSlot: string;
   location: string;
+  isOnline: boolean;
+  meetLink?: string;
   teacher: Schema.Types.ObjectId;
   maxStudents: number;
   enrolledStudents: Schema.Types.ObjectId[];
@@ -27,6 +29,8 @@ const specialTrackSchema = new Schema<ISpecialTrack>(
     daysPerWeek:      { type: String, required: true },
     timeSlot:         { type: String, required: true },
     location:         { type: String, required: true },
+    isOnline:         { type: Boolean, default: false },
+    meetLink:         { type: String },
     teacher:          { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
     maxStudents:      { type: Number, required: true },
     enrolledStudents: [{ type: Schema.Types.ObjectId, ref: 'Student' }],

@@ -38,6 +38,15 @@ export function useCreateTeacher() {
   });
 }
 
+export function useUpdateTeacher() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) =>
+      put<SingleResponse>(`/teachers/${id}`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["teachers"] }),
+  });
+}
+
 export function useDeleteTeacher() {
   const qc = useQueryClient();
   return useMutation({

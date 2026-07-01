@@ -384,3 +384,15 @@
 | 14:57 | Created quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | — | ~2685 |
 | 14:58 | Created quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx | — | ~4027 |
 | 14:58 | Created quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | — | ~3700 |
+| 14:59 | Session end: 11 writes across 8 files (quran_hifz_v2 (7).html, masjid.controller.ts, masjid.routes.ts, masajid.ts, halqat.ts) | 20 reads | ~105866 tok |
+| 14:59 | Rewrote TeacherRecordLesson.tsx to match HTML flow: halqa selector → per-student recording cards (type, segment, recorder, notes, pts, send) | quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx | done | ~350 |
+| 14:59 | Session end: 11 writes across 8 files (quran_hifz_v2 (7).html, masjid.controller.ts, masjid.routes.ts, masajid.ts, halqat.ts) | 27 reads | ~114887 tok |
+| 15:00 | Edited quran-hifz-server/src/models/SpecialTrack.model.ts | 16→18 lines | ~122 |
+| 15:00 | Edited quran-hifz-server/src/models/SpecialTrack.model.ts | 2→4 lines | ~69 |
+| 15:00 | Edited quran-hifz-server/src/controllers/special-track.controller.ts | 13→15 lines | ~191 |
+| 15:00 | Edited quran-hifz/src/quran/api/special-tracks.ts | 15→17 lines | ~112 |
+| 15:00 | Edited quran-hifz/src/quran/api/teachers.ts | modified useCreateTeacher() | ~161 |
+| 15:02 | Created quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | — | ~5259 |
+| 15:02 | Created quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | — | ~3031 |
+| 15:03 | Created quran-hifz/src/quran/pages/admin/AdminStudents.tsx | — | ~3902 |
+| 15:03 | Session end: 19 writes across 15 files (quran_hifz_v2 (7).html, masjid.controller.ts, masjid.routes.ts, masajid.ts, halqat.ts) | 27 reads | ~127734 tok |

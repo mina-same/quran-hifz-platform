@@ -11,6 +11,8 @@ export type SpecialTrack = {
   daysPerWeek: string;
   timeSlot: string;
   location: string;
+  isOnline: boolean;
+  meetLink?: string;
   teacher: { _id: string; name: string } | string;
   maxStudents: number;
   enrolledStudents: string[];

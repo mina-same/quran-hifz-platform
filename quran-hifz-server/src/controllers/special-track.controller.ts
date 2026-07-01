@@ -12,6 +12,8 @@ const trackSchema = z.object({
   daysPerWeek: z.string().min(1),
   timeSlot:    z.string().min(1),
   location:    z.string().min(1),
+  isOnline:    z.boolean().optional(),
+  meetLink:    z.string().url('رابط غير صالح').optional().or(z.literal('')),
   teacher:     z.string().min(1),
   maxStudents: z.number().int().positive(),
   notes:       z.string().optional(),
