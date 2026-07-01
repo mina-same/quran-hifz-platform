@@ -5,6 +5,10 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { loadEnv } from "vite";
+
+// Dev-only: where the Vite dev server proxies `/api` requests to. Not used in production builds.
+const { VITE_API_PROXY_TARGET } = loadEnv("development", process.cwd(), "");
 
 export default defineConfig({
   tanstackStart: {
@@ -15,7 +19,7 @@ export default defineConfig({
   vite: {
     server: {
       proxy: {
-        "/api": "http://localhost:5001",
+        "/api": VITE_API_PROXY_TARGET || "http://localhost:5001",
       },
     },
   },

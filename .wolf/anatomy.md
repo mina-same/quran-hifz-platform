@@ -1,11 +1,12 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-30T21:33:06.653Z
-> Files: 317 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T09:29:09.399Z
+> Files: 322 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
 
 - `joyful-growing-duckling.md` — Plan: Connect quran-hifz frontend → quran-hifz-server (~2150 tok)
+- `ticklish-gathering-neumann.md` — Plan: Wire `quran-hifz-mobile` to the real backend (foundation + read screens) (~2460 tok)
 
 ## ./
 
@@ -82,7 +83,7 @@
 - `package-lock.json` — npm lock file (~62494 tok)
 - `package.json` — Node.js package manifest (~436 tok)
 - `tailwind.config.js` — Tailwind CSS configuration (~214 tok)
-- `tsconfig.json` — TypeScript configuration (~78 tok)
+- `tsconfig.json` — TypeScript configuration (~87 tok)
 
 ## quran-hifz-mobile/.claude/
 
@@ -100,12 +101,12 @@
 
 ## quran-hifz-mobile/app/
 
-- `_layout.tsx` — RootLayout (~389 tok)
-- `index.tsx` — PORTAL_CARDS — renders modal (~1986 tok)
+- `_layout.tsx` — queryClient (~639 tok)
+- `index.tsx` — getHalqaName — renders form, modal (~2409 tok)
 
 ## quran-hifz-mobile/app/(portal)/
 
-- `_layout.tsx` — PortalLayout — renders modal — uses useRouter, useEffect (~362 tok)
+- `_layout.tsx` — PortalLayout — renders modal (~270 tok)
 
 ## quran-hifz-mobile/app/(portal)/admin/
 
@@ -189,6 +190,8 @@
 
 ## quran-hifz-mobile/lib/
 
+- `api.ts` — Exports ApiError, get, post, put + 2 more (~451 tok)
+- `auth-storage.ts` — Exports getToken, setToken, clearToken (~229 tok)
 - `theme.ts` — Exports theme, Theme (~279 tok)
 
 ## quran-hifz-mobile/lib/constants/
@@ -201,9 +204,13 @@
 - `students.ts` — Exports STUDENTS, MY_HIFZ_PLAN, MY_ATTENDANCE, MY_MESSAGES (~1142 tok)
 - `teachers.ts` — Exports TEACHERS, HOMEWORK_REVIEWS, INDIVIDUAL_PLANS (~707 tok)
 
+## quran-hifz-mobile/lib/queries/
+
+- `parent.ts` — Exports ParentChild, ChildHifzEntry, ChildAttendanceRecord, ChildHomework + 9 more (~896 tok)
+
 ## quran-hifz-mobile/lib/store/
 
-- `portalStore.ts` — Exports usePortalStore (~403 tok)
+- `portalStore.ts` — Exports AuthUser, usePortalStore (~941 tok)
 
 ## quran-hifz-mobile/lib/types/
 
@@ -299,6 +306,7 @@
 
 ## quran-hifz/
 
+- `.env.example` — VITE_API_URL / VITE_API_PROXY_TARGET template (~80 tok)
 - `.gitignore` — Git ignore rules (~90 tok)
 - `.prettierignore` (~25 tok)
 - `.prettierrc` — Prettier configuration (~24 tok)
@@ -309,7 +317,7 @@
 - `package-lock.json` — npm lock file (~86488 tok)
 - `package.json` — Node.js package manifest (~829 tok)
 - `tsconfig.json` — TypeScript configuration (~192 tok)
-- `vite.config.ts` — or the app will break with duplicate plugins: (~260 tok)
+- `vite.config.ts` — or the app will break with duplicate plugins: (~327 tok)
 
 ## quran-hifz/.lovable/
 
@@ -378,7 +386,7 @@
 
 ## quran-hifz/src/lib/
 
-- `api.ts` — Exports ApiError, get, post, put + 2 more (~434 tok)
+- `api.ts` — Exports ApiError, get, post, put + 2 more (~443 tok)
 - `auth-storage.ts` — Exports StoredUser, getToken, setToken, clearToken + 3 more (~243 tok)
 - `error-capture.ts` — Captures the original Error out-of-band so server.ts can recover the stack (~259 tok)
 - `error-page.ts` — Exports renderErrorPage (~392 tok)

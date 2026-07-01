@@ -1,22 +1,8 @@
-import { useEffect } from 'react';
-import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
-import { usePortalStore } from '@/lib/store/portalStore';
 import DrawerContent from '@/components/layout/DrawerContent';
 import { theme } from '@/lib/theme';
 
 export default function PortalLayout() {
-  const { portal } = usePortalStore();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!portal) {
-      router.replace('/');
-    }
-  }, [portal]);
-
-  if (!portal) return null;
-
   return (
     <Drawer
       drawerContent={() => <DrawerContent />}

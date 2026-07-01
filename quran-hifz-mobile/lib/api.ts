@@ -1,6 +1,6 @@
-import { getToken } from "./auth-storage";
+import { getToken } from './auth-storage';
 
-const BASE = import.meta.env.VITE_API_URL ?? "/api";
+const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:5000/api';
 
 export class ApiError extends Error {
   constructor(
@@ -8,17 +8,17 @@ export class ApiError extends Error {
     message: string,
   ) {
     super(message);
-    this.name = "ApiError";
+    this.name = 'ApiError';
   }
 }
 
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken();
+  const token = await getToken();
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
 
@@ -41,17 +41,17 @@ export function get<T>(path: string): Promise<T> {
 }
 
 export function post<T>(path: string, body: unknown): Promise<T> {
-  return apiFetch<T>(path, { method: "POST", body: JSON.stringify(body) });
+  return apiFetch<T>(path, { method: 'POST', body: JSON.stringify(body) });
 }
 
 export function put<T>(path: string, body: unknown): Promise<T> {
-  return apiFetch<T>(path, { method: "PUT", body: JSON.stringify(body) });
+  return apiFetch<T>(path, { method: 'PUT', body: JSON.stringify(body) });
 }
 
 export function patch<T>(path: string, body: unknown): Promise<T> {
-  return apiFetch<T>(path, { method: "PATCH", body: JSON.stringify(body) });
+  return apiFetch<T>(path, { method: 'PATCH', body: JSON.stringify(body) });
 }
 
 export function del<T>(path: string): Promise<T> {
-  return apiFetch<T>(path, { method: "DELETE" });
+  return apiFetch<T>(path, { method: 'DELETE' });
 }

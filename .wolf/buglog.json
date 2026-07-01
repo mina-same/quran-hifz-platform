@@ -128,6 +128,50 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-29T14:22:15.431Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-07-01T08:53:48.686Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/lib/api.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T08:53:48.686Z"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-07-01T09:12:29.818Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-mobile/app/(portal)/_layout.tsx",
+      "root_cause": "11 lines replaced/restructured",
+      "fix": "Rewrote 20→6 lines (11 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T09:12:29.818Z"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-07-01T09:20:00.000Z",
+      "error_message": "tsc exited immediately with TS5101 (baseUrl deprecated), so `tsc --noEmit` has never actually type-checked this project's files — it always failed before reaching them.",
+      "file": "quran-hifz-mobile/tsconfig.json",
+      "root_cause": "tsconfig.json (unchanged since initial commit) sets \"baseUrl\": \".\" without \"ignoreDeprecations\": \"6.0\", and the pinned typescript@6.0.3 treats baseUrl as a hard deprecation error, aborting before checking any file.",
+      "fix": "Added \"ignoreDeprecations\": \"6.0\" to compilerOptions so tsc actually runs. This uncovered ~12 pre-existing files with real type errors that predate this session: missing theme colors (theme.cream, theme.greenPale referenced but not defined in lib/theme.ts), Badge/StatBox components used with props (children, pct) their Props types don't declare, `number && {...}` conditional style spreads (e.g. `0 && {...}`) that don't satisfy RN's style types, a StyleSheet.absoluteFillObject typo (should be absoluteFill), and a StatusBar backgroundColor prop that doesn't exist on its type. None of these are in files touched this session (app/(portal)/admin/special_tracks.tsx, app/(portal)/parent/{attendance,dashboard,homework_view,messages,recordings,timeline}.tsx, app/(portal)/student/{points,store}.tsx, app/(portal)/teacher/{evaluate,grouphomework,recordlesson}.tsx) except app/_layout.tsx and app/index.tsx which inherited the absoluteFillObject/StatusBar/global.css issues verbatim from the pre-existing code they were built from.",
+      "tags": ["auto-detected", "type-fix", "tsconfig", "systemic", "mobile"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T09:20:00.000Z"
     }
   ]
 }
