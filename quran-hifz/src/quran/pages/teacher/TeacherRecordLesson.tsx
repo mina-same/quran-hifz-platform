@@ -175,6 +175,9 @@ export function TeacherRecordLesson() {
         contexts={contexts}
         onSelect={setSelected}
         emptyLabel="لا توجد حلقات أو مسارات مسجلة لهذا المعلم"
+        heading="اختر الحلقة أو المسار الاستثنائي لتسجيل درس صوتي لطلابه"
+        actionLabel="بدء تسجيل الدرس"
+        actionIcon="ti-player-record"
       />
     );
   }

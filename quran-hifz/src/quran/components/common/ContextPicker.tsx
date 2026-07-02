@@ -43,10 +43,19 @@ export function ContextPicker({
   contexts,
   onSelect,
   emptyLabel,
+  heading,
+  actionLabel,
+  actionIcon,
 }: {
   contexts: TeachingContext[];
   onSelect: (ctx: TeachingContext) => void;
   emptyLabel?: string;
+  /** Short line above the grid stating what selecting a card will do (e.g. "اختر الحلقة أو المسار لأخذ الحضور"). Keeps otherwise-identical picker screens across pages visually distinguishable. */
+  heading?: string;
+  /** Overrides the default "اختيار الحلقة/المسار" button text with an action-specific label (e.g. "أخذ الحضور"). */
+  actionLabel?: string;
+  /** Overrides the button icon (defaults to the halqa/track kind icon). */
+  actionIcon?: string;
 }) {
   if (contexts.length === 0) {
     return (
@@ -55,7 +64,11 @@ export function ContextPicker({
   }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+    <>
+      {heading && (
+        <p style={{ margin: "0 0 14px", fontSize: 13, color: "var(--text2)" }}>{heading}</p>
+      )}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
       {contexts.map((ctx) => (
         <div
           key={`${ctx.kind}-${ctx.id}`}
@@ -91,11 +104,12 @@ export function ContextPicker({
             style={{ width: "100%", justifyContent: "center", marginTop: 12 }}
             onClick={(e) => { e.stopPropagation(); onSelect(ctx); }}
           >
-            <i className={`ti ${ctx.kind === "halqa" ? "ti-school" : "ti-calendar-event"}`} />
-            {ctx.kind === "halqa" ? "اختيار الحلقة" : "اختيار المسار"}
+            <i className={`ti ${actionIcon ?? (ctx.kind === "halqa" ? "ti-school" : "ti-calendar-event")}`} />
+            {actionLabel ?? (ctx.kind === "halqa" ? "اختيار الحلقة" : "اختيار المسار")}
           </button>
         </div>
       ))}
-    </div>
+      </div>
+    </>
   );
 }

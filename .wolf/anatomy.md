@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T11:08:33.674Z
-> Files: 352 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T11:16:38.392Z
+> Files: 353 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/c53595ee-8b45-447d-aec7-904c055a8dc1/scratchpad/
 
@@ -462,6 +462,7 @@
 - `AyahBar.tsx` — AyahBar (~40 tok)
 - `Badge.tsx` — Badge (~83 tok)
 - `Card.tsx` — Card (~181 tok)
+- `ContextPicker.tsx` — Unified shape for "teaching context" — either a Halqa or a SpecialTrack. (~1159 tok)
 - `HalqaRow.tsx` — HalqaRow (~104 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
 - `Skeleton.tsx` — Skeleton — renders table (~816 tok)
@@ -521,14 +522,14 @@
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — TeacherAttendance — renders table (~1642 tok)
+- `TeacherAttendance.tsx` — TeacherAttendance — renders table (~1682 tok)
 - `TeacherDashboard.tsx` — getName — renders table (~1300 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
-- `TeacherGroupHomework.tsx` — STUDENTS (~2885 tok)
+- `TeacherGroupHomework.tsx` — STUDENTS (~2926 tok)
 - `TeacherHalqa.tsx` — getName (~792 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1009 tok)
 - `TeacherPlans.tsx` — ROWS — renders table (~436 tok)
-- `TeacherRecordLesson.tsx` — LESSON_TYPES (~3758 tok)
+- `TeacherRecordLesson.tsx` — LESSON_TYPES (~3801 tok)
 - `TeacherReports.tsx` — TeacherReports — renders chart (~172 tok)
 - `TeacherSpecialTracks.tsx` — getEnrolledName (~4015 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2044 tok)
