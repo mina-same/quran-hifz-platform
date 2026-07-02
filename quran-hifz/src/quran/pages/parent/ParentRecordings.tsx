@@ -4,6 +4,7 @@ import { useChildRecordings } from "../../api/parent";
 import { Alert } from "../../components/common/Alert";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
+import { SkeletonTable } from "../../components/common/Skeleton";
 
 export function ParentRecordings() {
   const { activeChild } = useParentContext();
@@ -17,7 +18,7 @@ export function ParentRecordings() {
       <Alert tone="info">جميع دروس ابنك مرتبة من الأحدث — سجّلها المعلم مباشرة في الحلقة.</Alert>
       <Card icon="ti-table" title="سجل الدروس">
         {isLoading ? (
-          <div style={{ padding: "1rem", color: "var(--text-muted)" }}>جارٍ التحميل...</div>
+          <SkeletonTable cols={5} rows={5} />
         ) : (
           <div className="tbl-wrap">
             <table className="tbl">

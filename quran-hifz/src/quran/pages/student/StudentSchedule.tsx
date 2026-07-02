@@ -3,6 +3,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { Alert } from "../../components/common/Alert";
 import { HalqaRow } from "../../components/common/HalqaRow";
+import { SkeletonCard } from "../../components/common/Skeleton";
 import { useStudent } from "../../api/students";
 import { useHalqa } from "../../api/halqat";
 
@@ -25,11 +26,7 @@ export function StudentSchedule() {
   useTopbar("ti-clock", "مواعيد حلقتي");
 
   if (isLoading) {
-    return (
-      <div className="page-loading">
-        <i className="ti ti-loader-2" /> جارٍ التحميل...
-      </div>
-    );
+    return <SkeletonCard lines={4} />;
   }
 
   const days = halqa?.days?.split(/[،,]/).map((d) => d.trim()).filter(Boolean) ?? [];

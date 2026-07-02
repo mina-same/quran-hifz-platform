@@ -2,6 +2,7 @@
 
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
+| 2026-07-02 14:09 | Replaced all "جارٍ التحميل..." spinner loading states across web app with skeleton placeholders (shimmer via new .skl CSS class); built shared Skeleton.tsx primitive library (Skeleton, SkeletonStatsRow, SkeletonTable, SkeletonCard, SkeletonCardGrid, SkeletonList); applied via 4 parallel subagents across admin/teacher/parent/student portals; build verified clean | Skeleton.tsx (new), quran.css, AdminDashboard/Halqat/Kpis/Masajid/Parents/SpecialTracks/Students/Teachers.tsx, TeacherAttendance/GroupHomework/Halqa/Homework/RecordLesson/SpecialTracks/Students.tsx, ParentAttendance/HomeworkView/Messages/Recordings/Timeline.tsx, StudentAttendance/Dashboard/Hifz/Messages/Schedule/SpecialTracks.tsx | complete | ~13000 |
 | 2026-07-01 | Added dark mode system + sidebar toggle + landing page redesign | ThemeContext.tsx (new), QuranApp.tsx, Sidebar.tsx, PortalScreen.tsx, quran.css | complete | ~4800 |
 | 2026-07-01 16:49 | UI/UX pro-max: improved students modal (capacity bar, initials avatars, search filter, dashed add section) + tabs underline indicator in TeacherStudents | AdminSpecialTracks.tsx, TeacherStudents.tsx | complete | ~1800 |
 | 13:14 | SEO + social link preview: proper Arabic title/description, OG image, twitter:card, favicon, lang=ar dir=rtl, VITE_PUBLIC_URL env var | src/routes/__root.tsx, .env.example | complete | ~400 |
@@ -605,3 +606,99 @@
 | 17:06 | Session end: 5 writes across 3 files (AdminSpecialTracks.tsx, TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx) | 2 reads | ~21910 tok |
 | 17:10 | Created quran-hifz/src/quran/context/PortalContext.tsx | — | ~780 |
 | 17:11 | Session end: 6 writes across 4 files (AdminSpecialTracks.tsx, TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx, PortalContext.tsx) | 5 reads | ~24007 tok |
+| 14:00 | Created quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx | — | ~2497 |
+| 14:01 | Created quran-hifz/src/quran/components/common/Skeleton.tsx | — | ~816 |
+| 14:01 | Edited quran-hifz/src/quran/quran.css | expanded (+11 lines) | ~118 |
+| 14:01 | Edited quran-hifz-mobile/lib/queries/attendance.ts | added 1 condition(s) | ~627 |
+| 14:01 | Edited quran-hifz/src/quran/pages/admin/AdminDashboard.tsx | CSS: display, gridTemplateColumns, gap | ~273 |
+| 14:02 | Created quran-hifz-mobile/lib/queries/homework.ts | — | ~699 |
+| 14:02 | Created quran-hifz-mobile/lib/queries/students.ts | — | ~488 |
+| 14:02 | Created quran-hifz-mobile/lib/queries/specialTracks.ts | — | ~801 |
+| 14:02 | Created quran-hifz-mobile/app/(portal)/teacher/myhalqa.tsx | — | ~894 |
+| 14:02 | Created quran-hifz-mobile/app/(portal)/teacher/attendance.tsx | — | ~2005 |
+| 14:02 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | added 1 import(s) | ~40 |
+| 14:02 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | modified if() | ~22 |
+| 14:03 | Edited quran-hifz/src/quran/pages/admin/AdminKpis.tsx | added 1 import(s) | ~51 |
+| 14:03 | Edited quran-hifz/src/quran/pages/admin/AdminKpis.tsx | 5→1 lines | ~16 |
+| 14:03 | Edited quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | added 1 import(s) | ~41 |
+| 14:03 | Edited quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | modified if() | ~22 |
+| 14:03 | Created quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx | — | ~2667 |
+| 14:03 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | added 1 import(s) | ~61 |
+| 14:03 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | 3→1 lines | ~17 |
+| 14:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | added 1 import(s) | ~72 |
+| 14:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | modified if() | ~26 |
+| 14:03 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | added 1 import(s) | ~36 |
+| 14:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 3→3 lines | ~25 |
+| 14:03 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | inline fix | ~18 |
+| 14:03 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | added 1 import(s) | ~67 |
+| 14:03 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | 3→1 lines | ~17 |
+| 14:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | added 1 import(s) | ~58 |
+| 14:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | modified if() | ~26 |
+| 14:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | 3→3 lines | ~35 |
+| 14:03 | Edited quran-hifz/src/quran/pages/parent/ParentAttendance.tsx | added 1 import(s) | ~50 |
+| 14:03 | Edited quran-hifz/src/quran/pages/parent/ParentAttendance.tsx | 3→3 lines | ~24 |
+| 14:03 | Edited quran-hifz/src/quran/pages/parent/ParentRecordings.tsx | added 1 import(s) | ~50 |
+| 14:03 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | added 1 import(s) | ~68 |
+| 14:03 | Edited quran-hifz/src/quran/pages/parent/ParentRecordings.tsx | 3→3 lines | ~24 |
+| 14:03 | Edited quran-hifz/src/quran/pages/student/StudentAttendance.tsx | added 1 import(s) | ~55 |
+| 14:03 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | 3→1 lines | ~17 |
+| 14:03 | Edited quran-hifz/src/quran/pages/parent/ParentHomeworkView.tsx | added 1 import(s) | ~50 |
+| 14:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherHalqa.tsx | added 1 import(s) | ~50 |
+| 14:03 | Edited quran-hifz/src/quran/pages/parent/ParentHomeworkView.tsx | 3→3 lines | ~32 |
+| 14:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherHalqa.tsx | modified if() | ~22 |
+| 14:03 | Edited quran-hifz/src/quran/pages/student/StudentAttendance.tsx | 5→1 lines | ~17 |
+| 14:03 | Edited quran-hifz/src/quran/pages/parent/ParentMessages.tsx | added 1 import(s) | ~34 |
+| 14:03 | Edited quran-hifz/src/quran/pages/parent/ParentMessages.tsx | 3→1 lines | ~18 |
+| 14:03 | Edited quran-hifz/src/quran/pages/parent/ParentTimeline.tsx | added 1 import(s) | ~34 |
+| 14:03 | Edited quran-hifz/src/quran/pages/parent/ParentTimeline.tsx | 3→3 lines | ~33 |
+| 14:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherHomework.tsx | added 1 import(s) | ~54 |
+| 14:03 | Edited quran-hifz/src/quran/pages/student/StudentDashboard.tsx | added 1 import(s) | ~84 |
+| 14:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherHomework.tsx | 5→3 lines | ~23 |
+| 14:03 | Session end: 53 writes across 31 files (AdminSpecialTracks.tsx, TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx, PortalContext.tsx, Skeleton.tsx) | 44 reads | ~118646 tok |
+| 14:03 | Edited quran-hifz/src/quran/pages/student/StudentDashboard.tsx | CSS: display, gridTemplateColumns, gap | ~85 |
+| 14:03 | Edited quran-hifz/src/quran/pages/student/StudentHifz.tsx | added 1 import(s) | ~48 |
+| 14:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx | added 1 import(s) | ~54 |
+| 14:04 | Edited quran-hifz/src/quran/pages/student/StudentHifz.tsx | 5→1 lines | ~17 |
+| 14:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx | inline fix | ~22 |
+| 14:04 | Session end: 58 writes across 33 files (AdminSpecialTracks.tsx, TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx, PortalContext.tsx, Skeleton.tsx) | 44 reads | ~118872 tok |
+| 14:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx | inline fix | ~17 |
+| 14:04 | Edited quran-hifz/src/quran/pages/student/StudentMessages.tsx | added 1 import(s) | ~52 |
+| 14:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | added 1 import(s) | ~54 |
+| 14:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | inline fix | ~18 |
+| 14:04 | Edited quran-hifz/src/quran/pages/student/StudentMessages.tsx | modified if() | ~34 |
+| 14:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | added 1 import(s) | ~43 |
+| 14:04 | Session end: 64 writes across 35 files (AdminSpecialTracks.tsx, TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx, PortalContext.tsx, Skeleton.tsx) | 44 reads | ~119097 tok |
+| 14:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | 3→3 lines | ~27 |
+| 14:04 | Edited quran-hifz/src/quran/pages/student/StudentSchedule.tsx | added 1 import(s) | ~50 |
+| 14:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | 3→3 lines | ~26 |
+| 14:04 | Edited quran-hifz/src/quran/pages/student/StudentSchedule.tsx | modified if() | ~18 |
+| 14:04 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | added 1 import(s) | ~64 |
+| 14:04 | Created quran-hifz-mobile/app/(portal)/teacher/homework.tsx | — | ~1014 |
+| 14:04 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | 3→1 lines | ~18 |
+| 14:04 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | removed 169 lines | ~19 |
+| 14:04 | Edited quran-hifz-mobile/components/ui/Badge.tsx | 1→2 lines | ~29 |
+| 14:04 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | expanded (+6 lines) | ~441 |
+| 14:04 | Session end: 74 writes across 38 files (AdminSpecialTracks.tsx, TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx, PortalContext.tsx, Skeleton.tsx) | 45 reads | ~121586 tok |
+| 14:04 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | CSS: item | ~76 |
+| 14:05 | Created quran-hifz-mobile/app/(portal)/teacher/special_tracks.tsx | — | ~2112 |
+| 14:05 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | modified TrackCard() | ~2294 |
+| 14:05 | Edited quran-hifz-mobile/app/(portal)/teacher/_layout.tsx | 5→6 lines | ~85 |
+| 11:05 | Fixed admin special_tracks click lag: hoisted TrackCard/InfoRow/SectionHeader out of AdminSpecialTracks() so clicking "students" no longer force-remounts the whole card grid | quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | fixed | ~3800 |
+| 14:05 | Created quran-hifz-mobile/app/(portal)/student/attendance.tsx | — | ~811 |
+| 14:06 | Created quran-hifz-mobile/app/(portal)/student/homework.tsx | — | ~905 |
+| 14:06 | Created quran-hifz-mobile/app/(portal)/student/special_tracks.tsx | — | ~1719 |
+| 14:06 | Edited quran-hifz-mobile/app/(portal)/student/_layout.tsx | 6→7 lines | ~104 |
+| 14:20 | Phase 2 web: built ContextPicker component (TeachingContext type, halqaToContext/trackToContext), extended attendance/homework/group-homework/lesson-recordings/students API hooks with specialTrack param, refactored TeacherAttendance/TeacherRecordLesson/TeacherGroupHomework/TeacherSpecialTracks to use picker + track rosters via /students?specialTrack= | quran-hifz/src/quran/components/common/ContextPicker.tsx, api/{attendance,homework,group-homework,lesson-recordings,students}.ts, pages/teacher/{TeacherAttendance,TeacherRecordLesson,TeacherGroupHomework,TeacherSpecialTracks}.tsx | done, tsc clean | ~28000 |
+| 14:20 | RECOVERY: a git stash/pop during my own tsc verification (to diff pre/post-change errors) briefly trapped concurrent Phase 1 backend (quran-hifz-server controllers/models/seed) and Phase 3 mobile work from parallel agents in a stash, since .wolf/*.md conflicts blocked the pop. Recovered via `git checkout stash@{0} -- <file>` per-file for all server/mobile/web files, then dropped the stash. Verified quran-hifz-server tsc still clean after recovery. Lesson logged in cerebrum Do-Not-Repeat. | quran-hifz-server/*, quran-hifz-mobile/* | recovered, verified | ~1200 |
+| 14:07 | Created quran-hifz-mobile/app/(portal)/parent/attendance.tsx | — | ~819 |
+| 14:07 | Session end: 83 writes across 40 files (AdminSpecialTracks.tsx, TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx, PortalContext.tsx, Skeleton.tsx) | 46 reads | ~132077 tok |
+| 14:07 | Created quran-hifz-mobile/app/(portal)/parent/homework_view.tsx | — | ~832 |
+| 14:07 | Created quran-hifz-mobile/app/(portal)/parent/recordings.tsx | — | ~661 |
+| 14:07 | Edited quran-hifz-mobile/app/(portal)/parent/recordings.tsx | 4→3 lines | ~49 |
+| 14:08 | Edited quran-hifz-mobile/components/layout/NavItem.tsx | 6→7 lines | ~95 |
+| 14:08 | Edited quran-hifz-mobile/components/layout/NavItem.tsx | expanded (+6 lines) | ~83 |
+| 14:08 | Edited quran-hifz-mobile/lib/constants/portals.ts | 5→6 lines | ~111 |
+| 14:08 | Edited quran-hifz-mobile/lib/constants/portals.ts | 8→11 lines | ~190 |
+| 14:08 | Session end: 90 writes across 44 files (AdminSpecialTracks.tsx, TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx, PortalContext.tsx, Skeleton.tsx) | 47 reads | ~135270 tok |
+| 14:08 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/c53595ee-8b45-447d-aec7-904c055a8dc1/scratchpad/append_bug.py | — | ~546 |
+| 14:10 | Session end: 91 writes across 45 files (AdminSpecialTracks.tsx, TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx, PortalContext.tsx, Skeleton.tsx) | 47 reads | ~135816 tok |

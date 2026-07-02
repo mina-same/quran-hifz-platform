@@ -893,6 +893,458 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-01T14:05:35.341Z"
+    },
+    {
+      "id": "bug-056",
+      "timestamp": "2026-07-02T11:01:28.211Z",
+      "error_message": "CSS fix: animation",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "animation: spin 1s linear infinite → sklShimmer 1.6s ease-in-out infinite",
+      "fix": "Changed animation: spin 1s linear infinite → sklShimmer 1.6s ease-in-out infinite",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:01:28.211Z"
+    },
+    {
+      "id": "bug-057",
+      "timestamp": "2026-07-02T11:01:32.204Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-mobile/lib/queries/attendance.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 39→75 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:01:32.204Z"
+    },
+    {
+      "id": "bug-058",
+      "timestamp": "2026-07-02T11:01:37.260Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminDashboard.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 19→25 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:01:37.260Z"
+    },
+    {
+      "id": "bug-059",
+      "timestamp": "2026-07-02T11:02:56.643Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 7→3 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:02:56.643Z"
+    },
+    {
+      "id": "bug-060",
+      "timestamp": "2026-07-02T11:03:01.163Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/admin/AdminKpis.tsx",
+      "root_cause": "Had \"../../api/kpis\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:01.163Z"
+    },
+    {
+      "id": "bug-061",
+      "timestamp": "2026-07-02T11:03:09.482Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminMasajid.tsx",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 7→3 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:09.482Z"
+    },
+    {
+      "id": "bug-062",
+      "timestamp": "2026-07-02T11:03:19.559Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Had \"../../api/halqat\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:19.559Z"
+    },
+    {
+      "id": "bug-063",
+      "timestamp": "2026-07-02T11:03:21.119Z",
+      "error_message": "Wrong return value",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Was returning: <div className=\"page-loading\"><i className=\"ti ti-",
+      "fix": "Now returns: <SkeletonCard lines={2} />;",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:21.119Z"
+    },
+    {
+      "id": "bug-064",
+      "timestamp": "2026-07-02T11:03:27.095Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+      "root_cause": "Had \"../../api/students\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:27.095Z"
+    },
+    {
+      "id": "bug-065",
+      "timestamp": "2026-07-02T11:03:30.706Z",
+      "error_message": "Wrong return value",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx",
+      "root_cause": "Was returning: <div className=\"page-loading\"><i className=\"ti ti-",
+      "fix": "Now returns: <SkeletonCard lines={3} />;",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:30.706Z"
+    },
+    {
+      "id": "bug-066",
+      "timestamp": "2026-07-02T11:03:36.776Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/admin/AdminTeachers.tsx",
+      "root_cause": "Had \"../../api/teachers\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:36.776Z"
+    },
+    {
+      "id": "bug-067",
+      "timestamp": "2026-07-02T11:03:38.093Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentAttendance.tsx",
+      "root_cause": "Had \"../../api/attendance\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:38.093Z"
+    },
+    {
+      "id": "bug-068",
+      "timestamp": "2026-07-02T11:03:40.005Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherHalqa.tsx",
+      "root_cause": "Had \"../../api/halqat\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:40.005Z"
+    },
+    {
+      "id": "bug-069",
+      "timestamp": "2026-07-02T11:03:41.644Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherHalqa.tsx",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 7→3 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:41.644Z"
+    },
+    {
+      "id": "bug-070",
+      "timestamp": "2026-07-02T11:03:47.140Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherHomework.tsx",
+      "root_cause": "Had \"../../api/homework\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:47.140Z"
+    },
+    {
+      "id": "bug-071",
+      "timestamp": "2026-07-02T11:03:48.360Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherHomework.tsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→3 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:48.360Z"
+    },
+    {
+      "id": "bug-072",
+      "timestamp": "2026-07-02T11:03:52.608Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/student/StudentDashboard.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 7→12 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:52.608Z"
+    },
+    {
+      "id": "bug-073",
+      "timestamp": "2026-07-02T11:03:58.335Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentHifz.tsx",
+      "root_cause": "Had \"../../api/hifz\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:58.335Z"
+    },
+    {
+      "id": "bug-074",
+      "timestamp": "2026-07-02T11:04:02.893Z",
+      "error_message": "Wrong return value",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx",
+      "root_cause": "Was returning: <div style={{ padding: 32, textAlign: \"center\", co",
+      "fix": "Now returns: <SkeletonCard lines={5} />;",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-02T11:04:04.235Z"
+    },
+    {
+      "id": "bug-075",
+      "timestamp": "2026-07-02T11:04:07.606Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentMessages.tsx",
+      "root_cause": "Had \"../../api/messages\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:04:07.606Z"
+    },
+    {
+      "id": "bug-076",
+      "timestamp": "2026-07-02T11:04:17.989Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentSchedule.tsx",
+      "root_cause": "Had \"../../api/students\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:04:17.989Z"
+    },
+    {
+      "id": "bug-077",
+      "timestamp": "2026-07-02T11:04:22.632Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/student/StudentSchedule.tsx",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 7→3 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:04:22.632Z"
+    },
+    {
+      "id": "bug-078",
+      "timestamp": "2026-07-02T11:04:29.643Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+      "root_cause": "Had \"../../api/special-tracks\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:04:29.643Z"
+    },
+    {
+      "id": "bug-079",
+      "timestamp": "2026-07-02T11:04:52.445Z",
+      "error_message": "CSS fix: mode",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "mode: \"form\", item → \"students\", item",
+      "fix": "Changed mode: \"form\", item → \"students\", item",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:04:52.445Z"
+    },
+    {
+      "id": "bug-080",
+      "timestamp": "2026-07-02T11:05:19.376Z",
+      "error_message": "CSS fix: href",
+      "file": "quran-hifz-mobile/app/(portal)/teacher/_layout.tsx",
+      "root_cause": "href: null, title: 'واجب جماعي' → null, title: 'المسارات الاستثنائية'",
+      "fix": "Changed href: null, title: 'واجب جماعي' → null, title: 'المسارات الاستثنائية'",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-02T11:06:47.814Z"
+    },
+    {
+      "id": "bug-081",
+      "timestamp": "2026-07-02T11:06:06.077110Z",
+      "error_message": "User report: clicking a student's 'manage students' action on /#special_tracks (admin) sometimes doesn't open, is slow, or the click lands in the wrong place",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "TrackCard, InfoRow, and SectionHeader were defined as nested function components inside AdminSpecialTracks(). Any state change on the page (typing in student search, selecting a student, opening/closing any modal) creates new component function identities each render, forcing React to fully unmount+remount every track card in the grid instead of patching props. This caused the click that opens the students modal to sometimes race the remount, producing missed clicks / perceived lag / clicks landing on the wrong element after layout re-settles.",
+      "fix": "Hoisted TrackCard, InfoRow, and SectionHeader to module scope (stable component identity across renders). TrackCard now receives onManageStudents/onEdit/onDelete as props instead of closing over component state setters. Added a stable openStudents(item) helper in AdminSpecialTracks to replace the inline modal-opening closure.",
+      "tags": [
+        "auto-detected",
+        "react-perf",
+        "nested-component-antipattern",
+        "click-lag",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:06:06.077110Z"
+    },
+    {
+      "id": "bug-082",
+      "timestamp": "2026-07-02T11:08:18.035Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-mobile/lib/constants/portals.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→6 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:08:18.035Z"
+    },
+    {
+      "id": "bug-083",
+      "timestamp": "2026-07-02T11:09:10.992935Z",
+      "error_message": "git stash used to diff pre/post-change tsc errors trapped concurrent agents' work-in-progress (quran-hifz-server Phase 1 backend + quran-hifz-mobile Phase 3) in the stash; git stash pop then aborted on .wolf/anatomy.md and .wolf/memory.md conflicts, leaving both my quran-hifz edits and the other agents' backend/mobile edits present only in the stash with nothing on disk",
+      "file": "quran-hifz-server/src/models/*.ts, quran-hifz-server/src/controllers/*.ts, quran-hifz-server/src/seeds/seed.ts, quran-hifz-mobile/app/(portal)/**, quran-hifz-mobile/lib/queries/*.ts",
+      "root_cause": "Ran `git stash -u` in a multi-agent repo to capture a clean tsc baseline for comparison; the stash captured the entire dirty working tree including other agents' in-flight work, and the pop step failed due to unrelated OpenWolf log-file conflicts (.wolf/anatomy.md, .wolf/memory.md are append-only and change on every agent turn)",
+      "fix": "Recovered every trapped file individually with `git checkout stash@{0} -- <path>` (does not require a clean merge, unlike stash pop/apply), verified quran-hifz-server tsc still passed after recovery, then ran `git stash drop` once nothing else was needed from it",
+      "tags": [
+        "git",
+        "stash",
+        "multi-agent",
+        "data-loss-near-miss",
+        "process"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:09:10.992935Z"
     }
   ]
 }

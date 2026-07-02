@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
+import { SkeletonTable } from "../../components/common/Skeleton";
 import {
   useAdminParents, useCreateParent, useUpdateParent, useLinkChild, useUnlinkChild,
   type ParentUser,
@@ -119,9 +120,7 @@ export function AdminParents() {
   return (
     <>
       <Card>
-        {isLoading && (
-          <div className="page-loading"><i className="ti ti-loader-2" /> جارٍ التحميل...</div>
-        )}
+        {isLoading && <SkeletonTable cols={5} rows={5} />}
         {error && (
           <div style={{ color: "#ef4444", padding: 12, fontSize: 13 }}>تعذّر تحميل بيانات أولياء الأمور</div>
         )}

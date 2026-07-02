@@ -4,6 +4,7 @@ import { useChildAttendance } from "../../api/parent";
 import { StatsRow } from "../../components/common/StatsRow";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
+import { SkeletonTable } from "../../components/common/Skeleton";
 
 const STATUS_TONE: Record<string, "green" | "gold" | "red"> = {
   "حاضر":   "green",
@@ -35,7 +36,7 @@ export function ParentAttendance() {
       />
       <Card icon="ti-calendar" title="سجل الحضور">
         {isLoading ? (
-          <div style={{ padding: "1rem", color: "var(--text-muted)" }}>جارٍ التحميل...</div>
+          <SkeletonTable cols={5} rows={5} />
         ) : (
           <div className="tbl-wrap">
             <table className="tbl">

@@ -6,6 +6,7 @@ import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { HalqaRow } from "../../components/common/HalqaRow";
+import { SkeletonStatsRow, SkeletonCard } from "../../components/common/Skeleton";
 import { useStudent } from "../../api/students";
 import { useHomework } from "../../api/homework";
 import { toAr, pct } from "../../../lib/format";
@@ -35,9 +36,14 @@ export function StudentDashboard() {
 
   if (isLoading) {
     return (
-      <div className="page-loading">
-        <i className="ti ti-loader-2" /> جارٍ التحميل...
-      </div>
+      <>
+        <SkeletonStatsRow />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+          <SkeletonCard lines={4} />
+          <SkeletonCard lines={3} />
+        </div>
+        <SkeletonCard lines={4} />
+      </>
     );
   }
 

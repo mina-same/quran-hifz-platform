@@ -4,6 +4,9 @@ import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { useSpecialTracks, type SpecialTrack, type EnrolledStudent, type TrackTeacher } from "../../api/special-tracks";
+import { SkeletonCardGrid } from "../../components/common/Skeleton";
+
+type TrackCardProps = { track: SpecialTrack; onStudents?: () => void; onAttendance?: () => void };
 
 /* ─── helpers ─── */
 function getEnrolledName(v: EnrolledStudent | string) { return typeof v === "object" ? v.name : v; }
@@ -29,7 +32,7 @@ const STATUS_CFG = {
 };
 
 /* ─── Track card ─── */
-function TrackCard({ track }: { track: SpecialTrack }) {
+function TrackCard({ track, onStudents, onAttendance }: TrackCardProps) {
   const [open, setOpen] = useState(track.status === "active");
 
   const cfg      = STATUS_CFG[track.status];
@@ -59,6 +62,30 @@ function TrackCard({ track }: { track: SpecialTrack }) {
           )}
         </div>
         <h3 style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 800, color: "var(--text)" }}>{track.title}</h3>
+
+        {/* action buttons */}
+        {(onStudents || onAttendance) && (
+          <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+            {onStudents && (
+              <button
+                className="topbar-btn btn-ghost"
+                style={{ flex: 1, justifyContent: "center", fontSize: 11 }}
+                onClick={onStudents}
+              >
+                <i className="ti ti-users" /> الطلاب
+              </button>
+            )}
+            {onAttendance && (
+              <button
+                className="topbar-btn btn-primary"
+                style={{ flex: 1, justifyContent: "center", fontSize: 11 }}
+                onClick={onAttendance}
+              >
+                <i className="ti ti-calendar-check" /> الحضور
+              </button>
+            )}
+          </div>
+        )}
 
         {/* info grid */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", fontSize: 12, marginBottom: 14 }}>
@@ -216,7 +243,7 @@ function TrackCard({ track }: { track: SpecialTrack }) {
 /* ════════════════════════════════════════════════ */
 export function TeacherSpecialTracks() {
   useTopbar("ti-calendar-event", "مساراتي الاستثنائية");
-  const { user } = usePortal();
+  const { user, showPage } = usePortal();
 
   const { data: tracks = [], isLoading } = useSpecialTracks(
     undefined,
@@ -239,7 +266,14 @@ export function TeacherSpecialTracks() {
           </span>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {items.map((t) => <TrackCard key={t._id} track={t} />)}
+          {items.map((t) => (
+            <TrackCard
+              key={t._id}
+              track={t}
+              onStudents={() => showPage("students")}
+              onAttendance={() => showPage("attendance")}
+            />
+          ))}
         </div>
       </div>
     );
@@ -247,7 +281,7 @@ export function TeacherSpecialTracks() {
 
   return (
     <Card>
-      {isLoading && <div className="page-loading"><i className="ti ti-loader-2" /> جارٍ التحميل...</div>}
+      {isLoading && <SkeletonCardGrid count={3} lines={4} />}
 
       {!isLoading && tracks.length === 0 && (
         <div style={{ textAlign: "center", padding: "52px 0" }}>

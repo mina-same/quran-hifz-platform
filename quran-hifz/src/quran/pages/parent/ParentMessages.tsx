@@ -2,6 +2,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { useParentContext } from "../../context/ParentContext";
 import { useChildMessages } from "../../api/parent";
 import { Card } from "../../components/common/Card";
+import { SkeletonList } from "../../components/common/Skeleton";
 
 export function ParentMessages() {
   const { activeChild } = useParentContext();
@@ -11,9 +12,7 @@ export function ParentMessages() {
 
   return (
     <Card icon="ti-inbox" title="الرسائل الواردة">
-      {isLoading && (
-        <div style={{ padding: "1rem", color: "var(--text-muted)" }}>جارٍ التحميل...</div>
-      )}
+      {isLoading && <SkeletonList rows={5} avatar={true} />}
       {(messages ?? []).map((m, i) => (
         <div
           key={i}

@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { usePortal } from "../../context/PortalContext";
-import { useHalqat, type Halqa } from "../../api/halqat";
+import { useHalqat } from "../../api/halqat";
+import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudents, type Student } from "../../api/students";
 import { useCreateRecording } from "../../api/lesson-recordings";
 import { Card } from "../../components/common/Card";
 import { Alert } from "../../components/common/Alert";
 import { Badge } from "../../components/common/Badge";
+import { ContextPicker, halqaToContext, trackToContext, type TeachingContext } from "../../components/common/ContextPicker";
+import { SkeletonCard } from "../../components/common/Skeleton";
 
 const LESSON_TYPES = ["حفظ جديد", "مراجعة قريبة", "مراجعة بعيدة", "تحسين تلاوة", "اختبار"];
 
@@ -23,12 +26,21 @@ function fmtTimer(secs: number) {
 }
 
 export function TeacherRecordLesson() {
-  const { setTopbar } = usePortal();
-  const [selectedHalqa, setSelectedHalqa] = useState<Halqa | null>(null);
+  const { setTopbar, user } = usePortal();
+  const [selected, setSelected] = useState<TeachingContext | null>(null);
 
-  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat();
+  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: user?.profileId });
+  const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, user?.profileId as string | undefined);
+  const contexts: TeachingContext[] = [
+    ...halqat.map(halqaToContext),
+    ...tracks.map(trackToContext),
+  ];
   const { data: students = [], isLoading: loadingStudents } = useStudents(
-    selectedHalqa ? { halqa: selectedHalqa._id } : undefined
+    selected
+      ? selected.kind === "halqa"
+        ? { halqa: selected.id }
+        : { specialTrack: selected.id }
+      : undefined
   );
   const createRecording = useCreateRecording();
 
@@ -42,24 +54,24 @@ export function TeacherRecordLesson() {
 
   // Topbar
   useEffect(() => {
-    if (!selectedHalqa) {
+    if (!selected) {
       setTopbar({ icon: "ti-player-record", title: "سجّل درس الحلقة" });
     } else {
       setTopbar({
         icon: "ti-player-record",
-        title: "سجّل دروس — " + selectedHalqa.name,
+        title: "سجّل دروس — " + selected.title,
         actions: (
-          <button className="topbar-btn btn-ghost" onClick={() => setSelectedHalqa(null)}>
-            <i className="ti ti-arrow-right" /> الحلقات
+          <button className="topbar-btn btn-ghost" onClick={() => setSelected(null)}>
+            <i className="ti ti-arrow-right" /> الحلقات والمسارات
           </button>
         ),
       });
     }
-  }, [selectedHalqa, setTopbar]);
+  }, [selected, setTopbar]);
 
-  // Stop all recorders when leaving halqa view
+  // Stop all recorders when leaving the selected context view
   useEffect(() => {
-    if (!selectedHalqa) {
+    if (!selected) {
       Object.values(recsRef.current).forEach((r) => {
         try { clearInterval(r.interval); r.mr.stop(); r.stream.getTracks().forEach((t) => t.stop()); } catch (_) {}
       });
@@ -70,7 +82,7 @@ export function TeacherRecordLesson() {
       setForms({});
       setSent({});
     }
-  }, [selectedHalqa]);
+  }, [selected]);
 
   // Initialize form defaults when students load
   useEffect(() => {
@@ -145,7 +157,7 @@ export function TeacherRecordLesson() {
     if (!f.segment.trim()) return;
     await createRecording.mutateAsync({
       student:     id,
-      halqa:       selectedHalqa!._id,
+      ...(selected!.kind === "halqa" ? { halqa: selected!.id } : { specialTrack: selected!.id }),
       type:        f.type,
       segment:     f.segment,
       points:      Number(f.pts) || 0,
@@ -155,44 +167,20 @@ export function TeacherRecordLesson() {
     setRecStates((p) => ({ ...p, [id]: "idle" }));
   }
 
-  // ── View 1: Halqa Selector ─────────────────────────────────────────
-  if (!selectedHalqa) {
-    if (loadingHalqat) return <div style={{ padding: 32, textAlign: "center", color: "var(--text2)" }}>جارٍ التحميل…</div>;
+  // ── View 1: Context Selector ─────────────────────────────────────────
+  if (!selected) {
+    if (loadingHalqat || loadingTracks) return <SkeletonCard lines={5} />;
     return (
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-        {halqat.map((hq) => {
-          const masjid = typeof hq.masjid === "object" ? hq.masjid.name : hq.masjid;
-          return (
-            <div
-              key={hq._id}
-              className="card"
-              style={{ cursor: "pointer", border: "2px solid transparent", transition: "border .15s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--green)")}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "transparent")}
-              onClick={() => setSelectedHalqa(hq)}
-            >
-              <div className="card-header">
-                <div className="card-title"><i className="ti ti-school" /> {hq.name}</div>
-              </div>
-              <div className="halqa-row"><span className="lbl">المسجد</span><span className="val">{masjid}</span></div>
-              <div className="halqa-row"><span className="lbl">المواعيد</span><span className="val" style={{ fontSize: 11 }}>{hq.days} | {hq.time}</span></div>
-              <div className="halqa-row"><span className="lbl">الطلاب</span><span className="val">{hq.studentCount ?? "—"} طالب</span></div>
-              <button
-                className="topbar-btn btn-primary"
-                style={{ width: "100%", justifyContent: "center", marginTop: 12 }}
-                onClick={(e) => { e.stopPropagation(); setSelectedHalqa(hq); }}
-              >
-                <i className="ti ti-player-record" /> سجّل دروس الحلقة
-              </button>
-            </div>
-          );
-        })}
-      </div>
+      <ContextPicker
+        contexts={contexts}
+        onSelect={setSelected}
+        emptyLabel="لا توجد حلقات أو مسارات مسجلة لهذا المعلم"
+      />
     );
   }
 
   // ── View 2: Per-student session ─────────────────────────────────────
-  if (loadingStudents) return <div style={{ padding: 32, textAlign: "center", color: "var(--text2)" }}>جارٍ تحميل الطلاب…</div>;
+  if (loadingStudents) return <SkeletonCard lines={5} />;
 
   return (
     <>

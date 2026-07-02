@@ -5,7 +5,8 @@ export type LessonRecording = {
   _id: string;
   student: { _id: string; name: string } | string;
   teacher: { _id: string; name: string } | string;
-  halqa: { _id: string; name: string } | string;
+  halqa?: { _id: string; name: string } | string;
+  specialTrack?: { _id: string; title: string } | string;
   type: string;
   segment: string;
   points: number;
@@ -14,7 +15,7 @@ export type LessonRecording = {
   recordedAt: string;
 };
 
-type ListFilters = { student?: string; teacher?: string; halqa?: string };
+type ListFilters = { student?: string; teacher?: string; halqa?: string; specialTrack?: string };
 type ListResponse = { success: boolean; count: number; data: LessonRecording[] };
 type SingleResponse = { success: boolean; data: LessonRecording };
 
@@ -23,6 +24,7 @@ function buildQuery(f: ListFilters) {
   if (f.student) p.set("student", f.student);
   if (f.teacher) p.set("teacher", f.teacher);
   if (f.halqa)   p.set("halqa",   f.halqa);
+  if (f.specialTrack) p.set("specialTrack", f.specialTrack);
   const q = p.toString();
   return q ? `?${q}` : "";
 }

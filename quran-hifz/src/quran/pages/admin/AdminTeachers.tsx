@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
+import { SkeletonTable } from "../../components/common/Skeleton";
 import { useTeachers, useCreateTeacher, useUpdateTeacher, useDeleteTeacher, type Teacher } from "../../api/teachers";
 import { toAr } from "../../../lib/format";
 
@@ -123,9 +124,7 @@ export function AdminTeachers() {
   return (
     <>
       <Card>
-        {isLoading && (
-          <div className="page-loading"><i className="ti ti-loader-2" /> جارٍ التحميل...</div>
-        )}
+        {isLoading && <SkeletonTable cols={8} rows={5} />}
         {error && (
           <div style={{ color: "#ef4444", padding: 12, fontSize: 13 }}>تعذّر تحميل بيانات المعلمين</div>
         )}

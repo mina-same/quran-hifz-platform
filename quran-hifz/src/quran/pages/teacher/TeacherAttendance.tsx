@@ -3,20 +3,32 @@ import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { Alert } from "../../components/common/Alert";
+import { ContextPicker, halqaToContext, trackToContext, type TeachingContext } from "../../components/common/ContextPicker";
+import { SkeletonCard, SkeletonTable } from "../../components/common/Skeleton";
 import { useHalqat } from "../../api/halqat";
+import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudents } from "../../api/students";
 import { useBulkAttendance } from "../../api/attendance";
 
-function getName(v: unknown): string {
-  if (v && typeof v === "object" && "name" in v) return (v as { name: string }).name;
-  return "";
-}
-
 export function TeacherAttendance() {
   const { user } = usePortal();
-  const { data: halqat = [] } = useHalqat({ teacher: user?.profileId });
-  const firstHalqa = halqat[0];
-  const { data: students = [] } = useStudents({ halqa: firstHalqa?._id });
+  const [selected, setSelected] = useState<TeachingContext | null>(null);
+
+  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: user?.profileId });
+  const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, user?.profileId as string | undefined);
+
+  const contexts: TeachingContext[] = [
+    ...halqat.map(halqaToContext),
+    ...tracks.map(trackToContext),
+  ];
+
+  const { data: students = [], isLoading: loadingStudents } = useStudents(
+    selected
+      ? selected.kind === "halqa"
+        ? { halqa: selected.id }
+        : { specialTrack: selected.id }
+      : undefined
+  );
   const bulkAttendance = useBulkAttendance();
 
   const today = new Date().toISOString().split("T")[0];
@@ -28,37 +40,62 @@ export function TeacherAttendance() {
 
   useTopbar(
     "ti-calendar-check",
-    "الحضور اليومي",
-    <button
-      className="topbar-btn btn-primary"
-      onClick={() => {
-        if (!firstHalqa) return;
-        const records = students.map((s) => ({
-          student: s._id,
-          status: statuses[s._id] ?? "حاضر",
-        }));
-        bulkAttendance.mutate({ halqa: firstHalqa._id, date: today, records });
-      }}
-      disabled={bulkAttendance.isPending || !firstHalqa}
-    >
-      <i className="ti ti-send" />
-      {bulkAttendance.isPending ? "جارٍ الحفظ..." : "حفظ وإرسال إشعارات"}
-    </button>,
+    selected ? `الحضور اليومي — ${selected.title}` : "الحضور اليومي",
+    selected ? (
+      <div style={{ display: "flex", gap: 8 }}>
+        <button className="topbar-btn btn-ghost" onClick={() => { setSelected(null); setStatuses({}); }}>
+          <i className="ti ti-arrow-right" /> الحلقات والمسارات
+        </button>
+        <button
+          className="topbar-btn btn-primary"
+          onClick={() => {
+            const records = students.map((s) => ({
+              student: s._id,
+              status: statuses[s._id] ?? "حاضر",
+            }));
+            bulkAttendance.mutate(
+              selected.kind === "halqa"
+                ? { halqa: selected.id, date: today, records }
+                : { specialTrack: selected.id, date: today, records }
+            );
+          }}
+          disabled={bulkAttendance.isPending}
+        >
+          <i className="ti ti-send" />
+          {bulkAttendance.isPending ? "جارٍ الحفظ..." : "حفظ وإرسال إشعارات"}
+        </button>
+      </div>
+    ) : undefined,
   );
 
+  // ── View 1: context selector ──────────────────────────────────────
+  if (!selected) {
+    if (loadingHalqat || loadingTracks) {
+      return <SkeletonCard lines={2} />;
+    }
+    return (
+      <ContextPicker
+        contexts={contexts}
+        onSelect={setSelected}
+        emptyLabel="لا توجد حلقات أو مسارات مسجلة لهذا المعلم"
+      />
+    );
+  }
+
+  // ── View 2: attendance table ───────────────────────────────────────
   return (
     <>
       <Card
-        icon="ti-school"
-        title={firstHalqa ? `${firstHalqa.name} — اليوم` : "الحضور اليومي"}
+        icon={selected.kind === "halqa" ? "ti-school" : "ti-calendar-event"}
+        title={`${selected.title} — اليوم`}
         headerExtra={
           <span style={{ fontSize: 12, color: "var(--text2)" }}>{today}</span>
         }
       >
-        {!firstHalqa && (
-          <div className="page-loading">لا توجد حلقات مسجلة لهذا المعلم</div>
+        {loadingStudents && (
+          <SkeletonTable cols={3} rows={5} />
         )}
-        {firstHalqa && (
+        {!loadingStudents && (
           <div className="tbl-wrap">
             <table className="tbl">
               <thead>
@@ -97,6 +134,13 @@ export function TeacherAttendance() {
                     </tr>
                   );
                 })}
+                {students.length === 0 && (
+                  <tr>
+                    <td colSpan={3} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                      لا يوجد طلاب
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

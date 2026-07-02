@@ -4,18 +4,21 @@ import { Types } from 'mongoose';
 import { Attendance } from '../models/Attendance.model';
 import { Student } from '../models/Student.model';
 import { AppError } from '../middleware/error';
+import { contextRefinement } from '../validators/context';
 
 const recordSchema = z.object({
-  student: z.string().min(1),
-  halqa:   z.string().min(1),
+  student:      z.string().min(1),
+  halqa:        z.string().min(1).optional(),
+  specialTrack: z.string().min(1).optional(),
   date:    z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
   day:     z.string().min(1),
   time:    z.string().min(1),
   status:  z.enum(['حاضر', 'غائب', 'متأخر']),
-});
+}).superRefine(contextRefinement);
 
 const bulkSchema = z.object({
-  halqa:   z.string().min(1),
+  halqa:        z.string().min(1).optional(),
+  specialTrack: z.string().min(1).optional(),
   date:    z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
   day:     z.string().min(1),
   time:    z.string().min(1),
@@ -23,14 +26,15 @@ const bulkSchema = z.object({
     student: z.string().min(1),
     status:  z.enum(['حاضر', 'غائب', 'متأخر']),
   })),
-});
+}).superRefine(contextRefinement);
 
 export async function getAttendance(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { student, halqa, from, to } = req.query;
+    const { student, halqa, specialTrack, from, to } = req.query;
     const filter: Record<string, unknown> = {};
-    if (student) filter.student = student;
-    if (halqa)   filter.halqa   = halqa;
+    if (student)      filter.student      = student;
+    if (halqa)        filter.halqa        = halqa;
+    if (specialTrack) filter.specialTrack = specialTrack;
     if (from || to) {
       filter.date = {};
       if (from) (filter.date as Record<string, Date>).$gte = new Date(from as string);
@@ -40,6 +44,7 @@ export async function getAttendance(req: Request, res: Response, next: NextFunct
     const records = await Attendance.find(filter)
       .populate('student', 'name')
       .populate('halqa',   'name')
+      .populate('specialTrack', 'title')
       .sort({ date: -1 });
 
     res.json({ success: true, count: records.length, data: records });
@@ -68,13 +73,16 @@ export async function recordAttendance(req: Request, res: Response, next: NextFu
 
 export async function bulkAttendance(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { halqa, date, day, time, records } = bulkSchema.parse(req.body);
+    const { halqa, specialTrack, date, day, time, records } = bulkSchema.parse(req.body);
     const dateObj = new Date(date);
+    const contextField = halqa
+      ? { halqa: new Types.ObjectId(halqa) }
+      : { specialTrack: new Types.ObjectId(specialTrack!) };
 
     const ops = records.map(({ student, status }) => ({
       updateOne: {
         filter: { student: new Types.ObjectId(student), date: dateObj },
-        update: { $set: { student: new Types.ObjectId(student), halqa: new Types.ObjectId(halqa), date: dateObj, day, time, status } },
+        update: { $set: { student: new Types.ObjectId(student), ...contextField, date: dateObj, day, time, status } },
         upsert: true,
       },
     }));

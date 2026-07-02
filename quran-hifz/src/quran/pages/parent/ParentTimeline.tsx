@@ -2,6 +2,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { useParentContext } from "../../context/ParentContext";
 import { useChildHifz } from "../../api/parent";
 import { Card } from "../../components/common/Card";
+import { SkeletonList } from "../../components/common/Skeleton";
 
 const STATUS_COLOR: Record<string, string> = {
   "مكتمل": "var(--green)",
@@ -23,7 +24,7 @@ export function ParentTimeline() {
   return (
     <Card icon="ti-route" title="رحلة الحفظ من البداية حتى الآن">
       {isLoading ? (
-        <div style={{ padding: "1rem", color: "var(--text-muted)" }}>جارٍ التحميل...</div>
+        <SkeletonList rows={5} avatar={true} />
       ) : (hifzEntries ?? []).length === 0 ? (
         <p style={{ textAlign: "center", color: "var(--text2)", padding: 24, fontSize: 12 }}>
           لا توجد سجلات حفظ بعد.

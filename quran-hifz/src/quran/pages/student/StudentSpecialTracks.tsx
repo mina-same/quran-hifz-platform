@@ -2,6 +2,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
+import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { useSpecialTracks, type SpecialTrack, type TrackTeacher } from "../../api/special-tracks";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -213,9 +214,7 @@ export function StudentSpecialTracks() {
 
   return (
     <Card>
-      {isLoading && (
-        <div className="page-loading"><i className="ti ti-loader-2" /> جارٍ التحميل...</div>
-      )}
+      {isLoading && <SkeletonCardGrid count={3} lines={4} />}
 
       {!isLoading && tracks.length === 0 && (
         <div style={{ textAlign: "center", padding: "52px 0" }}>

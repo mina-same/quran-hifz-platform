@@ -20,6 +20,7 @@ export type Student = {
 
 export type StudentFilters = {
   halqa?: string;
+  specialTrack?: string;
   masjid?: string;
   status?: string;
   search?: string;
@@ -32,6 +33,7 @@ function buildQuery(filters?: StudentFilters) {
   if (!filters) return '';
   const params = new URLSearchParams();
   if (filters.halqa) params.set('halqa', filters.halqa);
+  if (filters.specialTrack) params.set('specialTrack', filters.specialTrack);
   if (filters.masjid) params.set('masjid', filters.masjid);
   if (filters.status) params.set('status', filters.status);
   if (filters.search) params.set('search', filters.search);

@@ -3,6 +3,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { Alert } from "../../components/common/Alert";
 import { Badge, type BadgeTone } from "../../components/common/Badge";
+import { SkeletonTable } from "../../components/common/Skeleton";
 import { useHomework } from "../../api/homework";
 import { useGradeHomework } from "../../api/homework";
 
@@ -31,9 +32,7 @@ export function TeacherHomework() {
       </Alert>
       <Card>
         {isLoading && (
-          <div className="page-loading">
-            <i className="ti ti-loader-2" /> جارٍ التحميل...
-          </div>
+          <SkeletonTable cols={6} rows={5} />
         )}
         {!isLoading && (
           <div className="tbl-wrap">

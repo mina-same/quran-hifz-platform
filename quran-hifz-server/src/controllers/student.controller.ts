@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { Student } from '../models/Student.model';
 import { User } from '../models/User.model';
+import { SpecialTrack } from '../models/SpecialTrack.model';
 import { AppError } from '../middleware/error';
 
 const studentSchema = z.object({
@@ -20,13 +21,18 @@ const studentSchema = z.object({
 
 export async function getStudents(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { halqa, masjid, status, search } = req.query;
+    const { halqa, specialTrack, masjid, status, search } = req.query;
     const filter: Record<string, unknown> = {};
 
     if (halqa)   filter.halqa  = halqa;
     if (masjid)  filter.masjid = masjid;
     if (status)  filter.status = status;
     if (search)  filter.name   = { $regex: search, $options: 'i' };
+
+    if (specialTrack) {
+      const track = await SpecialTrack.findById(specialTrack).select('enrolledStudents');
+      filter._id = { $in: track ? track.enrolledStudents : [] };
+    }
 
     const students = await Student.find(filter)
       .populate('halqa',  'name time days')

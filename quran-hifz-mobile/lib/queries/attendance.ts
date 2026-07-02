@@ -1,10 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
-import { get } from '@/lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { get, post } from '@/lib/api';
 
 export type AttendanceRecord = {
   _id: string;
   student: { _id: string; name: string } | string;
-  halqa: { _id: string; name: string } | string;
+  halqa?: { _id: string; name: string } | string;
+  specialTrack?: { _id: string; title: string } | string;
   date: string;
   day: string;
   time: string;
@@ -14,6 +15,7 @@ export type AttendanceRecord = {
 export type AttendanceFilters = {
   student?: string;
   halqa?: string;
+  specialTrack?: string;
   from?: string;
   to?: string;
 };
@@ -25,6 +27,7 @@ function buildQuery(filters?: AttendanceFilters) {
   const params = new URLSearchParams();
   if (filters.student) params.set('student', filters.student);
   if (filters.halqa) params.set('halqa', filters.halqa);
+  if (filters.specialTrack) params.set('specialTrack', filters.specialTrack);
   if (filters.from) params.set('from', filters.from);
   if (filters.to) params.set('to', filters.to);
   const q = params.toString();
@@ -35,5 +38,38 @@ export function useAttendance(filters?: AttendanceFilters) {
   return useQuery({
     queryKey: ['attendance', filters],
     queryFn: () => get<ListResponse>(`/attendance${buildQuery(filters)}`).then((r) => r.data),
+  });
+}
+
+export function useRecordAttendance() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: {
+      student: string;
+      halqa?: string;
+      specialTrack?: string;
+      date: string;
+      status: string;
+    }) => post('/attendance', body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['attendance'] });
+      qc.invalidateQueries({ queryKey: ['students'] });
+    },
+  });
+}
+
+export function useBulkAttendance() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: {
+      halqa?: string;
+      specialTrack?: string;
+      date: string;
+      records: { student: string; status: string }[];
+    }) => post('/attendance/bulk', body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['attendance'] });
+      qc.invalidateQueries({ queryKey: ['students'] });
+    },
   });
 }

@@ -799,6 +799,17 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 }
 .page-loading i { animation: spin 1s linear infinite; font-size: 22px; color: var(--green); }
 
+/* SKELETON LOADING */
+@keyframes sklShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skl {
+  background: linear-gradient(90deg, var(--border) 25%, var(--green-pale) 37%, var(--border) 63%);
+  background-size: 400% 100%;
+  animation: sklShimmer 1.6s ease-in-out infinite;
+}
+
 
 /* ══════════════════════════════════════════════
    DARK MODE

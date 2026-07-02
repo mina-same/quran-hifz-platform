@@ -3,6 +3,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { StatsRow } from "../../components/common/StatsRow";
 import { Card } from "../../components/common/Card";
 import { Badge, type BadgeTone } from "../../components/common/Badge";
+import { SkeletonTable } from "../../components/common/Skeleton";
 import { useAttendance } from "../../api/attendance";
 import { useStudent } from "../../api/students";
 import { toAr, pct } from "../../../lib/format";
@@ -35,11 +36,7 @@ export function StudentAttendance() {
         ]}
       />
       <Card>
-        {isLoading && (
-          <div className="page-loading">
-            <i className="ti ti-loader-2" /> جارٍ التحميل...
-          </div>
-        )}
+        {isLoading && <SkeletonTable cols={4} rows={5} />}
         {!isLoading && (
           <div className="tbl-wrap">
             <table className="tbl">

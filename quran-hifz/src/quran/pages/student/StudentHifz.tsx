@@ -4,6 +4,7 @@ import { Card } from "../../components/common/Card";
 import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { HalqaRow } from "../../components/common/HalqaRow";
+import { SkeletonTable } from "../../components/common/Skeleton";
 import { useHifz } from "../../api/hifz";
 import { useStudent } from "../../api/students";
 import { toAr, pct } from "../../../lib/format";
@@ -49,11 +50,7 @@ export function StudentHifz() {
         </div>
       </Card>
       <Card icon="ti-list" title="تفاصيل الحفظ">
-        {isLoading && (
-          <div className="page-loading">
-            <i className="ti ti-loader-2" /> جارٍ التحميل...
-          </div>
-        )}
+        {isLoading && <SkeletonTable cols={4} rows={6} />}
         {!isLoading && (
           <div className="tbl-wrap">
             <table className="tbl">

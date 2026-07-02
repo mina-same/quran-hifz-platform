@@ -1,6 +1,7 @@
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { Badge, type BadgeTone } from "../../components/common/Badge";
+import { SkeletonTable } from "../../components/common/Skeleton";
 import { useKpis } from "../../api/kpis";
 
 const RATING_TONE: Record<string, BadgeTone> = {
@@ -30,11 +31,7 @@ export function AdminKpis() {
 
   return (
     <Card icon="ti-target" title="المؤشرات السنوية">
-      {isLoading && (
-        <div className="page-loading">
-          <i className="ti ti-loader-2" /> جارٍ التحميل...
-        </div>
-      )}
+      {isLoading && <SkeletonTable cols={4} rows={5} />}
       {error && (
         <div style={{ color: "var(--red, #c0392b)", padding: 12, fontSize: 13 }}>
           تعذّر تحميل المؤشرات

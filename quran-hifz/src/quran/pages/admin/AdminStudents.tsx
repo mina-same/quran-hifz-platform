@@ -4,6 +4,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { ProgressBar } from "../../components/common/ProgressBar";
+import { SkeletonTable } from "../../components/common/Skeleton";
 import { useStudents, useUpdateStudent, useDeleteStudent, type Student } from "../../api/students";
 import { useHalqat } from "../../api/halqat";
 import { useMasajid } from "../../api/masajid";
@@ -171,9 +172,7 @@ export function AdminStudents() {
           </select>
         </div>
 
-        {isLoading && (
-          <div className="page-loading"><i className="ti ti-loader-2" /> جارٍ التحميل...</div>
-        )}
+        {isLoading && <SkeletonTable cols={9} rows={6} />}
         {error && (
           <div style={{ color: "#ef4444", padding: 12, fontSize: 13 }}>تعذّر تحميل بيانات الطلاب</div>
         )}

@@ -3,6 +3,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { Badge } from "../../components/common/Badge";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { HalqaRow } from "../../components/common/HalqaRow";
+import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { useHalqat } from "../../api/halqat";
 import { toAr } from "../../../lib/format";
 
@@ -18,11 +19,7 @@ export function TeacherHalqa() {
   useTopbar("ti-school", "حلقاتي");
 
   if (isLoading) {
-    return (
-      <div className="page-loading">
-        <i className="ti ti-loader-2" /> جارٍ التحميل...
-      </div>
-    );
+    return <SkeletonCardGrid count={3} lines={4} />;
   }
 
   const occupancyPct = (studentCount: number, capacity: number) =>

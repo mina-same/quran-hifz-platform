@@ -1,7 +1,11 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T14:10:56.993Z
-> Files: 348 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T11:08:33.674Z
+> Files: 352 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/c53595ee-8b45-447d-aec7-904c055a8dc1/scratchpad/
+
+- `append_bug.py` — , quran-hifz-mobile/lib/queries/*.ts", (~546 tok)
 
 ## ../../../../Users/macbook/.claude/plans/
 
@@ -125,37 +129,39 @@
 ## quran-hifz-mobile/app/(portal)/parent/
 
 - `_layout.tsx` — ParentTabLayout (~445 tok)
-- `attendance.tsx` — STATS (~648 tok)
+- `attendance.tsx` — ParentAttendance (~819 tok)
 - `dashboard.tsx` — CHILD (~877 tok)
-- `homework_view.tsx` — GROUP_HWS (~617 tok)
+- `homework_view.tsx` — ParentHomeworkView (~832 tok)
 - `messages.tsx` — MSGS (~670 tok)
-- `recordings.tsx` — ROWS (~634 tok)
+- `recordings.tsx` — ParentRecordings (~649 tok)
 - `timeline.tsx` — TL (~894 tok)
 
 ## quran-hifz-mobile/app/(portal)/student/
 
-- `_layout.tsx` — StudentTabLayout (~475 tok)
-- `attendance.tsx` — StudentAttendance — renders table (~722 tok)
+- `_layout.tsx` — StudentTabLayout (~503 tok)
+- `attendance.tsx` — StudentAttendance — renders table (~811 tok)
 - `dashboard.tsx` — STATS (~1468 tok)
-- `homework.tsx` — StudentHomework (~638 tok)
+- `homework.tsx` — getTitle (~905 tok)
 - `messages.tsx` — StudentMessages (~912 tok)
 - `myhifz.tsx` — StudentHifz — renders table (~1106 tok)
 - `points.tsx` — MY_PTS (~984 tok)
 - `schedule.tsx` — DAYS (~1534 tok)
+- `special_tracks.tsx` — getTeacherName (~1719 tok)
 - `store.tsx` — MY_PTS (~1012 tok)
 
 ## quran-hifz-mobile/app/(portal)/teacher/
 
-- `_layout.tsx` — TeacherTabLayout (~551 tok)
-- `attendance.tsx` — OPTIONS — uses useState (~1267 tok)
+- `_layout.tsx` — TeacherTabLayout (~580 tok)
+- `attendance.tsx` — OPTIONS (~2005 tok)
 - `dashboard.tsx` — STATS — renders table (~1104 tok)
 - `evaluate.tsx` — STUDENTS (~1127 tok)
-- `grouphomework.tsx` — INITIAL (~1434 tok)
-- `homework.tsx` — TeacherHomework — renders table (~647 tok)
-- `myhalqa.tsx` — TeacherHalqa (~358 tok)
+- `grouphomework.tsx` — DAYS (~2497 tok)
+- `homework.tsx` — getName — renders form, table (~1014 tok)
+- `myhalqa.tsx` — TeacherHalqa (~894 tok)
 - `plans.tsx` — statusVariant — renders table (~695 tok)
-- `recordlesson.tsx` — TeacherRecordLesson (~1298 tok)
+- `recordlesson.tsx` — LESSON_TYPES (~2667 tok)
 - `reports.tsx` — TeacherReports (~708 tok)
+- `special_tracks.tsx` — getEnrolledName (~2112 tok)
 - `students.tsx` — hwVariant — renders table (~726 tok)
 
 ## quran-hifz-mobile/components/domain/
@@ -174,13 +180,13 @@
 ## quran-hifz-mobile/components/layout/
 
 - `DrawerContent.tsx` — DrawerContent — uses useRouter (~1139 tok)
-- `NavItem.tsx` — ICON_MAP — renders chart — uses useRouter (~732 tok)
+- `NavItem.tsx` — ICON_MAP (~815 tok)
 
 ## quran-hifz-mobile/components/ui/
 
 - `Alert.tsx` — COLORS (~403 tok)
 - `AyahBar.tsx` — AyahBar (~234 tok)
-- `Badge.tsx` — VARIANT_STYLES (~294 tok)
+- `Badge.tsx` — VARIANT_STYLES (~305 tok)
 - `Button.tsx` — VARIANTS (~564 tok)
 - `Card.tsx` — Card (~201 tok)
 - `CardHeader.tsx` — CardHeader (~277 tok)
@@ -197,7 +203,7 @@
 
 ## quran-hifz-mobile/lib/constants/
 
-- `portals.ts` — Exports PORTALS, PORTAL_ROUTES (~1172 tok)
+- `portals.ts` — Exports PORTALS, PORTAL_ROUTES (~1243 tok)
 
 ## quran-hifz-mobile/lib/data/
 
@@ -207,17 +213,17 @@
 
 ## quran-hifz-mobile/lib/queries/
 
-- `attendance.ts` — Exports AttendanceRecord, AttendanceFilters, useAttendance (~325 tok)
+- `attendance.ts` — Exports AttendanceRecord, AttendanceFilters, useAttendance, useRecordAttendance, useBulkAttendance (~628 tok)
 - `halqat.ts` — Exports Halqa, HalqaFilters, useHalqat, useHalqa (~366 tok)
 - `hifz.ts` — Exports HifzEntry, useHifz (~155 tok)
-- `homework.ts` — Exports Homework, HomeworkFilters, useHomework (~368 tok)
+- `homework.ts` — Exports Homework, HomeworkFilters, useHomework, useCreateHomework + 2 more (~699 tok)
 - `kpis.ts` — Exports KPI, useKpis (~132 tok)
 - `masajid.ts` — Exports Masjid, useMasajid, useMasjid (~189 tok)
 - `messages.ts` — Exports Message, useMessages (~154 tok)
 - `parent.ts` — Exports ParentChild, ChildHifzEntry, ChildAttendanceRecord, ChildHomework + 9 more (~896 tok)
-- `specialTracks.ts` — Exports SpecialTrack, useSpecialTracks (~207 tok)
+- `specialTracks.ts` — Exports EnrolledStudent, TrackTeacher, SpecialTrack, useSpecialTracks + 5 more (~801 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~165 tok)
-- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent (~458 tok)
+- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent (~488 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher (~225 tok)
 
 ## quran-hifz-mobile/lib/store/
@@ -421,7 +427,7 @@
 
 ## quran-hifz/src/quran/
 
-- `quran.css` — Styles: 73 rules, 18 vars (~15103 tok)
+- `quran.css` — Styles: 73 rules, 18 vars (~15194 tok)
 - `QuranApp.tsx` — Quran Hifz platform — React entry. (~834 tok)
 
 ## quran-hifz/src/quran/api/
@@ -458,6 +464,7 @@
 - `Card.tsx` — Card (~181 tok)
 - `HalqaRow.tsx` — HalqaRow (~104 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
+- `Skeleton.tsx` — Skeleton — renders table (~816 tok)
 - `StatsRow.tsx` — StatsRow (~146 tok)
 
 ## quran-hifz/src/quran/config/
@@ -480,51 +487,51 @@
 
 ## quran-hifz/src/quran/pages/admin/
 
-- `AdminDashboard.tsx` — PageLoading (~1209 tok)
-- `AdminHalqat.tsx` — EMPTY_FORM — renders form, modal (~3700 tok)
-- `AdminKpis.tsx` — RATING_TONE — renders table (~562 tok)
-- `AdminMasajid.tsx` — OVERLAY — renders modal (~2685 tok)
-- `AdminParents.tsx` — EMPTY_ADD — renders table (~5192 tok)
+- `AdminDashboard.tsx` — PageLoading (~1272 tok)
+- `AdminHalqat.tsx` — EMPTY_FORM — renders form, modal (~3698 tok)
+- `AdminKpis.tsx` — RATING_TONE — renders table (~556 tok)
+- `AdminMasajid.tsx` — OVERLAY — renders modal (~2682 tok)
+- `AdminParents.tsx` — EMPTY_ADD — renders table (~5191 tok)
 - `AdminRegister.tsx` — schema — renders form (~3078 tok)
 - `AdminReports.tsx` — REPORTS — renders chart (~419 tok)
-- `AdminSpecialTracks.tsx` — getEnrolledId — renders form, modal (~12420 tok)
-- `AdminStudents.tsx` — PATH_TONE — renders table (~5093 tok)
-- `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4599 tok)
+- `AdminSpecialTracks.tsx` — getEnrolledId — renders form, modal (~12510 tok)
+- `AdminStudents.tsx` — PATH_TONE — renders table (~5092 tok)
+- `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4598 tok)
 
 ## quran-hifz/src/quran/pages/parent/
 
-- `ParentAttendance.tsx` — STATUS_TONE — renders table (~780 tok)
+- `ParentAttendance.tsx` — STATUS_TONE — renders table (~786 tok)
 - `ParentDashboard.tsx` — NOTIFICATIONS (~1180 tok)
-- `ParentHomeworkView.tsx` — ParentHomeworkView (~1020 tok)
-- `ParentMessages.tsx` — ParentMessages (~545 tok)
-- `ParentRecordings.tsx` — ParentRecordings — renders table (~570 tok)
-- `ParentTimeline.tsx` — STATUS_COLOR (~1012 tok)
+- `ParentHomeworkView.tsx` — ParentHomeworkView (~1027 tok)
+- `ParentMessages.tsx` — ParentMessages (~546 tok)
+- `ParentRecordings.tsx` — ParentRecordings — renders table (~575 tok)
+- `ParentTimeline.tsx` — STATUS_COLOR (~1018 tok)
 
 ## quran-hifz/src/quran/pages/student/
 
-- `StudentAttendance.tsx` — STATUS_TONE — renders table (~793 tok)
-- `StudentDashboard.tsx` — getName (~1636 tok)
-- `StudentHifz.tsx` — tone — renders table (~1059 tok)
+- `StudentAttendance.tsx` — STATUS_TONE — renders table (~784 tok)
+- `StudentDashboard.tsx` — getName (~1702 tok)
+- `StudentHifz.tsx` — tone — renders table (~1051 tok)
 - `StudentHomework.tsx` — AR_DIGITS — uses useState, useEffect (~1000 tok)
-- `StudentMessages.tsx` — StudentMessages (~758 tok)
+- `StudentMessages.tsx` — StudentMessages (~768 tok)
 - `StudentPoints.tsx` — MY_POINTS (~1302 tok)
-- `StudentSchedule.tsx` — getId (~836 tok)
-- `StudentSpecialTracks.tsx` — STATUS_LABEL (~3342 tok)
+- `StudentSchedule.tsx` — getId (~829 tok)
+- `StudentSpecialTracks.tsx` — STATUS_LABEL (~3344 tok)
 - `StudentStore.tsx` — MY_POINTS (~874 tok)
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — getName — renders table (~1138 tok)
+- `TeacherAttendance.tsx` — TeacherAttendance — renders table (~1642 tok)
 - `TeacherDashboard.tsx` — getName — renders table (~1300 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
-- `TeacherGroupHomework.tsx` — STUDENTS (~2396 tok)
-- `TeacherHalqa.tsx` — getName (~793 tok)
-- `TeacherHomework.tsx` — getName — renders table (~1011 tok)
+- `TeacherGroupHomework.tsx` — STUDENTS (~2885 tok)
+- `TeacherHalqa.tsx` — getName (~792 tok)
+- `TeacherHomework.tsx` — getName — renders table (~1009 tok)
 - `TeacherPlans.tsx` — ROWS — renders table (~436 tok)
-- `TeacherRecordLesson.tsx` — LESSON_TYPES (~4027 tok)
+- `TeacherRecordLesson.tsx` — LESSON_TYPES (~3758 tok)
 - `TeacherReports.tsx` — TeacherReports — renders chart (~172 tok)
-- `TeacherSpecialTracks.tsx` — getEnrolledName (~3684 tok)
-- `TeacherStudents.tsx` — HW_TONE — renders table (~2053 tok)
+- `TeacherSpecialTracks.tsx` — getEnrolledName (~4015 tok)
+- `TeacherStudents.tsx` — HW_TONE — renders table (~2044 tok)
 
 ## quran-hifz/src/quran/router/
 

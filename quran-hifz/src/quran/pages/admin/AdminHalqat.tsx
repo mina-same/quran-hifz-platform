@@ -3,6 +3,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { HalqaRow } from "../../components/common/HalqaRow";
+import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import {
   useHalqat,
   useCreateHalqa,
@@ -148,11 +149,7 @@ export function AdminHalqat() {
   );
 
   if (isLoading) {
-    return (
-      <div className="page-loading">
-        <i className="ti ti-loader-2" /> جارٍ التحميل...
-      </div>
-    );
+    return <SkeletonCardGrid count={6} lines={4} />;
   }
   if (error) {
     return <div style={{ color: "#ef4444", padding: 12 }}>تعذّر تحميل الحلقات</div>;

@@ -1,9 +1,11 @@
 import { Schema, model, Document } from 'mongoose';
+import { applyContextValidation } from '../validators/context';
 
 export interface ILessonRecording extends Document {
   student: Schema.Types.ObjectId;
   teacher: Schema.Types.ObjectId;
-  halqa: Schema.Types.ObjectId;
+  halqa?: Schema.Types.ObjectId;
+  specialTrack?: Schema.Types.ObjectId;
   type: string;
   segment: string;
   points: number;
@@ -16,9 +18,10 @@ export interface ILessonRecording extends Document {
 
 const lessonRecordingSchema = new Schema<ILessonRecording>(
   {
-    student:     { type: Schema.Types.ObjectId, ref: 'Student', required: true },
-    teacher:     { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
-    halqa:       { type: Schema.Types.ObjectId, ref: 'Halqa', required: true },
+    student:      { type: Schema.Types.ObjectId, ref: 'Student', required: true },
+    teacher:      { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
+    halqa:        { type: Schema.Types.ObjectId, ref: 'Halqa' },
+    specialTrack: { type: Schema.Types.ObjectId, ref: 'SpecialTrack' },
     type:        { type: String, required: true },
     segment:     { type: String, required: true },
     points:      { type: Number, default: 0 },
@@ -28,5 +31,8 @@ const lessonRecordingSchema = new Schema<ILessonRecording>(
   },
   { timestamps: true },
 );
+
+lessonRecordingSchema.index({ specialTrack: 1, recordedAt: -1 });
+applyContextValidation(lessonRecordingSchema);
 
 export const LessonRecording = model<ILessonRecording>('LessonRecording', lessonRecordingSchema);

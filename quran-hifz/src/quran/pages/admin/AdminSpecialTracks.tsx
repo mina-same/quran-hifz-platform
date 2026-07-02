@@ -9,6 +9,7 @@ import { useTeachers } from "../../api/teachers";
 import { useMasajid } from "../../api/masajid";
 import { useStudents } from "../../api/students";
 import { Badge } from "../../components/common/Badge";
+import { SkeletonCardGrid } from "../../components/common/Skeleton";
 
 /* ─── helpers ─────────────────────────────────────────────── */
 function getEnrolledId(v: EnrolledStudent | string)  { return typeof v === "object" ? v._id  : v; }
@@ -120,6 +121,9 @@ export function AdminSpecialTracks() {
     });
     setFormError(""); setModal({ mode: "form", item });
   }
+  function openStudents(item: SpecialTrack) {
+    setAddStudentId(""); setStudentsSearch(""); setModal({ mode: "students", item });
+  }
 
   function sf<K extends keyof FormFields>(k: K, v: FormFields[K]) {
     setForm((p) => ({ ...p, [k]: v }));
@@ -188,178 +192,10 @@ export function AdminSpecialTracks() {
   const upcoming = tracks.filter((t) => t.status === "upcoming");
   const ended    = tracks.filter((t) => t.status === "ended");
 
-  /* ════════════════════ TRACK CARD ════════════════════════ */
-  function TrackCard({ t }: { t: SpecialTrack }) {
-    const cfg     = STATUS_CFG[t.status];
-    const enrolled = t.enrolledStudents.length;
-    const pct      = Math.min(100, Math.round((enrolled / t.maxStudents) * 100));
-    const barClr   = pct >= 90 ? "#ef4444" : pct >= 70 ? "#f59e0b" : "var(--green)";
-
-    return (
-      <div style={{
-        background: "var(--surface)", borderRadius: 16,
-        border: "1px solid var(--border)",
-        overflow: "hidden",
-        transition: "box-shadow .2s",
-      }}>
-        {/* coloured top strip */}
-        <div style={{ height: 4, background: cfg.bar }} />
-
-        <div style={{ padding: "16px 18px" }}>
-          {/* row 1: badges + actions */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, flex: 1 }}>
-              <Badge tone={cfg.tone}>{cfg.label}</Badge>
-              <span style={{
-                fontSize: 11, background: cfg.bg, color: cfg.color,
-                borderRadius: 6, padding: "2px 9px", fontWeight: 600,
-              }}>{t.type}</span>
-              {t.isOnline
-                ? <span style={{ fontSize: 11, background: "#eff6ff", color: "#1d4ed8", borderRadius: 6, padding: "2px 9px", fontWeight: 600 }}>
-                    <i className="ti ti-wifi" style={{ marginLeft: 3 }} />أونلاين
-                  </span>
-                : <span style={{ fontSize: 11, background: "var(--cream)", color: "var(--text2)", borderRadius: 6, padding: "2px 9px" }}>
-                    <i className="ti ti-building-arch" style={{ marginLeft: 3 }} />حضوري
-                  </span>
-              }
-            </div>
-            {/* action buttons */}
-            <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-              <button
-                className="topbar-btn btn-ghost"
-                style={{ padding: "5px 11px", fontSize: 12, color: "var(--green)", borderColor: "rgba(26,92,42,0.25)" }}
-                onClick={() => { setAddStudentId(""); setStudentsSearch(""); setModal({ mode: "students", item: t }); }}
-              >
-                <i className="ti ti-users" />
-                {enrolled > 0 && (
-                  <span style={{ background: "var(--green)", color: "#fff", borderRadius: 99, fontSize: 10, fontWeight: 700, padding: "1px 6px", marginRight: 4 }}>
-                    {enrolled}
-                  </span>
-                )}
-              </button>
-              <button className="topbar-btn btn-ghost" style={{ padding: "5px 11px", fontSize: 12 }} onClick={() => openEdit(t)}>
-                <i className="ti ti-pencil" />
-              </button>
-              <button
-                className="topbar-btn btn-ghost"
-                style={{ padding: "5px 11px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.25)" }}
-                onClick={() => setDeleteId(t._id)}
-              >
-                <i className="ti ti-trash" />
-              </button>
-            </div>
-          </div>
-
-          {/* title */}
-          <h3 style={{ margin: "10px 0 12px", fontSize: 15, fontWeight: 800, color: "var(--text)" }}>{t.title}</h3>
-
-          {/* info grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12, color: "var(--text2)", marginBottom: 12 }}>
-            <InfoRow icon="ti-clock"    label="الوقت"    val={t.timeSlot} />
-            <InfoRow icon="ti-calendar-repeat" label="الأيام" val={t.daysPerWeek} />
-            <InfoRow icon="ti-calendar" label="البداية"  val={fmtDate(t.startDate)} />
-            <InfoRow icon="ti-calendar-off" label="النهاية" val={fmtDate(t.endDate)} />
-            <InfoRow
-              icon={t.isOnline ? "ti-video" : "ti-map-pin"}
-              label="المكان"
-              val={t.isOnline ? "أونلاين" : t.location}
-              span
-            />
-          </div>
-
-          {/* teachers */}
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6, fontWeight: 600 }}>المعلمون</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {t.teachers.map((tc, i) => {
-                const c = AVATAR_COLORS[i % AVATAR_COLORS.length];
-                return (
-                  <div key={getTeacherId(tc)} style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    background: c.bg, color: c.fg,
-                    borderRadius: 99, padding: "4px 10px 4px 4px", fontSize: 12, fontWeight: 600,
-                  }}>
-                    <div style={{
-                      width: 22, height: 22, borderRadius: "50%",
-                      background: c.fg, color: "#fff",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 9, fontWeight: 800,
-                    }}>
-                      {avatarInitials(getTeacherName(tc))}
-                    </div>
-                    {getTeacherName(tc)}
-                  </div>
-                );
-              })}
-              {t.teachers.length === 0 && (
-                <span style={{ fontSize: 12, color: "var(--text3)" }}>— لا يوجد معلم —</span>
-              )}
-            </div>
-          </div>
-
-          {/* capacity bar */}
-          <div style={{ background: "var(--cream)", borderRadius: 10, padding: "10px 12px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <span style={{ fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>
-                <i className="ti ti-user-check" style={{ marginLeft: 4 }} />الطاقة الاستيعابية
-              </span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: barClr }}>
-                {enrolled} / {t.maxStudents}
-              </span>
-            </div>
-            <div style={{ height: 6, background: "var(--border)", borderRadius: 99, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${pct}%`, background: barClr, borderRadius: 99, transition: "width .4s" }} />
-            </div>
-          </div>
-
-          {/* meet link */}
-          {t.isOnline && t.meetLink && (
-            <a
-              href={t.meetLink} target="_blank" rel="noreferrer"
-              style={{
-                marginTop: 10, display: "inline-flex", alignItems: "center", gap: 6,
-                fontSize: 12, color: "#1d4ed8", background: "#eff6ff",
-                padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(29,78,216,0.2)",
-                textDecoration: "none", fontWeight: 600,
-              }}
-            >
-              <i className="ti ti-video" /> انضم للجلسة
-            </a>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  function InfoRow({ icon, label, val, span }: { icon: string; label: string; val: string; span?: boolean }) {
-    return (
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 6, gridColumn: span ? "1 / -1" : undefined }}>
-        <i className={`ti ${icon}`} style={{ color: "var(--green)", marginTop: 1, flexShrink: 0 }} />
-        <div>
-          <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>{label}</div>
-          <div style={{ fontWeight: 600, color: "var(--text)", marginTop: 1 }}>{val}</div>
-        </div>
-      </div>
-    );
-  }
-
-  function SectionHeader({ label, count, color }: { label: string; count: number; color: string }) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-        <div style={{ width: 4, height: 18, borderRadius: 2, background: color }} />
-        <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{label}</span>
-        <span style={{
-          fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 99,
-          background: color + "22", color,
-        }}>{count}</span>
-      </div>
-    );
-  }
-
   /* ════════════════════ RENDER ════════════════════════════ */
   return (
     <>
-      {isLoading && <div className="page-loading"><i className="ti ti-loader-2" /> جارٍ التحميل...</div>}
+      {isLoading && <SkeletonCardGrid count={3} lines={4} />}
 
       {!isLoading && tracks.length === 0 && (
         <div style={{ textAlign: "center", padding: "56px 0" }}>
@@ -385,7 +221,9 @@ export function AdminSpecialTracks() {
             <section>
               <SectionHeader label="المسارات النشطة" count={active.length} color="var(--green)" />
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14 }}>
-                {active.map((t) => <TrackCard key={t._id} t={t} />)}
+                {active.map((t) => (
+                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} />
+                ))}
               </div>
             </section>
           )}
@@ -393,7 +231,9 @@ export function AdminSpecialTracks() {
             <section>
               <SectionHeader label="المسارات القادمة" count={upcoming.length} color="#d97706" />
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14 }}>
-                {upcoming.map((t) => <TrackCard key={t._id} t={t} />)}
+                {upcoming.map((t) => (
+                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} />
+                ))}
               </div>
             </section>
           )}
@@ -401,7 +241,9 @@ export function AdminSpecialTracks() {
             <section>
               <SectionHeader label="المسارات المنتهية" count={ended.length} color="var(--text3)" />
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14, opacity: 0.75 }}>
-                {ended.map((t) => <TrackCard key={t._id} t={t} />)}
+                {ended.map((t) => (
+                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} />
+                ))}
               </div>
             </section>
           )}
@@ -826,6 +668,181 @@ export function AdminSpecialTracks() {
         </div>
       )}
     </>
+  );
+}
+
+/* ── track card (module scope so it doesn't remount on every keystroke/state change in AdminSpecialTracks) ── */
+function TrackCard({
+  t, onManageStudents, onEdit, onDelete,
+}: {
+  t: SpecialTrack;
+  onManageStudents: (t: SpecialTrack) => void;
+  onEdit: (t: SpecialTrack) => void;
+  onDelete: (id: string) => void;
+}) {
+  const cfg     = STATUS_CFG[t.status];
+  const enrolled = t.enrolledStudents.length;
+  const pct      = Math.min(100, Math.round((enrolled / t.maxStudents) * 100));
+  const barClr   = pct >= 90 ? "#ef4444" : pct >= 70 ? "#f59e0b" : "var(--green)";
+
+  return (
+    <div style={{
+      background: "var(--surface)", borderRadius: 16,
+      border: "1px solid var(--border)",
+      overflow: "hidden",
+      transition: "box-shadow .2s",
+    }}>
+      {/* coloured top strip */}
+      <div style={{ height: 4, background: cfg.bar }} />
+
+      <div style={{ padding: "16px 18px" }}>
+        {/* row 1: badges + actions */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, flex: 1 }}>
+            <Badge tone={cfg.tone}>{cfg.label}</Badge>
+            <span style={{
+              fontSize: 11, background: cfg.bg, color: cfg.color,
+              borderRadius: 6, padding: "2px 9px", fontWeight: 600,
+            }}>{t.type}</span>
+            {t.isOnline
+              ? <span style={{ fontSize: 11, background: "#eff6ff", color: "#1d4ed8", borderRadius: 6, padding: "2px 9px", fontWeight: 600 }}>
+                  <i className="ti ti-wifi" style={{ marginLeft: 3 }} />أونلاين
+                </span>
+              : <span style={{ fontSize: 11, background: "var(--cream)", color: "var(--text2)", borderRadius: 6, padding: "2px 9px" }}>
+                  <i className="ti ti-building-arch" style={{ marginLeft: 3 }} />حضوري
+                </span>
+            }
+          </div>
+          {/* action buttons */}
+          <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+            <button
+              className="topbar-btn btn-ghost"
+              style={{ padding: "5px 11px", fontSize: 12, color: "var(--green)", borderColor: "rgba(26,92,42,0.25)" }}
+              onClick={() => onManageStudents(t)}
+            >
+              <i className="ti ti-users" />
+              {enrolled > 0 && (
+                <span style={{ background: "var(--green)", color: "#fff", borderRadius: 99, fontSize: 10, fontWeight: 700, padding: "1px 6px", marginRight: 4 }}>
+                  {enrolled}
+                </span>
+              )}
+            </button>
+            <button className="topbar-btn btn-ghost" style={{ padding: "5px 11px", fontSize: 12 }} onClick={() => onEdit(t)}>
+              <i className="ti ti-pencil" />
+            </button>
+            <button
+              className="topbar-btn btn-ghost"
+              style={{ padding: "5px 11px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.25)" }}
+              onClick={() => onDelete(t._id)}
+            >
+              <i className="ti ti-trash" />
+            </button>
+          </div>
+        </div>
+
+        {/* title */}
+        <h3 style={{ margin: "10px 0 12px", fontSize: 15, fontWeight: 800, color: "var(--text)" }}>{t.title}</h3>
+
+        {/* info grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12, color: "var(--text2)", marginBottom: 12 }}>
+          <InfoRow icon="ti-clock"    label="الوقت"    val={t.timeSlot} />
+          <InfoRow icon="ti-calendar-repeat" label="الأيام" val={t.daysPerWeek} />
+          <InfoRow icon="ti-calendar" label="البداية"  val={fmtDate(t.startDate)} />
+          <InfoRow icon="ti-calendar-off" label="النهاية" val={fmtDate(t.endDate)} />
+          <InfoRow
+            icon={t.isOnline ? "ti-video" : "ti-map-pin"}
+            label="المكان"
+            val={t.isOnline ? "أونلاين" : t.location}
+            span
+          />
+        </div>
+
+        {/* teachers */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6, fontWeight: 600 }}>المعلمون</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {t.teachers.map((tc, i) => {
+              const c = AVATAR_COLORS[i % AVATAR_COLORS.length];
+              return (
+                <div key={getTeacherId(tc)} style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  background: c.bg, color: c.fg,
+                  borderRadius: 99, padding: "4px 10px 4px 4px", fontSize: 12, fontWeight: 600,
+                }}>
+                  <div style={{
+                    width: 22, height: 22, borderRadius: "50%",
+                    background: c.fg, color: "#fff",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 9, fontWeight: 800,
+                  }}>
+                    {avatarInitials(getTeacherName(tc))}
+                  </div>
+                  {getTeacherName(tc)}
+                </div>
+              );
+            })}
+            {t.teachers.length === 0 && (
+              <span style={{ fontSize: 12, color: "var(--text3)" }}>— لا يوجد معلم —</span>
+            )}
+          </div>
+        </div>
+
+        {/* capacity bar */}
+        <div style={{ background: "var(--cream)", borderRadius: 10, padding: "10px 12px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <span style={{ fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>
+              <i className="ti ti-user-check" style={{ marginLeft: 4 }} />الطاقة الاستيعابية
+            </span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: barClr }}>
+              {enrolled} / {t.maxStudents}
+            </span>
+          </div>
+          <div style={{ height: 6, background: "var(--border)", borderRadius: 99, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${pct}%`, background: barClr, borderRadius: 99, transition: "width .4s" }} />
+          </div>
+        </div>
+
+        {/* meet link */}
+        {t.isOnline && t.meetLink && (
+          <a
+            href={t.meetLink} target="_blank" rel="noreferrer"
+            style={{
+              marginTop: 10, display: "inline-flex", alignItems: "center", gap: 6,
+              fontSize: 12, color: "#1d4ed8", background: "#eff6ff",
+              padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(29,78,216,0.2)",
+              textDecoration: "none", fontWeight: 600,
+            }}
+          >
+            <i className="ti ti-video" /> انضم للجلسة
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function InfoRow({ icon, label, val, span }: { icon: string; label: string; val: string; span?: boolean }) {
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 6, gridColumn: span ? "1 / -1" : undefined }}>
+      <i className={`ti ${icon}`} style={{ color: "var(--green)", marginTop: 1, flexShrink: 0 }} />
+      <div>
+        <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>{label}</div>
+        <div style={{ fontWeight: 600, color: "var(--text)", marginTop: 1 }}>{val}</div>
+      </div>
+    </div>
+  );
+}
+
+function SectionHeader({ label, count, color }: { label: string; count: number; color: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+      <div style={{ width: 4, height: 18, borderRadius: 2, background: color }} />
+      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{label}</span>
+      <span style={{
+        fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 99,
+        background: color + "22", color,
+      }}>{count}</span>
+    </div>
   );
 }
 

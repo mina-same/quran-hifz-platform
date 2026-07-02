@@ -4,6 +4,7 @@ import { Attendance } from '../models/Attendance.model';
 import { Homework } from '../models/Homework.model';
 import { GroupHomework } from '../models/GroupHomework.model';
 import { LessonRecording } from '../models/LessonRecording.model';
+import { SpecialTrack } from '../models/SpecialTrack.model';
 import { Message } from '../models/Message.model';
 import { HifzEntry } from '../models/HifzEntry.model';
 import { Student } from '../models/Student.model';
@@ -50,9 +51,12 @@ export async function getChildHomework(req: Request, res: Response, next: NextFu
     const student = await Student.findById(req.params.studentId).select('halqa');
     if (!student) throw new AppError('الطالب غير موجود', 404);
 
+    const tracks = await SpecialTrack.find({ enrolledStudents: req.params.studentId }).select('_id');
+    const trackIds = tracks.map((t) => t._id);
+
     const [individual, group] = await Promise.all([
       Homework.find({ student: req.params.studentId }).sort({ dueDate: -1 }),
-      GroupHomework.find({ halqa: student.halqa }).sort({ dueDate: -1 }),
+      GroupHomework.find({ $or: [{ halqa: student.halqa }, { specialTrack: { $in: trackIds } }] }).sort({ dueDate: -1 }),
     ]);
     res.json({ success: true, data: { individual, group } });
   } catch (err) {

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { Badge } from "../../components/common/Badge";
+import { SkeletonList } from "../../components/common/Skeleton";
 import {
   useMasajid,
   useCreateMasjid,
@@ -105,11 +106,7 @@ export function AdminMasajid() {
   );
 
   if (isLoading) {
-    return (
-      <div className="page-loading">
-        <i className="ti ti-loader-2" /> جارٍ التحميل...
-      </div>
-    );
+    return <SkeletonList rows={4} avatar={false} />;
   }
   if (error) {
     return <div style={{ color: "#ef4444", padding: 12 }}>تعذّر تحميل المساجد</div>;

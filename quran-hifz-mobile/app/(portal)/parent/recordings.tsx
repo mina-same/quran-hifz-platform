@@ -2,31 +2,31 @@ import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
-import Badge from '@/components/ui/Badge';
+import { useParentChildren, useChildRecordings } from '@/lib/queries/parent';
+import { usePortalStore } from '@/lib/store/portalStore';
 import { theme } from '@/lib/theme';
 
-const ROWS = [
-  { date: 'اليوم',    type: 'حفظ جديد',     segment: 'البقرة ٢٤٠-٢٤٥', pts: '٨٥٠', note: 'أحسنت! الإيقاع ممتاز' },
-  { date: 'أمس',     type: 'مراجعة بعيدة',  segment: 'سورة الكهف',       pts: '٦٠٠', note: 'تحقق من مد المنفصل' },
-  { date: 'الاثنين', type: 'حفظ جديد',     segment: 'البقرة ٢٢٠-٢٣٥', pts: '٨٠٠', note: 'أداء قوي' },
-  { date: 'السبت',   type: 'تحسين تلاوة',  segment: 'الفاتحة',           pts: '٧٠٠', note: 'حسّن نطق الضاد' },
-];
-
 export default function ParentRecordings() {
+  const selectedChildId = usePortalStore((s) => s.selectedChildId);
+  const { data: children = [] } = useParentChildren();
+  const childId = selectedChildId ?? children[0]?._id;
+
+  const { data: recordings = [], isLoading } = useChildRecordings(childId);
+
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
         <Card>
           <CardHeader title="الدروس المسجّلة" />
-          {ROWS.map((r, i) => (
-            <View key={i} style={[s.item, i && s.border]}>
+          {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
+          {!isLoading && recordings.length === 0 && <Text style={s.muted}>لا توجد دروس مسجّلة</Text>}
+          {recordings.map((r, i) => (
+            <View key={r._id} style={[s.item, i > 0 && s.border]}>
               <View style={s.itemHead}>
-                <Text style={s.date}>{r.date}</Text>
-                <Badge variant="blue">{r.type}</Badge>
-                <Text style={s.pts}>{r.pts} نقطة</Text>
+                <Text style={s.date}>{new Date(r.recordedAt).toLocaleDateString('ar-SA')}</Text>
               </View>
-              <Text style={s.segment}>{r.segment}</Text>
-              <Text style={s.note}>{r.note}</Text>
+              {!!r.segment && <Text style={s.segment}>{r.segment}</Text>}
+              {!!r.notes && <Text style={s.note}>{r.notes}</Text>}
             </View>
           ))}
         </Card>
@@ -36,13 +36,13 @@ export default function ParentRecordings() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.cream },
+  safe: { flex: 1, backgroundColor: theme.bg },
   page: { padding: 16 },
+  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
   item: { paddingVertical: 12 },
   border: { borderTopWidth: 1, borderTopColor: theme.border },
   itemHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' },
   date: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
-  pts: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.gold, marginRight: 'auto' as any },
   segment: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text, marginBottom: 2 },
   note: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
 });

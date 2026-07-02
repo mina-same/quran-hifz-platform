@@ -4,7 +4,8 @@ import {
   IconHome, IconBook, IconMicrophone, IconCalendarCheck,
   IconClock, IconMessage, IconLayoutDashboard, IconSchool,
   IconUsers, IconChalkboard, IconTarget, IconChartBar,
-  IconUserPlus, IconBuildingArch,
+  IconUserPlus, IconBuildingArch, IconCalendarEvent, IconStar,
+  IconVideo, IconListCheck, IconGift, IconTimeline,
 } from '@tabler/icons-react-native';
 import type { NavItem as NavItemType } from '@/lib/types/portal';
 import type { PortalType } from '@/lib/types/portal';
@@ -25,6 +26,12 @@ const ICON_MAP: Record<string, React.ComponentType<{ size: number; color: string
   'chart-bar':        IconChartBar,
   'user-plus':        IconUserPlus,
   'building-arch':    IconBuildingArch,
+  'calendar-event':   IconCalendarEvent,
+  star:               IconStar,
+  video:              IconVideo,
+  'list-check':       IconListCheck,
+  gift:               IconGift,
+  timeline:           IconTimeline,
 };
 
 interface Props {

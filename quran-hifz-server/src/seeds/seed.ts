@@ -12,6 +12,9 @@ import { Student } from '../models/Student.model';
 import { HifzEntry } from '../models/HifzEntry.model';
 import { Attendance } from '../models/Attendance.model';
 import { Homework } from '../models/Homework.model';
+import { GroupHomework } from '../models/GroupHomework.model';
+import { LessonRecording } from '../models/LessonRecording.model';
+import { SpecialTrack } from '../models/SpecialTrack.model';
 import { KPI } from '../models/KPI.model';
 import { ParentStudent } from '../models/ParentStudent.model';
 
@@ -29,6 +32,9 @@ async function seed(): Promise<void> {
     HifzEntry.deleteMany({}),
     Attendance.deleteMany({}),
     Homework.deleteMany({}),
+    GroupHomework.deleteMany({}),
+    LessonRecording.deleteMany({}),
+    SpecialTrack.deleteMany({}),
     KPI.deleteMany({}),
     ParentStudent.deleteMany({}),
   ]);
@@ -122,6 +128,48 @@ async function seed(): Promise<void> {
     { student: students[3]._id, teacher: tSaad._id,  halqa: hAbuBakr._id, type: 'مراجعة',  segment: 'المائدة ١-٨',         dueDate: new Date('2024-10-20'), status: 'متأخر', rating: undefined },
   ]);
   console.log(`📝  Seeded homework records`);
+
+  // ── Special Tracks (multi-teacher, many-to-many enrollment) ───────────────
+  const specialTracks = await SpecialTrack.insertMany([
+    {
+      title: 'دورة رمضان المكثفة',
+      type: 'رمضاني',
+      status: 'active',
+      startDate: new Date('2024-10-01'),
+      endDate: new Date('2024-12-01'),
+      daysPerWeek: 'السبت، الأحد، الثلاثاء',
+      timeSlot: '٨:٠٠ م - ٩:٣٠ م',
+      location: mFaruq.name,
+      isOnline: false,
+      teachers: [tNasir._id, tSaad._id],
+      maxStudents: 20,
+      enrolledStudents: [students[0]._id, students[2]._id],
+      notes: 'مسار مكثف لختم جزء إضافي خلال الفترة',
+    },
+  ]);
+  console.log(`🌙  Seeded ${specialTracks.length} special tracks`);
+  const [trackRamadan] = specialTracks;
+
+  // ── Group homework (one halqa-linked, one specialTrack-linked) ────────────
+  await GroupHomework.insertMany([
+    { halqa: hOmar._id, teacher: tNasir._id, title: 'مراجعة جماعية', description: 'مراجعة سورة البقرة كاملة', dueDay: 'الخميس', dueDate: new Date('2024-10-24') },
+    { specialTrack: trackRamadan._id, teacher: tNasir._id, title: 'ورد رمضان', description: 'حفظ نصف جزء إضافي', dueDay: 'الثلاثاء', dueDate: new Date('2024-10-29') },
+  ]);
+  console.log(`📋  Seeded group homework records`);
+
+  // ── Lesson recordings (one halqa-linked, one specialTrack-linked) ─────────
+  await LessonRecording.insertMany([
+    { student: students[0]._id, teacher: tNasir._id, halqa: hOmar._id, type: 'تسميع', segment: 'البقرة ١-٢٠', points: 9, teacherNote: 'أداء ممتاز' },
+    { student: students[0]._id, teacher: tNasir._id, specialTrack: trackRamadan._id, type: 'تسميع', segment: 'جزء إضافي', points: 8, teacherNote: 'التزام جيد بورد المسار' },
+  ]);
+  console.log(`🎙️  Seeded lesson recordings`);
+
+  // ── Special-track attendance (cross-halqa roster) ──────────────────────────
+  await Attendance.insertMany([
+    { student: students[0]._id, specialTrack: trackRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'حاضر' },
+    { student: students[2]._id, specialTrack: trackRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'غائب' },
+  ]);
+  console.log(`✅  Seeded special-track attendance records`);
 
   // ── KPIs ───────────────────────────────────────────────────────────────────
   await KPI.insertMany([

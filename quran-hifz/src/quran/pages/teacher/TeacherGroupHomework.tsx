@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { useTopbar } from "../../context/useTopbar";
+import { usePortal } from "../../context/PortalContext";
 import { useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework } from "../../api/group-homework";
+import { useHalqat } from "../../api/halqat";
+import { useSpecialTracks } from "../../api/special-tracks";
 import { Card } from "../../components/common/Card";
 import { Alert } from "../../components/common/Alert";
 import { Badge } from "../../components/common/Badge";
+import { ContextPicker, halqaToContext, trackToContext, type TeachingContext } from "../../components/common/ContextPicker";
+import { SkeletonCard, SkeletonList } from "../../components/common/Skeleton";
 
 const STUDENTS = ["عبدالله الحميداني", "يوسف الزهراني", "أحمد الشهري", "فارس العسيري", "سالم الدوسري"];
 
@@ -86,7 +91,23 @@ function IndividualHomeworkCard() {
 const DAYS = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس"];
 
 export function TeacherGroupHomework() {
-  const { data: homeworks, isLoading } = useGroupHomework();
+  const { user } = usePortal();
+  const [selected, setSelected] = useState<TeachingContext | null>(null);
+
+  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: user?.profileId });
+  const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, user?.profileId as string | undefined);
+  const contexts: TeachingContext[] = [
+    ...halqat.map(halqaToContext),
+    ...tracks.map(trackToContext),
+  ];
+
+  const { data: homeworks, isLoading } = useGroupHomework(
+    selected
+      ? selected.kind === "halqa"
+        ? { halqa: selected.id }
+        : { specialTrack: selected.id }
+      : undefined
+  );
   const createHW = useCreateGroupHomework();
   const deleteHW = useDeleteGroupHomework();
 
@@ -96,15 +117,23 @@ export function TeacherGroupHomework() {
 
   useTopbar(
     "ti-list-check",
-    "الواجبات الجماعية",
-    <button className="topbar-btn btn-primary" onClick={() => setShowForm(true)}>
-      <i className="ti ti-plus" /> واجب جديد
-    </button>,
+    selected ? `الواجبات الجماعية — ${selected.title}` : "الواجبات الجماعية",
+    selected ? (
+      <div style={{ display: "flex", gap: 8 }}>
+        <button className="topbar-btn btn-ghost" onClick={() => setSelected(null)}>
+          <i className="ti ti-arrow-right" /> الحلقات والمسارات
+        </button>
+        <button className="topbar-btn btn-primary" onClick={() => setShowForm(true)}>
+          <i className="ti ti-plus" /> واجب جديد
+        </button>
+      </div>
+    ) : undefined,
   );
 
   async function handleAdd() {
-    if (!form.title.trim() || !form.desc.trim()) return;
+    if (!selected || !form.title.trim() || !form.desc.trim()) return;
     await createHW.mutateAsync({
+      ...(selected.kind === "halqa" ? { halqa: selected.id } : { specialTrack: selected.id }),
       title:       form.title,
       description: form.desc,
       dueDay:      form.dueDay,
@@ -116,10 +145,24 @@ export function TeacherGroupHomework() {
     setTimeout(() => setSaved(false), 3000);
   }
 
+  // ── View 1: context selector ──────────────────────────────────────
+  if (!selected) {
+    if (loadingHalqat || loadingTracks) {
+      return <SkeletonCard lines={3} />;
+    }
+    return (
+      <ContextPicker
+        contexts={contexts}
+        onSelect={setSelected}
+        emptyLabel="لا توجد حلقات أو مسارات مسجلة لهذا المعلم"
+      />
+    );
+  }
+
   return (
     <>
       {saved && <Alert tone="success">تم إضافة الواجب الجماعي بنجاح ✓</Alert>}
-      {createHW.isError && <Alert tone="error">فشلت الإضافة، حاول مجدداً.</Alert>}
+      {createHW.isError && <Alert tone="warning">فشلت الإضافة، حاول مجدداً.</Alert>}
 
       {showForm && (
         <Card icon="ti-plus" title="إضافة واجب جماعي">
@@ -148,7 +191,7 @@ export function TeacherGroupHomework() {
 
       <Card icon="ti-users" title="الواجبات الجماعية">
         {isLoading ? (
-          <div style={{ padding: "1rem", color: "var(--text-muted)" }}>جارٍ التحميل...</div>
+          <SkeletonList rows={4} avatar={false} />
         ) : (homeworks ?? []).length === 0 ? (
           <p style={{ color: "var(--text2)", padding: 16, textAlign: "center", fontSize: 13 }}>لا توجد واجبات جماعية بعد</p>
         ) : (

@@ -6,6 +6,7 @@ import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { useStudents } from "../../api/students";
 import { useHalqat } from "../../api/halqat";
 import { useSpecialTracks, type EnrolledStudent } from "../../api/special-tracks";
+import { SkeletonTable } from "../../components/common/Skeleton";
 
 const HW_TONE: Record<string, BadgeTone> = {
   submitted: "green",
@@ -94,7 +95,7 @@ export function TeacherStudents() {
       {tab === "halqa" && (
         <>
           {loadingStudents && (
-            <div className="page-loading"><i className="ti ti-loader-2" /> جارٍ التحميل...</div>
+            <SkeletonTable cols={6} rows={5} />
           )}
           {!loadingStudents && (
             <div className="tbl-wrap">
@@ -146,7 +147,7 @@ export function TeacherStudents() {
       {tab === "tracks" && (
         <>
           {loadingTracks && (
-            <div className="page-loading"><i className="ti ti-loader-2" /> جارٍ التحميل...</div>
+            <SkeletonTable cols={3} rows={5} />
           )}
           {!loadingTracks && trackStudents.length === 0 && (
             <div style={{ textAlign: "center", padding: "32px 0", color: "var(--text3)", fontSize: 13 }}>

@@ -5,6 +5,7 @@ import { StatsRow } from "../../components/common/StatsRow";
 import { Card } from "../../components/common/Card";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { Alert } from "../../components/common/Alert";
+import { SkeletonStatsRow, SkeletonCard } from "../../components/common/Skeleton";
 import { useStats } from "../../api/stats";
 import { useStudents } from "../../api/students";
 import { useKpis } from "../../api/kpis";
@@ -12,9 +13,14 @@ import { toAr, pct } from "../../../lib/format";
 
 function PageLoading() {
   return (
-    <div className="page-loading">
-      <i className="ti ti-loader-2" /> جارٍ التحميل...
-    </div>
+    <>
+      <SkeletonStatsRow />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+        <SkeletonCard lines={4} />
+        <SkeletonCard lines={4} />
+      </div>
+      <SkeletonCard lines={3} />
+    </>
   );
 }
 
