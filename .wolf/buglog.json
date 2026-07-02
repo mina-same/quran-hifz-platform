@@ -1361,6 +1361,73 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-02T11:16:17.331Z"
+    },
+    {
+      "id": "bug-085",
+      "timestamp": "2026-07-02T11:22:26.828Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/api/students.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:22:26.828Z"
+    },
+    {
+      "id": "bug-086",
+      "timestamp": "2026-07-02T11:22:42.795Z",
+      "error_message": "CSS fix: halqa",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx",
+      "root_cause": "halqa: firstHalqaId → halqaIds.join(\",\")",
+      "fix": "Changed halqa: firstHalqaId → halqaIds.join(\",\")",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:22:42.795Z"
+    },
+    {
+      "id": "bug-087",
+      "timestamp": "2026-07-02T11:22:53.870Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 7→13 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:22:53.870Z"
+    },
+    {
+      "id": "bug-088",
+      "timestamp": "2026-07-02T11:30:00.000Z",
+      "error_message": "User report: teacher has zero حلقات on #myhalqa but the 'طلاب الحلقة' tab on #students shows students anyway",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx",
+      "root_cause": "TeacherStudents.tsx computed `firstHalqaId = halqat[0]?._id` and called `useStudents({ halqa: firstHalqaId })`. When a teacher has zero halqat (confirmed via direct DB query — teacher id 6a4516cfda22032acf633b87 has no Halqa document referencing it at all), firstHalqaId is undefined, and api/students.ts's buildQuery() skips any falsy filter value, so it silently sent GET /students with NO filter — returning ALL 9 students in the database (belonging to other teachers' halqat) instead of none. This made a teacher with no halqa appear to have students. Same root pattern as the earlier TeacherAttendance.tsx `firstHalqa = halqat[0]` bug fixed via ContextPicker, but this file was outside that refactor's scope and was missed. Also would have under-fetched for a teacher with 2+ halqat (only showed the first one's roster).",
+      "fix": "(1) quran-hifz-server student.controller.ts getStudents: halqa query param now accepts a comma-separated list of ids, using $in when more than one. (2) quran-hifz/src/quran/api/students.ts: useStudents() now takes an optional second `{enabled}` arg passed through to react-query, so callers can explicitly gate the query instead of it silently firing with an empty filter. (3) TeacherStudents.tsx: aggregates ALL of the teacher's halqa ids (not just the first), passes them comma-joined, and gates the query on `!loadingHalqat && halqaIds.length > 0`; renders an explicit 'لا توجد حلقة مسندة لهذا المعلم' state when the teacher truly has none.",
+      "tags": [
+        "data-leak",
+        "unfiltered-query",
+        "halqa",
+        "teacher-students",
+        "react-query",
+        "tsx"
+      ],
+      "related_bugs": ["bug-086", "bug-087"],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:30:00.000Z"
     }
   ]
 }

@@ -24,7 +24,10 @@ export async function getStudents(req: Request, res: Response, next: NextFunctio
     const { halqa, specialTrack, masjid, status, search } = req.query;
     const filter: Record<string, unknown> = {};
 
-    if (halqa)   filter.halqa  = halqa;
+    if (halqa) {
+      const ids = String(halqa).split(',').filter(Boolean);
+      filter.halqa = ids.length > 1 ? { $in: ids } : ids[0];
+    }
     if (masjid)  filter.masjid = masjid;
     if (status)  filter.status = status;
     if (search)  filter.name   = { $regex: search, $options: 'i' };

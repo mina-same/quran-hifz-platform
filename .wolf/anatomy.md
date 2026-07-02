@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T11:16:38.392Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T11:22:53.856Z
 > Files: 353 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/c53595ee-8b45-447d-aec7-904c055a8dc1/scratchpad/
@@ -275,7 +275,7 @@
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
-- `student.controller.ts` — Zod schemas: studentSchema (~1412 tok)
+- `student.controller.ts` — Zod schemas: studentSchema (~1517 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1398 tok)
 
 ## quran-hifz-server/src/middleware/
@@ -445,7 +445,7 @@
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
 - `special-tracks.ts` — Exports EnrolledStudent, TrackTeacher, SpecialTrack, useSpecialTracks + 5 more (~805 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~166 tok)
-- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~737 tok)
+- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~783 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~504 tok)
 
 ## quran-hifz/src/quran/components/
@@ -532,7 +532,7 @@
 - `TeacherRecordLesson.tsx` — LESSON_TYPES (~3801 tok)
 - `TeacherReports.tsx` — TeacherReports — renders chart (~172 tok)
 - `TeacherSpecialTracks.tsx` — getEnrolledName (~4015 tok)
-- `TeacherStudents.tsx` — HW_TONE — renders table (~2044 tok)
+- `TeacherStudents.tsx` — HW_TONE — renders table (~2190 tok)
 
 ## quran-hifz/src/quran/router/
 

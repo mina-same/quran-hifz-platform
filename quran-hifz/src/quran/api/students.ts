@@ -43,10 +43,11 @@ function buildQuery(filters?: StudentFilters) {
   return q ? `?${q}` : "";
 }
 
-export function useStudents(filters?: StudentFilters) {
+export function useStudents(filters?: StudentFilters, opts?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["students", filters],
     queryFn: () => get<ListResponse>(`/students${buildQuery(filters)}`).then((r) => r.data),
+    enabled: opts?.enabled,
   });
 }
 

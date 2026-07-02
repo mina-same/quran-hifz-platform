@@ -34,9 +34,12 @@ export function TeacherStudents() {
   const { user } = usePortal();
   const [tab, setTab] = useState<"halqa" | "tracks">("halqa");
 
-  const { data: halqat = [] } = useHalqat({ teacher: user?.profileId });
-  const firstHalqaId = halqat[0]?._id;
-  const { data: students = [], isLoading: loadingStudents } = useStudents({ halqa: firstHalqaId });
+  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: user?.profileId });
+  const halqaIds = halqat.map((h) => h._id);
+  const { data: students = [], isLoading: loadingStudents } = useStudents(
+    { halqa: halqaIds.join(",") },
+    { enabled: !loadingHalqat && halqaIds.length > 0 },
+  );
 
   const { data: myTracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, user?.profileId as string | undefined);
 
@@ -94,10 +97,16 @@ export function TeacherStudents() {
       {/* ── Halqa Students Tab ── */}
       {tab === "halqa" && (
         <>
-          {loadingStudents && (
+          {(loadingHalqat || loadingStudents) && (
             <SkeletonTable cols={6} rows={5} />
           )}
-          {!loadingStudents && (
+          {!loadingHalqat && halqaIds.length === 0 && (
+            <div style={{ textAlign: "center", padding: "32px 0", color: "var(--text3)", fontSize: 13 }}>
+              <i className="ti ti-school-off" style={{ fontSize: 32, display: "block", marginBottom: 10 }} />
+              لا توجد حلقة مسندة لهذا المعلم
+            </div>
+          )}
+          {!loadingHalqat && !loadingStudents && halqaIds.length > 0 && (
             <div className="tbl-wrap">
               <table className="tbl">
                 <thead>
