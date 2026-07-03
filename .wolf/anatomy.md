@@ -1,11 +1,13 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T09:18:04.858Z
-> Files: 363 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T09:56:36.225Z
+> Files: 365 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/bbd609da-d480-4381-aa1d-3b8d4fbbf3f3/scratchpad/
 
-- `drive.mjs` — Declares shot (~413 tok)
+- `drive.mjs` — Declares DIR (~1130 tok)
+- `drive2.mjs` — Declares DIR (~600 tok)
+- `drive3.mjs` — Declares DIR (~1118 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/c53595ee-8b45-447d-aec7-904c055a8dc1/scratchpad/
 
@@ -338,7 +340,7 @@
 
 ## quran-hifz-server/src/seeds/
 
-- `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~3398 tok)
+- `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~4765 tok)
 
 ## quran-hifz-server/src/types/
 
@@ -547,7 +549,7 @@
 - `TeacherGroupHomework.tsx` — STUDENTS (~2926 tok)
 - `TeacherHalqa.tsx` — getName (~792 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1009 tok)
-- `TeacherPlans.tsx` — surahName — renders form, modal (~9672 tok)
+- `TeacherPlans.tsx` — surahName — renders form, modal (~9734 tok)
 - `TeacherRecordLesson.tsx` — LESSON_TYPES (~3801 tok)
 - `TeacherReports.tsx` — TeacherReports — renders chart (~172 tok)
 - `TeacherSpecialTracks.tsx` — getEnrolledName (~4015 tok)

@@ -1559,6 +1559,73 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-03T09:18:04.883Z"
+    },
+    {
+      "id": "bug-097",
+      "timestamp": "2026-07-03T09:24:37.576Z",
+      "error_message": "Missing await",
+      "file": "quran-hifz-server/src/seeds/seed.ts",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:24:37.576Z"
+    },
+    {
+      "id": "bug-098",
+      "timestamp": "2026-07-03T09:28:20.461Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/config/portals.ts",
+      "root_cause": "Had \"الخطط الفردية\"",
+      "fix": "Changed to \"الخطط القرآنية\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:28:20.461Z"
+    },
+    {
+      "id": "bug-099",
+      "timestamp": "2026-07-03T09:53:26.697Z",
+      "error_message": "CSS fix: pointRules",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "pointRules: form.pointsEnabled ? form.pointRules : [], → form.pointsEnabled ? form.pointRules.map((r) => ({ ...r, label: r.label.trim()",
+      "fix": "Changed pointRules: form.pointsEnabled ? form.pointRules : [], → form.pointsEnabled ? form.pointRules.map((r) => ({ ...r, label: r.label.trim()",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:53:26.697Z"
+    },
+    {
+      "id": "bug-100",
+      "timestamp": "2026-07-03T09:55:00.000Z",
+      "error_message": "Browser console shows repeated 'Maximum update depth exceeded' warnings immediately after teacher login, plus a pageerror 'Switched to client rendering because the server rendering errored: localStorage is not defined' on first navigation to any quran-hifz page in dev mode.",
+      "file": "quran-hifz/src/quran/context/ThemeContext.tsx (suspected; not yet root-caused)",
+      "root_cause": "NOT YET DIAGNOSED. Confirmed via Playwright E2E during the quran-plans feature build (2026-07-03) that this occurs on EVERY page load right after login — reproduced with zero navigation into the new TeacherPlans.tsx page, so it predates and is unrelated to that feature. Likely chain: TanStack Start SSR renders ThemeProvider, which reads `localStorage` during SSR (no `typeof window` guard) → SSR throws → dev server 'switches to client rendering' → the resulting remount/rehydrate appears to trigger a setState-in-effect loop somewhere in the auth/portal/theme context chain, logged by React as 'Maximum update depth exceeded'. App still functions (login, navigation, CRUD all work correctly per E2E testing), so this looks like a dev-mode-only cosmetic console spam issue, not a functional bug — but not confirmed for production builds.",
+      "fix": "NOT FIXED — out of scope for the quran-plans feature. Flagging for a future session: check ThemeContext.tsx for an SSR-unsafe `localStorage` read (needs `typeof window !== 'undefined'` guard) as the likely root cause of the initial SSR error; the update-depth loop may resolve once that's fixed, or may be a separate issue in AuthContext/PortalContext worth tracing independently.",
+      "tags": [
+        "pre-existing",
+        "ssr",
+        "react",
+        "console-warning",
+        "not-fixed",
+        "unrelated-to-quran-plans"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:55:00.000Z"
     }
   ]
 }

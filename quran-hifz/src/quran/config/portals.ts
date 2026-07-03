@@ -59,7 +59,7 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
       { group: "التقييم", items: [
         { id: "homework", icon: "ti-microphone", label: "مراجعة الواجبات", dot: true },
         { id: "evaluate", icon: "ti-star",       label: "التقييم والنقاط", dot: true },
-        { id: "plans",    icon: "ti-target",     label: "الخطط الفردية" },
+        { id: "plans",    icon: "ti-target",     label: "الخطط القرآنية" },
         { id: "reports",  icon: "ti-chart-bar",  label: "تقارير الطلاب" },
       ]},
     ],

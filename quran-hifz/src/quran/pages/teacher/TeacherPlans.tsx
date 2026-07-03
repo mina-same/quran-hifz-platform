@@ -159,6 +159,9 @@ export function TeacherPlans() {
       form.rangeStart.surahNumber < form.rangeEnd.surahNumber ||
       (form.rangeStart.surahNumber === form.rangeEnd.surahNumber && form.rangeStart.ayah <= form.rangeEnd.ayah);
     if (!startsBeforeEnd) { setFormError("نقطة البداية يجب أن تسبق نقطة النهاية"); return; }
+    if (form.pointsEnabled && form.pointRules.some((r) => !r.label.trim())) {
+      setFormError("يرجى كتابة وصف لكل قاعدة نقاط، أو حذف القواعد الفارغة"); return;
+    }
 
     setFormError("");
     const body: Record<string, unknown> = {
@@ -174,7 +177,7 @@ export function TeacherPlans() {
       restrictNavigationRange: form.restrictNavigationRange,
       ignoreSurahHeaders: form.ignoreSurahHeaders,
       pointsEnabled: form.pointsEnabled,
-      pointRules: form.pointsEnabled ? form.pointRules : [],
+      pointRules: form.pointsEnabled ? form.pointRules.map((r) => ({ ...r, label: r.label.trim() })) : [],
       endType: form.endType,
       activeDaysCount: form.endType === "activeDays" ? Number(form.activeDaysCount) : undefined,
       endDate: form.endType === "date" ? form.endDate : undefined,

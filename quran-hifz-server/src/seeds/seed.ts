@@ -17,6 +17,7 @@ import { LessonRecording } from '../models/LessonRecording.model';
 import { SpecialTrack } from '../models/SpecialTrack.model';
 import { KPI } from '../models/KPI.model';
 import { ParentStudent } from '../models/ParentStudent.model';
+import { QuranPlan } from '../models/QuranPlan.model';
 
 async function seed(): Promise<void> {
   await mongoose.connect(ENV.MONGO_URI);
@@ -37,6 +38,7 @@ async function seed(): Promise<void> {
     SpecialTrack.deleteMany({}),
     KPI.deleteMany({}),
     ParentStudent.deleteMany({}),
+    QuranPlan.deleteMany({}),
   ]);
   console.log('🗑   Cleared existing collections');
 
@@ -170,6 +172,72 @@ async function seed(): Promise<void> {
     { student: students[2]._id, specialTrack: trackRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'غائب' },
   ]);
   console.log(`✅  Seeded special-track attendance records`);
+
+  // ── Quran plans (halqa-, students-, and specialTrack-targeted) ────────────
+  const today = new Date();
+  const inAMonth = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const ALL_WEEK_DAYS = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
+
+  await QuranPlan.insertMany([
+    {
+      name: 'خطة حفظ سورة البقرة',
+      type: 'حفظ',
+      description: 'حفظ سورة البقرة كاملة على مدار الشهر',
+      teacher: tNasir._id,
+      targetType: 'halqa',
+      halqa: hOmar._id,
+      days: ALL_WEEK_DAYS,
+      rangeStart: { surahNumber: 1, ayah: 1 },
+      rangeEnd: { surahNumber: 2, ayah: 286 },
+      repetitionCount: 2,
+      restrictNavigationRange: true,
+      ignoreSurahHeaders: false,
+      pointsEnabled: true,
+      pointRules: [
+        { label: 'خطأ في التجويد', amount: 2, kind: 'خصم' },
+        { label: 'تلاوة ممتازة', amount: 5, kind: 'زيادة' },
+      ],
+      endType: 'activeDays',
+      activeDaysCount: 30,
+    },
+    {
+      name: 'مراجعة جزء عمّ',
+      type: 'مراجعة',
+      description: 'مراجعة أسبوعية لجزء عمّ',
+      teacher: tNasir._id,
+      targetType: 'students',
+      students: [students[0]._id, students[1]._id],
+      days: ['السبت', 'الاثنين', 'الأربعاء'],
+      rangeStart: { surahNumber: 78, ayah: 1 },
+      rangeEnd: { surahNumber: 114, ayah: 6 },
+      repetitionCount: 1,
+      restrictNavigationRange: false,
+      ignoreSurahHeaders: true,
+      pointsEnabled: false,
+      endType: 'date',
+      startDate: today,
+      endDate: inAMonth,
+    },
+    {
+      name: 'ورد تلاوة المسار الرمضاني',
+      type: 'تلاوة',
+      description: 'ورد تلاوة يومي لمتابعي مسار رمضان المكثف',
+      teacher: tNasir._id,
+      targetType: 'specialTrack',
+      specialTrack: trackRamadan._id,
+      days: ['السبت', 'الأحد', 'الثلاثاء'],
+      rangeStart: { surahNumber: 1, ayah: 1 },
+      rangeEnd: { surahNumber: 2, ayah: 50 },
+      repetitionCount: 1,
+      restrictNavigationRange: false,
+      ignoreSurahHeaders: false,
+      pointsEnabled: true,
+      pointRules: [{ label: 'إتمام الورد', amount: 3, kind: 'زيادة' }],
+      endType: 'activeDays',
+      activeDaysCount: 15,
+    },
+  ]);
+  console.log(`🎯  Seeded 3 Quran plans`);
 
   // ── KPIs ───────────────────────────────────────────────────────────────────
   await KPI.insertMany([
