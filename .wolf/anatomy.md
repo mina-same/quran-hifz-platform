@@ -1,7 +1,11 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-02T11:22:53.856Z
-> Files: 353 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-03T09:18:04.858Z
+> Files: 363 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/bbd609da-d480-4381-aa1d-3b8d4fbbf3f3/scratchpad/
+
+- `drive.mjs` — Declares shot (~413 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/c53595ee-8b45-447d-aec7-904c055a8dc1/scratchpad/
 
@@ -11,6 +15,10 @@
 
 - `joyful-growing-duckling.md` — Plan: Connect quran-hifz frontend → quran-hifz-server (~2150 tok)
 - `ticklish-gathering-neumann.md` — Plan: Wire `quran-hifz-mobile` to the real backend (foundation + read screens) (~2460 tok)
+
+## ../../../.claude/plans/
+
+- `partitioned-percolating-phoenix.md` — خطة قرآنية — Teacher Quran Plan Builder (~3202 tok)
 
 ## ./
 
@@ -251,7 +259,7 @@
 
 ## quran-hifz-server/src/
 
-- `app.ts` — API routes: GET (1 endpoints) (~818 tok)
+- `app.ts` — API routes: GET (1 endpoints) (~851 tok)
 - `server.ts` — Declares bootstrap (~198 tok)
 
 ## quran-hifz-server/src/config/
@@ -273,10 +281,15 @@
 - `masjid.controller.ts` — Zod schemas: masjidSchema (~698 tok)
 - `message.controller.ts` — Zod schemas: messageSchema (~526 tok)
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
+- `quran-plan.controller.ts` — Zod schemas: pointRuleSchema, rangePointSchema, quranPlanSchema (~1976 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
 - `student.controller.ts` — Zod schemas: studentSchema (~1517 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1398 tok)
+
+## quran-hifz-server/src/lib/
+
+- `quranRange.ts` — Sat..Fri order, matches the 7 toggle chips shown in the plan-builder UI. (~1332 tok)
 
 ## quran-hifz-server/src/middleware/
 
@@ -297,6 +310,7 @@
 - `Masjid.model.ts` — Exports IMasjid, Masjid (~125 tok)
 - `Message.model.ts` — Exports IMessage, Message (~291 tok)
 - `ParentStudent.model.ts` — Exports IParentStudent, ParentStudent (~172 tok)
+- `QuranPlan.model.ts` — Exports PlanType, IPointRule, IRangePoint, IQuranPlan, QuranPlan (~918 tok)
 - `SpecialTrack.model.ts` — Exports ISpecialTrack, SpecialTrack (~429 tok)
 - `Student.model.ts` — Exports IStudent, Student (~498 tok)
 - `Teacher.model.ts` — Exports ITeacher, Teacher (~289 tok)
@@ -316,6 +330,7 @@
 - `masjid.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~161 tok)
 - `message.routes.ts` — API routes: GET, POST, PATCH (3 endpoints) (~105 tok)
 - `parent.routes.ts` — API routes: GET (6 endpoints) (~239 tok)
+- `quran-plan.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~160 tok)
 - `special-track.routes.ts` — API routes: GET, POST, PUT, DELETE (6 endpoints) (~210 tok)
 - `stats.routes.ts` — API routes: GET (1 endpoints) (~79 tok)
 - `student.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~173 tok)
@@ -443,6 +458,7 @@
 - `masajid.ts` — Exports Masjid, useMasajid, useMasjid, useCreateMasjid + 2 more (~461 tok)
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
+- `quran-plans.ts` — Exports PlanType, PointRule, RangePoint, PlanTeacher + 10 more (~948 tok)
 - `special-tracks.ts` — Exports EnrolledStudent, TrackTeacher, SpecialTrack, useSpecialTracks + 5 more (~805 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~166 tok)
 - `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~783 tok)
@@ -463,10 +479,13 @@
 - `Badge.tsx` — Badge (~83 tok)
 - `Card.tsx` — Card (~181 tok)
 - `ContextPicker.tsx` — Unified shape for "teaching context" — either a Halqa or a SpecialTrack. (~1159 tok)
+- `DaysOfWeekPicker.tsx` — WEEK_DAYS (~481 tok)
+- `FormSection.tsx` — FormSection (~195 tok)
 - `HalqaRow.tsx` — HalqaRow (~104 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
 - `Skeleton.tsx` — Skeleton — renders table (~816 tok)
 - `StatsRow.tsx` — StatsRow (~146 tok)
+- `SurahRangePicker.tsx` — SurahPointFields (~439 tok)
 
 ## quran-hifz/src/quran/config/
 
@@ -495,7 +514,7 @@
 - `AdminParents.tsx` — EMPTY_ADD — renders table (~5191 tok)
 - `AdminRegister.tsx` — schema — renders form (~3078 tok)
 - `AdminReports.tsx` — REPORTS — renders chart (~419 tok)
-- `AdminSpecialTracks.tsx` — getEnrolledId — renders form, modal (~12510 tok)
+- `AdminSpecialTracks.tsx` — getEnrolledId — renders form, modal (~12335 tok)
 - `AdminStudents.tsx` — PATH_TONE — renders table (~5092 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4598 tok)
 
@@ -528,7 +547,7 @@
 - `TeacherGroupHomework.tsx` — STUDENTS (~2926 tok)
 - `TeacherHalqa.tsx` — getName (~792 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1009 tok)
-- `TeacherPlans.tsx` — ROWS — renders table (~436 tok)
+- `TeacherPlans.tsx` — surahName — renders form, modal (~9672 tok)
 - `TeacherRecordLesson.tsx` — LESSON_TYPES (~3801 tok)
 - `TeacherReports.tsx` — TeacherReports — renders chart (~172 tok)
 - `TeacherSpecialTracks.tsx` — getEnrolledName (~4015 tok)

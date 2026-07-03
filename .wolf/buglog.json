@@ -1425,9 +1425,140 @@
         "react-query",
         "tsx"
       ],
-      "related_bugs": ["bug-086", "bug-087"],
+      "related_bugs": [
+        "bug-086",
+        "bug-087"
+      ],
       "occurrences": 1,
       "last_seen": "2026-07-02T11:30:00.000Z"
+    },
+    {
+      "id": "bug-089",
+      "timestamp": "2026-07-03T08:26:38.807Z",
+      "error_message": "Type error",
+      "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T08:26:38.807Z"
+    },
+    {
+      "id": "bug-090",
+      "timestamp": "2026-07-03T08:26:44.705Z",
+      "error_message": "Wrong reference: quranPlanSchema should be quranPlanCreateSchema",
+      "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "root_cause": "Used \"quranPlanSchema\" instead of \"quranPlanCreateSchema\"",
+      "fix": "Changed quranPlanSchema → quranPlanCreateSchema",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T08:26:44.705Z"
+    },
+    {
+      "id": "bug-091",
+      "timestamp": "2026-07-03T08:27:08.247Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz-server/src/app.ts",
+      "root_cause": "Had './routes/admin.routes'",
+      "fix": "Changed to './routes/quran-plan.routes'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T08:27:13.982Z"
+    },
+    {
+      "id": "bug-092",
+      "timestamp": "2026-07-03T09:14:19.541Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/models/QuranPlan.model.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 3→4 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:14:19.541Z"
+    },
+    {
+      "id": "bug-093",
+      "timestamp": "2026-07-03T09:14:35.616Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 3→4 lines (3 removed) | Also: const { teacher, halqa, student } = req.query;; if (teacher) filter.teacher = teacher;",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T09:14:51.709Z"
+    },
+    {
+      "id": "bug-094",
+      "timestamp": "2026-07-03T09:16:25.971Z",
+      "error_message": "CSS fix: value",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "value: \"تلاوة\",  label: \"تلاوة\",  icon: \"ti-microphone\" → \"specialTrack\", label: \"مسار استثنائي\", icon: \"ti-calendar-event\"",
+      "fix": "Changed value: \"تلاوة\",  label: \"تلاوة\",  icon: \"ti-microphone\" → \"specialTrack\", label: \"مسار استثنائي\", icon: \"ti-calendar-event\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 5,
+      "last_seen": "2026-07-03T09:17:19.266Z"
+    },
+    {
+      "id": "bug-095",
+      "timestamp": "2026-07-03T09:17:51.383Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 38→54 lines (9 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:17:51.383Z"
+    },
+    {
+      "id": "bug-096",
+      "timestamp": "2026-07-03T09:18:04.883Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "Had \"ti-users\"",
+      "fix": "Changed to \"12px 0\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:18:04.883Z"
     }
   ]
 }

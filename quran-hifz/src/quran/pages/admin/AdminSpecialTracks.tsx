@@ -10,6 +10,7 @@ import { useMasajid } from "../../api/masajid";
 import { useStudents } from "../../api/students";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
+import { FormSection } from "../../components/common/FormSection";
 
 /* ─── helpers ─────────────────────────────────────────────── */
 function getEnrolledId(v: EnrolledStudent | string)  { return typeof v === "object" ? v._id  : v; }
@@ -842,25 +843,6 @@ function SectionHeader({ label, count, color }: { label: string; count: number; 
         fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 99,
         background: color + "22", color,
       }}>{count}</span>
-    </div>
-  );
-}
-
-/* ── small presentational helper ── */
-function FormSection({ label, icon, children }: { label: string; icon: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 20 }}>
-      <div style={{
-        display: "flex", alignItems: "center", gap: 7,
-        marginBottom: 12, paddingBottom: 8,
-        borderBottom: "1px solid var(--border)",
-      }}>
-        <i className={`ti ${icon}`} style={{ color: "var(--green)", fontSize: 14 }} />
-        <span style={{ fontSize: 12, fontWeight: 800, color: "var(--text2)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          {label}
-        </span>
-      </div>
-      {children}
     </div>
   );
 }
