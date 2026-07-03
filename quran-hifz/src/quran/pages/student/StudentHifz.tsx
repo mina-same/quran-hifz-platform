@@ -26,7 +26,7 @@ export function StudentHifz() {
   const remaining = (student?.totalPages || 604) - pages;
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 18 }}>
+    <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 18 }}>
       <Card icon="ti-target" title="هدفي السنوي">
         <div style={{ textAlign: "center", padding: "12px 0" }}>
           <div style={{ fontSize: 48, fontWeight: 700, color: "var(--green)" }}>

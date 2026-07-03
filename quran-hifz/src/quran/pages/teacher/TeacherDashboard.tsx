@@ -40,7 +40,7 @@ export function TeacherDashboard() {
           { num: toAr(pendingHW.length), label: "واجبات معلقة", icon: "ti-microphone", variant: "red" },
         ]}
       />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+      <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
         <Card icon="ti-school" title="حلقاتي">
           {halqat.length === 0 && (
             <div className="page-loading">لا توجد حلقات مسجلة</div>

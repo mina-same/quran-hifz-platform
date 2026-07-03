@@ -466,7 +466,9 @@ body { font-family: 'Cairo', sans-serif; background: var(--cream); color: var(--
   display: flex;
   flex-direction: column;
   z-index: 100;
+  transition: transform 0.25s ease;
 }
+.sidebar-overlay { display: none; }
 .sidebar-brand {
   padding: 20px 16px 16px;
   border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -600,6 +602,21 @@ body { font-family: 'Cairo', sans-serif; background: var(--cream); color: var(--
 .btn-gold { background: var(--gold-pale); color: var(--brown); border: 1px solid rgba(201,149,42,0.3); }
 .btn-gold:hover { background: #fae8c0; }
 
+.sidebar-toggle-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--green);
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.sidebar-toggle-btn:hover { background: var(--green-pale); }
+
 .content { padding: 24px 28px; }
 
 /* CARDS */
@@ -692,6 +709,21 @@ table.tbl tr:hover td { background: var(--green-pale); }
 .form-input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(26,92,42,0.1); }
 textarea.form-input { resize: vertical; min-height: 80px; }
 
+/* TRACK CARDS (special tracks pages) */
+.track-card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
+  transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s, border-color 0.2s;
+}
+.track-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.08);
+  border-color: var(--green2);
+}
+.dark .track-card:hover { box-shadow: 0 14px 32px rgba(0,0,0,0.45); }
+
 /* PROGRESS */
 .progress-bar { height: 6px; background: var(--green-pale); border-radius: 3px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 3px; background: var(--green); transition: width 0.4s; }
@@ -705,6 +737,11 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 .halqa-row { display: flex; justify-content: space-between; margin-bottom: 7px; font-size: 12px; }
 .halqa-row .lbl { color: var(--text2); }
 .halqa-row .val { font-weight: 600; color: var(--text); }
+
+/* RESPONSIVE GRID UTILITY — add alongside an inline multi-column
+   `style={{ display: "grid", gridTemplateColumns: ... }}` so it still
+   collapses to 1 column below the tablet breakpoint (see bottom of file). */
+.grid-collapse { }
 
 /* MASJID ACCORDION */
 .masjid-item { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 8px; overflow: hidden; }
@@ -730,6 +767,55 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 .rec-icon { font-size: 56px; color: #ef4444; display: block; margin: 0 auto 12px; }
 .rec-pulse { animation: pulse 1s infinite; }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.7;transform:scale(.93)} }
+
+/* ATTENDANCE MARKING */
+.att-summary { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.att-chip { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; background: var(--green-pale); color: var(--green); }
+.att-chip.absent { background: #fef2f2; color: #b91c1c; }
+.att-chip i { font-size: 13px; }
+.att-mark-all { margin-inline-start: auto; background: transparent; border: 1px solid var(--border2); color: var(--text2); border-radius: 20px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background .15s, color .15s; }
+.att-mark-all:hover { background: var(--green-pale); color: var(--green); }
+
+.att-list { display: flex; flex-direction: column; gap: 8px; }
+.att-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--cream); transition: background .15s, border-color .15s; }
+.att-row.is-absent { border-color: rgba(239,68,68,0.3); background: #fff8f8; }
+.att-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--green-pale); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.att-row.is-absent .att-avatar { background: #fee2e2; color: #b91c1c; }
+.att-info { flex: 1; min-width: 0; }
+.att-name { font-weight: 700; font-size: 13px; color: var(--text); }
+.att-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.att-toggle { display: flex; border: 1px solid var(--border2); border-radius: 20px; overflow: hidden; flex-shrink: 0; }
+.att-toggle button { border: none; background: transparent; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--text2); display: flex; align-items: center; gap: 5px; transition: background .15s, color .15s; }
+.att-toggle button.active.present { background: var(--green); color: white; }
+.att-toggle button.active.absent { background: #ef4444; color: white; }
+.att-toggle button:not(.active):hover { background: var(--green-pale); }
+
+.dark .att-row { background: var(--surface); border-color: var(--border); }
+.dark .att-row.is-absent { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); }
+.dark .att-chip.absent { background: rgba(239,68,68,0.12); color: #f87171; }
+.dark .att-mark-all:hover { background: #0d2117; color: var(--green); }
+
+/* MODAL — centered dialog on desktop, bottom sheet on mobile (see 900px media block) */
+.modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.modal-sheet { background: var(--surface); border-radius: 16px; width: 100%; max-height: 92vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+.modal-handle { display: none; }
+.modal-head { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 0; }
+.modal-head h3 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text); }
+.modal-body { padding: 20px; }
+.modal-footer { display: flex; gap: 10px; padding: 0 20px 20px; }
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+/* RESPONSIVE CARD LIST — mobile replacement for .tbl tables (see 900px media block) */
+.rc-list { display: none; flex-direction: column; gap: 8px; }
+.rc-card { border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--cream); padding: 12px 14px; }
+.rc-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.rc-card-title { font-weight: 700; font-size: 13px; flex: 1; color: var(--text); }
+.rc-row { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-top: 1px solid var(--border); font-size: 12px; }
+.rc-row:first-child { border-top: none; }
+.rc-row-label { color: var(--text2); }
+.rc-actions { display: flex; gap: 6px; margin-top: 8px; }
+.rc-actions button { min-height: 36px; min-width: 36px; }
+.dark .rc-card { background: var(--surface); border-color: var(--border); }
 
 /* PAGE TRANSITIONS */
 .page { display: none; }
@@ -1543,4 +1629,73 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 @media (max-width: 520px) {
   .login-card { padding: 28px 20px 22px; }
   .login-dev-row { flex-wrap: wrap; }
+}
+
+/* ══════════════════════════════════════════════
+   PORTAL APP SHELL — Responsive
+   Sidebar becomes an off-canvas drawer (toggled via
+   .sidebar-open on #app) below the tablet breakpoint.
+══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(100%); /* RTL: sidebar sits on the right, hide off to the right */
+  }
+  #app.sidebar-open .sidebar {
+    transform: translateX(0);
+    box-shadow: -12px 0 32px rgba(0,0,0,0.25);
+  }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 99;
+  }
+  #app.sidebar-open .sidebar-overlay { display: block; }
+
+  .main { margin-right: 0; }
+  .sidebar-toggle-btn { display: flex; }
+
+  .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
+  .topbar-title { font-size: 16px; }
+  .topbar-actions { flex-wrap: wrap; gap: 8px; }
+
+  .content { padding: 16px; }
+
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+  .halqa-grid { grid-template-columns: 1fr; }
+  .grid-collapse {
+    grid-template-columns: 1fr !important;
+  }
+
+  .portal-cards { max-width: 320px; }
+
+  /* Modal → bottom sheet */
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-sheet {
+    border-radius: 16px 16px 0 0;
+    max-height: 88vh;
+    max-width: 100% !important;
+    animation: sheet-up .22s ease-out;
+  }
+  .modal-handle {
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border2);
+    margin: 10px auto 0;
+  }
+
+  /* Tables → card list */
+  .tbl-wrap { display: none; }
+  .rc-list { display: flex; }
+}
+
+@media (max-width: 480px) {
+  .stats-row { grid-template-columns: 1fr; }
+  .content { padding: 12px; }
+  .topbar { padding: 10px 12px; }
+  .card { padding: 16px; }
 }

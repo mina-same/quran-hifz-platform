@@ -2,6 +2,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { AyahBar } from "../../components/common/AyahBar";
 import { Card } from "../../components/common/Card";
 import { StatsRow } from "../../components/common/StatsRow";
+import { toAr } from "../../../lib/format";
 
 const MY_POINTS = 740;
 
@@ -31,13 +32,13 @@ export function StudentPoints() {
       <AyahBar />
       <StatsRow
         items={[
-          { num: String(MY_POINTS), label: "إجمالي النقاط",       icon: "ti-star",      variant: "gold" },
+          { num: toAr(MY_POINTS),  label: "إجمالي النقاط",       icon: "ti-star",      variant: "gold" },
           { num: "٣",               label: "أسابيع متتالية",       icon: "ti-trophy" },
           { num: "١٢",              label: "واجب مسلَّم",           icon: "ti-microphone", variant: "blue" },
           { num: "نجم",             label: "المستوى الحالي",        icon: "ti-award" },
         ]}
       />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 18 }}>
+      <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 18 }}>
         <Card icon="ti-chart-bar" title="المستويات">
           <div style={{ fontSize: 13 }}>
             {LEVELS.map((lv) => (

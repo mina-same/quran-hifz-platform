@@ -14,7 +14,7 @@ function getInitials(name: string): string {
 }
 
 export function Sidebar() {
-  const { portal, page, user, showPage, logout } = usePortal();
+  const { portal, page, user, showPage, logout, closeSidebar } = usePortal();
   const { theme, toggleTheme } = useTheme();
   if (!portal) return null;
   const cfg = PORTALS[portal];
@@ -24,7 +24,9 @@ export function Sidebar() {
   const displayInitials = user ? getInitials(user.name) : cfg.user.initials;
 
   return (
-    <div className="sidebar">
+    <>
+      <div className="sidebar-overlay" onClick={closeSidebar} />
+      <div className="sidebar">
       <div className="sidebar-brand">
         <img className="sidebar-logo" src={LOGO_SRC} alt="شعار" />
         <div className="sidebar-name">جمعية تحفيظ القرآن الكريم بالعماير</div>
@@ -65,6 +67,7 @@ export function Sidebar() {
           <i className="ti ti-logout logout-btn" title="خروج" onClick={logout} />
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

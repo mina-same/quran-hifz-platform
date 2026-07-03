@@ -1,6 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { get, post, put, del } from "../../lib/api";
 
+/** sessionStorage key used to hand off "create a plan for this track" from the
+ * Special Tracks page to TeacherPlans, which reads it on mount and opens the
+ * create modal pre-filled with targetType "specialTrack". */
+export const PLAN_PREFILL_TRACK_KEY = "qh_prefill_plan_track";
+
 export type PlanType = "حفظ" | "مراجعة" | "ترتيل" | "تلاوة";
 
 export type PointRule = { label: string; amount: number; kind: "خصم" | "زيادة" };
@@ -10,6 +15,9 @@ export type PlanHalqa       = { _id: string; name: string };
 export type PlanStudent     = { _id: string; name: string };
 export type PlanSpecialTrack = { _id: string; title: string };
 export type TodayAssignment = { surahStart: number; ayahStart: number; surahEnd: number; ayahEnd: number };
+export type PlanProgress = { completed: number; total: number; percent: number };
+export type JuzProgress = { completed: number; total: number };
+export type ScheduleEntry = TodayAssignment & { occurrenceIndex: number; date: string; juz: number };
 
 export type QuranPlan = {
   _id: string;
@@ -42,6 +50,9 @@ export type QuranPlan = {
 
   status: "نشطة" | "متوقفة" | "منتهية";
   todayAssignment: TodayAssignment | null;
+  progress: PlanProgress | null;
+  juzProgress: JuzProgress | null;
+  schedule: ScheduleEntry[];
 };
 
 type ListResponse   = { success: boolean; count: number; data: QuranPlan[] };

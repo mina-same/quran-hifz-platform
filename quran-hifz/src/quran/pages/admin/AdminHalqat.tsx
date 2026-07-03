@@ -4,6 +4,7 @@ import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { HalqaRow } from "../../components/common/HalqaRow";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
+import { Modal } from "../../components/common/Modal";
 import {
   useHalqat,
   useCreateHalqa,
@@ -27,28 +28,6 @@ type FormFields = {
 };
 
 const EMPTY_FORM: FormFields = { name: "", teacherId: "", masjidId: "", days: "", time: "", capacity: "" };
-
-const OVERLAY: React.CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  zIndex: 1000,
-  background: "rgba(0,0,0,0.45)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: 16,
-};
-
-const DIALOG: React.CSSProperties = {
-  background: "white",
-  borderRadius: 12,
-  padding: 24,
-  width: "100%",
-  maxWidth: 480,
-  maxHeight: "90vh",
-  overflowY: "auto",
-  boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-};
 
 function getName(v: unknown): string {
   if (v && typeof v === "object" && "name" in v) return (v as { name: string }).name;
@@ -227,135 +206,123 @@ export function AdminHalqat() {
       )}
 
       {/* Add / Edit Modal */}
-      {modal && (
-        <div style={OVERLAY} onClick={() => setModal(null)}>
-          <div style={DIALOG} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text)" }}>
-                {modal.mode === "add" ? "إضافة حلقة جديدة" : "تعديل بيانات الحلقة"}
-              </h3>
-              <button className="topbar-btn btn-ghost" style={{ padding: "4px 8px" }} onClick={() => setModal(null)}>
-                <i className="ti ti-x" />
-              </button>
-            </div>
+      <Modal
+        open={!!modal}
+        onClose={() => setModal(null)}
+        title={modal?.mode === "add" ? "إضافة حلقة جديدة" : "تعديل بيانات الحلقة"}
+        maxWidth={480}
+      >
+        {formError && (
+          <div style={{ color: "#ef4444", fontSize: 13, marginBottom: 14, padding: "8px 12px", background: "#fef2f2", borderRadius: 8 }}>
+            {formError}
+          </div>
+        )}
 
-            {formError && (
-              <div style={{ color: "#ef4444", fontSize: 13, marginBottom: 14, padding: "8px 12px", background: "#fef2f2", borderRadius: 8 }}>
-                {formError}
-              </div>
-            )}
+        <div className="form-grid-2">
+          <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+            <label className="form-label">اسم الحلقة <span>*</span></label>
+            <input
+              className="form-input"
+              value={form.name}
+              onChange={(e) => setField("name", e.target.value)}
+              placeholder="حلقة النور"
+            />
+          </div>
 
-            <div className="form-grid-2">
-              <div className="form-group" style={{ gridColumn: "1 / -1" }}>
-                <label className="form-label">اسم الحلقة <span>*</span></label>
-                <input
-                  className="form-input"
-                  value={form.name}
-                  onChange={(e) => setField("name", e.target.value)}
-                  placeholder="حلقة النور"
-                />
-              </div>
+          <div className="form-group">
+            <label className="form-label">المعلم <span>*</span></label>
+            <select className="form-input" value={form.teacherId} onChange={(e) => setField("teacherId", e.target.value)}>
+              <option value="">اختر المعلم</option>
+              {teachers.map((t) => (
+                <option key={t._id} value={t._id}>{t.name}</option>
+              ))}
+            </select>
+          </div>
 
-              <div className="form-group">
-                <label className="form-label">المعلم <span>*</span></label>
-                <select className="form-input" value={form.teacherId} onChange={(e) => setField("teacherId", e.target.value)}>
-                  <option value="">اختر المعلم</option>
-                  {teachers.map((t) => (
-                    <option key={t._id} value={t._id}>{t.name}</option>
-                  ))}
-                </select>
-              </div>
+          <div className="form-group">
+            <label className="form-label">المسجد <span>*</span></label>
+            <select className="form-input" value={form.masjidId} onChange={(e) => setField("masjidId", e.target.value)}>
+              <option value="">اختر المسجد</option>
+              {masajid.map((m) => (
+                <option key={m._id} value={m._id}>{m.name}</option>
+              ))}
+            </select>
+          </div>
 
-              <div className="form-group">
-                <label className="form-label">المسجد <span>*</span></label>
-                <select className="form-input" value={form.masjidId} onChange={(e) => setField("masjidId", e.target.value)}>
-                  <option value="">اختر المسجد</option>
-                  {masajid.map((m) => (
-                    <option key={m._id} value={m._id}>{m.name}</option>
-                  ))}
-                </select>
-              </div>
+          <div className="form-group">
+            <label className="form-label">الأيام <span>*</span></label>
+            <input
+              className="form-input"
+              value={form.days}
+              onChange={(e) => setField("days", e.target.value)}
+              placeholder="السبت - الاثنين - الأربعاء"
+            />
+          </div>
 
-              <div className="form-group">
-                <label className="form-label">الأيام <span>*</span></label>
-                <input
-                  className="form-input"
-                  value={form.days}
-                  onChange={(e) => setField("days", e.target.value)}
-                  placeholder="السبت - الاثنين - الأربعاء"
-                />
-              </div>
+          <div className="form-group">
+            <label className="form-label">الوقت <span>*</span></label>
+            <input
+              className="form-input"
+              value={form.time}
+              onChange={(e) => setField("time", e.target.value)}
+              placeholder="17:00 - 18:30"
+              dir="ltr"
+            />
+          </div>
 
-              <div className="form-group">
-                <label className="form-label">الوقت <span>*</span></label>
-                <input
-                  className="form-input"
-                  value={form.time}
-                  onChange={(e) => setField("time", e.target.value)}
-                  placeholder="17:00 - 18:30"
-                  dir="ltr"
-                />
-              </div>
-
-              <div className="form-group" style={{ gridColumn: "1 / -1" }}>
-                <label className="form-label">الطاقة الاستيعابية</label>
-                <input
-                  className="form-input"
-                  type="number"
-                  min={1}
-                  value={form.capacity}
-                  onChange={(e) => setField("capacity", e.target.value)}
-                  placeholder="20"
-                />
-              </div>
-            </div>
-
-            <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-              <button
-                className="topbar-btn btn-primary"
-                style={{ flex: 1, justifyContent: "center", padding: 10 }}
-                onClick={handleSubmit}
-                disabled={isPending}
-              >
-                <i className="ti ti-check" />
-                {isPending ? "جارٍ الحفظ..." : "حفظ"}
-              </button>
-              <button className="topbar-btn btn-ghost" style={{ padding: "10px 20px" }} onClick={() => setModal(null)}>
-                إلغاء
-              </button>
-            </div>
+          <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+            <label className="form-label">الطاقة الاستيعابية</label>
+            <input
+              className="form-input"
+              type="number"
+              min={1}
+              value={form.capacity}
+              onChange={(e) => setField("capacity", e.target.value)}
+              placeholder="20"
+            />
           </div>
         </div>
-      )}
+
+        <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+          <button
+            className="topbar-btn btn-primary"
+            style={{ flex: 1, justifyContent: "center", padding: 10 }}
+            onClick={handleSubmit}
+            disabled={isPending}
+          >
+            <i className="ti ti-check" />
+            {isPending ? "جارٍ الحفظ..." : "حفظ"}
+          </button>
+          <button className="topbar-btn btn-ghost" style={{ padding: "10px 20px" }} onClick={() => setModal(null)}>
+            إلغاء
+          </button>
+        </div>
+      </Modal>
 
       {/* Delete Confirmation */}
-      {deleteId && (
-        <div style={OVERLAY} onClick={() => setDeleteId(null)}>
-          <div style={{ ...DIALOG, maxWidth: 360 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ textAlign: "center", marginBottom: 20 }}>
-              <i className="ti ti-alert-triangle" style={{ fontSize: 40, color: "#ef4444", display: "block" }} />
-              <h3 style={{ margin: "12px 0 6px", fontSize: 16, color: "var(--text)" }}>حذف الحلقة</h3>
-              <p style={{ margin: 0, fontSize: 13, color: "var(--text2)" }}>
-                سيتم حذف الحلقة نهائياً وهذا الإجراء لا يمكن التراجع عنه.
-              </p>
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button
-                className="topbar-btn btn-primary"
-                style={{ flex: 1, justifyContent: "center", background: "#ef4444", padding: 10 }}
-                onClick={handleDelete}
-                disabled={deleteHalqa.isPending}
-              >
-                <i className="ti ti-trash" />
-                {deleteHalqa.isPending ? "جارٍ الحذف..." : "حذف نهائياً"}
-              </button>
-              <button className="topbar-btn btn-ghost" style={{ padding: "10px 20px" }} onClick={() => setDeleteId(null)}>
-                إلغاء
-              </button>
-            </div>
-          </div>
+      <Modal open={!!deleteId} onClose={() => setDeleteId(null)} maxWidth={360}>
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <i className="ti ti-alert-triangle" style={{ fontSize: 40, color: "#ef4444", display: "block" }} />
+          <h3 style={{ margin: "12px 0 6px", fontSize: 16, color: "var(--text)" }}>حذف الحلقة</h3>
+          <p style={{ margin: 0, fontSize: 13, color: "var(--text2)" }}>
+            سيتم حذف الحلقة نهائياً وهذا الإجراء لا يمكن التراجع عنه.
+          </p>
         </div>
-      )}
+        <div style={{ display: "flex", gap: 10 }}>
+          <button
+            className="topbar-btn btn-primary"
+            style={{ flex: 1, justifyContent: "center", background: "#ef4444", padding: 10 }}
+            onClick={handleDelete}
+            disabled={deleteHalqa.isPending}
+          >
+            <i className="ti ti-trash" />
+            {deleteHalqa.isPending ? "جارٍ الحذف..." : "حذف نهائياً"}
+          </button>
+          <button className="topbar-btn btn-ghost" style={{ padding: "10px 20px" }} onClick={() => setDeleteId(null)}>
+            إلغاء
+          </button>
+        </div>
+      </Modal>
     </>
   );
 }

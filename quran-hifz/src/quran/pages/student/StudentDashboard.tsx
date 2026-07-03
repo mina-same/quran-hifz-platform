@@ -38,7 +38,7 @@ export function StudentDashboard() {
     return (
       <>
         <SkeletonStatsRow />
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+        <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
           <SkeletonCard lines={4} />
           <SkeletonCard lines={3} />
         </div>
@@ -66,7 +66,7 @@ export function StudentDashboard() {
           { num: "٢",                                 label: "أيام للموعد القادم",   icon: "ti-clock" },
         ]}
       />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+      <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
         {/* خطتي الحالية */}
         <Card icon="ti-book" title="خطتي الحالية">
           <div style={{ textAlign: "center", padding: "8px 0" }}>

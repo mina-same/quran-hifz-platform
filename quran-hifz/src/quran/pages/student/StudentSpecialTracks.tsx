@@ -1,9 +1,16 @@
+import { useState } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { useSpecialTracks, type SpecialTrack, type TrackTeacher } from "../../api/special-tracks";
+import { useQuranPlans } from "../../api/quran-plans";
+import { SURAHS } from "../../data/surahs";
+
+function surahName(n: number) {
+  return SURAHS.find((s) => s.number === n)?.name ?? "";
+}
 
 const STATUS_LABEL: Record<string, string> = {
   active:   "نشط الآن",
@@ -39,12 +46,12 @@ function daysLeft(endDate: string): number {
 
 function TrackCard({ track }: { track: SpecialTrack }) {
   const days = daysLeft(track.endDate);
+  const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: track._id });
+  const linkedPlan = linkedPlans[0];
+  const [planOpen, setPlanOpen] = useState(false);
 
   return (
-    <div style={{
-      border: "1px solid var(--border)", borderRadius: 16,
-      overflow: "hidden", background: "var(--surface)",
-    }}>
+    <div className="track-card">
       {/* Colored top bar */}
       <div style={{
         height: 5,
@@ -83,7 +90,7 @@ function TrackCard({ track }: { track: SpecialTrack }) {
         </h3>
 
         {/* Info grid */}
-        <div style={{
+        <div className="grid-collapse" style={{
           display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 16px",
           fontSize: 13, color: "var(--text2)",
         }}>
@@ -162,6 +169,58 @@ function TrackCard({ track }: { track: SpecialTrack }) {
             </span>
           )}
         </div>
+
+        {/* Linked Quran plan (collapsible) */}
+        {linkedPlan && (
+          <div style={{
+            marginTop: 12, borderRadius: 10, padding: "10px 12px",
+            background: linkedPlan.todayAssignment ? "var(--green-pale)" : "var(--cream)",
+          }}>
+            <div
+              onClick={() => setPlanOpen((o) => !o)}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8, cursor: "pointer" }}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, fontWeight: 700, color: linkedPlan.todayAssignment ? "var(--green)" : "var(--text3)" }}>
+                <i className="ti ti-target" />{linkedPlan.name}
+                {linkedPlan.progress && (
+                  <span style={{ background: "var(--green)", color: "#fff", borderRadius: 99, padding: "1px 8px", fontSize: 10 }}>
+                    {linkedPlan.progress.percent}%
+                  </span>
+                )}
+              </span>
+              <i className={`ti ti-chevron-${planOpen ? "up" : "down"}`} style={{ fontSize: 13, color: "var(--text3)" }} />
+            </div>
+
+            {planOpen && (
+              <div style={{ marginTop: 8 }}>
+                {linkedPlan.progress && (
+                  <div style={{ marginBottom: 6 }}>
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{ width: `${linkedPlan.progress.percent}%` }} />
+                    </div>
+                    <div style={{ fontSize: 10, color: "var(--text3)", marginTop: 3 }}>
+                      {linkedPlan.juzProgress
+                        ? `${linkedPlan.juzProgress.completed} / ${linkedPlan.juzProgress.total} جزء`
+                        : ""}
+                      {" · "}{linkedPlan.progress.completed} / {linkedPlan.progress.total} يوم
+                    </div>
+                  </div>
+                )}
+                <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
+                  {linkedPlan.todayAssignment ? (
+                    <>
+                      مقرَّر اليوم: {surahName(linkedPlan.todayAssignment.surahStart)} : {linkedPlan.todayAssignment.ayahStart}
+                      {" — "}
+                      {surahName(linkedPlan.todayAssignment.surahEnd)} : {linkedPlan.todayAssignment.ayahEnd}
+                    </>
+                  ) : (
+                    <span style={{ fontWeight: 400, color: "var(--text3)" }}>لا يوجد جزء مخصص لليوم</span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Meet link */}
         {track.isOnline && track.meetLink && track.status === "active" && (
@@ -249,7 +308,7 @@ export function StudentSpecialTracks() {
                   {active.length}
                 </span>
               </h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(380px,1fr))", gap: 16 }}>
                 {active.map((t) => <TrackCard key={t._id} track={t} />)}
               </div>
             </div>
@@ -267,7 +326,7 @@ export function StudentSpecialTracks() {
                   {upcoming.length}
                 </span>
               </h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(380px,1fr))", gap: 16 }}>
                 {upcoming.map((t) => <TrackCard key={t._id} track={t} />)}
               </div>
             </div>
@@ -285,7 +344,7 @@ export function StudentSpecialTracks() {
                   {ended.length}
                 </span>
               </h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14, opacity: 0.7 }}>
+              <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(380px,1fr))", gap: 16, opacity: 0.7 }}>
                 {ended.map((t) => <TrackCard key={t._id} track={t} />)}
               </div>
             </div>

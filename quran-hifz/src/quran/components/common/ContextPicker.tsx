@@ -68,7 +68,7 @@ export function ContextPicker({
       {heading && (
         <p style={{ margin: "0 0 14px", fontSize: 13, color: "var(--text2)" }}>{heading}</p>
       )}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+      <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
       {contexts.map((ctx) => (
         <div
           key={`${ctx.kind}-${ctx.id}`}

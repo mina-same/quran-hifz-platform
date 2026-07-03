@@ -38,37 +38,63 @@ export function StudentAttendance() {
       <Card>
         {isLoading && <SkeletonTable cols={4} rows={5} />}
         {!isLoading && (
-          <div className="tbl-wrap">
-            <table className="tbl">
-              <thead>
-                <tr>
-                  <th>التاريخ</th>
-                  <th>اليوم</th>
-                  <th>الوقت</th>
-                  <th>الحالة</th>
-                </tr>
-              </thead>
-              <tbody>
-                {records.map((r) => (
-                  <tr key={r._id}>
-                    <td>{new Date(r.date).toLocaleDateString("ar-SA")}</td>
-                    <td>{r.day}</td>
-                    <td>{r.time || "—"}</td>
-                    <td>
-                      <Badge tone={STATUS_TONE[r.status] ?? "gray"}>{r.status}</Badge>
-                    </td>
-                  </tr>
-                ))}
-                {records.length === 0 && (
+          <>
+            <div className="tbl-wrap">
+              <table className="tbl">
+                <thead>
                   <tr>
-                    <td colSpan={4} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                      لا توجد سجلات حضور بعد
-                    </td>
+                    <th>التاريخ</th>
+                    <th>اليوم</th>
+                    <th>الوقت</th>
+                    <th>الحالة</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {records.map((r) => (
+                    <tr key={r._id}>
+                      <td>{new Date(r.date).toLocaleDateString("ar-SA")}</td>
+                      <td>{r.day}</td>
+                      <td>{r.time || "—"}</td>
+                      <td>
+                        <Badge tone={STATUS_TONE[r.status] ?? "gray"}>{r.status}</Badge>
+                      </td>
+                    </tr>
+                  ))}
+                  {records.length === 0 && (
+                    <tr>
+                      <td colSpan={4} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                        لا توجد سجلات حضور بعد
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="rc-list">
+              {records.map((r) => (
+                <div key={r._id} className="rc-card">
+                  <div className="rc-card-head">
+                    <span className="rc-card-title">{new Date(r.date).toLocaleDateString("ar-SA")}</span>
+                    <Badge tone={STATUS_TONE[r.status] ?? "gray"}>{r.status}</Badge>
+                  </div>
+                  <div className="rc-row">
+                    <span className="rc-row-label">اليوم</span>
+                    <span>{r.day}</span>
+                  </div>
+                  <div className="rc-row">
+                    <span className="rc-row-label">الوقت</span>
+                    <span>{r.time || "—"}</span>
+                  </div>
+                </div>
+              ))}
+              {records.length === 0 && (
+                <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                  لا توجد سجلات حضور بعد
+                </div>
+              )}
+            </div>
+          </>
         )}
       </Card>
     </>

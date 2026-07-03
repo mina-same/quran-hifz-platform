@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { QuranPlan } from '../models/QuranPlan.model';
 import { AppError } from '../middleware/error';
 import { SURAHS } from '../data/surahs';
-import { WEEK_DAYS, computeTodayAssignment } from '../lib/quranRange';
+import { WEEK_DAYS, computeTodayAssignment, computePlanProgress, computeJuzProgress, computeScheduleBreakdown } from '../lib/quranRange';
 
 const SURAH_BY_NUMBER = new Map(SURAHS.map((s) => [s.number, s]));
 
@@ -84,17 +84,22 @@ const quranPlanCreateSchema = quranPlanSchema.superRefine((data, ctx) => {
 
 function withTodayAssignment(plan: InstanceType<typeof QuranPlan>) {
   const obj = plan.toObject();
+  const scheduleInput = {
+    days:            plan.days,
+    startDate:       plan.startDate,
+    endType:         plan.endType,
+    activeDaysCount: plan.activeDaysCount,
+    endDate:         plan.endDate,
+    rangeStart:      plan.rangeStart,
+    rangeEnd:        plan.rangeEnd,
+  };
+  const progress = computePlanProgress(scheduleInput);
   return {
     ...obj,
-    todayAssignment: computeTodayAssignment({
-      days:            plan.days,
-      startDate:       plan.startDate,
-      endType:         plan.endType,
-      activeDaysCount: plan.activeDaysCount,
-      endDate:         plan.endDate,
-      rangeStart:      plan.rangeStart,
-      rangeEnd:        plan.rangeEnd,
-    }),
+    todayAssignment: computeTodayAssignment(scheduleInput),
+    progress,
+    juzProgress:     computeJuzProgress(scheduleInput, progress),
+    schedule:        computeScheduleBreakdown(scheduleInput),
   };
 }
 

@@ -8,9 +8,15 @@ import {
 import { useTeachers } from "../../api/teachers";
 import { useMasajid } from "../../api/masajid";
 import { useStudents } from "../../api/students";
+import { useQuranPlans } from "../../api/quran-plans";
+import { SURAHS } from "../../data/surahs";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { FormSection } from "../../components/common/FormSection";
+
+function surahName(n: number) {
+  return SURAHS.find((s) => s.number === n)?.name ?? "";
+}
 
 /* ─── helpers ─────────────────────────────────────────────── */
 function getEnrolledId(v: EnrolledStudent | string)  { return typeof v === "object" ? v._id  : v; }
@@ -686,13 +692,12 @@ function TrackCard({
   const pct      = Math.min(100, Math.round((enrolled / t.maxStudents) * 100));
   const barClr   = pct >= 90 ? "#ef4444" : pct >= 70 ? "#f59e0b" : "var(--green)";
 
+  const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: t._id });
+  const linkedPlan = linkedPlans[0];
+  const [planOpen, setPlanOpen] = useState(false);
+
   return (
-    <div style={{
-      background: "var(--surface)", borderRadius: 16,
-      border: "1px solid var(--border)",
-      overflow: "hidden",
-      transition: "box-shadow .2s",
-    }}>
+    <div className="track-card">
       {/* coloured top strip */}
       <div style={{ height: 4, background: cfg.bar }} />
 
@@ -745,7 +750,7 @@ function TrackCard({
         <h3 style={{ margin: "10px 0 12px", fontSize: 15, fontWeight: 800, color: "var(--text)" }}>{t.title}</h3>
 
         {/* info grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12, color: "var(--text2)", marginBottom: 12 }}>
+        <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12, color: "var(--text2)", marginBottom: 12 }}>
           <InfoRow icon="ti-clock"    label="الوقت"    val={t.timeSlot} />
           <InfoRow icon="ti-calendar-repeat" label="الأيام" val={t.daysPerWeek} />
           <InfoRow icon="ti-calendar" label="البداية"  val={fmtDate(t.startDate)} />
@@ -801,6 +806,61 @@ function TrackCard({
           <div style={{ height: 6, background: "var(--border)", borderRadius: 99, overflow: "hidden" }}>
             <div style={{ height: "100%", width: `${pct}%`, background: barClr, borderRadius: 99, transition: "width .4s" }} />
           </div>
+        </div>
+
+        {/* linked Quran plan (collapsible) */}
+        <div style={{
+          marginTop: 12, borderRadius: 10, padding: "10px 12px",
+          background: linkedPlan?.todayAssignment ? "var(--green-pale)" : "var(--cream)",
+        }}>
+          <div
+            onClick={() => linkedPlan && setPlanOpen((o) => !o)}
+            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8, cursor: linkedPlan ? "pointer" : "default" }}
+          >
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, fontWeight: 700, color: linkedPlan?.todayAssignment ? "var(--green)" : "var(--text3)" }}>
+              <i className="ti ti-target" />الخطة القرآنية
+              {linkedPlan?.progress && (
+                <span style={{ background: "var(--green)", color: "#fff", borderRadius: 99, padding: "1px 8px", fontSize: 10 }}>
+                  {linkedPlan.progress.percent}%
+                </span>
+              )}
+            </span>
+            {linkedPlan && <i className={`ti ti-chevron-${planOpen ? "up" : "down"}`} style={{ fontSize: 13, color: "var(--text3)" }} />}
+          </div>
+
+          {linkedPlan && planOpen && (
+            <div style={{ marginTop: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>{linkedPlan.name}</div>
+
+              {linkedPlan.progress && (
+                <div style={{ margin: "6px 0" }}>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: `${linkedPlan.progress.percent}%` }} />
+                  </div>
+                  <div style={{ fontSize: 10, color: "var(--text3)", marginTop: 3 }}>
+                    {linkedPlan.juzProgress
+                      ? `${linkedPlan.juzProgress.completed} / ${linkedPlan.juzProgress.total} جزء`
+                      : ""}
+                    {" · "}{linkedPlan.progress.completed} / {linkedPlan.progress.total} يوم
+                  </div>
+                </div>
+              )}
+
+              <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2 }}>
+                {linkedPlan.todayAssignment ? (
+                  <>
+                    مقرَّر اليوم: {surahName(linkedPlan.todayAssignment.surahStart)} : {linkedPlan.todayAssignment.ayahStart}
+                    {" — "}
+                    {surahName(linkedPlan.todayAssignment.surahEnd)} : {linkedPlan.todayAssignment.ayahEnd}
+                  </>
+                ) : "لا يوجد جزء مخصص لليوم"}
+              </div>
+            </div>
+          )}
+
+          {!linkedPlan && (
+            <p style={{ margin: "6px 0 0", fontSize: 11, color: "var(--text3)" }}>لا توجد خطة حفظ مرتبطة بهذا المسار</p>
+          )}
         </div>
 
         {/* meet link */}

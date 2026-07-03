@@ -15,7 +15,7 @@ function PageLoading() {
   return (
     <>
       <SkeletonStatsRow />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+      <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
         <SkeletonCard lines={4} />
         <SkeletonCard lines={4} />
       </div>
@@ -75,7 +75,7 @@ export function AdminDashboard() {
           { num: pct(stats?.avgAttendancePct ?? 0), label: "نسبة الحضور", icon: "ti-calendar-check" },
         ]}
       />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+      <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
         <Card icon="ti-chart-pie" title="توزيع المسارات">
           {masarRows.length === 0 ? (
             <div className="page-loading">لا توجد بيانات</div>

@@ -14,7 +14,7 @@ import type { PortalKey } from "./config/portals";
 
 function AppShell() {
   const { user } = useAuth();
-  const { portal, enterPortal } = usePortal();
+  const { portal, enterPortal, isSidebarOpen } = usePortal();
 
   useEffect(() => {
     if (user && !portal) {
@@ -25,7 +25,7 @@ function AppShell() {
   if (!portal) return null;
 
   return (
-    <div id="app" style={{ display: "block" }}>
+    <div id="app" className={isSidebarOpen ? "sidebar-open" : ""} style={{ display: "block" }}>
       <Sidebar />
       <div className="main">
         <Topbar />

@@ -85,7 +85,10 @@ export function TeacherAttendance() {
     );
   }
 
-  // ── View 2: attendance table ───────────────────────────────────────
+  // ── View 2: attendance list ───────────────────────────────────────
+  const presentCount = students.filter((s) => (statuses[s._id] ?? "حاضر") === "حاضر").length;
+  const absentCount = students.length - presentCount;
+
   return (
     <>
       <Card
@@ -99,54 +102,64 @@ export function TeacherAttendance() {
           <SkeletonTable cols={3} rows={5} />
         )}
         {!loadingStudents && (
-          <div className="tbl-wrap">
-            <table className="tbl">
-              <thead>
-                <tr>
-                  <th>الطالب</th>
-                  <th>آخر حفظ</th>
-                  <th>الحضور</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((s) => {
-                  const status = statuses[s._id] ?? "حاضر";
-                  return (
-                    <tr key={s._id}>
-                      <td style={{ fontWeight: 600 }}>{s.name}</td>
-                      <td style={{ fontSize: 12, color: "var(--text2)" }}>{s.lastMemorization || "—"}</td>
-                      <td>
-                        <div style={{ display: "flex", gap: 8 }}>
-                          {["حاضر", "غائب", "متأخر"].map((opt) => (
-                            <label
-                              key={opt}
-                              style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", fontSize: 12 }}
-                            >
-                              <input
-                                type="radio"
-                                name={`att-${s._id}`}
-                                value={opt}
-                                checked={status === opt}
-                                onChange={() => setStatus(s._id, opt)}
-                              />
-                              {opt}
-                            </label>
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {students.length === 0 && (
-                  <tr>
-                    <td colSpan={3} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                      لا يوجد طلاب
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {students.length > 0 && (
+              <div className="att-summary">
+                <span className="att-chip">
+                  <i className="ti ti-check" /> حاضر: {presentCount}
+                </span>
+                <span className="att-chip absent">
+                  <i className="ti ti-x" /> غائب: {absentCount}
+                </span>
+                <button
+                  className="att-mark-all"
+                  onClick={() => {
+                    const all: Record<string, string> = {};
+                    students.forEach((s) => { all[s._id] = "حاضر"; });
+                    setStatuses(all);
+                  }}
+                >
+                  <i className="ti ti-checks" /> تحديد الكل حاضر
+                </button>
+              </div>
+            )}
+            <div className="att-list">
+              {students.map((s) => {
+                const status = statuses[s._id] ?? "حاضر";
+                const isAbsent = status === "غائب";
+                return (
+                  <div key={s._id} className={`att-row ${isAbsent ? "is-absent" : ""}`}>
+                    <div className="att-avatar">{s.name.trim().charAt(0)}</div>
+                    <div className="att-info">
+                      <div className="att-name">{s.name}</div>
+                      <div className="att-sub">آخر حفظ: {s.lastMemorization || "—"}</div>
+                    </div>
+                    <div className="att-toggle">
+                      <button
+                        type="button"
+                        className={status === "حاضر" ? "active present" : ""}
+                        onClick={() => setStatus(s._id, "حاضر")}
+                      >
+                        <i className="ti ti-check" /> حاضر
+                      </button>
+                      <button
+                        type="button"
+                        className={isAbsent ? "active absent" : ""}
+                        onClick={() => setStatus(s._id, "غائب")}
+                      >
+                        <i className="ti ti-x" /> غائب
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              {students.length === 0 && (
+                <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                  لا يوجد طلاب
+                </div>
+              )}
+            </div>
+          </>
         )}
       </Card>
       {bulkAttendance.isSuccess && (

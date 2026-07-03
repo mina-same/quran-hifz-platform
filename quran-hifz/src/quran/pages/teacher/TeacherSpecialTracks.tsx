@@ -4,9 +4,15 @@ import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { useSpecialTracks, type SpecialTrack, type EnrolledStudent, type TrackTeacher } from "../../api/special-tracks";
+import { useQuranPlans, PLAN_PREFILL_TRACK_KEY } from "../../api/quran-plans";
+import { SURAHS } from "../../data/surahs";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 
-type TrackCardProps = { track: SpecialTrack; onStudents?: () => void; onAttendance?: () => void };
+type TrackCardProps = { track: SpecialTrack; onAttendance?: () => void; onConnectPlan?: () => void };
+
+function surahName(n: number) {
+  return SURAHS.find((s) => s.number === n)?.name ?? "";
+}
 
 /* ─── helpers ─── */
 function getEnrolledName(v: EnrolledStudent | string) { return typeof v === "object" ? v.name : v; }
@@ -32,19 +38,20 @@ const STATUS_CFG = {
 };
 
 /* ─── Track card ─── */
-function TrackCard({ track, onStudents, onAttendance }: TrackCardProps) {
+function TrackCard({ track, onAttendance, onConnectPlan }: TrackCardProps) {
   const [open, setOpen] = useState(track.status === "active");
+  const [planOpen, setPlanOpen] = useState(false);
 
   const cfg      = STATUS_CFG[track.status];
   const enrolled = track.enrolledStudents.length;
   const pct      = Math.min(100, Math.round((enrolled / track.maxStudents) * 100));
   const barClr   = pct >= 90 ? "#ef4444" : pct >= 70 ? "#f59e0b" : "var(--green)";
 
+  const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: track._id });
+  const linkedPlan = linkedPlans[0];
+
   return (
-    <div style={{
-      border: "1px solid var(--border)", borderRadius: 16,
-      overflow: "hidden", background: "var(--surface)",
-    }}>
+    <div className="track-card">
       {/* coloured strip */}
       <div style={{ height: 4, background: cfg.bar }} />
 
@@ -64,31 +71,20 @@ function TrackCard({ track, onStudents, onAttendance }: TrackCardProps) {
         <h3 style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 800, color: "var(--text)" }}>{track.title}</h3>
 
         {/* action buttons */}
-        {(onStudents || onAttendance) && (
+        {onAttendance && (
           <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-            {onStudents && (
-              <button
-                className="topbar-btn btn-ghost"
-                style={{ flex: 1, justifyContent: "center", fontSize: 11 }}
-                onClick={onStudents}
-              >
-                <i className="ti ti-users" /> الطلاب
-              </button>
-            )}
-            {onAttendance && (
-              <button
-                className="topbar-btn btn-primary"
-                style={{ flex: 1, justifyContent: "center", fontSize: 11 }}
-                onClick={onAttendance}
-              >
-                <i className="ti ti-calendar-check" /> الحضور
-              </button>
-            )}
+            <button
+              className="topbar-btn btn-primary"
+              style={{ flex: 1, justifyContent: "center", fontSize: 11 }}
+              onClick={onAttendance}
+            >
+              <i className="ti ti-calendar-check" /> تسجيل الحضور
+            </button>
           </div>
         )}
 
         {/* info grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", fontSize: 12, marginBottom: 14 }}>
+        <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", fontSize: 12, marginBottom: 14 }}>
           {[
             { icon: "ti-clock",          label: "الوقت",    val: track.timeSlot },
             { icon: "ti-calendar-repeat",label: "الأيام",   val: track.daysPerWeek },
@@ -154,6 +150,75 @@ function TrackCard({ track, onStudents, onAttendance }: TrackCardProps) {
           <div style={{ height: 6, background: "var(--border)", borderRadius: 99, overflow: "hidden" }}>
             <div style={{ height: "100%", width: `${pct}%`, background: barClr, borderRadius: 99, transition: "width .4s" }} />
           </div>
+        </div>
+
+        {/* linked Quran plan (collapsible) */}
+        <div style={{
+          borderRadius: 10, padding: "10px 12px", marginBottom: 14,
+          background: linkedPlan?.todayAssignment ? "var(--green-pale)" : "var(--cream)",
+        }}>
+          <div
+            onClick={() => linkedPlan && setPlanOpen((o) => !o)}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8,
+              cursor: linkedPlan ? "pointer" : "default",
+            }}
+          >
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, fontWeight: 700, color: linkedPlan?.todayAssignment ? "var(--green)" : "var(--text3)" }}>
+              <i className="ti ti-target" />الخطة القرآنية
+              {linkedPlan?.progress && (
+                <span style={{ background: "var(--green)", color: "#fff", borderRadius: 99, padding: "1px 8px", fontSize: 10 }}>
+                  {linkedPlan.progress.percent}%
+                </span>
+              )}
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {onConnectPlan && (
+                <button
+                  className="topbar-btn btn-ghost"
+                  style={{ padding: "2px 9px", fontSize: 10 }}
+                  onClick={(e) => { e.stopPropagation(); onConnectPlan(); }}
+                >
+                  <i className="ti ti-plus" /> {linkedPlan ? "خطة أخرى" : "ربط خطة"}
+                </button>
+              )}
+              {linkedPlan && <i className={`ti ti-chevron-${planOpen ? "up" : "down"}`} style={{ fontSize: 13, color: "var(--text3)" }} />}
+            </span>
+          </div>
+
+          {linkedPlan && planOpen && (
+            <div style={{ marginTop: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>{linkedPlan.name}</div>
+
+              {linkedPlan.progress && (
+                <div style={{ margin: "6px 0" }}>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: `${linkedPlan.progress.percent}%` }} />
+                  </div>
+                  <div style={{ fontSize: 10, color: "var(--text3)", marginTop: 3 }}>
+                    {linkedPlan.juzProgress
+                      ? `${linkedPlan.juzProgress.completed} / ${linkedPlan.juzProgress.total} جزء`
+                      : ""}
+                    {" · "}{linkedPlan.progress.completed} / {linkedPlan.progress.total} يوم
+                  </div>
+                </div>
+              )}
+
+              <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2 }}>
+                {linkedPlan.todayAssignment ? (
+                  <>
+                    مقرَّر اليوم: {surahName(linkedPlan.todayAssignment.surahStart)} : {linkedPlan.todayAssignment.ayahStart}
+                    {" — "}
+                    {surahName(linkedPlan.todayAssignment.surahEnd)} : {linkedPlan.todayAssignment.ayahEnd}
+                  </>
+                ) : "لا يوجد جزء مخصص لليوم"}
+              </div>
+            </div>
+          )}
+
+          {!linkedPlan && (
+            <p style={{ margin: "6px 0 0", fontSize: 11, color: "var(--text3)" }}>لا توجد خطة حفظ مرتبطة بهذا المسار بعد</p>
+          )}
         </div>
 
         {/* meet link */}
@@ -254,6 +319,11 @@ export function TeacherSpecialTracks() {
   const upcoming = tracks.filter((t) => t.status === "upcoming");
   const ended    = tracks.filter((t) => t.status === "ended");
 
+  function connectPlan(trackId: string) {
+    sessionStorage.setItem(PLAN_PREFILL_TRACK_KEY, trackId);
+    showPage("plans");
+  }
+
   function Section({ title, color, items }: { title: string; color: string; items: SpecialTrack[] }) {
     if (!items.length) return null;
     return (
@@ -265,13 +335,13 @@ export function TeacherSpecialTracks() {
             {items.length}
           </span>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(380px,1fr))", gap: 16 }}>
           {items.map((t) => (
             <TrackCard
               key={t._id}
               track={t}
-              onStudents={() => showPage("students")}
               onAttendance={() => showPage("attendance")}
+              onConnectPlan={() => connectPlan(t._id)}
             />
           ))}
         </div>

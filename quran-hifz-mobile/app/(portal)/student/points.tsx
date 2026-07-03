@@ -10,8 +10,8 @@ const MY_PTS = 740;
 const NEXT   = 1000;
 
 const STATS = [
-  { label: 'نقطة مكتسبة',         value: String(MY_PTS),       color: theme.green },
-  { label: 'للمستوى التالي',       value: String(NEXT - MY_PTS), color: theme.gold },
+  { label: 'نقطة مكتسبة',         value: '٧٤٠',                 color: theme.green },
+  { label: 'للمستوى التالي',       value: '٢٦٠',                 color: theme.gold },
   { label: 'مرتبتك في الحلقة',    value: '١',                   color: '#3B82F6' },
   { label: 'مستواك',               value: 'نجم ⭐',             color: theme.green },
 ];

@@ -2,6 +2,7 @@
 
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
+| 2026-07-03 | Arabic Fusha audit: fixed Egyptian-dialect phrase "من فين لفين" in plan range label; fixed digit-system mix (Western vs Arabic-Indic ٠-٩) within same stat rows; fixed "متجر الأدوات"→"متجر المكافآت" nav/page title mismatch | quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx, .../student/StudentPoints.tsx, .../parent/ParentDashboard.tsx, .../parent/ParentAttendance.tsx, .../config/portals.ts, quran-hifz-mobile/app/(portal)/student/points.tsx | complete | ~1200 |
 | 2026-07-02 14:09 | Replaced all "جارٍ التحميل..." spinner loading states across web app with skeleton placeholders (shimmer via new .skl CSS class); built shared Skeleton.tsx primitive library (Skeleton, SkeletonStatsRow, SkeletonTable, SkeletonCard, SkeletonCardGrid, SkeletonList); applied via 4 parallel subagents across admin/teacher/parent/student portals; build verified clean | Skeleton.tsx (new), quran.css, AdminDashboard/Halqat/Kpis/Masajid/Parents/SpecialTracks/Students/Teachers.tsx, TeacherAttendance/GroupHomework/Halqa/Homework/RecordLesson/SpecialTracks/Students.tsx, ParentAttendance/HomeworkView/Messages/Recordings/Timeline.tsx, StudentAttendance/Dashboard/Hifz/Messages/Schedule/SpecialTracks.tsx | complete | ~13000 |
 | 2026-07-01 | Added dark mode system + sidebar toggle + landing page redesign | ThemeContext.tsx (new), QuranApp.tsx, Sidebar.tsx, PortalScreen.tsx, quran.css | complete | ~4800 |
 | 2026-07-01 16:49 | UI/UX pro-max: improved students modal (capacity bar, initials avatars, search filter, dashed add section) + tabs underline indicator in TeacherStudents | AdminSpecialTracks.tsx, TeacherStudents.tsx | complete | ~1800 |
@@ -780,3 +781,183 @@
 | 12:55 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/bbd609da-d480-4381-aa1d-3b8d4fbbf3f3/scratchpad/drive3.mjs | 6→9 lines | ~143 |
 | 12:56 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/bbd609da-d480-4381-aa1d-3b8d4fbbf3f3/scratchpad/drive3.mjs | 2→1 lines | ~12 |
 | 12:56 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/bbd609da-d480-4381-aa1d-3b8d4fbbf3f3/scratchpad/drive3.mjs | 4→4 lines | ~60 |
+| 13:00 | Session summary: built teacher "خطة قرآنية" plan builder end-to-end — 114-surah dataset (dual-sourced, verified), quranRange.ts today's-portion math, QuranPlan model/controller/routes (halqa/students/specialTrack targets, points system), quran-plans.ts API hooks, DaysOfWeekPicker/SurahRangePicker/FormSection components, TeacherPlans.tsx rewrite with modal form + live cards, 3 additive demo plans seeded via API. Verified via curl (create/list/update/delete/validation) and Playwright E2E (full CRUD cycle, screenshots). Discovered pre-existing unrelated bug (SSR localStorage + update-depth loop on every page, logged as bug-100, not fixed — out of scope). | quran-hifz-server/{data,lib,models,controllers,routes}/*, quran-hifz/src/quran/{data,api,components/common,pages/teacher,config}/* | success | ~large |
+
+## Session: 2026-07-03 13:28
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-03 13:29
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-03 13:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:47 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | "نطاق الحفظ — من فين لفين" → "نطاق الحفظ (من - إلى)" | ~21 |
+| 13:47 | Session end: 1 writes across 1 files (TeacherPlans.tsx) | 9 reads | ~28325 tok |
+| 13:49 | Session end: 1 writes across 1 files (TeacherPlans.tsx) | 11 reads | ~34861 tok |
+| 13:50 | Edited quran-hifz/src/quran/quran.css | CSS: transition | ~82 |
+| 13:50 | Edited quran-hifz/src/quran/quran.css | expanded (+15 lines) | ~154 |
+| 13:51 | Edited quran-hifz/src/quran/quran.css | expanded (+9 lines) | ~212 |
+| 13:51 | Edited quran-hifz/src/quran/quran.css | modified media() | ~439 |
+| 13:51 | Edited quran-hifz/src/quran/context/PortalContext.tsx | CSS: isSidebarOpen, toggleSidebar, closeSidebar | ~98 |
+| 13:51 | Edited quran-hifz/src/quran/context/PortalContext.tsx | 3→4 lines | ~81 |
+| 13:51 | Edited quran-hifz/src/quran/context/PortalContext.tsx | expanded (+8 lines) | ~210 |
+| 13:51 | Edited quran-hifz/src/quran/quran.css | expanded (+15 lines) | ~164 |
+| 13:51 | Edited quran-hifz/src/quran/QuranApp.tsx | modified AppShell() | ~158 |
+| 13:51 | Edited quran-hifz/src/quran/components/Sidebar.tsx | modified Sidebar() | ~152 |
+| 13:51 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | added optional chaining | ~234 |
+| 13:52 | Edited quran-hifz/src/quran/components/Sidebar.tsx | 6→7 lines | ~40 |
+| 13:52 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | 7→5 lines | ~61 |
+| 13:52 | Edited quran-hifz/src/quran/components/Topbar.tsx | modified Topbar() | ~157 |
+| 13:52 | Edited quran-hifz/src/quran/api/quran-plans.ts | 2→7 lines | ~119 |
+| 13:52 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | CSS: data, specialTrack | ~174 |
+| 13:52 | Edited quran-hifz/src/quran/quran.css | CSS: gridTemplateColumns | ~67 |
+| 13:52 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | added optional chaining | ~593 |
+| 13:52 | Edited quran-hifz/src/quran/quran.css | 3→3 lines | ~19 |
+| 13:53 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | CSS: trackId, gridTemplateColumns | ~408 |
+| 13:53 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | added optional chaining | ~165 |
+| 13:53 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | CSS: data, specialTrack | ~83 |
+| 13:53 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | 5→5 lines | ~60 |
+| 13:53 | Edited quran-hifz/src/quran/pages/student/StudentSchedule.tsx | 7→8 lines | ~73 |
+| 13:53 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | expanded (+23 lines) | ~336 |
+| 13:53 | Edited quran-hifz/src/quran/pages/student/StudentStore.tsx | "grid" → "grid-collapse" | ~33 |
+| 13:53 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | CSS: gridTemplateColumns | ~60 |
+| 13:54 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | CSS: gridTemplateColumns | ~61 |
+| 13:54 | Edited quran-hifz/src/quran/pages/student/StudentHifz.tsx | 2→2 lines | ~44 |
+| 13:54 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | CSS: gridTemplateColumns | ~64 |
+| 13:54 | Edited quran-hifz/src/quran/pages/student/StudentDashboard.tsx | "grid" → "grid-collapse" | ~31 |
+| 13:54 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | 8→9 lines | ~122 |
+| 13:54 | Edited quran-hifz/src/quran/pages/student/StudentDashboard.tsx | "grid" → "grid-collapse" | ~31 |
+| 13:54 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | CSS: button, targetType, specialTrack | ~156 |
+| 13:54 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | "grid" → "grid-collapse" | ~32 |
+| 13:54 | Edited quran-hifz/src/quran/pages/student/StudentPoints.tsx | 2→2 lines | ~46 |
+| 13:54 | Edited quran-hifz/src/quran/pages/admin/AdminDashboard.tsx | 3→3 lines | ~51 |
+| 13:54 | Edited quran-hifz/src/quran/pages/admin/AdminDashboard.tsx | 2→2 lines | ~47 |
+
+## Session: 2026-07-03 13:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:54 | Edited quran-hifz/src/quran/pages/parent/ParentDashboard.tsx | 2→2 lines | ~40 |
+| 13:55 | Edited quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | 2→2 lines | ~44 |
+| 13:55 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | "grid" → "grid-collapse" | ~49 |
+| 13:55 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | "grid" → "grid-collapse" | ~49 |
+| 13:55 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | "grid" → "grid-collapse" | ~43 |
+| 13:55 | Edited quran-hifz/src/quran/components/common/ContextPicker.tsx | "grid" → "grid-collapse" | ~31 |
+| 13:56 | Linked Quran plans to Special Tracks pages: redesigned track cards (grid layout, .track-card hover), added linked-plan widget with today's assignment, teacher "ربط خطة" CTA deep-links into TeacherPlans create modal via sessionStorage prefill key | TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx, TeacherPlans.tsx, quran-plans.ts, quran.css | complete, tsc clean | ~3200 |
+| 13:57 | Edited quran-hifz/src/quran/pages/student/StudentPoints.tsx | added 1 import(s) | ~37 |
+| 13:57 | Edited quran-hifz/src/quran/pages/student/StudentPoints.tsx | inline fix | ~30 |
+| 13:57 | Edited quran-hifz/src/quran/pages/parent/ParentDashboard.tsx | inline fix | ~14 |
+| 13:57 | Edited quran-hifz/src/quran/pages/parent/ParentDashboard.tsx | "${attendancePct}٪" → "نسبة الحضور" | ~32 |
+| 13:57 | Edited quran-hifz/src/quran/pages/parent/ParentAttendance.tsx | added 1 import(s) | ~33 |
+| 13:57 | Edited quran-hifz/src/quran/pages/parent/ParentAttendance.tsx | 4→4 lines | ~117 |
+| 13:57 | Edited quran-hifz/src/quran/pages/parent/ParentDashboard.tsx | inline fix | ~31 |
+| 13:58 | Edited quran-hifz/src/quran/quran.css | modified not() | ~830 |
+| 13:58 | Edited quran-hifz-server/src/lib/quranRange.ts | added 2 condition(s) | ~378 |
+| 13:58 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | inline fix | ~26 |
+| 13:58 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | modified withTodayAssignment() | ~153 |
+| 13:58 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | CSS: all | ~944 |
+| 13:58 | Edited quran-hifz/src/quran/api/quran-plans.ts | 1→2 lines | ~54 |
+| 13:58 | Edited quran-hifz/src/quran/api/quran-plans.ts | 3→4 lines | ~34 |
+| 13:58 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | CSS: display, justifyContent, width | ~347 |
+| 13:59 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | modified TrackCard() | ~157 |
+| 13:59 | Edited quran-hifz-mobile/app/(portal)/student/points.tsx | 2→2 lines | ~49 |
+| 13:59 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | expanded (+31 lines) | ~922 |
+| 13:59 | Edited quran-hifz/src/quran/config/portals.ts | inline fix | ~22 |
+| 13:59 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | 30→28 lines | ~411 |
+| 13:59 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/35c84b0d-5c81-4886-a031-7bbef61ca6d6/scratchpad/pw/driver.mjs | — | ~346 |
+| 14:00 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | added 1 import(s) | ~25 |
+| 14:00 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | modified TrackCard() | ~76 |
+| 14:00 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/d9ad3c02-3ebc-4983-830f-edb85405fd09/scratchpad/pw-test/driver.mjs | — | ~341 |
+| 14:00 | Session end: 30 writes across 17 files (ParentDashboard.tsx, TeacherDashboard.tsx, AdminSpecialTracks.tsx, TeacherPlans.tsx, TeacherSpecialTracks.tsx) | 33 reads | ~79172 tok |
+| 14:00 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | expanded (+26 lines) | ~696 |
+| 14:01 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | added 1 import(s) | ~36 |
+| 14:01 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | 3→3 lines | ~62 |
+| 14:01 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | 2→1 lines | ~22 |
+| 14:01 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | 3→3 lines | ~58 |
+| 14:06 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | reduced (-11 lines) | ~122 |
+| 14:06 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | inline fix | ~29 |
+| 14:06 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | inline fix | ~22 |
+| 14:06 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | 3→2 lines | ~24 |
+| 14:07 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/d9ad3c02-3ebc-4983-830f-edb85405fd09/scratchpad/pw-test/driver2.mjs | — | ~915 |
+| 14:05 | Removed redundant "الطلاب" nav-away button from teacher special-track cards (student list already expands inline); renamed "الحضور" action button to "تسجيل الحضور" for clarity | TeacherSpecialTracks.tsx | complete, tsc clean | ~600 |
+| 14:07 | Session end: 40 writes across 18 files (ParentDashboard.tsx, TeacherDashboard.tsx, AdminSpecialTracks.tsx, TeacherPlans.tsx, TeacherSpecialTracks.tsx) | 41 reads | ~82582 tok |
+| 14:09 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | added optional chaining | ~152 |
+| 14:09 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | CSS: data, specialTrack | ~141 |
+| 14:09 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | added optional chaining | ~813 |
+| 14:12 | Extended the linked-plan + progress widget (collapsible, % badge, today assignment) to the Admin Special Tracks page, matching Teacher/Student pages; switched card wrapper to shared .track-card hover class | AdminSpecialTracks.tsx | complete, tsc clean | ~900 |
+| 14:10 | Session end: 43 writes across 18 files (ParentDashboard.tsx, TeacherDashboard.tsx, AdminSpecialTracks.tsx, TeacherPlans.tsx, TeacherSpecialTracks.tsx) | 44 reads | ~83754 tok |
+| 14:10 | Redesigned teacher attendance page: 2-state حاضر/غائب only (removed متأخر from UI), card-list rows with avatar+segmented toggle+live summary chips+mark-all-present | quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx, quran.css | success | ~3500 |
+| 14:11 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | "grid" → "grid-collapse" | ~39 |
+| 14:11 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | 3→3 lines | ~68 |
+| 14:11 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | 3→3 lines | ~68 |
+| 14:11 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | 3→3 lines | ~72 |
+| 14:11 | Session end: 47 writes across 18 files (ParentDashboard.tsx, TeacherDashboard.tsx, AdminSpecialTracks.tsx, TeacherPlans.tsx, TeacherSpecialTracks.tsx) | 44 reads | ~84378 tok |
+| 14:12 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | CSS: flexWrap, gap | ~85 |
+| 14:12 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/d9ad3c02-3ebc-4983-830f-edb85405fd09/scratchpad/pw-test/driver2.mjs | added error handling | ~311 |
+| 14:12 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | inline fix | ~47 |
+| 14:12 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | inline fix | ~41 |
+| 14:20 | Fixed a real mobile overflow bug: track-list grids used gridTemplateColumns minmax(380px,1fr), which forces a track wider than the viewport on phones <380px; added className="grid-collapse" (project convention, collapses to 1fr under 900px) to all track grids in Teacher/Student/Admin Special Tracks pages; also added flexWrap to the linked-plan widget header row so it wraps instead of clipping on narrow cards | TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx, AdminSpecialTracks.tsx | complete, tsc clean | ~500 |
+| 14:13 | Session end: 51 writes across 18 files (ParentDashboard.tsx, TeacherDashboard.tsx, AdminSpecialTracks.tsx, TeacherPlans.tsx, TeacherSpecialTracks.tsx) | 52 reads | ~84877 tok |
+| 14:15 | Session end: 51 writes across 18 files (ParentDashboard.tsx, TeacherDashboard.tsx, AdminSpecialTracks.tsx, TeacherPlans.tsx, TeacherSpecialTracks.tsx) | 52 reads | ~84877 tok |
+
+## Session: 2026-07-03 14:16
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:17 | Created quran-hifz-server/src/data/juz.ts | — | ~459 |
+| 14:18 | Edited quran-hifz-server/src/lib/quranRange.ts | added 1 import(s) | ~24 |
+| 14:18 | Edited quran-hifz-server/src/lib/quranRange.ts | added 1 condition(s) | ~165 |
+| 14:18 | Edited quran-hifz-server/src/lib/quranRange.ts | added 3 condition(s) | ~1051 |
+| 14:18 | Edited quran-hifz-server/src/lib/quranRange.ts | added 3 condition(s) | ~516 |
+| 14:19 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | inline fix | ~40 |
+| 14:19 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | 6→9 lines | ~82 |
+| 14:19 | Edited quran-hifz/src/quran/api/quran-plans.ts | 2→4 lines | ~102 |
+| 14:19 | Edited quran-hifz/src/quran/api/quran-plans.ts | 4→6 lines | ~52 |
+| 14:19 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | inline fix | ~28 |
+| 14:19 | Session end: 10 writes across 5 files (juz.ts, quranRange.ts, quran-plan.controller.ts, quran-plans.ts, TeacherPlans.tsx) | 6 reads | ~19763 tok |
+| 14:20 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | added optional chaining | ~695 |
+| 14:20 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | CSS: mode | ~98 |
+| 14:20 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | CSS: onSchedule | ~55 |
+| 14:20 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | expanded (+8 lines) | ~164 |
+| 14:20 | Session end: 14 writes across 5 files (juz.ts, quranRange.ts, quran-plan.controller.ts, quran-plans.ts, TeacherPlans.tsx) | 8 reads | ~40088 tok |
+| 14:20 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | CSS: marginTop | ~286 |
+| 14:21 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | 8→11 lines | ~185 |
+| 14:21 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | 3→6 lines | ~111 |
+| 14:21 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | 3→6 lines | ~108 |
+| 14:22 | Session end: 18 writes across 8 files (juz.ts, quranRange.ts, quran-plan.controller.ts, quran-plans.ts, TeacherPlans.tsx) | 11 reads | ~63132 tok |
+| 14:23 | Created quran-hifz-server/src/_verify_juz.ts | — | ~358 |
+| 14:28 | Added real Ajza (juz) progress tracking: canonical 30-juz boundary dataset (juz.ts, server+client mirror), computeJuzProgress + computeScheduleBreakdown in quranRange.ts (generalized computeTodayAssignment into shared sliceForOccurrence helper), wired progress/juzProgress/schedule into quran-plan API response; added "تقسيم الأجزاء على الأيام" button+modal on TeacherPlans plan cards showing full day-by-day breakdown table; updated progress displays on all 3 Special Tracks pages to show ajza completed alongside days; verified math via throwaway script (deleted after) | quran-hifz-server/src/data/juz.ts (new), quran-hifz-server/src/lib/quranRange.ts, quran-plan.controller.ts, quran-hifz/src/quran/data/juz.ts (new), api/quran-plans.ts, TeacherPlans.tsx, TeacherSpecialTracks.tsx, StudentSpecialTracks.tsx, AdminSpecialTracks.tsx | complete, tsc clean both projects, verified server-side math | ~6500 |
+| 14:24 | Created ../../../.claude/plans/cryptic-gliding-gadget.md | — | ~2422 |
+| 14:25 | Session end: 20 writes across 10 files (juz.ts, quranRange.ts, quran-plan.controller.ts, quran-plans.ts, TeacherPlans.tsx) | 15 reads | ~75800 tok |
+| 14:25 | Edited quran-hifz/src/quran/quran.css | expanded (+22 lines) | ~588 |
+| 14:26 | Edited quran-hifz/src/quran/quran.css | expanded (+21 lines) | ~168 |
+| 14:26 | Created quran-hifz/src/quran/components/common/Modal.tsx | — | ~288 |
+| 14:26 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | added 1 import(s) | ~117 |
+| 14:26 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | removed 23 lines | ~11 |
+| 14:26 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | added optional chaining | ~1332 |
+| 14:27 | Edited quran-hifz/src/quran/pages/student/StudentAttendance.tsx | expanded (+26 lines) | ~635 |
+| 14:27 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | inline fix | ~12 |
+| 14:27 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | expanded (+7 lines) | ~83 |
+| 14:27 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | CSS: onViewTrack | ~67 |
+| 14:27 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | CSS: onViewTrack | ~58 |
+| 14:27 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | modified InfoRow() | ~305 |
+| 14:40 | Made the "الهدف" info row on TeacherPlans plan cards a clickable link (ti-arrow-left, green underline) when a plan targets a Special Track, navigating to showPage("specialtracks") — closes the loop with the earlier "ربط خطة" special-tracks->plans deep link, now plans->special-tracks too | TeacherPlans.tsx | complete, tsc clean | ~700 |
+| 14:28 | Session end: 32 writes across 14 files (juz.ts, quranRange.ts, quran-plan.controller.ts, quran-plans.ts, TeacherPlans.tsx) | 19 reads | ~83583 tok |
+| 14:28 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/9cdca122-7784-410a-bdd8-e96747e16c60/scratchpad/pw/driver.mjs | — | ~1301 |
+| 14:40 | Edited quran-hifz/src/quran/pages/parent/ParentAttendance.tsx | expanded (+25 lines) | ~609 |
+| 14:40 | Edited quran-hifz/src/quran/pages/teacher/TeacherHomework.tsx | CSS: flex | ~1302 |
+| 14:40 | Edited quran-hifz/src/quran/pages/parent/ParentRecordings.tsx | expanded (+25 lines) | ~646 |
+| 14:41 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | reduced (-10 lines) | ~222 |
+| 14:41 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | expanded (+65 lines) | ~1924 |
+
+## Session: 2026-07-03 14:41
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:42 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | reduced (-29 lines) | ~2252 |

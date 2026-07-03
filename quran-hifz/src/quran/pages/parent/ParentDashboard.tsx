@@ -7,7 +7,7 @@ import { StatsRow } from "../../components/common/StatsRow";
 import { Card } from "../../components/common/Card";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { HalqaRow } from "../../components/common/HalqaRow";
-import { toAr } from "../../../lib/format";
+import { toAr, pct } from "../../../lib/format";
 
 const NOTIFICATIONS = [
   { date: "اليوم",  text: "أرسل الواجب اليومي بنجاح ✓",          tone: "green" as const },
@@ -52,19 +52,19 @@ export function ParentDashboard() {
       <StatsRow
         items={[
           { num: toAr(totalJuz),         label: "جزءاً محفوظاً",  icon: "ti-book" },
-          { num: `${attendancePct}٪`,    label: "نسبة الحضور",     icon: "ti-calendar-check", variant: "gold" },
+          { num: pct(attendancePct),     label: "نسبة الحضور",     icon: "ti-calendar-check", variant: "gold" },
           { num: toAr(progressPages),    label: "نقطة مكتسبة",     icon: "ti-star",            variant: "blue" },
           { num: level,                  label: "المستوى",          icon: "ti-award" },
         ]}
       />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+      <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
         {/* خطة الحفظ الفردية */}
         <Card icon="ti-book" title="خطة الحفظ الفردية">
           <div style={{ textAlign: "center", padding: "8px 0" }}>
             <div style={{ fontSize: 11, color: "var(--text2)", marginBottom: 4 }}>
               التقدم نحو هدف السنة: ٣٠ جزءاً
             </div>
-            <div style={{ fontSize: 36, fontWeight: 700, color: "var(--green)" }}>{progressPct}٪</div>
+            <div style={{ fontSize: 36, fontWeight: 700, color: "var(--green)" }}>{pct(progressPct)}</div>
             <div style={{ margin: "10px auto", maxWidth: 220 }}>
               <ProgressBar pct={progressPct} />
             </div>

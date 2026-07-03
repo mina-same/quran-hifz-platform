@@ -1,0 +1,36 @@
+// Standard 30-juz' boundary table (surah:ayah each juz' starts at). Keep this file
+// byte-identical to quran-hifz/src/quran/data/juz.ts.
+export type JuzStart = { number: number; surahNumber: number; ayah: number };
+
+export const JUZ_STARTS: JuzStart[] = [
+  { number: 1,  surahNumber: 1,  ayah: 1 },
+  { number: 2,  surahNumber: 2,  ayah: 142 },
+  { number: 3,  surahNumber: 2,  ayah: 253 },
+  { number: 4,  surahNumber: 3,  ayah: 93 },
+  { number: 5,  surahNumber: 4,  ayah: 24 },
+  { number: 6,  surahNumber: 4,  ayah: 148 },
+  { number: 7,  surahNumber: 5,  ayah: 82 },
+  { number: 8,  surahNumber: 6,  ayah: 111 },
+  { number: 9,  surahNumber: 7,  ayah: 88 },
+  { number: 10, surahNumber: 8,  ayah: 41 },
+  { number: 11, surahNumber: 9,  ayah: 93 },
+  { number: 12, surahNumber: 11, ayah: 6 },
+  { number: 13, surahNumber: 12, ayah: 53 },
+  { number: 14, surahNumber: 15, ayah: 1 },
+  { number: 15, surahNumber: 17, ayah: 1 },
+  { number: 16, surahNumber: 18, ayah: 75 },
+  { number: 17, surahNumber: 21, ayah: 1 },
+  { number: 18, surahNumber: 23, ayah: 1 },
+  { number: 19, surahNumber: 25, ayah: 21 },
+  { number: 20, surahNumber: 27, ayah: 56 },
+  { number: 21, surahNumber: 29, ayah: 46 },
+  { number: 22, surahNumber: 33, ayah: 31 },
+  { number: 23, surahNumber: 36, ayah: 28 },
+  { number: 24, surahNumber: 39, ayah: 32 },
+  { number: 25, surahNumber: 41, ayah: 47 },
+  { number: 26, surahNumber: 46, ayah: 1 },
+  { number: 27, surahNumber: 51, ayah: 31 },
+  { number: 28, surahNumber: 58, ayah: 1 },
+  { number: 29, surahNumber: 67, ayah: 1 },
+  { number: 30, surahNumber: 78, ayah: 1 },
+];

@@ -34,7 +34,7 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
       ]},
       { group: "النقاط والمكافآت", items: [
         { id: "points", icon: "ti-star",          label: "نقاطي" },
-        { id: "store",  icon: "ti-shopping-cart", label: "متجر الأدوات" },
+        { id: "store",  icon: "ti-shopping-cart", label: "متجر المكافآت" },
       ]},
       { group: "التواصل", items: [
         { id: "messages", icon: "ti-message", label: "الرسائل" },

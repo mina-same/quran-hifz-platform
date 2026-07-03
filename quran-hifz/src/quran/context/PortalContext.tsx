@@ -16,10 +16,13 @@ type PortalContextValue = {
   page: string;
   topbar: TopbarConfig;
   user: AuthUser | null;
+  isSidebarOpen: boolean;
   enterPortal: (p: PortalKey) => void;
   logout: () => void;
   showPage: (id: string) => void;
   setTopbar: (cfg: TopbarConfig) => void;
+  toggleSidebar: () => void;
+  closeSidebar: () => void;
 };
 
 /* ── hash helpers ── */
@@ -41,6 +44,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
   const [portal, setPortal] = useState<PortalKey | null>(null);
   const [page,   setPage]   = useState<string>(readHash);
   const [topbar, setTopbarState] = useState<TopbarConfig>({ icon: "ti-home", title: "لوحة التحكم" });
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   // Keep hash in sync whenever page changes
   useEffect(() => { writeHash(page); }, [page]);
@@ -73,12 +77,20 @@ export function PortalProvider({ children }: { children: ReactNode }) {
     setPage(id);
     // Use pushState so the back button works between pages
     window.history.pushState(null, "", "#" + id);
+    setSidebarOpen(false); // close the mobile drawer after navigating
   }, []);
 
   const setTopbar = useCallback((cfg: TopbarConfig) => setTopbarState(cfg), []);
+  const toggleSidebar = useCallback(() => setSidebarOpen((v) => !v), []);
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
   return (
-    <PortalContext.Provider value={{ portal, page, topbar, user, enterPortal, logout, showPage, setTopbar }}>
+    <PortalContext.Provider
+      value={{
+        portal, page, topbar, user, isSidebarOpen,
+        enterPortal, logout, showPage, setTopbar, toggleSidebar, closeSidebar,
+      }}
+    >
       {children}
     </PortalContext.Provider>
   );

@@ -36,6 +36,7 @@ export function StudentSchedule() {
       <Card icon="ti-school" title={halqa?.name ?? "حلقتي"}>
         {days.length > 0 && (
           <div
+            className="grid-collapse"
             style={{
               display: "grid",
               gridTemplateColumns: `repeat(${Math.min(days.length, 3)}, 1fr)`,

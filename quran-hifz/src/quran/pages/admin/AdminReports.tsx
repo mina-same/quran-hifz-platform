@@ -25,7 +25,7 @@ export function AdminReports() {
     </button>,
   );
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 }}>
+    <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 }}>
       {REPORTS.map((r) => (
         <div
           key={r[0]}

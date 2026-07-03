@@ -1,8 +1,9 @@
-import { useState, type CSSProperties } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
 import {
   useQuranPlans, useCreateQuranPlan, useUpdateQuranPlan, useDeleteQuranPlan,
+  PLAN_PREFILL_TRACK_KEY,
   type QuranPlan, type PlanType, type PointRule, type RangePoint,
   type PlanHalqa, type PlanSpecialTrack,
 } from "../../api/quran-plans";
@@ -84,7 +85,7 @@ const EMPTY: FormFields = {
   endDate: "",
 };
 
-type Modal = null | { mode: "form"; item?: QuranPlan };
+type Modal = null | { mode: "form"; item?: QuranPlan } | { mode: "schedule"; item: QuranPlan };
 
 /* ─── overlay / dialog styles (matches AdminSpecialTracks) ──── */
 const OVERLAY: CSSProperties = {
@@ -100,7 +101,7 @@ const DIALOG: CSSProperties = {
 
 /* ════════════════════════════════════════════════════════════ */
 export function TeacherPlans() {
-  const { user } = usePortal();
+  const { user, showPage } = usePortal();
   const teacherId = user?.profileId;
 
   const { data: plans = [], isLoading } = useQuranPlans({ teacher: teacherId });
@@ -124,6 +125,17 @@ export function TeacherPlans() {
   function openAdd() {
     setForm(EMPTY); setFormError(""); setModal({ mode: "form" });
   }
+
+  // Deep link from the Special Tracks page's "ربط خطة" button: open the create
+  // modal pre-filled to the track the teacher clicked from.
+  useEffect(() => {
+    const trackId = sessionStorage.getItem(PLAN_PREFILL_TRACK_KEY);
+    if (!trackId) return;
+    sessionStorage.removeItem(PLAN_PREFILL_TRACK_KEY);
+    setForm({ ...EMPTY, targetType: "specialTrack", specialTrack: trackId });
+    setFormError("");
+    setModal({ mode: "form" });
+  }, []);
   function openEdit(item: QuranPlan) {
     setForm({
       name: item.name, type: item.type, description: item.description ?? "",
@@ -226,9 +238,16 @@ export function TeacherPlans() {
       )}
 
       {!isLoading && plans.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14 }}>
+        <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14 }}>
           {plans.map((p) => (
-            <PlanCard key={p._id} plan={p} onEdit={openEdit} onDelete={setDeleteId} />
+            <PlanCard
+              key={p._id}
+              plan={p}
+              onEdit={openEdit}
+              onDelete={setDeleteId}
+              onSchedule={(item) => setModal({ mode: "schedule", item })}
+              onViewTrack={() => showPage("specialtracks")}
+            />
           ))}
         </div>
       )}
@@ -373,7 +392,7 @@ export function TeacherPlans() {
               </FormSection>
 
               {/* نطاق الحفظ */}
-              <FormSection label="نطاق الحفظ — من فين لفين" icon="ti-book">
+              <FormSection label="نطاق الحفظ (من - إلى)" icon="ti-book">
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   <SurahPointFields label="من" value={form.rangeStart} onChange={(v) => sf("rangeStart", v)} />
                   <SurahPointFields label="إلى" value={form.rangeEnd} onChange={(v) => sf("rangeEnd", v)} />
@@ -487,17 +506,70 @@ export function TeacherPlans() {
           </div>
         </div>
       )}
+
+      {/* ════════ SCHEDULE BREAKDOWN ════════ */}
+      {modal?.mode === "schedule" && (
+        <div style={OVERLAY} onClick={() => setModal(null)}>
+          <div style={{ ...DIALOG, maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              padding: "20px 24px 16px", borderBottom: "1px solid var(--border)",
+            }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "var(--text)" }}>تقسيم الأجزاء على الأيام</h3>
+                <p style={{ margin: 0, fontSize: 11, color: "var(--text3)" }}>{modal.item.name}</p>
+              </div>
+              <button className="topbar-btn btn-ghost" style={{ padding: "6px 9px" }} onClick={() => setModal(null)}>
+                <i className="ti ti-x" />
+              </button>
+            </div>
+
+            <div className="tbl-wrap" style={{ padding: "0 24px 20px", maxHeight: "60vh" }}>
+              {modal.item.schedule.length === 0 ? (
+                <p style={{ margin: "20px 0", fontSize: 13, color: "var(--text3)", textAlign: "center" }}>
+                  لا يوجد جدول محسوب لهذه الخطة
+                </p>
+              ) : (
+                <table className="tbl">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>التاريخ</th>
+                      <th>الجزء</th>
+                      <th>من</th>
+                      <th>إلى</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {modal.item.schedule.map((s) => (
+                      <tr key={s.occurrenceIndex}>
+                        <td>{s.occurrenceIndex}</td>
+                        <td>{fmtDate(s.date)}</td>
+                        <td><Badge tone="green">جزء {s.juz}</Badge></td>
+                        <td>{surahName(s.surahStart)} : {s.ayahStart}</td>
+                        <td>{surahName(s.surahEnd)} : {s.ayahEnd}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
 
 /* ── plan card (module scope — never nest inside the page render body) ── */
 function PlanCard({
-  plan, onEdit, onDelete,
+  plan, onEdit, onDelete, onSchedule, onViewTrack,
 }: {
   plan: QuranPlan;
   onEdit: (p: QuranPlan) => void;
   onDelete: (id: string) => void;
+  onSchedule: (p: QuranPlan) => void;
+  onViewTrack: () => void;
 }) {
   const typeCfg = PLAN_TYPES.find((t) => t.value === plan.type) ?? PLAN_TYPES[0];
   const targetLabel =
@@ -539,6 +611,14 @@ function PlanCard({
             </div>
           </div>
           <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+            <button
+              className="topbar-btn btn-ghost"
+              style={{ padding: "5px 11px", fontSize: 12 }}
+              onClick={() => onSchedule(plan)}
+              title="تقسيم الأجزاء على الأيام"
+            >
+              <i className="ti ti-calendar-stats" />
+            </button>
             <button className="topbar-btn btn-ghost" style={{ padding: "5px 11px", fontSize: 12 }} onClick={() => onEdit(plan)}>
               <i className="ti ti-pencil" />
             </button>
@@ -554,8 +634,13 @@ function PlanCard({
 
         {plan.description && <p style={{ margin: "12px 0 0", fontSize: 12, color: "var(--text2)" }}>{plan.description}</p>}
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12, color: "var(--text2)", margin: "12px 0" }}>
-          <InfoRow icon={targetIcon} label="الهدف" val={targetLabel} />
+        <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12, color: "var(--text2)", margin: "12px 0" }}>
+          <InfoRow
+            icon={targetIcon}
+            label="الهدف"
+            val={targetLabel}
+            onClick={plan.targetType === "specialTrack" ? onViewTrack : undefined}
+          />
           <InfoRow icon="ti-calendar-week" label="الأيام" val={plan.days.join("، ")} span />
           <InfoRow icon="ti-book" label="من" val={pointLabel(plan.rangeStart)} />
           <InfoRow icon="ti-book-2" label="إلى" val={pointLabel(plan.rangeEnd)} />
@@ -576,6 +661,25 @@ function PlanCard({
                 {r.label} {r.kind === "زيادة" ? "+" : "-"}{r.amount}
               </span>
             ))}
+          </div>
+        )}
+
+        {plan.progress && (
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+              <span style={{ fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>
+                <i className="ti ti-progress" style={{ marginLeft: 4 }} />تقدّم الخطة
+              </span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--green)" }}>
+                {plan.juzProgress ? `${plan.juzProgress.completed} / ${plan.juzProgress.total} جزء` : `${plan.progress.percent}%`}
+              </span>
+            </div>
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: `${plan.progress.percent}%` }} />
+            </div>
+            <div style={{ fontSize: 10, color: "var(--text3)", marginTop: 3 }}>
+              {plan.progress.completed} / {plan.progress.total} يوم ({plan.progress.percent}%)
+            </div>
           </div>
         )}
 
@@ -601,13 +705,26 @@ function PlanCard({
   );
 }
 
-function InfoRow({ icon, label, val, span }: { icon: string; label: string; val: string; span?: boolean }) {
+function InfoRow({ icon, label, val, span, onClick }: { icon: string; label: string; val: string; span?: boolean; onClick?: () => void }) {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", gap: 6, gridColumn: span ? "1 / -1" : undefined }}>
       <i className={`ti ${icon}`} style={{ color: "var(--green)", marginTop: 1, flexShrink: 0 }} />
       <div>
         <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>{label}</div>
-        <div style={{ fontWeight: 600, color: "var(--text)", marginTop: 1 }}>{val}</div>
+        {onClick ? (
+          <button
+            onClick={onClick}
+            style={{
+              background: "none", border: "none", padding: 0, cursor: "pointer",
+              fontWeight: 600, color: "var(--green)", marginTop: 1,
+              display: "flex", alignItems: "center", gap: 3, textDecoration: "underline",
+            }}
+          >
+            {val} <i className="ti ti-arrow-left" style={{ fontSize: 11 }} />
+          </button>
+        ) : (
+          <div style={{ fontWeight: 600, color: "var(--text)", marginTop: 1 }}>{val}</div>
+        )}
       </div>
     </div>
   );

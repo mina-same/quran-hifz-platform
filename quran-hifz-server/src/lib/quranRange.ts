@@ -1,4 +1,5 @@
 import { SURAHS } from '../data/surahs';
+import { JUZ_STARTS } from '../data/juz';
 
 export type RangePoint = { surahNumber: number; ayah: number };
 
@@ -38,6 +39,19 @@ export function fromFlatIndex(index: number): RangePoint {
 
 export function countRangeAyahs(start: RangePoint, end: RangePoint): number {
   return toFlatIndex(end) - toFlatIndex(start) + 1;
+}
+
+/** arr[i] = flat index where juz' (i+1) starts. */
+const JUZ_STARTS_FLAT: number[] = JUZ_STARTS.map((j) => toFlatIndex({ surahNumber: j.surahNumber, ayah: j.ayah }));
+
+/** Which of the 30 ajza' a flat ayah index falls in. */
+export function juzOfFlatIndex(flatIndex: number): number {
+  let juz = 1;
+  for (let i = 0; i < JUZ_STARTS_FLAT.length; i++) {
+    if (flatIndex >= JUZ_STARTS_FLAT[i]) juz = i + 1;
+    else break;
+  }
+  return juz;
 }
 
 function dateOnly(d: Date): Date {
@@ -88,10 +102,31 @@ export type TodayAssignment = {
 };
 
 /**
+ * The ayah slice for a given 0-based occurrence index, dividing the full range
+ * evenly across all occurrences; any remainder (when total ayahs doesn't divide
+ * evenly) is absorbed by the last occurrence so the slices always cover the whole
+ * range exactly once. Returns null if there's nothing left for a non-final day
+ * (more occurrences than ayahs).
+ */
+function sliceForOccurrence(plan: PlanScheduleInput, occurrenceIndex: number, occurrenceCount: number): TodayAssignment | null {
+  const totalAyahs = countRangeAyahs(plan.rangeStart, plan.rangeEnd);
+  const dailyPortion = Math.floor(totalAyahs / occurrenceCount);
+  const isLast = occurrenceIndex === occurrenceCount - 1;
+
+  if (dailyPortion === 0 && !isLast) return null;
+
+  const rangeStartFlat = toFlatIndex(plan.rangeStart);
+  const sliceStartFlat = rangeStartFlat + occurrenceIndex * dailyPortion;
+  const sliceEndFlat = isLast ? toFlatIndex(plan.rangeEnd) : sliceStartFlat + dailyPortion - 1;
+
+  const start = fromFlatIndex(sliceStartFlat);
+  const end = fromFlatIndex(sliceEndFlat);
+  return { surahStart: start.surahNumber, ayahStart: start.ayah, surahEnd: end.surahNumber, ayahEnd: end.ayah };
+}
+
+/**
  * The ayah slice due today, if today is one of the plan's selected days and falls
- * within the plan's active window. Divides the full range evenly across all
- * occurrences; any remainder (when total ayahs doesn't divide evenly) is absorbed
- * by the last occurrence so the slices always cover the whole range exactly once.
+ * within the plan's active window.
  */
 export function computeTodayAssignment(plan: PlanScheduleInput, today: Date = new Date()): TodayAssignment | null {
   const todayDate = dateOnly(today);
@@ -107,21 +142,113 @@ export function computeTodayAssignment(plan: PlanScheduleInput, today: Date = ne
   const occurrenceIndex = countMatchingDays(startDate, todayDate, plan.days) - 1;
   if (occurrenceIndex < 0 || occurrenceIndex >= occurrenceCount) return null;
 
-  const totalAyahs = countRangeAyahs(plan.rangeStart, plan.rangeEnd);
-  const dailyPortion = Math.floor(totalAyahs / occurrenceCount);
-  const isLast = occurrenceIndex === occurrenceCount - 1;
+  return sliceForOccurrence(plan, occurrenceIndex, occurrenceCount);
+}
 
-  if (dailyPortion === 0 && !isLast) return null; // more occurrences than ayahs — nothing left for a non-final day
+export type ScheduleEntry = TodayAssignment & {
+  occurrenceIndex: number; // 1-based
+  date: string; // ISO date (date-only, midnight local)
+  juz: number; // juz' the slice's first ayah falls in
+};
 
-  const rangeStartFlat = toFlatIndex(plan.rangeStart);
-  const sliceStartFlat = rangeStartFlat + occurrenceIndex * dailyPortion;
-  const sliceEndFlat = isLast ? toFlatIndex(plan.rangeEnd) : sliceStartFlat + dailyPortion - 1;
+/** Safety cap on how many calendar days computeSchedule will walk looking for
+ * occurrences, so a misconfigured plan (e.g. empty `days`, which validation
+ * should prevent anyway) can't loop indefinitely. ~10 years of daily dates. */
+const SCHEDULE_WALK_LIMIT_DAYS = 3650;
 
-  const start = fromFlatIndex(sliceStartFlat);
-  const end = fromFlatIndex(sliceEndFlat);
-  return { surahStart: start.surahNumber, ayahStart: start.ayah, surahEnd: end.surahNumber, ayahEnd: end.ayah };
+/** Full day-by-day breakdown of the plan: which ayah slice (and which juz') is
+ * due on each occurrence date, from start to finish. */
+export function computeScheduleBreakdown(plan: PlanScheduleInput): ScheduleEntry[] {
+  const occurrenceCount = countOccurrences(plan);
+  if (occurrenceCount <= 0) return [];
+
+  const entries: ScheduleEntry[] = [];
+  const cursor = dateOnly(plan.startDate);
+  let occurrenceIndex = 0;
+  let walked = 0;
+
+  while (occurrenceIndex < occurrenceCount && walked < SCHEDULE_WALK_LIMIT_DAYS) {
+    if (plan.days.includes(dayLabel(cursor))) {
+      const slice = sliceForOccurrence(plan, occurrenceIndex, occurrenceCount);
+      if (slice) {
+        entries.push({
+          ...slice,
+          occurrenceIndex: occurrenceIndex + 1,
+          date: cursor.toISOString(),
+          juz: juzOfFlatIndex(toFlatIndex({ surahNumber: slice.surahStart, ayah: slice.ayahStart })),
+        });
+      }
+      occurrenceIndex++;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+    walked++;
+  }
+  return entries;
 }
 
 export function surahName(surahNumber: number): string {
   return SURAH_BY_NUMBER.get(surahNumber)?.name ?? '';
+}
+
+export type PlanProgress = { completed: number; total: number; percent: number };
+
+/**
+ * How far along the plan's schedule is, regardless of whether today happens to be
+ * one of its active days (unlike computeTodayAssignment, which only returns
+ * something on a matching day). `completed` counts matching-weekday occurrences
+ * from startDate through today (capped at endDate/activeDaysCount), so it keeps
+ * climbing even on off days and settles at 100% once the plan is done.
+ */
+export function computePlanProgress(plan: PlanScheduleInput, today: Date = new Date()): PlanProgress | null {
+  const total = countOccurrences(plan);
+  if (total <= 0) return null;
+
+  const startDate = dateOnly(plan.startDate);
+  const todayDate = dateOnly(today);
+  if (todayDate.getTime() < startDate.getTime()) return { completed: 0, total, percent: 0 };
+
+  const cappedToday =
+    plan.endType === 'date' && plan.endDate && todayDate.getTime() > dateOnly(plan.endDate).getTime()
+      ? dateOnly(plan.endDate)
+      : todayDate;
+
+  const completed = Math.min(countMatchingDays(startDate, cappedToday, plan.days), total);
+  const percent = Math.round((completed / total) * 100);
+  return { completed, total, percent };
+}
+
+export type JuzProgress = { completed: number; total: number };
+
+/**
+ * How many of the ajza' spanned by the plan's range are fully finished, derived
+ * from the same day-based `completed/total` ratio as computePlanProgress (the
+ * plan divides its ayah range evenly across occurrences, so day-progress and
+ * ayah-progress track together). `total` is the count of distinct ajza' the
+ * plan's rangeStart..rangeEnd touches; `completed` counts only ajza' whose
+ * entire span (clamped to the plan's range) has been covered so far — a juz'
+ * that's only partially covered doesn't count yet.
+ */
+export function computeJuzProgress(plan: PlanScheduleInput, dayProgress: PlanProgress | null): JuzProgress | null {
+  if (!dayProgress) return null;
+
+  const rangeStartFlat = toFlatIndex(plan.rangeStart);
+  const rangeEndFlat = toFlatIndex(plan.rangeEnd);
+  const juzStart = juzOfFlatIndex(rangeStartFlat);
+  const juzEnd = juzOfFlatIndex(rangeEndFlat);
+  const total = juzEnd - juzStart + 1;
+
+  if (dayProgress.completed <= 0) return { completed: 0, total };
+
+  const totalAyahs = rangeEndFlat - rangeStartFlat + 1;
+  const coveredAyahs = Math.round(totalAyahs * (dayProgress.completed / dayProgress.total));
+  const lastCoveredFlat = Math.min(rangeStartFlat + coveredAyahs - 1, rangeEndFlat);
+
+  let completed = 0;
+  for (let j = juzStart; j <= juzEnd; j++) {
+    const juzEndFlat = j < 30 ? JUZ_STARTS_FLAT[j] - 1 : Number.MAX_SAFE_INTEGER;
+    const effectiveEndFlat = Math.min(juzEndFlat, rangeEndFlat);
+    if (lastCoveredFlat >= effectiveEndFlat) completed++;
+    else break;
+  }
+  return { completed, total };
 }

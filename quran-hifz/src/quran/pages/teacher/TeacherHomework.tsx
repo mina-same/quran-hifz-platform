@@ -35,61 +35,108 @@ export function TeacherHomework() {
           <SkeletonTable cols={6} rows={5} />
         )}
         {!isLoading && (
-          <div className="tbl-wrap">
-            <table className="tbl">
-              <thead>
-                <tr>
-                  <th>الطالب</th>
-                  <th>نوع الواجب</th>
-                  <th>المقطع</th>
-                  <th>تاريخ الاستحقاق</th>
-                  <th>الحالة</th>
-                  <th>التقييم</th>
-                </tr>
-              </thead>
-              <tbody>
-                {homework.map((hw) => (
-                  <tr key={hw._id}>
-                    <td style={{ fontWeight: 600 }}>{getName(hw.student)}</td>
-                    <td>
-                      <Badge tone="blue">{hw.type}</Badge>
-                    </td>
-                    <td style={{ fontSize: 12 }}>{hw.segment}</td>
-                    <td style={{ fontSize: 12, color: "var(--text2)" }}>
-                      {hw.dueDate ? new Date(hw.dueDate).toLocaleDateString("ar-SA") : "—"}
-                    </td>
-                    <td>
-                      <Badge tone={STATUS_TONE[hw.status] ?? "gray"}>{hw.status}</Badge>
-                    </td>
-                    <td>
-                      <select
-                        className="form-input"
-                        style={{ padding: "4px 8px", fontSize: 11, width: 120 }}
-                        value={hw.rating ?? ""}
-                        onChange={(e) => {
-                          if (!e.target.value) return;
-                          gradeHW.mutate({ id: hw._id, rating: e.target.value, status: "مراجع" });
-                        }}
-                      >
-                        <option value="">اختر التقييم</option>
-                        <option value="ممتاز">ممتاز</option>
-                        <option value="جيد جداً">جيد جداً</option>
-                        <option value="جيد">جيد</option>
-                        <option value="مقبول">مقبول</option>
-                      </select>
-                    </td>
-                  </tr>
-                ))}
-                {homework.length === 0 && (
+          <>
+            <div className="tbl-wrap">
+              <table className="tbl">
+                <thead>
                   <tr>
-                    <td colSpan={6} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                      لا توجد واجبات
-                    </td>
+                    <th>الطالب</th>
+                    <th>نوع الواجب</th>
+                    <th>المقطع</th>
+                    <th>تاريخ الاستحقاق</th>
+                    <th>الحالة</th>
+                    <th>التقييم</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {homework.map((hw) => (
+                    <tr key={hw._id}>
+                      <td style={{ fontWeight: 600 }}>{getName(hw.student)}</td>
+                      <td>
+                        <Badge tone="blue">{hw.type}</Badge>
+                      </td>
+                      <td style={{ fontSize: 12 }}>{hw.segment}</td>
+                      <td style={{ fontSize: 12, color: "var(--text2)" }}>
+                        {hw.dueDate ? new Date(hw.dueDate).toLocaleDateString("ar-SA") : "—"}
+                      </td>
+                      <td>
+                        <Badge tone={STATUS_TONE[hw.status] ?? "gray"}>{hw.status}</Badge>
+                      </td>
+                      <td>
+                        <select
+                          className="form-input"
+                          style={{ padding: "4px 8px", fontSize: 11, width: 120 }}
+                          value={hw.rating ?? ""}
+                          onChange={(e) => {
+                            if (!e.target.value) return;
+                            gradeHW.mutate({ id: hw._id, rating: e.target.value, status: "مراجع" });
+                          }}
+                        >
+                          <option value="">اختر التقييم</option>
+                          <option value="ممتاز">ممتاز</option>
+                          <option value="جيد جداً">جيد جداً</option>
+                          <option value="جيد">جيد</option>
+                          <option value="مقبول">مقبول</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                  {homework.length === 0 && (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                        لا توجد واجبات
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="rc-list">
+              {homework.map((hw) => (
+                <div key={hw._id} className="rc-card">
+                  <div className="rc-card-head">
+                    <span className="rc-card-title">{getName(hw.student)}</span>
+                    <Badge tone={STATUS_TONE[hw.status] ?? "gray"}>{hw.status}</Badge>
+                  </div>
+                  <div className="rc-row">
+                    <span className="rc-row-label">نوع الواجب</span>
+                    <Badge tone="blue">{hw.type}</Badge>
+                  </div>
+                  <div className="rc-row">
+                    <span className="rc-row-label">المقطع</span>
+                    <span>{hw.segment}</span>
+                  </div>
+                  <div className="rc-row">
+                    <span className="rc-row-label">تاريخ الاستحقاق</span>
+                    <span>{hw.dueDate ? new Date(hw.dueDate).toLocaleDateString("ar-SA") : "—"}</span>
+                  </div>
+                  <div className="rc-actions">
+                    <select
+                      className="form-input"
+                      style={{ padding: "8px 10px", fontSize: 12, flex: 1 }}
+                      value={hw.rating ?? ""}
+                      onChange={(e) => {
+                        if (!e.target.value) return;
+                        gradeHW.mutate({ id: hw._id, rating: e.target.value, status: "مراجع" });
+                      }}
+                    >
+                      <option value="">اختر التقييم</option>
+                      <option value="ممتاز">ممتاز</option>
+                      <option value="جيد جداً">جيد جداً</option>
+                      <option value="جيد">جيد</option>
+                      <option value="مقبول">مقبول</option>
+                    </select>
+                  </div>
+                </div>
+              ))}
+              {homework.length === 0 && (
+                <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                  لا توجد واجبات
+                </div>
+              )}
+            </div>
+          </>
         )}
       </Card>
     </>
