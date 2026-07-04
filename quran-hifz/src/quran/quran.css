@@ -3599,6 +3599,21 @@ textarea.form-input {
   margin-bottom: 16px;
 }
 
+/* Spotlight columns (top-scorer / best-attendance mini leaderboards) */
+.spotlight-col-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 10px;
+}
+.spotlight-col-title i {
+  color: var(--gold);
+  font-size: 14px;
+}
+
 /* Scope segmented control */
 .scope-tabs {
   display: flex;
@@ -4191,7 +4206,7 @@ textarea.form-input {
   position: relative;
   transition: all 0.15s;
 }
-.day-chip:hover:not(:disabled):not(.active) {
+.day-chip:hover:not(:disabled):not(.active):not(.not-planned) {
   border-color: var(--green2);
   color: var(--green);
 }
@@ -4226,13 +4241,22 @@ textarea.form-input {
   font-weight: 700;
   line-height: 1;
 }
-.day-chip:disabled {
-  opacity: 0.4;
+.day-chip.not-planned {
+  opacity: 0.55;
   cursor: not-allowed;
-  background: transparent;
+  background: rgba(239, 68, 68, 0.05);
   border-style: dashed;
-  border-color: var(--border);
+  border-color: rgba(239, 68, 68, 0.35);
   color: var(--text3);
+}
+.day-chip.not-planned:hover {
+  opacity: 0.8;
+  border-color: rgba(239, 68, 68, 0.6);
+}
+.day-chip.not-planned .day-chip-wd,
+.day-chip.not-planned .day-chip-num {
+  text-decoration: line-through;
+  text-decoration-color: rgba(239, 68, 68, 0.5);
 }
 
 /* Dark overrides */
@@ -4254,7 +4278,7 @@ textarea.form-input {
   border-color: var(--border);
   color: var(--text2);
 }
-.dark .day-chip:hover:not(:disabled):not(.active) {
+.dark .day-chip:hover:not(:disabled):not(.active):not(.not-planned) {
   border-color: var(--green2);
   color: var(--green);
 }
@@ -4267,10 +4291,13 @@ textarea.form-input {
 .dark .day-chip.is-today:not(.active) {
   border-color: var(--gold);
 }
-.dark .day-chip:disabled {
-  background: transparent;
-  border-color: var(--border);
+.dark .day-chip.not-planned {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.3);
   color: var(--text3);
+}
+.dark .day-chip.not-planned:hover {
+  border-color: rgba(239, 68, 68, 0.5);
 }
 
 @media (max-width: 480px) {

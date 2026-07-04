@@ -1,7 +1,7 @@
 import { usePortal } from "../../context/PortalContext";
 import { useHalqat } from "../../api/halqat";
 import { useSpecialTracks } from "../../api/special-tracks";
-import { ReportsAnalytics } from "../../components/common/ReportsAnalytics";
+import { ReportsDashboard } from "../../components/common/ReportsDashboard";
 
 /** Teacher reports — scoped to the teacher's own halqat (and tracks they teach).
  *  No KPI/teacher scorecards (those are org-wide admin views). */
@@ -16,7 +16,7 @@ export function TeacherReports() {
     halqat.length > 0 ? { halqa: halqat.map((h) => h._id).join(",") } : { halqa: "__none__" };
 
   return (
-    <ReportsAnalytics
+    <ReportsDashboard
       topbarIcon="ti-chart-bar"
       topbarTitle="تقارير طلابي"
       baseFilter={baseFilter}

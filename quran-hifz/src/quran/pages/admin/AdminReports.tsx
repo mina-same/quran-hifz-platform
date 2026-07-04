@@ -3,7 +3,7 @@ import { useTeachers } from "../../api/teachers";
 import { useKpis } from "../../api/kpis";
 import { useHalqat } from "../../api/halqat";
 import { useSpecialTracks } from "../../api/special-tracks";
-import { ReportsAnalytics } from "../../components/common/ReportsAnalytics";
+import { ReportsDashboard } from "../../components/common/ReportsDashboard";
 
 /** Admin reports — full school cohort. KPIs + teachers are org-wide widgets
  *  surfaced in addition to the student analytics. */
@@ -13,11 +13,11 @@ export function AdminReports() {
   const { data: halqat = [] } = useHalqat();
   const { data: tracks = [] } = useSpecialTracks();
   // Pre-warm the full students query so the StatsRow/KPIs render instantly
-  // once the user lands — ReportsAnalytics re-queries under the active scope.
+  // once the user lands — ReportsDashboard re-queries under the active scope.
   useStudents();
 
   return (
-    <ReportsAnalytics
+    <ReportsDashboard
       topbarIcon="ti-chart-bar"
       topbarTitle="التقارير والتحليلات"
       baseFilter={{}}

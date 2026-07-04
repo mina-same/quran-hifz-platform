@@ -1247,3 +1247,48 @@
 | 17:59 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | CSS: KPI_TONE, actual, target | ~108 |
 | 17:59 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | added nullish coalescing | ~196 |
 | 18:00 | Edited quran-hifz/src/quran/quran.css | modified media() | ~641 |
+| 18:00 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | "../../components/common/R" → "../../components/common/R" | ~22 |
+| 18:00 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | inline fix | ~6 |
+| 18:00 | Edited quran-hifz/src/quran/pages/teacher/TeacherReports.tsx | "../../components/common/R" → "../../components/common/R" | ~22 |
+| 18:00 | Edited quran-hifz/src/quran/pages/teacher/TeacherReports.tsx | inline fix | ~6 |
+| 19:40 | Redesigned attendance-page assignment display into visual .assignment-banner (icon + surah range + page/juz pills), removed redundant weekday text | quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx, quran-hifz/src/quran/quran.css | done | ~2600 |
+| 19:55 | Confirmed eval-chip defaults already 0 for hifz/tajweed/talawah on unsaved days (blankEval) via screenshot | quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | verified, no change needed | ~400 |
+| 20:05 | Locked attendance/eval editing + send button once evaluations exist for a day (alreadySubmitted), added success alert + disabled styles | quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx, quran-hifz/src/quran/quran.css | done | ~1800 |
+| 18:01 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | inline fix | ~23 |
+| 18:01 | Session end: 21 writes across 6 files (quran.css, TeacherAttendance.tsx, Gauge.tsx, ReportsDashboard.tsx, AdminReports.tsx) | 17 reads | ~55553 tok |
+| 18:05 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/5e99008d-42f8-400b-8d6e-0b514ac8fc61/scratchpad/drive.mjs | — | ~768 |
+| 18:05 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | modified weekdayOf() | ~252 |
+| 18:05 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 1→4 lines | ~90 |
+| 18:06 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | CSS: lockReason | ~234 |
+| 18:06 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/5e99008d-42f8-400b-8d6e-0b514ac8fc61/scratchpad/check500.mjs | — | ~254 |
+| 18:07 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 9→13 lines | ~148 |
+| 18:07 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | expanded (+6 lines) | ~317 |
+| 18:07 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 16→16 lines | ~225 |
+| 18:07 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | inline fix | ~18 |
+| 18:08 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 1→5 lines | ~104 |
+| 18:08 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | added 1 condition(s) | ~362 |
+| 18:08 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | expanded (+6 lines) | ~65 |
+| 18:09 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 5→6 lines | ~65 |
+| 18:09 | Edited quran-hifz/src/quran/quran.css | CSS: not-planned, text-decoration, text-decoration-color | ~126 |
+| 18:09 | Edited quran-hifz/src/quran/quran.css | CSS: not-planned | ~61 |
+| 18:09 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/5e99008d-42f8-400b-8d6e-0b514ac8fc61/scratchpad/drive.mjs | added 1 condition(s) | ~86 |
+| 18:09 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/5e99008d-42f8-400b-8d6e-0b514ac8fc61/scratchpad/mobile.mjs | — | ~354 |
+| 18:09 | Edited quran-hifz/src/quran/quran.css | modified not() | ~40 |
+| 18:10 | Edited quran-hifz/src/quran/quran.css | modified not() | ~43 |
+| 18:10 | Replaced reports page 1 (ReportsAnalytics, deleted) with new evaluation-focused ReportsDashboard.tsx + Gauge.tsx; wired into AdminReports.tsx/TeacherReports.tsx | ReportsDashboard.tsx, Gauge.tsx, quran.css, AdminReports.tsx, TeacherReports.tsx | verified via Playwright (admin/teacher, light/dark, mobile) — real data renders correctly | ~9500 |
+| 18:12 | Session end: 40 writes across 9 files (quran.css, TeacherAttendance.tsx, Gauge.tsx, ReportsDashboard.tsx, AdminReports.tsx) | 23 reads | ~64251 tok |
+| 18:20 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 7→6 lines | ~93 |
+| 21:10 | Fixed day-slider timezone bug (addDays fixed-point on UTC+ timezones froze all chips on one date) + local-date `today` | quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | fixed, logged bug-219 | ~3200 |
+| 21:20 | Added not-planned day-chip styling (dashed red, strikethrough) + click-to-explain message for days outside the plan | quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx, quran.css | done | ~1400 |
+| 21:30 | Added future-day lock (can't record attendance for a session that hasn't happened) alongside existing same-day-twice lock, unified as `lockReason` | quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | done | ~1600 |
+| 21:35 | Reworded assignment-banner page pill to "من صفحة X إلى صفحة Y" instead of a bare hyphen when a day spans multiple pages | quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | done | ~300 |
+| 18:24 | Session end: 41 writes across 9 files (quran.css, TeacherAttendance.tsx, Gauge.tsx, ReportsDashboard.tsx, AdminReports.tsx) | 23 reads | ~64351 tok |
+| 18:28 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | added nullish coalescing | ~573 |
+| 18:29 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | added 1 import(s) | ~42 |
+| 18:29 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | inline fix | ~14 |
+| 18:29 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | expanded (+19 lines) | ~242 |
+| 18:30 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 14→14 lines | ~187 |
+| 18:30 | Edited quran-hifz/src/quran/quran.css | expanded (+15 lines) | ~116 |
+| 18:30 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | toFixed() → round() | ~31 |
+| 18:31 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | modified for() | ~493 |
+| 21:50 | Added "أبرز الطلاب" spotlight card below سجل الجلسات — top-score + best-attendance mini leaderboards (reused common Leaderboard.tsx, computed client-side from existing history query) | quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx, quran.css | done | ~2200 |

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T15:00:36.227Z
-> Files: 401 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T15:31:29.307Z
+> Files: 403 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/
 
@@ -15,6 +15,12 @@
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/5c97896d-af07-41e8-9ef0-23679e1515df/scratchpad/
 
 - `verify_attendance.mjs` — Declares errors (~543 tok)
+
+## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/5e99008d-42f8-400b-8d6e-0b514ac8fc61/scratchpad/
+
+- `check500.mjs` — Declares BASE (~254 tok)
+- `drive.mjs` — DIR: loginAs, goToReports (~812 tok)
+- `mobile.mjs` — Declares DIR (~354 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/9cdca122-7784-410a-bdd8-e96747e16c60/scratchpad/pw/
 
@@ -488,7 +494,7 @@
 
 ## quran-hifz/src/quran/
 
-- `quran.css` — Styles: 71 rules, 18 vars (~23750 tok)
+- `quran.css` — Styles: 71 rules, 18 vars (~23954 tok)
 - `QuranApp.tsx` — Quran Hifz platform — React entry. (~852 tok)
 
 ## quran-hifz/src/quran/api/
@@ -534,8 +540,7 @@
 - `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
-- `ReportsAnalytics.tsx` — Shared reports engine: scope tabs + KPI strip + insights + donuts + halqa ranking + leaderboards + KPI scorecard + teacher workload + export dropdown. Drives both AdminReports & TeacherReports. All numbers Arabic-Indic via toAr/pct (~6200 tok)
-- `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~7253 tok)
+- `ReportsDashboard.tsx` — Shared reports engine v2 (replaces deleted `ReportsAnalytics.tsx`): evaluation-rubric centerpiece — Gauge hero + رقم four-dimension breakdown cards (حضور/حفظ/تجويد/تلاوة) + cohort trend line + halqa evaluation-comparison table + evaluation-based top/watch leaderboards — plus kept hifz-progress donut, admin KPI scorecard, teacher workload chart, and `StudentReportPanel` deep-dive. Drives both AdminReports & TeacherReports. All numbers Arabic-Indic via toAr/pct (~7253 tok)
 - `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)
 - `Skeleton.tsx` — Skeleton — renders table (~816 tok)
 - `StatsRow.tsx` — StatsRow (~146 tok)
@@ -578,7 +583,7 @@
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~2682 tok)
 - `AdminParents.tsx` — EMPTY_ADD, ChildChip — renders table, modal, search bar, avatars (~5900 tok)
 - `AdminRegister.tsx` — schema — renders form (~3078 tok)
-- `AdminReports.tsx` — Now a thin wrapper that feeds school-wide data into ReportsAnalytics (showAdmin) (~430 tok)
+- `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~324 tok)
 - `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13252 tok)
 - `AdminStudents.tsx` — PATH_TONE — renders table (~5092 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4598 tok)
@@ -606,7 +611,7 @@
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — Normalize any date-ish string (full ISO timestamp OR bare YYYY-MM-DD) to a (~6582 tok)
+- `TeacherAttendance.tsx` — Add `n` calendar days to a bare YYYY-MM-DD string using pure UTC arithmetic. (~8025 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1419 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
 - `TeacherGroupHomework.tsx` — STUDENTS (~2926 tok)
@@ -614,7 +619,7 @@
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
 - `TeacherPlans.tsx` — surahName — renders form, modal (~11602 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
-- `TeacherReports.tsx` — Now a thin wrapper that feeds teacher-scoped halqat/tracks into ReportsAnalytics (~370 tok)
+- `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
 - `TeacherSpecialTracks.tsx` — surahName (~5113 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2190 tok)
 

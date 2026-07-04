@@ -11,6 +11,7 @@ import {
   type TeachingContext,
 } from "../../components/common/ContextPicker";
 import { SkeletonCard, SkeletonTable } from "../../components/common/Skeleton";
+import { Leaderboard } from "../../components/common/Leaderboard";
 import { useHalqat } from "../../api/halqat";
 import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudents } from "../../api/students";
@@ -19,7 +20,7 @@ import { useQuranPlans, type ScheduleEntry } from "../../api/quran-plans";
 import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
 import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
-import { toAr } from "../../../lib/format";
+import { toAr, pct } from "../../../lib/format";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -32,10 +33,17 @@ const ARABIC_WEEKDAYS = ["الأحد", "الاثنين", "الثلاثاء", "ا
 function weekdayOf(iso: string): string {
   return ARABIC_WEEKDAYS[new Date(iso + "T00:00:00").getDay()];
 }
+/** Add `n` calendar days to a bare YYYY-MM-DD string using pure UTC arithmetic.
+ *  Building the Date via local midnight (`new Date(iso + "T00:00:00")`) then
+ *  reading it back via `toISOString()` (UTC) is NOT a no-op round trip for any
+ *  timezone ahead of UTC (e.g. Cairo/Riyadh, UTC+2/+3): local midnight of day X
+ *  converts to UTC as day X-1 at (24-offset):00, so `addDays(X, 1)` silently
+ *  returned X again — a fixed point that froze the entire day-slider on one
+ *  repeated date. Date.UTC(...) sidesteps local time entirely so the result
+ *  never depends on the browser's offset. */
 function addDays(iso: string, n: number): string {
-  const d = new Date(iso + "T00:00:00");
-  d.setDate(d.getDate() + n);
-  return d.toISOString().split("T")[0];
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().split("T")[0];
 }
 /** Normalize any date-ish string (full ISO timestamp OR bare YYYY-MM-DD) to a
  *  bare `YYYY-MM-DD` so date math + set keys are consistent. The server stores
@@ -136,7 +144,10 @@ export function TeacherAttendance() {
   const { data: students = [], isLoading: loadingStudents } = useStudents(contextFilter);
   const bulkEvaluate = useBulkEvaluate();
 
-  const today = new Date().toISOString().split("T")[0];
+  // Local calendar date, not UTC (`toISOString()` lags a day behind local wall-clock
+  // time for the first `offset` hours of each day in any UTC+ timezone).
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   // All active memorization plans for this context. Each plan carries a
   // `schedule` (server-computed list of every occurrence's date + ayah slice +
@@ -183,6 +194,7 @@ export function TeacherAttendance() {
   // don't leak into Tuesday's roster for the same students.
   useEffect(() => {
     setOverrides({});
+    setDayNotice(null);
   }, [effectiveDate]);
 
   // Auto-scroll the active day chip into view whenever the effective day changes
@@ -212,7 +224,58 @@ export function TeacherAttendance() {
   // Full session history for this context (all dates), for the log below.
   const { data: history = [] } = useEvaluations(contextFilter);
 
+  // Per-student rollup from the same history — top score + best attendance,
+  // no extra API calls.
+  const { topScoreRows, topAttendanceRows } = useMemo(() => {
+    type Agg = { id: string; name: string; totalSum: number; sessions: number; present: number };
+    const byStudent = new Map<string, Agg>();
+    for (const r of history) {
+      const id = typeof r.student === "string" ? r.student : r.student._id;
+      const name = typeof r.student === "string" ? r.student : r.student.name;
+      const agg = byStudent.get(id) ?? { id, name, totalSum: 0, sessions: 0, present: 0 };
+      agg.totalSum += r.total;
+      agg.sessions += 1;
+      if (r.attendanceStatus === "حاضر") agg.present += 1;
+      byStudent.set(id, agg);
+    }
+    const all = Array.from(byStudent.values());
+
+    const byScore = [...all]
+      .sort((a, b) => b.totalSum / b.sessions - a.totalSum / a.sessions)
+      .slice(0, 3)
+      .map((a) => {
+        const avg = a.totalSum / a.sessions;
+        return {
+          id: a.id,
+          name: a.name,
+          subtitle: a.sessions === 1 ? "جلسة واحدة" : `متوسط ${toAr(a.sessions)} جلسات`,
+          meter: (avg / TOTAL_MAX) * 100,
+          display: `${toAr(Math.round(avg))}/${toAr(TOTAL_MAX)}`,
+        };
+      });
+
+    const byAttendance = [...all]
+      .sort((a, b) => b.present / b.sessions - a.present / a.sessions)
+      .slice(0, 3)
+      .map((a) => {
+        const rate = (a.present / a.sessions) * 100;
+        return {
+          id: a.id,
+          name: a.name,
+          subtitle: `${toAr(a.present)} من ${toAr(a.sessions)} جلسة`,
+          meter: rate,
+          display: pct(rate),
+        };
+      });
+
+    return { topScoreRows: byScore, topAttendanceRows: byAttendance };
+  }, [history]);
+
   const [overrides, setOverrides] = useState<Record<string, StudentEval>>({});
+  // Transient message when the teacher taps a day-chip that isn't part of the
+  // plan — those chips are visually disabled but still clickable so the click
+  // can explain *why*, instead of silently doing nothing.
+  const [dayNotice, setDayNotice] = useState<string | null>(null);
   const evalFor = (studentId: string): StudentEval =>
     overrides[studentId] ?? savedById[studentId] ?? blankEval();
 
@@ -235,6 +298,16 @@ export function TeacherAttendance() {
   // bulk-evaluate would re-notify parents and could overwrite the teacher's
   // recorded scores. The roster stays read-only until a different day is picked.
   const alreadySubmitted = savedToday.length > 0;
+  // A plan day can be scheduled in the future (recurring plans list every
+  // upcoming occurrence) — the teacher can look ahead at what's due, but can't
+  // record attendance for a session that hasn't happened yet.
+  const isFutureDay = effectiveDate > today;
+  const lockReason: "submitted" | "future" | null = alreadySubmitted
+    ? "submitted"
+    : isFutureDay
+      ? "future"
+      : null;
+  const locked = lockReason !== null;
 
   useTopbar(
     "ti-calendar-check",
@@ -273,14 +346,18 @@ export function TeacherAttendance() {
               records,
             });
           }}
-          disabled={bulkEvaluate.isPending || !hasAssignment || alreadySubmitted}
+          disabled={bulkEvaluate.isPending || !hasAssignment || locked}
         >
-          <i className={`ti ${alreadySubmitted ? "ti-circle-check" : "ti-send"}`} />
+          <i
+            className={`ti ${lockReason === "submitted" ? "ti-circle-check" : lockReason === "future" ? "ti-clock" : "ti-send"}`}
+          />
           {bulkEvaluate.isPending
             ? "جارٍ الحفظ..."
-            : alreadySubmitted
+            : lockReason === "submitted"
               ? "تم الإرسال لهذا اليوم"
-              : "حفظ وإرسال إشعارات"}
+              : lockReason === "future"
+                ? "اليوم لم يحن بعد"
+                : "حفظ وإرسال إشعارات"}
         </button>
       </div>
     ) : undefined,
@@ -337,9 +414,15 @@ export function TeacherAttendance() {
                   role="tab"
                   aria-selected={isSel}
                   aria-disabled={!enabled}
-                  disabled={!enabled}
-                  className={`day-chip ${isSel ? "active" : ""} ${d.isToday ? "is-today" : ""}`}
-                  onClick={() => setSelectedDate(d.iso)}
+                  className={`day-chip ${isSel ? "active" : ""} ${d.isToday ? "is-today" : ""} ${!enabled ? "not-planned" : ""}`}
+                  onClick={() => {
+                    if (!enabled) {
+                      setDayNotice(`${fmtDate(d.iso)} — هذا اليوم غير مشمول بخطة الحفظ الحالية`);
+                      return;
+                    }
+                    setDayNotice(null);
+                    setSelectedDate(d.iso);
+                  }}
                   title={enabled ? fmtDate(d.iso) : "لا يوجد خطة لهذا اليوم"}
                 >
                   <span className="day-chip-wd">{d.weekday}</span>
@@ -363,6 +446,12 @@ export function TeacherAttendance() {
           </button>
         </div>
       ) : null}
+
+      {dayNotice && (
+        <Alert tone="warning" icon="ti-calendar-off">
+          {dayNotice}
+        </Alert>
+      )}
 
       {!loadingPlans && scheduledSorted.length === 0 && (
         <Alert tone="warning">
@@ -394,10 +483,9 @@ export function TeacherAttendance() {
           <div className="assignment-meta">
             <span className="assignment-pill">
               <i className="ti ti-file-text" />
-              صفحة {toAr(assignment.pageStart)}
               {assignment.pageEnd !== assignment.pageStart
-                ? ` - ${toAr(assignment.pageEnd)}`
-                : ""}
+                ? `من صفحة ${toAr(assignment.pageStart)} إلى صفحة ${toAr(assignment.pageEnd)}`
+                : `صفحة ${toAr(assignment.pageStart)}`}
             </span>
             <span className="assignment-pill">
               <i className="ti ti-bookmark" />
@@ -419,10 +507,16 @@ export function TeacherAttendance() {
             <SkeletonTable cols={3} rows={5} />
           ) : (
             <>
-              {alreadySubmitted && (
+              {lockReason === "submitted" && (
                 <Alert tone="success" icon="ti-lock">
                   تم إرسال الحضور والتقييم لهذا اليوم مسبقًا — لا يمكن التعديل أو الإرسال مرة أخرى.
                   اختر يومًا آخر من الأعلى للتسجيل.
+                </Alert>
+              )}
+              {lockReason === "future" && (
+                <Alert tone="warning" icon="ti-clock">
+                  هذا اليوم لم يحن بعد — لا يمكن تسجيل الحضور والتقييم مسبقًا لجلسة لم تُعقد. عد إلى
+                  هذا اليوم بعد حلوله.
                 </Alert>
               )}
               {students.length > 0 && (
@@ -435,7 +529,7 @@ export function TeacherAttendance() {
                   </span>
                   <button
                     className="att-mark-all"
-                    disabled={alreadySubmitted}
+                    disabled={locked}
                     onClick={() => {
                       const all: Record<string, StudentEval> = {};
                       students.forEach((s) => {
@@ -465,7 +559,7 @@ export function TeacherAttendance() {
                           <button
                             type="button"
                             className={!isAbsent ? "active present" : ""}
-                            disabled={alreadySubmitted}
+                            disabled={locked}
                             onClick={() => setAttendance(s._id, "حاضر")}
                           >
                             <i className="ti ti-check" /> حاضر
@@ -473,7 +567,7 @@ export function TeacherAttendance() {
                           <button
                             type="button"
                             className={isAbsent ? "active absent" : ""}
-                            disabled={alreadySubmitted}
+                            disabled={locked}
                             onClick={() => setAttendance(s._id, "غائب")}
                           >
                             <i className="ti ti-x" /> غائب
@@ -490,7 +584,7 @@ export function TeacherAttendance() {
                                   key={n}
                                   type="button"
                                   className={`eval-chip ${!isAbsent && e[cat] === n ? "active" : ""}`}
-                                  disabled={isAbsent || alreadySubmitted}
+                                  disabled={isAbsent || locked}
                                   onClick={() => setScore(s._id, cat, n)}
                                 >
                                   {toAr(n)}
@@ -581,6 +675,25 @@ export function TeacherAttendance() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </Card>
+      )}
+
+      {(topScoreRows.length > 0 || topAttendanceRows.length > 0) && (
+        <Card icon="ti-medal" title="أبرز الطلاب">
+          <div className="reports-grid grid-collapse">
+            <div className="spotlight-col">
+              <div className="spotlight-col-title">
+                <i className="ti ti-trophy" /> الأعلى تقييمًا
+              </div>
+              <Leaderboard rows={topScoreRows} emptyText="لا يوجد بيانات كافية بعد" />
+            </div>
+            <div className="spotlight-col">
+              <div className="spotlight-col-title">
+                <i className="ti ti-calendar-check" /> الأعلى حضورًا
+              </div>
+              <Leaderboard rows={topAttendanceRows} emptyText="لا يوجد بيانات كافية بعد" />
+            </div>
           </div>
         </Card>
       )}

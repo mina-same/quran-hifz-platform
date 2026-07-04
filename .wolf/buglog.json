@@ -3365,6 +3365,235 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-04T14:59:55.216Z"
+    },
+    {
+      "id": "bug-209",
+      "timestamp": "2026-07-04T15:00:48.994Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/admin/AdminReports.tsx",
+      "root_cause": "Had \"../../components/common/ReportsAnalytics\"",
+      "fix": "Changed to \"../../components/common/ReportsDashboard\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:00:48.994Z"
+    },
+    {
+      "id": "bug-210",
+      "timestamp": "2026-07-04T15:00:50.078Z",
+      "error_message": "Wrong reference: ReportsAnalytics should be ReportsDashboard",
+      "file": "quran-hifz/src/quran/pages/admin/AdminReports.tsx",
+      "root_cause": "Used \"ReportsAnalytics\" instead of \"ReportsDashboard\"",
+      "fix": "Changed ReportsAnalytics → ReportsDashboard",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T15:01:17.687Z"
+    },
+    {
+      "id": "bug-211",
+      "timestamp": "2026-07-04T15:00:51.779Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherReports.tsx",
+      "root_cause": "Had \"../../components/common/ReportsAnalytics\"",
+      "fix": "Changed to \"../../components/common/ReportsDashboard\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:00:51.779Z"
+    },
+    {
+      "id": "bug-212",
+      "timestamp": "2026-07-04T15:00:52.764Z",
+      "error_message": "Wrong reference: ReportsAnalytics should be ReportsDashboard",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherReports.tsx",
+      "root_cause": "Used \"ReportsAnalytics\" instead of \"ReportsDashboard\"",
+      "fix": "Changed ReportsAnalytics → ReportsDashboard",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:00:52.764Z"
+    },
+    {
+      "id": "bug-213",
+      "timestamp": "2026-07-04T15:05:36.518Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:05:36.518Z"
+    },
+    {
+      "id": "bug-214",
+      "timestamp": "2026-07-04T15:06:56.806Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:06:56.806Z"
+    },
+    {
+      "id": "bug-215",
+      "timestamp": "2026-07-04T15:07:04.172Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 9→13 lines (3 removed) | Also: {alreadySubmitted && (; disabled={alreadySubmitted}",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T15:07:29.871Z"
+    },
+    {
+      "id": "bug-216",
+      "timestamp": "2026-07-04T15:07:52.578Z",
+      "error_message": "Wrong reference: alreadySubmitted should be locked",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Used \"alreadySubmitted\" instead of \"locked\"",
+      "fix": "Changed alreadySubmitted → locked",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:07:52.578Z"
+    },
+    {
+      "id": "bug-217",
+      "timestamp": "2026-07-04T15:09:16.121Z",
+      "error_message": "CSS fix: opacity, background, border-color",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "opacity: 0.4 → 0.8; background: transparent → rgba(239, 68, 68, 0.05); border-color: var(--border) → rgba(239, 68, 68, 0.6)",
+      "fix": "Changed opacity: 0.4 → 0.8; background: transparent → rgba(239, 68, 68, 0.05); border-color: var(--border) → rgba(239, 68, 68, 0.6)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 4,
+      "last_seen": "2026-07-04T15:10:07.510Z"
+    },
+    {
+      "id": "bug-218",
+      "timestamp": "2026-07-04T18:05:00.000Z",
+      "error_message": "GET /api/quran-plans?student=__none__ and GET /api/evaluations?student=__none__ both return 500 on initial mount",
+      "file": "quran-hifz/src/quran/components/common/StudentReportPanel.tsx",
+      "root_cause": "StudentReportPanel picks selectedId = pickedId || students[0]?._id || \"\" reactively; on first render before the students query resolves, selectedId is empty so it queries useQuranPlans/useEvaluations with the literal filter value student: \"__none__\" as a sentinel to mean \"fetch nothing yet\" — but the backend tries to treat \"__none__\" as a real ObjectId and throws, instead of the frontend using enabled:false to skip the request entirely.",
+      "fix": "NOT FIXED — discovered during visual verification of the new ReportsDashboard.tsx (which reuses StudentReportPanel unchanged) via Playwright network capture. Harmless/self-healing (next render resolves the real selectedId and the correct data loads a moment later), so left out of scope for this session's task. A real fix should either pass enabled: false to the two hooks when selectedId is empty, or have the backend controllers 400 instead of 500 on a malformed ObjectId.",
+      "tags": [
+        "pre-existing",
+        "not-fixed",
+        "evaluations",
+        "quran-plans",
+        "reports",
+        "__none__-sentinel"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T18:05:00.000Z"
+    },
+    {
+      "id": "bug-219",
+      "timestamp": "2026-07-04T20:30:00.000Z",
+      "error_message": "Teacher attendance day-slider showed the exact same day (weekday + day number) repeated for every chip — user: \"all the day show the same days\"",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "addDays() built the next date via new Date(iso+\"T00:00:00\") (local midnight) then setDate()+toISOString() (UTC). For any timezone ahead of UTC (this dev machine: Africa/Cairo, UTC+3), local midnight of day X+1 converts to UTC as day X at 21:00 — so toISOString().split(\"T\")[0] returned X again, a fixed point. Every loop iteration in buildDayChips() advanced cur to itself, so all 1095 chips (the guard cap) rendered the same iso/weekday/day-number. Confirmed by isolated node repro. today (new Date().toISOString().split(\"T\")[0]) had the same UTC-vs-local-date bug on a narrower scale (wrong during the first ~3 hours of each local day).",
+      "fix": "Rewrote addDays to pure UTC arithmetic: new Date(Date.UTC(y, m-1, d+n)).toISOString().split(\"T\")[0] — never touches local time, so the offset can't leak in. Rewrote today to build from now.getFullYear()/getMonth()/getDate() (local calendar date) instead of toISOString().",
+      "tags": [
+        "timezone",
+        "date-math",
+        "day-slider",
+        "attendance",
+        "utc-offset"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T20:30:00.000Z"
+    },
+    {
+      "id": "bug-220",
+      "timestamp": "2026-07-04T15:28:38.729Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:28:38.729Z"
+    },
+    {
+      "id": "bug-221",
+      "timestamp": "2026-07-04T15:30:13.205Z",
+      "error_message": "CSS fix: gap, margin-bottom",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "gap: 10px → 6px; margin-bottom: 16px → 10px",
+      "fix": "Changed gap: 10px → 6px; margin-bottom: 16px → 10px",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:30:13.205Z"
+    },
+    {
+      "id": "bug-222",
+      "timestamp": "2026-07-04T15:30:24.296Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Had `${toAr(avg.toFixed(1))}/${toAr(TOTAL_MAX)}`",
+      "fix": "Changed to `${toAr(Math.round(avg))}/${toAr(TOTAL_MAX)}`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:30:24.296Z"
     }
   ]
 }
