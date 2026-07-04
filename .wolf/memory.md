@@ -1202,3 +1202,48 @@
 | 15:05 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | expanded (+8 lines) | ~226 |
 | 15:05 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | expanded (+20 lines) | ~322 |
 | 15:08 | Session end: 18 writes across 7 files (TeacherRecordLesson.tsx, quranRange.ts, StudentReportPanel.tsx, TeacherDashboard.tsx, verify.mjs) | 17 reads | ~20868 tok |
+
+## Session: 2026-07-04 15:12
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:20 | Planned + built reports redesign (shared ReportsAnalytics engine + Donut/Leaderboard/ScopeTabs) | quran-hifz/src/quran/components/common/{ReportsAnalytics,Donut,Leaderboard,ScopeTabs}.tsx, quran.css | created | ~5600 |
+| 15:22 | Rewrote AdminReports.tsx & TeacherReports.tsx to use ReportsAnalytics | quran-hifz/src/quran/pages/{admin/AdminReports,teacher/TeacherReports}.tsx | done | ~900 |
+| 15:30 | Diagnosed Arabic-design bug: page mixed Arabic-Indic (new widgets) + Western (StudentReportPanel) digits — converted StudentReportPanel to toAr/pct for whole-page consistency; added tick/label/tooltip formatters to all charts | StudentReportPanel.tsx, ReportsAnalytics.tsx | fixed, digits now uniform (diag numbers: []) | ~2200 |
+| 15:34 | Verified via Playwright (admin light/dark/mobile screenshots in .wolf/designqc-captures/) + tsc clean + build passes | — | ok | ~1500 |
+
+## Session: 2026-07-04 17:47
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-04 17:47
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-04 17:48
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-04 17:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:50 | Edited quran-hifz/src/quran/quran.css | modified media() | ~545 |
+| 17:50 | Edited quran-hifz/src/quran/quran.css | CSS: box-shadow | ~109 |
+| 17:51 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | expanded (+23 lines) | ~366 |
+| 17:51 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 3→2 lines | ~28 |
+| 17:57 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 4→8 lines | ~113 |
+| 17:57 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 5→9 lines | ~105 |
+| 17:57 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | expanded (+7 lines) | ~368 |
+| 17:58 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 36→38 lines | ~575 |
+| 17:58 | Created quran-hifz/src/quran/components/common/Gauge.tsx | — | ~578 |
+| 17:58 | Edited quran-hifz/src/quran/quran.css | modified not() | ~83 |
+| 17:58 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 6→6 lines | ~82 |
+| 17:59 | Created quran-hifz/src/quran/components/common/ReportsDashboard.tsx | — | ~7044 |
+| 17:59 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | added 1 import(s) | ~71 |
+| 17:59 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | CSS: KPI_TONE, actual, target | ~108 |
+| 17:59 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | added nullish coalescing | ~196 |
+| 18:00 | Edited quran-hifz/src/quran/quran.css | modified media() | ~641 |

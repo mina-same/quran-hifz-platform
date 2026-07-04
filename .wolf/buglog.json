@@ -3250,6 +3250,121 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-04T12:05:12.360Z"
+    },
+    {
+      "id": "bug-202",
+      "timestamp": "2026-07-04T15:30:00.000Z",
+      "error_message": "Reports page mixed Arabic-Indic digits (new widgets: ٨٣٪) with Western digits (StudentReportPanel: 83%, 10/10, juz numbers) — user flagged \"problem with the arabic with the design\"",
+      "file": "quran-hifz/src/quran/components/common/StudentReportPanel.tsx",
+      "root_cause": "StudentReportPanel (older component) rendered plain Western digits in recharts axes/LabelList/tooltips + juz & comparison tables, while the new ReportsAnalytics widgets correctly used toAr/pct — placing them on the same page caused two digit systems to collide",
+      "fix": "Converted StudentReportPanel to toAr/pct everywhere (StatsRow, juz table, comparison table) and added tickFormatter/LabelList formatter/Tooltip formatter to radar/line/bar charts so all chart numbers render Arabic-Indic; verified via Playwright diag scan (leaf text with [0-9] → numbers: [])",
+      "tags": [
+        "arabic",
+        "digits",
+        "recharts",
+        "rtl",
+        "reports",
+        "consistency"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:30:00.000Z"
+    },
+    {
+      "id": "bug-203",
+      "timestamp": "2026-07-04T14:50:54.045Z",
+      "error_message": "CSS fix: background, border-color",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "background: rgba(239, 68, 68, 0.1) → linear-gradient(135deg, var(--green-pale) 0%, var(--gold-pale) 100%); border-color: rgba(239, 68, 68, 0.25) → var(--border2)",
+      "fix": "Changed background: rgba(239, 68, 68, 0.1) → linear-gradient(135deg, var(--green-pale) 0%, var(--gold-pale) 100%); border-color: rgba(239, 68, 68, 0.25) → var(--border2)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T14:50:54.045Z"
+    },
+    {
+      "id": "bug-204",
+      "timestamp": "2026-07-04T14:51:09.195Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "8 lines replaced/restructured",
+      "fix": "Rewrote 11→34 lines (8 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T14:51:09.195Z"
+    },
+    {
+      "id": "bug-205",
+      "timestamp": "2026-07-04T14:57:39.287Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→9 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T14:57:39.287Z"
+    },
+    {
+      "id": "bug-206",
+      "timestamp": "2026-07-04T14:58:35.436Z",
+      "error_message": "CSS fix: button, background",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "button: not(.active):hover { → disabled:hover,; background: var(--green-pale) → transparent",
+      "fix": "Changed button: not(.active):hover { → disabled:hover,; background: var(--green-pale) → transparent",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T14:58:35.436Z"
+    },
+    {
+      "id": "bug-207",
+      "timestamp": "2026-07-04T14:59:46.707Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/components/common/ReportsDashboard.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T14:59:46.707Z"
+    },
+    {
+      "id": "bug-208",
+      "timestamp": "2026-07-04T14:59:55.216Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/components/common/ReportsDashboard.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T14:59:55.216Z"
     }
   ]
 }

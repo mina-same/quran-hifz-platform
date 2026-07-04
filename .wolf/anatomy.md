@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T12:05:25.764Z
-> Files: 395 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T15:00:36.227Z
+> Files: 401 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/
 
@@ -488,7 +488,7 @@
 
 ## quran-hifz/src/quran/
 
-- `quran.css` — Styles: 74 rules, 18 vars (~17774 tok)
+- `quran.css` — Styles: 71 rules, 18 vars (~23750 tok)
 - `QuranApp.tsx` — Quran Hifz platform — React entry. (~852 tok)
 
 ## quran-hifz/src/quran/api/
@@ -521,16 +521,22 @@
 
 ## quran-hifz/src/quran/components/common/
 
-- `Alert.tsx` — ICONS (~156 tok)
+- `Alert.tsx` — ICONS — now supports `danger` tone (~165 tok)
 - `AyahBar.tsx` — AyahBar (~40 tok)
 - `Badge.tsx` — Badge (~83 tok)
 - `Card.tsx` — Card (~181 tok)
 - `ContextPicker.tsx` — Unified shape for "teaching context" — either a Halqa or a SpecialTrack. (~1166 tok)
 - `DaysOfWeekPicker.tsx` — WEEK_DAYS (~481 tok)
+- `Donut.tsx` — Donut — recharts PieChart donut + center label + legend (~330 tok)
 - `FormSection.tsx` — FormSection (~195 tok)
+- `Gauge.tsx` — Single-value ring gauge (0-100) with a tiered color + badge, used as the (~578 tok)
 - `HalqaRow.tsx` — HalqaRow (~104 tok)
+- `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
+- `ReportsAnalytics.tsx` — Shared reports engine: scope tabs + KPI strip + insights + donuts + halqa ranking + leaderboards + KPI scorecard + teacher workload + export dropdown. Drives both AdminReports & TeacherReports. All numbers Arabic-Indic via toAr/pct (~6200 tok)
+- `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~7253 tok)
+- `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)
 - `Skeleton.tsx` — Skeleton — renders table (~816 tok)
 - `StatsRow.tsx` — StatsRow (~146 tok)
 - `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from a student's plans — no dedicated (~4018 tok)
@@ -572,7 +578,7 @@
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~2682 tok)
 - `AdminParents.tsx` — EMPTY_ADD, ChildChip — renders table, modal, search bar, avatars (~5900 tok)
 - `AdminRegister.tsx` — schema — renders form (~3078 tok)
-- `AdminReports.tsx` — GIFTED_THRESHOLD (~2121 tok)
+- `AdminReports.tsx` — Now a thin wrapper that feeds school-wide data into ReportsAnalytics (showAdmin) (~430 tok)
 - `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13252 tok)
 - `AdminStudents.tsx` — PATH_TONE — renders table (~5092 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4598 tok)
@@ -600,7 +606,7 @@
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — surahName (~3997 tok)
+- `TeacherAttendance.tsx` — Normalize any date-ish string (full ISO timestamp OR bare YYYY-MM-DD) to a (~6582 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1419 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
 - `TeacherGroupHomework.tsx` — STUDENTS (~2926 tok)
@@ -608,7 +614,7 @@
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
 - `TeacherPlans.tsx` — surahName — renders form, modal (~11602 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
-- `TeacherReports.tsx` — GIFTED_THRESHOLD (~1881 tok)
+- `TeacherReports.tsx` — Now a thin wrapper that feeds teacher-scoped halqat/tracks into ReportsAnalytics (~370 tok)
 - `TeacherSpecialTracks.tsx` — surahName (~5113 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2190 tok)
 

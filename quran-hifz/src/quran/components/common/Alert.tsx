@@ -1,10 +1,11 @@
 import type { ReactNode, CSSProperties } from "react";
 
-type Tone = "info" | "success" | "warning";
+type Tone = "info" | "success" | "warning" | "danger";
 const ICONS: Record<Tone, string> = {
   info: "ti-info-circle",
   success: "ti-circle-check",
   warning: "ti-alert-circle",
+  danger: "ti-alert-octagon",
 };
 
 export function Alert({
