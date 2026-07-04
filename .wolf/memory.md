@@ -1107,3 +1107,98 @@
 | 12:57 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/test-slicing.ts | — | ~610 |
 | 12:57 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/test-slicing.ts | "../../../../../../Users/x" → "./lib/quranRange" | ~24 |
 | 12:57 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/bbd609da-d480-4381-aa1d-3b8d4fbbf3f3/scratchpad/shot_parents4.mjs | — | ~586 |
+| now | Rewrote quran-hifz/src/quran/pages/teacher/TeacherReports.tsx | placeholder "قريباً" text → real reports (attendance/hifz/gifted CSV exports scoped to teacher's own halqat via useHalqat+useStudents) | ~1150 |
+| 12:59 | Session end: 34 writes across 15 files (quranRange.ts, quran-plan.controller.ts, TeacherPlans.tsx, quran-plans.ts, quran.css) | 21 reads | ~63604 tok |
+| 12:59 | Edited quran-hifz/src/quran/api/quran-plans.ts | inline fix | ~41 |
+| 12:59 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | 7→11 lines | ~183 |
+| 13:00 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | CSS: pageStart | ~238 |
+| 13:00 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | CSS: fontWeight, color | ~180 |
+| 13:00 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | 4→6 lines | ~144 |
+| 13:00 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | 4→6 lines | ~144 |
+| 13:01 | Session end: 40 writes across 18 files (quranRange.ts, quran-plan.controller.ts, TeacherPlans.tsx, quran-plans.ts, quran.css) | 25 reads | ~87250 tok |
+
+## Session: 2026-07-04 (AdminParents UI/UX pass)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:40 | ui-ux-pro-max pass on admin Parents page: fixed undefined --bg2 var (chips had no background — bug-179), added .child-chip/.child-chip-remove CSS + dark override, extracted module-scope ChildChip component (was duplicated 3x), added search bar (name/email, matches AdminStudents convention), .att-avatar initials on rows, live count via toAr(), split empty-state vs no-results message, aria-label on icon-only edit button + shared Modal close button | AdminParents.tsx, quran.css, Modal.tsx | verified via Playwright screenshots (desktop/dark/mobile/search/edit-modal), tsc clean | ~2400 |
+| 13:11 | Session end: 40 writes across 18 files (quranRange.ts, quran-plan.controller.ts, TeacherPlans.tsx, quran-plans.ts, quran.css) | 30 reads | ~87250 tok |
+| 13:43 | Created ../../../.claude/plans/ethereal-popping-babbage.md | — | ~2725 |
+| 13:43 | Created quran-hifz-server/src/models/Evaluation.model.ts | — | ~506 |
+| 13:43 | Edited quran-hifz-server/src/models/Evaluation.model.ts | inline fix | ~14 |
+| 13:44 | Created quran-hifz-server/src/lib/notify.ts | — | ~593 |
+| 13:44 | Edited quran-hifz-server/src/controllers/attendance.controller.ts | 9→8 lines | ~109 |
+| 13:44 | Edited quran-hifz-server/src/controllers/attendance.controller.ts | modified deriveDayAndTime() | ~504 |
+| 13:45 | Edited quran-hifz-server/src/controllers/attendance.controller.ts | modified bulkAttendance() | ~243 |
+| 13:45 | Created quran-hifz-server/src/controllers/evaluation.controller.ts | — | ~1316 |
+| 13:45 | Edited quran-hifz-server/src/lib/notify.ts | modified notifyParents() | ~65 |
+| 13:45 | Edited quran-hifz-server/src/lib/notify.ts | 9→9 lines | ~82 |
+| 13:45 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | added 1 condition(s) | ~209 |
+| 13:46 | Created quran-hifz-server/src/routes/evaluation.routes.ts | — | ~115 |
+| 13:46 | Edited quran-hifz-server/src/app.ts | added 1 import(s) | ~34 |
+| 13:46 | Edited quran-hifz-server/src/app.ts | 1→2 lines | ~27 |
+| 13:46 | Created quran-hifz/src/quran/lib/evaluationRubric.ts | — | ~34 |
+| 13:46 | Created quran-hifz/src/quran/api/evaluations.ts | — | ~659 |
+| 13:47 | Edited quran-hifz/src/quran/quran.css | CSS: flex-direction | ~82 |
+| 13:47 | Edited quran-hifz/src/quran/quran.css | expanded (+17 lines) | ~366 |
+| 13:48 | Created quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | — | ~3860 |
+| 13:48 | Edited quran-hifz/src/quran/router/pageRegistry.ts | 3→2 lines | ~43 |
+| 13:48 | Edited quran-hifz/src/quran/router/pageRegistry.ts | 3→2 lines | ~22 |
+| 13:49 | Edited quran-hifz/src/quran/config/portals.ts | 8→7 lines | ~142 |
+| 13:49 | Edited quran-hifz/src/quran/pages/parent/ParentAttendance.tsx | added 1 import(s) | ~146 |
+| 13:49 | Edited quran-hifz/src/quran/pages/parent/ParentAttendance.tsx | CSS: student | ~118 |
+| 13:49 | Edited quran-hifz/src/quran/pages/parent/ParentAttendance.tsx | CSS: fontWeight | ~326 |
+| 13:50 | Edited quran-hifz/src/quran/pages/parent/ParentAttendance.tsx | CSS: fontWeight, color | ~414 |
+| 13:50 | Edited quran-hifz/src/quran/lib/quranRange.ts | added 1 condition(s) | ~318 |
+| 13:50 | Edited quran-hifz/src/quran/lib/quranRange.ts | modified juzOfFlatIndex() | ~180 |
+| 13:51 | Edited quran-hifz/src/quran/api/evaluations.ts | modified useEvaluations() | ~137 |
+| 13:52 | Created quran-hifz/src/quran/components/common/StudentReportPanel.tsx | — | ~2402 |
+| 13:52 | Edited quran-hifz/src/quran/components/common/StudentReportPanel.tsx | 3→3 lines | ~35 |
+| 13:52 | Edited quran-hifz/src/quran/components/common/StudentReportPanel.tsx | inline fix | ~18 |
+| 13:52 | Edited quran-hifz/src/quran/pages/teacher/TeacherReports.tsx | added 2 import(s) | ~111 |
+| 13:53 | Edited quran-hifz/src/quran/pages/teacher/TeacherReports.tsx | CSS: marginBottom | ~50 |
+| 13:53 | Edited quran-hifz/src/quran/pages/teacher/TeacherReports.tsx | CSS: halqa | ~94 |
+| 13:53 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | modified if() | ~106 |
+| 13:53 | Edited quran-hifz/src/quran/pages/teacher/TeacherReports.tsx | 5→5 lines | ~58 |
+| 13:53 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | added 2 import(s) | ~108 |
+| 13:53 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | CSS: marginBottom | ~50 |
+| 13:54 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | 5→10 lines | ~91 |
+| 13:59 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/verify.mjs | — | ~355 |
+| 14:00 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | added optional chaining | ~58 |
+| 14:01 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 4→4 lines | ~55 |
+| 14:01 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | expanded (+6 lines) | ~259 |
+| 14:01 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 4→4 lines | ~22 |
+| 14:03 | Created quran-hifz-server/src/seeds/backfillPlans.ts | — | ~926 |
+| 14:03 | Edited quran-hifz-server/src/seeds/backfillPlans.ts | 2→2 lines | ~27 |
+| 14:03 | Edited quran-hifz-server/src/seeds/backfillPlans.ts | added 1 condition(s) | ~155 |
+| 14:05 | Edited quran-hifz-server/src/seeds/backfillPlans.ts | 8→12 lines | ~203 |
+| 14:11 | Edited quran-hifz-server/package.json | 1→2 lines | ~29 |
+
+## Session: 2026-07-04 14:13
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:14 | Created quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx | — | ~228 |
+| 14:14 | Edited quran-hifz/src/quran/lib/quranRange.ts | added 1 condition(s) | ~139 |
+| 14:22 | Replaced TeacherRecordLesson recorder UI with a "قريباً" (Coming Soon) placeholder card per user request | quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx | done | ~250 |
+| 14:14 | Session end: 2 writes across 2 files (TeacherRecordLesson.tsx, quranRange.ts) | 3 reads | ~5003 tok |
+| 14:15 | Created quran-hifz/src/quran/components/common/StudentReportPanel.tsx | — | ~3949 |
+| 14:17 | Edited quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | modified getName() | ~389 |
+| 14:17 | Edited quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | 2→2 lines | ~53 |
+| 14:17 | Edited quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | 17→19 lines | ~262 |
+| 14:17 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/verify.mjs | 16→16 lines | ~191 |
+| 14:17 | Edited quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | modified TeacherDashboard() | ~36 |
+| 14:17 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/verify.mjs | added 1 condition(s) | ~298 |
+| 14:35 | Connected TeacherDashboard stats/list to Special Tracks (useSpecialTracks) in addition to Halqat — combined via halqaToContext/trackToContext, stat renamed "حلقاتي ومساراتي" | quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | done | ~600 |
+| 14:18 | Session end: 9 writes across 5 files (TeacherRecordLesson.tsx, quranRange.ts, StudentReportPanel.tsx, TeacherDashboard.tsx, verify.mjs) | 6 reads | ~11674 tok |
+| 14:38 | Edited quran-hifz/src/quran/components/common/StudentReportPanel.tsx | 5→9 lines | ~174 |
+| 14:38 | Edited quran-hifz/src/quran/components/common/StudentReportPanel.tsx | inline fix | ~31 |
+| 14:47 | Session end: 11 writes across 5 files (TeacherRecordLesson.tsx, quranRange.ts, StudentReportPanel.tsx, TeacherDashboard.tsx, verify.mjs) | 13 reads | ~15828 tok |
+| 15:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherReports.tsx | added 2 import(s) | ~138 |
+| 15:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherReports.tsx | CSS: track, specialTrack | ~351 |
+| 15:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherReports.tsx | 5→9 lines | ~238 |
+| 15:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherReports.tsx | CSS: marginBottom, maxWidth, track | ~329 |
+| 15:05 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | added 3 import(s) | ~148 |
+| 15:05 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | expanded (+8 lines) | ~226 |
+| 15:05 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | expanded (+20 lines) | ~322 |
+| 15:08 | Session end: 18 writes across 7 files (TeacherRecordLesson.tsx, quranRange.ts, StudentReportPanel.tsx, TeacherDashboard.tsx, verify.mjs) | 17 reads | ~20868 tok |

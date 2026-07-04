@@ -1,6 +1,7 @@
 import { useTopbar } from "../../context/useTopbar";
 import { useParentContext } from "../../context/ParentContext";
 import { useChildAttendance } from "../../api/parent";
+import { useEvaluations } from "../../api/evaluations";
 import { StatsRow } from "../../components/common/StatsRow";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
@@ -16,8 +17,11 @@ const STATUS_TONE: Record<string, "green" | "gold" | "red"> = {
 export function ParentAttendance() {
   const { activeChild } = useParentContext();
   const { data: records, isLoading } = useChildAttendance(activeChild?._id);
+  const { data: evaluations = [] } = useEvaluations(activeChild?._id ? { student: activeChild._id } : undefined);
 
   useTopbar("ti-calendar-check", `سجل حضور ${activeChild?.name ?? "—"}`, <></>);
+
+  const evalByDate = new Map(evaluations.map((e) => [new Date(e.date).toDateString(), e]));
 
   const present  = records?.filter((r) => r.status === "حاضر").length  ?? 0;
   const late     = records?.filter((r) => r.status === "متأخر").length ?? 0;
@@ -48,46 +52,60 @@ export function ParentAttendance() {
                     <th>اليوم</th>
                     <th>الوقت</th>
                     <th>الحالة</th>
+                    <th>التقييم</th>
                     <th>ملاحظة</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {(records ?? []).map((r, i) => (
-                    <tr key={i}>
-                      <td>{new Date(r.date).toLocaleDateString("ar-SA")}</td>
-                      <td>{r.day}</td>
-                      <td>{r.time}</td>
-                      <td><Badge tone={STATUS_TONE[r.status] ?? "green"}>{r.status}</Badge></td>
-                      <td style={{ fontSize: 12, color: "var(--text2)" }}>
-                        {(r as { note?: string }).note ?? "—"}
-                      </td>
-                    </tr>
-                  ))}
+                  {(records ?? []).map((r, i) => {
+                    const evalForDay = evalByDate.get(new Date(r.date).toDateString());
+                    return (
+                      <tr key={i}>
+                        <td>{new Date(r.date).toLocaleDateString("ar-SA")}</td>
+                        <td>{r.day}</td>
+                        <td>{r.time}</td>
+                        <td><Badge tone={STATUS_TONE[r.status] ?? "green"}>{r.status}</Badge></td>
+                        <td style={{ fontWeight: 700, color: "var(--green)" }}>
+                          {evalForDay ? `${evalForDay.total}/10` : "—"}
+                        </td>
+                        <td style={{ fontSize: 12, color: "var(--text2)" }}>
+                          {(r as { note?: string }).note ?? "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
             <div className="rc-list">
-              {(records ?? []).map((r, i) => (
-                <div key={i} className="rc-card">
-                  <div className="rc-card-head">
-                    <span className="rc-card-title">{new Date(r.date).toLocaleDateString("ar-SA")}</span>
-                    <Badge tone={STATUS_TONE[r.status] ?? "green"}>{r.status}</Badge>
+              {(records ?? []).map((r, i) => {
+                const evalForDay = evalByDate.get(new Date(r.date).toDateString());
+                return (
+                  <div key={i} className="rc-card">
+                    <div className="rc-card-head">
+                      <span className="rc-card-title">{new Date(r.date).toLocaleDateString("ar-SA")}</span>
+                      <Badge tone={STATUS_TONE[r.status] ?? "green"}>{r.status}</Badge>
+                    </div>
+                    <div className="rc-row">
+                      <span className="rc-row-label">اليوم</span>
+                      <span>{r.day}</span>
+                    </div>
+                    <div className="rc-row">
+                      <span className="rc-row-label">الوقت</span>
+                      <span>{r.time}</span>
+                    </div>
+                    <div className="rc-row">
+                      <span className="rc-row-label">التقييم</span>
+                      <span style={{ fontWeight: 700, color: "var(--green)" }}>{evalForDay ? `${evalForDay.total}/10` : "—"}</span>
+                    </div>
+                    <div className="rc-row">
+                      <span className="rc-row-label">ملاحظة</span>
+                      <span>{(r as { note?: string }).note ?? "—"}</span>
+                    </div>
                   </div>
-                  <div className="rc-row">
-                    <span className="rc-row-label">اليوم</span>
-                    <span>{r.day}</span>
-                  </div>
-                  <div className="rc-row">
-                    <span className="rc-row-label">الوقت</span>
-                    <span>{r.time}</span>
-                  </div>
-                  <div className="rc-row">
-                    <span className="rc-row-label">ملاحظة</span>
-                    <span>{(r as { note?: string }).note ?? "—"}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         )}

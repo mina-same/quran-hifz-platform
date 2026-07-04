@@ -852,6 +852,8 @@ function TrackCard({
                     مقرَّر اليوم: {surahName(linkedPlan.todayAssignment.surahStart)} : {linkedPlan.todayAssignment.ayahStart}
                     {" — "}
                     {surahName(linkedPlan.todayAssignment.surahEnd)} : {linkedPlan.todayAssignment.ayahEnd}
+                    {" "}(صفحة {linkedPlan.todayAssignment.pageStart}
+                    {linkedPlan.todayAssignment.pageEnd !== linkedPlan.todayAssignment.pageStart ? ` - ${linkedPlan.todayAssignment.pageEnd}` : ""})
                   </>
                 ) : "لا يوجد جزء مخصص لليوم"}
               </div>

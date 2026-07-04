@@ -212,6 +212,10 @@ function TrackCard({ track }: { track: SpecialTrack }) {
                       مقرَّر اليوم: {surahName(linkedPlan.todayAssignment.surahStart)} : {linkedPlan.todayAssignment.ayahStart}
                       {" — "}
                       {surahName(linkedPlan.todayAssignment.surahEnd)} : {linkedPlan.todayAssignment.ayahEnd}
+                      <span style={{ fontWeight: 400, color: "var(--text2)" }}>
+                        {" "}(صفحة {linkedPlan.todayAssignment.pageStart}
+                        {linkedPlan.todayAssignment.pageEnd !== linkedPlan.todayAssignment.pageStart ? ` - ${linkedPlan.todayAssignment.pageEnd}` : ""})
+                      </span>
                     </>
                   ) : (
                     <span style={{ fontWeight: 400, color: "var(--text3)" }}>لا يوجد جزء مخصص لليوم</span>

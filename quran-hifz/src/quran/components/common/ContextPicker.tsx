@@ -58,9 +58,7 @@ export function ContextPicker({
   actionIcon?: string;
 }) {
   if (contexts.length === 0) {
-    return (
-      <div className="page-loading">{emptyLabel ?? "لا توجد حلقات أو مسارات مسجلة"}</div>
-    );
+    return <div className="page-loading">{emptyLabel ?? "لا توجد حلقات أو مسارات مسجلة"}</div>;
   }
 
   return (
@@ -68,47 +66,62 @@ export function ContextPicker({
       {heading && (
         <p style={{ margin: "0 0 14px", fontSize: 13, color: "var(--text2)" }}>{heading}</p>
       )}
-      <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-      {contexts.map((ctx) => (
-        <div
-          key={`${ctx.kind}-${ctx.id}`}
-          className="card"
-          style={{ cursor: "pointer", border: "2px solid transparent", transition: "border .15s" }}
-          onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--green)")}
-          onMouseLeave={(e) => (e.currentTarget.style.borderColor = "transparent")}
-          onClick={() => onSelect(ctx)}
-        >
-          <div className="card-header">
-            <div className="card-title">
-              <i className={`ti ${ctx.kind === "halqa" ? "ti-school" : "ti-calendar-event"}`} /> {ctx.title}
-            </div>
-          </div>
-          {ctx.subtitle && (
-            <div className="halqa-row">
-              <span className="lbl">{ctx.kind === "halqa" ? "المسجد" : "المكان"}</span>
-              <span className="val">{ctx.subtitle}</span>
-            </div>
-          )}
-          {ctx.scheduleLabel && (
-            <div className="halqa-row">
-              <span className="lbl">المواعيد</span>
-              <span className="val" style={{ fontSize: 11 }}>{ctx.scheduleLabel}</span>
-            </div>
-          )}
-          <div className="halqa-row">
-            <span className="lbl">الطلاب</span>
-            <span className="val">{ctx.studentCount ?? "—"} طالب</span>
-          </div>
-          <button
-            className="topbar-btn btn-primary"
-            style={{ width: "100%", justifyContent: "center", marginTop: 12 }}
-            onClick={(e) => { e.stopPropagation(); onSelect(ctx); }}
+      <div
+        className="grid-collapse"
+        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}
+      >
+        {contexts.map((ctx) => (
+          <div
+            key={`${ctx.kind}-${ctx.id}`}
+            className="card"
+            style={{
+              cursor: "pointer",
+              border: "2px solid transparent",
+              transition: "border .15s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--green)")}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "transparent")}
+            onClick={() => onSelect(ctx)}
           >
-            <i className={`ti ${actionIcon ?? (ctx.kind === "halqa" ? "ti-school" : "ti-calendar-event")}`} />
-            {actionLabel ?? (ctx.kind === "halqa" ? "اختيار الحلقة" : "اختيار المسار")}
-          </button>
-        </div>
-      ))}
+            <div className="card-header">
+              <div className="card-title">
+                <i className={`ti ${ctx.kind === "halqa" ? "ti-school" : "ti-calendar-event"}`} />{" "}
+                {ctx.title}
+              </div>
+            </div>
+            {ctx.subtitle && (
+              <div className="halqa-row">
+                <span className="lbl">{ctx.kind === "halqa" ? "المسجد" : "المكان"}</span>
+                <span className="val">{ctx.subtitle}</span>
+              </div>
+            )}
+            {ctx.scheduleLabel && (
+              <div className="halqa-row">
+                <span className="lbl">المواعيد</span>
+                <span className="val" style={{ fontSize: 11 }}>
+                  {ctx.scheduleLabel}
+                </span>
+              </div>
+            )}
+            <div className="halqa-row">
+              <span className="lbl">الطلاب</span>
+              <span className="val">{ctx.studentCount ?? "—"} طالب</span>
+            </div>
+            <button
+              className="topbar-btn btn-primary"
+              style={{ width: "100%", justifyContent: "center", marginTop: 12 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(ctx);
+              }}
+            >
+              <i
+                className={`ti ${actionIcon ?? (ctx.kind === "halqa" ? "ti-school" : "ti-calendar-event")}`}
+              />
+              {actionLabel ?? (ctx.kind === "halqa" ? "اختيار الحلقة" : "اختيار المسار")}
+            </button>
+          </div>
+        ))}
       </div>
     </>
   );

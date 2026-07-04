@@ -796,7 +796,8 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 .att-mark-all:hover { background: var(--green-pale); color: var(--green); }
 
 .att-list { display: flex; flex-direction: column; gap: 8px; }
-.att-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--cream); transition: background .15s, border-color .15s; }
+.att-row { display: flex; flex-direction: column; gap: 10px; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--cream); transition: background .15s, border-color .15s; }
+.att-row-top { display: flex; align-items: center; gap: 12px; }
 .att-row.is-absent { border-color: rgba(239,68,68,0.3); background: #fff8f8; }
 .att-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--green-pale); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
 .att-row.is-absent .att-avatar { background: #fee2e2; color: #b91c1c; }
@@ -813,6 +814,23 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 .dark .att-row.is-absent { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); }
 .dark .att-chip.absent { background: rgba(239,68,68,0.12); color: #f87171; }
 .dark .att-mark-all:hover { background: #0d2117; color: var(--green); }
+
+.eval-scores { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding-inline-start: 50px; }
+.eval-cat { display: flex; align-items: center; gap: 6px; }
+.eval-cat-label { font-size: 11px; color: var(--text2); font-weight: 600; }
+.eval-chip-group { display: flex; gap: 3px; }
+.eval-chip {
+  width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border2);
+  background: transparent; color: var(--text2); font-size: 11px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.eval-chip.active { background: var(--green); border-color: var(--green); color: white; }
+.eval-chip:disabled { cursor: not-allowed; opacity: 0.4; }
+.eval-total { margin-inline-start: auto; font-size: 12px; font-weight: 800; color: var(--green); }
+.eval-total.zero { color: var(--text3); }
+
+.dark .eval-chip { border-color: var(--border); }
 
 /* MODAL — centered dialog on desktop, bottom sheet on mobile (see 900px media block) */
 .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 16px; }

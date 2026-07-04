@@ -547,6 +547,7 @@ export function TeacherPlans() {
                       <th>الجزء</th>
                       <th>من</th>
                       <th>إلى</th>
+                      <th>الصفحات</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -557,6 +558,7 @@ export function TeacherPlans() {
                         <td><Badge tone="green">جزء {s.juz}</Badge></td>
                         <td>{surahName(s.surahStart)} : {s.ayahStart}</td>
                         <td>{surahName(s.surahEnd)} : {s.ayahEnd}</td>
+                        <td>{s.pageStart === s.pageEnd ? s.pageStart : `${s.pageStart} - ${s.pageEnd}`}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -719,6 +721,10 @@ function PlanCard({
               {surahName(plan.todayAssignment.surahStart)} : {plan.todayAssignment.ayahStart}
               {" — "}
               {surahName(plan.todayAssignment.surahEnd)} : {plan.todayAssignment.ayahEnd}
+              <span style={{ fontWeight: 400, color: "var(--text2)" }}>
+                {" "}(صفحة {plan.todayAssignment.pageStart}
+                {plan.todayAssignment.pageEnd !== plan.todayAssignment.pageStart ? ` - ${plan.todayAssignment.pageEnd}` : ""})
+              </span>
             </div>
           ) : (
             <div style={{ fontSize: 11, color: "var(--text3)" }}>لا يوجد جزء مخصص لليوم</div>

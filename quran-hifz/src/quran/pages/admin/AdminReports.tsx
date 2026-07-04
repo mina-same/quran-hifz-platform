@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { useStudents } from "../../api/students";
 import { useTeachers } from "../../api/teachers";
 import { useKpis } from "../../api/kpis";
+import { useHalqat } from "../../api/halqat";
+import { useSpecialTracks } from "../../api/special-tracks";
 import { downloadCsv } from "../../../lib/csv";
+import { Card } from "../../components/common/Card";
+import { StudentReportPanel } from "../../components/common/StudentReportPanel";
 
 const GIFTED_THRESHOLD = 85;
 
@@ -28,6 +33,14 @@ export function AdminReports() {
   const { data: students = [], isLoading: studentsLoading } = useStudents();
   const { data: teachers = [], isLoading: teachersLoading } = useTeachers();
   const { data: kpis = [], isLoading: kpisLoading } = useKpis();
+  const { data: halqat = [] } = useHalqat();
+  const { data: tracks = [] } = useSpecialTracks();
+
+  const [reportContext, setReportContext] = useState("");
+  const reportHalqa = halqat.find((h) => `halqa:${h._id}` === reportContext);
+  const reportTrack = tracks.find((t) => `track:${t._id}` === reportContext);
+  const reportFilter = reportHalqa ? { halqa: reportHalqa._id } : reportTrack ? { specialTrack: reportTrack._id } : {};
+  const { data: reportStudents = students } = useStudents(reportFilter, { enabled: !!(reportFilter.halqa || reportFilter.specialTrack) });
 
   const gifted = students.filter((s) => s.progressPct >= GIFTED_THRESHOLD);
 
@@ -97,7 +110,8 @@ export function AdminReports() {
   );
 
   return (
-    <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 }}>
+    <>
+    <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 16 }}>
       {REPORTS.map((r) => (
         <div
           key={r.title}
@@ -128,5 +142,30 @@ export function AdminReports() {
         <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 4 }}>قريباً</div>
       </div>
     </div>
+
+    <Card icon="ti-report-analytics" title="تقارير مفصّلة">
+      <div className="form-group" style={{ marginBottom: 16, maxWidth: 320 }}>
+        <label className="form-label">الحلقة أو المسار الاستثنائي</label>
+        <select className="form-input" value={reportContext} onChange={(e) => setReportContext(e.target.value)}>
+          <option value="">كل الطلاب</option>
+          {halqat.length > 0 && (
+            <optgroup label="الحلقات">
+              {halqat.map((h) => <option key={h._id} value={`halqa:${h._id}`}>{h.name}</option>)}
+            </optgroup>
+          )}
+          {tracks.length > 0 && (
+            <optgroup label="المسارات الاستثنائية">
+              {tracks.map((t) => <option key={t._id} value={`track:${t._id}`}>{t.title}</option>)}
+            </optgroup>
+          )}
+        </select>
+      </div>
+      <StudentReportPanel
+        students={reportStudents}
+        aggregateFilter={reportFilter}
+        aggregateTitle={reportHalqa ? `مقارنة طلاب ${reportHalqa.name}` : reportTrack ? `مقارنة طلاب ${reportTrack.title}` : "متوسط الدرجات لكل طلاب المدرسة"}
+      />
+    </Card>
+    </>
   );
 }

@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import { useHalqat } from "../../api/halqat";
+import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudents } from "../../api/students";
 import { downloadCsv } from "../../../lib/csv";
+import { Card } from "../../components/common/Card";
+import { StudentReportPanel } from "../../components/common/StudentReportPanel";
 
 const GIFTED_THRESHOLD = 85;
 
@@ -20,12 +24,26 @@ function colorVar(c: "" | "gold" | "blue") {
 export function TeacherReports() {
   const { user } = usePortal();
   const { data: halqat = [], isLoading: halqatLoading } = useHalqat({ teacher: user?.profileId });
+  const { data: tracks = [] } = useSpecialTracks(undefined, user?.profileId as string | undefined);
   const halqaIds = halqat.map((h) => h._id);
   const { data: students = [], isLoading: studentsLoading } = useStudents(
     { halqa: halqaIds.join(",") },
     { enabled: !halqatLoading && halqaIds.length > 0 },
   );
   const loading = halqatLoading || studentsLoading;
+
+  // Detailed report (StudentReportPanel) filter — "من فين الطلاب" — teachers
+  // often have several halqat and tracks, so the CSV cards above stay scoped
+  // to "all my halqat" but the detailed panel below lets picking exactly one.
+  const [pickedContext, setPickedContext] = useState("");
+  // "" means "all my halqat" — only a sensible default when halqat actually
+  // exist; a teacher with only special tracks (no halqat) defaults to their
+  // first track instead of silently resolving to an empty student list.
+  const reportContext = pickedContext || (halqaIds.length > 0 ? "" : tracks[0] ? `track:${tracks[0]._id}` : "");
+  const reportHalqa = halqat.find((h) => `halqa:${h._id}` === reportContext);
+  const reportTrack = tracks.find((t) => `track:${t._id}` === reportContext);
+  const reportFilter = reportHalqa ? { halqa: reportHalqa._id } : reportTrack ? { specialTrack: reportTrack._id } : { halqa: halqaIds.join(",") };
+  const { data: reportStudents = [] } = useStudents(reportFilter, { enabled: !!(reportFilter.halqa || reportFilter.specialTrack) });
 
   const gifted = students.filter((s) => s.progressPct >= GIFTED_THRESHOLD);
 
@@ -75,7 +93,8 @@ export function TeacherReports() {
   );
 
   return (
-    <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 }}>
+    <>
+    <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 16 }}>
       {REPORTS.map((r) => (
         <div
           key={r.title}
@@ -99,5 +118,30 @@ export function TeacherReports() {
         </div>
       ))}
     </div>
+
+    <Card icon="ti-report-analytics" title="تقارير مفصّلة">
+      <div className="form-group" style={{ marginBottom: 16, maxWidth: 320 }}>
+        <label className="form-label">الحلقة أو المسار الاستثنائي</label>
+        <select className="form-input" value={reportContext} onChange={(e) => setPickedContext(e.target.value)}>
+          {halqaIds.length > 0 && <option value="">كل حلقاتي</option>}
+          {halqat.length > 0 && (
+            <optgroup label="الحلقات">
+              {halqat.map((h) => <option key={h._id} value={`halqa:${h._id}`}>{h.name}</option>)}
+            </optgroup>
+          )}
+          {tracks.length > 0 && (
+            <optgroup label="المسارات الاستثنائية">
+              {tracks.map((t) => <option key={t._id} value={`track:${t._id}`}>{t.title}</option>)}
+            </optgroup>
+          )}
+        </select>
+      </div>
+      <StudentReportPanel
+        students={reportStudents}
+        aggregateFilter={reportFilter}
+        aggregateTitle={reportHalqa ? `مقارنة طلاب ${reportHalqa.name}` : reportTrack ? `مقارنة طلاب ${reportTrack.title}` : "متوسط الدرجات لكل طلاب حلقاتي"}
+      />
+    </Card>
+    </>
   );
 }
