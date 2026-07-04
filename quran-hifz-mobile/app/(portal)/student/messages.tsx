@@ -10,7 +10,7 @@ export default function StudentMessages() {
   const unreadCount = MY_MESSAGES.filter((m) => m.unread).length;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         <Card>
           <CardHeader

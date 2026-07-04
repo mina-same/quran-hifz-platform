@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AyahBar from '@/components/ui/AyahBar';
@@ -5,15 +6,9 @@ import StatsRow from '@/components/ui/StatsRow';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import ProgressBar from '@/components/ui/ProgressBar';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 const CHILD = { name: 'عبدالله الحميداني', juz: 20, attend: '٩٥٪', pts: 740, level: 'الحلقة المتميزة', halqa: 'حلقة عمر بن الخطاب', teacher: 'أ. ناصر الحميداني' };
-const STATS = [
-  { label: 'جزءاً محفوظاً',  value: String(CHILD.juz),   color: theme.green },
-  { label: 'نسبة الحضور',    value: CHILD.attend,          color: theme.gold },
-  { label: 'نقطة مكتسبة',   value: String(CHILD.pts),    color: '#3B82F6' },
-  { label: 'المستوى',         value: CHILD.level,           color: theme.green },
-];
 const NOTIFS = [
   { day: 'اليوم',  text: 'أرسل الواجب اليومي بنجاح ✓' },
   { day: 'أمس',   text: `تقييم الأستاذ: ممتاز — ${CHILD.pts} نقطة` },
@@ -21,7 +16,29 @@ const NOTIFS = [
 ];
 
 export default function ParentDashboard() {
+  const theme = useAppTheme();
   const pct = Math.round((CHILD.juz / 30) * 100);
+
+  const STATS = [
+    { label: 'جزءاً محفوظاً',  value: String(CHILD.juz),   color: theme.green },
+    { label: 'نسبة الحضور',    value: CHILD.attend,          color: theme.gold },
+    { label: 'نقطة مكتسبة',   value: String(CHILD.pts),    color: theme.blue },
+    { label: 'المستوى',         value: CHILD.level,           color: theme.green },
+  ];
+
+  const s = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.cream },
+    page: { padding: 16, gap: 14 },
+    pctNum: { fontSize: 32, fontFamily: theme.fontCairoBold, color: theme.green, textAlign: 'center', marginVertical: 8 },
+    row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderTopWidth: 1, borderTopColor: theme.border },
+    key: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
+    val: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
+    notifRow: { flexDirection: 'row', gap: 10, paddingVertical: 8 },
+    borderTop: { borderTopWidth: 1, borderTopColor: theme.border },
+    day: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, minWidth: 42 },
+    notifText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.text, flex: 1 },
+  }), [theme]);
+
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
@@ -51,16 +68,3 @@ export default function ParentDashboard() {
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.cream },
-  page: { padding: 16, gap: 14 },
-  pctNum: { fontSize: 32, fontFamily: theme.fontCairoBold, color: theme.green, textAlign: 'center', marginVertical: 8 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderTopWidth: 1, borderTopColor: theme.border },
-  key: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
-  val: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
-  notifRow: { flexDirection: 'row', gap: 10, paddingVertical: 8 },
-  borderTop: { borderTopWidth: 1, borderTopColor: theme.border },
-  day: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, minWidth: 42 },
-  notifText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.text, flex: 1 },
-});

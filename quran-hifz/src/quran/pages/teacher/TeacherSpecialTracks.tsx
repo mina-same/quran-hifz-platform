@@ -5,6 +5,7 @@ import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { useSpecialTracks, type SpecialTrack, type EnrolledStudent, type TrackTeacher } from "../../api/special-tracks";
 import { useQuranPlans, PLAN_PREFILL_TRACK_KEY } from "../../api/quran-plans";
+import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
 import { SURAHS } from "../../data/surahs";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 
@@ -324,6 +325,11 @@ export function TeacherSpecialTracks() {
     showPage("plans");
   }
 
+  function takeAttendance(trackId: string) {
+    sessionStorage.setItem(ATTENDANCE_PREFILL_TRACK_KEY, trackId);
+    showPage("attendance");
+  }
+
   function Section({ title, color, items }: { title: string; color: string; items: SpecialTrack[] }) {
     if (!items.length) return null;
     return (
@@ -340,7 +346,7 @@ export function TeacherSpecialTracks() {
             <TrackCard
               key={t._id}
               track={t}
-              onAttendance={() => showPage("attendance")}
+              onAttendance={() => takeAttendance(t._id)}
               onConnectPlan={() => connectPlan(t._id)}
             />
           ))}

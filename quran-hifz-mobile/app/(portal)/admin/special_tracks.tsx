@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
@@ -20,7 +20,7 @@ import {
 } from '@/lib/queries/specialTracks';
 import { useTeachers } from '@/lib/queries/teachers';
 import { useStudents } from '@/lib/queries/students';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 function getTeacherId(v: TrackTeacher | string) {
   return typeof v === 'object' ? v._id : v;
@@ -164,7 +164,7 @@ export default function AdminSpecialTracks() {
   const availableStudents = allStudents.filter((s) => !enrolledIds.has(s._id));
 
   return (
-    <SafeAreaView style={s.safe} edges={['bottom']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
         {saved && <Text style={s.successBanner}>تم حفظ المسار الاستثنائي ✓</Text>}
 

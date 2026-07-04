@@ -30,10 +30,6 @@ export interface IQuranPlan extends Document {
   rangeStart: IRangePoint;
   rangeEnd: IRangePoint;
 
-  repetitionCount: number;
-  restrictNavigationRange: boolean;
-  ignoreSurahHeaders: boolean;
-
   pointsEnabled: boolean;
   pointRules: IPointRule[];
 
@@ -84,10 +80,6 @@ const quranPlanSchema = new Schema<IQuranPlan>(
 
     rangeStart: { type: rangePointSchema, required: true },
     rangeEnd:   { type: rangePointSchema, required: true },
-
-    repetitionCount:         { type: Number, default: 1, min: 1 },
-    restrictNavigationRange: { type: Boolean, default: false },
-    ignoreSurahHeaders:      { type: Boolean, default: false },
 
     pointsEnabled: { type: Boolean, default: false },
     pointRules:    { type: [pointRuleSchema], default: [] },

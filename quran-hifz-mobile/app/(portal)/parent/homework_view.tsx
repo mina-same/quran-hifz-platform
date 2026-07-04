@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
@@ -5,9 +6,10 @@ import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import { useParentChildren, useChildHomework } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 export default function ParentHomeworkView() {
+  const theme = useAppTheme();
   const selectedChildId = usePortalStore((s) => s.selectedChildId);
   const { data: children = [] } = useParentChildren();
   const childId = selectedChildId ?? children[0]?._id;
@@ -15,6 +17,17 @@ export default function ParentHomeworkView() {
   const { data, isLoading } = useChildHomework(childId);
   const group = data?.group ?? [];
   const individual = data?.individual ?? [];
+
+  const s = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: 16, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
+    item: { paddingVertical: 12, gap: 6 },
+    border: { borderTopWidth: 1, borderTopColor: theme.border },
+    title: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    desc: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
+    badgeRow: { flexDirection: 'row', gap: 8 },
+  }), [theme]);
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
@@ -52,14 +65,3 @@ export default function ParentHomeworkView() {
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: 16, gap: 14 },
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
-  item: { paddingVertical: 12, gap: 6 },
-  border: { borderTopWidth: 1, borderTopColor: theme.border },
-  title: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
-  desc: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
-  badgeRow: { flexDirection: 'row', gap: 8 },
-});

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
@@ -8,7 +8,7 @@ import { SkeletonCard, SkeletonTable } from "../../components/common/Skeleton";
 import { useHalqat } from "../../api/halqat";
 import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudents } from "../../api/students";
-import { useBulkAttendance } from "../../api/attendance";
+import { useAttendance, useBulkAttendance, ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
 
 export function TeacherAttendance() {
   const { user } = usePortal();
@@ -22,6 +22,19 @@ export function TeacherAttendance() {
     ...tracks.map(trackToContext),
   ];
 
+  // Deep link from the Special Tracks page's "تسجيل الحضور" button: skip the
+  // picker and jump straight to the attendance list for the track clicked from.
+  const [pendingTrackId] = useState(() => {
+    const id = sessionStorage.getItem(ATTENDANCE_PREFILL_TRACK_KEY);
+    if (id) sessionStorage.removeItem(ATTENDANCE_PREFILL_TRACK_KEY);
+    return id;
+  });
+  useEffect(() => {
+    if (!pendingTrackId || selected) return;
+    const track = tracks.find((t) => t._id === pendingTrackId);
+    if (track) setSelected(trackToContext(track));
+  }, [pendingTrackId, selected, tracks]);
+
   const { data: students = [], isLoading: loadingStudents } = useStudents(
     selected
       ? selected.kind === "halqa"
@@ -32,10 +45,28 @@ export function TeacherAttendance() {
   const bulkAttendance = useBulkAttendance();
 
   const today = new Date().toISOString().split("T")[0];
-  const [statuses, setStatuses] = useState<Record<string, string>>({});
+
+  // Today's already-saved attendance for this context, so re-opening the same
+  // halqa/track later the same day shows what was actually recorded instead of
+  // resetting every student back to the "حاضر" default.
+  const { data: savedToday = [] } = useAttendance(
+    selected
+      ? selected.kind === "halqa"
+        ? { halqa: selected.id, from: today, to: today }
+        : { specialTrack: selected.id, from: today, to: today }
+      : undefined
+  );
+  const savedStatusById: Record<string, string> = {};
+  for (const r of savedToday) {
+    const id = typeof r.student === "string" ? r.student : r.student._id;
+    savedStatusById[id] = r.status;
+  }
+
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
+  const statusFor = (studentId: string) => overrides[studentId] ?? savedStatusById[studentId] ?? "حاضر";
 
   function setStatus(studentId: string, status: string) {
-    setStatuses((prev) => ({ ...prev, [studentId]: status }));
+    setOverrides((prev) => ({ ...prev, [studentId]: status }));
   }
 
   useTopbar(
@@ -43,7 +74,7 @@ export function TeacherAttendance() {
     selected ? `الحضور اليومي — ${selected.title}` : "الحضور اليومي",
     selected ? (
       <div style={{ display: "flex", gap: 8 }}>
-        <button className="topbar-btn btn-ghost" onClick={() => { setSelected(null); setStatuses({}); }}>
+        <button className="topbar-btn btn-ghost" onClick={() => { setSelected(null); setOverrides({}); }}>
           <i className="ti ti-arrow-right" /> الحلقات والمسارات
         </button>
         <button
@@ -51,7 +82,7 @@ export function TeacherAttendance() {
           onClick={() => {
             const records = students.map((s) => ({
               student: s._id,
-              status: statuses[s._id] ?? "حاضر",
+              status: statusFor(s._id),
             }));
             bulkAttendance.mutate(
               selected.kind === "halqa"
@@ -86,7 +117,7 @@ export function TeacherAttendance() {
   }
 
   // ── View 2: attendance list ───────────────────────────────────────
-  const presentCount = students.filter((s) => (statuses[s._id] ?? "حاضر") === "حاضر").length;
+  const presentCount = students.filter((s) => statusFor(s._id) === "حاضر").length;
   const absentCount = students.length - presentCount;
 
   return (
@@ -116,7 +147,7 @@ export function TeacherAttendance() {
                   onClick={() => {
                     const all: Record<string, string> = {};
                     students.forEach((s) => { all[s._id] = "حاضر"; });
-                    setStatuses(all);
+                    setOverrides(all);
                   }}
                 >
                   <i className="ti ti-checks" /> تحديد الكل حاضر
@@ -125,7 +156,7 @@ export function TeacherAttendance() {
             )}
             <div className="att-list">
               {students.map((s) => {
-                const status = statuses[s._id] ?? "حاضر";
+                const status = statusFor(s._id);
                 const isAbsent = status === "غائب";
                 return (
                   <div key={s._id} className={`att-row ${isAbsent ? "is-absent" : ""}`}>
@@ -163,7 +194,15 @@ export function TeacherAttendance() {
         )}
       </Card>
       {bulkAttendance.isSuccess && (
-        <Alert tone="success">تم حفظ الحضور بنجاح.</Alert>
+        <Alert tone="success">
+          تم حفظ الحضور بنجاح
+          {bulkAttendance.data.notified > 0 && ` وإرسال إشعارات لأولياء أمور ${bulkAttendance.data.notified} طالب غائب`}.
+        </Alert>
+      )}
+      {bulkAttendance.isSuccess && bulkAttendance.data.unnotified.length > 0 && (
+        <Alert tone="warning">
+          تعذر إرسال إشعار عن غياب: {bulkAttendance.data.unnotified.map((s) => s.name).join("، ")} — لا يوجد ولي أمر مرتبط بالحساب.
+        </Alert>
       )}
       {bulkAttendance.isError && (
         <Alert tone="warning">{(bulkAttendance.error as Error).message}</Alert>

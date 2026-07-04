@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { QuranPlan } from '../models/QuranPlan.model';
 import { AppError } from '../middleware/error';
 import { SURAHS } from '../data/surahs';
-import { WEEK_DAYS, computeTodayAssignment, computePlanProgress, computeJuzProgress, computeScheduleBreakdown } from '../lib/quranRange';
+import { WEEK_DAYS, computeTodayAssignment, computePlanProgress, computeJuzProgress, computeScheduleBreakdown, pageRangeOfAyahRange } from '../lib/quranRange';
 
 const SURAH_BY_NUMBER = new Map(SURAHS.map((s) => [s.number, s]));
 
@@ -34,10 +34,6 @@ const quranPlanSchema = z.object({
 
   rangeStart: rangePointSchema,
   rangeEnd:   rangePointSchema,
-
-  repetitionCount:         z.number().int().min(1).default(1),
-  restrictNavigationRange: z.boolean().default(false),
-  ignoreSurahHeaders:      z.boolean().default(false),
 
   pointsEnabled: z.boolean().default(false),
   pointRules:    z.array(pointRuleSchema).default([]),
@@ -99,6 +95,7 @@ function withTodayAssignment(plan: InstanceType<typeof QuranPlan>) {
     todayAssignment: computeTodayAssignment(scheduleInput),
     progress,
     juzProgress:     computeJuzProgress(scheduleInput, progress),
+    pageRange:       pageRangeOfAyahRange(plan.rangeStart, plan.rangeEnd),
     schedule:        computeScheduleBreakdown(scheduleInput),
   };
 }

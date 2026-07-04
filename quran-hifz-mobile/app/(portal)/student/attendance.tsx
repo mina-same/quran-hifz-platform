@@ -38,7 +38,7 @@ export default function StudentAttendance() {
   }));
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         <StatsRow stats={STATS} />
         <Card noPadding>

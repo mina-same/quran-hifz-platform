@@ -16,6 +16,7 @@ import { FormSection } from "../../components/common/FormSection";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { DaysOfWeekPicker } from "../../components/common/DaysOfWeekPicker";
 import { SurahPointFields } from "../../components/common/SurahRangePicker";
+import { countRangeAyahs, pageRangeOfAyahRange } from "../../lib/quranRange";
 
 /* ─── helpers ─────────────────────────────────────────────── */
 function surahName(n: number) {
@@ -59,9 +60,6 @@ type FormFields = {
   days: string[];
   rangeStart: RangePoint;
   rangeEnd: RangePoint;
-  repetitionCount: string;
-  restrictNavigationRange: boolean;
-  ignoreSurahHeaders: boolean;
   pointsEnabled: boolean;
   pointRules: PointRule[];
   endType: "activeDays" | "date";
@@ -75,9 +73,6 @@ const EMPTY: FormFields = {
   days: [],
   rangeStart: { surahNumber: 1, ayah: 1 },
   rangeEnd:   { surahNumber: 1, ayah: 1 },
-  repetitionCount: "1",
-  restrictNavigationRange: false,
-  ignoreSurahHeaders: false,
   pointsEnabled: false,
   pointRules: [],
   endType: "activeDays",
@@ -146,9 +141,6 @@ export function TeacherPlans() {
       days: item.days,
       rangeStart: item.rangeStart,
       rangeEnd:   item.rangeEnd,
-      repetitionCount: String(item.repetitionCount),
-      restrictNavigationRange: item.restrictNavigationRange,
-      ignoreSurahHeaders: item.ignoreSurahHeaders,
       pointsEnabled: item.pointsEnabled,
       pointRules: item.pointRules,
       endType: item.endType,
@@ -156,6 +148,27 @@ export function TeacherPlans() {
       endDate: item.endDate ? item.endDate.split("T")[0] : "",
     });
     setFormError(""); setModal({ mode: "form", item });
+  }
+
+  // "نسخ الخطة": pre-fill the create form with the source plan's data
+  // (no `item` in the modal state, so Submit creates a brand-new plan).
+  function openDuplicate(item: QuranPlan) {
+    setForm({
+      name: `${item.name} (نسخة)`, type: item.type, description: item.description ?? "",
+      targetType: item.targetType,
+      halqa: item.halqa ? getId(item.halqa) : "",
+      students: (item.students ?? []).map(getId),
+      specialTrack: item.specialTrack ? getId(item.specialTrack) : "",
+      days: item.days,
+      rangeStart: item.rangeStart,
+      rangeEnd:   item.rangeEnd,
+      pointsEnabled: item.pointsEnabled,
+      pointRules: item.pointRules,
+      endType: item.endType,
+      activeDaysCount: item.activeDaysCount ? String(item.activeDaysCount) : "",
+      endDate: item.endDate ? item.endDate.split("T")[0] : "",
+    });
+    setFormError(""); setModal({ mode: "form" });
   }
 
   async function handleSubmit() {
@@ -185,9 +198,6 @@ export function TeacherPlans() {
       specialTrack: form.targetType === "specialTrack" ? form.specialTrack : undefined,
       days: form.days,
       rangeStart: form.rangeStart, rangeEnd: form.rangeEnd,
-      repetitionCount: Number(form.repetitionCount) || 1,
-      restrictNavigationRange: form.restrictNavigationRange,
-      ignoreSurahHeaders: form.ignoreSurahHeaders,
       pointsEnabled: form.pointsEnabled,
       pointRules: form.pointsEnabled ? form.pointRules.map((r) => ({ ...r, label: r.label.trim() })) : [],
       endType: form.endType,
@@ -245,6 +255,7 @@ export function TeacherPlans() {
               plan={p}
               onEdit={openEdit}
               onDelete={setDeleteId}
+              onDuplicate={openDuplicate}
               onSchedule={(item) => setModal({ mode: "schedule", item })}
               onViewTrack={() => showPage("specialtracks")}
             />
@@ -396,19 +407,17 @@ export function TeacherPlans() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   <SurahPointFields label="من" value={form.rangeStart} onChange={(v) => sf("rangeStart", v)} />
                   <SurahPointFields label="إلى" value={form.rangeEnd} onChange={(v) => sf("rangeEnd", v)} />
+                  {(form.rangeStart.surahNumber < form.rangeEnd.surahNumber ||
+                    (form.rangeStart.surahNumber === form.rangeEnd.surahNumber && form.rangeStart.ayah <= form.rangeEnd.ayah)) && (() => {
+                    const { pageStart, pageEnd, pageCount } = pageRangeOfAyahRange(form.rangeStart, form.rangeEnd);
+                    return (
+                      <div style={{ fontSize: 13, color: "var(--muted-foreground, #666)" }}>
+                        عدد الآيات: {countRangeAyahs(form.rangeStart, form.rangeEnd)} — عدد الصفحات: {pageCount}
+                        {" "}(صفحة {pageStart}{pageEnd !== pageStart ? ` إلى ${pageEnd}` : ""})
+                      </div>
+                    );
+                  })()}
                 </div>
-              </FormSection>
-
-              {/* إعدادات متقدمة */}
-              <FormSection label="إعدادات التنقل المتقدمة" icon="ti-adjustments">
-                <div className="form-grid-2">
-                  <div className="form-group">
-                    <label className="form-label">عدد التكرارات</label>
-                    <input className="form-input" type="number" min={1} value={form.repetitionCount} onChange={(e) => sf("repetitionCount", e.target.value)} />
-                  </div>
-                </div>
-                <BoolToggleRow label="تحديد نطاق التنقل" checked={form.restrictNavigationRange} onChange={(v) => sf("restrictNavigationRange", v)} />
-                <BoolToggleRow label="تجاهل رؤوس السور" checked={form.ignoreSurahHeaders} onChange={(v) => sf("ignoreSurahHeaders", v)} />
               </FormSection>
 
               {/* نظام النقاط */}
@@ -563,11 +572,12 @@ export function TeacherPlans() {
 
 /* ── plan card (module scope — never nest inside the page render body) ── */
 function PlanCard({
-  plan, onEdit, onDelete, onSchedule, onViewTrack,
+  plan, onEdit, onDelete, onDuplicate, onSchedule, onViewTrack,
 }: {
   plan: QuranPlan;
   onEdit: (p: QuranPlan) => void;
   onDelete: (id: string) => void;
+  onDuplicate: (p: QuranPlan) => void;
   onSchedule: (p: QuranPlan) => void;
   onViewTrack: () => void;
 }) {
@@ -624,6 +634,14 @@ function PlanCard({
             </button>
             <button
               className="topbar-btn btn-ghost"
+              style={{ padding: "5px 11px", fontSize: 12 }}
+              onClick={() => onDuplicate(plan)}
+              title="نسخ الخطة"
+            >
+              <i className="ti ti-copy" />
+            </button>
+            <button
+              className="topbar-btn btn-ghost"
               style={{ padding: "5px 11px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.25)" }}
               onClick={() => onDelete(plan._id)}
             >
@@ -644,6 +662,12 @@ function PlanCard({
           <InfoRow icon="ti-calendar-week" label="الأيام" val={plan.days.join("، ")} span />
           <InfoRow icon="ti-book" label="من" val={pointLabel(plan.rangeStart)} />
           <InfoRow icon="ti-book-2" label="إلى" val={pointLabel(plan.rangeEnd)} />
+          <InfoRow
+            icon="ti-files"
+            label="عدد الصفحات"
+            val={plan.pageRange.pageCount === 1 ? `صفحة ${plan.pageRange.pageStart}` : `${plan.pageRange.pageCount} (${plan.pageRange.pageStart}-${plan.pageRange.pageEnd})`}
+            span
+          />
           {plan.endType === "date" && plan.endDate
             ? <InfoRow icon="ti-calendar-due" label="ينتهي في" val={fmtDate(plan.endDate)} span />
             : <InfoRow icon="ti-calendar-due" label="عدد الأيام النشطة" val={String(plan.activeDaysCount ?? "—")} span />

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { ScrollView, View, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,9 +7,10 @@ import Button from '@/components/ui/Button';
 import { useHalqat } from '@/lib/queries/halqat';
 import { useSpecialTracks } from '@/lib/queries/specialTracks';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 export default function TeacherHalqa() {
+  const theme = useAppTheme();
   const router = useRouter();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
 
@@ -18,7 +20,7 @@ export default function TeacherHalqa() {
   const isLoading = loadingHalqat || loadingTracks;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         {isLoading && <Text style={styles.muted}>جارٍ التحميل...</Text>}
 

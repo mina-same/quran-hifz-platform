@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, View, Text, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconCircleCheck } from '@tabler/icons-react-native';
@@ -10,7 +10,7 @@ import FormGroup from '@/components/forms/FormGroup';
 import FormInput from '@/components/forms/FormInput';
 import FormSelect from '@/components/forms/FormSelect';
 import { HALQAT } from '@/lib/data/halqat';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 const PATHS = [
   { value: 'full',   label: 'حفظ كامل (٦٠٤ صفحات — ٣ سنوات)' },
@@ -43,7 +43,7 @@ export default function AdminRegister() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           {submitted && (

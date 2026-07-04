@@ -1,8 +1,9 @@
+import { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 type EventStatus = 'done' | 'current' | 'future';
 const TL: { date: string; label: string; detail: string; juz: number; s: EventStatus }[] = [
@@ -14,10 +15,25 @@ const TL: { date: string; label: string; detail: string; juz: number; s: EventSt
   { date: 'ذو الحجة ١٤٤٦', label: 'الهدف السنوي: الختم',      detail: 'الناس — الفاتحة',          juz: 30, s: 'future' },
 ];
 
-const DOT_COLOR: Record<EventStatus, string> = { done: theme.green, current: theme.gold, future: theme.border };
 const BADGE: Record<EventStatus, string> = { done: 'مكتمل ✓', current: 'أنت هنا', future: 'مستهدف' };
 
 export default function ParentTimeline() {
+  const theme = useAppTheme();
+  const DOT_COLOR: Record<EventStatus, string> = { done: theme.green, current: theme.gold, future: theme.border };
+
+  const s = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.cream },
+    page: { padding: 16 },
+    row: { flexDirection: 'row', gap: 12, marginBottom: 16, alignItems: 'flex-start' },
+    dot: { width: 18, height: 18, borderRadius: 9, marginTop: 4, flexShrink: 0 },
+    evBody: { flex: 1, backgroundColor: theme.cream, borderRadius: 10, padding: 12 },
+    evHead: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
+    evLabel: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    badge: { fontSize: 11, fontFamily: theme.fontCairoBold },
+    detail: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
+    date: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 2 },
+  }), [theme]);
+
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
@@ -43,16 +59,3 @@ export default function ParentTimeline() {
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.cream },
-  page: { padding: 16 },
-  row: { flexDirection: 'row', gap: 12, marginBottom: 16, alignItems: 'flex-start' },
-  dot: { width: 18, height: 18, borderRadius: 9, marginTop: 4, flexShrink: 0 },
-  evBody: { flex: 1, backgroundColor: theme.cream, borderRadius: 10, padding: 12 },
-  evHead: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  evLabel: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
-  badge: { fontSize: 11, fontFamily: theme.fontCairoBold },
-  detail: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
-  date: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 2 },
-});

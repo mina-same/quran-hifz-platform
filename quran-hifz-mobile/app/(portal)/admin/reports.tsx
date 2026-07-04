@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import StatsRow from '@/components/ui/StatsRow';
@@ -6,7 +7,7 @@ import CardHeader from '@/components/ui/CardHeader';
 import Button from '@/components/ui/Button';
 import { STUDENTS } from '@/lib/data/students';
 import { HALQAT } from '@/lib/data/halqat';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 const EXPORT_BTNS = [
   { label: 'تقرير الطلاب PDF',    variant: 'danger' },
@@ -36,7 +37,7 @@ export default function AdminReports() {
   ];
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         <StatsRow stats={STATS} />
 

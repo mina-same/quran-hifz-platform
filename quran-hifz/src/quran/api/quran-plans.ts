@@ -17,6 +17,7 @@ export type PlanSpecialTrack = { _id: string; title: string };
 export type TodayAssignment = { surahStart: number; ayahStart: number; surahEnd: number; ayahEnd: number };
 export type PlanProgress = { completed: number; total: number; percent: number };
 export type JuzProgress = { completed: number; total: number };
+export type PageRange = { pageStart: number; pageEnd: number; pageCount: number };
 export type ScheduleEntry = TodayAssignment & { occurrenceIndex: number; date: string; juz: number };
 
 export type QuranPlan = {
@@ -37,10 +38,6 @@ export type QuranPlan = {
   rangeStart: RangePoint;
   rangeEnd: RangePoint;
 
-  repetitionCount: number;
-  restrictNavigationRange: boolean;
-  ignoreSurahHeaders: boolean;
-
   pointsEnabled: boolean;
   pointRules: PointRule[];
 
@@ -52,6 +49,7 @@ export type QuranPlan = {
   todayAssignment: TodayAssignment | null;
   progress: PlanProgress | null;
   juzProgress: JuzProgress | null;
+  pageRange: PageRange;
   schedule: ScheduleEntry[];
 };
 

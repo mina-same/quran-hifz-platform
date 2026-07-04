@@ -22,7 +22,7 @@ export default function TeacherEvaluate() {
   }
 
   return (
-    <SafeAreaView style={s.safe} edges={['bottom']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
         {saved && <Text style={s.successBanner}>تم حفظ التقييم بنجاح ✓</Text>}
         <Card>

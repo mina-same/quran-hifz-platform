@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import StatsRow from '@/components/ui/StatsRow';
@@ -7,9 +8,17 @@ import Badge from '@/components/ui/Badge';
 import DataTable from '@/components/ui/DataTable';
 import ProgressBar from '@/components/ui/ProgressBar';
 import { STUDENTS } from '@/lib/data/students';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 export default function AdminStudents() {
+  const theme = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    bold: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    cell: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+  }), [theme]);
+
   const active   = STUDENTS.filter((s) => s.status === 'active').length;
   const inactive = STUDENTS.filter((s) => s.status === 'inactive').length;
 
@@ -36,7 +45,7 @@ export default function AdminStudents() {
   }));
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         <StatsRow stats={STATS} />
         <Card noPadding>

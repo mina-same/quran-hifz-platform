@@ -689,6 +689,25 @@ table.tbl tr:hover td { background: var(--green-pale); }
 .badge-gray { background: #f3f4f6; color: #6b7280; }
 .badge-brown { background: #fdf0e8; color: var(--brown); }
 
+/* CHILD CHIPS (e.g. linked students on a parent's account) */
+.child-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500;
+  background: var(--green-pale); color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 4px 6px 4px 10px;
+}
+.child-chip-remove {
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px;
+  border: none; background: transparent; color: #b91c1c;
+  border-radius: 50%; cursor: pointer; font-size: 12px; padding: 0;
+  transition: background 0.15s;
+}
+.child-chip-remove:hover { background: rgba(239,68,68,0.14); }
+.dark .child-chip { background: rgba(52,208,88,0.08); border-color: var(--border); }
+.dark .child-chip-remove:hover { background: rgba(239,68,68,0.2); }
+
 /* FORMS */
 .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }

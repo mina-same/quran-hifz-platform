@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { usePortal } from "../../context/PortalContext";
+import { usePortal, useSetTopbar } from "../../context/PortalContext";
 import { useHalqat } from "../../api/halqat";
 import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudents, type Student } from "../../api/students";
@@ -26,7 +26,8 @@ function fmtTimer(secs: number) {
 }
 
 export function TeacherRecordLesson() {
-  const { setTopbar, user } = usePortal();
+  const { user } = usePortal();
+  const setTopbar = useSetTopbar();
   const [selected, setSelected] = useState<TeachingContext | null>(null);
 
   const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: user?.profileId });

@@ -3,6 +3,7 @@ import { Card } from "../../components/common/Card";
 import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { SkeletonTable } from "../../components/common/Skeleton";
 import { useKpis } from "../../api/kpis";
+import { downloadCsv } from "../../../lib/csv";
 
 const RATING_TONE: Record<string, BadgeTone> = {
   ممتاز: "green",
@@ -21,10 +22,15 @@ const RATING_LABEL: Record<string, string> = {
 export function AdminKpis() {
   const { data: kpis = [], isLoading, error } = useKpis();
 
+  function exportCsv() {
+    downloadCsv("تقرير مؤشرات الأداء.csv", ["المؤشر", "المستهدف", "الفعلي", "التقييم"],
+      kpis.map((k) => [k.indicator, k.target, k.actual, RATING_LABEL[k.rating] ?? k.rating]));
+  }
+
   useTopbar(
     "ti-target",
     "مؤشرات الأداء",
-    <button className="topbar-btn btn-ghost">
+    <button className="topbar-btn btn-ghost" onClick={exportCsv} disabled={kpis.length === 0}>
       <i className="ti ti-download" /> تصدير
     </button>,
   );
@@ -37,7 +43,13 @@ export function AdminKpis() {
           تعذّر تحميل المؤشرات
         </div>
       )}
-      {!isLoading && !error && (
+      {!isLoading && !error && kpis.length === 0 && (
+        <div style={{ textAlign: "center", padding: "40px 20px", color: "var(--text3)", fontSize: 14 }}>
+          <i className="ti ti-target" style={{ fontSize: 36, display: "block", marginBottom: 12 }} />
+          لا توجد مؤشرات أداء مسجلة بعد
+        </div>
+      )}
+      {!isLoading && !error && kpis.length > 0 && (
         <div className="tbl-wrap">
           <table className="tbl">
             <thead>

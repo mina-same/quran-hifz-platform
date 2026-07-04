@@ -26,7 +26,7 @@ export function Modal({
         {title !== undefined && (
           <div className="modal-head">
             <h3>{title}</h3>
-            <button className="topbar-btn btn-ghost" style={{ padding: "4px 8px" }} onClick={onClose}>
+            <button className="topbar-btn btn-ghost" style={{ padding: "4px 8px" }} onClick={onClose} aria-label="إغلاق">
               <i className="ti ti-x" />
             </button>
           </div>

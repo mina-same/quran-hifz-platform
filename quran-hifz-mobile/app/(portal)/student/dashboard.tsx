@@ -26,7 +26,7 @@ const RECENT_HW = [
 
 export default function StudentDashboard() {
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         <AyahBar />
 

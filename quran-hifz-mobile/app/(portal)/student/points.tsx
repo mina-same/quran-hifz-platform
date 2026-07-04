@@ -32,7 +32,7 @@ const HISTORY = [
 export default function StudentPoints() {
   const pct = Math.round((MY_PTS / NEXT) * 100);
   return (
-    <SafeAreaView style={s.safe} edges={['bottom']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
         <StatsRow stats={STATS} />
         <Card>

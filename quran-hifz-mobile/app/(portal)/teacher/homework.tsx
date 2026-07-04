@@ -50,7 +50,7 @@ export default function TeacherHomework() {
   }));
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         <Card noPadding>
           <CardHeader title="واجبات الطلاب" style={{ padding: 16, paddingBottom: 8 }} />

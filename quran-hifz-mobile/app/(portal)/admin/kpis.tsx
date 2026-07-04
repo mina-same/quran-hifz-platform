@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import StatsRow from '@/components/ui/StatsRow';
@@ -6,12 +7,20 @@ import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import DataTable from '@/components/ui/DataTable';
 import { KPIS } from '@/lib/data/halqat';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 const ratingVariant = (r: string) =>
   r === 'ممتاز' ? 'green' : r === 'جيد' ? 'gold' : r === 'مقبول' ? 'blue' : 'red';
 
 export default function AdminKpis() {
+  const theme = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    bold: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    muted: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+  }), [theme]);
+
   const excellent = KPIS.filter((k) => k.rating === 'ممتاز').length;
   const good      = KPIS.filter((k) => k.rating === 'جيد').length;
   const poor      = KPIS.filter((k) => k.rating === 'ضعيف').length;
@@ -31,7 +40,7 @@ export default function AdminKpis() {
   }));
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         <StatsRow stats={STATS} />
         <Card noPadding>

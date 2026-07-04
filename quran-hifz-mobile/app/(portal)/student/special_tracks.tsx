@@ -1,10 +1,11 @@
+import { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { useSpecialTracks, type SpecialTrack, type TrackTeacher } from '@/lib/queries/specialTracks';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 function getTeacherName(v: TrackTeacher | string) {
   return typeof v === 'object' ? v.name : v;
@@ -20,7 +21,25 @@ const STATUS_LABEL: Record<SpecialTrack['status'], string> = { active: 'نشط �
 const STATUS_VARIANT: Record<SpecialTrack['status'], 'green' | 'gold' | 'red'> = { active: 'green', upcoming: 'gold', ended: 'red' };
 
 function TrackCard({ track }: { track: SpecialTrack }) {
+  const theme = useAppTheme();
   const remaining = daysLeft(track.endDate);
+
+  const s = useMemo(() => StyleSheet.create({
+    headRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
+    typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+    onlineTag: { fontSize: 11, backgroundColor: theme.bluePale, color: theme.blue, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+    title: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 12 },
+    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 10 },
+    infoItem: { width: '46%' },
+    infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
+    infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
+    dateBox: { backgroundColor: theme.bg, borderRadius: 10, padding: 10, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+    dateText: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
+    dateRemaining: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.textMuted },
+    meetLink: { fontSize: 11, color: theme.blue, fontFamily: theme.fontCairo, marginBottom: 8 },
+    notes: { fontSize: 12, color: theme.brown, backgroundColor: theme.goldPale, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo },
+  }), [theme]);
+
   return (
     <Card>
       <View style={s.headRow}>
@@ -69,15 +88,23 @@ function TrackCard({ track }: { track: SpecialTrack }) {
 }
 
 export default function StudentSpecialTracks() {
+  const theme = useAppTheme();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
   const { data: tracks = [], isLoading } = useSpecialTracks(undefined, undefined, profileId);
+
+  const s = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+    sectionTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 6 },
+  }), [theme]);
 
   const active = tracks.filter((t) => t.status === 'active');
   const upcoming = tracks.filter((t) => t.status === 'upcoming');
   const ended = tracks.filter((t) => t.status === 'ended');
 
   return (
-    <SafeAreaView style={s.safe} edges={['bottom']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
         {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
 
@@ -107,23 +134,3 @@ export default function StudentSpecialTracks() {
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: theme.pagePadding, gap: 14 },
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
-  sectionTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 6 },
-  headRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
-  typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
-  onlineTag: { fontSize: 11, backgroundColor: theme.bluePale, color: theme.blue, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
-  title: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 12 },
-  infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 10 },
-  infoItem: { width: '46%' },
-  infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
-  infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
-  dateBox: { backgroundColor: theme.bg, borderRadius: 10, padding: 10, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  dateText: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
-  dateRemaining: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.textMuted },
-  meetLink: { fontSize: 11, color: theme.blue, fontFamily: theme.fontCairo, marginBottom: 8 },
-  notes: { fontSize: 12, color: theme.brown, backgroundColor: theme.goldPale, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo },
-});

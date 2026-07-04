@@ -38,7 +38,7 @@ export default function TeacherDashboard() {
   }));
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         <AyahBar />
         <StatsRow stats={STATS} />

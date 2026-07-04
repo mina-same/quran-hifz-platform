@@ -9,12 +9,30 @@ import {
   type ParentUser,
 } from "../../api/admin-parents";
 import { useStudents } from "../../api/students";
+import { toAr } from "../../../lib/format";
 
 type AddForm = { name: string; email: string; password: string };
 const EMPTY_ADD: AddForm = { name: "", email: "", password: "" };
 
 type EditForm = { name: string; email: string; newPassword: string };
 type CreatedCredentials = { email: string; password: string };
+
+function ChildChip({ name, onRemove }: { name: string; onRemove: () => void }) {
+  return (
+    <span className="child-chip">
+      {name}
+      <button
+        type="button"
+        className="child-chip-remove"
+        title="إلغاء الربط"
+        aria-label={`إلغاء ربط ${name}`}
+        onClick={onRemove}
+      >
+        <i className="ti ti-x" />
+      </button>
+    </span>
+  );
+}
 
 export function AdminParents() {
   const { data: parents = [], isLoading, error } = useAdminParents();
@@ -35,6 +53,8 @@ export function AdminParents() {
 
   const [linkParent, setLinkParent]           = useState<ParentUser | null>(null);
   const [selectedStudent, setSelectedStudent] = useState("");
+
+  const [search, setSearch] = useState("");
 
   function setAddField<K extends keyof AddForm>(key: K, value: string) {
     setAddForm((prev) => ({ ...prev, [key]: value }));
@@ -99,6 +119,12 @@ export function AdminParents() {
   const linkedStudentIds   = new Set(linkParent?.children.map((c) => c._id) ?? []);
   const availableStudents  = students.filter((s) => !linkedStudentIds.has(s._id));
 
+  const filtered = parents.filter((p) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return p.name.toLowerCase().includes(q) || p.email.toLowerCase().includes(q);
+  });
+
   useTopbar(
     "ti-user-heart",
     "أولياء الأمور",
@@ -110,6 +136,21 @@ export function AdminParents() {
   return (
     <>
       <Card>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, marginBottom: 14 }}>
+          <input
+            className="form-input"
+            style={{ flex: 1, minWidth: 200, maxWidth: 320 }}
+            placeholder="البحث بالاسم أو البريد الإلكتروني..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {!isLoading && !error && (
+            <span style={{ fontSize: 12, color: "var(--text2)", whiteSpace: "nowrap" }}>
+              {toAr(filtered.length)} من {toAr(parents.length)} ولي أمر
+            </span>
+          )}
+        </div>
+
         {isLoading && <SkeletonTable cols={5} rows={5} />}
         {error && (
           <div style={{ color: "#ef4444", padding: 12, fontSize: 13 }}>تعذّر تحميل بيانات أولياء الأمور</div>
@@ -128,33 +169,22 @@ export function AdminParents() {
                   </tr>
                 </thead>
                 <tbody>
-                  {parents.map((p) => (
+                  {filtered.map((p) => (
                     <tr key={p._id}>
-                      <td style={{ fontWeight: 600 }}>{p.name}</td>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div className="att-avatar">{p.name.trim().charAt(0)}</div>
+                          <span style={{ fontWeight: 600 }}>{p.name}</span>
+                        </div>
+                      </td>
                       <td style={{ fontSize: 12, direction: "ltr" }}>{p.email}</td>
                       <td>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                           {p.children.length === 0 && (
                             <span style={{ fontSize: 12, color: "var(--text3)" }}>لا يوجد أبناء</span>
                           )}
                           {p.children.map((c) => (
-                            <span
-                              key={c._id}
-                              style={{
-                                display: "inline-flex", alignItems: "center", gap: 4,
-                                fontSize: 11, background: "var(--bg2)", borderRadius: 6,
-                                padding: "2px 8px", border: "1px solid var(--border)",
-                              }}
-                            >
-                              {c.name}
-                              <button
-                                style={{ background: "none", border: "none", cursor: "pointer", color: "#ef4444", padding: 0, lineHeight: 1, fontSize: 12 }}
-                                title="إلغاء الربط"
-                                onClick={() => handleUnlink(p._id, c._id)}
-                              >
-                                <i className="ti ti-x" />
-                              </button>
-                            </span>
+                            <ChildChip key={c._id} name={c.name} onRemove={() => handleUnlink(p._id, c._id)} />
                           ))}
                         </div>
                       </td>
@@ -170,6 +200,7 @@ export function AdminParents() {
                             style={{ padding: "3px 9px", fontSize: 12 }}
                             onClick={() => openEdit(p)}
                             title="تعديل"
+                            aria-label="تعديل"
                           >
                             <i className="ti ti-pencil" />
                           </button>
@@ -188,7 +219,14 @@ export function AdminParents() {
                   {parents.length === 0 && (
                     <tr>
                       <td colSpan={5} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                        لا يوجد أولياء أمور مسجلون
+                        لا يوجد أولياء أمور مسجلون بعد
+                      </td>
+                    </tr>
+                  )}
+                  {parents.length > 0 && filtered.length === 0 && (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                        لا توجد نتائج مطابقة لبحثك
                       </td>
                     </tr>
                   )}
@@ -197,9 +235,12 @@ export function AdminParents() {
             </div>
 
             <div className="rc-list">
-              {parents.map((p) => (
+              {filtered.map((p) => (
                 <div key={p._id} className="rc-card">
                   <div className="rc-card-head">
+                    <div className="att-avatar" style={{ width: 32, height: 32, fontSize: 12 }}>
+                      {p.name.trim().charAt(0)}
+                    </div>
                     <span className="rc-card-title">{p.name}</span>
                     <Badge tone={p.isActive ? "green" : "gray"}>{p.isActive ? "نشط" : "غير نشط"}</Badge>
                   </div>
@@ -208,29 +249,13 @@ export function AdminParents() {
                     <span style={{ direction: "ltr" }}>{p.email}</span>
                   </div>
                   <div className="rc-row">
-                    <span className="rc-row-label">الأبناء</span>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, justifyContent: "flex-end" }}>
+                    <span className="rc-row-label">الأبناء{p.children.length > 0 ? ` (${toAr(p.children.length)})` : ""}</span>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "flex-end" }}>
                       {p.children.length === 0 && (
                         <span style={{ fontSize: 12, color: "var(--text3)" }}>لا يوجد أبناء</span>
                       )}
                       {p.children.map((c) => (
-                        <span
-                          key={c._id}
-                          style={{
-                            display: "inline-flex", alignItems: "center", gap: 4,
-                            fontSize: 11, background: "var(--bg2)", borderRadius: 6,
-                            padding: "2px 8px", border: "1px solid var(--border)",
-                          }}
-                        >
-                          {c.name}
-                          <button
-                            style={{ background: "none", border: "none", cursor: "pointer", color: "#ef4444", padding: 0, lineHeight: 1, fontSize: 12 }}
-                            title="إلغاء الربط"
-                            onClick={() => handleUnlink(p._id, c._id)}
-                          >
-                            <i className="ti ti-x" />
-                          </button>
-                        </span>
+                        <ChildChip key={c._id} name={c.name} onRemove={() => handleUnlink(p._id, c._id)} />
                       ))}
                     </div>
                   </div>
@@ -254,7 +279,12 @@ export function AdminParents() {
               ))}
               {parents.length === 0 && (
                 <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                  لا يوجد أولياء أمور مسجلون
+                  لا يوجد أولياء أمور مسجلون بعد
+                </div>
+              )}
+              {parents.length > 0 && filtered.length === 0 && (
+                <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                  لا توجد نتائج مطابقة لبحثك
                 </div>
               )}
             </div>
@@ -376,22 +406,7 @@ export function AdminParents() {
             <p style={{ margin: "0 0 8px", fontSize: 12, fontWeight: 600, color: "var(--text2)" }}>الأبناء الحاليون:</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {linkParent.children.map((c) => (
-                <span
-                  key={c._id}
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: 4,
-                    fontSize: 12, background: "var(--bg2)", borderRadius: 8,
-                    padding: "4px 10px", border: "1px solid var(--border)",
-                  }}
-                >
-                  {c.name}
-                  <button
-                    style={{ background: "none", border: "none", cursor: "pointer", color: "#ef4444", padding: 0, fontSize: 12 }}
-                    onClick={() => handleUnlink(linkParent._id, c._id)}
-                  >
-                    <i className="ti ti-x" />
-                  </button>
-                </span>
+                <ChildChip key={c._id} name={c.name} onRemove={() => handleUnlink(linkParent._id, c._id)} />
               ))}
             </div>
           </div>

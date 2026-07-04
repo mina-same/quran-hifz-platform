@@ -1,6 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { get, post } from "../../lib/api";
 
+/** sessionStorage key used to hand off "take attendance for this special track" from
+ * the Special Tracks page to TeacherAttendance, which reads it on mount and jumps
+ * straight to that track's attendance list instead of showing the picker. */
+export const ATTENDANCE_PREFILL_TRACK_KEY = "qh_prefill_attendance_track";
+
 export type AttendanceRecord = {
   _id: string;
   student: { _id: string; name: string } | string;
@@ -54,11 +59,18 @@ export function useRecordAttendance() {
   });
 }
 
+export type BulkAttendanceResponse = {
+  success: boolean;
+  message: string;
+  notified: number;
+  unnotified: { id: string; name: string }[];
+};
+
 export function useBulkAttendance() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: { halqa?: string; specialTrack?: string; date: string; records: { student: string; status: string }[] }) =>
-      post("/attendance/bulk", body),
+      post<BulkAttendanceResponse>("/attendance/bulk", body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["attendance"] });
       qc.invalidateQueries({ queryKey: ["students"] });

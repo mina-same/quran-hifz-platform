@@ -112,7 +112,7 @@ export default function TeacherSpecialTracks() {
   const ended = tracks.filter((t) => t.status === 'ended');
 
   return (
-    <SafeAreaView style={s.safe} edges={['bottom']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
         {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
 

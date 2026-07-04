@@ -1,5 +1,11 @@
 import { SURAHS } from '../data/surahs';
 import { JUZ_STARTS } from '../data/juz';
+import quranPageRangesJson from '../data/quranPageRanges.json';
+
+/** Standard 604-page Madani mushaf boundary table (surah:ayah each page starts at).
+ * Source: quranPageRanges.json (surah/ayah start+end per page, cross-checked against
+ * quran-center/quran-meta Hafs PageList — all 604 page starts match exactly). */
+const PAGE_STARTS = quranPageRangesJson.map((p) => ({ number: p.page, surahNumber: p.start.surah, ayah: p.start.ayah }));
 
 export type RangePoint = { surahNumber: number; ayah: number };
 
@@ -21,6 +27,9 @@ const CUMULATIVE_BEFORE: number[] = (() => {
   }
   return acc;
 })();
+
+/** Total ayahs in the Quran (6236 for Hafs). */
+const TOTAL_AYAHS = SURAHS.reduce((sum, s) => sum + s.ayahCount, 0);
 
 export function toFlatIndex({ surahNumber, ayah }: RangePoint): number {
   return CUMULATIVE_BEFORE[surahNumber] + (ayah - 1);
@@ -52,6 +61,39 @@ export function juzOfFlatIndex(flatIndex: number): number {
     else break;
   }
   return juz;
+}
+
+/** arr[i] = flat index where mushaf page (i+1) starts (604-page Madani mushaf). */
+const PAGE_STARTS_FLAT: number[] = PAGE_STARTS.map((p) => toFlatIndex({ surahNumber: p.surahNumber, ayah: p.ayah }));
+
+/** Which of the 604 mushaf pages a flat ayah index falls in. */
+export function pageOfFlatIndex(flatIndex: number): number {
+  let page = 1;
+  for (let i = 0; i < PAGE_STARTS_FLAT.length; i++) {
+    if (flatIndex >= PAGE_STARTS_FLAT[i]) page = i + 1;
+    else break;
+  }
+  return page;
+}
+
+/** First ayah (flat index) of the given 1-based mushaf page. */
+function firstFlatOfPage(page: number): number {
+  return PAGE_STARTS_FLAT[page - 1];
+}
+
+/** Last ayah (flat index) of the given 1-based mushaf page — the ayah right
+ * before the next page starts, or the Quran's final ayah for page 604. */
+function lastFlatOfPage(page: number): number {
+  return page < PAGE_STARTS_FLAT.length ? PAGE_STARTS_FLAT[page] - 1 : TOTAL_AYAHS - 1;
+}
+
+export type PageRange = { pageStart: number; pageEnd: number; pageCount: number };
+
+/** The mushaf page range (and page count) spanned by an ayah range, inclusive. */
+export function pageRangeOfAyahRange(start: RangePoint, end: RangePoint): PageRange {
+  const pageStart = pageOfFlatIndex(toFlatIndex(start));
+  const pageEnd = pageOfFlatIndex(toFlatIndex(end));
+  return { pageStart, pageEnd, pageCount: pageEnd - pageStart + 1 };
 }
 
 function dateOnly(d: Date): Date {
@@ -99,29 +141,37 @@ export type TodayAssignment = {
   ayahStart: number;
   surahEnd: number;
   ayahEnd: number;
+  pageStart: number;
+  pageEnd: number;
 };
 
 /**
- * The ayah slice for a given 0-based occurrence index, dividing the full range
- * evenly across all occurrences; any remainder (when total ayahs doesn't divide
- * evenly) is absorbed by the last occurrence so the slices always cover the whole
- * range exactly once. Returns null if there's nothing left for a non-final day
- * (more occurrences than ayahs).
+ * The ayah slice for a given 0-based occurrence index, dividing the full range's
+ * mushaf *pages* evenly across all occurrences — never mid-page — so intermediate
+ * days always start and end on a page boundary. Only the very first day (which
+ * starts at the plan's actual rangeStart) and the very last day (which ends at the
+ * plan's actual rangeEnd) may be partial pages; any remainder page count is
+ * absorbed by the last occurrence. Returns null if there's nothing left for a
+ * non-final day (more occurrences than pages).
  */
 function sliceForOccurrence(plan: PlanScheduleInput, occurrenceIndex: number, occurrenceCount: number): TodayAssignment | null {
-  const totalAyahs = countRangeAyahs(plan.rangeStart, plan.rangeEnd);
-  const dailyPortion = Math.floor(totalAyahs / occurrenceCount);
+  const { pageStart, pageEnd, pageCount: totalPages } = pageRangeOfAyahRange(plan.rangeStart, plan.rangeEnd);
+  const dailyPages = Math.floor(totalPages / occurrenceCount);
   const isLast = occurrenceIndex === occurrenceCount - 1;
 
-  if (dailyPortion === 0 && !isLast) return null;
+  if (dailyPages === 0 && !isLast) return null;
 
-  const rangeStartFlat = toFlatIndex(plan.rangeStart);
-  const sliceStartFlat = rangeStartFlat + occurrenceIndex * dailyPortion;
-  const sliceEndFlat = isLast ? toFlatIndex(plan.rangeEnd) : sliceStartFlat + dailyPortion - 1;
+  const firstPage = pageStart + occurrenceIndex * dailyPages;
+  const lastPage = isLast ? pageEnd : firstPage + dailyPages - 1;
 
-  const start = fromFlatIndex(sliceStartFlat);
-  const end = fromFlatIndex(sliceEndFlat);
-  return { surahStart: start.surahNumber, ayahStart: start.ayah, surahEnd: end.surahNumber, ayahEnd: end.ayah };
+  const start = occurrenceIndex === 0 ? plan.rangeStart : fromFlatIndex(firstFlatOfPage(firstPage));
+  const end = isLast ? plan.rangeEnd : fromFlatIndex(lastFlatOfPage(lastPage));
+
+  return {
+    surahStart: start.surahNumber, ayahStart: start.ayah,
+    surahEnd: end.surahNumber, ayahEnd: end.ayah,
+    pageStart: firstPage, pageEnd: lastPage,
+  };
 }
 
 /**
@@ -221,9 +271,10 @@ export type JuzProgress = { completed: number; total: number };
 
 /**
  * How many of the ajza' spanned by the plan's range are fully finished, derived
- * from the same day-based `completed/total` ratio as computePlanProgress (the
- * plan divides its ayah range evenly across occurrences, so day-progress and
- * ayah-progress track together). `total` is the count of distinct ajza' the
+ * from the same day-based `completed/total` ratio as computePlanProgress. This is
+ * an ayah-count approximation (the actual per-day slices are page-aligned via
+ * sliceForOccurrence, not perfectly even by ayah), close enough for a progress
+ * indicator. `total` is the count of distinct ajza' the
  * plan's rangeStart..rangeEnd touches; `completed` counts only ajza' whose
  * entire span (clamped to the plan's range) has been covered so far — a juz'
  * that's only partially covered doesn't count yet.

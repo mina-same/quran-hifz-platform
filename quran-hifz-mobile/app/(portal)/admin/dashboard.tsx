@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AyahBar from '@/components/ui/AyahBar';
@@ -10,12 +11,20 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import HalqaCard from '@/components/domain/HalqaCard';
 import { STUDENTS } from '@/lib/data/students';
 import { HALQAT, KPIS, MASAJID } from '@/lib/data/halqat';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 const kpiVariant = (r: string) =>
   r === 'ممتاز' ? 'green' : r === 'جيد' ? 'gold' : r === 'مقبول' ? 'blue' : 'red';
 
 export default function AdminDashboard() {
+  const theme = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    bold: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    cell: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+  }), [theme]);
+
   const STATS = [
     { label: 'الطلاب المسجلون', value: STUDENTS.length, color: theme.green },
     { label: 'المعلمون',         value: '٥',             color: theme.gold },
@@ -44,7 +53,7 @@ export default function AdminDashboard() {
   }));
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         <AyahBar />
         <StatsRow stats={STATS} />

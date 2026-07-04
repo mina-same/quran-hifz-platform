@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
@@ -5,12 +6,20 @@ import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import DataTable from '@/components/ui/DataTable';
 import { TEACHERS } from '@/lib/data/teachers';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 const ratingVariant = (r: string) =>
   r === 'ممتاز' ? 'green' : r === 'جيد جداً' ? 'gold' : r === 'جيد' ? 'blue' : 'gray';
 
 export default function AdminTeachers() {
+  const theme = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    bold: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    muted: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
+  }), [theme]);
+
   const rows = TEACHERS.map((t) => ({
     name:      <Text style={styles.bold}>{t.name}</Text>,
     specialty: <Text style={styles.muted}>{t.specialty}</Text>,
@@ -21,7 +30,7 @@ export default function AdminTeachers() {
   }));
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         <Card noPadding>
           <CardHeader title={`المعلمون (${TEACHERS.length})`} style={{ padding: 16, paddingBottom: 8 }} />

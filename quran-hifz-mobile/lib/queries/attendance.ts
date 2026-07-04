@@ -38,6 +38,7 @@ export function useAttendance(filters?: AttendanceFilters) {
   return useQuery({
     queryKey: ['attendance', filters],
     queryFn: () => get<ListResponse>(`/attendance${buildQuery(filters)}`).then((r) => r.data),
+    enabled: !!(filters?.student || filters?.halqa || filters?.specialTrack),
   });
 }
 
@@ -58,6 +59,13 @@ export function useRecordAttendance() {
   });
 }
 
+export type BulkAttendanceResponse = {
+  success: boolean;
+  message: string;
+  notified: number;
+  unnotified: { id: string; name: string }[];
+};
+
 export function useBulkAttendance() {
   const qc = useQueryClient();
   return useMutation({
@@ -66,7 +74,7 @@ export function useBulkAttendance() {
       specialTrack?: string;
       date: string;
       records: { student: string; status: string }[];
-    }) => post('/attendance/bulk', body),
+    }) => post<BulkAttendanceResponse>('/attendance/bulk', body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['attendance'] });
       qc.invalidateQueries({ queryKey: ['students'] });

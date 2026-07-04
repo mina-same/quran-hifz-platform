@@ -1,17 +1,31 @@
+import { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import { useParentChildren, useChildRecordings } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 export default function ParentRecordings() {
+  const theme = useAppTheme();
   const selectedChildId = usePortalStore((s) => s.selectedChildId);
   const { data: children = [] } = useParentChildren();
   const childId = selectedChildId ?? children[0]?._id;
 
   const { data: recordings = [], isLoading } = useChildRecordings(childId);
+
+  const s = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: 16 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
+    item: { paddingVertical: 12 },
+    border: { borderTopWidth: 1, borderTopColor: theme.border },
+    itemHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' },
+    date: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
+    segment: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text, marginBottom: 2 },
+    note: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
+  }), [theme]);
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
@@ -34,15 +48,3 @@ export default function ParentRecordings() {
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: 16 },
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
-  item: { paddingVertical: 12 },
-  border: { borderTopWidth: 1, borderTopColor: theme.border },
-  itemHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' },
-  date: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
-  segment: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text, marginBottom: 2 },
-  note: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
-});

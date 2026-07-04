@@ -1,8 +1,9 @@
+import { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 const MSGS = [
   { from: 'أ. ناصر الحميداني', text: 'أحسن عبدالله في مراجعة آل عمران هذا الأسبوع', time: 'أمس' },
@@ -12,6 +13,21 @@ const MSGS = [
 ];
 
 export default function ParentMessages() {
+  const theme = useAppTheme();
+
+  const s = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.cream },
+    page: { padding: 16 },
+    item: { flexDirection: 'row', gap: 12, paddingVertical: 12, alignItems: 'flex-start' },
+    border: { borderTopWidth: 1, borderTopColor: theme.border },
+    avatar: { width: 38, height: 38, borderRadius: 19, backgroundColor: theme.greenPale, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+    avatarText: { fontSize: 16, fontFamily: theme.fontCairoBold, color: theme.green },
+    head: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 },
+    from: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    time: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
+    text: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
+  }), [theme]);
+
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
@@ -36,16 +52,3 @@ export default function ParentMessages() {
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.cream },
-  page: { padding: 16 },
-  item: { flexDirection: 'row', gap: 12, paddingVertical: 12, alignItems: 'flex-start' },
-  border: { borderTopWidth: 1, borderTopColor: theme.border },
-  avatar: { width: 38, height: 38, borderRadius: 19, backgroundColor: theme.greenPale, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  avatarText: { fontSize: 16, fontFamily: theme.fontCairoBold, color: theme.green },
-  head: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 },
-  from: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
-  time: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
-  text: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
-});

@@ -134,7 +134,7 @@ export default function TeacherRecordLesson() {
 
   if (!selected) {
     return (
-      <SafeAreaView style={s.safe} edges={['bottom']}>
+      <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
           {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
           {!isLoading && halqat.length === 0 && tracks.length === 0 && (
@@ -156,7 +156,7 @@ export default function TeacherRecordLesson() {
   }
 
   return (
-    <SafeAreaView style={s.safe} edges={['bottom']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
         <Pressable onPress={() => setSelected(null)}>
           <Text style={s.backLink}>‹ رجوع لاختيار الحلقة/المسار</Text>

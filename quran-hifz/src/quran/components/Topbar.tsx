@@ -1,7 +1,8 @@
-import { usePortal } from "../context/PortalContext";
+import { usePortal, useTopbarValue } from "../context/PortalContext";
 
 export function Topbar() {
-  const { topbar, toggleSidebar } = usePortal();
+  const { toggleSidebar } = usePortal();
+  const topbar = useTopbarValue();
   return (
     <div className="topbar">
       <div className="topbar-title">

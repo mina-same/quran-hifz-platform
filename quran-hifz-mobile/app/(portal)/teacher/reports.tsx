@@ -9,7 +9,7 @@ import { theme } from '@/lib/theme';
 
 export default function TeacherReports() {
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         {STUDENTS.map((s) => (
           <Card key={s.id}>

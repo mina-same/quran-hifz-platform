@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconCircleCheck } from '@tabler/icons-react-native';
@@ -10,23 +10,23 @@ import ContextCard, { halqaToContext, trackToContext, type TeachingContext } fro
 import { useHalqat } from '@/lib/queries/halqat';
 import { useSpecialTracks } from '@/lib/queries/specialTracks';
 import { useStudents } from '@/lib/queries/students';
-import { useBulkAttendance } from '@/lib/queries/attendance';
+import { useAttendance, useBulkAttendance } from '@/lib/queries/attendance';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 type AttStatus = 'حاضر' | 'غائب' | 'متأخر';
 const OPTIONS: AttStatus[] = ['حاضر', 'غائب', 'متأخر'];
 
-const STATUS_COLOR: Record<AttStatus, string> = {
-  'حاضر': theme.green,
-  'غائب': theme.red,
-  'متأخر': theme.gold,
-};
-
 export default function TeacherAttendance() {
+  const theme = useAppTheme();
+  const STATUS_COLOR: Record<AttStatus, string> = {
+    'حاضر': theme.green,
+    'غائب': theme.red,
+    'متأخر': theme.gold,
+  };
   const profileId = usePortalStore((s) => s.authUser?.profileId);
   const [selected, setSelected] = useState<TeachingContext | null>(null);
-  const [statuses, setStatuses] = useState<Record<string, AttStatus>>({});
+  const [overrides, setOverrides] = useState<Record<string, AttStatus>>({});
   const [saved, setSaved] = useState(false);
 
   const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: profileId });
@@ -41,16 +41,34 @@ export default function TeacherAttendance() {
   );
 
   const bulkAttendance = useBulkAttendance();
+  const [unnotified, setUnnotified] = useState<{ id: string; name: string }[]>([]);
 
   const today = new Date().toISOString().split('T')[0];
 
+  // Today's already-saved attendance for this context, so re-opening the same
+  // halqa/track later the same day shows what was actually recorded instead of
+  // resetting every student back to the 'حاضر' default.
+  const { data: savedToday = [] } = useAttendance(
+    selected
+      ? selected.kind === 'halqa'
+        ? { halqa: selected.id, from: today, to: today }
+        : { specialTrack: selected.id, from: today, to: today }
+      : undefined,
+  );
+  const savedStatusById: Record<string, AttStatus> = {};
+  for (const r of savedToday) {
+    const id = typeof r.student === 'string' ? r.student : r.student._id;
+    savedStatusById[id] = r.status as AttStatus;
+  }
+  const statusFor = (studentId: string): AttStatus => overrides[studentId] ?? savedStatusById[studentId] ?? 'حاضر';
+
   function setStatus(studentId: string, status: AttStatus) {
-    setStatuses((p) => ({ ...p, [studentId]: status }));
+    setOverrides((p) => ({ ...p, [studentId]: status }));
   }
 
   function handleSave() {
     if (!selected) return;
-    const records = students.map((s) => ({ student: s._id, status: statuses[s._id] ?? 'حاضر' }));
+    const records = students.map((s) => ({ student: s._id, status: statusFor(s._id) }));
     bulkAttendance.mutate(
       {
         ...(selected.kind === 'halqa' ? { halqa: selected.id } : { specialTrack: selected.id }),
@@ -58,8 +76,9 @@ export default function TeacherAttendance() {
         records,
       },
       {
-        onSuccess: () => {
+        onSuccess: (res) => {
           setSaved(true);
+          setUnnotified(res.unnotified);
           setTimeout(() => setSaved(false), 4000);
         },
       },
@@ -68,9 +87,40 @@ export default function TeacherAttendance() {
 
   const isLoading = loadingHalqat || loadingTracks;
 
+  const styles = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+    backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
+    studentRow: { paddingVertical: 14, gap: 8 },
+    rowBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
+    studentName: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
+    lastHifz: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    optionRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+    optionBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: theme.radiusSm,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    radio: {
+      width: 12, height: 12, borderRadius: 6,
+      backgroundColor: theme.border,
+    },
+    optionText: {
+      fontSize: 12,
+      fontFamily: theme.fontCairo,
+      color: theme.text,
+    },
+  }), [theme]);
+
   if (!selected) {
     return (
-      <SafeAreaView style={styles.safe} edges={['bottom']}>
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
           {isLoading && <Text style={styles.muted}>جارٍ التحميل...</Text>}
           {!isLoading && halqat.length === 0 && tracks.length === 0 && (
@@ -92,18 +142,23 @@ export default function TeacherAttendance() {
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         {saved && (
           <Alert variant="success" icon={<IconCircleCheck size={18} color="#166534" />}>
             تم حفظ الحضور وإرسال إشعارات لأولياء الأمور عن الطلاب الغائبين.
           </Alert>
         )}
+        {saved && unnotified.length > 0 && (
+          <Alert variant="error">
+            تعذر إرسال إشعار عن غياب: {unnotified.map((s) => s.name).join('، ')} — لا يوجد ولي أمر مرتبط بالحساب.
+          </Alert>
+        )}
         {bulkAttendance.isError && (
           <Alert variant="error">{(bulkAttendance.error as Error).message}</Alert>
         )}
 
-        <Pressable onPress={() => setSelected(null)}>
+        <Pressable onPress={() => { setSelected(null); setOverrides({}); }}>
           <Text style={styles.backLink}>‹ رجوع لاختيار الحلقة/المسار</Text>
         </Pressable>
 
@@ -122,7 +177,7 @@ export default function TeacherAttendance() {
               <Text style={styles.lastHifz}>{st.lastMemorization || '—'}</Text>
               <View style={styles.optionRow}>
                 {OPTIONS.map((opt) => {
-                  const active = (statuses[st._id] ?? 'حاضر') === opt;
+                  const active = statusFor(st._id) === opt;
                   return (
                     <Pressable
                       key={opt}
@@ -151,34 +206,3 @@ export default function TeacherAttendance() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: theme.pagePadding, gap: 14 },
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
-  backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
-  studentRow: { paddingVertical: 14, gap: 8 },
-  rowBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
-  studentName: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
-  lastHifz: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
-  optionRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  optionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: theme.radiusSm,
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  radio: {
-    width: 12, height: 12, borderRadius: 6,
-    backgroundColor: theme.border,
-  },
-  optionText: {
-    fontSize: 12,
-    fontFamily: theme.fontCairo,
-    color: theme.text,
-  },
-});
