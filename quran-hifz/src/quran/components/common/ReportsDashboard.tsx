@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, LabelList } from "recharts";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, LabelList } from "recharts";
 import { toAr, pct } from "../../../lib/format";
 import { downloadCsv } from "../../../lib/csv";
 import { useStudents, type Student, type StudentFilters } from "../../api/students";
@@ -16,7 +16,8 @@ import { Alert } from "./Alert";
 import { Badge, type BadgeTone } from "./Badge";
 import { ProgressBar } from "./ProgressBar";
 import { Donut, type DonutSlice } from "./Donut";
-import { Gauge } from "./Gauge";
+import { BentoTile } from "./BentoTile";
+import { HonorBoard } from "./HonorBoard";
 import { Leaderboard, type LeaderRow } from "./Leaderboard";
 import { ScopeTabs } from "./ScopeTabs";
 import { StudentReportPanel } from "./StudentReportPanel";
@@ -89,6 +90,14 @@ function pctOfMax(avgScore: number, max: number): number {
   return Math.max(0, Math.min(100, Math.round((avgScore / max) * 100)));
 }
 
+function tierOf(v: number): "ممتاز" | "جيد" | "متوسط" | "ضعيف" {
+  if (v >= 90) return "ممتاز";
+  if (v >= 75) return "جيد";
+  if (v >= 50) return "متوسط";
+  return "ضعيف";
+}
+const TIER_TONE: Record<string, BadgeTone> = { ممتاز: "green", جيد: "blue", متوسط: "gold", ضعيف: "red" };
+
 /* ── component ────────────────────────────────────────────────────────── */
 
 export function ReportsDashboard({
@@ -159,7 +168,7 @@ export function ReportsDashboard({
     };
   }, [evaluations]);
 
-  /* ── trend: cohort avg total score per evaluation date ── */
+  /* ── trend: cohort avg total score per evaluation date (for the trend chart + hero sparkline) ── */
   const trendData = useMemo(() => {
     const byDate = new Map<string, { sum: number; count: number }>();
     for (const e of evaluations) {
@@ -177,13 +186,23 @@ export function ReportsDashboard({
       }));
   }, [evaluations]);
 
-  const trendDirection = useMemo<"up" | "down" | null>(() => {
-    if (trendData.length < 4) return null;
-    const half = Math.floor(trendData.length / 2);
-    const diff = avg(trendData.slice(half).map((d) => d.avg)) - avg(trendData.slice(0, half).map((d) => d.avg));
-    if (Math.abs(diff) < 0.3) return null;
-    return diff > 0 ? "up" : "down";
-  }, [trendData]);
+  /* ── half-over-half delta (recent sessions vs earlier ones) per dimension + total,
+     used for the hero trend chip and the small up/down arrows on the metric tiles ── */
+  const halfSplit = useMemo(() => {
+    if (evaluations.length < 4) return null;
+    const sorted = [...evaluations].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const half = Math.floor(sorted.length / 2);
+    const first = sorted.slice(0, half);
+    const second = sorted.slice(half);
+    const deltaOf = (pick: (e: EvaluationRecord) => number) => avg(second.map(pick)) - avg(first.map(pick));
+    return {
+      total: round1(deltaOf((e) => e.total)),
+      attendance: round1(deltaOf((e) => e.scores.attendance)),
+      hifz: round1(deltaOf((e) => e.scores.hifz)),
+      tajweed: round1(deltaOf((e) => e.scores.tajweed)),
+      talawah: round1(deltaOf((e) => e.scores.talawah)),
+    };
+  }, [evaluations]);
 
   /* ── halqa comparison (only meaningful when more than one halqa is in scope) ── */
   const halqaEvalStats = useMemo(() => {
@@ -221,7 +240,7 @@ export function ReportsDashboard({
       .sort((a, b) => b.avgTotal - a.avgTotal);
   }, [evaluations, halqat]);
 
-  /* ── per-student evaluation leaderboard (top achievers + needs-attention) ── */
+  /* ── per-student evaluation leaderboard (honor board top-3 + needs-attention) ── */
   const studentEvalStats = useMemo(() => {
     const map = new Map<string, { name: string; sum: number; count: number }>();
     for (const e of evaluations) {
@@ -282,13 +301,13 @@ export function ReportsDashboard({
         </Alert>,
       );
     }
-    if (trendDirection === "up") {
+    if (halfSplit && halfSplit.total >= 0.3) {
       insights.push(
         <Alert key="trend-up" tone="success" icon="ti-trending-up">
           متوسط التقييم في تحسّن مستمر خلال آخر الجلسات
         </Alert>,
       );
-    } else if (trendDirection === "down") {
+    } else if (halfSplit && halfSplit.total <= -0.3) {
       insights.push(
         <Alert key="trend-down" tone="danger" icon="ti-trending-down">
           متوسط التقييم في تراجع خلال آخر الجلسات — يستحق المتابعة
@@ -410,6 +429,7 @@ export function ReportsDashboard({
         : "متوسط الدرجات لطلابك";
 
   const empty = !isLoading && students.length === 0;
+  const tier = evalStats ? tierOf(evalStats.avgTotalPct) : null;
 
   /* ── render ────────────────────────────────────────────────────────── */
   return (
@@ -459,159 +479,210 @@ export function ReportsDashboard({
         </Card>
       ) : (
         <>
-          {/* Hero: overall gauge + rubric breakdown */}
-          <div className="eval-hero grid-collapse">
-            <Card icon="ti-star" title="الأداء العام">
-              <Gauge value={evalStats.avgTotalPct} label={`${toAr(evalStats.sessions)} جلسة مسجّلة`} />
-            </Card>
-            <Card icon="ti-chart-radar" title="تفصيل معايير التقييم">
-              <div className="rubric-grid">
-                {evalStats.dims.map((d) => (
-                  <div className="rubric-card" key={d.key} style={{ ["--rubric-color" as string]: d.color }}>
-                    <i className={`ti ${d.icon} rubric-card-icon`} />
-                    <div className="rubric-card-val">{pct(d.pctVal)}</div>
-                    <div className="rubric-card-label">{d.label}</div>
-                    <div className="rubric-card-bar">
-                      <div className="rubric-card-fill" style={{ width: `${d.pctVal}%` }} />
-                    </div>
+          <div className="bento-grid">
+            {/* Hero: huge headline number + sparkline + trend delta, no ring/donut this time */}
+            <BentoTile span="2" tall className="bento-hero">
+              <div className="hero-eyebrow">الأداء العام</div>
+              <div className="hero-number-row">
+                <span className="hero-number">{toAr(evalStats.avgTotal)}</span>
+                <span className="hero-number-max">/ {toAr(10)}</span>
+                {tier && <Badge tone={TIER_TONE[tier]}>{tier}</Badge>}
+              </div>
+              {halfSplit && Math.abs(halfSplit.total) >= 0.1 && (
+                <div className={`hero-delta ${halfSplit.total > 0 ? "up" : "down"}`}>
+                  <i className={`ti ${halfSplit.total > 0 ? "ti-trending-up" : "ti-trending-down"}`} />
+                  {toAr(Math.abs(halfSplit.total))} عن الفترة السابقة
+                </div>
+              )}
+              <div className="hero-spark">
+                <ResponsiveContainer width="100%" height={56}>
+                  <AreaChart data={trendData}>
+                    <defs>
+                      <linearGradient id="heroSparkFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--gold)" stopOpacity={0.35} />
+                        <stop offset="100%" stopColor="var(--gold)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <Area type="monotone" dataKey="avg" stroke="var(--gold)" strokeWidth={2} fill="url(#heroSparkFill)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="hero-meta">{toAr(evalStats.sessions)} جلسة تقييم مسجّلة</div>
+            </BentoTile>
+
+            {/* Rubric breakdown: 4 standalone bento tiles, not nested inside one card */}
+            {evalStats.dims.map((d) => {
+              const delta = halfSplit ? halfSplit[d.key] : 0;
+              const showDelta = halfSplit && Math.abs(delta) >= 0.1;
+              return (
+                <BentoTile key={d.key} icon={d.icon} label={d.label}>
+                  <div className="metric-tile-val" style={{ color: d.color }}>
+                    {pct(d.pctVal)}
                   </div>
-                ))}
-              </div>
-            </Card>
-          </div>
+                  <div className="metric-tile-bar">
+                    <div className="metric-tile-fill" style={{ width: `${d.pctVal}%`, background: d.color }} />
+                  </div>
+                  {showDelta && (
+                    <div className={`metric-tile-delta ${delta > 0 ? "up" : "down"}`}>
+                      <i className={`ti ${delta > 0 ? "ti-arrow-up-right" : "ti-arrow-down-right"}`} />
+                    </div>
+                  )}
+                </BentoTile>
+              );
+            })}
 
-          {/* Trend */}
-          <Card icon="ti-trending-up" title="تطور متوسط التقييم عبر الزمن">
-            {trendData.length < 2 ? (
-              <div className="page-loading" style={{ padding: "24px 0" }}>
-                <span>يلزم أكثر من جلسة تقييم واحدة لعرض الاتجاه</span>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height={230}>
-                <LineChart data={trendData}>
-                  <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="date" fontSize={11} stroke="var(--text3)" tick={{ fill: "var(--text2)" }} />
-                  <YAxis
-                    domain={[0, 10]}
-                    fontSize={11}
-                    stroke="var(--text3)"
-                    tick={{ fill: "var(--text2)" }}
-                    tickFormatter={(v: number) => toAr(v)}
-                  />
-                  <Tooltip
-                    contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
-                    formatter={(v: number) => [toAr(Number(v)), "متوسط التقييم"]}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="avg"
-                    stroke="var(--gold)"
-                    strokeWidth={2}
-                    dot={{ r: 4, fill: "var(--gold)", stroke: "var(--surface)", strokeWidth: 2 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </Card>
+            {/* Trend: full-width gradient area chart */}
+            <BentoTile span="4" icon="ti-trending-up" label="تطور متوسط التقييم عبر الزمن">
+              {trendData.length < 2 ? (
+                <div className="page-loading" style={{ padding: "24px 0" }}>
+                  <span>يلزم أكثر من جلسة تقييم واحدة لعرض الاتجاه</span>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={220}>
+                  <AreaChart data={trendData}>
+                    <defs>
+                      <linearGradient id="trendAreaFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--green)" stopOpacity={0.28} />
+                        <stop offset="100%" stopColor="var(--green)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke="var(--border)" vertical={false} />
+                    <XAxis dataKey="date" fontSize={11} stroke="var(--text3)" tick={{ fill: "var(--text2)" }} />
+                    <YAxis
+                      domain={[0, 10]}
+                      fontSize={11}
+                      stroke="var(--text3)"
+                      tick={{ fill: "var(--text2)" }}
+                      tickFormatter={(v: number) => toAr(v)}
+                    />
+                    <Tooltip
+                      contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
+                      formatter={(v: number) => [toAr(Number(v)), "متوسط التقييم"]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="avg"
+                      stroke="var(--green)"
+                      strokeWidth={2}
+                      fill="url(#trendAreaFill)"
+                      dot={{ r: 4, fill: "var(--green)", stroke: "var(--surface)", strokeWidth: 2 }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+            </BentoTile>
 
-          {/* Halqa comparison (only when more than one halqa is in play) */}
-          {halqaEvalStats.length > 1 && (
-            <Card icon="ti-school" title="مقارنة الحلقات في التقييم" headerExtra={<Badge tone="green">{toAr(halqaEvalStats.length)} حلقة</Badge>}>
-              <div className="tbl-wrap">
-                <table className="tbl">
-                  <thead>
-                    <tr>
-                      <th>الحلقة</th>
-                      <th>حضور</th>
-                      <th>حفظ</th>
-                      <th>تجويد</th>
-                      <th>تلاوة</th>
-                      <th>المتوسط الكلي</th>
-                      <th>الجلسات</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {halqaEvalStats.map((h) => (
-                      <tr key={h.name}>
-                        <td style={{ fontWeight: 700 }}>{h.name}</td>
-                        <td>{pct(h.avgAttendance)}</td>
-                        <td>{pct(h.avgHifz)}</td>
-                        <td>{pct(h.avgTajweed)}</td>
-                        <td>{pct(h.avgTalawah)}</td>
-                        <td>
-                          <strong>{toAr(h.avgTotal)}/{toAr(10)}</strong>
-                        </td>
-                        <td>{toAr(h.count)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-          )}
-
-          {/* Leaderboards: top achievers + needs-attention, both evaluation-based */}
-          <div className="reports-grid grid-collapse">
-            <Card icon="ti-trophy" title="الأعلى تقييماً" headerExtra={<Badge tone="gold">{toAr(evalTop.length)} طالب</Badge>}>
-              <Leaderboard rows={evalTop} variant="leader" emptyText="لا توجد تقييمات بعد" emptyIcon="ti-mood-empty" />
-            </Card>
-            <Card icon="ti-alert-triangle" title="بحاجة لمتابعة (تقييم)" headerExtra={<Badge tone="red">{toAr(evalWatch.length)} طالب</Badge>}>
+            {/* Honor board: top-3 podium + needs-attention list */}
+            <BentoTile span="2" icon="ti-trophy" label="الأعلى تقييماً">
+              <HonorBoard rows={evalTop} emptyText="لا توجد تقييمات كافية بعد" />
+            </BentoTile>
+            <BentoTile
+              span="2"
+              icon="ti-alert-triangle"
+              label="بحاجة لمتابعة"
+              badge={<Badge tone="red">{toAr(evalWatch.length)}</Badge>}
+            >
               <Leaderboard rows={evalWatch} variant="watch" emptyText="لا يوجد طلاب بتقييم منخفض — الحمد لله" emptyIcon="ti-mood-smile" />
-            </Card>
+            </BentoTile>
+
+            {/* Halqa comparison (only when more than one halqa is in play) */}
+            {halqaEvalStats.length > 1 && (
+              <BentoTile
+                span="4"
+                icon="ti-school"
+                label="مقارنة الحلقات في التقييم"
+                badge={<Badge tone="green">{toAr(halqaEvalStats.length)} حلقة</Badge>}
+              >
+                <div className="tbl-wrap">
+                  <table className="tbl">
+                    <thead>
+                      <tr>
+                        <th>الحلقة</th>
+                        <th>حضور</th>
+                        <th>حفظ</th>
+                        <th>تجويد</th>
+                        <th>تلاوة</th>
+                        <th>المتوسط الكلي</th>
+                        <th>الجلسات</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {halqaEvalStats.map((h) => (
+                        <tr key={h.name}>
+                          <td style={{ fontWeight: 700 }}>{h.name}</td>
+                          <td>{pct(h.avgAttendance)}</td>
+                          <td>{pct(h.avgHifz)}</td>
+                          <td>{pct(h.avgTajweed)}</td>
+                          <td>{pct(h.avgTalawah)}</td>
+                          <td>
+                            <strong>
+                              {toAr(h.avgTotal)}/{toAr(10)}
+                            </strong>
+                          </td>
+                          <td>{toAr(h.count)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </BentoTile>
+            )}
+
+            {/* Hifz progress distribution — kept, complements the evaluation حفظ dimension */}
+            <BentoTile span={showAdmin ? "2" : "4"} icon="ti-chart-donut" label="توزيع إنجاز الحفظ">
+              <Donut data={BUCKET_SLICES(progBuckets)} centerNum={pct(m.avgProg)} centerSub="متوسط الإنجاز" emptyText="لا توجد بيانات إنجاز" />
+            </BentoTile>
+
+            {/* Admin-only: org-wide teacher workload */}
+            {showAdmin && teacherRows.length > 0 && (
+              <BentoTile span="2" icon="ti-chalkboard" label="توزيع عبء المعلمين" badge={<Badge tone="blue">{toAr(teacherRows.length)} معلم</Badge>}>
+                <ResponsiveContainer width="100%" height={Math.max(180, teacherRows.length * 36)}>
+                  <BarChart data={teacherRows} layout="vertical" margin={{ left: 8, right: 36, top: 4, bottom: 4 }}>
+                    <CartesianGrid stroke="var(--border)" horizontal={false} />
+                    <XAxis
+                      type="number"
+                      domain={[0, maxTeacherCount]}
+                      fontSize={11}
+                      stroke="var(--text3)"
+                      tick={{ fill: "var(--text2)" }}
+                      tickFormatter={(v: number) => toAr(v)}
+                    />
+                    <YAxis type="category" dataKey="name" width={110} fontSize={12} stroke="var(--text3)" tick={{ fill: "var(--text)" }} />
+                    <Tooltip
+                      contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12, direction: "rtl" }}
+                      formatter={(v: number) => [toAr(Number(v)), "عدد الطلاب"]}
+                    />
+                    <Bar dataKey="count" fill="var(--green3)" radius={[0, 4, 4, 0]} maxBarSize={22}>
+                      <LabelList dataKey="count" position="right" style={{ fill: "var(--text)", fontSize: 11, fontWeight: 700 }} formatter={(v: number) => toAr(Number(v))} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </BentoTile>
+            )}
+
+            {/* Admin-only: org-wide KPI scorecard */}
+            {showAdmin && (kpis?.length ?? 0) > 0 && (
+              <BentoTile span="4" icon="ti-target" label="مؤشرات الأداء" badge={<Badge tone="green">تقييم المؤسسة</Badge>}>
+                <div className="kpi-list">
+                  {kpis!.map((k) => (
+                    <div className="kpi-item" key={k._id}>
+                      <div className="kpi-head">
+                        <span className="kpi-name">{k.indicator}</span>
+                        <span className="kpi-actual">
+                          {toAr(k.actual)} / {toAr(k.target)}
+                        </span>
+                      </div>
+                      <ProgressBar pct={pctOf(k.actual, k.target)} />
+                      <div className="kpi-meta">
+                        <Badge tone={KPI_TONE[k.rating] ?? "gray"}>{k.rating}</Badge>
+                        <span>النسبة من الهدف: {pct(pctOf(k.actual, k.target))}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </BentoTile>
+            )}
           </div>
-
-          {/* Hifz progress distribution — kept, complements the evaluation حفظ dimension */}
-          <Card icon="ti-chart-donut" title="توزيع إنجاز الحفظ">
-            <Donut data={BUCKET_SLICES(progBuckets)} centerNum={pct(m.avgProg)} centerSub="متوسط الإنجاز" emptyText="لا توجد بيانات إنجاز" />
-          </Card>
-
-          {/* Admin-only: org-wide teacher workload */}
-          {showAdmin && teacherRows.length > 0 && (
-            <Card icon="ti-chalkboard" title="توزيع عبء المعلمين" headerExtra={<Badge tone="blue">{toAr(teacherRows.length)} معلم</Badge>}>
-              <ResponsiveContainer width="100%" height={Math.max(180, teacherRows.length * 36)}>
-                <BarChart data={teacherRows} layout="vertical" margin={{ left: 8, right: 36, top: 4, bottom: 4 }}>
-                  <CartesianGrid stroke="var(--border)" horizontal={false} />
-                  <XAxis
-                    type="number"
-                    domain={[0, maxTeacherCount]}
-                    fontSize={11}
-                    stroke="var(--text3)"
-                    tick={{ fill: "var(--text2)" }}
-                    tickFormatter={(v: number) => toAr(v)}
-                  />
-                  <YAxis type="category" dataKey="name" width={110} fontSize={12} stroke="var(--text3)" tick={{ fill: "var(--text)" }} />
-                  <Tooltip
-                    contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12, direction: "rtl" }}
-                    formatter={(v: number) => [toAr(Number(v)), "عدد الطلاب"]}
-                  />
-                  <Bar dataKey="count" fill="var(--green3)" radius={[0, 4, 4, 0]} maxBarSize={22}>
-                    <LabelList dataKey="count" position="right" style={{ fill: "var(--text)", fontSize: 11, fontWeight: 700 }} formatter={(v: number) => toAr(Number(v))} />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-          )}
-
-          {/* Admin-only: org-wide KPI scorecard */}
-          {showAdmin && (kpis?.length ?? 0) > 0 && (
-            <Card icon="ti-target" title="مؤشرات الأداء" headerExtra={<Badge tone="green">تقييم المؤسسة · غير مرتبط بالنطاق</Badge>}>
-              <div className="kpi-list">
-                {kpis!.map((k) => (
-                  <div className="kpi-item" key={k._id}>
-                    <div className="kpi-head">
-                      <span className="kpi-name">{k.indicator}</span>
-                      <span className="kpi-actual">{toAr(k.actual)} / {toAr(k.target)}</span>
-                    </div>
-                    <ProgressBar pct={pctOf(k.actual, k.target)} />
-                    <div className="kpi-meta">
-                      <Badge tone={KPI_TONE[k.rating] ?? "gray"}>{k.rating}</Badge>
-                      <span>النسبة من الهدف: {pct(pctOf(k.actual, k.target))}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
 
           {/* Per-student deep dive */}
           <Card icon="ti-report-analytics" title="تقرير طالب مفصّل">

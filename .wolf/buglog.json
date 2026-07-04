@@ -3594,6 +3594,38 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-04T15:30:24.296Z"
+    },
+    {
+      "id": "bug-223",
+      "timestamp": "2026-07-04T15:39:30.728Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 6→12 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:39:30.728Z"
+    },
+    {
+      "id": "bug-224",
+      "timestamp": "2026-07-04T15:47:07.079Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "38 lines replaced/restructured",
+      "fix": "Rewrote 109→297 lines (38 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:47:07.079Z"
     }
   ]
 }

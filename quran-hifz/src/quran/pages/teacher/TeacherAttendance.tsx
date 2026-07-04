@@ -195,7 +195,14 @@ export function TeacherAttendance() {
   useEffect(() => {
     setOverrides({});
     setDayNotice(null);
+    setEditUnlocked(false);
   }, [effectiveDate]);
+
+  // Relock automatically once the edited data is actually saved, so re-opening
+  // requires tapping "تعديل" again rather than staying permanently unlocked.
+  useEffect(() => {
+    if (bulkEvaluate.isSuccess) setEditUnlocked(false);
+  }, [bulkEvaluate.isSuccess]);
 
   // Auto-scroll the active day chip into view whenever the effective day changes
   // (the slider can span months — without this the selected day stays off-screen).
@@ -276,6 +283,10 @@ export function TeacherAttendance() {
   // plan — those chips are visually disabled but still clickable so the click
   // can explain *why*, instead of silently doing nothing.
   const [dayNotice, setDayNotice] = useState<string | null>(null);
+  // Deliberate override for a day whose attendance/evaluation was already sent —
+  // the teacher must explicitly tap "تعديل" to reopen it, rather than it always
+  // being editable (which would make the "sent once" guard pointless).
+  const [editUnlocked, setEditUnlocked] = useState(false);
   const evalFor = (studentId: string): StudentEval =>
     overrides[studentId] ?? savedById[studentId] ?? blankEval();
 
@@ -307,7 +318,9 @@ export function TeacherAttendance() {
     : isFutureDay
       ? "future"
       : null;
-  const locked = lockReason !== null;
+  // Explicitly re-opened via the "تعديل" button — only meaningful for a
+  // same-day resend; a future day was never sent, so there's nothing to edit.
+  const locked = lockReason !== null && !(lockReason === "submitted" && editUnlocked);
 
   useTopbar(
     "ti-calendar-check",
@@ -324,6 +337,14 @@ export function TeacherAttendance() {
         >
           <i className="ti ti-arrow-right" /> الحلقات والمسارات
         </button>
+        {lockReason === "submitted" && !editUnlocked && (
+          <button
+            className="topbar-btn btn-ghost"
+            onClick={() => setEditUnlocked(true)}
+          >
+            <i className="ti ti-edit" /> تعديل حضور اليوم
+          </button>
+        )}
         <button
           className="topbar-btn btn-primary"
           onClick={() => {
@@ -349,12 +370,14 @@ export function TeacherAttendance() {
           disabled={bulkEvaluate.isPending || !hasAssignment || locked}
         >
           <i
-            className={`ti ${lockReason === "submitted" ? "ti-circle-check" : lockReason === "future" ? "ti-clock" : "ti-send"}`}
+            className={`ti ${lockReason === "submitted" ? (editUnlocked ? "ti-device-floppy" : "ti-circle-check") : lockReason === "future" ? "ti-clock" : "ti-send"}`}
           />
           {bulkEvaluate.isPending
             ? "جارٍ الحفظ..."
             : lockReason === "submitted"
-              ? "تم الإرسال لهذا اليوم"
+              ? editUnlocked
+                ? "حفظ التعديلات"
+                : "تم الإرسال لهذا اليوم"
               : lockReason === "future"
                 ? "اليوم لم يحن بعد"
                 : "حفظ وإرسال إشعارات"}
@@ -507,10 +530,16 @@ export function TeacherAttendance() {
             <SkeletonTable cols={3} rows={5} />
           ) : (
             <>
-              {lockReason === "submitted" && (
+              {lockReason === "submitted" && !editUnlocked && (
                 <Alert tone="success" icon="ti-lock">
-                  تم إرسال الحضور والتقييم لهذا اليوم مسبقًا — لا يمكن التعديل أو الإرسال مرة أخرى.
-                  اختر يومًا آخر من الأعلى للتسجيل.
+                  تم إرسال الحضور والتقييم لهذا اليوم مسبقًا. لتصحيح أي بيانات اضغط "تعديل حضور
+                  اليوم" أعلى الصفحة.
+                </Alert>
+              )}
+              {lockReason === "submitted" && editUnlocked && (
+                <Alert tone="warning" icon="ti-edit">
+                  وضع التعديل مفعّل — عدّل الحضور أو الدرجات ثم اضغط "حفظ التعديلات" لإرسالها
+                  مجددًا.
                 </Alert>
               )}
               {lockReason === "future" && (

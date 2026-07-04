@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T15:31:29.307Z
-> Files: 403 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T15:49:04.080Z
+> Files: 406 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/
 
@@ -20,6 +20,7 @@
 
 - `check500.mjs` — Declares BASE (~254 tok)
 - `drive.mjs` — DIR: loginAs, goToReports (~812 tok)
+- `inspect.mjs` — Declares BASE (~324 tok)
 - `mobile.mjs` — Declares DIR (~354 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/9cdca122-7784-410a-bdd8-e96747e16c60/scratchpad/pw/
@@ -494,7 +495,7 @@
 
 ## quran-hifz/src/quran/
 
-- `quran.css` — Styles: 71 rules, 18 vars (~23954 tok)
+- `quran.css` — Styles: 71 rules, 18 vars (~25004 tok)
 - `QuranApp.tsx` — Quran Hifz platform — React entry. (~852 tok)
 
 ## quran-hifz/src/quran/api/
@@ -530,6 +531,7 @@
 - `Alert.tsx` — ICONS — now supports `danger` tone (~165 tok)
 - `AyahBar.tsx` — AyahBar (~40 tok)
 - `Badge.tsx` — Badge (~83 tok)
+- `BentoTile.tsx` — Bento-grid tile: a flatter, lighter-weight alternative to `Card` — small (~313 tok)
 - `Card.tsx` — Card (~181 tok)
 - `ContextPicker.tsx` — Unified shape for "teaching context" — either a Halqa or a SpecialTrack. (~1166 tok)
 - `DaysOfWeekPicker.tsx` — WEEK_DAYS (~481 tok)
@@ -537,10 +539,11 @@
 - `FormSection.tsx` — FormSection (~195 tok)
 - `Gauge.tsx` — Single-value ring gauge (0-100) with a tiered color + badge, used as the (~578 tok)
 - `HalqaRow.tsx` — HalqaRow (~104 tok)
+- `HonorBoard.tsx` — Podium-style top-3 showcase — visually distinct from `Leaderboard`'s (~584 tok)
 - `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
-- `ReportsDashboard.tsx` — Shared reports engine v2 (replaces deleted `ReportsAnalytics.tsx`): evaluation-rubric centerpiece — Gauge hero + رقم four-dimension breakdown cards (حضور/حفظ/تجويد/تلاوة) + cohort trend line + halqa evaluation-comparison table + evaluation-based top/watch leaderboards — plus kept hifz-progress donut, admin KPI scorecard, teacher workload chart, and `StudentReportPanel` deep-dive. Drives both AdminReports & TeacherReports. All numbers Arabic-Indic via toAr/pct (~7253 tok)
+- `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~8279 tok)
 - `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)
 - `Skeleton.tsx` — Skeleton — renders table (~816 tok)
 - `StatsRow.tsx` — StatsRow (~146 tok)
@@ -611,7 +614,7 @@
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — Add `n` calendar days to a bare YYYY-MM-DD string using pure UTC arithmetic. (~8025 tok)
+- `TeacherAttendance.tsx` — Add `n` calendar days to a bare YYYY-MM-DD string using pure UTC arithmetic. (~8437 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1419 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
 - `TeacherGroupHomework.tsx` — STUDENTS (~2926 tok)

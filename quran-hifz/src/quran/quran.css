@@ -4026,109 +4026,297 @@ textarea.form-input {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   EVALUATION DASHBOARD — reports page 2 (gauge hero + rubric breakdown)
-   Distinct visual identity from the section above: a ring gauge for the
-   single headline score, and a 4-card rubric grid instead of another bar
-   chart, so the evaluation data reads at a glance.
+   BENTO DASHBOARD — reports page 2 (evaluation-centric)
+   Deliberately NOT another stack of identical full-width cards: a 4-column
+   grid where tiles vary in span/height (hero 2x2, metric tiles 1x1, trend
+   4x1, honor board / halqa table etc.), a flat `.bento-tile` with a small
+   uppercase eyebrow label instead of `.card`'s bordered header, a big
+   typographic hero number + inline sparkline, and a podium-style honor
+   board for the top-3 instead of another ranked list.
 ════════════════════════════════════════════════════════════════ */
-.eval-hero {
+.bento-grid {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 2fr;
-  gap: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(96px, auto);
+  gap: 14px;
   margin-bottom: 16px;
 }
-.gauge-wrap {
-  position: relative;
+.bento-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.bento-tile.span-2 {
+  grid-column: span 2;
+}
+.bento-tile.span-4 {
+  grid-column: span 4;
+}
+.bento-tile.row-2 {
+  grid-row: span 2;
+}
+.bento-tile-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.bento-tile-head i {
+  font-size: 13px;
+  color: var(--green);
+}
+.bento-tile-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Hero tile: huge headline number + sparkline, not another ring/donut */
+.bento-hero {
+  justify-content: space-between;
+}
+.hero-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.hero-number-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.hero-number {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.hero-number-max {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text3);
+}
+.hero-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  width: fit-content;
+}
+.hero-delta.up {
+  color: var(--green);
+}
+.hero-delta.down {
+  color: #ef4444;
+}
+.hero-spark {
+  margin-top: 10px;
+}
+.hero-meta {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 6px;
+}
+
+/* Metric tiles: rubric dimension breakdown, 4 standalone bento tiles */
+.metric-tile-val {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.metric-tile-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--border);
+  margin-top: 12px;
+  overflow: hidden;
+}
+.metric-tile-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+.metric-tile-delta {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 13px;
+  width: fit-content;
+}
+.metric-tile-delta.up {
+  color: var(--green);
+}
+.metric-tile-delta.down {
+  color: #ef4444;
+}
+
+/* Honor board: podium-style top-3, distinct from Leaderboard's ranked rows */
+.honor-board {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0 4px;
+}
+.honor-slot-empty {
+  flex: 1;
+  max-width: 110px;
+}
+.honor-card {
+  flex: 1;
+  max-width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 14px 8px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--cream);
+}
+.honor-card.rank-1 {
+  border-color: var(--gold);
+  background: var(--gold-pale);
+  padding-top: 18px;
+  transform: translateY(-8px);
+}
+.honor-icon {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.honor-card.rank-1 .honor-icon {
+  color: var(--gold);
+  font-size: 22px;
+}
+.honor-card.rank-2 .honor-icon {
+  color: #64748b;
+}
+.honor-card.rank-3 .honor-icon {
+  color: var(--brown);
+}
+.honor-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--green-pale);
+  color: var(--green);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
-.gauge-center {
-  position: absolute;
-  inset: 0;
+.honor-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.honor-sub {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+.honor-score {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.honor-bar {
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 6px 6px 0 0;
+  background: var(--border);
+}
+.honor-card.rank-1 .honor-bar {
+  background: var(--gold);
+}
+.honor-card.rank-2 .honor-bar {
+  background: #94a3b8;
+}
+.honor-card.rank-3 .honor-bar {
+  background: var(--brown);
+}
+.honor-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  pointer-events: none;
-}
-.gauge-center-num {
-  font-size: 30px;
-  font-weight: 800;
-  line-height: 1;
-}
-.gauge-center-sub {
-  font-size: 11px;
+  gap: 8px;
+  padding: 28px 0;
   color: var(--text3);
+  font-size: 13px;
+}
+.honor-empty i {
+  font-size: 26px;
 }
 
-.rubric-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-.rubric-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px 10px;
-  text-align: center;
-  background: var(--cream);
-}
-.rubric-card-icon {
-  font-size: 20px;
-  color: var(--rubric-color);
-  margin-bottom: 8px;
-  display: block;
-}
-.rubric-card-val {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--text);
-  line-height: 1;
-}
-.rubric-card-label {
-  font-size: 11px;
-  color: var(--text3);
-  margin-top: 5px;
-}
-.rubric-card-bar {
-  height: 5px;
-  border-radius: 3px;
-  background: var(--border);
-  margin-top: 10px;
-  overflow: hidden;
-}
-.rubric-card-fill {
-  height: 100%;
-  background: var(--rubric-color);
-  border-radius: 3px;
-}
-
-.dark .rubric-card {
+.dark .honor-card {
   background: var(--surface);
 }
-.dark .gauge-center-num {
+.dark .honor-card.rank-1 {
+  background: rgba(224, 184, 64, 0.1);
+}
+.dark .honor-avatar {
+  background: #0d2117;
+  color: var(--green);
+}
+.dark .hero-number {
   filter: brightness(1.1);
 }
 
 @media (max-width: 900px) {
-  .eval-hero {
-    grid-template-columns: 1fr;
-  }
-  .rubric-grid {
+  .bento-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .bento-tile.span-4 {
+    grid-column: 1 / -1;
   }
 }
 @media (max-width: 480px) {
-  .rubric-grid {
-    gap: 8px;
+  .bento-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
-  .rubric-card {
-    padding: 10px 6px;
+  .bento-tile.span-2,
+  .bento-tile.span-4 {
+    grid-column: 1 / -1;
   }
-  .rubric-card-val {
-    font-size: 16px;
+  .bento-tile.row-2 {
+    grid-row: auto;
+  }
+  .hero-number {
+    font-size: 38px;
+  }
+  .honor-card {
+    max-width: 96px;
+    padding-inline: 4px;
+  }
+  .honor-card.rank-1 {
+    transform: translateY(-4px);
   }
 }
 
