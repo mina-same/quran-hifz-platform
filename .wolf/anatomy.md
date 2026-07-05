@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T08:21:54.586Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T08:22:33.635Z
 > Files: 407 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/
@@ -580,7 +580,7 @@
 ## quran-hifz/src/quran/pages/
 
 - `LandingPage.tsx` — LOGO_SRC (~4826 tok)
-- `LoginPage.tsx` — schema — renders form (~1400 tok)
+- `LoginPage.tsx` — schema — renders form. No dev-account quick-login buttons (removed for security, 2026-07-05). (~1400 tok)
 
 ## quran-hifz/src/quran/pages/admin/
 
@@ -627,7 +627,7 @@
 - `TeacherPlans.tsx` — surahName — renders form, modal (~11602 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
-- `TeacherSpecialTracks.tsx` — surahName — renders modal (~5978 tok)
+- `TeacherSpecialTracks.tsx` — surahName — renders modal. `LinkPlanModal` lets a teacher pick an existing unlinked plan to attach to a track, or fall back to creating a new one (2026-07-05) (~6300 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2190 tok)
 
 ## quran-hifz/src/quran/router/
