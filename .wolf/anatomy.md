@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T08:22:33.635Z
-> Files: 407 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T08:44:28.219Z
+> Files: 408 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/
 
@@ -41,6 +41,7 @@
 - `shot_parents3.mjs` — Declares OUT (~360 tok)
 - `shot_parents4.mjs` — Declares OUT (~586 tok)
 - `verify2.mjs` — Declares BASE (~359 tok)
+- `verify3.mjs` — Declares BASE (~329 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/c53595ee-8b45-447d-aec7-904c055a8dc1/scratchpad/
 
@@ -624,7 +625,7 @@
 - `TeacherGroupHomework.tsx` — STUDENTS (~2926 tok)
 - `TeacherHalqa.tsx` — TeacherHalqa (~210 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
-- `TeacherPlans.tsx` — surahName — renders form, modal (~11602 tok)
+- `TeacherPlans.tsx` — surahName — renders form, modal (~10492 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
 - `TeacherSpecialTracks.tsx` — surahName — renders modal. `LinkPlanModal` lets a teacher pick an existing unlinked plan to attach to a track, or fall back to creating a new one (2026-07-05) (~6300 tok)

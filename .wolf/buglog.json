@@ -3724,6 +3724,22 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-05T08:22:33.670Z"
+    },
+    {
+      "id": "bug-231",
+      "timestamp": "2026-07-05T08:42:19.614Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 5→3 lines (2 removed) | Also: pointsEnabled: item.pointsEnabled,; pointRules: item.pointRules, | Also: if (form.pointsEnabled && form.pointRules.some((r); setFormError(\"يرجى كتابة وصف لكل قاعدة نقاط، أو حذ",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-07-05T08:42:50.098Z"
     }
   ]
 }

@@ -4,7 +4,7 @@ import { useTopbar } from "../../context/useTopbar";
 import {
   useQuranPlans, useCreateQuranPlan, useUpdateQuranPlan, useDeleteQuranPlan,
   PLAN_PREFILL_TRACK_KEY,
-  type QuranPlan, type PlanType, type PointRule, type RangePoint,
+  type QuranPlan, type PlanType, type RangePoint,
   type PlanHalqa, type PlanSpecialTrack,
 } from "../../api/quran-plans";
 import { useHalqat } from "../../api/halqat";
@@ -60,8 +60,6 @@ type FormFields = {
   days: string[];
   rangeStart: RangePoint;
   rangeEnd: RangePoint;
-  pointsEnabled: boolean;
-  pointRules: PointRule[];
   endType: "activeDays" | "date";
   activeDaysCount: string;
   endDate: string;
@@ -73,8 +71,6 @@ const EMPTY: FormFields = {
   days: [],
   rangeStart: { surahNumber: 1, ayah: 1 },
   rangeEnd:   { surahNumber: 1, ayah: 1 },
-  pointsEnabled: false,
-  pointRules: [],
   endType: "activeDays",
   activeDaysCount: "10",
   endDate: "",
@@ -141,8 +137,6 @@ export function TeacherPlans() {
       days: item.days,
       rangeStart: item.rangeStart,
       rangeEnd:   item.rangeEnd,
-      pointsEnabled: item.pointsEnabled,
-      pointRules: item.pointRules,
       endType: item.endType,
       activeDaysCount: item.activeDaysCount ? String(item.activeDaysCount) : "",
       endDate: item.endDate ? item.endDate.split("T")[0] : "",
@@ -162,8 +156,6 @@ export function TeacherPlans() {
       days: item.days,
       rangeStart: item.rangeStart,
       rangeEnd:   item.rangeEnd,
-      pointsEnabled: item.pointsEnabled,
-      pointRules: item.pointRules,
       endType: item.endType,
       activeDaysCount: item.activeDaysCount ? String(item.activeDaysCount) : "",
       endDate: item.endDate ? item.endDate.split("T")[0] : "",
@@ -184,9 +176,6 @@ export function TeacherPlans() {
       form.rangeStart.surahNumber < form.rangeEnd.surahNumber ||
       (form.rangeStart.surahNumber === form.rangeEnd.surahNumber && form.rangeStart.ayah <= form.rangeEnd.ayah);
     if (!startsBeforeEnd) { setFormError("نقطة البداية يجب أن تسبق نقطة النهاية"); return; }
-    if (form.pointsEnabled && form.pointRules.some((r) => !r.label.trim())) {
-      setFormError("يرجى كتابة وصف لكل قاعدة نقاط، أو حذف القواعد الفارغة"); return;
-    }
 
     setFormError("");
     const body: Record<string, unknown> = {
@@ -198,8 +187,6 @@ export function TeacherPlans() {
       specialTrack: form.targetType === "specialTrack" ? form.specialTrack : undefined,
       days: form.days,
       rangeStart: form.rangeStart, rangeEnd: form.rangeEnd,
-      pointsEnabled: form.pointsEnabled,
-      pointRules: form.pointsEnabled ? form.pointRules.map((r) => ({ ...r, label: r.label.trim() })) : [],
       endType: form.endType,
       activeDaysCount: form.endType === "activeDays" ? Number(form.activeDaysCount) : undefined,
       endDate: form.endType === "date" ? form.endDate : undefined,
@@ -418,14 +405,6 @@ export function TeacherPlans() {
                     );
                   })()}
                 </div>
-              </FormSection>
-
-              {/* نظام النقاط */}
-              <FormSection label="نظام النقاط" icon="ti-star">
-                <BoolToggleRow label="تفعيل نظام النقاط" checked={form.pointsEnabled} onChange={(v) => sf("pointsEnabled", v)} />
-                {form.pointsEnabled && (
-                  <PointRulesEditor rules={form.pointRules} onChange={(rules) => sf("pointRules", rules)} />
-                )}
               </FormSection>
 
               {/* تاريخ الانتهاء */}
@@ -676,20 +655,6 @@ function PlanCard({
           }
         </div>
 
-        {plan.pointsEnabled && plan.pointRules.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
-            {plan.pointRules.map((r, i) => (
-              <span key={i} style={{
-                fontSize: 11, borderRadius: 99, padding: "3px 10px", fontWeight: 600,
-                background: r.kind === "زيادة" ? "var(--green-pale)" : "#fef2f2",
-                color:      r.kind === "زيادة" ? "var(--green)" : "#ef4444",
-              }}>
-                {r.label} {r.kind === "زيادة" ? "+" : "-"}{r.amount}
-              </span>
-            ))}
-          </div>
-        )}
-
         {plan.progress && (
           <div style={{ marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
@@ -760,20 +725,6 @@ function InfoRow({ icon, label, val, span, onClick }: { icon: string; label: str
   );
 }
 
-function BoolToggleRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <label style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", cursor: "pointer" }}>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        style={{ accentColor: "var(--green)", width: 17, height: 17 }}
-      />
-      <span style={{ fontSize: 13, color: "var(--text)" }}>{label}</span>
-    </label>
-  );
-}
-
 function StudentPicker({
   students, selected, onChange,
 }: {
@@ -831,41 +782,3 @@ function StudentPicker({
   );
 }
 
-function PointRulesEditor({ rules, onChange }: { rules: PointRule[]; onChange: (rules: PointRule[]) => void }) {
-  function update(i: number, patch: Partial<PointRule>) {
-    onChange(rules.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
-  }
-  function remove(i: number) {
-    onChange(rules.filter((_, idx) => idx !== i));
-  }
-  function add() {
-    onChange([...rules, { label: "", amount: 1, kind: "خصم" }]);
-  }
-
-  return (
-    <div style={{ marginTop: 10 }}>
-      {rules.map((r, i) => (
-        <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
-          <input
-            className="form-input" style={{ flex: 2 }} placeholder="مثال: خطأ في التجويد"
-            value={r.label} onChange={(e) => update(i, { label: e.target.value })}
-          />
-          <select className="form-input" style={{ flex: 1 }} value={r.kind} onChange={(e) => update(i, { kind: e.target.value as PointRule["kind"] })}>
-            <option value="خصم">خصم</option>
-            <option value="زيادة">زيادة</option>
-          </select>
-          <input
-            className="form-input" style={{ flex: 1 }} type="number" min={1}
-            value={r.amount} onChange={(e) => update(i, { amount: Number(e.target.value) || 1 })}
-          />
-          <button type="button" className="topbar-btn btn-ghost" style={{ padding: "8px 10px", color: "#ef4444" }} onClick={() => remove(i)}>
-            <i className="ti ti-trash" />
-          </button>
-        </div>
-      ))}
-      <button type="button" className="topbar-btn btn-ghost" style={{ padding: "6px 14px", fontSize: 12 }} onClick={add}>
-        <i className="ti ti-plus" /> إضافة قاعدة نقاط
-      </button>
-    </div>
-  );
-}
