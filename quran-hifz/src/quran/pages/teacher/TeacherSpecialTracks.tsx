@@ -3,13 +3,19 @@ import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
+import { Modal } from "../../components/common/Modal";
 import { useSpecialTracks, type SpecialTrack, type EnrolledStudent, type TrackTeacher } from "../../api/special-tracks";
-import { useQuranPlans, PLAN_PREFILL_TRACK_KEY } from "../../api/quran-plans";
+import { useQuranPlans, useUpdateQuranPlan, PLAN_PREFILL_TRACK_KEY, type QuranPlan } from "../../api/quran-plans";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
 import { SURAHS } from "../../data/surahs";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 
-type TrackCardProps = { track: SpecialTrack; onAttendance?: () => void; onConnectPlan?: () => void };
+type TrackCardProps = {
+  track: SpecialTrack;
+  teacherId?: string;
+  onAttendance?: () => void;
+  onCreateNewPlan?: () => void;
+};
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -38,10 +44,81 @@ const STATUS_CFG = {
   ended:    { label: "منتهي", tone: "gray"  as const, bar: "var(--border)",                                     color: "var(--text3)" },
 };
 
+/* ─── modal: pick an already-existing plan (of this teacher's) to link to a track ─── */
+function LinkPlanModal({
+  open, track, teacherId, onClose, onCreateNew,
+}: {
+  open: boolean;
+  track: SpecialTrack;
+  teacherId?: string;
+  onClose: () => void;
+  onCreateNew: () => void;
+}) {
+  const { data: myPlans = [], isLoading } = useQuranPlans({ teacher: teacherId });
+  const updatePlan = useUpdateQuranPlan();
+
+  const linkable = myPlans.filter((p) => p.specialTrack !== track._id && (typeof p.specialTrack !== "object" || p.specialTrack?._id !== track._id));
+
+  function link(plan: QuranPlan) {
+    updatePlan.mutate(
+      { id: plan._id, targetType: "specialTrack", specialTrack: track._id },
+      { onSuccess: onClose },
+    );
+  }
+
+  return (
+    <Modal open={open} onClose={onClose} title={`ربط خطة بـ"${track.title}"`} maxWidth={480}>
+      {isLoading && <p style={{ fontSize: 12, color: "var(--text3)" }}>جارٍ التحميل...</p>}
+
+      {!isLoading && linkable.length === 0 && (
+        <p style={{ margin: "0 0 12px", fontSize: 12, color: "var(--text3)" }}>
+          لا توجد خطط أخرى يمكن ربطها بهذا المسار.
+        </p>
+      )}
+
+      {!isLoading && linkable.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14, maxHeight: 320, overflowY: "auto" }}>
+          {linkable.map((p) => (
+            <div
+              key={p._id}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
+                border: "1px solid var(--border)", borderRadius: 10, padding: "10px 12px",
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{p.name}</div>
+                <div style={{ fontSize: 11, color: "var(--text3)" }}>{p.type}</div>
+              </div>
+              <button
+                className="topbar-btn btn-primary"
+                style={{ fontSize: 11, padding: "5px 12px" }}
+                disabled={updatePlan.isPending}
+                onClick={() => link(p)}
+              >
+                {updatePlan.isPending ? "جارٍ الربط..." : "ربط"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <button
+        className="topbar-btn btn-ghost"
+        style={{ width: "100%", justifyContent: "center", fontSize: 12 }}
+        onClick={onCreateNew}
+      >
+        <i className="ti ti-plus" /> إنشاء خطة جديدة بدلاً من ذلك
+      </button>
+    </Modal>
+  );
+}
+
 /* ─── Track card ─── */
-function TrackCard({ track, onAttendance, onConnectPlan }: TrackCardProps) {
+function TrackCard({ track, teacherId, onAttendance, onCreateNewPlan }: TrackCardProps) {
   const [open, setOpen] = useState(track.status === "active");
   const [planOpen, setPlanOpen] = useState(false);
+  const [linkModalOpen, setLinkModalOpen] = useState(false);
 
   const cfg      = STATUS_CFG[track.status];
   const enrolled = track.enrolledStudents.length;
@@ -174,11 +251,11 @@ function TrackCard({ track, onAttendance, onConnectPlan }: TrackCardProps) {
               )}
             </span>
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              {onConnectPlan && (
+              {onCreateNewPlan && (
                 <button
                   className="topbar-btn btn-ghost"
                   style={{ padding: "2px 9px", fontSize: 10 }}
-                  onClick={(e) => { e.stopPropagation(); onConnectPlan(); }}
+                  onClick={(e) => { e.stopPropagation(); setLinkModalOpen(true); }}
                 >
                   <i className="ti ti-plus" /> {linkedPlan ? "خطة أخرى" : "ربط خطة"}
                 </button>
@@ -304,6 +381,14 @@ function TrackCard({ track, onAttendance, onConnectPlan }: TrackCardProps) {
           </div>
         )}
       </div>
+
+      <LinkPlanModal
+        open={linkModalOpen}
+        track={track}
+        teacherId={teacherId}
+        onClose={() => setLinkModalOpen(false)}
+        onCreateNew={() => { setLinkModalOpen(false); onCreateNewPlan?.(); }}
+      />
     </div>
   );
 }
@@ -312,17 +397,18 @@ function TrackCard({ track, onAttendance, onConnectPlan }: TrackCardProps) {
 export function TeacherSpecialTracks() {
   useTopbar("ti-calendar-event", "مساراتي الاستثنائية");
   const { user, showPage } = usePortal();
+  const teacherId = user?.profileId as string | undefined;
 
   const { data: tracks = [], isLoading } = useSpecialTracks(
     undefined,
-    user?.profileId as string | undefined,
+    teacherId,
   );
 
   const active   = tracks.filter((t) => t.status === "active");
   const upcoming = tracks.filter((t) => t.status === "upcoming");
   const ended    = tracks.filter((t) => t.status === "ended");
 
-  function connectPlan(trackId: string) {
+  function createNewPlan(trackId: string) {
     sessionStorage.setItem(PLAN_PREFILL_TRACK_KEY, trackId);
     showPage("plans");
   }
@@ -348,8 +434,9 @@ export function TeacherSpecialTracks() {
             <TrackCard
               key={t._id}
               track={t}
+              teacherId={teacherId}
               onAttendance={() => takeAttendance(t._id)}
-              onConnectPlan={() => connectPlan(t._id)}
+              onCreateNewPlan={() => createNewPlan(t._id)}
             />
           ))}
         </div>

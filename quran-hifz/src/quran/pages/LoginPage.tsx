@@ -14,20 +14,13 @@ type FormData = z.infer<typeof schema>;
 
 const LOGO_SRC = "/quran/logo.png";
 
-const DEV_ACCOUNTS = [
-  { label: "مدير",     email: "admin@quran-hifz.sa",    password: "admin123",   icon: "ti-shield-check" },
-  { label: "معلم",     email: "nasir@quran-hifz.sa",    password: "teacher123", icon: "ti-chalkboard" },
-  { label: "طالب",     email: "abdullah@quran-hifz.sa", password: "student123", icon: "ti-user-circle" },
-  { label: "ولي أمر", email: "parent@quran-hifz.sa",   password: "parent123",  icon: "ti-users" },
-];
-
 export function LoginPage({ onBack }: { onBack?: () => void }) {
   const { login } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [serverError,  setServerError]  = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } =
+  const { register, handleSubmit, formState: { errors, isSubmitting } } =
     useForm<FormData>({ resolver: zodResolver(schema) });
 
   async function onSubmit(data: FormData) {
@@ -135,24 +128,6 @@ export function LoginPage({ onBack }: { onBack?: () => void }) {
               )}
             </button>
           </form>
-
-          {/* Dev accounts */}
-          <div className="login-dev">
-            <div className="login-dev-label">حسابات تجريبية</div>
-            <div className="login-dev-row">
-              {DEV_ACCOUNTS.map((a) => (
-                <button
-                  key={a.email}
-                  type="button"
-                  className="login-dev-btn"
-                  onClick={() => { setValue("email", a.email); setValue("password", a.password); }}
-                >
-                  <i className={`ti ${a.icon}`} />
-                  {a.label}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>

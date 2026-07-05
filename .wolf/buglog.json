@@ -3626,6 +3626,88 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-04T15:47:07.079Z"
+    },
+    {
+      "id": "bug-225",
+      "timestamp": "2026-07-04T15:56:59.459Z",
+      "error_message": "Wrong condition in logic",
+      "file": "quran-hifz/src/quran/components/common/ReportsDashboard.tsx",
+      "root_cause": "Condition was: if (evaluations.length < 4)",
+      "fix": "Changed to: if (evaluations.length < 8)",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:56:59.459Z"
+    },
+    {
+      "id": "bug-226",
+      "timestamp": "2026-07-04T18:50:00.000Z",
+      "error_message": "Hero trend-delta chip on the new bento ReportsDashboard.tsx showed a nonsensical \"+٥.٧\" swing next to a \"٧.٢/١٠\" average score",
+      "file": "quran-hifz/src/quran/components/common/ReportsDashboard.tsx",
+      "root_cause": "halfSplit (the half-over-half average comparison powering the hero delta chip and the 4 metric-tile arrows) only required evaluations.length >= 4 before computing a 3-vs-3 (or fewer) split. With exactly 6 real evaluation records in the test dataset, a 3-vs-3 split is noisy enough that one low outlier in one half can produce a delta larger than the average itself, which reads as broken/alarming even though the arithmetic was technically correct.",
+      "fix": "Raised the minimum sample requirement from evaluations.length < 4 to < 8, guaranteeing at least 4 samples per half before any delta chip renders. Caught during Playwright verification by extracting .hero-delta/.hero-number textContent via page.evaluate() and sanity-checking the numbers against each other, not just eyeballing the screenshot.",
+      "tags": [
+        "fixed",
+        "reports",
+        "evaluations",
+        "data-quality",
+        "small-sample-noise"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T18:50:00.000Z"
+    },
+    {
+      "id": "bug-227",
+      "timestamp": "2026-07-05T08:09:25.834Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/LoginPage.tsx",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 17→10 lines (7 removed) | Also: {/* Dev accounts */}; <div className=\"login-dev\">",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-05T08:09:32.334Z"
+    },
+    {
+      "id": "bug-228",
+      "timestamp": "2026-07-05T08:10:27.170Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T08:10:27.170Z"
+    },
+    {
+      "id": "bug-229",
+      "timestamp": "2026-07-05T08:10:49.135Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 25→34 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T08:10:49.135Z"
     }
   ]
 }

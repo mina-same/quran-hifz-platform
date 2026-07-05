@@ -189,7 +189,10 @@ export function ReportsDashboard({
   /* ── half-over-half delta (recent sessions vs earlier ones) per dimension + total,
      used for the hero trend chip and the small up/down arrows on the metric tiles ── */
   const halfSplit = useMemo(() => {
-    if (evaluations.length < 4) return null;
+    // Require enough samples per half (≥4 each) that a delta reflects a real
+    // shift rather than noise from 2-3 sparse records — a 3-vs-3 split on
+    // thin data can swing by several points and read as a false alarm.
+    if (evaluations.length < 8) return null;
     const sorted = [...evaluations].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const half = Math.floor(sorted.length / 2);
     const first = sorted.slice(0, half);

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-04T15:49:04.080Z
-> Files: 406 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T08:21:54.586Z
+> Files: 407 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/
 
@@ -11,6 +11,10 @@
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/35c84b0d-5c81-4886-a031-7bbef61ca6d6/scratchpad/pw/
 
 - `driver.mjs` — Declares browser (~346 tok)
+
+## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/4b69bb93-f7e3-4e7f-a100-cca1ef6d57da/scratchpad/
+
+- `verify.mjs` — Declares BASE (~427 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/5c97896d-af07-41e8-9ef0-23679e1515df/scratchpad/
 
@@ -36,6 +40,7 @@
 - `shot_parents2.mjs` — Declares OUT (~290 tok)
 - `shot_parents3.mjs` — Declares OUT (~360 tok)
 - `shot_parents4.mjs` — Declares OUT (~586 tok)
+- `verify2.mjs` — Declares BASE (~359 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/c53595ee-8b45-447d-aec7-904c055a8dc1/scratchpad/
 
@@ -537,13 +542,12 @@
 - `DaysOfWeekPicker.tsx` — WEEK_DAYS (~481 tok)
 - `Donut.tsx` — Donut — recharts PieChart donut + center label + legend (~330 tok)
 - `FormSection.tsx` — FormSection (~195 tok)
-- `Gauge.tsx` — Single-value ring gauge (0-100) with a tiered color + badge, used as the (~578 tok)
 - `HalqaRow.tsx` — HalqaRow (~104 tok)
-- `HonorBoard.tsx` — Podium-style top-3 showcase — visually distinct from `Leaderboard`'s (~584 tok)
+- `HonorBoard.tsx` — Podium-style top-3 showcase (crown/medal icons, RTL-correct rank order via array index not DOM order) — visually distinct from `Leaderboard`'s ranked-row list. Degrades gracefully with <3 rows (~584 tok)
 - `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
-- `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~8279 tok)
+- `ReportsDashboard.tsx` — Reports engine v3 (bento-grid redesign, replaces the v2 gauge/rubric-card layout — `Gauge.tsx` deleted, unused after this pass): `.bento-grid` of variable-span `BentoTile`s — hero tile (huge headline avg-eval number + inline AreaChart sparkline + half-over-half trend delta chip, min 8 samples required to show a delta), 4 standalone rubric-dimension tiles (حضور/حفظ/تجويد/تلاوة), full-width gradient trend AreaChart, `HonorBoard` podium for top-3 + `Leaderboard` watchlist, halqa evaluation-comparison table, hifz-progress donut, admin KPI/teacher-workload tiles — plus `StudentReportPanel` deep-dive below the grid (unchanged). Drives both AdminReports & TeacherReports (~8344 tok)
 - `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)
 - `Skeleton.tsx` — Skeleton — renders table (~816 tok)
 - `StatsRow.tsx` — StatsRow (~146 tok)
@@ -576,7 +580,7 @@
 ## quran-hifz/src/quran/pages/
 
 - `LandingPage.tsx` — LOGO_SRC (~4826 tok)
-- `LoginPage.tsx` — schema — renders form (~1710 tok)
+- `LoginPage.tsx` — schema — renders form (~1400 tok)
 
 ## quran-hifz/src/quran/pages/admin/
 
@@ -623,7 +627,7 @@
 - `TeacherPlans.tsx` — surahName — renders form, modal (~11602 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
-- `TeacherSpecialTracks.tsx` — surahName (~5113 tok)
+- `TeacherSpecialTracks.tsx` — surahName — renders modal (~5978 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2190 tok)
 
 ## quran-hifz/src/quran/router/
