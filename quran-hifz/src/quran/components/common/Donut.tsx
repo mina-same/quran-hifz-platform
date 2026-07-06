@@ -33,7 +33,7 @@ export function Donut({
 
   return (
     <div className="donut-block">
-      <div className="donut-wrap" style={{ position: "relative", height: size, flexShrink: 0 }}>
+      <div className="donut-wrap" style={{ position: "relative", height: size, width: size, flexShrink: 0 }}>
         <ResponsiveContainer width="100%" height={size}>
           <PieChart>
             <Pie

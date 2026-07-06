@@ -217,12 +217,20 @@ const scheduleEntryUpdateSchema = z.object({
   ayahStart:  z.number().int().min(1),
   surahEnd:   z.number().int().min(1).max(114),
   ayahEnd:    z.number().int().min(1),
+  // Optional manual overrides — when omitted, derived from the ayah range as
+  // before; when given, the teacher's own page/juz' number wins outright
+  // (e.g. to correct a mushaf edition mismatch), no cross-check against the
+  // ayah range.
+  pageStart: z.number().int().min(1).max(604).optional(),
+  pageEnd:   z.number().int().min(1).max(604).optional(),
+  juz:       z.number().int().min(1).max(30).optional(),
 });
 
 /** Hand-edits one day's assigned range within an already-persisted schedule
- * (see generateSchedule) — page range and juz' are always recomputed
- * server-side from the new ayah range rather than trusted from the client,
- * same "never trust client-derived numbers" rule as evaluation scoring. */
+ * (see generateSchedule). Page range and juz' default to being recomputed
+ * server-side from the new ayah range, but the teacher may override either
+ * with their own number (e.g. to correct a mushaf edition mismatch) via the
+ * optional `pageStart`/`pageEnd`/`juz` fields. */
 export async function updateScheduleEntry(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const occurrenceIndex = Number(req.params.occurrenceIndex);
@@ -249,6 +257,10 @@ export async function updateScheduleEntry(req: Request, res: Response, next: Nex
     const entry = plan.schedule.find((s) => s.occurrenceIndex === occurrenceIndex);
     if (!entry) throw new AppError('لم يتم العثور على هذا اليوم — يجب حفظ توزيع الأيام أولاً', 404);
 
+    if (data.pageStart != null && data.pageEnd != null && data.pageStart > data.pageEnd) {
+      throw new AppError('صفحة البداية يجب أن تسبق صفحة النهاية', 400);
+    }
+
     const startFlat = toFlatIndex({ surahNumber: data.surahStart, ayah: data.ayahStart });
     const endFlat = toFlatIndex({ surahNumber: data.surahEnd, ayah: data.ayahEnd });
 
@@ -256,9 +268,9 @@ export async function updateScheduleEntry(req: Request, res: Response, next: Nex
     entry.ayahStart = data.ayahStart;
     entry.surahEnd = data.surahEnd;
     entry.ayahEnd = data.ayahEnd;
-    entry.pageStart = pageOfFlatIndex(startFlat);
-    entry.pageEnd = pageOfFlatIndex(endFlat);
-    entry.juz = juzOfFlatIndex(startFlat);
+    entry.pageStart = data.pageStart ?? pageOfFlatIndex(startFlat);
+    entry.pageEnd = data.pageEnd ?? pageOfFlatIndex(endFlat);
+    entry.juz = data.juz ?? juzOfFlatIndex(startFlat);
 
     await plan.save();
 

@@ -14,7 +14,13 @@
       "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('id:',j.data._id\\);console.log\\('scheduleIsPersisted:',j.data.scheduleIsPersisted\\);}\\)\")",
       "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('scheduleIsPersisted:',j.data.scheduleIsPersisted\\);console.log\\('entries:',j.data.schedule.length\\);}\\)\")",
       "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{console.log\\(JSON.parse\\(d\\).data._id\\);}\\)\")",
-      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('success:',j.success\\);}\\)\")"
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('success:',j.success\\);}\\)\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080 --max-time 3)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(npx playwright *)",
+      "Bash(node shot.mjs)",
+      "Bash(node shot2.mjs)"
     ]
   },
   "hooks": {

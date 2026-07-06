@@ -110,13 +110,15 @@ export function useGenerateSchedule() {
 
 /** Hand-edits one day's ayah range within an already-persisted schedule (the
  * server 404s if the schedule hasn't been generated yet for this plan). Page
- * range and juz' are recomputed server-side from the new range. */
+ * range and juz' default to being recomputed server-side from the new ayah
+ * range, but pass `pageStart`/`pageEnd`/`juz` to override them directly. */
 export function useUpdateScheduleEntry() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, occurrenceIndex, ...body }: {
       id: string; occurrenceIndex: number;
       surahStart: number; ayahStart: number; surahEnd: number; ayahEnd: number;
+      pageStart?: number; pageEnd?: number; juz?: number;
     }) => put<SingleResponse>(`/quran-plans/${id}/schedule/${occurrenceIndex}`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["quran-plans"] }),
   });

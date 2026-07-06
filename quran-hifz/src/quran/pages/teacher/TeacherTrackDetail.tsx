@@ -42,6 +42,32 @@ function pageLabel(point: { surahNumber: number; ayah: number }, edge: "start" |
   return isPartial ? toAr(value.toFixed(1)) : toAr(value);
 }
 
+const compactInputStyle = { fontSize: 12, padding: "6px 8px" };
+
+/** Compact surah+ayah picker for the schedule table's inline row edit — no
+ * built-in label (the table column header already says "من"/"إلى"), just the
+ * two selects side by side, sized to sit comfortably inside a table cell. */
+function CompactSurahAyah({ value, onChange }: { value: RangePoint; onChange: (v: RangePoint) => void }) {
+  const surah = SURAHS.find((s) => s.number === value.surahNumber) ?? SURAHS[0];
+  function setSurah(surahNumber: number) {
+    const s = SURAHS.find((x) => x.number === surahNumber) ?? SURAHS[0];
+    onChange({ surahNumber, ayah: Math.min(value.ayah, s.ayahCount) });
+  }
+  function setAyah(ayah: number) {
+    onChange({ ...value, ayah: Math.max(1, Math.min(ayah || 1, surah.ayahCount)) });
+  }
+  return (
+    <div style={{ display: "flex", gap: 5 }}>
+      <select className="form-input" style={{ ...compactInputStyle, flex: "1 1 auto", minWidth: 90 }} value={value.surahNumber} onChange={(e) => setSurah(Number(e.target.value))}>
+        {SURAHS.map((s) => <option key={s.number} value={s.number}>{s.number}. {s.name}</option>)}
+      </select>
+      <select className="form-input" style={{ ...compactInputStyle, width: 62, flexShrink: 0 }} value={value.ayah} onChange={(e) => setAyah(Number(e.target.value))}>
+        {Array.from({ length: surah.ayahCount }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}</option>)}
+      </select>
+    </div>
+  );
+}
+
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
 }
@@ -402,6 +428,9 @@ export function TeacherTrackDetail() {
   const [editingDay, setEditingDay] = useState<ScheduleEntry | null>(null);
   const [dayRangeStart, setDayRangeStart] = useState<RangePoint>({ surahNumber: 1, ayah: 1 });
   const [dayRangeEnd, setDayRangeEnd] = useState<RangePoint>({ surahNumber: 1, ayah: 1 });
+  const [dayPageStart, setDayPageStart] = useState(1);
+  const [dayPageEnd, setDayPageEnd] = useState(1);
+  const [dayJuz, setDayJuz] = useState(1);
   const [dayError, setDayError] = useState("");
 
   // True while the day-edit panel is open and its fields differ from the day
@@ -411,7 +440,8 @@ export function TeacherTrackDetail() {
     if (!editingDay) return false;
     return (
       dayRangeStart.surahNumber !== editingDay.surahStart || dayRangeStart.ayah !== editingDay.ayahStart ||
-      dayRangeEnd.surahNumber !== editingDay.surahEnd || dayRangeEnd.ayah !== editingDay.ayahEnd
+      dayRangeEnd.surahNumber !== editingDay.surahEnd || dayRangeEnd.ayah !== editingDay.ayahEnd ||
+      dayPageStart !== editingDay.pageStart || dayPageEnd !== editingDay.pageEnd || dayJuz !== editingDay.juz
     );
   }
   /** Asks for confirmation before discarding an in-progress, unsaved day edit.
@@ -441,6 +471,9 @@ export function TeacherTrackDetail() {
     setEditingDay(entry);
     setDayRangeStart({ surahNumber: entry.surahStart, ayah: entry.ayahStart });
     setDayRangeEnd({ surahNumber: entry.surahEnd, ayah: entry.ayahEnd });
+    setDayPageStart(entry.pageStart);
+    setDayPageEnd(entry.pageEnd);
+    setDayJuz(entry.juz);
     setDayError("");
   }
 
@@ -456,6 +489,7 @@ export function TeacherTrackDetail() {
       dayRangeStart.surahNumber < dayRangeEnd.surahNumber ||
       (dayRangeStart.surahNumber === dayRangeEnd.surahNumber && dayRangeStart.ayah <= dayRangeEnd.ayah);
     if (!startsBeforeEnd) { setDayError("نقطة البداية يجب أن تسبق نقطة النهاية"); return; }
+    if (dayPageStart > dayPageEnd) { setDayError("صفحة البداية يجب أن تسبق صفحة النهاية"); return; }
     setDayError("");
     try {
       await updateScheduleEntry.mutateAsync({
@@ -463,6 +497,7 @@ export function TeacherTrackDetail() {
         occurrenceIndex: editingDay.occurrenceIndex,
         surahStart: dayRangeStart.surahNumber, ayahStart: dayRangeStart.ayah,
         surahEnd: dayRangeEnd.surahNumber, ayahEnd: dayRangeEnd.ayah,
+        pageStart: dayPageStart, pageEnd: dayPageEnd, juz: dayJuz,
       });
       setEditingDay(null);
     } catch (e) {
@@ -1033,30 +1068,49 @@ export function TeacherTrackDetail() {
                           );
                         }
                         return (
-                          <tr key={s.occurrenceIndex}>
+                          <tr key={s.occurrenceIndex} style={{ background: "var(--green-pale)" }}>
                             <td>{toAr(s.occurrenceIndex)}</td>
                             <td>{fmtDayLabel(toDateOnly(s.date))}</td>
-                            <td><Badge tone="green">جزء {toAr(s.juz)}</Badge></td>
-                            <td style={{ minWidth: 220 }}>
-                              <SurahPointFields label="من" value={dayRangeStart} onChange={setDayRangeStart} />
+                            <td>
+                              <input
+                                type="number" min={1} max={30} className="form-input"
+                                style={{ ...compactInputStyle, width: 52 }}
+                                value={dayJuz}
+                                onChange={(e) => setDayJuz(Math.max(1, Math.min(30, Number(e.target.value) || 1)))}
+                              />
                             </td>
-                            <td style={{ minWidth: 220 }}>
-                              <SurahPointFields label="إلى" value={dayRangeEnd} onChange={setDayRangeEnd} />
+                            <td style={{ minWidth: 170 }}>
+                              <CompactSurahAyah value={dayRangeStart} onChange={setDayRangeStart} />
+                            </td>
+                            <td style={{ minWidth: 170 }}>
+                              <CompactSurahAyah value={dayRangeEnd} onChange={setDayRangeEnd} />
                             </td>
                             <td>
-                              {pageLabel(dayRangeStart, "start")}
-                              {" - "}
-                              {pageLabel(dayRangeEnd, "end")}
+                              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                <input
+                                  type="number" min={1} max={604} className="form-input"
+                                  style={{ ...compactInputStyle, width: 56 }}
+                                  value={dayPageStart}
+                                  onChange={(e) => setDayPageStart(Math.max(1, Math.min(604, Number(e.target.value) || 1)))}
+                                />
+                                <span style={{ color: "var(--text3)" }}>-</span>
+                                <input
+                                  type="number" min={1} max={604} className="form-input"
+                                  style={{ ...compactInputStyle, width: 56 }}
+                                  value={dayPageEnd}
+                                  onChange={(e) => setDayPageEnd(Math.max(1, Math.min(604, Number(e.target.value) || 1)))}
+                                />
+                              </div>
                             </td>
                             <td>
                               <div style={{ display: "flex", gap: 6 }}>
-                                <button className="topbar-btn btn-primary" style={{ padding: "4px 9px", fontSize: 11 }} onClick={saveEditDay} disabled={updateScheduleEntry.isPending}>
+                                <button className="topbar-btn btn-primary" style={{ padding: "6px 10px", fontSize: 11 }} onClick={saveEditDay} disabled={updateScheduleEntry.isPending} title="حفظ">
                                   {updateScheduleEntry.isPending
                                     ? <i className="ti ti-loader-2" style={{ animation: "spin 1s linear infinite" }} />
                                     : <i className="ti ti-check" />
                                   }
                                 </button>
-                                <button className="topbar-btn btn-ghost" style={{ padding: "4px 9px", fontSize: 11 }} onClick={() => { if (guardDiscardDayEdit()) setEditingDay(null); }}>
+                                <button className="topbar-btn btn-ghost" style={{ padding: "6px 10px", fontSize: 11 }} onClick={() => { if (guardDiscardDayEdit()) setEditingDay(null); }} title="إلغاء">
                                   <i className="ti ti-x" />
                                 </button>
                               </div>
