@@ -51,6 +51,9 @@ export type QuranPlan = {
   juzProgress: JuzProgress | null;
   pageRange: PageRange;
   schedule: ScheduleEntry[];
+  /** Whether `schedule` came from the persisted `schedule` field (frozen via
+   * `useGenerateSchedule`) rather than being recomputed live on this fetch. */
+  scheduleIsPersisted: boolean;
 };
 
 type ListResponse   = { success: boolean; count: number; data: QuranPlan[] };
@@ -90,6 +93,31 @@ export function useUpdateQuranPlan() {
   return useMutation({
     mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) =>
       put<SingleResponse>(`/quran-plans/${id}`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["quran-plans"] }),
+  });
+}
+
+/** Freezes the plan's live-computed schedule into the DB. After this,
+ * `schedule` comes from the persisted record instead of being recomputed on
+ * every fetch, so a hand-edited day (see `useUpdateScheduleEntry`) sticks. */
+export function useGenerateSchedule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => post<SingleResponse>(`/quran-plans/${id}/schedule/generate`, {}),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["quran-plans"] }),
+  });
+}
+
+/** Hand-edits one day's ayah range within an already-persisted schedule (the
+ * server 404s if the schedule hasn't been generated yet for this plan). Page
+ * range and juz' are recomputed server-side from the new range. */
+export function useUpdateScheduleEntry() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, occurrenceIndex, ...body }: {
+      id: string; occurrenceIndex: number;
+      surahStart: number; ayahStart: number; surahEnd: number; ayahEnd: number;
+    }) => put<SingleResponse>(`/quran-plans/${id}/schedule/${occurrenceIndex}`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["quran-plans"] }),
   });
 }

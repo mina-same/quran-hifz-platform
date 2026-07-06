@@ -589,7 +589,7 @@ function PlanCard({
               <i className={`ti ${typeCfg.icon}`} />
             </div>
             <div style={{ minWidth: 0 }}>
-              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{plan.name}</h3>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "var(--text)", whiteSpace: "normal", wordBreak: "break-word" }}>{plan.name}</h3>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
                 <Badge tone={plan.status === "نشطة" ? "green" : plan.status === "متوقفة" ? "gold" : "gray"}>{plan.status}</Badge>
                 <span style={{

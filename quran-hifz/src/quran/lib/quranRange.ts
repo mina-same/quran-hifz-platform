@@ -77,3 +77,28 @@ export function pageRangeOfAyahRange(start: RangePoint, end: RangePoint): PageRa
   const pageEnd = pageOfFlatIndex(toFlatIndex(end));
   return { pageStart, pageEnd, pageCount: pageEnd - pageStart + 1 };
 }
+
+function firstFlatOfPage(page: number): number {
+  return PAGE_STARTS_FLAT[page - 1];
+}
+function lastFlatOfPage(page: number): number {
+  return page < PAGE_STARTS_FLAT.length ? PAGE_STARTS_FLAT[page] - 1 : TOTAL_AYAHS - 1;
+}
+
+/** Fractional page position for a schedule day's "من"/"إلى" display. An ayah that
+ * lands exactly on its page's first ayah (as a range start) or last ayah (as a
+ * range end) is a "clean" page boundary — shown as the plain page number. Any
+ * other ayah is mid-page — shown as `page + (position within page / page length)`
+ * rounded to one decimal, e.g. a day ending 70% through page 2 shows as `2.7`, so
+ * a partial-page day reads differently from a day that completes the page. */
+export function fractionalPage(point: RangePoint, edge: "start" | "end"): { value: number; isPartial: boolean } {
+  const flat = toFlatIndex(point);
+  const page = pageOfFlatIndex(flat);
+  const first = firstFlatOfPage(page);
+  const last = lastFlatOfPage(page);
+  const pageLen = last - first + 1;
+  const posInPage = flat - first + 1;
+  const isCleanBoundary = edge === "start" ? posInPage === 1 : posInPage === pageLen;
+  if (isCleanBoundary) return { value: page, isPartial: false };
+  return { value: page + Math.round((posInPage / pageLen) * 10) / 10, isPartial: true };
+}

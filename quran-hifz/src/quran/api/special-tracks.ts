@@ -1,6 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { get, post, put, del } from "../../lib/api";
 
+/** sessionStorage key used to hand off "open this track's detail page" from the
+ * Special Tracks list to TeacherTrackDetail, which reads it on mount to know
+ * which track to show (the hash-based router has no room for per-page params). */
+export const TRACK_DETAIL_ID_KEY = "qh_track_detail_id";
+
 export type EnrolledStudent = { _id: string; name: string };
 export type TrackTeacher    = { _id: string; name: string };
 

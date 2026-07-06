@@ -1,4 +1,22 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"attendance.controller.ts\\\\` — \\\\|evaluation.controller.ts\\\\` — \\\\|student.controller.ts\\\\` — \\\\|Attendance.model.ts\\\\` — \\\\|Evaluation.model.ts\\\\` — \\\\|context.ts\\\\` — \" \"/Users/xontel/Downloads/mina work/quran-hifz-platform/.wolf/anatomy.md\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5001/api)",
+      "Bash(mkdir -p \"/private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/acf85922-ed88-4311-85f5-cdc043cf61d7/scratchpad\")",
+      "Bash(node -e \"require\\('playwright'\\); console.log\\('ok'\\)\")",
+      "Bash(curl -s http://localhost:5001/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"teacher@test.com\",\"password\":\"123456\"}')",
+      "Bash(curl -s http://localhost:5001/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"nasir@quran-hifz.sa\",\"password\":\"teacher123\"}')",
+      "Bash(grep -n \"function openEdit\\\\|setFormError\\(\\\\\"\\\\\"\\); setModal\\({ mode: \\\\\"form\\\\\", item }\\);\" \"/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx\")",
+      "Bash(node -e ' *)",
+      "Bash(grep -n \"useUpdateQuranPlan,\\\\|^import {\" \"/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5001/api/quran-plans -H \"Authorization: Bearer x\")",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('id:',j.data._id\\);console.log\\('scheduleIsPersisted:',j.data.scheduleIsPersisted\\);}\\)\")",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('scheduleIsPersisted:',j.data.scheduleIsPersisted\\);console.log\\('entries:',j.data.schedule.length\\);}\\)\")",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{console.log\\(JSON.parse\\(d\\).data._id\\);}\\)\")",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('success:',j.success\\);}\\)\")"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-05T08:44:28.219Z
-> Files: 408 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-06T14:16:44.810Z
+> Files: 411 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/
 
@@ -30,6 +30,10 @@
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/9cdca122-7784-410a-bdd8-e96747e16c60/scratchpad/pw/
 
 - `driver.mjs` — BASE: login, openMobileNav, desktopNav, hasOverflow (~1301 tok)
+
+## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/acf85922-ed88-4311-85f5-cdc043cf61d7/scratchpad/
+
+- `driver.mjs` — Declares BASE (~816 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/bbd609da-d480-4381-aa1d-3b8d4fbbf3f3/scratchpad/
 
@@ -318,9 +322,9 @@
 ## quran-hifz-server/src/controllers/
 
 - `admin.controller.ts` — Zod schemas: updateParentSchema, createParentSchema (~1450 tok)
-- `attendance.controller.ts` — Upserts one Attendance doc per {student, date} and recalculates each (~1624 tok)
+- `attendance.controller.ts` — Upserts one Attendance doc per {student, date} and recalculates each (~1736 tok)
 - `auth.controller.ts` — Zod schemas: loginSchema (~481 tok)
-- `evaluation.controller.ts` — Fixed-weight evaluation rubric: حضور 3 + حفظ 4 + تجويد 2 + تلاوة 1 = 10. (~1456 tok)
+- `evaluation.controller.ts` — Fixed-weight evaluation rubric: حضور 3 + حفظ 4 + تجويد 2 + تلاوة 1 = 10. (~1524 tok)
 - `group-homework.controller.ts` — Zod schemas: groupHomeworkSchema (~495 tok)
 - `halqa.controller.ts` — Zod schemas: halqaSchema (~878 tok)
 - `hifz.controller.ts` — Zod schemas: entrySchema (~739 tok)
@@ -330,10 +334,10 @@
 - `masjid.controller.ts` — Zod schemas: masjidSchema (~698 tok)
 - `message.controller.ts` — Zod schemas: messageSchema (~526 tok)
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
-- `quran-plan.controller.ts` — Zod schemas: pointRuleSchema, rangePointSchema, quranPlanSchema (~2036 tok)
+- `quran-plan.controller.ts` — Freezes the plan's live-computed day-by-day schedule into `plan.schedule` (~3329 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
-- `student.controller.ts` — Zod schemas: studentSchema (~1517 tok)
+- `student.controller.ts` — Zod schemas: studentSchema (~1756 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1398 tok)
 
 ## quran-hifz-server/src/data/
@@ -354,8 +358,8 @@
 
 ## quran-hifz-server/src/models/
 
-- `Attendance.model.ts` — Exports IAttendance, Attendance (~264 tok)
-- `Evaluation.model.ts` — Exports IEvaluationScores, IEvaluation, Evaluation (~500 tok)
+- `Attendance.model.ts` — Exports IAttendance, Attendance (~378 tok)
+- `Evaluation.model.ts` — Exports IEvaluationScores, IEvaluation, Evaluation (~541 tok)
 - `GroupHomework.model.ts` — Exports IGroupHomework, GroupHomework (~242 tok)
 - `Halqa.model.ts` — Exports IHalqa, Halqa (~336 tok)
 - `HifzEntry.model.ts` — Exports IHifzEntry, HifzEntry (~267 tok)
@@ -366,7 +370,7 @@
 - `Masjid.model.ts` — Exports IMasjid, Masjid (~125 tok)
 - `Message.model.ts` — Exports IMessage, Message (~334 tok)
 - `ParentStudent.model.ts` — Exports IParentStudent, ParentStudent (~172 tok)
-- `QuranPlan.model.ts` — Exports PlanType, IPointRule, IRangePoint, IQuranPlan, QuranPlan (~835 tok)
+- `QuranPlan.model.ts` — Exports PlanType, IPointRule, IRangePoint, IScheduleEntry + 2 more (~1198 tok)
 - `SpecialTrack.model.ts` — Exports ISpecialTrack, SpecialTrack (~429 tok)
 - `Student.model.ts` — Exports IStudent, Student (~498 tok)
 - `Teacher.model.ts` — Exports ITeacher, Teacher (~289 tok)
@@ -387,7 +391,7 @@
 - `masjid.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~161 tok)
 - `message.routes.ts` — API routes: GET, POST, PATCH (3 endpoints) (~105 tok)
 - `parent.routes.ts` — API routes: GET (6 endpoints) (~239 tok)
-- `quran-plan.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~160 tok)
+- `quran-plan.routes.ts` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~219 tok)
 - `special-track.routes.ts` — API routes: GET, POST, PUT, DELETE (6 endpoints) (~210 tok)
 - `stats.routes.ts` — API routes: GET (1 endpoints) (~79 tok)
 - `student.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~173 tok)
@@ -401,6 +405,10 @@
 ## quran-hifz-server/src/types/
 
 - `express.d.ts` — Declares Request (~62 tok)
+
+## quran-hifz-server/src/validators/
+
+- `context.ts` — API routes: GET (3 endpoints) (~272 tok)
 
 ## quran-hifz/
 
@@ -507,8 +515,8 @@
 ## quran-hifz/src/quran/api/
 
 - `admin-parents.ts` — Exports ParentUser, useAdminParents, useCreateParent, useLinkChild + 4 more (~787 tok)
-- `attendance.ts` — sessionStorage key used to hand off "take attendance for this special track" from (~747 tok)
-- `evaluations.ts` — Pass `undefined` to skip fetching (e.g. before a context is selected); pass an (~709 tok)
+- `attendance.ts` — ATTENDANCE_PREFILL_TRACK_KEY (bare track-id sessionStorage handoff), AttendanceRecord/Filters, useAttendance, useRecordAttendance, useBulkAttendance. halqa/specialTrack only, no `plan` field (~699 tok)
+- `evaluations.ts` — EvaluationRecord/Filters, useEvaluations (pass `undefined` to skip fetching), useBulkEvaluate. halqa/specialTrack only, no `plan` field (~709 tok)
 - `group-homework.ts` — Exports GroupHomework, useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework (~359 tok)
 - `halqat.ts` — Exports Halqa, HalqaFilters, useHalqat, useHalqa + 3 more (~589 tok)
 - `hifz.ts` — Exports HifzEntry, useHifz, useUpsertHifz, useDeleteHifz (~388 tok)
@@ -518,10 +526,10 @@
 - `masajid.ts` — Exports Masjid, useMasajid, useMasjid, useCreateMasjid + 2 more (~461 tok)
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
-- `quran-plans.ts` — sessionStorage key used to hand off "create a plan for this track" from the (~1142 tok)
-- `special-tracks.ts` — Exports EnrolledStudent, TrackTeacher, SpecialTrack, useSpecialTracks + 5 more (~805 tok)
+- `quran-plans.ts` — sessionStorage key used to hand off "create a plan for this track" from the (~1530 tok)
+- `special-tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~891 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~166 tok)
-- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~783 tok)
+- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~803 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~504 tok)
 
 ## quran-hifz/src/quran/components/
@@ -539,7 +547,7 @@
 - `Badge.tsx` — Badge (~83 tok)
 - `BentoTile.tsx` — Bento-grid tile: a flatter, lighter-weight alternative to `Card` — small (~313 tok)
 - `Card.tsx` — Card (~181 tok)
-- `ContextPicker.tsx` — Unified shape for "teaching context" — either a Halqa or a SpecialTrack. (~1166 tok)
+- `ContextPicker.tsx` — Unified shape for "teaching context" — a Halqa or a SpecialTrack only (~1166 tok)
 - `DaysOfWeekPicker.tsx` — WEEK_DAYS (~481 tok)
 - `Donut.tsx` — Donut — recharts PieChart donut + center label + legend (~330 tok)
 - `FormSection.tsx` — FormSection (~195 tok)
@@ -576,7 +584,7 @@
 ## quran-hifz/src/quran/lib/
 
 - `evaluationRubric.ts` — Exports MAX_SCORES, TOTAL_MAX (~34 tok)
-- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~780 tok)
+- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~1149 tok)
 
 ## quran-hifz/src/quran/pages/
 
@@ -619,21 +627,22 @@
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — Add `n` calendar days to a bare YYYY-MM-DD string using pure UTC arithmetic. (~8437 tok)
+- `TeacherAttendance.tsx` — Original halqa/specialTrack-only context picker + day-slider attendance/eval page (~8437 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1419 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
 - `TeacherGroupHomework.tsx` — STUDENTS (~2926 tok)
 - `TeacherHalqa.tsx` — TeacherHalqa (~210 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
-- `TeacherPlans.tsx` — surahName — renders form, modal (~10492 tok)
+- `TeacherPlans.tsx` — surahName — renders form, modal (~10486 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
-- `TeacherSpecialTracks.tsx` — surahName — renders modal. `LinkPlanModal` lets a teacher pick an existing unlinked plan to attach to a track, or fall back to creating a new one (2026-07-05) (~6300 tok)
+- `TeacherSpecialTracks.tsx` — Simple click-to-open track summary cards (status strip, badges, time/days, capacity bar, today's-target teaser) — click navigates to TeacherTrackDetail (~2681 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2190 tok)
+- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~15850 tok)
 
 ## quran-hifz/src/quran/router/
 
-- `pageRegistry.ts` — Exports PAGE_REGISTRY (~1147 tok)
+- `pageRegistry.ts` — Exports PAGE_REGISTRY (~1180 tok)
 
 ## quran-hifz/src/routes/
 

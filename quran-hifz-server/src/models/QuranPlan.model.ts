@@ -13,6 +13,18 @@ export interface IRangePoint {
   ayah: number;
 }
 
+export interface IScheduleEntry {
+  occurrenceIndex: number;
+  date: Date;
+  surahStart: number;
+  ayahStart: number;
+  surahEnd: number;
+  ayahEnd: number;
+  pageStart: number;
+  pageEnd: number;
+  juz: number;
+}
+
 export interface IQuranPlan extends Document {
   name: string;
   type: PlanType;
@@ -38,6 +50,14 @@ export interface IQuranPlan extends Document {
   endDate?: Date;
 
   status: 'نشطة' | 'متوقفة' | 'منتهية';
+
+  // Persisted day-by-day breakdown — normally computed live from the fields
+  // above (see quranRange.ts's computeScheduleBreakdown), so this starts empty.
+  // The plan's own teacher can freeze the live computation into this array
+  // (POST /quran-plans/:id/schedule/generate) once they want to hand-edit
+  // individual days without those edits being wiped by every recompute.
+  schedule: IScheduleEntry[];
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,6 +75,21 @@ const rangePointSchema = new Schema<IRangePoint>(
   {
     surahNumber: { type: Number, required: true, min: 1, max: 114 },
     ayah:        { type: Number, required: true, min: 1 },
+  },
+  { _id: false },
+);
+
+const scheduleEntrySchema = new Schema<IScheduleEntry>(
+  {
+    occurrenceIndex: { type: Number, required: true },
+    date:            { type: Date, required: true },
+    surahStart:      { type: Number, required: true },
+    ayahStart:       { type: Number, required: true },
+    surahEnd:        { type: Number, required: true },
+    ayahEnd:         { type: Number, required: true },
+    pageStart:       { type: Number, required: true },
+    pageEnd:         { type: Number, required: true },
+    juz:             { type: Number, required: true },
   },
   { _id: false },
 );
@@ -89,6 +124,8 @@ const quranPlanSchema = new Schema<IQuranPlan>(
     endDate:         { type: Date },
 
     status: { type: String, enum: ['نشطة', 'متوقفة', 'منتهية'], default: 'نشطة' },
+
+    schedule: { type: [scheduleEntrySchema], default: [] },
   },
   { timestamps: true },
 );

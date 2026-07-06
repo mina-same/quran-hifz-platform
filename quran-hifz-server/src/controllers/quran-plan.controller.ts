@@ -3,7 +3,10 @@ import { z } from 'zod';
 import { QuranPlan } from '../models/QuranPlan.model';
 import { AppError } from '../middleware/error';
 import { SURAHS } from '../data/surahs';
-import { WEEK_DAYS, computeTodayAssignment, computePlanProgress, computeJuzProgress, computeScheduleBreakdown, pageRangeOfAyahRange } from '../lib/quranRange';
+import {
+  WEEK_DAYS, computeTodayAssignment, computePlanProgress, computeJuzProgress, computeScheduleBreakdown,
+  pageRangeOfAyahRange, toFlatIndex, pageOfFlatIndex, juzOfFlatIndex,
+} from '../lib/quranRange';
 
 const SURAH_BY_NUMBER = new Map(SURAHS.map((s) => [s.number, s]));
 
@@ -90,13 +93,22 @@ function withTodayAssignment(plan: InstanceType<typeof QuranPlan>) {
     rangeEnd:        plan.rangeEnd,
   };
   const progress = computePlanProgress(scheduleInput);
+  // Once a teacher freezes the schedule (generateSchedule), the persisted
+  // array wins over live recomputation — that's the whole point: it survives
+  // later config edits and can carry hand-adjusted days without being wiped
+  // on every fetch. Plans that never had it generated fall back to the
+  // always-fresh live computation, same as before this field existed.
+  const persisted = plan.schedule && plan.schedule.length > 0;
   return {
     ...obj,
     todayAssignment: computeTodayAssignment(scheduleInput),
     progress,
     juzProgress:     computeJuzProgress(scheduleInput, progress),
     pageRange:       pageRangeOfAyahRange(plan.rangeStart, plan.rangeEnd),
-    schedule:        computeScheduleBreakdown(scheduleInput),
+    schedule:        persisted
+      ? obj.schedule.map((s: { date: Date }) => ({ ...s, date: new Date(s.date).toISOString() }))
+      : computeScheduleBreakdown(scheduleInput),
+    scheduleIsPersisted: persisted,
   };
 }
 
@@ -164,6 +176,98 @@ export async function updatePlan(req: Request, res: Response, next: NextFunction
       .populate('specialTrack', 'title');
     if (!plan) throw new AppError('الخطة غير موجودة', 404);
     res.json({ success: true, data: withTodayAssignment(plan) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/** Freezes the plan's live-computed day-by-day schedule into `plan.schedule`
+ * so it's a real, persisted record instead of a value re-derived on every
+ * fetch — any authenticated teacher may do this (not just the plan's creator,
+ * so co-teachers on a shared halqa/track can all manage it). Re-running this
+ * while a schedule is already persisted re-freezes from the current live
+ * computation, discarding any earlier persisted version (including
+ * hand-edits) — the caller decides when that's appropriate. */
+export async function generateSchedule(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const plan = await QuranPlan.findById(req.params.id);
+    if (!plan) throw new AppError('الخطة غير موجودة', 404);
+
+    const scheduleInput = {
+      days: plan.days, startDate: plan.startDate,
+      endType: plan.endType, activeDaysCount: plan.activeDaysCount, endDate: plan.endDate,
+      rangeStart: plan.rangeStart, rangeEnd: plan.rangeEnd,
+    };
+    plan.schedule = computeScheduleBreakdown(scheduleInput).map((s) => ({ ...s, date: new Date(s.date) }));
+    await plan.save();
+
+    const populated = await QuranPlan.findById(plan._id)
+      .populate('teacher', 'name')
+      .populate('halqa', 'name')
+      .populate('students', 'name')
+      .populate('specialTrack', 'title');
+    res.json({ success: true, data: withTodayAssignment(populated!) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+const scheduleEntryUpdateSchema = z.object({
+  surahStart: z.number().int().min(1).max(114),
+  ayahStart:  z.number().int().min(1),
+  surahEnd:   z.number().int().min(1).max(114),
+  ayahEnd:    z.number().int().min(1),
+});
+
+/** Hand-edits one day's assigned range within an already-persisted schedule
+ * (see generateSchedule) — page range and juz' are always recomputed
+ * server-side from the new ayah range rather than trusted from the client,
+ * same "never trust client-derived numbers" rule as evaluation scoring. */
+export async function updateScheduleEntry(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const occurrenceIndex = Number(req.params.occurrenceIndex);
+    const data = scheduleEntryUpdateSchema.parse(req.body);
+
+    const startsBeforeEnd =
+      data.surahStart < data.surahEnd ||
+      (data.surahStart === data.surahEnd && data.ayahStart <= data.ayahEnd);
+    if (!startsBeforeEnd) throw new AppError('نقطة البداية يجب أن تسبق نقطة النهاية', 400);
+
+    for (const [surahNumber, ayah] of [
+      [data.surahStart, data.ayahStart],
+      [data.surahEnd, data.ayahEnd],
+    ] as const) {
+      const surah = SURAH_BY_NUMBER.get(surahNumber);
+      if (surah && ayah > surah.ayahCount) {
+        throw new AppError(`سورة ${surah.name} تحتوي على ${surah.ayahCount} آية فقط`, 400);
+      }
+    }
+
+    const plan = await QuranPlan.findById(req.params.id);
+    if (!plan) throw new AppError('الخطة غير موجودة', 404);
+
+    const entry = plan.schedule.find((s) => s.occurrenceIndex === occurrenceIndex);
+    if (!entry) throw new AppError('لم يتم العثور على هذا اليوم — يجب حفظ توزيع الأيام أولاً', 404);
+
+    const startFlat = toFlatIndex({ surahNumber: data.surahStart, ayah: data.ayahStart });
+    const endFlat = toFlatIndex({ surahNumber: data.surahEnd, ayah: data.ayahEnd });
+
+    entry.surahStart = data.surahStart;
+    entry.ayahStart = data.ayahStart;
+    entry.surahEnd = data.surahEnd;
+    entry.ayahEnd = data.ayahEnd;
+    entry.pageStart = pageOfFlatIndex(startFlat);
+    entry.pageEnd = pageOfFlatIndex(endFlat);
+    entry.juz = juzOfFlatIndex(startFlat);
+
+    await plan.save();
+
+    const populated = await QuranPlan.findById(plan._id)
+      .populate('teacher', 'name')
+      .populate('halqa', 'name')
+      .populate('students', 'name')
+      .populate('specialTrack', 'title');
+    res.json({ success: true, data: withTodayAssignment(populated!) });
   } catch (err) {
     next(err);
   }
