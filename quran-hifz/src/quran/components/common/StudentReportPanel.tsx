@@ -408,7 +408,7 @@ export function StudentReportPanel({
               <YAxis
                 type="category"
                 dataKey="name"
-                width={110}
+                width={150}
                 fontSize={12}
                 stroke="var(--text3)"
                 tick={{ fill: "var(--text)" }}

@@ -4364,6 +4364,22 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-06T14:58:54.390Z"
+    },
+    {
+      "id": "bug-271",
+      "timestamp": "2026-07-06T15:07:24.295Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/inspect2.mjs",
+      "root_cause": "Had \")].find(e => e.textContent === \"",
+      "fix": "Changed to \")].find(e => e.textContent.trim() === \"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-06T15:08:04.986Z"
     }
   ]
 }

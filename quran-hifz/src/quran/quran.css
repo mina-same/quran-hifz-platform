@@ -3586,6 +3586,13 @@ textarea.form-input {
    of the portal. recharts renders donut + bar charts; CSS just styles the
    surrounding chrome.
 ════════════════════════════════════════════════════════════════ */
+/* Recharts sets text-anchor="end" on vertical-bar YAxis ticks, which assumes
+   LTR script — for Arabic (RTL) tick labels the browser extends the text in
+   the opposite direction, spilling it rightward into the plot/bars instead of
+   leftward into the empty label gutter. Force it back to the correct side. */
+.recharts-yAxis text {
+  text-anchor: start;
+}
 .reports-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

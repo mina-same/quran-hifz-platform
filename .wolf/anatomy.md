@@ -1,11 +1,13 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-06T15:00:39.588Z
-> Files: 414 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-06T15:11:03.445Z
+> Files: 416 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/
 
+- `crop2.mjs` — Declares browser (~396 tok)
 - `inspect.mjs` — Declares browser (~413 tok)
+- `inspect2.mjs` — Declares browser (~508 tok)
 - `shot.mjs` — Declares browser (~304 tok)
 - `shot2.mjs` — Declares browser (~292 tok)
 
@@ -515,7 +517,7 @@
 
 ## quran-hifz/src/quran/
 
-- `quran.css` — Styles: 71 rules, 18 vars (~25004 tok)
+- `quran.css` — Styles: 71 rules, 18 vars (~25107 tok)
 - `QuranApp.tsx` — Quran Hifz platform — React entry. (~852 tok)
 
 ## quran-hifz/src/quran/api/
@@ -566,7 +568,7 @@
 - `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)
 - `Skeleton.tsx` — Skeleton — renders table (~816 tok)
 - `StatsRow.tsx` — StatsRow (~146 tok)
-- `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from a student's plans — no dedicated (~4018 tok)
+- `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from a student's plans — no dedicated (~4975 tok)
 - `SurahRangePicker.tsx` — SurahPointFields (~439 tok)
 
 ## quran-hifz/src/quran/config/

@@ -20,7 +20,10 @@
       "Bash(npm install *)",
       "Bash(npx playwright *)",
       "Bash(node shot.mjs)",
-      "Bash(node shot2.mjs)"
+      "Bash(node shot2.mjs)",
+      "Bash(node crop.mjs)",
+      "Bash(node inspect2.mjs)",
+      "Bash(node crop2.mjs)"
     ]
   },
   "hooks": {
