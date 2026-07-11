@@ -18,6 +18,8 @@ import { TeacherStudents }       from "../pages/teacher/TeacherStudents";
 import { TeacherAttendance }     from "../pages/teacher/TeacherAttendance";
 import { TeacherHomework }       from "../pages/teacher/TeacherHomework";
 import { TeacherPlans }          from "../pages/teacher/TeacherPlans";
+import { TeacherPlanForm }       from "../pages/teacher/TeacherPlanForm";
+import { TeacherPlanDetail }     from "../pages/teacher/TeacherPlanDetail";
 import { TeacherReports }        from "../pages/teacher/TeacherReports";
 import { TeacherRecordLesson }   from "../pages/teacher/TeacherRecordLesson";
 import { TeacherGroupHomework }  from "../pages/teacher/TeacherGroupHomework";
@@ -61,6 +63,8 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     attendance:    TeacherAttendance,
     homework:      TeacherHomework,
     plans:         TeacherPlans,
+    planform:      TeacherPlanForm,
+    plandetail:    TeacherPlanDetail,
     reports:       TeacherReports,
     recordlesson:  TeacherRecordLesson,
     grouphomework: TeacherGroupHomework,

@@ -27,7 +27,10 @@ function TrackCard({ track, onOpen }: { track: SpecialTrack; onOpen: (t: Special
   // Small "N+1" fetch just for the at-a-glance today's-target teaser — same
   // trade-off already accepted elsewhere in this file (small per-teacher lists).
   const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: track._id });
-  const linkedPlan = linkedPlans[0];
+  // Prefer the plan actually targeting the whole track over a narrower
+  // students-only plan that merely still carries a stale specialTrack
+  // reference (see the same fix/comment in TeacherTrackDetail.tsx).
+  const linkedPlan = linkedPlans.find((p) => p.targetType === "specialTrack") ?? linkedPlans[0];
 
   return (
     <div

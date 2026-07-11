@@ -1,5 +1,6 @@
 import "./quran.css";
 import { useEffect, useState } from "react";
+import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { PortalProvider, usePortal } from "./context/PortalContext";
 import { ParentProvider, useParentContext } from "./context/ParentContext";
@@ -100,6 +101,7 @@ export default function QuranApp() {
             <AuthGate />
           </ParentProvider>
         </AuthProvider>
+        <Toaster dir="rtl" position="top-center" richColors />
       </div>
     </ThemeProvider>
   );

@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
@@ -23,6 +23,10 @@ function getName(v: unknown): string {
   if (v && typeof v === "object" && "name" in v) return (v as { name: string }).name;
   return "";
 }
+function getId(v: unknown): string {
+  if (v && typeof v === "object" && "_id" in v) return (v as { _id: string })._id;
+  return typeof v === "string" ? v : "";
+}
 function getEnrolledName(v: EnrolledStudent | string): string {
   return typeof v === "object" ? v.name : v;
 }
@@ -30,9 +34,21 @@ function getEnrolledId(v: EnrolledStudent | string): string {
   return typeof v === "object" ? v._id : v;
 }
 
+type Row = {
+  id: string;
+  name: string;
+  halqaId: string | null;
+  halqaName: string;
+  guardian: string;
+  guardianPhone: string;
+  lastMemorization: string;
+  homeworkStatus: string | null;
+  tracks: string[];
+};
+
 export function TeacherStudents() {
   const { user } = usePortal();
-  const [tab, setTab] = useState<"halqa" | "tracks">("halqa");
+  const [filter, setFilter] = useState<string>("all"); // "all" | "halqa:<id>" | "track:<id>"
 
   const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: user?.profileId });
   const halqaIds = halqat.map((h) => h._id);
@@ -43,155 +59,163 @@ export function TeacherStudents() {
 
   const { data: myTracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, user?.profileId as string | undefined);
 
-  // Aggregate unique enrolled students across all teacher's tracks
-  const trackStudentsMap = new Map<string, { name: string; tracks: string[] }>();
+  // Map studentId -> track titles they're enrolled in (across teacher's tracks)
+  const studentTracksMap = new Map<string, string[]>();
   for (const track of myTracks) {
     for (const s of track.enrolledStudents) {
       const id = getEnrolledId(s);
-      const name = getEnrolledName(s);
-      if (!trackStudentsMap.has(id)) {
-        trackStudentsMap.set(id, { name, tracks: [] });
-      }
-      trackStudentsMap.get(id)!.tracks.push(track.title);
+      if (!studentTracksMap.has(id)) studentTracksMap.set(id, []);
+      studentTracksMap.get(id)!.push(track.title);
     }
   }
-  const trackStudents = Array.from(trackStudentsMap.entries()).map(([id, v]) => ({ id, ...v }));
+
+  const studentIds = new Set(students.map((s) => s._id));
+
+  const rows: Row[] = [
+    ...students.map((s) => ({
+      id: s._id,
+      name: s.name,
+      halqaId: getId(s.halqa) || null,
+      halqaName: getName(s.halqa),
+      guardian: s.guardian || "—",
+      guardianPhone: s.guardianPhone || "—",
+      lastMemorization: s.lastMemorization || "—",
+      homeworkStatus: s.homeworkStatus,
+      tracks: studentTracksMap.get(s._id) ?? [],
+    })),
+    // students enrolled only in a special track (not in teacher's halqa)
+    ...Array.from(studentTracksMap.entries())
+      .filter(([id]) => !studentIds.has(id))
+      .map(([id, tracks]) => {
+        const enrolled = myTracks
+          .flatMap((t) => t.enrolledStudents)
+          .find((s) => getEnrolledId(s) === id);
+        return {
+          id,
+          name: enrolled ? getEnrolledName(enrolled) : "",
+          halqaId: null,
+          halqaName: "—",
+          guardian: "—",
+          guardianPhone: "—",
+          lastMemorization: "—",
+          homeworkStatus: null,
+          tracks,
+        };
+      }),
+  ];
+
+  const trackTitleFilter = filter.startsWith("track:")
+    ? myTracks.find((t) => t._id === filter.slice(6))?.title
+    : undefined;
+
+  const visibleRows = rows.filter((r) => {
+    if (filter === "all") return true;
+    if (filter.startsWith("halqa:")) return r.halqaId === filter.slice(6);
+    if (trackTitleFilter) return r.tracks.includes(trackTitleFilter);
+    return true;
+  });
 
   useTopbar("ti-users", "طلابي");
 
-  const TAB_BTN = (active: boolean): CSSProperties => ({
-    display: "flex", alignItems: "center", gap: 6,
-    padding: "10px 16px",
-    border: "none", borderBottom: `2.5px solid ${active ? "var(--green)" : "transparent"}`,
-    cursor: "pointer", background: "transparent",
-    fontSize: 13, fontWeight: active ? 700 : 500,
-    color: active ? "var(--green)" : "var(--text2)",
-    transition: "all .18s",
-    marginBottom: -1,
-  });
+  const loading = loadingHalqat || loadingStudents || loadingTracks;
+  const hasAny = halqaIds.length > 0 || myTracks.length > 0;
 
   return (
     <Card>
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: "1px solid var(--border)" }}>
-        <button style={TAB_BTN(tab === "halqa")} onClick={() => setTab("halqa")}>
-          <i className="ti ti-school" />
-          طلاب الحلقة
-        </button>
-        <button style={TAB_BTN(tab === "tracks")} onClick={() => setTab("tracks")}>
-          <i className="ti ti-star" />
-          المسارات الاستثنائية
-          {trackStudents.length > 0 && (
-            <span style={{
-              background: tab === "tracks" ? "var(--green)" : "var(--border2)",
-              color: tab === "tracks" ? "#fff" : "var(--text2)",
-              borderRadius: 99, padding: "1px 8px", fontSize: 11, fontWeight: 700,
-              transition: "all .18s",
-            }}>
-              {trackStudents.length}
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* ── Halqa Students Tab ── */}
-      {tab === "halqa" && (
-        <>
-          {(loadingHalqat || loadingStudents) && (
-            <SkeletonTable cols={6} rows={5} />
-          )}
-          {!loadingHalqat && halqaIds.length === 0 && (
-            <div style={{ textAlign: "center", padding: "32px 0", color: "var(--text3)", fontSize: 13 }}>
-              <i className="ti ti-school-off" style={{ fontSize: 32, display: "block", marginBottom: 10 }} />
-              لا توجد حلقة مسندة لهذا المعلم
-            </div>
-          )}
-          {!loadingHalqat && !loadingStudents && halqaIds.length > 0 && (
-            <div className="tbl-wrap">
-              <table className="tbl">
-                <thead>
-                  <tr>
-                    <th>الطالب</th>
-                    <th>الحلقة</th>
-                    <th>آخر حفظ</th>
-                    <th>الواجب القادم</th>
-                    <th>الدرس</th>
-                    <th>إجراء</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((s) => (
-                    <tr key={s._id}>
-                      <td style={{ fontWeight: 600 }}>{s.name}</td>
-                      <td>{getName(s.halqa)}</td>
-                      <td style={{ fontSize: 12, color: "var(--text2)" }}>{s.lastMemorization || "—"}</td>
-                      <td style={{ fontSize: 12, color: "var(--text2)" }}>—</td>
-                      <td>
-                        <Badge tone={HW_TONE[s.homeworkStatus] ?? "gold"}>
-                          {HW_LABEL[s.homeworkStatus] ?? "لم يُسجَّل"}
-                        </Badge>
-                      </td>
-                      <td>
-                        <button className="topbar-btn btn-primary" style={{ fontSize: 11, padding: "5px 10px" }}>
-                          <i className="ti ti-microphone" /> سجّل
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {students.length === 0 && (
-                    <tr>
-                      <td colSpan={6} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                        لا توجد بيانات
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </>
+      {!loading && !hasAny && (
+        <div style={{ textAlign: "center", padding: "32px 0", color: "var(--text3)", fontSize: 13 }}>
+          <i className="ti ti-school-off" style={{ fontSize: 32, display: "block", marginBottom: 10 }} />
+          لا توجد حلقة أو مسارات مسندة لهذا المعلم
+        </div>
       )}
 
-      {/* ── Special Track Students Tab ── */}
-      {tab === "tracks" && (
+      {loading && <SkeletonTable cols={7} rows={5} />}
+
+      {!loading && hasAny && (
         <>
-          {loadingTracks && (
-            <SkeletonTable cols={3} rows={5} />
-          )}
-          {!loadingTracks && trackStudents.length === 0 && (
-            <div style={{ textAlign: "center", padding: "32px 0", color: "var(--text3)", fontSize: 13 }}>
-              <i className="ti ti-calendar-off" style={{ fontSize: 32, display: "block", marginBottom: 10 }} />
-              لا يوجد طلاب في مساراتك الاستثنائية
-            </div>
-          )}
-          {!loadingTracks && trackStudents.length > 0 && (
-            <div className="tbl-wrap">
-              <table className="tbl">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>الطالب</th>
-                    <th>المسارات المسجّل فيها</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {trackStudents.map((s, i) => (
-                    <tr key={s.id}>
-                      <td style={{ color: "var(--text3)", fontSize: 12 }}>{i + 1}</td>
-                      <td style={{ fontWeight: 600 }}>{s.name}</td>
-                      <td>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+            <label style={{ fontSize: 12, color: "var(--text2)", fontWeight: 600 }}>تصفية الطلاب</label>
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              style={{
+                padding: "6px 10px", borderRadius: 8, border: "1px solid var(--border)",
+                background: "var(--surface)", color: "var(--text)", fontSize: 13,
+              }}
+            >
+              <option value="all">كل الطلاب ({rows.length})</option>
+              {halqat.length > 0 && (
+                <optgroup label="الحلقات">
+                  {halqat.map((h) => (
+                    <option key={h._id} value={`halqa:${h._id}`}>{h.name}</option>
+                  ))}
+                </optgroup>
+              )}
+              {myTracks.length > 0 && (
+                <optgroup label="المسارات الاستثنائية">
+                  {myTracks.map((t) => (
+                    <option key={t._id} value={`track:${t._id}`}>{t.title}</option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
+          </div>
+
+          <div className="tbl-wrap">
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th>الطالب</th>
+                  <th>الحلقة</th>
+                  <th>المسارات الاستثنائية</th>
+                  <th>ولي الأمر</th>
+                  <th>رقم ولي الأمر</th>
+                  <th>آخر حفظ</th>
+                  <th>الدرس</th>
+                  <th>إجراء</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visibleRows.map((r) => (
+                  <tr key={r.id}>
+                    <td style={{ fontWeight: 600 }}>{r.name}</td>
+                    <td>{r.halqaName}</td>
+                    <td>
+                      {r.tracks.length > 0 ? (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                          {s.tracks.map((title) => (
+                          {r.tracks.map((title) => (
                             <Badge key={title} tone="green">{title}</Badge>
                           ))}
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                      ) : "—"}
+                    </td>
+                    <td style={{ fontSize: 12, color: "var(--text2)" }}>{r.guardian}</td>
+                    <td style={{ fontSize: 12, color: "var(--text2)", direction: "ltr", textAlign: "right" }}>{r.guardianPhone}</td>
+                    <td style={{ fontSize: 12, color: "var(--text2)" }}>{r.lastMemorization}</td>
+                    <td>
+                      {r.homeworkStatus ? (
+                        <Badge tone={HW_TONE[r.homeworkStatus] ?? "gold"}>
+                          {HW_LABEL[r.homeworkStatus] ?? "لم يُسجَّل"}
+                        </Badge>
+                      ) : "—"}
+                    </td>
+                    <td>
+                      <button className="topbar-btn btn-primary" style={{ fontSize: 11, padding: "5px 10px" }}>
+                        <i className="ti ti-microphone" /> سجّل
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {visibleRows.length === 0 && (
+                  <tr>
+                    <td colSpan={8} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                      لا توجد بيانات
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </Card>

@@ -1,22 +1,15 @@
-import { useState, useEffect, type CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
 import {
-  useQuranPlans, useCreateQuranPlan, useUpdateQuranPlan, useDeleteQuranPlan,
-  PLAN_PREFILL_TRACK_KEY,
+  useQuranPlans, useDeleteQuranPlan,
+  PLAN_FORM_HANDOFF_KEY, PLAN_DETAIL_ID_KEY,
   type QuranPlan, type PlanType, type RangePoint,
-  type PlanHalqa, type PlanSpecialTrack,
+  type PlanHalqa,
 } from "../../api/quran-plans";
-import { useHalqat } from "../../api/halqat";
-import { useStudents } from "../../api/students";
-import { useSpecialTracks } from "../../api/special-tracks";
 import { SURAHS } from "../../data/surahs";
 import { Badge } from "../../components/common/Badge";
-import { FormSection } from "../../components/common/FormSection";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
-import { DaysOfWeekPicker } from "../../components/common/DaysOfWeekPicker";
-import { SurahPointFields } from "../../components/common/SurahRangePicker";
-import { countRangeAyahs, pageRangeOfAyahRange } from "../../lib/quranRange";
 
 /* ─── helpers ─────────────────────────────────────────────── */
 function surahName(n: number) {
@@ -24,9 +17,6 @@ function surahName(n: number) {
 }
 function pointLabel(p: RangePoint) {
   return `${surahName(p.surahNumber)} : ${p.ayah}`;
-}
-function getId(v: { _id: string } | string) {
-  return typeof v === "object" ? v._id : v;
 }
 function getName(v: { name: string } | string) {
   return typeof v === "object" ? v.name : v;
@@ -41,42 +31,6 @@ const PLAN_TYPES: { value: PlanType; label: string; icon: string; fg: string; bg
   { value: "ترتيل",  label: "ترتيل",  icon: "ti-music",     fg: "#7c3aed",      bg: "#f3e8ff" },
   { value: "تلاوة",  label: "تلاوة",  icon: "ti-microphone",fg: "#c2410c",      bg: "#fff1e6" },
 ];
-
-const TARGET_TYPES: { value: "halqa" | "students" | "specialTrack"; label: string; icon: string }[] = [
-  { value: "halqa",        label: "حلقة كاملة",    icon: "ti-school" },
-  { value: "students",     label: "طلاب محددون",   icon: "ti-user" },
-  { value: "specialTrack", label: "مسار استثنائي", icon: "ti-calendar-event" },
-];
-
-/* ─── form types ──────────────────────────────────────────── */
-type FormFields = {
-  name: string;
-  type: PlanType;
-  description: string;
-  targetType: "halqa" | "students" | "specialTrack";
-  halqa: string;
-  students: string[];
-  specialTrack: string;
-  days: string[];
-  rangeStart: RangePoint;
-  rangeEnd: RangePoint;
-  endType: "activeDays" | "date";
-  activeDaysCount: string;
-  endDate: string;
-};
-
-const EMPTY: FormFields = {
-  name: "", type: "حفظ", description: "",
-  targetType: "halqa", halqa: "", students: [], specialTrack: "",
-  days: [],
-  rangeStart: { surahNumber: 1, ayah: 1 },
-  rangeEnd:   { surahNumber: 1, ayah: 1 },
-  endType: "activeDays",
-  activeDaysCount: "10",
-  endDate: "",
-};
-
-type Modal = null | { mode: "form"; item?: QuranPlan } | { mode: "schedule"; item: QuranPlan };
 
 /* ─── overlay / dialog styles (matches AdminSpecialTracks) ──── */
 const OVERLAY: CSSProperties = {
@@ -96,112 +50,25 @@ export function TeacherPlans() {
   const teacherId = user?.profileId;
 
   const { data: plans = [], isLoading } = useQuranPlans({ teacher: teacherId });
-  const { data: halqat = [] }           = useHalqat({ teacher: teacherId });
-  const { data: allStudents = [] }      = useStudents();
-  const { data: specialTracks = [] }    = useSpecialTracks(undefined, teacherId);
-
-  const createPlan = useCreateQuranPlan();
-  const updatePlan = useUpdateQuranPlan();
   const deletePlan = useDeleteQuranPlan();
 
-  const [modal, setModal]       = useState<Modal>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [form, setForm]         = useState<FormFields>(EMPTY);
-  const [formError, setFormError] = useState("");
-
-  function sf<K extends keyof FormFields>(k: K, v: FormFields[K]) {
-    setForm((p) => ({ ...p, [k]: v }));
-  }
 
   function openAdd() {
-    setForm(EMPTY); setFormError(""); setModal({ mode: "form" });
+    sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "create" }));
+    showPage("planform");
   }
-
-  // Deep link from the Special Tracks page's "ربط خطة" button: open the create
-  // modal pre-filled to the track the teacher clicked from.
-  useEffect(() => {
-    const trackId = sessionStorage.getItem(PLAN_PREFILL_TRACK_KEY);
-    if (!trackId) return;
-    sessionStorage.removeItem(PLAN_PREFILL_TRACK_KEY);
-    setForm({ ...EMPTY, targetType: "specialTrack", specialTrack: trackId });
-    setFormError("");
-    setModal({ mode: "form" });
-  }, []);
   function openEdit(item: QuranPlan) {
-    setForm({
-      name: item.name, type: item.type, description: item.description ?? "",
-      targetType: item.targetType,
-      halqa: item.halqa ? getId(item.halqa) : "",
-      students: (item.students ?? []).map(getId),
-      specialTrack: item.specialTrack ? getId(item.specialTrack) : "",
-      days: item.days,
-      rangeStart: item.rangeStart,
-      rangeEnd:   item.rangeEnd,
-      endType: item.endType,
-      activeDaysCount: item.activeDaysCount ? String(item.activeDaysCount) : "",
-      endDate: item.endDate ? item.endDate.split("T")[0] : "",
-    });
-    setFormError(""); setModal({ mode: "form", item });
+    sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "edit", plan: item }));
+    showPage("planform");
   }
-
-  // "نسخ الخطة": pre-fill the create form with the source plan's data
-  // (no `item` in the modal state, so Submit creates a brand-new plan).
   function openDuplicate(item: QuranPlan) {
-    setForm({
-      name: `${item.name} (نسخة)`, type: item.type, description: item.description ?? "",
-      targetType: item.targetType,
-      halqa: item.halqa ? getId(item.halqa) : "",
-      students: (item.students ?? []).map(getId),
-      specialTrack: item.specialTrack ? getId(item.specialTrack) : "",
-      days: item.days,
-      rangeStart: item.rangeStart,
-      rangeEnd:   item.rangeEnd,
-      endType: item.endType,
-      activeDaysCount: item.activeDaysCount ? String(item.activeDaysCount) : "",
-      endDate: item.endDate ? item.endDate.split("T")[0] : "",
-    });
-    setFormError(""); setModal({ mode: "form" });
+    sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "duplicate", plan: item }));
+    showPage("planform");
   }
-
-  async function handleSubmit() {
-    if (!form.name.trim())      { setFormError("اسم الخطة مطلوب"); return; }
-    if (form.days.length === 0) { setFormError("يرجى اختيار يوم واحد على الأقل"); return; }
-    if (form.targetType === "halqa" && !form.halqa) { setFormError("يرجى اختيار حلقة"); return; }
-    if (form.targetType === "students" && form.students.length === 0) { setFormError("يرجى اختيار طالب واحد على الأقل"); return; }
-    if (form.targetType === "specialTrack" && !form.specialTrack) { setFormError("يرجى اختيار المسار الاستثنائي"); return; }
-    if (form.endType === "activeDays" && !form.activeDaysCount) { setFormError("يرجى تحديد عدد الأيام النشطة"); return; }
-    if (form.endType === "date" && !form.endDate) { setFormError("يرجى تحديد تاريخ الانتهاء"); return; }
-
-    const startsBeforeEnd =
-      form.rangeStart.surahNumber < form.rangeEnd.surahNumber ||
-      (form.rangeStart.surahNumber === form.rangeEnd.surahNumber && form.rangeStart.ayah <= form.rangeEnd.ayah);
-    if (!startsBeforeEnd) { setFormError("نقطة البداية يجب أن تسبق نقطة النهاية"); return; }
-
-    setFormError("");
-    const body: Record<string, unknown> = {
-      name: form.name.trim(), type: form.type, description: form.description.trim() || undefined,
-      teacher: teacherId,
-      targetType: form.targetType,
-      halqa: form.targetType === "halqa" ? form.halqa : undefined,
-      students: form.targetType === "students" ? form.students : undefined,
-      specialTrack: form.targetType === "specialTrack" ? form.specialTrack : undefined,
-      days: form.days,
-      rangeStart: form.rangeStart, rangeEnd: form.rangeEnd,
-      endType: form.endType,
-      activeDaysCount: form.endType === "activeDays" ? Number(form.activeDaysCount) : undefined,
-      endDate: form.endType === "date" ? form.endDate : undefined,
-    };
-
-    try {
-      if (modal?.item) {
-        await updatePlan.mutateAsync({ id: modal.item._id, ...body });
-      } else {
-        await createPlan.mutateAsync(body);
-      }
-      setModal(null);
-    } catch (e) {
-      setFormError((e as Error).message);
-    }
+  function openDetail(item: QuranPlan) {
+    sessionStorage.setItem(PLAN_DETAIL_ID_KEY, item._id);
+    showPage("plandetail");
   }
 
   useTopbar("ti-target", "الخطط القرآنية",
@@ -209,8 +76,6 @@ export function TeacherPlans() {
       <i className="ti ti-plus" /> خطة جديدة
     </button>,
   );
-
-  const isPending = createPlan.isPending || updatePlan.isPending;
 
   return (
     <>
@@ -240,226 +105,13 @@ export function TeacherPlans() {
             <PlanCard
               key={p._id}
               plan={p}
+              onOpen={openDetail}
               onEdit={openEdit}
               onDelete={setDeleteId}
               onDuplicate={openDuplicate}
-              onSchedule={(item) => setModal({ mode: "schedule", item })}
               onViewTrack={() => showPage("specialtracks")}
             />
           ))}
-        </div>
-      )}
-
-      {/* ════════ FORM MODAL ════════ */}
-      {modal?.mode === "form" && (
-        <div style={OVERLAY} onClick={() => setModal(null)}>
-          <div style={{ ...DIALOG, maxWidth: 600 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-              padding: "20px 24px 16px", borderBottom: "1px solid var(--border)",
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: 10,
-                  background: "var(--green-pale)", color: "var(--green)",
-                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
-                }}>
-                  <i className="ti ti-target" />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "var(--text)" }}>
-                    {modal.item ? "تعديل الخطة" : "خطة قرآنية جديدة"}
-                  </h3>
-                  <p style={{ margin: 0, fontSize: 11, color: "var(--text3)" }}>أدخل بيانات الخطة بالكامل</p>
-                </div>
-              </div>
-              <button className="topbar-btn btn-ghost" style={{ padding: "6px 9px" }} onClick={() => setModal(null)}>
-                <i className="ti ti-x" />
-              </button>
-            </div>
-
-            <div style={{ padding: "20px 24px" }}>
-              {formError && (
-                <div style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  color: "#ef4444", fontSize: 13, marginBottom: 16,
-                  padding: "10px 14px", background: "#fef2f2", borderRadius: 10,
-                  border: "1px solid rgba(239,68,68,0.2)",
-                }}>
-                  <i className="ti ti-alert-circle" style={{ flexShrink: 0 }} /> {formError}
-                </div>
-              )}
-
-              {/* اسم الخطة + الوصف */}
-              <FormSection label="بيانات الخطة" icon="ti-info-circle">
-                <div className="form-grid-2">
-                  <div className="form-group" style={{ gridColumn: "1 / -1" }}>
-                    <label className="form-label">اسم الخطة <span>*</span></label>
-                    <input className="form-input" placeholder="مثال: خطة حفظ سورة البقرة" value={form.name} onChange={(e) => sf("name", e.target.value)} />
-                  </div>
-                  <div className="form-group" style={{ gridColumn: "1 / -1" }}>
-                    <label className="form-label">الوصف (اختياري)</label>
-                    <textarea className="form-input" rows={2} value={form.description} onChange={(e) => sf("description", e.target.value)} />
-                  </div>
-                </div>
-              </FormSection>
-
-              {/* نوع الخطة */}
-              <FormSection label="نوع الخطة" icon="ti-category">
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {PLAN_TYPES.map((t) => {
-                    const active = form.type === t.value;
-                    return (
-                      <button
-                        key={t.value}
-                        type="button"
-                        onClick={() => sf("type", t.value)}
-                        style={{
-                          flex: "1 1 120px", padding: "12px 0", borderRadius: 12, cursor: "pointer",
-                          border: `2px solid ${active ? t.fg : "var(--border)"}`,
-                          background: active ? t.bg : "var(--cream)",
-                          color: active ? t.fg : "var(--text2)",
-                          fontWeight: active ? 700 : 400,
-                          fontSize: 13, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5,
-                          transition: "all .15s",
-                        }}
-                      >
-                        <i className={`ti ${t.icon}`} style={{ fontSize: 18 }} />
-                        {t.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </FormSection>
-
-              {/* الهدف */}
-              <FormSection label="الهدف" icon="ti-users">
-                <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-                  {TARGET_TYPES.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => sf("targetType", opt.value)}
-                      style={{
-                        flex: "1 1 140px", padding: "11px 0", borderRadius: 10, cursor: "pointer",
-                        border: `2px solid ${form.targetType === opt.value ? "var(--green)" : "var(--border)"}`,
-                        background: form.targetType === opt.value ? "var(--green-pale)" : "var(--cream)",
-                        color: form.targetType === opt.value ? "var(--green)" : "var(--text2)",
-                        fontWeight: form.targetType === opt.value ? 700 : 400,
-                        fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-                      }}
-                    >
-                      <i className={`ti ${opt.icon}`} /> {opt.label}
-                    </button>
-                  ))}
-                </div>
-
-                {form.targetType === "halqa" && (
-                  <div className="form-group">
-                    <label className="form-label">الحلقة <span>*</span></label>
-                    <select className="form-input" value={form.halqa} onChange={(e) => sf("halqa", e.target.value)}>
-                      <option value="">— اختر حلقة —</option>
-                      {halqat.map((h) => <option key={h._id} value={h._id}>{h.name}</option>)}
-                    </select>
-                  </div>
-                )}
-                {form.targetType === "students" && (
-                  <StudentPicker
-                    students={allStudents}
-                    selected={form.students}
-                    onChange={(students) => sf("students", students)}
-                  />
-                )}
-                {form.targetType === "specialTrack" && (
-                  <div className="form-group">
-                    <label className="form-label">المسار الاستثنائي <span>*</span></label>
-                    <select className="form-input" value={form.specialTrack} onChange={(e) => sf("specialTrack", e.target.value)}>
-                      <option value="">— اختر مساراً —</option>
-                      {specialTracks.map((t) => <option key={t._id} value={t._id}>{t.title}</option>)}
-                    </select>
-                    {specialTracks.length === 0 && (
-                      <p style={{ margin: "6px 0 0", fontSize: 11, color: "var(--text3)" }}>لا يوجد مسارات استثنائية مرتبطة بك بعد</p>
-                    )}
-                  </div>
-                )}
-              </FormSection>
-
-              {/* أيام الخطة */}
-              <FormSection label="أيام الخطة" icon="ti-calendar-week">
-                <DaysOfWeekPicker value={form.days} onChange={(days) => sf("days", days)} />
-              </FormSection>
-
-              {/* نطاق الحفظ */}
-              <FormSection label="نطاق الحفظ (من - إلى)" icon="ti-book">
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  <SurahPointFields label="من" value={form.rangeStart} onChange={(v) => sf("rangeStart", v)} />
-                  <SurahPointFields label="إلى" value={form.rangeEnd} onChange={(v) => sf("rangeEnd", v)} />
-                  {(form.rangeStart.surahNumber < form.rangeEnd.surahNumber ||
-                    (form.rangeStart.surahNumber === form.rangeEnd.surahNumber && form.rangeStart.ayah <= form.rangeEnd.ayah)) && (() => {
-                    const { pageStart, pageEnd, pageCount } = pageRangeOfAyahRange(form.rangeStart, form.rangeEnd);
-                    return (
-                      <div style={{ fontSize: 13, color: "var(--muted-foreground, #666)" }}>
-                        عدد الآيات: {countRangeAyahs(form.rangeStart, form.rangeEnd)} — عدد الصفحات: {pageCount}
-                        {" "}(صفحة {pageStart}{pageEnd !== pageStart ? ` إلى ${pageEnd}` : ""})
-                      </div>
-                    );
-                  })()}
-                </div>
-              </FormSection>
-
-              {/* تاريخ الانتهاء */}
-              <FormSection label="تاريخ الانتهاء" icon="ti-calendar-due">
-                <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-                  {([
-                    { value: "activeDays" as const, label: "عدد الأيام النشطة" },
-                    { value: "date" as const,        label: "تاريخ محدد" },
-                  ]).map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => sf("endType", opt.value)}
-                      style={{
-                        flex: 1, padding: "11px 0", borderRadius: 10, cursor: "pointer",
-                        border: `2px solid ${form.endType === opt.value ? "var(--green)" : "var(--border)"}`,
-                        background: form.endType === opt.value ? "var(--green-pale)" : "var(--cream)",
-                        color: form.endType === opt.value ? "var(--green)" : "var(--text2)",
-                        fontWeight: form.endType === opt.value ? 700 : 400,
-                        fontSize: 13,
-                      }}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-                {form.endType === "activeDays" ? (
-                  <div className="form-group">
-                    <label className="form-label">عدد الأيام النشطة <span>*</span></label>
-                    <input className="form-input" type="number" min={1} value={form.activeDaysCount} onChange={(e) => sf("activeDaysCount", e.target.value)} />
-                  </div>
-                ) : (
-                  <div className="form-group">
-                    <label className="form-label">تاريخ الانتهاء <span>*</span></label>
-                    <input className="form-input" type="date" dir="ltr" value={form.endDate} onChange={(e) => sf("endDate", e.target.value)} />
-                  </div>
-                )}
-              </FormSection>
-
-              {/* actions */}
-              <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-                <button
-                  className="topbar-btn btn-primary"
-                  style={{ flex: 1, justifyContent: "center", padding: "11px 0" }}
-                  onClick={handleSubmit} disabled={isPending}
-                >
-                  {isPending
-                    ? <><i className="ti ti-loader-2" style={{ animation: "spin 1s linear infinite" }} /> جارٍ الحفظ...</>
-                    : <><i className="ti ti-check" /> حفظ الخطة</>
-                  }
-                </button>
-                <button className="topbar-btn btn-ghost" style={{ padding: "11px 20px" }} onClick={() => setModal(null)}>إلغاء</button>
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
@@ -494,72 +146,19 @@ export function TeacherPlans() {
           </div>
         </div>
       )}
-
-      {/* ════════ SCHEDULE BREAKDOWN ════════ */}
-      {modal?.mode === "schedule" && (
-        <div style={OVERLAY} onClick={() => setModal(null)}>
-          <div style={{ ...DIALOG, maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-              padding: "20px 24px 16px", borderBottom: "1px solid var(--border)",
-            }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "var(--text)" }}>تقسيم الأجزاء على الأيام</h3>
-                <p style={{ margin: 0, fontSize: 11, color: "var(--text3)" }}>{modal.item.name}</p>
-              </div>
-              <button className="topbar-btn btn-ghost" style={{ padding: "6px 9px" }} onClick={() => setModal(null)}>
-                <i className="ti ti-x" />
-              </button>
-            </div>
-
-            <div className="tbl-wrap" style={{ padding: "0 24px 20px", maxHeight: "60vh" }}>
-              {modal.item.schedule.length === 0 ? (
-                <p style={{ margin: "20px 0", fontSize: 13, color: "var(--text3)", textAlign: "center" }}>
-                  لا يوجد جدول محسوب لهذه الخطة
-                </p>
-              ) : (
-                <table className="tbl">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>التاريخ</th>
-                      <th>الجزء</th>
-                      <th>من</th>
-                      <th>إلى</th>
-                      <th>الصفحات</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {modal.item.schedule.map((s) => (
-                      <tr key={s.occurrenceIndex}>
-                        <td>{s.occurrenceIndex}</td>
-                        <td>{fmtDate(s.date)}</td>
-                        <td><Badge tone="green">جزء {s.juz}</Badge></td>
-                        <td>{surahName(s.surahStart)} : {s.ayahStart}</td>
-                        <td>{surahName(s.surahEnd)} : {s.ayahEnd}</td>
-                        <td>{s.pageStart === s.pageEnd ? s.pageStart : `${s.pageStart} - ${s.pageEnd}`}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
 
 /* ── plan card (module scope — never nest inside the page render body) ── */
 function PlanCard({
-  plan, onEdit, onDelete, onDuplicate, onSchedule, onViewTrack,
+  plan, onOpen, onEdit, onDelete, onDuplicate, onViewTrack,
 }: {
   plan: QuranPlan;
+  onOpen: (p: QuranPlan) => void;
   onEdit: (p: QuranPlan) => void;
   onDelete: (id: string) => void;
   onDuplicate: (p: QuranPlan) => void;
-  onSchedule: (p: QuranPlan) => void;
   onViewTrack: () => void;
 }) {
   const typeCfg = PLAN_TYPES.find((t) => t.value === plan.type) ?? PLAN_TYPES[0];
@@ -572,11 +171,20 @@ function PlanCard({
     plan.targetType === "specialTrack" ? "ti-calendar-event" : "ti-users";
 
   return (
-    <div style={{
-      background: "var(--surface)", borderRadius: 16,
-      border: "1px solid var(--border)", overflow: "hidden",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-    }}>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(plan)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(plan); } }}
+      style={{
+        background: "var(--surface)", borderRadius: 16,
+        border: "1px solid var(--border)", overflow: "hidden",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        cursor: "pointer", transition: "box-shadow .15s",
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.08)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)"; }}
+    >
       <div style={{ height: 4, background: `linear-gradient(90deg,${typeCfg.fg},${typeCfg.fg}99)` }} />
       <div style={{ padding: "16px 18px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
@@ -601,15 +209,7 @@ function PlanCard({
               </div>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-            <button
-              className="topbar-btn btn-ghost"
-              style={{ padding: "5px 11px", fontSize: 12 }}
-              onClick={() => onSchedule(plan)}
-              title="تقسيم الأجزاء على الأيام"
-            >
-              <i className="ti ti-calendar-stats" />
-            </button>
+          <div style={{ display: "flex", gap: 6, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
             <button className="topbar-btn btn-ghost" style={{ padding: "5px 11px", fontSize: 12 }} onClick={() => onEdit(plan)}>
               <i className="ti ti-pencil" />
             </button>
@@ -708,7 +308,7 @@ function InfoRow({ icon, label, val, span, onClick }: { icon: string; label: str
         <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>{label}</div>
         {onClick ? (
           <button
-            onClick={onClick}
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
             style={{
               background: "none", border: "none", padding: 0, cursor: "pointer",
               fontWeight: 600, color: "var(--green)", marginTop: 1,
@@ -724,61 +324,3 @@ function InfoRow({ icon, label, val, span, onClick }: { icon: string; label: str
     </div>
   );
 }
-
-function StudentPicker({
-  students, selected, onChange,
-}: {
-  students: { _id: string; name: string }[];
-  selected: string[];
-  onChange: (ids: string[]) => void;
-}) {
-  function toggle(id: string) {
-    onChange(selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]);
-  }
-  return (
-    <div>
-      {selected.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
-          {selected.map((id) => {
-            const s = students.find((x) => x._id === id);
-            return (
-              <div key={id} style={{
-                display: "flex", alignItems: "center", gap: 6,
-                background: "var(--green-pale)", color: "var(--green)",
-                borderRadius: 99, padding: "5px 10px", fontSize: 12, fontWeight: 700,
-              }}>
-                {s?.name ?? "—"}
-                <button type="button" onClick={() => toggle(id)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, lineHeight: 1 }}>
-                  <i className="ti ti-x" style={{ fontSize: 11 }} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-      <div style={{ border: "1px solid var(--border)", borderRadius: 10, maxHeight: 160, overflowY: "auto" }}>
-        {students.length === 0 && (
-          <div style={{ padding: 12, fontSize: 12, color: "var(--text3)", textAlign: "center" }}>لا يوجد طلاب مسجّلون</div>
-        )}
-        {students.map((s, i) => {
-          const isSel = selected.includes(s._id);
-          return (
-            <label
-              key={s._id}
-              style={{
-                display: "flex", alignItems: "center", gap: 10,
-                padding: "9px 12px", cursor: "pointer",
-                borderBottom: i < students.length - 1 ? "1px solid var(--border)" : "none",
-                background: isSel ? "var(--green-pale)" : "transparent",
-              }}
-            >
-              <input type="checkbox" checked={isSel} onChange={() => toggle(s._id)} style={{ accentColor: "var(--green)", width: 15, height: 15 }} />
-              <span style={{ fontSize: 13, fontWeight: isSel ? 700 : 400, color: isSel ? "var(--green)" : "var(--text)" }}>{s.name}</span>
-            </label>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-

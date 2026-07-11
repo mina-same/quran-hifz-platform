@@ -65,16 +65,22 @@ function pageOfFlatIndex(flatIndex: number): number {
   return page;
 }
 
+/** Span size (in ayahs) between two points — order-independent, since `start`
+ * may sit after `end` in mushaf order (a reverse-direction range). */
 export function countRangeAyahs(start: RangePoint, end: RangePoint): number {
-  return toFlatIndex(end) - toFlatIndex(start) + 1;
+  return Math.abs(toFlatIndex(end) - toFlatIndex(start)) + 1;
 }
 
 export type PageRange = { pageStart: number; pageEnd: number; pageCount: number };
 
-/** The mushaf page range (and page count) spanned by an ayah range, inclusive. */
+/** The mushaf page range (and page count) spanned by an ayah range, inclusive —
+ * a pure display/span utility, so it always normalizes to `pageStart <= pageEnd`
+ * even when `start` sits after `end` in mushaf order (a reverse-direction range). */
 export function pageRangeOfAyahRange(start: RangePoint, end: RangePoint): PageRange {
-  const pageStart = pageOfFlatIndex(toFlatIndex(start));
-  const pageEnd = pageOfFlatIndex(toFlatIndex(end));
+  const a = pageOfFlatIndex(toFlatIndex(start));
+  const b = pageOfFlatIndex(toFlatIndex(end));
+  const pageStart = Math.min(a, b);
+  const pageEnd = Math.max(a, b);
   return { pageStart, pageEnd, pageCount: pageEnd - pageStart + 1 };
 }
 

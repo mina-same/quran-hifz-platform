@@ -46,8 +46,10 @@ export function fromFlatIndex(index: number): RangePoint {
   return { surahNumber: last.number, ayah: last.ayahCount };
 }
 
+/** Span size (in ayahs) between two points — order-independent, since `start`
+ * may sit after `end` in mushaf order (a reverse-direction range). */
 export function countRangeAyahs(start: RangePoint, end: RangePoint): number {
-  return toFlatIndex(end) - toFlatIndex(start) + 1;
+  return Math.abs(toFlatIndex(end) - toFlatIndex(start)) + 1;
 }
 
 /** arr[i] = flat index where juz' (i+1) starts. */
@@ -77,22 +79,27 @@ export function pageOfFlatIndex(flatIndex: number): number {
 }
 
 /** First ayah (flat index) of the given 1-based mushaf page. */
-function firstFlatOfPage(page: number): number {
+export function firstFlatOfPage(page: number): number {
   return PAGE_STARTS_FLAT[page - 1];
 }
 
 /** Last ayah (flat index) of the given 1-based mushaf page — the ayah right
  * before the next page starts, or the Quran's final ayah for page 604. */
-function lastFlatOfPage(page: number): number {
+export function lastFlatOfPage(page: number): number {
   return page < PAGE_STARTS_FLAT.length ? PAGE_STARTS_FLAT[page] - 1 : TOTAL_AYAHS - 1;
 }
 
 export type PageRange = { pageStart: number; pageEnd: number; pageCount: number };
 
-/** The mushaf page range (and page count) spanned by an ayah range, inclusive. */
+/** The mushaf page range (and page count) spanned by an ayah range, inclusive —
+ * a pure display/span utility, so it always normalizes to `pageStart <= pageEnd`
+ * even when `start` sits after `end` in mushaf order (a reverse-direction range;
+ * direction itself only matters to the scheduling walk in `sliceForOccurrence`). */
 export function pageRangeOfAyahRange(start: RangePoint, end: RangePoint): PageRange {
-  const pageStart = pageOfFlatIndex(toFlatIndex(start));
-  const pageEnd = pageOfFlatIndex(toFlatIndex(end));
+  const a = pageOfFlatIndex(toFlatIndex(start));
+  const b = pageOfFlatIndex(toFlatIndex(end));
+  const pageStart = Math.min(a, b);
+  const pageEnd = Math.max(a, b);
   return { pageStart, pageEnd, pageCount: pageEnd - pageStart + 1 };
 }
 
@@ -153,24 +160,42 @@ export type TodayAssignment = {
  * plan's actual rangeEnd) may be partial pages; any remainder page count is
  * absorbed by the last occurrence. Returns null if there's nothing left for a
  * non-final day (more occurrences than pages).
+ *
+ * `rangeStart` is allowed to sit *after* `rangeEnd` in mushaf order — a genuine
+ * reverse walk (e.g. starting memorization at An-Nas and working backward toward
+ * Al-Fatiha): day 1 anchors at rangeStart regardless of which physical direction
+ * that is, and the walk proceeds toward rangeEnd, ending there on the last day.
+ * A single occurrence's own `surahStart/ayahStart..surahEnd/ayahEnd` is always
+ * reported in natural low→high reading order (a day's passage is still recited
+ * forward — only the *sequence of days* runs backward through the mushaf).
  */
 function sliceForOccurrence(plan: PlanScheduleInput, occurrenceIndex: number, occurrenceCount: number): TodayAssignment | null {
-  const { pageStart, pageEnd, pageCount: totalPages } = pageRangeOfAyahRange(plan.rangeStart, plan.rangeEnd);
+  const startFlat = toFlatIndex(plan.rangeStart);
+  const endFlat = toFlatIndex(plan.rangeEnd);
+  const forward = endFlat >= startFlat;
+  const anchorPage = pageOfFlatIndex(startFlat); // page containing rangeStart — occurrence 0 anchors here
+  const finalPage = pageOfFlatIndex(endFlat);    // page containing rangeEnd — the last occurrence anchors here
+  const totalPages = Math.abs(finalPage - anchorPage) + 1;
   const dailyPages = Math.floor(totalPages / occurrenceCount);
   const isLast = occurrenceIndex === occurrenceCount - 1;
 
   if (dailyPages === 0 && !isLast) return null;
 
-  const firstPage = pageStart + occurrenceIndex * dailyPages;
-  const lastPage = isLast ? pageEnd : firstPage + dailyPages - 1;
+  const step = forward ? 1 : -1;
+  const blockNearStartPage = anchorPage + occurrenceIndex * dailyPages * step;
+  const blockNearEndPage = isLast ? finalPage : blockNearStartPage + (dailyPages - 1) * step;
+  const loPage = Math.min(blockNearStartPage, blockNearEndPage);
+  const hiPage = Math.max(blockNearStartPage, blockNearEndPage);
 
-  const start = occurrenceIndex === 0 ? plan.rangeStart : fromFlatIndex(firstFlatOfPage(firstPage));
-  const end = isLast ? plan.rangeEnd : fromFlatIndex(lastFlatOfPage(lastPage));
+  let start = fromFlatIndex(firstFlatOfPage(loPage));
+  let end = fromFlatIndex(lastFlatOfPage(hiPage));
+  if (occurrenceIndex === 0) { if (forward) start = plan.rangeStart; else end = plan.rangeStart; }
+  if (isLast) { if (forward) end = plan.rangeEnd; else start = plan.rangeEnd; }
 
   return {
     surahStart: start.surahNumber, ayahStart: start.ayah,
     surahEnd: end.surahNumber, ayahEnd: end.ayah,
-    pageStart: firstPage, pageEnd: lastPage,
+    pageStart: loPage, pageEnd: hiPage,
   };
 }
 
@@ -284,22 +309,41 @@ export function computeJuzProgress(plan: PlanScheduleInput, dayProgress: PlanPro
 
   const rangeStartFlat = toFlatIndex(plan.rangeStart);
   const rangeEndFlat = toFlatIndex(plan.rangeEnd);
-  const juzStart = juzOfFlatIndex(rangeStartFlat);
-  const juzEnd = juzOfFlatIndex(rangeEndFlat);
-  const total = juzEnd - juzStart + 1;
+  const forward = rangeEndFlat >= rangeStartFlat;
+  const loFlat = Math.min(rangeStartFlat, rangeEndFlat);
+  const hiFlat = Math.max(rangeStartFlat, rangeEndFlat);
+  const total = juzOfFlatIndex(hiFlat) - juzOfFlatIndex(loFlat) + 1;
 
   if (dayProgress.completed <= 0) return { completed: 0, total };
 
-  const totalAyahs = rangeEndFlat - rangeStartFlat + 1;
+  // Progress accumulates from rangeStart toward rangeEnd — in a reverse-direction
+  // plan that means shrinking from the high end downward, not always upward.
+  const totalAyahs = hiFlat - loFlat + 1;
   const coveredAyahs = Math.round(totalAyahs * (dayProgress.completed / dayProgress.total));
-  const lastCoveredFlat = Math.min(rangeStartFlat + coveredAyahs - 1, rangeEndFlat);
+  const coveredBoundaryFlat = forward
+    ? Math.min(rangeStartFlat + coveredAyahs - 1, rangeEndFlat)
+    : Math.max(rangeStartFlat - coveredAyahs + 1, rangeEndFlat);
+  const loCovered = Math.min(rangeStartFlat, coveredBoundaryFlat);
+  const hiCovered = Math.max(rangeStartFlat, coveredBoundaryFlat);
 
+  // Walk juz' starting from rangeStart's side toward rangeEnd's side (matching
+  // the direction completion actually accumulates in), stopping at the first
+  // not-yet-fully-covered juz'.
+  const juzOfRangeStart = juzOfFlatIndex(rangeStartFlat);
+  const juzOfRangeEnd = juzOfFlatIndex(rangeEndFlat);
+  const juzStep = forward ? 1 : -1;
   let completed = 0;
-  for (let j = juzStart; j <= juzEnd; j++) {
+  let j = juzOfRangeStart;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const juzStartFlat = JUZ_STARTS_FLAT[j - 1];
     const juzEndFlat = j < 30 ? JUZ_STARTS_FLAT[j] - 1 : Number.MAX_SAFE_INTEGER;
-    const effectiveEndFlat = Math.min(juzEndFlat, rangeEndFlat);
-    if (lastCoveredFlat >= effectiveEndFlat) completed++;
+    const effStart = Math.max(juzStartFlat, loFlat);
+    const effEnd = Math.min(juzEndFlat, hiFlat);
+    if (loCovered <= effStart && hiCovered >= effEnd) completed++;
     else break;
+    if (j === juzOfRangeEnd) break;
+    j += juzStep;
   }
   return { completed, total };
 }

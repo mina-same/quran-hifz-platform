@@ -190,12 +190,20 @@ export function TeacherAttendance() {
       };
     }, [plans, selectedDate, today]);
 
+  // Which student's row is expanded — collapsed rows show only avatar/name/status
+  // summary, matching the roster list on the Special Track detail page's "الطلاب" tab.
+  const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
+  function toggleStudent(id: string) {
+    setExpandedStudentId((prev) => (prev === id ? null : id));
+  }
+
   // Reset per-student edits when the effective day changes so Monday's edits
   // don't leak into Tuesday's roster for the same students.
   useEffect(() => {
     setOverrides({});
     setDayNotice(null);
     setEditUnlocked(false);
+    setExpandedStudentId(null);
   }, [effectiveDate]);
 
   // Relock automatically once the edited data is actually saved, so re-opening
@@ -576,56 +584,76 @@ export function TeacherAttendance() {
                   const e = evalFor(s._id);
                   const isAbsent = e.attendanceStatus === "غائب";
                   const total = totalOf(e);
+                  const isExpanded = expandedStudentId === s._id;
+                  const hasSaved = !!savedById[s._id];
                   return (
-                    <div key={s._id} className={`att-row ${isAbsent ? "is-absent" : ""}`}>
-                      <div className="att-row-top">
+                    <div key={s._id} className={`att-row ${isAbsent && isExpanded ? "is-absent" : ""}`}>
+                      <div className="att-row-top" style={{ cursor: "pointer" }} onClick={() => toggleStudent(s._id)}>
                         <div className="att-avatar">{s.name.trim().charAt(0)}</div>
                         <div className="att-info">
                           <div className="att-name">{s.name}</div>
-                          <div className="att-sub">آخر حفظ: {s.lastMemorization || "—"}</div>
-                        </div>
-                        <div className="att-toggle">
-                          <button
-                            type="button"
-                            className={!isAbsent ? "active present" : ""}
-                            disabled={locked}
-                            onClick={() => setAttendance(s._id, "حاضر")}
-                          >
-                            <i className="ti ti-check" /> حاضر
-                          </button>
-                          <button
-                            type="button"
-                            className={isAbsent ? "active absent" : ""}
-                            disabled={locked}
-                            onClick={() => setAttendance(s._id, "غائب")}
-                          >
-                            <i className="ti ti-x" /> غائب
-                          </button>
-                        </div>
-                      </div>
-                      <div className="eval-scores">
-                        {(["hifz", "tajweed", "talawah"] as ScoreCategory[]).map((cat) => (
-                          <div key={cat} className="eval-cat">
-                            <span className="eval-cat-label">{CATEGORY_LABELS[cat]}</span>
-                            <div className="eval-chip-group">
-                              {Array.from({ length: MAX_SCORES[cat] + 1 }, (_, n) => n).map((n) => (
-                                <button
-                                  key={n}
-                                  type="button"
-                                  className={`eval-chip ${!isAbsent && e[cat] === n ? "active" : ""}`}
-                                  disabled={isAbsent || locked}
-                                  onClick={() => setScore(s._id, cat, n)}
-                                >
-                                  {toAr(n)}
-                                </button>
-                              ))}
-                            </div>
+                          <div className="att-sub">
+                            {hasSaved
+                              ? `${e.attendanceStatus} — ${toAr(total)}/${toAr(TOTAL_MAX)}${editUnlocked ? " (وضع التعديل)" : ""}`
+                              : "لم يُسجَّل لهذا اليوم بعد"}
                           </div>
-                        ))}
-                        <span className={`eval-total ${total === 0 ? "zero" : ""}`}>
-                          {toAr(total)}/{toAr(TOTAL_MAX)}
-                        </span>
+                        </div>
+                        <button
+                          type="button"
+                          className="topbar-btn btn-ghost"
+                          style={{ padding: "6px 10px" }}
+                          onClick={(ev) => { ev.stopPropagation(); toggleStudent(s._id); }}
+                          aria-label={isExpanded ? "طي" : "توسيع"}
+                        >
+                          <i className={`ti ${isExpanded ? "ti-chevron-up" : "ti-chevron-down"}`} />
+                        </button>
                       </div>
+
+                      {isExpanded && (
+                        <div style={{ padding: "10px 2px 4px" }}>
+                          <div className="att-toggle" style={{ display: "inline-flex", marginBottom: 10 }}>
+                            <button
+                              type="button"
+                              className={!isAbsent ? "active present" : ""}
+                              disabled={locked}
+                              onClick={() => setAttendance(s._id, "حاضر")}
+                            >
+                              <i className="ti ti-check" /> حاضر
+                            </button>
+                            <button
+                              type="button"
+                              className={isAbsent ? "active absent" : ""}
+                              disabled={locked}
+                              onClick={() => setAttendance(s._id, "غائب")}
+                            >
+                              <i className="ti ti-x" /> غائب
+                            </button>
+                          </div>
+                          <div className="eval-scores">
+                            {(["hifz", "tajweed", "talawah"] as ScoreCategory[]).map((cat) => (
+                              <div key={cat} className="eval-cat">
+                                <span className="eval-cat-label">{CATEGORY_LABELS[cat]}</span>
+                                <div className="eval-chip-group">
+                                  {Array.from({ length: MAX_SCORES[cat] + 1 }, (_, n) => n).map((n) => (
+                                    <button
+                                      key={n}
+                                      type="button"
+                                      className={`eval-chip ${!isAbsent && e[cat] === n ? "active" : ""}`}
+                                      disabled={isAbsent || locked}
+                                      onClick={() => setScore(s._id, cat, n)}
+                                    >
+                                      {toAr(n)}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                            <span className={`eval-total ${total === 0 ? "zero" : ""}`}>
+                              {toAr(total)}/{toAr(TOTAL_MAX)}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}

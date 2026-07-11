@@ -66,12 +66,9 @@ const quranPlanCreateSchema = quranPlanSchema.superRefine((data, ctx) => {
     ctx.addIssue({ code: 'custom', message: 'يجب تحديد تاريخ الانتهاء', path: ['endDate'] });
   }
 
-  const startsBeforeEnd =
-    data.rangeStart.surahNumber < data.rangeEnd.surahNumber ||
-    (data.rangeStart.surahNumber === data.rangeEnd.surahNumber && data.rangeStart.ayah <= data.rangeEnd.ayah);
-  if (!startsBeforeEnd) {
-    ctx.addIssue({ code: 'custom', message: 'نقطة البداية يجب أن تسبق نقطة النهاية', path: ['rangeEnd'] });
-  }
+  // rangeStart is deliberately allowed to sit after rangeEnd in mushaf order —
+  // a reverse-direction plan (e.g. starting at An-Nas and working backward
+  // toward Al-Fatiha), handled by sliceForOccurrence/computeScheduleBreakdown.
 
   for (const [key, point] of [['rangeStart', data.rangeStart], ['rangeEnd', data.rangeEnd]] as const) {
     const surah = SURAH_BY_NUMBER.get(point.surahNumber);

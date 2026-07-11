@@ -1,10 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { get, post, put, del } from "../../lib/api";
 
-/** sessionStorage key used to hand off "create a plan for this track" from the
- * Special Tracks page to TeacherPlans, which reads it on mount and opens the
- * create modal pre-filled with targetType "specialTrack". */
-export const PLAN_PREFILL_TRACK_KEY = "qh_prefill_plan_track";
+/** sessionStorage key used to hand off "open the plan form" from wherever a
+ * plan is created/edited/duplicated (TeacherPlans' list, TeacherTrackDetail's
+ * plan tab) to the dedicated TeacherPlanForm page — same no-router-params
+ * pattern as TRACK_DETAIL_ID_KEY. The full `QuranPlan`
+ * is carried in the payload for edit/duplicate (already in memory in the
+ * caller) rather than re-fetched by id. */
+export const PLAN_DETAIL_ID_KEY = "qh_plan_detail_id";
+
+export const PLAN_FORM_HANDOFF_KEY = "qh_plan_form_handoff";
+export type PlanFormHandoff =
+  | { mode: "create"; trackId?: string }
+  | { mode: "edit" | "duplicate"; plan: QuranPlan };
 
 export type PlanType = "حفظ" | "مراجعة" | "ترتيل" | "تلاوة";
 
