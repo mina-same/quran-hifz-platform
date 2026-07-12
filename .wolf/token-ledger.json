@@ -5,7 +5,7 @@
     "total_tokens_estimated": 7059244,
     "total_reads": 2881,
     "total_writes": 3955,
-    "total_sessions": 60,
+    "total_sessions": 64,
     "anatomy_hits": 2441,
     "anatomy_misses": 361,
     "repeated_reads_blocked": 1803,
