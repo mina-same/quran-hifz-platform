@@ -30,7 +30,7 @@ import { useRecordStudentOccurrence, useStudentPlanProgressList } from "../../ap
 import { IndividualPlanPanel, planCoversStudent } from "../../components/common/IndividualPlanPanel";
 import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
-import { fractionalPage } from "../../lib/quranRange";
+import { fractionalPage, toFlatIndex, fromFlatIndex } from "../../lib/quranRange";
 import { toAr } from "../../../lib/format";
 
 /** Formats a schedule day's page position: a clean page boundary shows as a
@@ -46,7 +46,7 @@ const compactInputStyle = { fontSize: 12, padding: "6px 8px" };
 /** Compact surah+ayah picker for the schedule table's inline row edit — no
  * built-in label (the table column header already says "من"/"إلى"), just the
  * two selects side by side, sized to sit comfortably inside a table cell. */
-function CompactSurahAyah({ value, onChange }: { value: RangePoint; onChange: (v: RangePoint) => void }) {
+function CompactSurahAyah({ value, onChange, disabled }: { value: RangePoint; onChange: (v: RangePoint) => void; disabled?: boolean }) {
   const surah = SURAHS.find((s) => s.number === value.surahNumber) ?? SURAHS[0];
   function setSurah(surahNumber: number) {
     const s = SURAHS.find((x) => x.number === surahNumber) ?? SURAHS[0];
@@ -57,10 +57,10 @@ function CompactSurahAyah({ value, onChange }: { value: RangePoint; onChange: (v
   }
   return (
     <div style={{ display: "flex", gap: 5 }}>
-      <select className="form-input" style={{ ...compactInputStyle, flex: "1 1 auto", minWidth: 90 }} value={value.surahNumber} onChange={(e) => setSurah(Number(e.target.value))}>
+      <select className="form-input" style={{ ...compactInputStyle, flex: "1 1 auto", minWidth: 90 }} value={value.surahNumber} disabled={disabled} onChange={(e) => setSurah(Number(e.target.value))}>
         {SURAHS.map((s) => <option key={s.number} value={s.number}>{s.number}. {s.name}</option>)}
       </select>
-      <select className="form-input" style={{ ...compactInputStyle, width: 62, flexShrink: 0 }} value={value.ayah} onChange={(e) => setAyah(Number(e.target.value))}>
+      <select className="form-input" style={{ ...compactInputStyle, width: 62, flexShrink: 0 }} value={value.ayah} disabled={disabled} onChange={(e) => setAyah(Number(e.target.value))}>
         {Array.from({ length: surah.ayahCount }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}</option>)}
       </select>
     </div>
@@ -224,10 +224,10 @@ export function TeacherTrackDetail() {
   }
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
   const [overrides, setOverrides] = useState<Record<string, StudentEval>>({});
-  // Which mushaf page each student actually reached today — defaults to the
-  // day's full assigned pageEnd (i.e. "finished it all") until the teacher
+  // Which surah+ayah each student actually reached today — defaults to the
+  // day's full assigned end point (i.e. "finished it all") until the teacher
   // pulls it back for a student who fell short.
-  const [completionOverrides, setCompletionOverrides] = useState<Record<string, number>>({});
+  const [completionOverrides, setCompletionOverrides] = useState<Record<string, RangePoint>>({});
   const recordOccurrence = useRecordStudentOccurrence();
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
   const [lastSavedId, setLastSavedId] = useState<string | null>(null);
@@ -427,11 +427,18 @@ export function TeacherTrackDetail() {
   function unlockStudent(studentId: string) {
     setUnlockedIds((prev) => new Set(prev).add(studentId));
   }
-  function completedPageFor(studentId: string, forAssignment: ScheduleEntry): number {
-    return completionOverrides[studentId] ?? forAssignment.pageEnd;
+  function completedPointFor(studentId: string, forAssignment: ScheduleEntry): RangePoint {
+    return completionOverrides[studentId] ?? { surahNumber: forAssignment.surahEnd, ayah: forAssignment.ayahEnd };
   }
-  function setCompletedPage(studentId: string, page: number) {
-    setCompletionOverrides((prev) => ({ ...prev, [studentId]: page }));
+  function setCompletedPoint(studentId: string, point: RangePoint) {
+    setCompletionOverrides((prev) => ({ ...prev, [studentId]: point }));
+  }
+  /** Clamps a teacher-picked completion point to the day's own assigned range
+   * — always low→high internally regardless of the plan's overall direction. */
+  function clampToAssignment(point: RangePoint, assignment: ScheduleEntry): RangePoint {
+    const loFlat = toFlatIndex({ surahNumber: assignment.surahStart, ayah: assignment.ayahStart });
+    const hiFlat = toFlatIndex({ surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd });
+    return fromFlatIndex(Math.max(loFlat, Math.min(hiFlat, toFlatIndex(point))));
   }
 
   function saveStudent(studentId: string, studentName: string) {
@@ -456,8 +463,10 @@ export function TeacherTrackDetail() {
           toast.success("تم الحفظ بنجاح", { id: toastId });
           return;
         }
-        const completedThroughPage = completedPageFor(studentId, studentAssignment);
-        const status = e.attendanceStatus === "غائب" ? "absent" : completedThroughPage < studentAssignment.pageEnd ? "partial" : "done";
+        const completedPoint = completedPointFor(studentId, studentAssignment);
+        const completedFlat = toFlatIndex(completedPoint);
+        const assignmentEndFlat = toFlatIndex({ surahNumber: studentAssignment.surahEnd, ayah: studentAssignment.ayahEnd });
+        const status = e.attendanceStatus === "غائب" ? "absent" : completedFlat < assignmentEndFlat ? "partial" : "done";
 
         if (status === "done") {
           toast.success("تم حفظ الحضور والتقييم بنجاح", { id: toastId });
@@ -474,7 +483,9 @@ export function TeacherTrackDetail() {
         recordOccurrence.mutate(
           {
             planId: linkedPlan._id, studentId, occurrenceIndex: studentAssignment.occurrenceIndex,
-            status, completedThroughPage: status === "partial" ? completedThroughPage : undefined,
+            status,
+            completedThroughSurah: status === "partial" ? completedPoint.surahNumber : undefined,
+            completedThroughAyah: status === "partial" ? completedPoint.ayah : undefined,
           },
           {
             onSuccess: (res) => {
@@ -796,28 +807,30 @@ export function TeacherTrackDetail() {
                           </div>
 
                           {!isAbsent && assignment && (() => {
-                            const actualPage = completedPageFor(id, assignment);
-                            const isFull = actualPage >= assignment.pageEnd;
-                            const shortfall = assignment.pageEnd - actualPage;
+                            const actualPoint = completedPointFor(id, assignment);
+                            const assignmentEndFlat = toFlatIndex({ surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd });
+                            const actualFlat = toFlatIndex(actualPoint);
+                            const isFull = actualFlat >= assignmentEndFlat;
+                            const shortfallAyahs = assignmentEndFlat - actualFlat;
                             return (
                               <div style={{ border: "1px dashed var(--border)", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
                                 <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text2)", display: "block", marginBottom: 6 }}>
-                                  <i className="ti ti-bookmark" style={{ marginLeft: 4, color: "var(--green)" }} /> الورد الفعلي — الصفحة التي وصل إليها الطالب
+                                  <i className="ti ti-bookmark" style={{ marginLeft: 4, color: "var(--green)" }} /> الورد الفعلي — السورة والآية التي وصل إليها الطالب
                                 </label>
                                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                                  <input
-                                    type="number" className="form-input" style={{ width: 90, fontSize: 12, padding: "6px 8px" }}
-                                    min={assignment.pageStart} max={assignment.pageEnd} disabled={controlsLocked}
-                                    value={actualPage}
-                                    onChange={(ev) => setCompletedPage(id, Math.max(assignment.pageStart, Math.min(assignment.pageEnd, Number(ev.target.value) || assignment.pageStart)))}
+                                  <CompactSurahAyah
+                                    value={actualPoint} disabled={controlsLocked}
+                                    onChange={(v) => setCompletedPoint(id, clampToAssignment(v, assignment))}
                                   />
-                                  <span style={{ fontSize: 11, color: "var(--text3)" }}>من {toAr(assignment.pageStart)} إلى {toAr(assignment.pageEnd)}</span>
+                                  <span style={{ fontSize: 11, color: "var(--text3)" }}>
+                                    من {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)} إلى {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}
+                                  </span>
                                   {!isFull && !controlsLocked && (
                                     <button
                                       type="button"
                                       className="topbar-btn btn-ghost"
                                       style={{ fontSize: 11, padding: "4px 10px" }}
-                                      onClick={() => setCompletedPage(id, assignment.pageEnd)}
+                                      onClick={() => setCompletedPoint(id, { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd })}
                                     >
                                       الورد كامل
                                     </button>
@@ -826,7 +839,7 @@ export function TeacherTrackDetail() {
                                 <div style={{ fontSize: 11, marginTop: 6, color: isFull ? "var(--green)" : "#b45309" }}>
                                   {isFull
                                     ? <><i className="ti ti-check" style={{ marginLeft: 3 }} />سيُسجَّل كمكتمل</>
-                                    : <><i className="ti ti-arrow-forward-up" style={{ marginLeft: 3 }} />سيتم تعويض {toAr(shortfall)} صفحة في باقي أيام خطته</>
+                                    : <><i className="ti ti-arrow-forward-up" style={{ marginLeft: 3 }} />سيتم تعويض {toAr(shortfallAyahs)} آية في باقي أيام خطته</>
                                   }
                                 </div>
                               </div>

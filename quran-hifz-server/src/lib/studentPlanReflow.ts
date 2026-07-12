@@ -1,7 +1,7 @@
 import { IQuranPlan } from '../models/QuranPlan.model';
 import { IStudentOccurrence, IStudentPlanProgress } from '../models/StudentPlanProgress.model';
 import {
-  PlanScheduleInput, RangePoint, computeScheduleBreakdown, fromFlatIndex, firstFlatOfPage, lastFlatOfPage, juzOfFlatIndex, toFlatIndex,
+  PlanScheduleInput, RangePoint, computeScheduleBreakdown, fromFlatIndex, juzOfFlatIndex, toFlatIndex, pageOfFlatIndex,
 } from './quranRange';
 
 function scheduleInputOf(plan: IQuranPlan): PlanScheduleInput {
@@ -47,11 +47,10 @@ export function initStudentOccurrences(plan: IQuranPlan, customRange?: { rangeSt
   }));
 }
 
-export type ReflowEvent = { kind: 'absent' } | { kind: 'partial'; completedThroughPage: number };
+export type ReflowEvent = { kind: 'absent' } | { kind: 'partial'; completedThroughSurah: number; completedThroughAyah: number };
 
-function rangePointFromPage(startPage: boolean, page: number) {
-  const flat = startPage ? firstFlatOfPage(page) : lastFlatOfPage(page);
-  return fromFlatIndex(flat);
+function occurrenceFlatRange(o: { surahStart: number; ayahStart: number; surahEnd: number; ayahEnd: number }) {
+  return { startFlat: toFlatIndex({ surahNumber: o.surahStart, ayah: o.ayahStart }), endFlat: toFlatIndex({ surahNumber: o.surahEnd, ayah: o.ayahEnd }) };
 }
 
 /** Whether this student's own schedule progresses forward (increasing pages)
@@ -67,36 +66,42 @@ function isForwardDoc(doc: IStudentPlanProgress): boolean {
 }
 
 /** Redistributes a shortfall (an absent or partially-completed day) across a
- * student's own remaining pending occurrences, in whole mushaf pages — same
- * even-division rule as the base plan's `sliceForOccurrence` (including
- * reverse-direction schedules), but anchored so the last pool occurrence's
- * true endpoint never moves (the plan's finish line doesn't drift just
- * because one student fell behind). Occurrences already marked
- * `manualOverride` are pinned and excluded from the pool. If the pool is
- * empty (the shortfall lands on/after the student's last occurrence), the
- * leftover is recorded as `overflowPages` instead of inventing a new day —
- * adding a day is a plan-level decision for the teacher to make explicitly. */
+ * student's own remaining pending occurrences, in whole ayahs (not whole
+ * pages — a single-page day can now be partially completed and still have its
+ * exact leftover ayahs carried forward) — same even-division rule as the base
+ * plan's `sliceForOccurrence` (including reverse-direction schedules), but
+ * anchored so the last pool occurrence's true endpoint never moves (the
+ * plan's finish line doesn't drift just because one student fell behind).
+ * `pageStart`/`pageEnd`/`juz` are derived from the resulting ayah boundaries
+ * purely for display/continuity, never the unit of division itself.
+ * Occurrences already marked `manualOverride` are pinned and excluded from
+ * the pool. If the pool is empty (the shortfall lands on/after the student's
+ * last occurrence), the leftover page-span is recorded as `overflowPages`
+ * instead of inventing a new day — adding a day is a plan-level decision for
+ * the teacher to make explicitly. */
 export function reflowStudentPlan(doc: IStudentPlanProgress, triggerIndex: number, event: ReflowEvent): void {
   const triggered = doc.occurrences.find((o) => o.occurrenceIndex === triggerIndex);
   if (!triggered) return;
 
   const forward = isForwardDoc(doc);
   const step = forward ? 1 : -1;
+  const { startFlat: triggerStartFlat, endFlat: triggerEndFlat } = occurrenceFlatRange(triggered);
 
-  let shortfallPages: number;
+  let shortfallAyahs: number;
+  let completedFlat = 0;
   if (event.kind === 'absent') {
     triggered.status = 'absent';
-    shortfallPages = triggered.pageEnd - triggered.pageStart + 1;
+    shortfallAyahs = triggerEndFlat - triggerStartFlat + 1;
   } else {
     triggered.status = 'partial';
-    triggered.completedThroughPage = event.completedThroughPage;
+    triggered.completedThroughSurah = event.completedThroughSurah;
+    triggered.completedThroughAyah = event.completedThroughAyah;
+    completedFlat = toFlatIndex({ surahNumber: event.completedThroughSurah, ayah: event.completedThroughAyah });
     // A day's own passage is always read low→high internally; which side is
     // "undone and continues into future days" depends on the plan's overall
     // direction — the far side from rangeStart, i.e. the side nearer rangeEnd.
-    shortfallPages = forward
-      ? triggered.pageEnd - event.completedThroughPage
-      : event.completedThroughPage - triggered.pageStart;
-    if (shortfallPages <= 0) {
+    shortfallAyahs = forward ? triggerEndFlat - completedFlat : completedFlat - triggerStartFlat;
+    if (shortfallAyahs <= 0) {
       triggered.status = 'done';
       doc.lastReflowedAt = new Date();
       return;
@@ -108,59 +113,67 @@ export function reflowStudentPlan(doc: IStudentPlanProgress, triggerIndex: numbe
     .sort((a, b) => a.occurrenceIndex - b.occurrenceIndex);
 
   if (pool.length === 0) {
-    doc.overflowPages += shortfallPages;
+    const overflowLoFlat = event.kind === 'absent'
+      ? Math.min(triggerStartFlat, triggerEndFlat)
+      : Math.min(forward ? completedFlat + 1 : triggerStartFlat, forward ? triggerEndFlat : completedFlat - 1);
+    const overflowHiFlat = event.kind === 'absent'
+      ? Math.max(triggerStartFlat, triggerEndFlat)
+      : Math.max(forward ? completedFlat + 1 : triggerStartFlat, forward ? triggerEndFlat : completedFlat - 1);
+    doc.overflowPages += pageOfFlatIndex(overflowHiFlat) - pageOfFlatIndex(overflowLoFlat) + 1;
     doc.lastReflowedAt = new Date();
     return;
   }
 
-  const poolOriginalPages = pool.reduce((sum, o) => sum + (o.pageEnd - o.pageStart + 1), 0);
-  const totalPages = shortfallPages + poolOriginalPages;
-  const dailyPages = Math.floor(totalPages / pool.length);
+  const poolOriginalAyahs = pool.reduce((sum, o) => {
+    const { startFlat, endFlat } = occurrenceFlatRange(o);
+    return sum + (endFlat - startFlat + 1);
+  }, 0);
+  const totalAyahs = shortfallAyahs + poolOriginalAyahs;
+  const dailyAyahs = Math.floor(totalAyahs / pool.length);
   const lastEntry = pool[pool.length - 1];
   // The pool's last entry is always the plan's true final occurrence — its
   // true endpoint must stay pinned to the plan's actual rangeEnd (which can
-  // land mid-page), never recomputed from the full page boundary the way
+  // land mid-page), never recomputed from the pool's own division the way
   // intermediate days are, exactly mirroring sliceForOccurrence's own
   // `isLast ? plan.rangeEnd : ...` special case. Which field holds that
   // anchor depends on direction (see sliceForOccurrence).
   const lastEntryAnchor = forward
     ? { surahNumber: lastEntry.baseSurahEnd, ayah: lastEntry.baseAyahEnd }
     : { surahNumber: lastEntry.baseSurahStart, ayah: lastEntry.baseAyahStart };
-  const lastPoolPageEnd = lastEntry.pageEnd;
-  const lastPoolPageStart = lastEntry.pageStart;
+  const { startFlat: lastPoolStartFlat, endFlat: lastPoolEndFlat } = occurrenceFlatRange(lastEntry);
 
-  // cursor starts at the first page of the shortfall content (the page right
-  // after whatever the student actually finished, or the whole day for an
-  // absence) — this is where the pool's redistributed content begins, walking
-  // toward rangeEnd (increasing pages if forward, decreasing if backward).
+  // cursor starts at the first ayah of the shortfall content (right after
+  // whatever the student actually finished, or the whole day for an absence)
+  // — this is where the pool's redistributed content begins, walking toward
+  // rangeEnd (increasing ayahs if forward, decreasing if backward).
   let cursor: number;
   if (event.kind === 'absent') {
-    cursor = forward ? triggered.pageStart : triggered.pageEnd;
+    cursor = forward ? triggerStartFlat : triggerEndFlat;
   } else {
-    cursor = forward ? event.completedThroughPage + 1 : event.completedThroughPage - 1;
+    cursor = forward ? completedFlat + 1 : completedFlat - 1;
   }
 
   pool.forEach((o, i) => {
     const isLast = i === pool.length - 1;
-    const blockNearStartPage = cursor;
-    const blockNearEndPage = isLast
-      ? (forward ? lastPoolPageEnd : lastPoolPageStart)
-      : blockNearStartPage + (dailyPages - 1) * step;
-    const loPage = Math.min(blockNearStartPage, blockNearEndPage);
-    const hiPage = Math.max(blockNearStartPage, blockNearEndPage);
+    const blockNearStartFlat = cursor;
+    const blockNearEndFlat = isLast
+      ? (forward ? lastPoolEndFlat : lastPoolStartFlat)
+      : blockNearStartFlat + (dailyAyahs - 1) * step;
+    const loFlat = Math.min(blockNearStartFlat, blockNearEndFlat);
+    const hiFlat = Math.max(blockNearStartFlat, blockNearEndFlat);
 
-    let start = rangePointFromPage(true, loPage);
-    let end = rangePointFromPage(false, hiPage);
+    let start = fromFlatIndex(loFlat);
+    let end = fromFlatIndex(hiFlat);
     if (isLast) { if (forward) end = lastEntryAnchor; else start = lastEntryAnchor; }
 
-    o.pageStart = loPage;
-    o.pageEnd = hiPage;
     o.surahStart = start.surahNumber; o.ayahStart = start.ayah;
     o.surahEnd = end.surahNumber; o.ayahEnd = end.ayah;
+    o.pageStart = pageOfFlatIndex(toFlatIndex(start));
+    o.pageEnd = pageOfFlatIndex(toFlatIndex(end));
     o.juz = juzOfFlatIndex(toFlatIndex(start));
     o.carryOverNote = `يشمل تعويضاً من اليوم رقم ${triggerIndex}`;
 
-    cursor = blockNearEndPage + step;
+    cursor = blockNearEndFlat + step;
   });
 
   doc.overflowPages = 0;
@@ -180,11 +193,17 @@ export function reflowAll(doc: IStudentPlanProgress): void {
 
   for (const o of unresolved) {
     // Fallback (should rarely trigger — recordOccurrence always sets
-    // completedThroughPage for 'partial') represents "nothing done", which
-    // sits just outside the occurrence's range on the rangeStart-facing side.
-    const noneDoneFallback = forward ? o.basePageStart - 1 : o.basePageEnd + 1;
+    // completedThrough* for 'partial') represents "nothing done", which sits
+    // just outside the occurrence's range on the rangeStart-facing side.
+    const noneDoneFallbackFlat = forward
+      ? toFlatIndex({ surahNumber: o.baseSurahStart, ayah: o.baseAyahStart }) - 1
+      : toFlatIndex({ surahNumber: o.baseSurahEnd, ayah: o.baseAyahEnd }) + 1;
+    const noneDoneFallback = fromFlatIndex(noneDoneFallbackFlat);
+    const completedPoint = o.completedThroughSurah != null && o.completedThroughAyah != null
+      ? { surahNumber: o.completedThroughSurah, ayah: o.completedThroughAyah }
+      : noneDoneFallback;
     const event: ReflowEvent =
-      o.status === 'absent' ? { kind: 'absent' } : { kind: 'partial', completedThroughPage: o.completedThroughPage ?? noneDoneFallback };
+      o.status === 'absent' ? { kind: 'absent' } : { kind: 'partial', completedThroughSurah: completedPoint.surahNumber, completedThroughAyah: completedPoint.ayah };
     reflowStudentPlan(doc, o.occurrenceIndex, event);
   }
 }

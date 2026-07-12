@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T10:42:45.431Z
-> Files: 446 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T12:10:20.576Z
+> Files: 447 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/
 
@@ -59,6 +59,7 @@
 
 - `add_bug.py` (~552 tok)
 - `add_bug2.py` (~466 tok)
+- `test_reflow_ayah.mjs` — Declares BASE (~763 tok)
 - `verify_roster.mjs` — Declares BASE (~885 tok)
 - `verify_roster2.mjs` — Declares BASE (~697 tok)
 - `verify.mjs` — Declares BASE (~429 tok)
@@ -396,7 +397,7 @@
 - `quran-plan.controller.ts` — Freezes the plan's live-computed day-by-day schedule into `plan.schedule` (~3498 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
-- `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~3164 tok)
+- `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~3440 tok)
 - `student.controller.ts` — Zod schemas: studentSchema (~1756 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1398 tok)
 
@@ -410,7 +411,7 @@
 - `notify.ts` — Builds one Message per student (skipping students with no linked parent (~600 tok)
 - `planStudents.ts` — Resolves which students are covered by a plan, branching on `targetType` (~352 tok)
 - `quranRange.ts` — Standard 604-page Madani mushaf boundary table (surah:ayah each page starts at). (~4207 tok)
-- `studentPlanReflow.ts` — Builds a fresh per-student occurrence array — `base*` and current fields (~2629 tok)
+- `studentPlanReflow.ts` — Builds a fresh per-student occurrence array — `base*` and current fields (~3091 tok)
 
 ## quran-hifz-server/src/middleware/
 
@@ -435,7 +436,7 @@
 - `QuranPlan.model.ts` — Exports PlanType, IPointRule, IRangePoint, IScheduleEntry + 2 more (~1198 tok)
 - `SpecialTrack.model.ts` — Exports ISpecialTrack, SpecialTrack (~429 tok)
 - `Student.model.ts` — Exports IStudent, Student (~498 tok)
-- `StudentPlanProgress.model.ts` — Exports StudentOccurrenceStatus, IStudentOccurrence, IStudentPlanProgress, StudentPlanProgress (~971 tok)
+- `StudentPlanProgress.model.ts` — Exports StudentOccurrenceStatus, IStudentOccurrence, IStudentPlanProgress, StudentPlanProgress (~994 tok)
 - `Teacher.model.ts` — Exports ITeacher, Teacher (~289 tok)
 - `User.model.ts` — Exports UserRole, IUser, User (~383 tok)
 
@@ -592,7 +593,7 @@
 - `quran-plans.ts` — sessionStorage key used to hand off "open the plan form" from wherever a (~1675 tok)
 - `special-tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~891 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~166 tok)
-- `student-plan-progress.ts` — False when the student has no individual overlay yet — `effectiveSchedule` (~1652 tok)
+- `student-plan-progress.ts` — False when the student has no individual overlay yet — `effectiveSchedule` (~1673 tok)
 - `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~803 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~504 tok)
 
@@ -692,7 +693,7 @@
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — Add `n` calendar days to a bare YYYY-MM-DD string using pure UTC arithmetic. (~10969 tok)
+- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~11698 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1419 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
 - `TeacherGroupHomework.tsx` — STUDENTS (~2926 tok)
@@ -706,7 +707,7 @@
 - `TeacherSpecialTracks.tsx` — surahName (~2758 tok)
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
 - `TeacherStudents.tsx` — Single unified table (halqa students + special-track-only students merged by id), one filter dropdown (كل الطلاب / per-halqa / per-track) replaces old tab UI. Shows guardian name/phone + track badges columns (~2700 tok)
-- `TeacherTrackDetail.tsx` — Track roster/schedule page; imports shared `IndividualPlanPanel`/`planCoversStudent` from components/common instead of local copies (~14200 tok)
+- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~16992 tok)
 
 ## quran-hifz/src/quran/router/
 

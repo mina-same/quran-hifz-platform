@@ -28,7 +28,8 @@ export interface IStudentOccurrence {
   juz: number;
 
   status: StudentOccurrenceStatus;
-  completedThroughPage?: number;
+  completedThroughSurah?: number;
+  completedThroughAyah?: number;
   // Once true, reflowStudentPlan() excludes this occurrence from the
   // redistribution pool entirely — a teacher's hand-edit is never silently
   // overwritten by a later absence/shortfall.
@@ -69,8 +70,9 @@ const studentOccurrenceSchema = new Schema<IStudentOccurrence>(
     pageEnd:    { type: Number, required: true },
     juz:        { type: Number, required: true },
 
-    status:                { type: String, enum: ['pending', 'done', 'partial', 'absent'], default: 'pending' },
-    completedThroughPage:  { type: Number },
+    status:                 { type: String, enum: ['pending', 'done', 'partial', 'absent'], default: 'pending' },
+    completedThroughSurah:  { type: Number },
+    completedThroughAyah:   { type: Number },
     manualOverride:        { type: Boolean, default: false },
     carryOverNote:         { type: String },
   },

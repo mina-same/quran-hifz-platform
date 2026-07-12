@@ -67,10 +67,11 @@ export async function getStudentProgress(req: Request, res: Response, next: Next
 const recordOccurrenceSchema = z.object({
   occurrenceIndex: z.number().int().min(1),
   status: z.enum(['done', 'partial', 'absent']),
-  completedThroughPage: z.number().int().min(1).max(604).optional(),
+  completedThroughSurah: z.number().int().min(1).max(114).optional(),
+  completedThroughAyah: z.number().int().min(1).optional(),
 }).superRefine((data, ctx) => {
-  if (data.status === 'partial' && data.completedThroughPage == null) {
-    ctx.addIssue({ code: 'custom', message: 'يجب تحديد الصفحة التي وصل إليها الطالب', path: ['completedThroughPage'] });
+  if (data.status === 'partial' && (data.completedThroughSurah == null || data.completedThroughAyah == null)) {
+    ctx.addIssue({ code: 'custom', message: 'يجب تحديد السورة والآية التي وصل إليها الطالب', path: ['completedThroughAyah'] });
   }
 });
 
@@ -91,11 +92,24 @@ export async function recordOccurrence(req: Request, res: Response, next: NextFu
 
     if (data.status === 'done') {
       entry.status = 'done';
-      entry.completedThroughPage = entry.pageEnd;
+      entry.completedThroughSurah = entry.surahEnd;
+      entry.completedThroughAyah = entry.ayahEnd;
     } else if (data.status === 'absent') {
       reflowStudentPlan(doc, data.occurrenceIndex, { kind: 'absent' });
     } else {
-      reflowStudentPlan(doc, data.occurrenceIndex, { kind: 'partial', completedThroughPage: data.completedThroughPage! });
+      const surah = SURAH_BY_NUMBER.get(data.completedThroughSurah!);
+      if (surah && data.completedThroughAyah! > surah.ayahCount) {
+        throw new AppError(`سورة ${surah.name} تحتوي على ${surah.ayahCount} آية فقط`, 400);
+      }
+      const completedFlat = toFlatIndex({ surahNumber: data.completedThroughSurah!, ayah: data.completedThroughAyah! });
+      const entryStartFlat = toFlatIndex({ surahNumber: entry.surahStart, ayah: entry.ayahStart });
+      const entryEndFlat = toFlatIndex({ surahNumber: entry.surahEnd, ayah: entry.ayahEnd });
+      if (completedFlat < entryStartFlat || completedFlat > entryEndFlat) {
+        throw new AppError('النقطة التي وصل إليها الطالب يجب أن تقع ضمن الورد المقرر لهذا اليوم', 400);
+      }
+      reflowStudentPlan(doc, data.occurrenceIndex, {
+        kind: 'partial', completedThroughSurah: data.completedThroughSurah!, completedThroughAyah: data.completedThroughAyah!,
+      });
     }
 
     await doc.save();

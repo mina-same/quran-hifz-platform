@@ -9,7 +9,8 @@ export type StudentOccurrence = ScheduleEntry & {
   baseSurahEnd: number; baseAyahEnd: number;
   basePageStart: number; basePageEnd: number; baseJuz: number;
   status: StudentOccurrenceStatus;
-  completedThroughPage?: number;
+  completedThroughSurah?: number;
+  completedThroughAyah?: number;
   manualOverride: boolean;
   carryOverNote?: string;
 };
@@ -65,7 +66,8 @@ export function useRecordStudentOccurrence() {
   return useMutation({
     mutationFn: ({ planId, studentId, ...body }: {
       planId: string; studentId: string;
-      occurrenceIndex: number; status: "done" | "partial" | "absent"; completedThroughPage?: number;
+      occurrenceIndex: number; status: "done" | "partial" | "absent";
+      completedThroughSurah?: number; completedThroughAyah?: number;
     }) => post<SingleResponse>(`/quran-plans/${planId}/students/${studentId}/progress/record`, body),
     onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: progressKey(vars.planId, vars.studentId) }),
   });
