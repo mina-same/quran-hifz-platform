@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
 import {
@@ -9,9 +10,11 @@ import {
 import { useHalqat } from "../../api/halqat";
 import { useStudents } from "../../api/students";
 import { useSpecialTracks } from "../../api/special-tracks";
+import { useStudentPlanProgressList } from "../../api/student-plan-progress";
 import { Card } from "../../components/common/Card";
 import { DaysOfWeekPicker } from "../../components/common/DaysOfWeekPicker";
 import { SurahPointFields } from "../../components/common/SurahRangePicker";
+import { IndividualPlanPanel } from "../../components/common/IndividualPlanPanel";
 import { countRangeAyahs, pageRangeOfAyahRange } from "../../lib/quranRange";
 
 const PLAN_TYPES: { value: PlanType; label: string; icon: string; fg: string; bg: string }[] = [
@@ -96,6 +99,9 @@ export function TeacherPlanForm() {
   const createPlan = useCreateQuranPlan();
   const updatePlan = useUpdateQuranPlan();
 
+  const [planRecord, setPlanRecord] = useState<QuranPlan | null>(handoff?.mode === "edit" ? handoff.plan : null);
+  const [planPanelStudentId, setPlanPanelStudentId] = useState<string | null>(null);
+
   const [form, setForm] = useState<FormFields>(() => {
     if (handoff?.mode === "edit") return fieldsFromPlan(handoff.plan);
     if (handoff?.mode === "duplicate") return fieldsFromPlan(handoff.plan, " (نسخة)");
@@ -110,9 +116,17 @@ export function TeacherPlanForm() {
     setForm((p) => ({ ...p, [k]: v }));
   }
 
-  const editingId = handoff?.mode === "edit" ? handoff.plan._id : undefined;
   const title = handoff?.mode === "edit" ? "تعديل الخطة" : handoff?.mode === "duplicate" ? "نسخ الخطة" : "خطة قرآنية جديدة";
   const typeCfg = PLAN_TYPES.find((t) => t.value === form.type) ?? PLAN_TYPES[0];
+
+  const { data: halqaStudents = [] } = useStudents({ halqa: form.halqa }, { enabled: form.targetType === "halqa" && !!form.halqa });
+  const { data: trackStudents = [] } = useStudents({ specialTrack: form.specialTrack }, { enabled: form.targetType === "specialTrack" && !!form.specialTrack });
+  const rosterStudents =
+    form.targetType === "halqa" ? halqaStudents :
+    form.targetType === "specialTrack" ? trackStudents :
+    allStudents.filter((s) => form.students.includes(s._id));
+
+  const progressByStudentId = useStudentPlanProgressList(planRecord?._id, rosterStudents.map((s) => s._id));
 
   async function handleSubmit() {
     if (!form.name.trim())      { setFormError("اسم الخطة مطلوب"); return; }
@@ -142,12 +156,11 @@ export function TeacherPlanForm() {
     };
 
     try {
-      if (editingId) {
-        await updatePlan.mutateAsync({ id: editingId, ...body });
-      } else {
-        await createPlan.mutateAsync(body);
-      }
-      showPage("plans");
+      const result = planRecord
+        ? await updatePlan.mutateAsync({ id: planRecord._id, ...body })
+        : await createPlan.mutateAsync(body);
+      setPlanRecord(result.data);
+      toast.success("تم حفظ الخطة");
     } catch (e) {
       setFormError((e as Error).message);
     }
@@ -297,6 +310,47 @@ export function TeacherPlanForm() {
           </div>
         )}
       </Card>
+
+      {/* ── Roster card — students covered by the chosen target ── */}
+      {rosterStudents.length > 0 && (
+        <Card icon="ti-list-details" title="طلاب الخطة">
+          {!planRecord && (
+            <div style={{
+              marginBottom: 12, padding: "10px 14px", borderRadius: 10,
+              background: "var(--cream)", fontSize: 12, color: "var(--text3)",
+            }}>
+              احفظ الخطة أولاً لتتمكن من إدارة خطط الطلاب الفردية
+            </div>
+          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {rosterStudents.map((s) => (
+              <div key={s._id} style={{ border: "1px solid var(--border)", borderRadius: 10, padding: "10px 12px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>{s.name}</span>
+                  {planRecord && (
+                    <button
+                      type="button"
+                      className="topbar-btn btn-ghost"
+                      style={{ fontSize: 11, padding: "5px 10px" }}
+                      onClick={() => setPlanPanelStudentId((cur) => (cur === s._id ? null : s._id))}
+                    >
+                      {planPanelStudentId === s._id
+                        ? <><i className="ti ti-chevron-up" /> إخفاء الخطة الفردية</>
+                        : progressByStudentId[s._id]?.progressIsPersisted
+                          ? <><i className="ti ti-list-details" /> عرض الخطة الفردية</>
+                          : <><i className="ti ti-plus" /> أنشئ خطة فردية</>
+                      }
+                    </button>
+                  )}
+                </div>
+                {planRecord && planPanelStudentId === s._id && (
+                  <IndividualPlanPanel planId={planRecord._id} studentId={s._id} studentName={s.name} basePlan={planRecord} />
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* ── Days card ── */}
       <Card icon="ti-calendar-week" title="أيام الخطة">

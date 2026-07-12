@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T09:21:24.758Z
-> Files: 444 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T10:42:45.431Z
+> Files: 446 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/
 
@@ -59,6 +59,8 @@
 
 - `add_bug.py` (~552 tok)
 - `add_bug2.py` (~466 tok)
+- `verify_roster.mjs` — Declares BASE (~885 tok)
+- `verify_roster2.mjs` — Declares BASE (~697 tok)
 - `verify.mjs` — Declares BASE (~429 tok)
 - `verify2.mjs` — Declares BASE (~655 tok)
 - `verify3.mjs` — Declares BASE (~409 tok)
@@ -90,7 +92,7 @@
 - `cryptic-gliding-gadget.md` — Mobile-friendly redesign for `quran-hifz` web (bottom sheets + scroll-free tables) (~2270 tok)
 - `ethereal-popping-babbage.md` — دمج الحضور والتقييم + تطوير صفحة التقارير (~2555 tok)
 - `partitioned-percolating-phoenix.md` — خطة قرآنية — Teacher Quran Plan Builder (~3202 tok)
-- `replicated-twirling-pearl.md` — Reverse-direction ranges, per-student custom-range plan creation, inline individual-plan view (~3335 tok)
+- `replicated-twirling-pearl.md` — Show the target roster in the plan form, with per-student individual-plan management (~1233 tok)
 
 ## ./
 
@@ -697,14 +699,14 @@
 - `TeacherHalqa.tsx` — TeacherHalqa (~210 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
 - `TeacherPlanDetail.tsx` — surahName — renders table (~3558 tok)
-- `TeacherPlanForm.tsx` — PLAN_TYPES — renders form (~5598 tok)
+- `TeacherPlanForm.tsx` — Create/edit plan form; tracks saved `planRecord` (no auto-nav on save, toast instead) and shows a "طلاب الخطة" roster card (halqa/specialTrack/students) with per-student `IndividualPlanPanel` (~7100 tok)
 - `TeacherPlans.tsx` — surahName (~4262 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
 - `TeacherSpecialTracks.tsx` — surahName (~2758 tok)
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
 - `TeacherStudents.tsx` — Single unified table (halqa students + special-track-only students merged by id), one filter dropdown (كل الطلاب / per-halqa / per-track) replaces old tab UI. Shows guardian name/phone + track badges columns (~2700 tok)
-- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~19859 tok)
+- `TeacherTrackDetail.tsx` — Track roster/schedule page; imports shared `IndividualPlanPanel`/`planCoversStudent` from components/common instead of local copies (~14200 tok)
 
 ## quran-hifz/src/quran/router/
 
