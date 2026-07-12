@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
@@ -12,18 +13,23 @@ import {
 } from "../../components/common/ContextPicker";
 import { SkeletonCard, SkeletonTable } from "../../components/common/Skeleton";
 import { Leaderboard } from "../../components/common/Leaderboard";
+import { IndividualPlanPanel, planCoversStudent } from "../../components/common/IndividualPlanPanel";
 import { useHalqat } from "../../api/halqat";
 import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudents } from "../../api/students";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
 import { useQuranPlans, type ScheduleEntry } from "../../api/quran-plans";
 import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
+import { useRecordStudentOccurrence, useStudentPlanProgressList } from "../../api/student-plan-progress";
 import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
 import { toAr, pct } from "../../../lib/format";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
+}
+function avatarInitials(name: string) {
+  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0] ?? "").join("");
 }
 
 // Matches the server's ARABIC_WEEKDAYS (attendance.controller.ts), indexed by
@@ -103,13 +109,11 @@ function totalOf(e: StudentEval): number {
 
 export function TeacherAttendance() {
   const { user } = usePortal();
+  const teacherId = user?.profileId as string | undefined;
   const [selected, setSelected] = useState<TeachingContext | null>(null);
 
-  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: user?.profileId });
-  const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(
-    undefined,
-    user?.profileId as string | undefined,
-  );
+  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: teacherId });
+  const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, teacherId);
 
   const contexts: TeachingContext[] = [
     ...halqat.map(halqaToContext),
@@ -143,6 +147,7 @@ export function TeacherAttendance() {
 
   const { data: students = [], isLoading: loadingStudents } = useStudents(contextFilter);
   const bulkEvaluate = useBulkEvaluate();
+  const recordOccurrence = useRecordStudentOccurrence();
 
   // Local calendar date, not UTC (`toISOString()` lags a day behind local wall-clock
   // time for the first `offset` hours of each day in any UTC+ timezone).
@@ -153,11 +158,15 @@ export function TeacherAttendance() {
   // `schedule` (server-computed list of every occurrence's date + ayah slice +
   // juz'), which is the source of truth for which days have an assignment.
   const { data: plans = [], isLoading: loadingPlans } = useQuranPlans(contextFilter);
+  // The plan whose target actually matches this context (a halqa/track can
+  // still carry other stray plans) — the one individual per-student plans
+  // (below) hang off of, same "one linked plan" model as TeacherTrackDetail.
+  const linkedPlan = plans.find((p) => p.targetType === (selected?.kind === "specialTrack" ? "specialTrack" : "halqa")) ?? plans[0];
 
   // Day slider state — "" means "not yet chosen", falls back to defaultDate.
   const [selectedDate, setSelectedDate] = useState("");
 
-  const { scheduledSet, scheduledSorted, assignmentByDate, dayChips, defaultDate, effectiveDate } =
+  const { scheduledSet, scheduledSorted, assignmentByDate, dayChips, effectiveDate } =
     useMemo(() => {
       const set = new Set<string>();
       const byDate = new Map<string, ScheduleEntry>();
@@ -185,10 +194,19 @@ export function TeacherAttendance() {
         scheduledSorted: sorted,
         assignmentByDate: byDate,
         dayChips: chips,
-        defaultDate: dflt,
         effectiveDate: effective,
       };
     }, [plans, selectedDate, today]);
+
+  // Each covered student can have their own effective schedule (absence/
+  // shortfall reflow, manual per-student overrides) once they have an
+  // individual plan overlay — fetch every covered student's own progress in
+  // one batched hook call, same as TeacherTrackDetail's students tab.
+  const coveredStudentIds = useMemo(() => {
+    if (!linkedPlan) return [];
+    return students.map((s) => s._id).filter((id) => planCoversStudent(linkedPlan, id));
+  }, [students, linkedPlan]);
+  const progressByStudentId = useStudentPlanProgressList(linkedPlan?._id, coveredStudentIds);
 
   // Which student's row is expanded — collapsed rows show only avatar/name/status
   // summary, matching the roster list on the Special Track detail page's "الطلاب" tab.
@@ -196,20 +214,35 @@ export function TeacherAttendance() {
   function toggleStudent(id: string) {
     setExpandedStudentId((prev) => (prev === id ? null : id));
   }
+  // Which student's individual-plan panel is open (at most one at a time).
+  const [planPanelStudentId, setPlanPanelStudentId] = useState<string | null>(null);
+  function togglePlanPanel(id: string) {
+    setPlanPanelStudentId((cur) => (cur === id ? null : id));
+  }
 
   // Reset per-student edits when the effective day changes so Monday's edits
   // don't leak into Tuesday's roster for the same students.
   useEffect(() => {
     setOverrides({});
+    setCompletionOverrides({});
     setDayNotice(null);
-    setEditUnlocked(false);
+    setUnlockedIds(new Set());
     setExpandedStudentId(null);
   }, [effectiveDate]);
 
-  // Relock automatically once the edited data is actually saved, so re-opening
-  // requires tapping "تعديل" again rather than staying permanently unlocked.
+  // Once a student's save succeeds, re-lock their row automatically —
+  // reopening it again requires an explicit "تعديل" tap, same "sent once"
+  // guard as before but scoped to a single student instead of the whole day.
   useEffect(() => {
-    if (bulkEvaluate.isSuccess) setEditUnlocked(false);
+    if (bulkEvaluate.isSuccess && lastSavedId) {
+      setUnlockedIds((prev) => {
+        if (!prev.has(lastSavedId)) return prev;
+        const next = new Set(prev);
+        next.delete(lastSavedId);
+        return next;
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bulkEvaluate.isSuccess]);
 
   // Auto-scroll the active day chip into view whenever the effective day changes
@@ -287,14 +320,19 @@ export function TeacherAttendance() {
   }, [history]);
 
   const [overrides, setOverrides] = useState<Record<string, StudentEval>>({});
+  // Which mushaf page each student actually reached today — defaults to the
+  // day's full assigned pageEnd (i.e. "finished it all") until the teacher
+  // pulls it back for a student who fell short.
+  const [completionOverrides, setCompletionOverrides] = useState<Record<string, number>>({});
   // Transient message when the teacher taps a day-chip that isn't part of the
   // plan — those chips are visually disabled but still clickable so the click
   // can explain *why*, instead of silently doing nothing.
   const [dayNotice, setDayNotice] = useState<string | null>(null);
-  // Deliberate override for a day whose attendance/evaluation was already sent —
-  // the teacher must explicitly tap "تعديل" to reopen it, rather than it always
-  // being editable (which would make the "sent once" guard pointless).
-  const [editUnlocked, setEditUnlocked] = useState(false);
+  // Per-student re-open guard — a saved student's row stays read-only until
+  // the teacher explicitly taps "تعديل" for that student.
+  const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
+  const [lastSavedId, setLastSavedId] = useState<string | null>(null);
+
   const evalFor = (studentId: string): StudentEval =>
     overrides[studentId] ?? savedById[studentId] ?? blankEval();
 
@@ -310,87 +348,109 @@ export function TeacherAttendance() {
       [studentId]: { ...evalFor(studentId), [category]: value },
     }));
   }
+  function unlockStudent(studentId: string) {
+    setUnlockedIds((prev) => new Set(prev).add(studentId));
+  }
+  function completedPageFor(studentId: string, forAssignment: ScheduleEntry): number {
+    return completionOverrides[studentId] ?? forAssignment.pageEnd;
+  }
+  function setCompletedPage(studentId: string, page: number) {
+    setCompletionOverrides((prev) => ({ ...prev, [studentId]: page }));
+  }
+  // Each student's own assigned portion for the selected day — falls back to
+  // the shared plan schedule (assignmentByDate) for anyone with no individual
+  // overlay yet, matching the API's own graceful-degradation behavior.
+  function assignmentForStudent(studentId: string): ScheduleEntry | undefined {
+    const perStudent = progressByStudentId[studentId]?.effectiveSchedule.find((o) => toDateOnly(o.date) === effectiveDate);
+    return perStudent ?? assignmentByDate.get(effectiveDate);
+  }
 
-  const assignment = assignmentByDate.get(effectiveDate);
-  const hasAssignment = !!assignment;
-  // Once evaluations exist for this exact day, block re-sending — a second
-  // bulk-evaluate would re-notify parents and could overwrite the teacher's
-  // recorded scores. The roster stays read-only until a different day is picked.
-  const alreadySubmitted = savedToday.length > 0;
-  // A plan day can be scheduled in the future (recurring plans list every
-  // upcoming occurrence) — the teacher can look ahead at what's due, but can't
-  // record attendance for a session that hasn't happened yet.
   const isFutureDay = effectiveDate > today;
-  const lockReason: "submitted" | "future" | null = alreadySubmitted
-    ? "submitted"
-    : isFutureDay
-      ? "future"
-      : null;
-  // Explicitly re-opened via the "تعديل" button — only meaningful for a
-  // same-day resend; a future day was never sent, so there's nothing to edit.
-  const locked = lockReason !== null && !(lockReason === "submitted" && editUnlocked);
+
+  function saveStudent(studentId: string, studentName: string) {
+    if (isFutureDay || !selected) return;
+    const e = evalFor(studentId);
+    const records: BulkEvaluateRecord[] = [{
+      student: studentId,
+      attendanceStatus: e.attendanceStatus,
+      hifz: e.hifz,
+      tajweed: e.tajweed,
+      talawah: e.talawah,
+    }];
+    setLastSavedId(studentId);
+    const toastId = toast.loading("جاري حفظ الحضور والتقييم...");
+    bulkEvaluate.mutate(
+      {
+        teacher: teacherId!,
+        ...(selected.kind === "halqa" ? { halqa: selected.id } : { specialTrack: selected.id }),
+        date: effectiveDate,
+        records,
+      },
+      {
+        onSuccess: () => {
+          // Feed the day's outcome into the student's individual plan overlay so
+          // an absence or a partial completion gets redistributed across their
+          // remaining days — only meaningful when there's an assigned portion.
+          const studentAssignment = linkedPlan && planCoversStudent(linkedPlan, studentId) ? assignmentForStudent(studentId) : undefined;
+          if (!linkedPlan || !studentAssignment) {
+            toast.success("تم الحفظ بنجاح", { id: toastId });
+            return;
+          }
+          const completedThroughPage = completedPageFor(studentId, studentAssignment);
+          const status = e.attendanceStatus === "غائب" ? "absent" : completedThroughPage < studentAssignment.pageEnd ? "partial" : "done";
+
+          if (status === "done") {
+            toast.success("تم حفظ الحضور والتقييم بنجاح", { id: toastId });
+            recordOccurrence.mutate({ planId: linkedPlan._id, studentId, occurrenceIndex: studentAssignment.occurrenceIndex, status });
+            return;
+          }
+
+          toast.loading(
+            status === "absent"
+              ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
+              : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`,
+            { id: toastId },
+          );
+          recordOccurrence.mutate(
+            {
+              planId: linkedPlan._id, studentId, occurrenceIndex: studentAssignment.occurrenceIndex,
+              status, completedThroughPage: status === "partial" ? completedThroughPage : undefined,
+            },
+            {
+              onSuccess: (res) => {
+                toast.success(
+                  status === "absent"
+                    ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
+                    : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`,
+                  { id: toastId },
+                );
+                if (res.data.overflowPages > 0) {
+                  toast.warning(`لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`);
+                }
+              },
+              onError: (err) => toast.error((err as Error).message, { id: toastId }),
+            },
+          );
+        },
+        onError: (err) => toast.error((err as Error).message, { id: toastId }),
+      },
+    );
+  }
 
   useTopbar(
     "ti-calendar-check",
     selected ? `الحضور والتقييم — ${selected.title}` : "الحضور والتقييم",
     selected ? (
-      <div style={{ display: "flex", gap: 8 }}>
-        <button
-          className="topbar-btn btn-ghost"
-          onClick={() => {
-            setSelected(null);
-            setOverrides({});
-            setSelectedDate("");
-          }}
-        >
-          <i className="ti ti-arrow-right" /> الحلقات والمسارات
-        </button>
-        {lockReason === "submitted" && !editUnlocked && (
-          <button
-            className="topbar-btn btn-ghost"
-            onClick={() => setEditUnlocked(true)}
-          >
-            <i className="ti ti-edit" /> تعديل حضور اليوم
-          </button>
-        )}
-        <button
-          className="topbar-btn btn-primary"
-          onClick={() => {
-            const records: BulkEvaluateRecord[] = students.map((s) => {
-              const e = evalFor(s._id);
-              return {
-                student: s._id,
-                attendanceStatus: e.attendanceStatus,
-                hifz: e.hifz,
-                tajweed: e.tajweed,
-                talawah: e.talawah,
-              };
-            });
-            bulkEvaluate.mutate({
-              teacher: user!.profileId as string,
-              ...(selected.kind === "halqa"
-                ? { halqa: selected.id }
-                : { specialTrack: selected.id }),
-              date: effectiveDate,
-              records,
-            });
-          }}
-          disabled={bulkEvaluate.isPending || !hasAssignment || locked}
-        >
-          <i
-            className={`ti ${lockReason === "submitted" ? (editUnlocked ? "ti-device-floppy" : "ti-circle-check") : lockReason === "future" ? "ti-clock" : "ti-send"}`}
-          />
-          {bulkEvaluate.isPending
-            ? "جارٍ الحفظ..."
-            : lockReason === "submitted"
-              ? editUnlocked
-                ? "حفظ التعديلات"
-                : "تم الإرسال لهذا اليوم"
-              : lockReason === "future"
-                ? "اليوم لم يحن بعد"
-                : "حفظ وإرسال إشعارات"}
-        </button>
-      </div>
+      <button
+        className="topbar-btn btn-ghost"
+        onClick={() => {
+          setSelected(null);
+          setOverrides({});
+          setSelectedDate("");
+        }}
+      >
+        <i className="ti ti-arrow-right" /> الحلقات والمسارات
+      </button>
     ) : undefined,
   );
 
@@ -411,10 +471,7 @@ export function TeacherAttendance() {
     );
   }
 
-  // ── View 2: day slider + attendance + evaluation list ─────────────
-  const presentCount = students.filter((s) => evalFor(s._id).attendanceStatus === "حاضر").length;
-  const absentCount = students.length - presentCount;
-
+  // ── View 2: day slider + per-student attendance/evaluation/plan roster ──
   return (
     <>
       {/* Day slider — only when there are scheduled days for this context */}
@@ -486,44 +543,16 @@ export function TeacherAttendance() {
 
       {!loadingPlans && scheduledSorted.length === 0 && (
         <Alert tone="warning">
-          لا يوجد خطة حفظ نشطة لهذه {selected.kind === "halqa" ? "الحلقة" : "المسار"} — لا يمكن
-          تسجيل الحضور والتقييم بدون خطة تحدد الآيات المطلوبة لكل يوم. أضف خطة من صفحة "الخطط
-          القرآنية" أولاً.
+          لا يوجد خطة حفظ نشطة لهذه {selected.kind === "halqa" ? "الحلقة" : "المسار"} — لا يمكن تحديد
+          يوم محدد لتسجيل الحضور والتقييم، لكن يمكنك تسجيل حضور اليوم مباشرة أدناه. أضف خطة من صفحة
+          "الخطط القرآنية" أولاً لتفعيل التقويم.
         </Alert>
       )}
 
-      {assignment && (
-        <div className="assignment-banner">
-          <div className="assignment-icon">
-            <i className="ti ti-book-2" />
-          </div>
-          <div className="assignment-body">
-            <div className="assignment-label">
-              <i className="ti ti-clipboard-text" /> الورد المقرر
-            </div>
-            <div className="assignment-range">
-              <span>
-                {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)}
-              </span>
-              <i className="ti ti-arrow-left assignment-arrow" />
-              <span>
-                {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}
-              </span>
-            </div>
-          </div>
-          <div className="assignment-meta">
-            <span className="assignment-pill">
-              <i className="ti ti-file-text" />
-              {assignment.pageEnd !== assignment.pageStart
-                ? `من صفحة ${toAr(assignment.pageStart)} إلى صفحة ${toAr(assignment.pageEnd)}`
-                : `صفحة ${toAr(assignment.pageStart)}`}
-            </span>
-            <span className="assignment-pill">
-              <i className="ti ti-bookmark" />
-              الجزء {toAr(assignment.juz)}
-            </span>
-          </div>
-        </div>
+      {isFutureDay && (
+        <Alert tone="warning" icon="ti-clock">
+          هذا اليوم لم يحن بعد — لا يمكن تسجيل الحضور والتقييم مسبقًا لجلسة لم تُعقد.
+        </Alert>
       )}
 
       {(loadingPlans || scheduledSorted.length > 0) && (
@@ -536,153 +565,200 @@ export function TeacherAttendance() {
         >
           {loadingStudents ? (
             <SkeletonTable cols={3} rows={5} />
+          ) : students.length === 0 ? (
+            <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>لا يوجد طلاب</div>
           ) : (
-            <>
-              {lockReason === "submitted" && !editUnlocked && (
-                <Alert tone="success" icon="ti-lock">
-                  تم إرسال الحضور والتقييم لهذا اليوم مسبقًا. لتصحيح أي بيانات اضغط "تعديل حضور
-                  اليوم" أعلى الصفحة.
-                </Alert>
-              )}
-              {lockReason === "submitted" && editUnlocked && (
-                <Alert tone="warning" icon="ti-edit">
-                  وضع التعديل مفعّل — عدّل الحضور أو الدرجات ثم اضغط "حفظ التعديلات" لإرسالها
-                  مجددًا.
-                </Alert>
-              )}
-              {lockReason === "future" && (
-                <Alert tone="warning" icon="ti-clock">
-                  هذا اليوم لم يحن بعد — لا يمكن تسجيل الحضور والتقييم مسبقًا لجلسة لم تُعقد. عد إلى
-                  هذا اليوم بعد حلوله.
-                </Alert>
-              )}
-              {students.length > 0 && (
-                <div className="att-summary">
-                  <span className="att-chip">
-                    <i className="ti ti-check" /> حاضر: {toAr(presentCount)}
-                  </span>
-                  <span className="att-chip absent">
-                    <i className="ti ti-x" /> غائب: {toAr(absentCount)}
-                  </span>
-                  <button
-                    className="att-mark-all"
-                    disabled={locked}
-                    onClick={() => {
-                      const all: Record<string, StudentEval> = {};
-                      students.forEach((s) => {
-                        all[s._id] = { ...evalFor(s._id), attendanceStatus: "حاضر" };
-                      });
-                      setOverrides(all);
-                    }}
-                  >
-                    <i className="ti ti-checks" /> تحديد الكل حاضر
-                  </button>
-                </div>
-              )}
-              <div className="att-list">
-                {students.map((s) => {
-                  const e = evalFor(s._id);
-                  const isAbsent = e.attendanceStatus === "غائب";
-                  const total = totalOf(e);
-                  const isExpanded = expandedStudentId === s._id;
-                  const hasSaved = !!savedById[s._id];
-                  return (
-                    <div key={s._id} className={`att-row ${isAbsent && isExpanded ? "is-absent" : ""}`}>
-                      <div className="att-row-top" style={{ cursor: "pointer" }} onClick={() => toggleStudent(s._id)}>
-                        <div className="att-avatar">{s.name.trim().charAt(0)}</div>
-                        <div className="att-info">
-                          <div className="att-name">{s.name}</div>
-                          <div className="att-sub">
-                            {hasSaved
-                              ? `${e.attendanceStatus} — ${toAr(total)}/${toAr(TOTAL_MAX)}${editUnlocked ? " (وضع التعديل)" : ""}`
-                              : "لم يُسجَّل لهذا اليوم بعد"}
-                          </div>
+            <div className="att-list">
+              {students.map((s) => {
+                const e = evalFor(s._id);
+                const isAbsent = e.attendanceStatus === "غائب";
+                const total = totalOf(e);
+                const isExpanded = expandedStudentId === s._id;
+                const hasSaved = !!savedById[s._id];
+                const isUnlocked = unlockedIds.has(s._id);
+                const controlsLocked = isFutureDay || (hasSaved && !isUnlocked);
+                const hasIndividualPlan = !!linkedPlan && planCoversStudent(linkedPlan, s._id);
+                const assignment = hasIndividualPlan ? assignmentForStudent(s._id) : undefined;
+                return (
+                  <div key={s._id} className={`att-row ${isAbsent && isExpanded ? "is-absent" : ""}`}>
+                    <div className="att-row-top" style={{ cursor: "pointer" }} onClick={() => toggleStudent(s._id)}>
+                      <div className="att-avatar">{avatarInitials(s.name)}</div>
+                      <div className="att-info">
+                        <div className="att-name">{s.name}</div>
+                        <div className="att-sub">
+                          {hasSaved
+                            ? `${e.attendanceStatus} — ${toAr(total)}/${toAr(TOTAL_MAX)}${isUnlocked ? " (وضع التعديل)" : ""}`
+                            : "لم يُسجَّل لهذا اليوم بعد"}
                         </div>
-                        <button
-                          type="button"
-                          className="topbar-btn btn-ghost"
-                          style={{ padding: "6px 10px" }}
-                          onClick={(ev) => { ev.stopPropagation(); toggleStudent(s._id); }}
-                          aria-label={isExpanded ? "طي" : "توسيع"}
-                        >
-                          <i className={`ti ${isExpanded ? "ti-chevron-up" : "ti-chevron-down"}`} />
-                        </button>
                       </div>
-
-                      {isExpanded && (
-                        <div style={{ padding: "10px 2px 4px" }}>
-                          <div className="att-toggle" style={{ display: "inline-flex", marginBottom: 10 }}>
-                            <button
-                              type="button"
-                              className={!isAbsent ? "active present" : ""}
-                              disabled={locked}
-                              onClick={() => setAttendance(s._id, "حاضر")}
-                            >
-                              <i className="ti ti-check" /> حاضر
-                            </button>
-                            <button
-                              type="button"
-                              className={isAbsent ? "active absent" : ""}
-                              disabled={locked}
-                              onClick={() => setAttendance(s._id, "غائب")}
-                            >
-                              <i className="ti ti-x" /> غائب
-                            </button>
-                          </div>
-                          <div className="eval-scores">
-                            {(["hifz", "tajweed", "talawah"] as ScoreCategory[]).map((cat) => (
-                              <div key={cat} className="eval-cat">
-                                <span className="eval-cat-label">{CATEGORY_LABELS[cat]}</span>
-                                <div className="eval-chip-group">
-                                  {Array.from({ length: MAX_SCORES[cat] + 1 }, (_, n) => n).map((n) => (
-                                    <button
-                                      key={n}
-                                      type="button"
-                                      className={`eval-chip ${!isAbsent && e[cat] === n ? "active" : ""}`}
-                                      disabled={isAbsent || locked}
-                                      onClick={() => setScore(s._id, cat, n)}
-                                    >
-                                      {toAr(n)}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                            <span className={`eval-total ${total === 0 ? "zero" : ""}`}>
-                              {toAr(total)}/{toAr(TOTAL_MAX)}
-                            </span>
-                          </div>
-                        </div>
-                      )}
+                      <button
+                        type="button"
+                        className="topbar-btn btn-ghost"
+                        style={{ padding: "6px 10px" }}
+                        onClick={(ev) => { ev.stopPropagation(); toggleStudent(s._id); }}
+                        aria-label={isExpanded ? "طي" : "توسيع"}
+                      >
+                        <i className={`ti ${isExpanded ? "ti-chevron-up" : "ti-chevron-down"}`} />
+                      </button>
                     </div>
-                  );
-                })}
-                {students.length === 0 && (
-                  <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                    لا يوجد طلاب
+
+                    {isExpanded && (
+                      <div style={{ padding: "10px 2px 4px" }}>
+                        {assignment ? (
+                          <div className="assignment-banner" style={{ marginBottom: 10 }}>
+                            <div className="assignment-icon">
+                              <i className="ti ti-book-2" />
+                            </div>
+                            <div className="assignment-body">
+                              <div className="assignment-label">
+                                <i className="ti ti-clipboard-text" /> الورد المقرر
+                              </div>
+                              <div className="assignment-range">
+                                <span>{surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)}</span>
+                                <i className="ti ti-arrow-left assignment-arrow" />
+                                <span>{surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}</span>
+                              </div>
+                            </div>
+                            <div className="assignment-meta">
+                              <span className="assignment-pill">
+                                <i className="ti ti-file-text" />
+                                {assignment.pageEnd !== assignment.pageStart
+                                  ? `من صفحة ${toAr(assignment.pageStart)} إلى صفحة ${toAr(assignment.pageEnd)}`
+                                  : `صفحة ${toAr(assignment.pageStart)}`}
+                              </span>
+                              <span className="assignment-pill">
+                                <i className="ti ti-bookmark" />
+                                الجزء {toAr(assignment.juz)}
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10 }}>لا يوجد جزء مخصص لهذا اليوم</div>
+                        )}
+
+                        {hasSaved && !isUnlocked && !isFutureDay && (
+                          <Alert tone="success" icon="ti-lock" style={{ marginBottom: 10 }}>
+                            تم تسجيل حضور وتقييم {s.name} لهذا اليوم. اضغط "تعديل" لتصحيح البيانات.
+                          </Alert>
+                        )}
+
+                        <div className="att-toggle" style={{ display: "inline-flex", marginBottom: 10 }}>
+                          <button type="button" disabled={controlsLocked} className={!isAbsent ? "active present" : ""} onClick={() => setAttendance(s._id, "حاضر")}>
+                            <i className="ti ti-check" /> حاضر
+                          </button>
+                          <button type="button" disabled={controlsLocked} className={isAbsent ? "active absent" : ""} onClick={() => setAttendance(s._id, "غائب")}>
+                            <i className="ti ti-x" /> غائب
+                          </button>
+                        </div>
+
+                        {!isAbsent && assignment && (() => {
+                          const actualPage = completedPageFor(s._id, assignment);
+                          const isFull = actualPage >= assignment.pageEnd;
+                          const shortfall = assignment.pageEnd - actualPage;
+                          return (
+                            <div style={{ border: "1px dashed var(--border)", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+                              <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text2)", display: "block", marginBottom: 6 }}>
+                                <i className="ti ti-bookmark" style={{ marginLeft: 4, color: "var(--green)" }} /> الورد الفعلي — الصفحة التي وصل إليها الطالب
+                              </label>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                                <input
+                                  type="number" className="form-input" style={{ width: 90, fontSize: 12, padding: "6px 8px" }}
+                                  min={assignment.pageStart} max={assignment.pageEnd} disabled={controlsLocked}
+                                  value={actualPage}
+                                  onChange={(ev) => setCompletedPage(s._id, Math.max(assignment.pageStart, Math.min(assignment.pageEnd, Number(ev.target.value) || assignment.pageStart)))}
+                                />
+                                <span style={{ fontSize: 11, color: "var(--text3)" }}>من {toAr(assignment.pageStart)} إلى {toAr(assignment.pageEnd)}</span>
+                                {!isFull && !controlsLocked && (
+                                  <button
+                                    type="button"
+                                    className="topbar-btn btn-ghost"
+                                    style={{ fontSize: 11, padding: "4px 10px" }}
+                                    onClick={() => setCompletedPage(s._id, assignment.pageEnd)}
+                                  >
+                                    الورد كامل
+                                  </button>
+                                )}
+                              </div>
+                              <div style={{ fontSize: 11, marginTop: 6, color: isFull ? "var(--green)" : "#b45309" }}>
+                                {isFull
+                                  ? <><i className="ti ti-check" style={{ marginLeft: 3 }} />سيُسجَّل كمكتمل</>
+                                  : <><i className="ti ti-arrow-forward-up" style={{ marginLeft: 3 }} />سيتم تعويض {toAr(shortfall)} صفحة في باقي أيام خطته</>
+                                }
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        <div className="eval-scores">
+                          {(["hifz", "tajweed", "talawah"] as ScoreCategory[]).map((cat) => (
+                            <div key={cat} className="eval-cat">
+                              <span className="eval-cat-label">{CATEGORY_LABELS[cat]}</span>
+                              <div className="eval-chip-group">
+                                {Array.from({ length: MAX_SCORES[cat] + 1 }, (_, n) => n).map((n) => (
+                                  <button
+                                    key={n}
+                                    type="button"
+                                    className={`eval-chip ${!isAbsent && e[cat] === n ? "active" : ""}`}
+                                    disabled={isAbsent || controlsLocked}
+                                    onClick={() => setScore(s._id, cat, n)}
+                                  >
+                                    {toAr(n)}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                          <span className={`eval-total ${total === 0 ? "zero" : ""}`}>{toAr(total)}/{toAr(TOTAL_MAX)}</span>
+                        </div>
+
+                        {hasIndividualPlan && (
+                          <button
+                            type="button"
+                            className="topbar-btn btn-ghost"
+                            style={{ fontSize: 11, padding: "5px 10px", marginBottom: 4 }}
+                            onClick={(ev) => { ev.stopPropagation(); togglePlanPanel(s._id); }}
+                          >
+                            {planPanelStudentId === s._id
+                              ? <><i className="ti ti-chevron-up" /> إخفاء الخطة الفردية</>
+                              : progressByStudentId[s._id]?.progressIsPersisted
+                                ? <><i className="ti ti-list-details" /> عرض الخطة الفردية</>
+                                : <><i className="ti ti-plus" /> أنشئ خطة فردية</>
+                            }
+                          </button>
+                        )}
+
+                        {hasIndividualPlan && linkedPlan && planPanelStudentId === s._id && (
+                          <IndividualPlanPanel planId={linkedPlan._id} studentId={s._id} studentName={s.name} basePlan={linkedPlan} />
+                        )}
+
+                        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+                          {isFutureDay ? (
+                            <button className="topbar-btn btn-ghost" style={{ padding: "8px 18px" }} disabled>
+                              <i className="ti ti-clock" /> اليوم لم يحن بعد
+                            </button>
+                          ) : hasSaved && !isUnlocked ? (
+                            <button className="topbar-btn btn-ghost" style={{ padding: "8px 18px" }} onClick={() => unlockStudent(s._id)}>
+                              <i className="ti ti-edit" /> تعديل
+                            </button>
+                          ) : (
+                            <button className="topbar-btn btn-primary" style={{ padding: "8px 18px" }} onClick={() => saveStudent(s._id, s.name)} disabled={bulkEvaluate.isPending}>
+                              {bulkEvaluate.isPending && lastSavedId === s._id
+                                ? <><i className="ti ti-loader-2" style={{ animation: "spin 1s linear infinite" }} /> جارٍ الحفظ...</>
+                                : isUnlocked
+                                  ? <><i className="ti ti-device-floppy" /> حفظ التعديلات</>
+                                  : <><i className="ti ti-device-floppy" /> حفظ لهذا الطالب</>
+                              }
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </>
+                );
+              })}
+            </div>
           )}
         </Card>
-      )}
-      {bulkEvaluate.isSuccess && (
-        <Alert tone="success">
-          تم حفظ الحضور والتقييم بنجاح
-          {bulkEvaluate.data.notified > 0 &&
-            ` وإرسال إشعارات لأولياء أمور ${toAr(bulkEvaluate.data.notified)} طالب`}
-          .
-        </Alert>
-      )}
-      {bulkEvaluate.isSuccess && bulkEvaluate.data.unnotified.length > 0 && (
-        <Alert tone="warning">
-          تعذر إرسال إشعار عن: {bulkEvaluate.data.unnotified.map((s) => s.name).join("، ")} — لا
-          يوجد ولي أمر مرتبط بالحساب.
-        </Alert>
-      )}
-      {bulkEvaluate.isError && (
-        <Alert tone="warning">{(bulkEvaluate.error as Error).message}</Alert>
       )}
 
       {history.length > 0 && (
