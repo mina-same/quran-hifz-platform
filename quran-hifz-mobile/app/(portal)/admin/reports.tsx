@@ -1,11 +1,13 @@
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import StatsRow from '@/components/ui/StatsRow';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Button from '@/components/ui/Button';
-import { STUDENTS } from '@/lib/data/students';
-import { HALQAT } from '@/lib/data/halqat';
+import Alert from '@/components/ui/Alert';
+import { useStats } from '@/lib/queries/stats';
+import { useStudents } from '@/lib/queries/students';
+import { useHalqat } from '@/lib/queries/halqat';
 import { theme } from '@/lib/theme';
 
 const EXPORT_BTNS = [
@@ -16,23 +18,53 @@ const EXPORT_BTNS = [
   { label: 'تقرير الحلقات PDF',   variant: 'danger' },
 ] as const;
 
-const MONTHLY = [
-  { label: 'طلاب جدد',                  val: '٢' },
-  { label: 'جلسات منعقدة',              val: '٤٨' },
-  { label: 'واجبات مُسلَّمة',            val: '١٢٦' },
-  { label: 'صفحات محفوظة إجمالاً',     val: '٣٨٤' },
-  { label: 'أولياء أمور تلقوا إشعارات', val: '٩٤' },
-];
-
 export default function AdminReports() {
-  const avgAttendance = Math.round(STUDENTS.reduce((a, s) => a + s.attendancePct, 0) / STUDENTS.length);
-  const avgProgress   = Math.round(STUDENTS.reduce((a, s) => a + s.progressPct, 0) / STUDENTS.length);
+  const statsQuery = useStats();
+  const studentsQuery = useStudents();
+  const halqatQuery = useHalqat();
+
+  const isLoading = statsQuery.isLoading || studentsQuery.isLoading || halqatQuery.isLoading;
+  const error = statsQuery.error || studentsQuery.error || halqatQuery.error;
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['bottom']}>
+        <View style={styles.page}>
+          <Card style={styles.loadingCard}>
+            <ActivityIndicator color={theme.green} size="large" />
+          </Card>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['bottom']}>
+        <View style={styles.page}>
+          <Alert variant="warning">{error.message}</Alert>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const stats = statsQuery.data;
+  const students = studentsQuery.data ?? [];
+  const halqat = halqatQuery.data ?? [];
+
+  const newStudents = students.filter((s) => s.status === 'new').length;
+  const totalPagesMemorized = students.reduce((a, s) => a + s.progressPages, 0);
 
   const STATS = [
-    { label: 'إجمالي الطلاب',   value: STUDENTS.length,     color: theme.green },
-    { label: 'متوسط الحضور',     value: `${avgAttendance}٪`, color: theme.gold },
-    { label: 'متوسط التقدم',     value: `${avgProgress}٪`,  color: '#3B82F6' },
-    { label: 'الحلقات النشطة',   value: HALQAT.length,       color: theme.red },
+    { label: 'إجمالي الطلاب',   value: stats?.totalStudents ?? 0,               color: theme.green },
+    { label: 'متوسط الحضور',     value: `${stats?.avgAttendancePct ?? 0}٪`,      color: theme.gold },
+    { label: 'متوسط التقدم',     value: `${stats?.avgProgressPct ?? 0}٪`,        color: '#3B82F6' },
+    { label: 'الحلقات النشطة',   value: stats?.totalHalqat ?? 0,                 color: theme.red },
+  ];
+
+  const SUMMARY = [
+    { label: 'طلاب جدد',                  val: newStudents },
+    { label: 'صفحات محفوظة إجمالاً',     val: totalPagesMemorized },
   ];
 
   return (
@@ -53,9 +85,9 @@ export default function AdminReports() {
         {/* Two-column summary cards */}
         <View style={styles.twoCol}>
           <Card style={styles.half}>
-            <CardHeader title="ملخص شهر ذو القعدة ١٤٤٥" />
-            {MONTHLY.map((row, i) => (
-              <View key={i} style={[styles.row, i < MONTHLY.length - 1 && styles.rowBorder]}>
+            <CardHeader title="ملخص عام" />
+            {SUMMARY.map((row, i) => (
+              <View key={i} style={[styles.row, i < SUMMARY.length - 1 && styles.rowBorder]}>
                 <Text style={styles.label}>{row.label}</Text>
                 <Text style={styles.val}>{row.val}</Text>
               </View>
@@ -64,8 +96,8 @@ export default function AdminReports() {
 
           <Card style={styles.half}>
             <CardHeader title="أداء الحلقات" />
-            {HALQAT.map((h, i) => (
-              <View key={h.id} style={[styles.row, i < HALQAT.length - 1 && styles.rowBorder]}>
+            {halqat.map((h, i) => (
+              <View key={h._id} style={[styles.row, i < halqat.length - 1 && styles.rowBorder]}>
                 <Text style={[styles.label, { flex: 1 }]} numberOfLines={1}>{h.name}</Text>
                 <Text style={[styles.val, { color: theme.green }]}>{h.attendancePct}٪ حضور</Text>
               </View>
@@ -87,4 +119,5 @@ const styles = StyleSheet.create({
   rowBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
   label: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
   val: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.green },
+  loadingCard: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40 },
 });

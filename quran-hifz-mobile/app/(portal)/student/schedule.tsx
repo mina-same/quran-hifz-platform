@@ -1,89 +1,122 @@
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
-import Badge from '@/components/ui/Badge';
+import Alert from '@/components/ui/Alert';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { useStudent } from '@/lib/queries/students';
+import { useHalqa } from '@/lib/queries/halqat';
 import { theme } from '@/lib/theme';
 
 const DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-const SESSION_DAYS = new Set(['الاثنين', 'الخميس', 'السبت']);
-const UPCOMING = [
-  { date: '١٤٤٥/١٠/٢٤', day: 'الاثنين', countdown: 'بعد يومين',  i: 0 },
-  { date: '١٤٤٥/١٠/٢٧', day: 'الخميس',  countdown: 'بعد ٥ أيام', i: 1 },
-  { date: '١٤٤٥/١٠/٢٩', day: 'السبت',   countdown: 'بعد أسبوع',  i: 2 },
-];
+
+function getId(v: unknown): string | undefined {
+  if (v && typeof v === 'object' && '_id' in v) return (v as { _id: string })._id;
+  if (typeof v === 'string') return v;
+  return undefined;
+}
+function getName(v: unknown): string {
+  if (v && typeof v === 'object' && 'name' in v) return (v as { name: string }).name;
+  return '—';
+}
 
 export default function StudentSchedule() {
+  const authUser = usePortalStore((s) => s.authUser);
+  const studentId = authUser?.profileId;
+
+  const { data: student, isLoading: studentLoading, isError: studentError } = useStudent(studentId);
+  const halqaId = student ? getId(student.halqa) : undefined;
+  const { data: halqa, isLoading: halqaLoading, isError: halqaError } = useHalqa(halqaId);
+
+  const isLoading = studentLoading || (!!halqaId && halqaLoading);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['bottom']}>
+        <View style={styles.loading}>
+          <ActivityIndicator color={theme.green} size="large" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (studentError || halqaError) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['bottom']}>
+        <View style={styles.page}>
+          <Alert variant="error">تعذر تحميل مواعيد الحلقة</Alert>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const sessionDays = new Set(
+    (halqa?.days ?? '').split(/[،,]/).map((d) => d.trim()).filter(Boolean),
+  );
+
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
-        {/* Halqa info */}
-        <Card>
-          <CardHeader title="تفاصيل الحلقة" />
-          <View style={styles.grid}>
-            {[
-              ['الحلقة',  'حلقة عمر بن الخطاب'],
-              ['المعلم',  'الأستاذ ناصر الحميداني'],
-              ['المسجد',  'مسجد الفاروق — حي العماير'],
-              ['الوقت',   '٥:٠٠ م — ٦:٣٠ م'],
-            ].map(([k, v]) => (
-              <View key={k} style={styles.gridItem}>
-                <Text style={styles.gridLabel}>{k}</Text>
-                <Text style={styles.gridValue}>{v}</Text>
+        {!halqa ? (
+          <Card>
+            <Text style={styles.emptyText}>لا توجد حلقة مسجلة بعد</Text>
+          </Card>
+        ) : (
+          <>
+            {/* Halqa info */}
+            <Card>
+              <CardHeader title="تفاصيل الحلقة" />
+              <View style={styles.grid}>
+                {[
+                  ['الحلقة', halqa.name],
+                  ['المعلم', getName(halqa.teacher)],
+                  ['المسجد', getName(halqa.masjid)],
+                  ['الوقت', halqa.time || '—'],
+                ].map(([k, v]) => (
+                  <View key={k} style={styles.gridItem}>
+                    <Text style={styles.gridLabel}>{k}</Text>
+                    <Text style={styles.gridValue}>{v}</Text>
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
-        </Card>
+            </Card>
 
-        {/* Weekly grid */}
-        <Card>
-          <CardHeader title="الجدول الأسبوعي" />
-          <View style={styles.weekGrid}>
-            {DAYS.map((day) => {
-              const isSession = SESSION_DAYS.has(day);
-              return (
-                <View
-                  key={day}
-                  style={[styles.dayCell, isSession ? styles.dayCellActive : styles.dayCellInactive]}
-                >
-                  <Text style={[styles.dayName, isSession && styles.dayNameActive]}>{day}</Text>
-                  {isSession ? (
-                    <>
-                      <Text style={styles.sessionTime}>٥:٠٠ م</Text>
-                      <Text style={styles.sessionTime}>٦:٣٠ م</Text>
-                    </>
-                  ) : (
-                    <Text style={styles.dash}>—</Text>
-                  )}
+            {/* Weekly grid */}
+            <Card>
+              <CardHeader title="الجدول الأسبوعي" />
+              <View style={styles.weekGrid}>
+                {DAYS.map((day) => {
+                  const isSession = sessionDays.has(day);
+                  return (
+                    <View
+                      key={day}
+                      style={[styles.dayCell, isSession ? styles.dayCellActive : styles.dayCellInactive]}
+                    >
+                      <Text style={[styles.dayName, isSession && styles.dayNameActive]}>{day}</Text>
+                      {isSession ? (
+                        <Text style={styles.sessionTime}>{halqa.time || '—'}</Text>
+                      ) : (
+                        <Text style={styles.dash}>—</Text>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+              <View style={styles.legend}>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: theme.green }]} />
+                  <Text style={styles.legendText}>يوم حلقة</Text>
                 </View>
-              );
-            })}
-          </View>
-          <View style={styles.legend}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: theme.green }]} />
-              <Text style={styles.legendText}>يوم حلقة</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#F9FAF5', borderWidth: 1, borderColor: theme.border }]} />
-              <Text style={styles.legendText}>يوم عادي</Text>
-            </View>
-          </View>
-        </Card>
-
-        {/* Upcoming sessions */}
-        <Card>
-          <CardHeader title="الجلسات القادمة" />
-          {UPCOMING.map((s, i) => (
-            <View key={s.date} style={[styles.sessionRow, i < UPCOMING.length - 1 && styles.sessionBorder]}>
-              <View>
-                <Text style={styles.sessionDay}>{s.day} <Text style={styles.sessionDate}>{s.date}</Text></Text>
-                <Text style={styles.sessionTimeLabel}>٥:٠٠ م — ٦:٣٠ م</Text>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#F9FAF5', borderWidth: 1, borderColor: theme.border }]} />
+                  <Text style={styles.legendText}>يوم عادي</Text>
+                </View>
               </View>
-              <Badge label={s.countdown} variant={s.i === 0 ? 'gold' : 'gray'} />
-            </View>
-          ))}
-        </Card>
+            </Card>
+
+            <Alert variant="info">سيصلك تذكير على الواتساب قبل كل جلسة بساعة.</Alert>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -91,7 +124,9 @@ export default function StudentSchedule() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   page: { padding: theme.pagePadding, gap: 14 },
+  emptyText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted, textAlign: 'center', paddingVertical: 20 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
   gridItem: { width: '46%', gap: 4 },
   gridLabel: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
@@ -108,9 +143,4 @@ const styles = StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   legendDot: { width: 12, height: 12, borderRadius: 3 },
   legendText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
-  sessionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 },
-  sessionBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
-  sessionDay: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
-  sessionDate: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
-  sessionTimeLabel: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted, marginTop: 2 },
 });

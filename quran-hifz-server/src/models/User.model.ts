@@ -10,6 +10,7 @@ export interface IUser extends Document {
   role: UserRole;
   profileId?: Schema.Types.ObjectId;  // ref to Student / Teacher doc
   isActive: boolean;
+  mustChangePassword: boolean;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidate: string): Promise<boolean>;
@@ -23,6 +24,7 @@ const userSchema = new Schema<IUser>(
     role:      { type: String, enum: ['admin', 'teacher', 'student', 'parent'], required: true },
     profileId: { type: Schema.Types.ObjectId, refPath: 'roleModel' },
     isActive:  { type: Boolean, default: true },
+    mustChangePassword: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

@@ -1,17 +1,43 @@
-import { ScrollView, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import StatsRow from '@/components/ui/StatsRow';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import DataTable from '@/components/ui/DataTable';
-import { KPIS } from '@/lib/data/halqat';
+import Alert from '@/components/ui/Alert';
+import { useKpis } from '@/lib/queries/kpis';
 import { theme } from '@/lib/theme';
 
 const ratingVariant = (r: string) =>
   r === 'ممتاز' ? 'green' : r === 'جيد' ? 'gold' : r === 'مقبول' ? 'blue' : 'red';
 
 export default function AdminKpis() {
+  const { data, isLoading, error } = useKpis();
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['bottom']}>
+        <View style={styles.page}>
+          <Card style={styles.loadingCard}>
+            <ActivityIndicator color={theme.green} size="large" />
+          </Card>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['bottom']}>
+        <View style={styles.page}>
+          <Alert variant="warning">{error.message}</Alert>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const KPIS = data ?? [];
   const excellent = KPIS.filter((k) => k.rating === 'ممتاز').length;
   const good      = KPIS.filter((k) => k.rating === 'جيد').length;
   const poor      = KPIS.filter((k) => k.rating === 'ضعيف').length;
@@ -56,4 +82,5 @@ const styles = StyleSheet.create({
   page: { padding: theme.pagePadding, gap: 14 },
   bold: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
   muted: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+  loadingCard: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40 },
 });

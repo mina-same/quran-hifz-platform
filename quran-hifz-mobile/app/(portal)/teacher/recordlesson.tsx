@@ -4,15 +4,28 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconMicrophone, IconPlayerStop, IconDeviceFloppy } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
+import FormGroup from '@/components/forms/FormGroup';
+import FormSelect from '@/components/forms/FormSelect';
+import { useStudents } from '@/lib/queries/students';
+import { useCreateRecording } from '@/lib/queries/lessonRecordings';
 import { theme } from '@/lib/theme';
 
 type RecState = 'idle' | 'recording' | 'done';
 
+const TYPES = ['حفظ جديد', 'مراجعة قريبة', 'مراجعة بعيدة', 'تحسين تلاوة'].map((t) => ({ value: t, label: t }));
+
 export default function TeacherRecordLesson() {
+  const { data: students = [] } = useStudents();
+  const createRecording = useCreateRecording();
+  const studentOptions = students.map((st) => ({ value: st._id, label: st.name }));
+
   const [recState, setRecState] = useState<RecState>('idle');
   const [saved, setSaved]       = useState(false);
+  const [student, setStudent]   = useState('');
+  const [type, setType]         = useState(TYPES[0].value);
   const [segment, setSegment]   = useState('');
   const [note, setNote]         = useState('');
+  const [points, setPoints]     = useState('700');
 
   function toggleRec() {
     if (recState === 'idle')      setRecState('recording');
@@ -20,7 +33,15 @@ export default function TeacherRecordLesson() {
     else setRecState('idle');
   }
 
-  function handleSave() {
+  async function handleSave() {
+    if (!student || !segment) return;
+    await createRecording.mutateAsync({
+      student,
+      type,
+      segment,
+      teacherNote: note,
+      points: Number(points) || 700,
+    });
     setSaved(true);
     setRecState('idle');
     setSegment('');
@@ -32,10 +53,19 @@ export default function TeacherRecordLesson() {
     <SafeAreaView style={s.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
         {saved && <Text style={s.successBanner}>تم حفظ التسجيل بنجاح ✓</Text>}
+        {createRecording.isError && <Text style={s.errorBanner}>{(createRecording.error as Error).message}</Text>}
+
         <Card>
           <CardHeader title="بيانات الدرس" />
+          <FormGroup label="الطالب" required>
+            <FormSelect options={studentOptions} placeholder="اختر الطالب" value={student} onChange={setStudent} />
+          </FormGroup>
+          <Text style={s.label}>نوع الدرس</Text>
+          <FormSelect options={TYPES} value={type} onChange={setType} />
           <Text style={s.label}>المقطع</Text>
           <TextInput style={s.input} placeholder="مثال: البقرة ٢٤٠-٢٤٥" value={segment} onChangeText={setSegment} />
+          <Text style={s.label}>النقاط</Text>
+          <TextInput style={s.input} placeholder="700" keyboardType="numeric" value={points} onChangeText={setPoints} />
           <Text style={s.label}>ملاحظة المعلم</Text>
           <TextInput style={s.input} placeholder="ملاحظة مختصرة..." value={note} onChangeText={setNote} />
         </Card>
@@ -60,9 +90,9 @@ export default function TeacherRecordLesson() {
                 </Text>
               </Pressable>
               {recState === 'done' && (
-                <Pressable style={s.saveBtn} onPress={handleSave}>
+                <Pressable style={s.saveBtn} onPress={handleSave} disabled={createRecording.isPending || !student || !segment}>
                   <IconDeviceFloppy size={18} color={theme.white} />
-                  <Text style={s.recBtnText}>حفظ الدرس</Text>
+                  <Text style={s.recBtnText}>{createRecording.isPending ? 'جارٍ الحفظ...' : 'حفظ الدرس'}</Text>
                 </Pressable>
               )}
             </View>
@@ -74,9 +104,10 @@ export default function TeacherRecordLesson() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.cream },
+  safe: { flex: 1, backgroundColor: theme.bg },
   page: { padding: 16, gap: 14 },
   successBanner: { backgroundColor: '#f0fdf4', color: '#15803d', fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
+  errorBanner: { backgroundColor: '#fef2f2', color: '#991b1b', fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
   label: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 6, marginTop: 10 },
   input: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo, fontSize: 13, color: theme.text, backgroundColor: theme.white },
   recArea: { alignItems: 'center', gap: 16, padding: 16 },

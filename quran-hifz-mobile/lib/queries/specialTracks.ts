@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { get } from '@/lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { get, post, del } from '@/lib/api';
 
 export type SpecialTrack = {
   _id: string;
@@ -18,10 +18,27 @@ export type SpecialTrack = {
 };
 
 type ListResponse = { success: boolean; count: number; data: SpecialTrack[] };
+type SingleResponse = { success: boolean; data: SpecialTrack };
 
 export function useSpecialTracks() {
   return useQuery({
     queryKey: ['special-tracks'],
     queryFn: () => get<ListResponse>('/special-tracks').then((r) => r.data),
+  });
+}
+
+export function useCreateTrack() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Record<string, unknown>) => post<SingleResponse>('/special-tracks', body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['special-tracks'] }),
+  });
+}
+
+export function useDeleteTrack() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => del(`/special-tracks/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['special-tracks'] }),
   });
 }

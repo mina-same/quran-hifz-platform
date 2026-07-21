@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { get } from '@/lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { get, post } from '@/lib/api';
 
 export type AttendanceRecord = {
   _id: string;
@@ -35,5 +35,17 @@ export function useAttendance(filters?: AttendanceFilters) {
   return useQuery({
     queryKey: ['attendance', filters],
     queryFn: () => get<ListResponse>(`/attendance${buildQuery(filters)}`).then((r) => r.data),
+  });
+}
+
+export function useBulkAttendance() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { halqa: string; date: string; records: { student: string; status: string }[] }) =>
+      post('/attendance/bulk', body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['attendance'] });
+      qc.invalidateQueries({ queryKey: ['students'] });
+    },
   });
 }

@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import StatsRow from '@/components/ui/StatsRow';
 import Card from '@/components/ui/Card';
@@ -6,25 +6,57 @@ import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import DataTable from '@/components/ui/DataTable';
 import ProgressBar from '@/components/ui/ProgressBar';
-import { STUDENTS } from '@/lib/data/students';
+import Alert from '@/components/ui/Alert';
+import { useStudents } from '@/lib/queries/students';
 import { theme } from '@/lib/theme';
 
+function getName(v: unknown): string {
+  if (v && typeof v === 'object' && 'name' in v) return (v as { name: string }).name;
+  return '';
+}
+
 export default function AdminStudents() {
+  const { data, isLoading, error } = useStudents();
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['bottom']}>
+        <View style={styles.page}>
+          <Card style={styles.loadingCard}>
+            <ActivityIndicator color={theme.green} size="large" />
+          </Card>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['bottom']}>
+        <View style={styles.page}>
+          <Alert variant="warning">{error.message}</Alert>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const STUDENTS = data ?? [];
   const active   = STUDENTS.filter((s) => s.status === 'active').length;
   const inactive = STUDENTS.filter((s) => s.status === 'inactive').length;
+  const newCount = STUDENTS.filter((s) => s.status === 'new').length;
 
   const STATS = [
-    { label: 'إجمالي الطلاب',   value: STUDENTS.length, color: theme.green },
-    { label: 'نشطون',            value: active,           color: theme.gold },
-    { label: 'غير نشطين',        value: inactive,         color: theme.red },
-    { label: 'مسجلون هذا الشهر', value: '٢',             color: '#3B82F6' },
+    { label: 'إجمالي الطلاب', value: STUDENTS.length, color: theme.green },
+    { label: 'نشطون',          value: active,           color: theme.gold },
+    { label: 'غير نشطين',      value: inactive,         color: theme.red },
+    { label: 'طلاب جدد',       value: newCount,         color: '#3B82F6' },
   ];
 
   const rows = STUDENTS.map((s) => ({
     name:       <Text style={styles.bold}>{s.name}</Text>,
     path:       <Badge label={s.path} variant="gold" />,
-    halqa:      <Text style={styles.cell}>{s.halqa}</Text>,
-    mosque:     <Text style={styles.cell}>{s.mosque}</Text>,
+    halqa:      <Text style={styles.cell}>{getName(s.halqa)}</Text>,
+    mosque:     <Text style={styles.cell}>{getName(s.masjid)}</Text>,
     attendance: <Text style={[styles.bold, { color: s.attendancePct >= 90 ? theme.green : theme.red }]}>{s.attendancePct}٪</Text>,
     progress: (
       <View style={{ minWidth: 80 }}>
@@ -64,4 +96,5 @@ const styles = StyleSheet.create({
   page: { padding: theme.pagePadding, gap: 14 },
   bold: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
   cell: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+  loadingCard: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40 },
 });

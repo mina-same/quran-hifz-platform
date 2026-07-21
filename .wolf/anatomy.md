@@ -1,17 +1,18 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-01T09:38:26.024Z
-> Files: 333 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-21T19:41:33.929Z
+> Files: 341 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../Users/macbook/.claude/plans/
 
+- `bubbly-soaring-mango.md` — Import real halaqat/course data + add Course concept (~1474 tok)
 - `joyful-growing-duckling.md` — Plan: Connect quran-hifz frontend → quran-hifz-server (~2150 tok)
 - `ticklish-gathering-neumann.md` — Plan: Wire `quran-hifz-mobile` to the real backend (foundation + read screens) (~2460 tok)
 
 ## ./
 
 - `.DS_Store` (~1640 tok)
-- `.gitignore` — Git ignore rules (~131 tok)
+- `.gitignore` — Git ignore rules (~148 tok)
 - `CLAUDE.md` — OpenWolf (~57 tok)
 - `quran hifz platform.html` — جمعية تحفيظ القرآن الكريم بالعماير (~59157 tok)
 
@@ -111,57 +112,59 @@
 ## quran-hifz-mobile/app/(portal)/admin/
 
 - `_layout.tsx` — AdminTabLayout (~514 tok)
-- `dashboard.tsx` — kpiVariant — renders table (~1087 tok)
-- `halqat.tsx` — AdminHalqat (~211 tok)
-- `kpis.tsx` — ratingVariant — renders table (~711 tok)
-- `masajid.tsx` — AdminMasajid (~270 tok)
-- `register.tsx` — PATHS — renders form — uses useState (~1788 tok)
-- `reports.tsx` — EXPORT_BTNS (~1073 tok)
-- `special_tracks.tsx` — INITIAL (~1589 tok)
-- `students.tsx` — AdminStudents — renders table (~852 tok)
-- `teachers.tsx` — ratingVariant — renders table (~636 tok)
+- `dashboard.tsx` — getName — renders table (~1638 tok)
+- `halqat.tsx` — getName (~611 tok)
+- `kpis.tsx` — ratingVariant — renders table (~932 tok)
+- `masajid.tsx` — getName (~845 tok)
+- `register.tsx` — PATHS — renders form (~2402 tok)
+- `reports.tsx` — EXPORT_BTNS (~1368 tok)
+- `special_tracks.tsx` — getName (~1894 tok)
+- `students.tsx` — getName — renders table (~1138 tok)
+- `teachers.tsx` — ratingVariant — renders table (~863 tok)
 
 ## quran-hifz-mobile/app/(portal)/parent/
 
 - `_layout.tsx` — ParentTabLayout (~445 tok)
-- `attendance.tsx` — STATS (~648 tok)
-- `dashboard.tsx` — CHILD (~877 tok)
-- `homework_view.tsx` — GROUP_HWS (~617 tok)
-- `messages.tsx` — MSGS (~670 tok)
-- `recordings.tsx` — ROWS (~634 tok)
-- `timeline.tsx` — TL (~894 tok)
+- `attendance.tsx` — ParentAttendance — renders table (~992 tok)
+- `dashboard.tsx` — ParentDashboard (~1191 tok)
+- `homework_view.tsx` — ParentHomeworkView (~1000 tok)
+- `messages.tsx` — ParentMessages (~1008 tok)
+- `recordings.tsx` — ParentRecordings — renders table (~812 tok)
+- `timeline.tsx` — DOT_COLOR (~1088 tok)
 
 ## quran-hifz-mobile/app/(portal)/student/
 
 - `_layout.tsx` — StudentTabLayout (~475 tok)
-- `attendance.tsx` — StudentAttendance — renders table (~722 tok)
-- `dashboard.tsx` — STATS (~1468 tok)
+- `attendance.tsx` — StudentAttendance — wired to `useAttendance({student})`+`useStudent`, real records/stats, DataTable (~979 tok)
+- `dashboard.tsx` — StudentDashboard — wired to `useStudent`+`useHomework`, real stats/plan/halqa/recent-homework; mock "next session"/"days committed" fields dropped (no server equivalent) (~1901 tok)
 - `homework.tsx` — StudentHomework (~638 tok)
-- `messages.tsx` — StudentMessages (~912 tok)
-- `myhifz.tsx` — StudentHifz — renders table (~1106 tok)
-- `points.tsx` — MY_PTS (~984 tok)
-- `schedule.tsx` — DAYS (~1534 tok)
+- `messages.tsx` — StudentMessages (~1144 tok)
+- `myhifz.tsx` — StudentHifz — wired to `useHifz`+`useStudent`, real hifz entries table; mock start-date/annual-goal fields dropped (~1410 tok)
+- `points.tsx` — MY_PTS — still mock, out of scope (no backend gamification model) (~984 tok)
+- `schedule.tsx` — wired to `useStudent`→`useHalqa`, real halqa days/time/teacher/masjid; mock "upcoming sessions" countdown list dropped (no session-instance endpoint) (~1736 tok)
 - `store.tsx` — MY_PTS (~1012 tok)
 
 ## quran-hifz-mobile/app/(portal)/teacher/
 
 - `_layout.tsx` — TeacherTabLayout (~551 tok)
-- `attendance.tsx` — OPTIONS — uses useState (~1267 tok)
-- `dashboard.tsx` — STATS — renders table (~1104 tok)
+- `attendance.tsx` — OPTIONS (~1694 tok)
+- `dashboard.tsx` — TeacherDashboard, getName — wired to useHalqat/useHomework/useStats (teacher.profileId scoped); halqat list + pending-homework alert cards replace old mock "today's session"/students table (~1050 tok)
 - `evaluate.tsx` — STUDENTS (~1127 tok)
-- `grouphomework.tsx` — INITIAL (~1434 tok)
-- `homework.tsx` — TeacherHomework — renders table (~647 tok)
-- `myhalqa.tsx` — TeacherHalqa (~358 tok)
-- `plans.tsx` — statusVariant — renders table (~695 tok)
-- `recordlesson.tsx` — TeacherRecordLesson (~1298 tok)
-- `reports.tsx` — TeacherReports (~708 tok)
-- `students.tsx` — hwVariant — renders table (~726 tok)
+- `grouphomework.tsx` — TeacherGroupHomework (~1761 tok)
+- `homework.tsx` — getName — renders form, table (~1020 tok)
+- `myhalqa.tsx` — TeacherHalqa, getName — wired to useHalqat({teacher}); maps real Halqa to lib/types/halqa shape for HalqaCard (~650 tok)
+- `plans.tsx` — statusVariant — renders table — MOCK DATA, no backend model, permanently out of scope (~695 tok)
+- `recordlesson.tsx` — TYPES — renders form (~1796 tok)
+- `reports.tsx` — TeacherReports, getName — wired to useHalqat+useStudents (first halqa, mirrors students.tsx scoping); web TeacherReports.tsx is a static placeholder so no direct web equivalent (~850 tok)
+- `students.tsx` — hwVariant, getName — wired to useHalqat+useStudents, scoped to teacher's first halqa (mirrors web TeacherStudents.tsx) (~800 tok)
 
 ## quran-hifz-mobile/components/domain/
 
 - `AudioRecorder.tsx` — AudioRecorder — uses useState, useEffect (~1336 tok)
+- `ChildSelector.tsx` — Post-login child picker for the parent portal — rendered once at the top (~860 tok)
 - `HalqaCard.tsx` — HalqaCard (~746 tok)
 - `MasjidAccordion.tsx` — MasjidAccordion — uses useState (~1036 tok)
+- `useSelectedChild.ts` — Shared gate for the 5 non-dashboard parent screens: reads the active (~225 tok)
 
 ## quran-hifz-mobile/components/forms/
 
@@ -206,17 +209,19 @@
 
 ## quran-hifz-mobile/lib/queries/
 
-- `attendance.ts` — Exports AttendanceRecord, AttendanceFilters, useAttendance (~325 tok)
+- `attendance.ts` — Exports AttendanceRecord, AttendanceFilters, useAttendance, useBulkAttendance (~446 tok)
+- `groupHomework.ts` — Exports GroupHomework, useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework (~358 tok)
 - `halqat.ts` — Exports Halqa, HalqaFilters, useHalqat, useHalqa (~366 tok)
 - `hifz.ts` — Exports HifzEntry, useHifz (~155 tok)
-- `homework.ts` — Exports Homework, HomeworkFilters, useHomework (~368 tok)
+- `homework.ts` — Exports Homework, HomeworkFilters, useHomework, useGradeHomework (~487 tok)
 - `kpis.ts` — Exports KPI, useKpis (~132 tok)
+- `lessonRecordings.ts` — Exports LessonRecording, useRecordings, useCreateRecording (~415 tok)
 - `masajid.ts` — Exports Masjid, useMasajid, useMasjid (~189 tok)
-- `messages.ts` — Exports Message, useMessages (~154 tok)
+- `messages.ts` — Exports Message, useMessages, useMarkRead (~231 tok)
 - `parent.ts` — Exports ParentChild, ChildHifzEntry, ChildAttendanceRecord, ChildHomework + 9 more (~896 tok)
-- `specialTracks.ts` — Exports SpecialTrack, useSpecialTracks (~207 tok)
+- `specialTracks.ts` — Exports SpecialTrack, useSpecialTracks, useCreateTrack, useDeleteTrack (~383 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~165 tok)
-- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent (~458 tok)
+- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent, useCreateStudent (~543 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher (~225 tok)
 
 ## quran-hifz-mobile/lib/store/
@@ -233,8 +238,9 @@
 ## quran-hifz-server/
 
 - `.gitignore` — Git ignore rules (~10 tok)
+- `diagnostic-tmp.ts` — Declares main (~253 tok)
 - `package-lock.json` — npm lock file (~23821 tok)
-- `package.json` — Node.js package manifest (~291 tok)
+- `package.json` — Node.js package manifest (~311 tok)
 - `tsconfig.json` — TypeScript configuration (~128 tok)
 
 ## quran-hifz-server/src/
@@ -274,8 +280,9 @@
 ## quran-hifz-server/src/models/
 
 - `Attendance.model.ts` — Exports IAttendance, Attendance (~264 tok)
+- `Course.model.ts` — Exports ICourse, Course (~177 tok)
 - `GroupHomework.model.ts` — Exports IGroupHomework, GroupHomework (~242 tok)
-- `Halqa.model.ts` — Exports IHalqa, Halqa (~336 tok)
+- `Halqa.model.ts` — Exports IHalqa, Halqa (~362 tok)
 - `HifzEntry.model.ts` — Exports IHifzEntry, HifzEntry (~267 tok)
 - `Homework.model.ts` — Exports IHomework, Homework (~373 tok)
 - `IndividualPlan.model.ts` — Exports IIndividualPlan, IndividualPlan (~302 tok)
@@ -285,9 +292,9 @@
 - `Message.model.ts` — Exports IMessage, Message (~291 tok)
 - `ParentStudent.model.ts` — Exports IParentStudent, ParentStudent (~172 tok)
 - `SpecialTrack.model.ts` — Exports ISpecialTrack, SpecialTrack (~392 tok)
-- `Student.model.ts` — Exports IStudent, Student (~498 tok)
+- `Student.model.ts` — Exports IStudent, Student (~535 tok)
 - `Teacher.model.ts` — Exports ITeacher, Teacher (~289 tok)
-- `User.model.ts` — Exports UserRole, IUser, User (~383 tok)
+- `User.model.ts` — Exports UserRole, IUser, User (~409 tok)
 
 ## quran-hifz-server/src/routes/
 
@@ -309,6 +316,7 @@
 
 ## quran-hifz-server/src/seeds/
 
+- `import-real-halaqat.ts` — One-time import of real course/halqa/teacher/student data. (~1333 tok)
 - `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~3212 tok)
 
 ## quran-hifz-server/src/types/

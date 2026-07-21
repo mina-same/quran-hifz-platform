@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { get } from '@/lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { get, patch } from '@/lib/api';
 
 export type Homework = {
   _id: string;
@@ -39,5 +39,17 @@ export function useHomework(filters?: HomeworkFilters) {
   return useQuery({
     queryKey: ['homework', filters],
     queryFn: () => get<ListResponse>(`/homework${buildQuery(filters)}`).then((r) => r.data),
+  });
+}
+
+export function useGradeHomework() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string; status?: string; rating?: string; notes?: string }) =>
+      patch(`/homework/${id}`, body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['homework'] });
+      qc.invalidateQueries({ queryKey: ['stats'] });
+    },
   });
 }

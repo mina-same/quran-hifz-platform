@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-06-27T12:42:49.696Z",
   "lifetime": {
-    "total_tokens_estimated": 575403,
-    "total_reads": 626,
-    "total_writes": 218,
-    "total_sessions": 19,
-    "anatomy_hits": 592,
-    "anatomy_misses": 16,
-    "repeated_reads_blocked": 37,
-    "estimated_savings_vs_bare_cli": 153645
+    "total_tokens_estimated": 975783,
+    "total_reads": 1046,
+    "total_writes": 368,
+    "total_sessions": 21,
+    "anatomy_hits": 1002,
+    "anatomy_misses": 20,
+    "repeated_reads_blocked": 307,
+    "estimated_savings_vs_bare_cli": 388870
   },
   "sessions": [
     {
@@ -5158,6 +5158,3440 @@
         "writes_count": 25,
         "repeated_reads_blocked": 8,
         "anatomy_lookups": 91
+      }
+    },
+    {
+      "id": "session-2026-07-12-1955",
+      "started": "2026-07-12T16:55:13.202Z",
+      "ended": "2026-07-12T17:26:54.043Z",
+      "reads": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/evaluate.tsx",
+          "tokens_estimated": 1127,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/register.tsx",
+          "tokens_estimated": 1788,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx",
+          "tokens_estimated": 1298,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx",
+          "tokens_estimated": 1434,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/attendance.tsx",
+          "tokens_estimated": 1267,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/masajid.tsx",
+          "tokens_estimated": 270,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/kpis.tsx",
+          "tokens_estimated": 711,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/students.tsx",
+          "tokens_estimated": 852,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/teachers.tsx",
+          "tokens_estimated": 636,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/halqat.tsx",
+          "tokens_estimated": 211,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/homework.tsx",
+          "tokens_estimated": 647,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/homework.tsx",
+          "tokens_estimated": 638,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/messages.tsx",
+          "tokens_estimated": 670,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/messages.tsx",
+          "tokens_estimated": 1144,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
+          "tokens_estimated": 1589,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/AudioRecorder.tsx",
+          "tokens_estimated": 1336,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/types/student.ts",
+          "tokens_estimated": 220,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/types/teacher.ts",
+          "tokens_estimated": 160,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/types/halqa.ts",
+          "tokens_estimated": 128,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/attendance.ts",
+          "tokens_estimated": 543,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/homework.ts",
+          "tokens_estimated": 628,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/group-homework.ts",
+          "tokens_estimated": 359,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/lesson-recordings.ts",
+          "tokens_estimated": 488,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/students.ts",
+          "tokens_estimated": 698,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/special-tracks.ts",
+          "tokens_estimated": 481,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/messages.ts",
+          "tokens_estimated": 327,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 1138,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherHomework.tsx",
+          "tokens_estimated": 1011,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminRegister.tsx",
+          "tokens_estimated": 2062,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+          "tokens_estimated": 1988,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentMessages.tsx",
+          "tokens_estimated": 758,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/api.ts",
+          "tokens_estimated": 451,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/attendance.ts",
+          "tokens_estimated": 325,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/homework.ts",
+          "tokens_estimated": 368,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/students.ts",
+          "tokens_estimated": 458,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/specialTracks.ts",
+          "tokens_estimated": 207,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/messages.ts",
+          "tokens_estimated": 154,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/halqat.ts",
+          "tokens_estimated": 366,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/store/portalStore.ts",
+          "tokens_estimated": 941,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/_layout.tsx",
+          "tokens_estimated": 639,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/_layout.tsx",
+          "tokens_estimated": 270,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/parent.ts",
+          "tokens_estimated": 896,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/stats.ts",
+          "tokens_estimated": 165,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/kpis.ts",
+          "tokens_estimated": 132,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/masajid.ts",
+          "tokens_estimated": 189,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/teachers.ts",
+          "tokens_estimated": 225,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/hifz.ts",
+          "tokens_estimated": 155,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/_layout.tsx",
+          "tokens_estimated": 445,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/constants/portals.ts",
+          "tokens_estimated": 1172,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/Alert.tsx",
+          "tokens_estimated": 403,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/DataTable.tsx",
+          "tokens_estimated": 724,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/StatBox.tsx",
+          "tokens_estimated": 376,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/StatsRow.tsx",
+          "tokens_estimated": 150,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/Badge.tsx",
+          "tokens_estimated": 294,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/ProgressBar.tsx",
+          "tokens_estimated": 380,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/Card.tsx",
+          "tokens_estimated": 201,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/CardHeader.tsx",
+          "tokens_estimated": 277,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/dashboard.tsx",
+          "tokens_estimated": 1087,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/reports.tsx",
+          "tokens_estimated": 1073,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminDashboard.tsx",
+          "tokens_estimated": 1271,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+          "tokens_estimated": 659,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminKpis.tsx",
+          "tokens_estimated": 551,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminMasajid.tsx",
+          "tokens_estimated": 546,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminReports.tsx",
+          "tokens_estimated": 419,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+          "tokens_estimated": 1295,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminTeachers.tsx",
+          "tokens_estimated": 566,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+          "tokens_estimated": 1104,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/myhalqa.tsx",
+          "tokens_estimated": 358,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/students.tsx",
+          "tokens_estimated": 726,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/reports.tsx",
+          "tokens_estimated": 708,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/HalqaCard.tsx",
+          "tokens_estimated": 746,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/MasjidAccordion.tsx",
+          "tokens_estimated": 1036,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/data/halqat.ts",
+          "tokens_estimated": 704,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/data/students.ts",
+          "tokens_estimated": 1142,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/data/teachers.ts",
+          "tokens_estimated": 707,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/Button.tsx",
+          "tokens_estimated": 564,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx",
+          "tokens_estimated": 940,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/AyahBar.tsx",
+          "tokens_estimated": 234,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherReports.tsx",
+          "tokens_estimated": 172,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/theme.ts",
+          "tokens_estimated": 279,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherHalqa.tsx",
+          "tokens_estimated": 793,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/dashboard.tsx",
+          "tokens_estimated": 1901,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/myhifz.tsx",
+          "tokens_estimated": 1106,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/attendance.tsx",
+          "tokens_estimated": 979,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/schedule.tsx",
+          "tokens_estimated": 1534,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentDashboard.tsx",
+          "tokens_estimated": 1048,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentHifz.tsx",
+          "tokens_estimated": 1059,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentAttendance.tsx",
+          "tokens_estimated": 793,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentSchedule.tsx",
+          "tokens_estimated": 752,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/masajid.ts",
+          "tokens_estimated": 386,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+          "tokens_estimated": 600,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/halqa.controller.ts",
+          "tokens_estimated": 878,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/student.controller.ts",
+          "tokens_estimated": 830,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/components/ChildSelector.tsx",
+          "tokens_estimated": 900,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/context/ParentContext.tsx",
+          "tokens_estimated": 206,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/dashboard.tsx",
+          "tokens_estimated": 877,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/timeline.tsx",
+          "tokens_estimated": 894,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/recordings.tsx",
+          "tokens_estimated": 634,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/homework_view.tsx",
+          "tokens_estimated": 617,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/attendance.tsx",
+          "tokens_estimated": 648,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentDashboard.tsx",
+          "tokens_estimated": 938,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentTimeline.tsx",
+          "tokens_estimated": 1012,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentRecordings.tsx",
+          "tokens_estimated": 570,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentHomeworkView.tsx",
+          "tokens_estimated": 1020,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentAttendance.tsx",
+          "tokens_estimated": 725,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentMessages.tsx",
+          "tokens_estimated": 545,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/_layout.tsx",
+          "tokens_estimated": 551,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/layout/NavItem.tsx",
+          "tokens_estimated": 732,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/tsconfig.json",
+          "tokens_estimated": 87,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/forms/FormSelect.tsx",
+          "tokens_estimated": 974,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx",
+          "tokens_estimated": 1395,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/forms/FormGroup.tsx",
+          "tokens_estimated": 249,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/forms/FormInput.tsx",
+          "tokens_estimated": 230,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/quran-hifz/src/quran/config/masarMap.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/config/masarMap.ts",
+          "tokens_estimated": 323,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Student.model.ts",
+          "tokens_estimated": 498,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/attendance.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/attendance.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/homework.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/homework.ts",
+          "tokens_estimated": 170,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/students.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/students.ts",
+          "tokens_estimated": 136,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/specialTracks.ts",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/specialTracks.ts",
+          "tokens_estimated": 237,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/messages.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/messages.ts",
+          "tokens_estimated": 112,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/groupHomework.ts",
+          "tokens_estimated": 358,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/lessonRecordings.ts",
+          "tokens_estimated": 415,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/attendance.tsx",
+          "tokens_estimated": 1694,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+          "tokens_estimated": 1254,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/dashboard.tsx",
+          "tokens_estimated": 1901,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+          "tokens_estimated": 42,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+          "tokens_estimated": 45,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/myhifz.tsx",
+          "tokens_estimated": 1410,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/homework.tsx",
+          "tokens_estimated": 1020,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/myhalqa.tsx",
+          "tokens_estimated": 867,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/attendance.tsx",
+          "tokens_estimated": 979,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/students.tsx",
+          "tokens_estimated": 1046,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx",
+          "tokens_estimated": 1762,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/dashboard.tsx",
+          "tokens_estimated": 1638,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/schedule.tsx",
+          "tokens_estimated": 1736,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/reports.tsx",
+          "tokens_estimated": 1115,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/halqat.tsx",
+          "tokens_estimated": 611,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/kpis.tsx",
+          "tokens_estimated": 932,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/masajid.tsx",
+          "tokens_estimated": 845,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx",
+          "tokens_estimated": 1797,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/students.tsx",
+          "tokens_estimated": 1138,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/teachers.tsx",
+          "tokens_estimated": 863,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/reports.tsx",
+          "tokens_estimated": 1368,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/register.tsx",
+          "tokens_estimated": 2402,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
+          "tokens_estimated": 1895,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/messages.tsx",
+          "tokens_estimated": 1144,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/useSelectedChild.ts",
+          "tokens_estimated": 225,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx",
+          "tokens_estimated": 14,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
+          "tokens_estimated": 14,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/ChildSelector.tsx",
+          "tokens_estimated": 860,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx",
+          "tokens_estimated": 14,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/dashboard.tsx",
+          "tokens_estimated": 1191,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 81141,
+        "output_tokens_estimated": 33596,
+        "reads_count": 116,
+        "writes_count": 42,
+        "repeated_reads_blocked": 90,
+        "anatomy_lookups": 114
+      }
+    },
+    {
+      "id": "session-2026-07-12-1955",
+      "started": "2026-07-12T16:55:13.202Z",
+      "ended": "2026-07-12T17:34:19.947Z",
+      "reads": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/evaluate.tsx",
+          "tokens_estimated": 1127,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/register.tsx",
+          "tokens_estimated": 1788,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx",
+          "tokens_estimated": 1298,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx",
+          "tokens_estimated": 1434,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/attendance.tsx",
+          "tokens_estimated": 1267,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/masajid.tsx",
+          "tokens_estimated": 270,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/kpis.tsx",
+          "tokens_estimated": 711,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/students.tsx",
+          "tokens_estimated": 852,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/teachers.tsx",
+          "tokens_estimated": 636,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/halqat.tsx",
+          "tokens_estimated": 211,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/homework.tsx",
+          "tokens_estimated": 647,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/homework.tsx",
+          "tokens_estimated": 638,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/messages.tsx",
+          "tokens_estimated": 670,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/messages.tsx",
+          "tokens_estimated": 1144,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
+          "tokens_estimated": 1589,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/AudioRecorder.tsx",
+          "tokens_estimated": 1336,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/types/student.ts",
+          "tokens_estimated": 220,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/types/teacher.ts",
+          "tokens_estimated": 160,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/types/halqa.ts",
+          "tokens_estimated": 128,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/attendance.ts",
+          "tokens_estimated": 543,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/homework.ts",
+          "tokens_estimated": 628,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/group-homework.ts",
+          "tokens_estimated": 359,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/lesson-recordings.ts",
+          "tokens_estimated": 488,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/students.ts",
+          "tokens_estimated": 698,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/special-tracks.ts",
+          "tokens_estimated": 481,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/messages.ts",
+          "tokens_estimated": 327,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 1138,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherHomework.tsx",
+          "tokens_estimated": 1011,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminRegister.tsx",
+          "tokens_estimated": 2062,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+          "tokens_estimated": 1988,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentMessages.tsx",
+          "tokens_estimated": 758,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/api.ts",
+          "tokens_estimated": 451,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/attendance.ts",
+          "tokens_estimated": 325,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/homework.ts",
+          "tokens_estimated": 368,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/students.ts",
+          "tokens_estimated": 458,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/specialTracks.ts",
+          "tokens_estimated": 207,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/messages.ts",
+          "tokens_estimated": 154,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/halqat.ts",
+          "tokens_estimated": 366,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/store/portalStore.ts",
+          "tokens_estimated": 941,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/_layout.tsx",
+          "tokens_estimated": 639,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/_layout.tsx",
+          "tokens_estimated": 270,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/parent.ts",
+          "tokens_estimated": 896,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/stats.ts",
+          "tokens_estimated": 165,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/kpis.ts",
+          "tokens_estimated": 132,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/masajid.ts",
+          "tokens_estimated": 189,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/teachers.ts",
+          "tokens_estimated": 225,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/hifz.ts",
+          "tokens_estimated": 155,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/_layout.tsx",
+          "tokens_estimated": 445,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/constants/portals.ts",
+          "tokens_estimated": 1172,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/Alert.tsx",
+          "tokens_estimated": 403,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/DataTable.tsx",
+          "tokens_estimated": 724,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/StatBox.tsx",
+          "tokens_estimated": 376,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/StatsRow.tsx",
+          "tokens_estimated": 150,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/Badge.tsx",
+          "tokens_estimated": 294,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/ProgressBar.tsx",
+          "tokens_estimated": 380,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/Card.tsx",
+          "tokens_estimated": 201,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/CardHeader.tsx",
+          "tokens_estimated": 277,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/dashboard.tsx",
+          "tokens_estimated": 1087,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/reports.tsx",
+          "tokens_estimated": 1073,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminDashboard.tsx",
+          "tokens_estimated": 1271,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+          "tokens_estimated": 659,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminKpis.tsx",
+          "tokens_estimated": 551,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminMasajid.tsx",
+          "tokens_estimated": 546,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminReports.tsx",
+          "tokens_estimated": 419,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+          "tokens_estimated": 1295,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminTeachers.tsx",
+          "tokens_estimated": 566,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+          "tokens_estimated": 1104,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/myhalqa.tsx",
+          "tokens_estimated": 358,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/students.tsx",
+          "tokens_estimated": 726,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/reports.tsx",
+          "tokens_estimated": 708,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/HalqaCard.tsx",
+          "tokens_estimated": 746,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/MasjidAccordion.tsx",
+          "tokens_estimated": 1036,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/data/halqat.ts",
+          "tokens_estimated": 704,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/data/students.ts",
+          "tokens_estimated": 1142,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/data/teachers.ts",
+          "tokens_estimated": 707,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/Button.tsx",
+          "tokens_estimated": 564,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx",
+          "tokens_estimated": 940,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/AyahBar.tsx",
+          "tokens_estimated": 234,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherReports.tsx",
+          "tokens_estimated": 172,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/theme.ts",
+          "tokens_estimated": 279,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherHalqa.tsx",
+          "tokens_estimated": 793,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/dashboard.tsx",
+          "tokens_estimated": 1901,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/myhifz.tsx",
+          "tokens_estimated": 1106,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/attendance.tsx",
+          "tokens_estimated": 979,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/schedule.tsx",
+          "tokens_estimated": 1534,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentDashboard.tsx",
+          "tokens_estimated": 1048,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentHifz.tsx",
+          "tokens_estimated": 1059,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentAttendance.tsx",
+          "tokens_estimated": 793,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentSchedule.tsx",
+          "tokens_estimated": 752,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/masajid.ts",
+          "tokens_estimated": 386,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+          "tokens_estimated": 600,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/halqa.controller.ts",
+          "tokens_estimated": 878,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/student.controller.ts",
+          "tokens_estimated": 830,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/components/ChildSelector.tsx",
+          "tokens_estimated": 900,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/context/ParentContext.tsx",
+          "tokens_estimated": 206,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/dashboard.tsx",
+          "tokens_estimated": 877,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/timeline.tsx",
+          "tokens_estimated": 894,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/recordings.tsx",
+          "tokens_estimated": 634,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/homework_view.tsx",
+          "tokens_estimated": 617,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/attendance.tsx",
+          "tokens_estimated": 648,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentDashboard.tsx",
+          "tokens_estimated": 938,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentTimeline.tsx",
+          "tokens_estimated": 1012,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentRecordings.tsx",
+          "tokens_estimated": 570,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentHomeworkView.tsx",
+          "tokens_estimated": 1020,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentAttendance.tsx",
+          "tokens_estimated": 725,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentMessages.tsx",
+          "tokens_estimated": 545,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/_layout.tsx",
+          "tokens_estimated": 551,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/layout/NavItem.tsx",
+          "tokens_estimated": 732,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/tsconfig.json",
+          "tokens_estimated": 87,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/forms/FormSelect.tsx",
+          "tokens_estimated": 974,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx",
+          "tokens_estimated": 1395,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/forms/FormGroup.tsx",
+          "tokens_estimated": 249,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/forms/FormInput.tsx",
+          "tokens_estimated": 230,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/quran-hifz/src/quran/config/masarMap.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/config/masarMap.ts",
+          "tokens_estimated": 323,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Student.model.ts",
+          "tokens_estimated": 498,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/attendance.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/attendance.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/homework.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/homework.ts",
+          "tokens_estimated": 170,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/students.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/students.ts",
+          "tokens_estimated": 136,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/specialTracks.ts",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/specialTracks.ts",
+          "tokens_estimated": 237,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/messages.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/messages.ts",
+          "tokens_estimated": 112,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/groupHomework.ts",
+          "tokens_estimated": 358,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/lessonRecordings.ts",
+          "tokens_estimated": 415,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/attendance.tsx",
+          "tokens_estimated": 1694,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+          "tokens_estimated": 1254,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/dashboard.tsx",
+          "tokens_estimated": 1901,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+          "tokens_estimated": 42,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+          "tokens_estimated": 45,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/myhifz.tsx",
+          "tokens_estimated": 1410,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/homework.tsx",
+          "tokens_estimated": 1020,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/myhalqa.tsx",
+          "tokens_estimated": 867,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/attendance.tsx",
+          "tokens_estimated": 979,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/students.tsx",
+          "tokens_estimated": 1046,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx",
+          "tokens_estimated": 1762,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/dashboard.tsx",
+          "tokens_estimated": 1638,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/schedule.tsx",
+          "tokens_estimated": 1736,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/reports.tsx",
+          "tokens_estimated": 1115,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/halqat.tsx",
+          "tokens_estimated": 611,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/kpis.tsx",
+          "tokens_estimated": 932,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/masajid.tsx",
+          "tokens_estimated": 845,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx",
+          "tokens_estimated": 1797,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/students.tsx",
+          "tokens_estimated": 1138,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/teachers.tsx",
+          "tokens_estimated": 863,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/reports.tsx",
+          "tokens_estimated": 1368,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/register.tsx",
+          "tokens_estimated": 2402,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
+          "tokens_estimated": 1895,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/messages.tsx",
+          "tokens_estimated": 1144,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/useSelectedChild.ts",
+          "tokens_estimated": 225,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx",
+          "tokens_estimated": 14,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
+          "tokens_estimated": 14,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/ChildSelector.tsx",
+          "tokens_estimated": 860,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx",
+          "tokens_estimated": 14,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/dashboard.tsx",
+          "tokens_estimated": 1191,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/timeline.tsx",
+          "tokens_estimated": 1088,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/recordings.tsx",
+          "tokens_estimated": 812,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/homework_view.tsx",
+          "tokens_estimated": 1000,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/attendance.tsx",
+          "tokens_estimated": 992,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/messages.tsx",
+          "tokens_estimated": 1008,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 81141,
+        "output_tokens_estimated": 38496,
+        "reads_count": 116,
+        "writes_count": 47,
+        "repeated_reads_blocked": 90,
+        "anatomy_lookups": 114
+      }
+    },
+    {
+      "id": "session-2026-07-12-1955",
+      "started": "2026-07-12T16:55:13.202Z",
+      "ended": "2026-07-12T17:36:51.779Z",
+      "reads": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/evaluate.tsx",
+          "tokens_estimated": 1127,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/register.tsx",
+          "tokens_estimated": 1788,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx",
+          "tokens_estimated": 1298,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx",
+          "tokens_estimated": 1434,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/attendance.tsx",
+          "tokens_estimated": 1267,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/masajid.tsx",
+          "tokens_estimated": 270,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/kpis.tsx",
+          "tokens_estimated": 711,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/students.tsx",
+          "tokens_estimated": 852,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/teachers.tsx",
+          "tokens_estimated": 636,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/halqat.tsx",
+          "tokens_estimated": 211,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/homework.tsx",
+          "tokens_estimated": 647,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/homework.tsx",
+          "tokens_estimated": 638,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/messages.tsx",
+          "tokens_estimated": 670,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/messages.tsx",
+          "tokens_estimated": 1144,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
+          "tokens_estimated": 1589,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/AudioRecorder.tsx",
+          "tokens_estimated": 1336,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/types/student.ts",
+          "tokens_estimated": 220,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/types/teacher.ts",
+          "tokens_estimated": 160,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/types/halqa.ts",
+          "tokens_estimated": 128,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/attendance.ts",
+          "tokens_estimated": 543,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/homework.ts",
+          "tokens_estimated": 628,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/group-homework.ts",
+          "tokens_estimated": 359,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/lesson-recordings.ts",
+          "tokens_estimated": 488,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/students.ts",
+          "tokens_estimated": 698,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/special-tracks.ts",
+          "tokens_estimated": 481,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/messages.ts",
+          "tokens_estimated": 327,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 1138,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherHomework.tsx",
+          "tokens_estimated": 1011,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminRegister.tsx",
+          "tokens_estimated": 2062,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+          "tokens_estimated": 1988,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentMessages.tsx",
+          "tokens_estimated": 758,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/api.ts",
+          "tokens_estimated": 451,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/attendance.ts",
+          "tokens_estimated": 325,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/homework.ts",
+          "tokens_estimated": 368,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/students.ts",
+          "tokens_estimated": 458,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/specialTracks.ts",
+          "tokens_estimated": 207,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/messages.ts",
+          "tokens_estimated": 154,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/halqat.ts",
+          "tokens_estimated": 366,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/store/portalStore.ts",
+          "tokens_estimated": 941,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/_layout.tsx",
+          "tokens_estimated": 639,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/_layout.tsx",
+          "tokens_estimated": 270,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/parent.ts",
+          "tokens_estimated": 896,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/stats.ts",
+          "tokens_estimated": 165,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/kpis.ts",
+          "tokens_estimated": 132,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/masajid.ts",
+          "tokens_estimated": 189,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/teachers.ts",
+          "tokens_estimated": 225,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/hifz.ts",
+          "tokens_estimated": 155,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/_layout.tsx",
+          "tokens_estimated": 445,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/constants/portals.ts",
+          "tokens_estimated": 1172,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/Alert.tsx",
+          "tokens_estimated": 403,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/DataTable.tsx",
+          "tokens_estimated": 724,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/StatBox.tsx",
+          "tokens_estimated": 376,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/StatsRow.tsx",
+          "tokens_estimated": 150,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/Badge.tsx",
+          "tokens_estimated": 294,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/ProgressBar.tsx",
+          "tokens_estimated": 380,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/Card.tsx",
+          "tokens_estimated": 201,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/CardHeader.tsx",
+          "tokens_estimated": 277,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/dashboard.tsx",
+          "tokens_estimated": 1087,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/reports.tsx",
+          "tokens_estimated": 1073,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminDashboard.tsx",
+          "tokens_estimated": 1271,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+          "tokens_estimated": 659,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminKpis.tsx",
+          "tokens_estimated": 551,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminMasajid.tsx",
+          "tokens_estimated": 546,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminReports.tsx",
+          "tokens_estimated": 419,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+          "tokens_estimated": 1295,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/admin/AdminTeachers.tsx",
+          "tokens_estimated": 566,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+          "tokens_estimated": 1104,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/myhalqa.tsx",
+          "tokens_estimated": 358,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/students.tsx",
+          "tokens_estimated": 726,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/reports.tsx",
+          "tokens_estimated": 708,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/HalqaCard.tsx",
+          "tokens_estimated": 746,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/MasjidAccordion.tsx",
+          "tokens_estimated": 1036,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/data/halqat.ts",
+          "tokens_estimated": 704,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/data/students.ts",
+          "tokens_estimated": 1142,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/data/teachers.ts",
+          "tokens_estimated": 707,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/Button.tsx",
+          "tokens_estimated": 564,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx",
+          "tokens_estimated": 940,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/ui/AyahBar.tsx",
+          "tokens_estimated": 234,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherReports.tsx",
+          "tokens_estimated": 172,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/theme.ts",
+          "tokens_estimated": 279,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherHalqa.tsx",
+          "tokens_estimated": 793,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/dashboard.tsx",
+          "tokens_estimated": 1901,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/myhifz.tsx",
+          "tokens_estimated": 1106,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/attendance.tsx",
+          "tokens_estimated": 979,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/schedule.tsx",
+          "tokens_estimated": 1534,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentDashboard.tsx",
+          "tokens_estimated": 1048,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentHifz.tsx",
+          "tokens_estimated": 1059,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentAttendance.tsx",
+          "tokens_estimated": 793,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/student/StudentSchedule.tsx",
+          "tokens_estimated": 752,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/api/masajid.ts",
+          "tokens_estimated": 386,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+          "tokens_estimated": 600,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/halqa.controller.ts",
+          "tokens_estimated": 878,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/student.controller.ts",
+          "tokens_estimated": 830,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/components/ChildSelector.tsx",
+          "tokens_estimated": 900,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/context/ParentContext.tsx",
+          "tokens_estimated": 206,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/dashboard.tsx",
+          "tokens_estimated": 877,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/timeline.tsx",
+          "tokens_estimated": 894,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/recordings.tsx",
+          "tokens_estimated": 634,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/homework_view.tsx",
+          "tokens_estimated": 617,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/attendance.tsx",
+          "tokens_estimated": 648,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentDashboard.tsx",
+          "tokens_estimated": 938,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentTimeline.tsx",
+          "tokens_estimated": 1012,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentRecordings.tsx",
+          "tokens_estimated": 570,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentHomeworkView.tsx",
+          "tokens_estimated": 1020,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentAttendance.tsx",
+          "tokens_estimated": 725,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/parent/ParentMessages.tsx",
+          "tokens_estimated": 545,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/_layout.tsx",
+          "tokens_estimated": 551,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/layout/NavItem.tsx",
+          "tokens_estimated": 732,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/tsconfig.json",
+          "tokens_estimated": 87,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/forms/FormSelect.tsx",
+          "tokens_estimated": 974,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx",
+          "tokens_estimated": 1395,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/forms/FormGroup.tsx",
+          "tokens_estimated": 249,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/forms/FormInput.tsx",
+          "tokens_estimated": 230,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/quran-hifz/src/quran/config/masarMap.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/config/masarMap.ts",
+          "tokens_estimated": 323,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Student.model.ts",
+          "tokens_estimated": 498,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/attendance.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/attendance.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/homework.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/homework.ts",
+          "tokens_estimated": 170,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/students.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/students.ts",
+          "tokens_estimated": 136,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/specialTracks.ts",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/specialTracks.ts",
+          "tokens_estimated": 237,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/messages.ts",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/messages.ts",
+          "tokens_estimated": 112,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/groupHomework.ts",
+          "tokens_estimated": 358,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/lib/queries/lessonRecordings.ts",
+          "tokens_estimated": 415,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/attendance.tsx",
+          "tokens_estimated": 1694,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+          "tokens_estimated": 1254,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/dashboard.tsx",
+          "tokens_estimated": 1901,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+          "tokens_estimated": 42,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+          "tokens_estimated": 45,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/myhifz.tsx",
+          "tokens_estimated": 1410,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/homework.tsx",
+          "tokens_estimated": 1020,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/myhalqa.tsx",
+          "tokens_estimated": 867,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/attendance.tsx",
+          "tokens_estimated": 979,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/students.tsx",
+          "tokens_estimated": 1046,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx",
+          "tokens_estimated": 1762,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/dashboard.tsx",
+          "tokens_estimated": 1638,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/schedule.tsx",
+          "tokens_estimated": 1736,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/reports.tsx",
+          "tokens_estimated": 1115,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/halqat.tsx",
+          "tokens_estimated": 611,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/kpis.tsx",
+          "tokens_estimated": 932,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/masajid.tsx",
+          "tokens_estimated": 845,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx",
+          "tokens_estimated": 1797,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/students.tsx",
+          "tokens_estimated": 1138,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/teachers.tsx",
+          "tokens_estimated": 863,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/reports.tsx",
+          "tokens_estimated": 1368,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/register.tsx",
+          "tokens_estimated": 2402,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
+          "tokens_estimated": 1895,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/student/messages.tsx",
+          "tokens_estimated": 1144,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/useSelectedChild.ts",
+          "tokens_estimated": 225,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx",
+          "tokens_estimated": 14,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
+          "tokens_estimated": 14,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/components/domain/ChildSelector.tsx",
+          "tokens_estimated": 860,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx",
+          "tokens_estimated": 14,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/dashboard.tsx",
+          "tokens_estimated": 1191,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/timeline.tsx",
+          "tokens_estimated": 1088,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/recordings.tsx",
+          "tokens_estimated": 812,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/homework_view.tsx",
+          "tokens_estimated": 1000,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/attendance.tsx",
+          "tokens_estimated": 992,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-mobile/app/(portal)/parent/messages.tsx",
+          "tokens_estimated": 1008,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 81141,
+        "output_tokens_estimated": 38496,
+        "reads_count": 116,
+        "writes_count": 47,
+        "repeated_reads_blocked": 90,
+        "anatomy_lookups": 114
+      }
+    },
+    {
+      "id": "session-2026-07-21-2210",
+      "started": "2026-07-21T19:10:14.343Z",
+      "ended": "2026-07-21T19:14:32.218Z",
+      "reads": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/config/env.ts",
+          "tokens_estimated": 161,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 161,
+        "output_tokens_estimated": 0,
+        "reads_count": 1,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-07-21-2210",
+      "started": "2026-07-21T19:10:14.343Z",
+      "ended": "2026-07-21T19:19:01.498Z",
+      "reads": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/config/env.ts",
+          "tokens_estimated": 161,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 161,
+        "output_tokens_estimated": 0,
+        "reads_count": 1,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-07-21-2210",
+      "started": "2026-07-21T19:10:14.343Z",
+      "ended": "2026-07-21T19:19:55.131Z",
+      "reads": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/config/env.ts",
+          "tokens_estimated": 161,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 161,
+        "output_tokens_estimated": 0,
+        "reads_count": 1,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-07-21-2210",
+      "started": "2026-07-21T19:10:14.343Z",
+      "ended": "2026-07-21T19:29:55.384Z",
+      "reads": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/config/env.ts",
+          "tokens_estimated": 161,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/all_6_halaqat_complete_data.json",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Halqa.model.ts",
+          "tokens_estimated": 336,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Student.model.ts",
+          "tokens_estimated": 498,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Teacher.model.ts",
+          "tokens_estimated": 289,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/User.model.ts",
+          "tokens_estimated": 383,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/seeds/seed.ts",
+          "tokens_estimated": 3212,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/IndividualPlan.model.ts",
+          "tokens_estimated": 302,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Masjid.model.ts",
+          "tokens_estimated": 125,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/halqa.controller.ts",
+          "tokens_estimated": 878,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+          "tokens_estimated": 600,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/routes/halqa.routes.ts",
+          "tokens_estimated": 169,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/app.ts",
+          "tokens_estimated": 788,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/student.controller.ts",
+          "tokens_estimated": 830,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/teacher.controller.ts",
+          "tokens_estimated": 792,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/config/masarMap.ts",
+          "tokens_estimated": 323,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 9686,
+        "output_tokens_estimated": 0,
+        "reads_count": 16,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 15
+      }
+    },
+    {
+      "id": "session-2026-07-21-2210",
+      "started": "2026-07-21T19:10:14.343Z",
+      "ended": "2026-07-21T19:30:07.734Z",
+      "reads": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/config/env.ts",
+          "tokens_estimated": 161,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/all_6_halaqat_complete_data.json",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Halqa.model.ts",
+          "tokens_estimated": 336,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Student.model.ts",
+          "tokens_estimated": 498,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Teacher.model.ts",
+          "tokens_estimated": 289,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/User.model.ts",
+          "tokens_estimated": 383,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/seeds/seed.ts",
+          "tokens_estimated": 3212,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/IndividualPlan.model.ts",
+          "tokens_estimated": 302,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Masjid.model.ts",
+          "tokens_estimated": 125,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/halqa.controller.ts",
+          "tokens_estimated": 878,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+          "tokens_estimated": 600,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/routes/halqa.routes.ts",
+          "tokens_estimated": 169,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/app.ts",
+          "tokens_estimated": 788,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/student.controller.ts",
+          "tokens_estimated": 830,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/teacher.controller.ts",
+          "tokens_estimated": 792,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/config/masarMap.ts",
+          "tokens_estimated": 323,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 9686,
+        "output_tokens_estimated": 0,
+        "reads_count": 16,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 15
+      }
+    },
+    {
+      "id": "session-2026-07-21-2210",
+      "started": "2026-07-21T19:10:14.343Z",
+      "ended": "2026-07-21T19:30:46.604Z",
+      "reads": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/config/env.ts",
+          "tokens_estimated": 161,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/all_6_halaqat_complete_data.json",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Halqa.model.ts",
+          "tokens_estimated": 336,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Student.model.ts",
+          "tokens_estimated": 498,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Teacher.model.ts",
+          "tokens_estimated": 289,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/User.model.ts",
+          "tokens_estimated": 383,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/seeds/seed.ts",
+          "tokens_estimated": 3212,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/IndividualPlan.model.ts",
+          "tokens_estimated": 302,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Masjid.model.ts",
+          "tokens_estimated": 125,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/halqa.controller.ts",
+          "tokens_estimated": 878,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+          "tokens_estimated": 600,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/routes/halqa.routes.ts",
+          "tokens_estimated": 169,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/app.ts",
+          "tokens_estimated": 788,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/student.controller.ts",
+          "tokens_estimated": 830,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/teacher.controller.ts",
+          "tokens_estimated": 792,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/config/masarMap.ts",
+          "tokens_estimated": 323,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 9686,
+        "output_tokens_estimated": 0,
+        "reads_count": 16,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 15
+      }
+    },
+    {
+      "id": "session-2026-07-21-2210",
+      "started": "2026-07-21T19:10:14.343Z",
+      "ended": "2026-07-21T19:44:20.063Z",
+      "reads": [
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/config/env.ts",
+          "tokens_estimated": 161,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/all_6_halaqat_complete_data.json",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Halqa.model.ts",
+          "tokens_estimated": 336,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Student.model.ts",
+          "tokens_estimated": 498,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Teacher.model.ts",
+          "tokens_estimated": 289,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/User.model.ts",
+          "tokens_estimated": 383,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/seeds/seed.ts",
+          "tokens_estimated": 3212,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/IndividualPlan.model.ts",
+          "tokens_estimated": 302,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Masjid.model.ts",
+          "tokens_estimated": 125,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/halqa.controller.ts",
+          "tokens_estimated": 878,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+          "tokens_estimated": 600,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/routes/halqa.routes.ts",
+          "tokens_estimated": 169,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/app.ts",
+          "tokens_estimated": 788,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/student.controller.ts",
+          "tokens_estimated": 830,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/teacher.controller.ts",
+          "tokens_estimated": 792,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz/src/quran/config/masarMap.ts",
+          "tokens_estimated": 323,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/SpecialTrack.model.ts",
+          "tokens_estimated": 392,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/controllers/special-track.controller.ts",
+          "tokens_estimated": 875,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/package.json",
+          "tokens_estimated": 291,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/.gitignore",
+          "tokens_estimated": 131,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/seeds/import-real-halaqat.ts",
+          "tokens_estimated": 1242,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/macbook/.claude/plans/bubbly-soaring-mango.md",
+          "tokens_estimated": 1685,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Course.model.ts",
+          "tokens_estimated": 177,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Halqa.model.ts",
+          "tokens_estimated": 194,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Student.model.ts",
+          "tokens_estimated": 54,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/Student.model.ts",
+          "tokens_estimated": 105,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/User.model.ts",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/models/User.model.ts",
+          "tokens_estimated": 51,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/seeds/import-real-halaqat.ts",
+          "tokens_estimated": 1242,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/package.json",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/.gitignore",
+          "tokens_estimated": 48,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/diagnostic-tmp.ts",
+          "tokens_estimated": 253,
+          "action": "create"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/seeds/import-real-halaqat.ts",
+          "tokens_estimated": 128,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/seeds/import-real-halaqat.ts",
+          "tokens_estimated": 104,
+          "action": "edit"
+        },
+        {
+          "file": "/Volumes/Data/work/quran hifz platform/quran-hifz-server/src/seeds/import-real-halaqat.ts",
+          "tokens_estimated": 104,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 12617,
+        "output_tokens_estimated": 4211,
+        "reads_count": 21,
+        "writes_count": 14,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 20
       }
     }
   ],

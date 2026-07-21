@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ScrollView, View, Text, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { useState, useMemo } from 'react';
+import { ScrollView, View, Text, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconCircleCheck } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';
@@ -9,7 +9,9 @@ import Button from '@/components/ui/Button';
 import FormGroup from '@/components/forms/FormGroup';
 import FormInput from '@/components/forms/FormInput';
 import FormSelect from '@/components/forms/FormSelect';
-import { HALQAT } from '@/lib/data/halqat';
+import { useHalqat } from '@/lib/queries/halqat';
+import { useMasajid } from '@/lib/queries/masajid';
+import { useCreateStudent } from '@/lib/queries/students';
 import { theme } from '@/lib/theme';
 
 const PATHS = [
@@ -17,6 +19,12 @@ const PATHS = [
   { value: 'twenty', label: 'عشرون جزءاً (٣٠٢ صفحات — ٢ سنوات)' },
   { value: 'ten',    label: 'عشرة أجزاء (١٥١ صفحة — سنة)' },
 ];
+
+const PATH_NAME: Record<string, string> = {
+  full: 'حفظ كامل',
+  twenty: 'عشرون جزءاً',
+  ten: 'عشرة أجزاء',
+};
 
 const PATH_INFO: Record<string, { duration: string; pages: string; daily: string }> = {
   full:   { duration: '٣ سنوات',   pages: '٦٠٤ صفحات', daily: '~١ صفحة/يوم' },
@@ -32,24 +40,54 @@ const RELATION = [
 ];
 
 export default function AdminRegister() {
+  const { data: masajid = [] } = useMasajid();
+  const { data: halqat = [] } = useHalqat();
+  const createStudent = useCreateStudent();
+
+  const [name, setName] = useState('');
+  const [nationalId, setNationalId] = useState('');
+  const [phone, setPhone] = useState('');
+  const [dob, setDob] = useState('');
+  const [guardianName, setGuardianName] = useState('');
+  const [guardianRelation, setGuardianRelation] = useState('');
+  const [guardianPhone, setGuardianPhone] = useState('');
   const [selectedPath, setSelectedPath] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const halqaOptions = HALQAT.map((h) => ({ value: h.id, label: `${h.name} — ${h.mosque}` }));
+  const [masjid, setMasjid] = useState('');
+  const [halqa, setHalqa] = useState('');
+
+  const halqaOptions = useMemo(() => halqat.map((h) => ({ value: h._id, label: h.name })), [halqat]);
+  const masjidOptions = useMemo(() => masajid.map((m) => ({ value: m._id, label: m.name })), [masajid]);
   const pathInfo = selectedPath ? PATH_INFO[selectedPath] : null;
 
-  const handleSubmit = () => {
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
-  };
+  const canSubmit = !!(name.trim() && guardianName.trim() && guardianPhone.trim() && selectedPath && masjid && halqa);
+
+  async function handleSubmit() {
+    if (!canSubmit) return;
+    await createStudent.mutateAsync({
+      name: name.trim(),
+      guardian: guardianName.trim(),
+      guardianPhone: guardianPhone.trim(),
+      halqa,
+      masjid,
+      path: PATH_NAME[selectedPath],
+      status: 'new',
+    });
+    setName(''); setNationalId(''); setPhone(''); setDob('');
+    setGuardianName(''); setGuardianRelation(''); setGuardianPhone('');
+    setSelectedPath(''); setMasjid(''); setHalqa('');
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          {submitted && (
+          {createStudent.isSuccess && (
             <Alert variant="success" icon={<IconCircleCheck size={18} color="#166534" />}>
-              تم تسجيل الطالب بنجاح وإرسال رسالة واتساب لولي الأمر.
+              تم تسجيل الطالب بنجاح.
             </Alert>
+          )}
+          {createStudent.isError && (
+            <Alert variant="warning">{(createStudent.error as Error).message}</Alert>
           )}
 
           {/* Student info */}
@@ -58,22 +96,22 @@ export default function AdminRegister() {
             <View style={styles.grid}>
               <View style={styles.gridItem}>
                 <FormGroup label="الاسم الكامل" required>
-                  <FormInput placeholder="أدخل الاسم الكامل" />
+                  <FormInput placeholder="أدخل الاسم الكامل" value={name} onChangeText={setName} />
                 </FormGroup>
               </View>
               <View style={styles.gridItem}>
                 <FormGroup label="رقم الهوية الوطنية">
-                  <FormInput placeholder="١٠XXXXXXXXX" keyboardType="numeric" />
+                  <FormInput placeholder="١٠XXXXXXXXX" keyboardType="numeric" value={nationalId} onChangeText={setNationalId} />
                 </FormGroup>
               </View>
               <View style={styles.gridItem}>
                 <FormGroup label="رقم الجوال">
-                  <FormInput placeholder="٠٥XXXXXXXX" keyboardType="phone-pad" />
+                  <FormInput placeholder="٠٥XXXXXXXX" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
                 </FormGroup>
               </View>
               <View style={styles.gridItem}>
                 <FormGroup label="تاريخ الميلاد">
-                  <FormInput placeholder="١٤٤٠/٠١/٠١" />
+                  <FormInput placeholder="١٤٤٠/٠١/٠١" value={dob} onChangeText={setDob} />
                 </FormGroup>
               </View>
             </View>
@@ -84,13 +122,13 @@ export default function AdminRegister() {
             <CardHeader title="بيانات ولي الأمر" />
             <View style={styles.formCol}>
               <FormGroup label="اسم ولي الأمر" required>
-                <FormInput placeholder="الاسم الكامل" />
+                <FormInput placeholder="الاسم الكامل" value={guardianName} onChangeText={setGuardianName} />
               </FormGroup>
               <FormGroup label="صلة القرابة">
-                <FormSelect options={RELATION} placeholder="اختر صلة القرابة" onChange={() => {}} />
+                <FormSelect options={RELATION} placeholder="اختر صلة القرابة" value={guardianRelation} onChange={setGuardianRelation} />
               </FormGroup>
               <FormGroup label="رقم الجوال / واتساب" required>
-                <FormInput placeholder="٠٥XXXXXXXX" keyboardType="phone-pad" />
+                <FormInput placeholder="٠٥XXXXXXXX" keyboardType="phone-pad" value={guardianPhone} onChangeText={setGuardianPhone} />
               </FormGroup>
             </View>
           </Card>
@@ -102,8 +140,11 @@ export default function AdminRegister() {
               <FormGroup label="مسار الحفظ" required>
                 <FormSelect options={PATHS} placeholder="اختر المسار" onChange={setSelectedPath} value={selectedPath} />
               </FormGroup>
+              <FormGroup label="المسجد" required>
+                <FormSelect options={masjidOptions} placeholder="اختر المسجد" value={masjid} onChange={setMasjid} />
+              </FormGroup>
               <FormGroup label="الحلقة" required>
-                <FormSelect options={halqaOptions} placeholder="اختر الحلقة" onChange={() => {}} />
+                <FormSelect options={halqaOptions} placeholder="اختر الحلقة" value={halqa} onChange={setHalqa} />
               </FormGroup>
             </View>
 
@@ -126,7 +167,13 @@ export default function AdminRegister() {
             )}
           </Card>
 
-          <Button label="حفظ التسجيل وإرسال إشعار" onPress={handleSubmit} fullWidth />
+          <Button
+            label={createStudent.isPending ? 'جارٍ الحفظ...' : 'حفظ التسجيل'}
+            onPress={handleSubmit}
+            loading={createStudent.isPending}
+            disabled={!canSubmit}
+            fullWidth
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

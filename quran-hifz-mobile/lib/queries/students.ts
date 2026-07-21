@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { get } from '@/lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { get, post } from '@/lib/api';
 
 export type Student = {
   _id: string;
@@ -51,5 +51,13 @@ export function useStudent(id: string | undefined) {
     queryKey: ['students', id],
     queryFn: () => get<SingleResponse>(`/students/${id}`).then((r) => r.data),
     enabled: !!id,
+  });
+}
+
+export function useCreateStudent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Record<string, unknown>) => post<SingleResponse>('/students', body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['students'] }),
   });
 }

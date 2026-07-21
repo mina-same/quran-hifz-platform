@@ -2,7 +2,9 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IStudent extends Document {
   name: string;
-  path: string;
+  path?: string;
+  level?: number;
+  plan?: string;
   halqa: Types.ObjectId;
   masjid: Types.ObjectId;
   attendancePct: number;
@@ -21,7 +23,9 @@ export interface IStudent extends Document {
 const studentSchema = new Schema<IStudent>(
   {
     name:             { type: String, required: true, trim: true },
-    path:             { type: String, required: true, enum: ['حفظ كامل', 'عشرون جزءاً', 'عشرة أجزاء', 'خمسة أجزاء'] },
+    path:             { type: String, enum: ['حفظ كامل', 'عشرون جزءاً', 'عشرة أجزاء', 'خمسة أجزاء'] },
+    level:            { type: Number, min: 1, max: 10 },
+    plan:             { type: String, trim: true },
     halqa:            { type: Schema.Types.ObjectId, ref: 'Halqa',  required: true },
     masjid:           { type: Schema.Types.ObjectId, ref: 'Masjid', required: true },
     attendancePct:    { type: Number, default: 0, min: 0, max: 100 },

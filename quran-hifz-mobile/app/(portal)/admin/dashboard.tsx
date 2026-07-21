@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AyahBar from '@/components/ui/AyahBar';
 import StatsRow from '@/components/ui/StatsRow';
@@ -7,34 +7,94 @@ import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import DataTable from '@/components/ui/DataTable';
 import ProgressBar from '@/components/ui/ProgressBar';
+import Alert from '@/components/ui/Alert';
 import HalqaCard from '@/components/domain/HalqaCard';
-import { STUDENTS } from '@/lib/data/students';
-import { HALQAT, KPIS, MASAJID } from '@/lib/data/halqat';
+import { useStats } from '@/lib/queries/stats';
+import { useHalqat, type Halqa as HalqaAPI } from '@/lib/queries/halqat';
+import { useKpis } from '@/lib/queries/kpis';
+import { useStudents } from '@/lib/queries/students';
+import type { Halqa as LocalHalqa } from '@/lib/types/halqa';
 import { theme } from '@/lib/theme';
+
+function getName(v: unknown): string {
+  if (v && typeof v === 'object' && 'name' in v) return (v as { name: string }).name;
+  return '';
+}
+
+function toCardHalqa(h: HalqaAPI): LocalHalqa {
+  return {
+    id: h._id,
+    name: h.name,
+    teacher: getName(h.teacher),
+    mosque: getName(h.masjid),
+    days: h.days,
+    time: h.time,
+    studentCount: h.studentCount ?? 0,
+    capacity: h.capacity,
+    attendancePct: h.attendancePct,
+    completionPct: h.completionPct,
+  };
+}
 
 const kpiVariant = (r: string) =>
   r === 'ممتاز' ? 'green' : r === 'جيد' ? 'gold' : r === 'مقبول' ? 'blue' : 'red';
 
 export default function AdminDashboard() {
+  const statsQuery = useStats();
+  const halqatQuery = useHalqat();
+  const kpisQuery = useKpis();
+  const studentsQuery = useStudents();
+
+  const isLoading =
+    statsQuery.isLoading || halqatQuery.isLoading || kpisQuery.isLoading || studentsQuery.isLoading;
+  const error = statsQuery.error || halqatQuery.error || kpisQuery.error || studentsQuery.error;
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['bottom']}>
+        <View style={styles.page}>
+          <Card style={styles.loadingCard}>
+            <ActivityIndicator color={theme.green} size="large" />
+          </Card>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['bottom']}>
+        <View style={styles.page}>
+          <Alert variant="warning">{error.message}</Alert>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const stats = statsQuery.data;
+  const halqat = halqatQuery.data ?? [];
+  const kpis = kpisQuery.data ?? [];
+  const students = studentsQuery.data ?? [];
+
   const STATS = [
-    { label: 'الطلاب المسجلون', value: STUDENTS.length, color: theme.green },
-    { label: 'المعلمون',         value: '٥',             color: theme.gold },
-    { label: 'الحلقات',          value: HALQAT.length,   color: '#3B82F6' },
-    { label: 'المساجد',          value: MASAJID.length,  color: theme.red },
+    { label: 'الطلاب المسجلون', value: stats?.totalStudents ?? 0, color: theme.green },
+    { label: 'المعلمون',         value: stats?.totalTeachers ?? 0, color: theme.gold },
+    { label: 'الحلقات',          value: stats?.totalHalqat ?? 0,   color: '#3B82F6' },
+    { label: 'المساجد',          value: stats?.totalMasajid ?? 0,  color: theme.red },
   ];
 
-  const kpiRows = KPIS.slice(0, 4).map((k) => ({
+  const kpiRows = kpis.slice(0, 4).map((k) => ({
     indicator: <Text style={styles.bold}>{k.indicator}</Text>,
     target:    <Text style={styles.cell}>{k.target}</Text>,
     actual:    <Text style={styles.cell}>{k.actual}</Text>,
     rating:    <Badge label={k.rating} variant={kpiVariant(k.rating) as any} />,
   }));
 
-  const recentRows = STUDENTS.slice(0, 5).map((s) => ({
+  const recentRows = students.slice(0, 5).map((s) => ({
     name:     <Text style={styles.bold}>{s.name}</Text>,
     path:     <Badge label={s.path} variant="gold" />,
-    halqa:    <Text style={styles.cell}>{s.halqa}</Text>,
-    mosque:   <Text style={styles.cell}>{s.mosque}</Text>,
+    halqa:    <Text style={styles.cell}>{getName(s.halqa)}</Text>,
+    mosque:   <Text style={styles.cell}>{getName(s.masjid)}</Text>,
     progress: (
       <View style={{ minWidth: 80 }}>
         <Text style={[styles.cell, { fontSize: 11, marginBottom: 2 }]}>{s.progressPct}٪</Text>
@@ -50,8 +110,8 @@ export default function AdminDashboard() {
         <StatsRow stats={STATS} />
 
         {/* Halqat overview (first 2) */}
-        {HALQAT.slice(0, 2).map((h) => (
-          <HalqaCard key={h.id} halqa={h} />
+        {halqat.slice(0, 2).map((h) => (
+          <HalqaCard key={h._id} halqa={toCardHalqa(h)} />
         ))}
 
         {/* KPIs */}
@@ -92,4 +152,5 @@ const styles = StyleSheet.create({
   page: { padding: theme.pagePadding, gap: 14 },
   bold: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
   cell: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+  loadingCard: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40 },
 });

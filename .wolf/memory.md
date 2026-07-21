@@ -293,3 +293,124 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-07-12 19:55
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-12 19:55
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 20:21 | Edited quran-hifz-mobile/lib/queries/attendance.ts | 2→2 lines | ~34 |
+| 20:21 | Edited quran-hifz-mobile/lib/queries/attendance.ts | modified useAttendance() | ~175 |
+| 20:21 | Edited quran-hifz-mobile/lib/queries/homework.ts | 2→2 lines | ~34 |
+| 20:21 | Edited quran-hifz-mobile/lib/queries/homework.ts | modified useHomework() | ~170 |
+| 20:21 | Edited quran-hifz-mobile/lib/queries/students.ts | 2→2 lines | ~34 |
+| 20:21 | Edited quran-hifz-mobile/lib/queries/students.ts | modified useStudent() | ~136 |
+| 20:21 | Edited quran-hifz-mobile/lib/queries/specialTracks.ts | 2→2 lines | ~35 |
+| 20:21 | Edited quran-hifz-mobile/lib/queries/specialTracks.ts | modified useSpecialTracks() | ~237 |
+| 20:21 | Edited quran-hifz-mobile/lib/queries/messages.ts | 2→2 lines | ~34 |
+| 20:21 | Edited quran-hifz-mobile/lib/queries/messages.ts | modified useMessages() | ~112 |
+| 20:22 | Created quran-hifz-mobile/lib/queries/groupHomework.ts | — | ~358 |
+| 20:22 | Created quran-hifz-mobile/lib/queries/lessonRecordings.ts | — | ~415 |
+| 20:22 | Created quran-hifz-mobile/app/(portal)/teacher/attendance.tsx | — | ~1694 |
+| 20:22 | Created quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx | — | ~1254 |
+| 20:22 | Created quran-hifz-mobile/app/(portal)/student/dashboard.tsx | — | ~1901 |
+| 20:22 | Edited quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx | 7→3 lines | ~42 |
+| 20:22 | Edited quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx | 3→2 lines | ~45 |
+| 20:23 | Created quran-hifz-mobile/app/(portal)/student/myhifz.tsx | — | ~1410 |
+| 20:23 | Created quran-hifz-mobile/app/(portal)/teacher/homework.tsx | — | ~1020 |
+| 20:23 | Created quran-hifz-mobile/app/(portal)/teacher/myhalqa.tsx | — | ~867 |
+| 20:23 | Created quran-hifz-mobile/app/(portal)/student/attendance.tsx | — | ~979 |
+| 20:23 | Created quran-hifz-mobile/app/(portal)/teacher/students.tsx | — | ~1046 |
+| 20:23 | Created quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx | — | ~1762 |
+| 20:23 | Created quran-hifz-mobile/app/(portal)/admin/dashboard.tsx | — | ~1638 |
+| 20:23 | Created quran-hifz-mobile/app/(portal)/student/schedule.tsx | — | ~1736 |
+| 20:23 | Created quran-hifz-mobile/app/(portal)/teacher/reports.tsx | — | ~1115 |
+| 20:23 | Created quran-hifz-mobile/app/(portal)/admin/halqat.tsx | — | ~611 |
+| 20:23 | Created quran-hifz-mobile/app/(portal)/admin/kpis.tsx | — | ~932 |
+| 20:24 | Created quran-hifz-mobile/app/(portal)/admin/masajid.tsx | — | ~845 |
+| 20:24 | Created quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx | — | ~1797 |
+| 20:24 | Created quran-hifz-mobile/app/(portal)/admin/students.tsx | — | ~1138 |
+| 20:24 | Created quran-hifz-mobile/app/(portal)/admin/teachers.tsx | — | ~863 |
+| 20:24 | Created quran-hifz-mobile/app/(portal)/admin/reports.tsx | — | ~1368 |
+| 20:25 | Created quran-hifz-mobile/app/(portal)/admin/register.tsx | — | ~2402 |
+| 20:25 | Created quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx | — | ~1895 |
+| 20:25 | Created quran-hifz-mobile/app/(portal)/student/messages.tsx | — | ~1144 |
+| 20:26 | Created quran-hifz-mobile/components/domain/useSelectedChild.ts | — | ~225 |
+| 20:26 | Edited quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx | inline fix | ~14 |
+| 20:26 | Edited quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx | inline fix | ~14 |
+| 20:26 | Created quran-hifz-mobile/components/domain/ChildSelector.tsx | — | ~860 |
+| 20:26 | Edited quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx | inline fix | ~14 |
+| 20:26 | Created quran-hifz-mobile/app/(portal)/parent/dashboard.tsx | — | ~1191 |
+| 20:26 | Session end: 42 writes across 26 files (attendance.ts, homework.ts, students.ts, specialTracks.ts, messages.ts) | 116 reads | ~114737 tok |
+| 20:27 | Created quran-hifz-mobile/app/(portal)/parent/timeline.tsx | — | ~1088 |
+| 20:27 | Created quran-hifz-mobile/app/(portal)/parent/recordings.tsx | — | ~812 |
+| 20:27 | Created quran-hifz-mobile/app/(portal)/parent/homework_view.tsx | — | ~1000 |
+| 20:27 | Created quran-hifz-mobile/app/(portal)/parent/attendance.tsx | — | ~992 |
+| 20:27 | Created quran-hifz-mobile/app/(portal)/parent/messages.tsx | — | ~1008 |
+
+## Session: 2026-07-12 (wire teacher screens to real hooks)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| — | Edited app/(portal)/teacher/dashboard.tsx | wired useHalqat({teacher})/useHomework({teacher,status})/useStats; replaced mock STATS/today's-session/students-table with real stats row + halqat list card + pending-homework alert card, mirroring web TeacherDashboard.tsx | tsc clean | ~1200 |
+| — | Edited app/(portal)/teacher/myhalqa.tsx | wired useHalqat({teacher}); added toHalqaCardData() mapper (real Halqa -> lib/types/halqa shape) since HalqaCard's Props type is fixed and out of scope to edit | tsc clean | ~700 |
+| — | Edited app/(portal)/teacher/students.tsx | wired useHalqat({teacher}) + useStudents({halqa: firstHalqaId}), mirroring web TeacherStudents.tsx's documented "first halqa" scoping judgment call | tsc clean | ~900 |
+| — | Edited app/(portal)/teacher/reports.tsx | wired same useHalqat+useStudents(firstHalqaId) pattern as students.tsx; web TeacherReports.tsx is a static placeholder with no real data, so mapped mobile mock's existing per-student fields (all present on real Student type) instead | tsc clean | ~950 |
+| — | Session end: 4 files edited (dashboard.tsx, myhalqa.tsx, students.tsx, reports.tsx), removed lib/data/* mock imports from all 4, ran `npx tsc --noEmit` — 0 new errors (only pre-existing baseline errors in points.tsx/store.tsx/evaluate.tsx/_layout.tsx/index.tsx per bug-011) | 30 reads | ~45000 tok |
+| 20:34 | Session end: 47 writes across 29 files (attendance.ts, homework.ts, students.ts, specialTracks.ts, messages.ts) | 116 reads | ~119637 tok |
+
+## Session: 2026-07-12 (wire student screens to real hooks)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| — | Edited app/(portal)/student/dashboard.tsx | wired useStudent(profileId)+useHomework({student}); replaced mock STATS/next-session/weekly-progress cards with real stats row (progressPages, attendancePct, submitted-homework count, progressPct), "خطتي الحالية"/"معلومات حلقتي" cards (mirroring web StudentDashboard.tsx), and real recent-homework list; dropped mock "أيام الالتزام"/"يوم للإكمال (تقديري)" stats and "الجلسة القادمة" schedule fields (no server equivalent) | tsc clean | ~1900 |
+| — | Edited app/(portal)/student/myhifz.tsx | wired useHifz(profileId)+useStudent(profileId); real hifz-entries table (surah/status/completionDate) and completed-surah-count progress bar preserved as-is (already real-data-shaped); replaced mock "تاريخ البداية"/"الهدف السنوي" summary fields with real progressPages/remaining-pages (no start-date or annual-goal-pages field on server) | tsc clean | ~1400 |
+| — | Edited app/(portal)/student/attendance.tsx | wired useAttendance({student})+useStudent(profileId); stats now use student.attendancePct (server-authoritative) plus present/absent/late counts computed from records, mirroring web StudentAttendance.tsx exactly; table is a direct data-source swap | tsc clean | ~980 |
+| — | Edited app/(portal)/student/schedule.tsx | wired useStudent(profileId)→useHalqa(halqaId) (student.halqa is a populated ref, extracted via local getId()); real halqa name/teacher/masjid/time/days feed both the info card and weekly grid (sessionDays now derived from halqa.days string, same split/trim pattern as web StudentSchedule.tsx); dropped mock "الجلسات القادمة" card entirely (fake future dates + countdown labels, no session-instance endpoint exists) and added web's static info Alert instead | tsc clean | ~1700 |
+| — | Session end: 4 files edited (dashboard.tsx, myhifz.tsx, attendance.tsx, schedule.tsx), removed lib/data/students mock imports from all 4, ran `npx tsc --noEmit` — 0 new errors (only pre-existing baseline errors in points.tsx/store.tsx/evaluate.tsx/_layout.tsx/index.tsx per bug-011). Untouched per scope: messages.tsx, homework.tsx (audio recorder, no upload endpoint), points.tsx, store.tsx (no gamification model) | 20 reads | ~40000 tok |
+| 20:36 | Session end: 47 writes across 29 files (attendance.ts, homework.ts, students.ts, specialTracks.ts, messages.ts) | 116 reads | ~119637 tok |
+| — | Edited app/(portal)/admin/dashboard.tsx | wired useStats+useHalqat+useKpis+useStudents, removed lib/data/* mock imports; added getName()/toCardHalqa() adapters | tsc clean | ~900 |
+| — | Edited app/(portal)/admin/halqat.tsx | wired useHalqat; reused HalqaCard via toCardHalqa() adapter (component's Props type is fixed, out of scope) | tsc clean | ~600 |
+| — | Edited app/(portal)/admin/kpis.tsx | wired useKpis, same column/stat structure as mock | tsc clean | ~450 |
+| — | Edited app/(portal)/admin/masajid.tsx | wired useMasajid+useHalqat cross-referenced by masjid _id via getRefId() — useMasajid's own embedded halqat sub-objects lack teacher/attendancePct/completionPct (server select() omits them), so pulled full Halqa records from useHalqat() and grouped client-side instead of using the incomplete embedded array | tsc clean | ~750 |
+| — | Edited app/(portal)/admin/reports.tsx | wired useStats+useStudents+useHalqat; web AdminReports.tsx has zero data hooks (static report-card grid) so mirrored the mobile mock's existing stats/summary/halqat-performance structure instead; dropped 3 of 5 "ملخص الشهر" rows (جلسات منعقدة، واجبات مُسلَّمة، أولياء أمور تلقوا إشعارات) since no server field backs them, kept طلاب جدد (status==='new' count) and صفحات محفوظة (sum of progressPages) | tsc clean | ~800 |
+| — | Edited app/(portal)/admin/students.tsx | wired useStudents; replaced hardcoded "مسجلون هذا الشهر: ٢" stat with real count of status==='new' students (relabeled "طلاب جدد" since no signup-date field exists to scope to "this month") | tsc clean | ~500 |
+| — | Edited app/(portal)/admin/teachers.tsx | wired useTeachers, same table structure as mock | tsc clean | ~400 |
+| — | Session end: 7 admin screens wired to real lib/queries/* hooks (dashboard, halqat, kpis, masajid, reports, students, teachers), all lib/data/* mock imports removed from them; `npx tsc --noEmit` shows 0 new errors (only pre-existing bug-011 baseline in points.tsx/store.tsx/evaluate.tsx/_layout.tsx/index.tsx) | 30 reads | ~55000 tok |
+
+## Session: 2026-07-21 22:10
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-21 22:10
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-21 22:10
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 22:14 | Dropped local dev DB (user asked to "remove all date from db", clarified to full wipe) | mongodb://127.0.0.1:27017/quran-hifz | success — 0 collections remain | ~200 |
+| 22:22 | Dropped remote Atlas DB (quaran-hifz.otnbdaz.mongodb.net/quran-hifz) per user request | quran-hifz-server/.env | success — 0 collections remain | ~150 |
+| 22:33 | Created ../../../../Users/macbook/.claude/plans/bubbly-soaring-mango.md | — | ~1572 |
+| 22:33 | Created quran-hifz-server/src/models/Course.model.ts | — | ~177 |
+| 22:33 | Edited quran-hifz-server/src/models/Halqa.model.ts | 19→21 lines | ~194 |
+| 22:34 | Edited quran-hifz-server/src/models/Student.model.ts | 6→8 lines | ~54 |
+| 22:34 | Edited quran-hifz-server/src/models/Student.model.ts | 3→5 lines | ~105 |
+| 22:34 | Edited quran-hifz-server/src/models/User.model.ts | 2→3 lines | ~35 |
+| 22:34 | Edited quran-hifz-server/src/models/User.model.ts | 2→3 lines | ~51 |
+| 22:34 | Created quran-hifz-server/src/seeds/import-real-halaqat.ts | — | ~1242 |
+| 22:34 | Edited quran-hifz-server/package.json | 1→2 lines | ~31 |
+| 22:34 | Edited .gitignore | 6→9 lines | ~44 |
+| 22:39 | Created quran-hifz-server/diagnostic-tmp.ts | — | ~253 |
+| 22:41 | Edited quran-hifz-server/src/seeds/import-real-halaqat.ts | modified toNewEmail() | ~128 |
+| 22:41 | Edited quran-hifz-server/src/seeds/import-real-halaqat.ts | 8→8 lines | ~104 |
+| 22:41 | Edited quran-hifz-server/src/seeds/import-real-halaqat.ts | 8→8 lines | ~104 |
+| 23:05 | Added Course model, imported real course/halqa/teacher/student data (uniform teacher@123/student@123 passwords, rawad.com domain) | quran-hifz-server/src/models/Course.model.ts, Halqa.model.ts, Student.model.ts, User.model.ts, seeds/import-real-halaqat.ts | success — Atlas: 2 courses, 6 halqat, 6 teachers, 74 students, 80 users | ~4000 |
+| 22:44 | Session end: 14 writes across 9 files (bubbly-soaring-mango.md, Course.model.ts, Halqa.model.ts, Student.model.ts, User.model.ts) | 21 reads | ~16828 tok |

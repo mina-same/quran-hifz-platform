@@ -1,34 +1,61 @@
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
-import Badge from '@/components/ui/Badge';
+import Alert from '@/components/ui/Alert';
+import DataTable from '@/components/ui/DataTable';
+import { useSelectedChild } from '@/components/domain/useSelectedChild';
+import { useChildRecordings } from '@/lib/queries/parent';
 import { theme } from '@/lib/theme';
 
-const ROWS = [
-  { date: 'اليوم',    type: 'حفظ جديد',     segment: 'البقرة ٢٤٠-٢٤٥', pts: '٨٥٠', note: 'أحسنت! الإيقاع ممتاز' },
-  { date: 'أمس',     type: 'مراجعة بعيدة',  segment: 'سورة الكهف',       pts: '٦٠٠', note: 'تحقق من مد المنفصل' },
-  { date: 'الاثنين', type: 'حفظ جديد',     segment: 'البقرة ٢٢٠-٢٣٥', pts: '٨٠٠', note: 'أداء قوي' },
-  { date: 'السبت',   type: 'تحسين تلاوة',  segment: 'الفاتحة',           pts: '٧٠٠', note: 'حسّن نطق الضاد' },
-];
-
 export default function ParentRecordings() {
+  const { selectedChildId, hasNoChildren } = useSelectedChild();
+  const { data: recordings, isLoading } = useChildRecordings(selectedChildId ?? undefined);
+
+  if (!selectedChildId) {
+    return (
+      <SafeAreaView style={s.safe} edges={['bottom']}>
+        <View style={s.loading}>
+          {hasNoChildren ? (
+            <Text style={s.emptyText}>لم يتم اختيار طالب</Text>
+          ) : (
+            <ActivityIndicator color={theme.green} size="large" />
+          )}
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const rows = (recordings ?? []).map((r) => ({
+    date: <Text style={s.cell}>{new Date(r.recordedAt).toLocaleDateString('ar-SA')}</Text>,
+    teacher: <Text style={s.cell}>{typeof r.teacher === 'object' ? r.teacher.name : r.teacher}</Text>,
+    segment: <Text style={s.cell}>{r.segment ?? '—'}</Text>,
+    notes: <Text style={s.cell}>{r.notes ?? '—'}</Text>,
+  }));
+
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
-        <Card>
-          <CardHeader title="الدروس المسجّلة" />
-          {ROWS.map((r, i) => (
-            <View key={i} style={[s.item, i && s.border]}>
-              <View style={s.itemHead}>
-                <Text style={s.date}>{r.date}</Text>
-                <Badge variant="blue">{r.type}</Badge>
-                <Text style={s.pts}>{r.pts} نقطة</Text>
-              </View>
-              <Text style={s.segment}>{r.segment}</Text>
-              <Text style={s.note}>{r.note}</Text>
+        <Alert variant="info">جميع دروس ابنك مرتبة من الأحدث — سجّلها المعلم مباشرة في الحلقة.</Alert>
+
+        <Card noPadding>
+          <CardHeader title="سجل الدروس" style={{ padding: 16, paddingBottom: 8 }} />
+          {isLoading ? (
+            <View style={s.inlineLoading}>
+              <ActivityIndicator color={theme.green} />
             </View>
-          ))}
+          ) : (
+            <DataTable
+              columns={[
+                { key: 'date', label: 'التاريخ' },
+                { key: 'teacher', label: 'المعلم' },
+                { key: 'segment', label: 'المقطع', flex: 1.4 },
+                { key: 'notes', label: 'ملاحظة المعلم', flex: 1.6 },
+              ]}
+              rows={rows}
+              emptyMessage="لا توجد دروس مسجّلة بعد"
+            />
+          )}
         </Card>
       </ScrollView>
     </SafeAreaView>
@@ -36,13 +63,10 @@ export default function ParentRecordings() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.cream },
-  page: { padding: 16 },
-  item: { paddingVertical: 12 },
-  border: { borderTopWidth: 1, borderTopColor: theme.border },
-  itemHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' },
-  date: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
-  pts: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.gold, marginRight: 'auto' as any },
-  segment: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text, marginBottom: 2 },
-  note: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
+  safe: { flex: 1, backgroundColor: theme.bg },
+  page: { padding: 16, gap: 14 },
+  loading: { paddingVertical: 60, alignItems: 'center' },
+  inlineLoading: { paddingVertical: 30, alignItems: 'center' },
+  emptyText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
+  cell: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text },
 });
