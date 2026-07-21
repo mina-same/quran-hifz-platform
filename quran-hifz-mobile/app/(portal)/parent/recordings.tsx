@@ -1,72 +1,50 @@
-import { ScrollView, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { useMemo } from 'react';
+import { ScrollView, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
-import Alert from '@/components/ui/Alert';
-import DataTable from '@/components/ui/DataTable';
-import { useSelectedChild } from '@/components/domain/useSelectedChild';
-import { useChildRecordings } from '@/lib/queries/parent';
-import { theme } from '@/lib/theme';
+import { useParentChildren, useChildRecordings } from '@/lib/queries/parent';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 export default function ParentRecordings() {
-  const { selectedChildId, hasNoChildren } = useSelectedChild();
-  const { data: recordings, isLoading } = useChildRecordings(selectedChildId ?? undefined);
+  const theme = useAppTheme();
+  const selectedChildId = usePortalStore((s) => s.selectedChildId);
+  const { data: children = [] } = useParentChildren();
+  const childId = selectedChildId ?? children[0]?._id;
 
-  if (!selectedChildId) {
-    return (
-      <SafeAreaView style={s.safe} edges={['bottom']}>
-        <View style={s.loading}>
-          {hasNoChildren ? (
-            <Text style={s.emptyText}>لم يتم اختيار طالب</Text>
-          ) : (
-            <ActivityIndicator color={theme.green} size="large" />
-          )}
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const { data: recordings = [], isLoading } = useChildRecordings(childId);
 
-  const rows = (recordings ?? []).map((r) => ({
-    date: <Text style={s.cell}>{new Date(r.recordedAt).toLocaleDateString('ar-SA')}</Text>,
-    teacher: <Text style={s.cell}>{typeof r.teacher === 'object' ? r.teacher.name : r.teacher}</Text>,
-    segment: <Text style={s.cell}>{r.segment ?? '—'}</Text>,
-    notes: <Text style={s.cell}>{r.notes ?? '—'}</Text>,
-  }));
+  const s = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: 16 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
+    item: { paddingVertical: 12 },
+    border: { borderTopWidth: 1, borderTopColor: theme.border },
+    itemHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' },
+    date: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
+    segment: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text, marginBottom: 2 },
+    note: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
+  }), [theme]);
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
-        <Alert variant="info">جميع دروس ابنك مرتبة من الأحدث — سجّلها المعلم مباشرة في الحلقة.</Alert>
-
-        <Card noPadding>
-          <CardHeader title="سجل الدروس" style={{ padding: 16, paddingBottom: 8 }} />
-          {isLoading ? (
-            <View style={s.inlineLoading}>
-              <ActivityIndicator color={theme.green} />
+        <Card>
+          <CardHeader title="الدروس المسجّلة" />
+          {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
+          {!isLoading && recordings.length === 0 && <Text style={s.muted}>لا توجد دروس مسجّلة</Text>}
+          {recordings.map((r, i) => (
+            <View key={r._id} style={[s.item, i > 0 && s.border]}>
+              <View style={s.itemHead}>
+                <Text style={s.date}>{new Date(r.recordedAt).toLocaleDateString('ar-SA')}</Text>
+              </View>
+              {!!r.segment && <Text style={s.segment}>{r.segment}</Text>}
+              {!!r.notes && <Text style={s.note}>{r.notes}</Text>}
             </View>
-          ) : (
-            <DataTable
-              columns={[
-                { key: 'date', label: 'التاريخ' },
-                { key: 'teacher', label: 'المعلم' },
-                { key: 'segment', label: 'المقطع', flex: 1.4 },
-                { key: 'notes', label: 'ملاحظة المعلم', flex: 1.6 },
-              ]}
-              rows={rows}
-              emptyMessage="لا توجد دروس مسجّلة بعد"
-            />
-          )}
+          ))}
         </Card>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: 16, gap: 14 },
-  loading: { paddingVertical: 60, alignItems: 'center' },
-  inlineLoading: { paddingVertical: 30, alignItems: 'center' },
-  emptyText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
-  cell: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text },
-});

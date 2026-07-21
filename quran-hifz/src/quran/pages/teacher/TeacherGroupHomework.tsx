@@ -1,14 +1,113 @@
 import { useState } from "react";
 import { useTopbar } from "../../context/useTopbar";
+import { usePortal } from "../../context/PortalContext";
 import { useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework } from "../../api/group-homework";
+import { useHalqat } from "../../api/halqat";
+import { useSpecialTracks } from "../../api/special-tracks";
 import { Card } from "../../components/common/Card";
 import { Alert } from "../../components/common/Alert";
 import { Badge } from "../../components/common/Badge";
+import { ContextPicker, halqaToContext, trackToContext, type TeachingContext } from "../../components/common/ContextPicker";
+import { SkeletonCard, SkeletonList } from "../../components/common/Skeleton";
+
+const STUDENTS = ["عبدالله الحميداني", "يوسف الزهراني", "أحمد الشهري", "فارس العسيري", "سالم الدوسري"];
+
+type IndivHW = { student: string; title: string; dueDay: string; note: string };
+
+function IndividualHomeworkCard() {
+  const [showForm, setShowForm] = useState(false);
+  const [list, setList]         = useState<IndivHW[]>([]);
+  const [form, setForm]         = useState({ student: STUDENTS[0], title: "", dueDay: "", note: "" });
+
+  function add() {
+    if (!form.student || !form.title) return;
+    setList((prev) => [{ ...form }, ...prev]);
+    setForm({ student: STUDENTS[0], title: "", dueDay: "", note: "" });
+    setShowForm(false);
+  }
+
+  return (
+    <Card
+      icon="ti-user"
+      title="الواجبات الفردية"
+      headerExtra={
+        <button className="topbar-btn btn-ghost" style={{ fontSize: 11 }} onClick={() => setShowForm((v) => !v)}>
+          <i className="ti ti-plus" /> واجب فردي
+        </button>
+      }
+    >
+      {showForm && (
+        <div style={{ padding: 12, background: "var(--cream, #f9f6f2)", borderRadius: 8, marginBottom: 12 }}>
+          <div className="form-grid-2">
+            <div className="form-group">
+              <label className="form-label">الطالب</label>
+              <select className="form-input" value={form.student} onChange={(e) => setForm((f) => ({ ...f, student: e.target.value }))}>
+                {STUDENTS.map((s) => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">الموعد</label>
+              <input className="form-input" placeholder="مثال: الثلاثاء" value={form.dueDay} onChange={(e) => setForm((f) => ({ ...f, dueDay: e.target.value }))} />
+            </div>
+          </div>
+          <div className="form-grid-2">
+            <div className="form-group">
+              <label className="form-label">الواجب</label>
+              <input className="form-input" placeholder="عنوان الواجب الفردي" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">ملاحظة للطالب</label>
+              <input className="form-input" placeholder="سبب الواجب الفردي..." value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} />
+            </div>
+          </div>
+          <button className="topbar-btn btn-primary" style={{ marginTop: 8 }} onClick={add}>
+            <i className="ti ti-send" /> إرسال للطالب وولي أمره
+          </button>
+        </div>
+      )}
+      {list.length === 0 ? (
+        <p style={{ color: "var(--text2)", textAlign: "center", padding: 20, fontSize: 13 }}>لا توجد واجبات فردية حتى الآن</p>
+      ) : (
+        list.map((hw, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 0", borderTop: i ? "1px solid var(--border)" : undefined }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: "var(--gold-pale, #fef9ec)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <i className="ti ti-user" style={{ color: "var(--gold)" }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2 }}>{hw.student}</div>
+              <div style={{ fontSize: 12, marginBottom: 3 }}>{hw.title}</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                {hw.dueDay && <Badge tone="gold">موعد: {hw.dueDay}</Badge>}
+                {hw.note && <Badge tone="gray">{hw.note}</Badge>}
+              </div>
+            </div>
+          </div>
+        ))
+      )}
+    </Card>
+  );
+}
 
 const DAYS = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس"];
 
 export function TeacherGroupHomework() {
-  const { data: homeworks, isLoading } = useGroupHomework();
+  const { user } = usePortal();
+  const [selected, setSelected] = useState<TeachingContext | null>(null);
+
+  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: user?.profileId });
+  const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, user?.profileId as string | undefined);
+  const contexts: TeachingContext[] = [
+    ...halqat.map(halqaToContext),
+    ...tracks.map(trackToContext),
+  ];
+
+  const { data: homeworks, isLoading } = useGroupHomework(
+    selected
+      ? selected.kind === "halqa"
+        ? { halqa: selected.id }
+        : { specialTrack: selected.id }
+      : undefined
+  );
   const createHW = useCreateGroupHomework();
   const deleteHW = useDeleteGroupHomework();
 
@@ -18,15 +117,23 @@ export function TeacherGroupHomework() {
 
   useTopbar(
     "ti-list-check",
-    "الواجبات الجماعية",
-    <button className="topbar-btn btn-primary" onClick={() => setShowForm(true)}>
-      <i className="ti ti-plus" /> واجب جديد
-    </button>,
+    selected ? `الواجبات الجماعية — ${selected.title}` : "الواجبات الجماعية",
+    selected ? (
+      <div style={{ display: "flex", gap: 8 }}>
+        <button className="topbar-btn btn-ghost" onClick={() => setSelected(null)}>
+          <i className="ti ti-arrow-right" /> الحلقات والمسارات
+        </button>
+        <button className="topbar-btn btn-primary" onClick={() => setShowForm(true)}>
+          <i className="ti ti-plus" /> واجب جديد
+        </button>
+      </div>
+    ) : undefined,
   );
 
   async function handleAdd() {
-    if (!form.title.trim() || !form.desc.trim()) return;
+    if (!selected || !form.title.trim() || !form.desc.trim()) return;
     await createHW.mutateAsync({
+      ...(selected.kind === "halqa" ? { halqa: selected.id } : { specialTrack: selected.id }),
       title:       form.title,
       description: form.desc,
       dueDay:      form.dueDay,
@@ -38,10 +145,27 @@ export function TeacherGroupHomework() {
     setTimeout(() => setSaved(false), 3000);
   }
 
+  // ── View 1: context selector ──────────────────────────────────────
+  if (!selected) {
+    if (loadingHalqat || loadingTracks) {
+      return <SkeletonCard lines={3} />;
+    }
+    return (
+      <ContextPicker
+        contexts={contexts}
+        onSelect={setSelected}
+        emptyLabel="لا توجد حلقات أو مسارات مسجلة لهذا المعلم"
+        heading="اختر الحلقة أو المسار الاستثنائي لإسناد واجب جماعي له"
+        actionLabel="إسناد واجب جماعي"
+        actionIcon="ti-list-check"
+      />
+    );
+  }
+
   return (
     <>
       {saved && <Alert tone="success">تم إضافة الواجب الجماعي بنجاح ✓</Alert>}
-      {createHW.isError && <Alert tone="error">فشلت الإضافة، حاول مجدداً.</Alert>}
+      {createHW.isError && <Alert tone="warning">فشلت الإضافة، حاول مجدداً.</Alert>}
 
       {showForm && (
         <Card icon="ti-plus" title="إضافة واجب جماعي">
@@ -68,9 +192,9 @@ export function TeacherGroupHomework() {
         </Card>
       )}
 
-      <Card icon="ti-list-check" title="الواجبات الجماعية الحالية">
+      <Card icon="ti-users" title="الواجبات الجماعية">
         {isLoading ? (
-          <div style={{ padding: "1rem", color: "var(--text-muted)" }}>جارٍ التحميل...</div>
+          <SkeletonList rows={4} avatar={false} />
         ) : (homeworks ?? []).length === 0 ? (
           <p style={{ color: "var(--text2)", padding: 16, textAlign: "center", fontSize: 13 }}>لا توجد واجبات جماعية بعد</p>
         ) : (
@@ -88,7 +212,7 @@ export function TeacherGroupHomework() {
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 3 }}>{hw.title}</div>
                 <div style={{ fontSize: 12, color: "var(--text2)", marginBottom: 6 }}>{hw.description}</div>
-                <Badge tone="gold" style={{ fontSize: 10 }}>موعد التسليم: {hw.dueDay}</Badge>
+                <Badge tone="gold">موعد التسليم: {hw.dueDay}</Badge>
               </div>
               <button
                 className="topbar-btn btn-danger"
@@ -102,6 +226,7 @@ export function TeacherGroupHomework() {
           ))
         )}
       </Card>
+      <IndividualHomeworkCard />
     </>
   );
 }

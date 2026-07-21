@@ -4,6 +4,7 @@ import { Card } from "../../components/common/Card";
 import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { HalqaRow } from "../../components/common/HalqaRow";
+import { SkeletonTable } from "../../components/common/Skeleton";
 import { useHifz } from "../../api/hifz";
 import { useStudent } from "../../api/students";
 import { toAr, pct } from "../../../lib/format";
@@ -25,7 +26,7 @@ export function StudentHifz() {
   const remaining = (student?.totalPages || 604) - pages;
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 18 }}>
+    <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 18 }}>
       <Card icon="ti-target" title="هدفي السنوي">
         <div style={{ textAlign: "center", padding: "12px 0" }}>
           <div style={{ fontSize: 48, fontWeight: 700, color: "var(--green)" }}>
@@ -49,11 +50,7 @@ export function StudentHifz() {
         </div>
       </Card>
       <Card icon="ti-list" title="تفاصيل الحفظ">
-        {isLoading && (
-          <div className="page-loading">
-            <i className="ti ti-loader-2" /> جارٍ التحميل...
-          </div>
-        )}
+        {isLoading && <SkeletonTable cols={4} rows={6} />}
         {!isLoading && (
           <div className="tbl-wrap">
             <table className="tbl">

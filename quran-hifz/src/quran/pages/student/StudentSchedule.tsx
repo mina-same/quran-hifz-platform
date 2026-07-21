@@ -3,6 +3,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { Alert } from "../../components/common/Alert";
 import { HalqaRow } from "../../components/common/HalqaRow";
+import { SkeletonCard } from "../../components/common/Skeleton";
 import { useStudent } from "../../api/students";
 import { useHalqa } from "../../api/halqat";
 
@@ -25,11 +26,7 @@ export function StudentSchedule() {
   useTopbar("ti-clock", "مواعيد حلقتي");
 
   if (isLoading) {
-    return (
-      <div className="page-loading">
-        <i className="ti ti-loader-2" /> جارٍ التحميل...
-      </div>
-    );
+    return <SkeletonCard lines={4} />;
   }
 
   const days = halqa?.days?.split(/[،,]/).map((d) => d.trim()).filter(Boolean) ?? [];
@@ -39,6 +36,7 @@ export function StudentSchedule() {
       <Card icon="ti-school" title={halqa?.name ?? "حلقتي"}>
         {days.length > 0 && (
           <div
+            className="grid-collapse"
             style={{
               display: "grid",
               gridTemplateColumns: `repeat(${Math.min(days.length, 3)}, 1fr)`,
@@ -58,17 +56,26 @@ export function StudentSchedule() {
               >
                 <div style={{ fontSize: 15, fontWeight: 700, color: "var(--green)" }}>{day}</div>
                 {halqa?.time && (
-                  <div style={{ fontSize: 13, color: "var(--text)", marginTop: 4, fontWeight: 600 }} dir="ltr">
-                    {halqa.time}
-                  </div>
+                  <>
+                    <div style={{ fontSize: 12, color: "var(--text2)", marginTop: 4 }}>
+                      بعد صلاة الفجر
+                    </div>
+                    <div style={{ fontSize: 13, color: "var(--text)", marginTop: 2, fontWeight: 600 }} dir="ltr">
+                      {halqa.time}
+                    </div>
+                  </>
                 )}
               </div>
             ))}
           </div>
         )}
+        <HalqaRow label="الموقع" value={getName(halqa?.masjid)} />
         <HalqaRow label="المعلم" value={getName(halqa?.teacher)} />
-        <HalqaRow label="المسجد" value={getName(halqa?.masjid)} />
-        {halqa?.days && <HalqaRow label="الأيام" value={halqa.days} />}
+        <HalqaRow
+          label="الموعد القادم"
+          value="الثلاثاء — بعد غد"
+          valueStyle={{ color: "var(--green)", fontWeight: 700 }}
+        />
       </Card>
       <div style={{ marginTop: 14 }}>
         <Alert tone="info" icon="ti-bell">

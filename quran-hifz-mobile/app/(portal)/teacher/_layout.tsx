@@ -26,6 +26,7 @@ export default function TeacherTabLayout() {
       <Tabs.Screen name="evaluate"      options={{ href: null, title: 'تقييم الجلسة' }} />
       <Tabs.Screen name="recordlesson"  options={{ href: null, title: 'تسجيل الدرس' }} />
       <Tabs.Screen name="grouphomework" options={{ href: null, title: 'واجب جماعي' }} />
+      <Tabs.Screen name="special_tracks" options={{ href: null, title: 'المسارات الاستثنائية' }} />
     </Tabs>
   );
 }

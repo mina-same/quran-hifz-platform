@@ -41,7 +41,7 @@ export function StudentStore() {
         </Alert>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+      <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
         {ITEMS.map((item) => {
           const canAfford = MY_POINTS >= item.pts;
           return (

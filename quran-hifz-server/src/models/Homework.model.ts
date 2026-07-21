@@ -1,9 +1,11 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { applyContextValidation } from '../validators/context';
 
 export interface IHomework extends Document {
   student: Types.ObjectId;
   teacher: Types.ObjectId;
-  halqa: Types.ObjectId;
+  halqa?: Types.ObjectId;
+  specialTrack?: Types.ObjectId;
   type: string;
   segment: string;
   dueDate: Date;
@@ -17,9 +19,10 @@ export interface IHomework extends Document {
 
 const homeworkSchema = new Schema<IHomework>(
   {
-    student:     { type: Schema.Types.ObjectId, ref: 'Student', required: true },
-    teacher:     { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
-    halqa:       { type: Schema.Types.ObjectId, ref: 'Halqa',   required: true },
+    student:      { type: Schema.Types.ObjectId, ref: 'Student', required: true },
+    teacher:      { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
+    halqa:        { type: Schema.Types.ObjectId, ref: 'Halqa' },
+    specialTrack: { type: Schema.Types.ObjectId, ref: 'SpecialTrack' },
     type:        { type: String, required: true },
     segment:     { type: String, required: true },
     dueDate:     { type: Date, required: true },
@@ -33,5 +36,7 @@ const homeworkSchema = new Schema<IHomework>(
 
 homeworkSchema.index({ student: 1, dueDate: -1 });
 homeworkSchema.index({ teacher: 1, status: 1 });
+homeworkSchema.index({ specialTrack: 1, dueDate: -1 });
+applyContextValidation(homeworkSchema);
 
 export const Homework = model<IHomework>('Homework', homeworkSchema);

@@ -33,12 +33,13 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(getStoredUser);
-  const [isLoading, setIsLoading] = useState<boolean>(!!getToken());
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const token = getToken();
     if (!token) {
+      setUser(getStoredUser());
       setIsLoading(false);
       return;
     }

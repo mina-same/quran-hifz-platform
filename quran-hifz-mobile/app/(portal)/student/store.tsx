@@ -24,7 +24,7 @@ export default function StudentStore() {
   }
 
   return (
-    <SafeAreaView style={s.safe} edges={['bottom']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
         <View style={s.balance}>
           <IconStar size={28} color={theme.gold} />

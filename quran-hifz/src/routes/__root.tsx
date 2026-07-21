@@ -72,21 +72,52 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL ?? "";
+const SITE_TITLE = "منصة تحفيظ القرآن الكريم";
+const SITE_DESCRIPTION =
+  "منصة متكاملة لإدارة حلقات تحفيظ القرآن الكريم — بوابات للطلاب والمعلمين وأولياء الأمور والإدارة";
+const SITE_URL = `${PUBLIC_URL}/`;
+const OG_IMAGE = `${PUBLIC_URL}/quran/logo.png`;
+
+const JSON_LD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  name: "جمعية تحفيظ القرآن الكريم بالعماير",
+  description: SITE_DESCRIPTION,
+  url: SITE_URL,
+  logo: OG_IMAGE,
+  inLanguage: "ar",
+  knowsAbout: "تحفيظ القرآن الكريم",
+});
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: SITE_TITLE },
+      { name: "description", content: SITE_DESCRIPTION },
+      { name: "theme-color", content: "#1a5c2a" },
+      // Open Graph
+      { property: "og:title", content: SITE_TITLE },
+      { property: "og:description", content: SITE_DESCRIPTION },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { property: "og:url", content: SITE_URL },
+      { property: "og:image", content: OG_IMAGE },
+      { property: "og:image:width", content: "512" },
+      { property: "og:image:height", content: "512" },
+      { property: "og:image:alt", content: "شعار منصة تحفيظ القرآن الكريم" },
+      { property: "og:locale", content: "ar_SA" },
+      // Twitter / X
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: SITE_TITLE },
+      { name: "twitter:description", content: SITE_DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE },
     ],
     links: [
+      { rel: "icon", type: "image/png", href: "/quran/logo.png" },
+      { rel: "apple-touch-icon", href: "/quran/logo.png" },
+      { rel: "canonical", href: SITE_URL },
       { rel: "stylesheet", href: appCss },
       {
         rel: "stylesheet",
@@ -97,7 +128,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css",
       },
     ],
-
+    scripts: [
+      { type: "application/ld+json", children: JSON_LD },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -107,7 +140,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl">
       <head>
         <HeadContent />
       </head>

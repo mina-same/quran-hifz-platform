@@ -1,10 +1,12 @@
 import "./quran.css";
 import { useEffect, useState } from "react";
+import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { PortalProvider, usePortal } from "./context/PortalContext";
 import { ParentProvider, useParentContext } from "./context/ParentContext";
-import { PortalScreen } from "./components/PortalScreen";
+import { ThemeProvider } from "./context/ThemeContext";
 import { ChildSelector } from "./components/ChildSelector";
+import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { Sidebar } from "./components/Sidebar";
 import { Topbar } from "./components/Topbar";
@@ -13,7 +15,7 @@ import type { PortalKey } from "./config/portals";
 
 function AppShell() {
   const { user } = useAuth();
-  const { portal, enterPortal } = usePortal();
+  const { portal, enterPortal, isSidebarOpen } = usePortal();
 
   useEffect(() => {
     if (user && !portal) {
@@ -24,7 +26,7 @@ function AppShell() {
   if (!portal) return null;
 
   return (
-    <div id="app" style={{ display: "block" }}>
+    <div id="app" className={isSidebarOpen ? "sidebar-open" : ""} style={{ display: "block" }}>
       <Sidebar />
       <div className="main">
         <Topbar />
@@ -36,14 +38,12 @@ function AppShell() {
   );
 }
 
-type AuthGateStep =
-  | { step: "portal-select" }
-  | { step: "login"; portalKey: PortalKey };
+type AuthGateStep = "landing" | "login";
 
 function AuthGate() {
   const { user, isLoading } = useAuth();
   const { activeChild } = useParentContext();
-  const [state, setState] = useState<AuthGateStep>({ step: "portal-select" });
+  const [step, setStep] = useState<AuthGateStep>("landing");
 
   if (isLoading) {
     return (
@@ -64,20 +64,10 @@ function AuthGate() {
   }
 
   if (!user) {
-    if (state.step === "portal-select") {
-      return (
-        <PortalScreen
-          onSelect={(key) => setState({ step: "login", portalKey: key })}
-        />
-      );
+    if (step === "landing") {
+      return <LandingPage onLogin={() => setStep("login")} />;
     }
-
-    return (
-      <LoginPage
-        portalKey={(state as { step: "login"; portalKey: PortalKey }).portalKey}
-        onBack={() => setState({ step: "portal-select" })}
-      />
-    );
+    return <LoginPage onBack={() => setStep("landing")} />;
   }
 
   // Parent must select a child before entering the dashboard
@@ -104,12 +94,15 @@ function AuthGate() {
  */
 export default function QuranApp() {
   return (
-    <div dir="rtl" lang="ar" className="quran-root">
-      <AuthProvider>
-        <ParentProvider>
-          <AuthGate />
-        </ParentProvider>
-      </AuthProvider>
-    </div>
+    <ThemeProvider>
+      <div dir="rtl" lang="ar" className="quran-root">
+        <AuthProvider>
+          <ParentProvider>
+            <AuthGate />
+          </ParentProvider>
+        </AuthProvider>
+        <Toaster dir="rtl" position="top-center" richColors />
+      </div>
+    </ThemeProvider>
   );
 }

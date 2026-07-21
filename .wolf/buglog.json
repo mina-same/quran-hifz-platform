@@ -181,9 +181,772 @@
     },
     {
       "id": "bug-012",
-      "timestamp": "2026-07-12T17:22:52.119Z",
+      "timestamp": "2026-07-01T11:11:59.474Z",
       "error_message": "Significant refactor of ",
-      "file": "quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx",
+      "file": "quran-hifz/src/quran/config/masarMap.ts",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 12→14 lines (7 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T11:11:59.474Z"
+    },
+    {
+      "id": "bug-013",
+      "timestamp": "2026-07-01T11:12:06.337Z",
+      "error_message": "Wrong reference: name should be path",
+      "file": "quran-hifz/src/quran/pages/admin/AdminRegister.tsx",
+      "root_cause": "Used \"name\" instead of \"path\"",
+      "fix": "Changed name → path",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T11:12:06.337Z"
+    },
+    {
+      "id": "bug-014",
+      "timestamp": "2026-07-01T11:27:21.688Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminDashboard.tsx",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 17→11 lines (9 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T11:27:21.688Z"
+    },
+    {
+      "id": "bug-015",
+      "timestamp": "2026-07-01T11:32:08.174Z",
+      "error_message": "CSS fix: fontSize",
+      "file": "quran-hifz/src/quran/pages/student/StudentSchedule.tsx",
+      "root_cause": "fontSize: 13, color: \"var(--text)\", marginTop: 4, fontWeight: 600 → 13, color: \"var(--text)\", marginTop: 2, fontWeight: 600",
+      "fix": "Changed fontSize: 13, color: \"var(--text)\", marginTop: 4, fontWeight: 600 → 13, color: \"var(--text)\", marginTop: 2, fontWeight: 600",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T11:32:08.174Z"
+    },
+    {
+      "id": "bug-016",
+      "timestamp": "2026-07-01T11:32:16.236Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/student/StudentSchedule.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T11:32:16.236Z"
+    },
+    {
+      "id": "bug-017",
+      "timestamp": "2026-07-01T11:32:50.609Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/student/StudentPoints.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 3→9 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T11:32:50.609Z"
+    },
+    {
+      "id": "bug-018",
+      "timestamp": "2026-07-01T11:33:04.835Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/parent/ParentAttendance.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T11:33:04.835Z"
+    },
+    {
+      "id": "bug-019",
+      "timestamp": "2026-07-01T11:33:14.048Z",
+      "error_message": "CSS fix: submitted, pending, late",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx",
+      "root_cause": "submitted: \"مُسلَّم\", → \"سُجِّل\",; pending: \"معلق\", → \"لم يُسجَّل\",; late: \"متأخر\", → \"لم يُسجَّل\",",
+      "fix": "Changed submitted: \"مُسلَّم\", → \"سُجِّل\",; pending: \"معلق\", → \"لم يُسجَّل\",; late: \"متأخر\", → \"لم يُسجَّل\",",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T11:33:29.262Z"
+    },
+    {
+      "id": "bug-020",
+      "timestamp": "2026-07-01T11:34:02.459Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx",
+      "root_cause": "No early return/throw for edge case: !form.student || !form.title",
+      "fix": "Added guard clause: if (!form.student || !form.title)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T11:34:02.459Z"
+    },
+    {
+      "id": "bug-021",
+      "timestamp": "2026-07-01T11:34:09.832Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx",
+      "root_cause": "Had \"ti-list-check\"",
+      "fix": "Changed to \"ti-users\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T11:34:09.832Z"
+    },
+    {
+      "id": "bug-022",
+      "timestamp": "2026-07-01T00:00:00.000Z",
+      "error_message": "Hydration failed because the server rendered HTML didn't match the client. AuthGate rendered PortalScreen on server but spinner on client.",
+      "file": "quran-hifz/src/quran/context/AuthContext.tsx",
+      "root_cause": "useState initializers ran differently on server vs client: getToken() returns null on SSR (no localStorage) so isLoading=false on server, but returns a real token on client so isLoading=true. Mismatched initial render caused React hydration error.",
+      "fix": "Changed isLoading initial state from !!getToken() to true (always). Changed user initial state from getStoredUser() to null. Both now agree with SSR. useEffect restores user from storage and sets isLoading=false after hydration.",
+      "tags": [
+        "hydration",
+        "ssr",
+        "auth",
+        "localStorage",
+        "react"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T00:00:00.000Z"
+    },
+    {
+      "id": "bug-023",
+      "timestamp": "2026-07-01T11:41:01.796Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/seeds/seed.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 13→23 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T11:41:01.796Z"
+    },
+    {
+      "id": "bug-024",
+      "timestamp": "2026-07-01T11:50:02.928Z",
+      "error_message": "Missing error handling in teacherRecordLesson",
+      "file": "quran_hifz_v2 (7).html",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T11:50:02.928Z"
+    },
+    {
+      "id": "bug-025",
+      "timestamp": "2026-07-01T12:04:48.178Z",
+      "error_message": "CSS fix: title, meetLink, teacher",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "title: \"\", type: \"\", timeSlot: \"\", location: \"\", isOnline: false, meetLink: \"\", → \"\", type: \"\", timeSlot: \"\", locationSelect: \"\", locationCustom: \"\", isOnline: false,; meetLink: string → \"\", teacher: \"\", maxStudents: \"\", startDate: \"\", endDate: \"\", daysPerWeek: \"\", status: \"upcoming\",; teacher: \"\", maxStudents: \"\", startDate: \"\", endDate: \"\", daysPerWeek: \"\", status: \"upcoming\", → string",
+      "fix": "Changed title: \"\", type: \"\", timeSlot: \"\", location: \"\", isOnline: false, meetLink: \"\", → \"\", type: \"\", timeSlot: \"\", locationSelect: \"\", locationCustom: \"\", isOnline: false,; meetLink: string → \"\", teacher: \"\", maxStudents: \"\", startDate: \"\", endDate: \"\", daysPerWeek: \"\", status: \"upcoming\",; teacher: \"\", maxStudents: \"\", startDate: \"\", endDate: \"\", daysPerWeek: \"\", status: \"upcoming\", → string",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T12:04:54.015Z"
+    },
+    {
+      "id": "bug-026",
+      "timestamp": "2026-07-01T12:05:04.750Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "12 lines replaced/restructured",
+      "fix": "Rewrote 19→22 lines (12 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:05:04.750Z"
+    },
+    {
+      "id": "bug-027",
+      "timestamp": "2026-07-01T12:05:21.025Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:05:21.025Z"
+    },
+    {
+      "id": "bug-028",
+      "timestamp": "2026-07-01T12:11:07.074Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/controllers/teacher.controller.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 9→21 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:11:07.074Z"
+    },
+    {
+      "id": "bug-029",
+      "timestamp": "2026-07-01T12:18:29.399Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/config/portals.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→6 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:18:29.399Z"
+    },
+    {
+      "id": "bug-030",
+      "timestamp": "2026-07-01T12:21:04.956Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/controllers/student.controller.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 9→21 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:21:04.956Z"
+    },
+    {
+      "id": "bug-031",
+      "timestamp": "2026-07-01T12:24:04.610Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz-server/src/controllers/teacher.controller.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: const { email, password, newPassword, ...teacherData } = tea; const teacher = await Teacher.findByIdAndUpdate(req.params.i",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T12:24:14.136Z"
+    },
+    {
+      "id": "bug-032",
+      "timestamp": "2026-07-01T12:24:39.050Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz-server/src/controllers/admin.controller.ts",
+      "root_cause": "No early return/throw for edge case: !parent",
+      "fix": "Added guard clause: if (!parent)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:24:39.050Z"
+    },
+    {
+      "id": "bug-033",
+      "timestamp": "2026-07-01T12:25:07.077Z",
+      "error_message": "CSS fix: EMPTY_FORM",
+      "file": "quran-hifz/src/quran/pages/admin/AdminTeachers.tsx",
+      "root_cause": "EMPTY_FORM: FormFields = { name: \"\", specialty: \"\", phone: \"\", rating: \"\", status: \"active\", email: \"\", password: \"\" → FormFields = { name: \"\", specialty: \"\", phone: \"\", rating: \"\", status: \"active\", email: \"\", password: \"\", newPassword: \"\"",
+      "fix": "Changed EMPTY_FORM: FormFields = { name: \"\", specialty: \"\", phone: \"\", rating: \"\", status: \"active\", email: \"\", password: \"\" → FormFields = { name: \"\", specialty: \"\", phone: \"\", rating: \"\", status: \"active\", email: \"\", password: \"\", newPassword: \"\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T12:25:13.349Z"
+    },
+    {
+      "id": "bug-034",
+      "timestamp": "2026-07-01T12:27:27.572Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:27:27.572Z"
+    },
+    {
+      "id": "bug-035",
+      "timestamp": "2026-07-01T12:28:04.568Z",
+      "error_message": "Wrong operator: || should be ===",
+      "file": "quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+      "root_cause": "Used \"||\" instead of \"===\"",
+      "fix": "Changed operator || → ===",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T12:28:04.568Z"
+    },
+    {
+      "id": "bug-036",
+      "timestamp": "2026-07-01T12:53:34.460Z",
+      "error_message": "CSS fix: padding",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "padding: 28px 20px 22px → 56px 16px",
+      "fix": "Changed padding: 28px 20px 22px → 56px 16px",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 15,
+      "last_seen": "2026-07-01T12:56:34.903Z"
+    },
+    {
+      "id": "bug-037",
+      "timestamp": "2026-07-01T00:00:00.000Z",
+      "error_message": "404: NOT_FOUND on Vercel — Code: NOT_FOUND",
+      "file": "quran-hifz-server/vercel.json",
+      "root_cause": "No vercel.json existed, so Vercel had no build config and no routing rules for the Express app — all requests returned NOT_FOUND.",
+      "fix": "Created vercel.json with @vercel/node builder routing all requests to api/index.ts; created api/index.ts as serverless entry point that caches the MongoDB connection and delegates to the Express app.",
+      "tags": [
+        "vercel",
+        "deployment",
+        "express",
+        "serverless",
+        "404"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T00:00:00.000Z"
+    },
+    {
+      "id": "bug-038",
+      "timestamp": "2026-07-01T13:13:45.940Z",
+      "error_message": "CSS fix: transition",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "transition: background 0.3s, color 0.3s → opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1)",
+      "fix": "Changed transition: background 0.3s, color 0.3s → opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T13:16:10.387Z"
+    },
+    {
+      "id": "bug-039",
+      "timestamp": "2026-07-01T13:14:27.001Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/routes/__root.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:14:27.001Z"
+    },
+    {
+      "id": "bug-040",
+      "timestamp": "2026-07-01T13:14:31.823Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/routes/__root.tsx",
+      "root_cause": "Had \"en\"",
+      "fix": "Changed to \"ar\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:14:31.823Z"
+    },
+    {
+      "id": "bug-041",
+      "timestamp": "2026-07-01T13:15:49.996Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "215 lines replaced/restructured",
+      "fix": "Rewrote 297→292 lines (215 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:15:49.996Z"
+    },
+    {
+      "id": "bug-042",
+      "timestamp": "2026-07-01T13:21:04.659Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/LandingPage.tsx",
+      "root_cause": "Had \"https://images.unsplash.com/photo-1519817914152-2",
+      "fix": "Changed to \"https://images.unsplash.com/photo-1564121211835-e",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-07-01T13:23:56.844Z"
+    },
+    {
+      "id": "bug-043",
+      "timestamp": "2026-07-01T13:38:00.665Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz-server/src/routes/special-track.routes.ts",
+      "root_cause": "Had '/:id'",
+      "fix": "Changed to '/:id/unenroll'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:38:00.665Z"
+    },
+    {
+      "id": "bug-044",
+      "timestamp": "2026-07-01T13:38:06.203Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz-server/src/controllers/student.controller.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: const { email, password, ...studentData } = studentSchema.pa; const student = await Student.findByIdAndUpdate(req.params.i",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T13:38:15.865Z"
+    },
+    {
+      "id": "bug-045",
+      "timestamp": "2026-07-01T13:38:31.541Z",
+      "error_message": "CSS fix: mode",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "mode: \"edit\" → \"students\"",
+      "fix": "Changed mode: \"edit\" → \"students\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-01T13:38:39.963Z"
+    },
+    {
+      "id": "bug-046",
+      "timestamp": "2026-07-01T13:38:43.685Z",
+      "error_message": "CSS fix: name",
+      "file": "quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+      "root_cause": "name: \"\", path: \"\", halqa: \"\", masjid: \"\", guardianPhone: \"\", status: \"active\" → \"\", path: \"\", halqa: \"\", masjid: \"\", guardianPhone: \"\", status: \"active\", email: \"\", password: \"\"",
+      "fix": "Changed name: \"\", path: \"\", halqa: \"\", masjid: \"\", guardianPhone: \"\", status: \"active\" → \"\", path: \"\", halqa: \"\", masjid: \"\", guardianPhone: \"\", status: \"active\", email: \"\", password: \"\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:38:43.685Z"
+    },
+    {
+      "id": "bug-047",
+      "timestamp": "2026-07-01T13:38:49.769Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: if (form.email.trim() && !form.password && !editItem?.email); setFormError(\"يرجى إدخال كلمة المرور لمنح الطالب حساباً جديد | Also: <p style={{ margin: \"0 0 10px\", fontSize: 12, color: \"var(--; <i className=\"ti ti-lock\" style={{ marginLeft: 4 }} />",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-07-01T13:39:10.888Z"
+    },
+    {
+      "id": "bug-048",
+      "timestamp": "2026-07-01T13:39:13.823Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:39:13.823Z"
+    },
+    {
+      "id": "bug-049",
+      "timestamp": "2026-07-01T13:30:00.000Z",
+      "error_message": "Editing a teacher to add email/password does not create a User account when teacher was originally created without credentials",
+      "file": "quran-hifz-server/src/controllers/teacher.controller.ts",
+      "root_cause": "updateTeacher only called userDoc.save() on existing User. If userDoc was null (teacher created without credentials) the else branch was missing — silently did nothing.",
+      "fix": "Added else-if branch: when userDoc is null but email + (newPassword || password) are provided, create a new User document for the teacher.",
+      "tags": [
+        "auth",
+        "user-creation",
+        "update",
+        "teacher"
+      ],
+      "related_bugs": [
+        "bug-050"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-01"
+    },
+    {
+      "id": "bug-050",
+      "timestamp": "2026-07-01T13:30:00.000Z",
+      "error_message": "Editing a student never creates/updates the User login account — email/password silently discarded",
+      "file": "quran-hifz-server/src/controllers/student.controller.ts",
+      "root_cause": "updateStudent passed the entire parsed body (including email and password) to Student.findByIdAndUpdate, which Mongoose silently ignores on unknown fields. The User model was never touched. AdminStudents.tsx edit form also had no email/password fields at all.",
+      "fix": "(1) Destructure email/password out before Student.findByIdAndUpdate. (2) Create or update User document when credentials provided (mirrors updateTeacher logic). (3) Enrich getStudents list with email from User collection. (4) Added email/password inputs to AdminStudents.tsx edit modal. (5) Added email field to Student TypeScript type.",
+      "tags": [
+        "auth",
+        "user-creation",
+        "update",
+        "student",
+        "frontend"
+      ],
+      "related_bugs": [
+        "bug-049"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-01"
+    },
+    {
+      "id": "bug-051",
+      "timestamp": "2026-07-01T13:45:31.903Z",
+      "error_message": "CSS fix: padding",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "padding: \"5px 12px\", fontSize: 12, color: \"var(--green)\", borderColor: \"rgba(26,92,42,0.25)\" → \"1px 6px\", marginRight: 4,",
+      "fix": "Changed padding: \"5px 12px\", fontSize: 12, color: \"var(--green)\", borderColor: \"rgba(26,92,42,0.25)\" → \"1px 6px\", marginRight: 4,",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:45:31.903Z"
+    },
+    {
+      "id": "bug-052",
+      "timestamp": "2026-07-01T13:46:24.861Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "41 lines replaced/restructured",
+      "fix": "Rewrote 114→236 lines (41 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:46:24.861Z"
+    },
+    {
+      "id": "bug-053",
+      "timestamp": "2026-07-01T13:49:38.482Z",
+      "error_message": "Wrong reference: React should be CSSProperties",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx",
+      "root_cause": "Used \"React\" instead of \"CSSProperties\"",
+      "fix": "Changed React → CSSProperties",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:49:38.482Z"
+    },
+    {
+      "id": "bug-054",
+      "timestamp": "2026-07-01T13:54:34.629Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/config/portals.ts",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 4→5 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T13:54:34.629Z"
+    },
+    {
+      "id": "bug-055",
+      "timestamp": "2026-07-01T14:05:35.340Z",
+      "error_message": "CSS fix: t",
+      "file": "quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+      "root_cause": "t: SpecialTrack[\"teacher\"]): string { → TrackTeacher | string): string {",
+      "fix": "Changed t: SpecialTrack[\"teacher\"]): string { → TrackTeacher | string): string {",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-01T14:05:35.341Z"
+    },
+    {
+      "id": "bug-056",
+      "timestamp": "2026-07-02T11:01:28.211Z",
+      "error_message": "CSS fix: animation",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "animation: spin 1s linear infinite → sklShimmer 1.6s ease-in-out infinite",
+      "fix": "Changed animation: spin 1s linear infinite → sklShimmer 1.6s ease-in-out infinite",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:01:28.211Z"
+    },
+    {
+      "id": "bug-057",
+      "timestamp": "2026-07-02T11:01:32.204Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-mobile/lib/queries/attendance.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 39→75 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:01:32.204Z"
+    },
+    {
+      "id": "bug-058",
+      "timestamp": "2026-07-02T11:01:37.260Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminDashboard.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 19→25 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:01:37.260Z"
+    },
+    {
+      "id": "bug-059",
+      "timestamp": "2026-07-02T11:02:56.643Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
       "root_cause": "5 lines replaced/restructured",
       "fix": "Rewrote 7→3 lines (5 removed)",
       "tags": [
@@ -193,15 +956,988 @@
       ],
       "related_bugs": [],
       "occurrences": 1,
-      "last_seen": "2026-07-12T17:22:52.119Z"
+      "last_seen": "2026-07-02T11:02:56.643Z"
     },
     {
-      "id": "bug-013",
-      "timestamp": "2026-07-12T17:26:27.886Z",
-      "error_message": "Wrong reference: cream should be bg",
-      "file": "quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx",
-      "root_cause": "Used \"cream\" instead of \"bg\"",
-      "fix": "Changed cream → bg",
+      "id": "bug-060",
+      "timestamp": "2026-07-02T11:03:01.163Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/admin/AdminKpis.tsx",
+      "root_cause": "Had \"../../api/kpis\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:01.163Z"
+    },
+    {
+      "id": "bug-061",
+      "timestamp": "2026-07-02T11:03:09.482Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminMasajid.tsx",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 7→3 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:09.482Z"
+    },
+    {
+      "id": "bug-062",
+      "timestamp": "2026-07-02T11:03:19.559Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Had \"../../api/halqat\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:19.559Z"
+    },
+    {
+      "id": "bug-063",
+      "timestamp": "2026-07-02T11:03:21.119Z",
+      "error_message": "Wrong return value",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Was returning: <div className=\"page-loading\"><i className=\"ti ti-",
+      "fix": "Now returns: <SkeletonCard lines={2} />;",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:21.119Z"
+    },
+    {
+      "id": "bug-064",
+      "timestamp": "2026-07-02T11:03:27.095Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+      "root_cause": "Had \"../../api/students\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:27.095Z"
+    },
+    {
+      "id": "bug-065",
+      "timestamp": "2026-07-02T11:03:30.706Z",
+      "error_message": "Wrong return value",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx",
+      "root_cause": "Was returning: <div className=\"page-loading\"><i className=\"ti ti-",
+      "fix": "Now returns: <SkeletonCard lines={3} />;",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:30.706Z"
+    },
+    {
+      "id": "bug-066",
+      "timestamp": "2026-07-02T11:03:36.776Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/admin/AdminTeachers.tsx",
+      "root_cause": "Had \"../../api/teachers\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:36.776Z"
+    },
+    {
+      "id": "bug-067",
+      "timestamp": "2026-07-02T11:03:38.093Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentAttendance.tsx",
+      "root_cause": "Had \"../../api/attendance\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:38.093Z"
+    },
+    {
+      "id": "bug-068",
+      "timestamp": "2026-07-02T11:03:40.005Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherHalqa.tsx",
+      "root_cause": "Had \"../../api/halqat\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:40.005Z"
+    },
+    {
+      "id": "bug-069",
+      "timestamp": "2026-07-02T11:03:41.644Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherHalqa.tsx",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 7→3 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:41.644Z"
+    },
+    {
+      "id": "bug-070",
+      "timestamp": "2026-07-02T11:03:47.140Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherHomework.tsx",
+      "root_cause": "Had \"../../api/homework\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:47.140Z"
+    },
+    {
+      "id": "bug-071",
+      "timestamp": "2026-07-02T11:03:48.360Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherHomework.tsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→3 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:48.360Z"
+    },
+    {
+      "id": "bug-072",
+      "timestamp": "2026-07-02T11:03:52.608Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/student/StudentDashboard.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 7→12 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:52.608Z"
+    },
+    {
+      "id": "bug-073",
+      "timestamp": "2026-07-02T11:03:58.335Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentHifz.tsx",
+      "root_cause": "Had \"../../api/hifz\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:03:58.335Z"
+    },
+    {
+      "id": "bug-074",
+      "timestamp": "2026-07-02T11:04:02.893Z",
+      "error_message": "Wrong return value",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherRecordLesson.tsx",
+      "root_cause": "Was returning: <div style={{ padding: 32, textAlign: \"center\", co",
+      "fix": "Now returns: <SkeletonCard lines={5} />;",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-02T11:04:04.235Z"
+    },
+    {
+      "id": "bug-075",
+      "timestamp": "2026-07-02T11:04:07.606Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentMessages.tsx",
+      "root_cause": "Had \"../../api/messages\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:04:07.606Z"
+    },
+    {
+      "id": "bug-076",
+      "timestamp": "2026-07-02T11:04:17.989Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentSchedule.tsx",
+      "root_cause": "Had \"../../api/students\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:04:17.989Z"
+    },
+    {
+      "id": "bug-077",
+      "timestamp": "2026-07-02T11:04:22.632Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/student/StudentSchedule.tsx",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 7→3 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:04:22.632Z"
+    },
+    {
+      "id": "bug-078",
+      "timestamp": "2026-07-02T11:04:29.643Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+      "root_cause": "Had \"../../api/special-tracks\"",
+      "fix": "Changed to \"../../components/common/Skeleton\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:04:29.643Z"
+    },
+    {
+      "id": "bug-079",
+      "timestamp": "2026-07-02T11:04:52.445Z",
+      "error_message": "CSS fix: mode",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "mode: \"form\", item → \"students\", item",
+      "fix": "Changed mode: \"form\", item → \"students\", item",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:04:52.445Z"
+    },
+    {
+      "id": "bug-080",
+      "timestamp": "2026-07-02T11:05:19.376Z",
+      "error_message": "CSS fix: href",
+      "file": "quran-hifz-mobile/app/(portal)/teacher/_layout.tsx",
+      "root_cause": "href: null, title: 'واجب جماعي' → null, title: 'المسارات الاستثنائية'",
+      "fix": "Changed href: null, title: 'واجب جماعي' → null, title: 'المسارات الاستثنائية'",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-02T11:06:47.814Z"
+    },
+    {
+      "id": "bug-081",
+      "timestamp": "2026-07-02T11:06:06.077110Z",
+      "error_message": "User report: clicking a student's 'manage students' action on /#special_tracks (admin) sometimes doesn't open, is slow, or the click lands in the wrong place",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "TrackCard, InfoRow, and SectionHeader were defined as nested function components inside AdminSpecialTracks(). Any state change on the page (typing in student search, selecting a student, opening/closing any modal) creates new component function identities each render, forcing React to fully unmount+remount every track card in the grid instead of patching props. This caused the click that opens the students modal to sometimes race the remount, producing missed clicks / perceived lag / clicks landing on the wrong element after layout re-settles.",
+      "fix": "Hoisted TrackCard, InfoRow, and SectionHeader to module scope (stable component identity across renders). TrackCard now receives onManageStudents/onEdit/onDelete as props instead of closing over component state setters. Added a stable openStudents(item) helper in AdminSpecialTracks to replace the inline modal-opening closure.",
+      "tags": [
+        "auto-detected",
+        "react-perf",
+        "nested-component-antipattern",
+        "click-lag",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:06:06.077110Z"
+    },
+    {
+      "id": "bug-082",
+      "timestamp": "2026-07-02T11:08:18.035Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-mobile/lib/constants/portals.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→6 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:08:18.035Z"
+    },
+    {
+      "id": "bug-083",
+      "timestamp": "2026-07-02T11:09:10.992935Z",
+      "error_message": "git stash used to diff pre/post-change tsc errors trapped concurrent agents' work-in-progress (quran-hifz-server Phase 1 backend + quran-hifz-mobile Phase 3) in the stash; git stash pop then aborted on .wolf/anatomy.md and .wolf/memory.md conflicts, leaving both my quran-hifz edits and the other agents' backend/mobile edits present only in the stash with nothing on disk",
+      "file": "quran-hifz-server/src/models/*.ts, quran-hifz-server/src/controllers/*.ts, quran-hifz-server/src/seeds/seed.ts, quran-hifz-mobile/app/(portal)/**, quran-hifz-mobile/lib/queries/*.ts",
+      "root_cause": "Ran `git stash -u` in a multi-agent repo to capture a clean tsc baseline for comparison; the stash captured the entire dirty working tree including other agents' in-flight work, and the pop step failed due to unrelated OpenWolf log-file conflicts (.wolf/anatomy.md, .wolf/memory.md are append-only and change on every agent turn)",
+      "fix": "Recovered every trapped file individually with `git checkout stash@{0} -- <path>` (does not require a clean merge, unlike stash pop/apply), verified quran-hifz-server tsc still passed after recovery, then ran `git stash drop` once nothing else was needed from it",
+      "tags": [
+        "git",
+        "stash",
+        "multi-agent",
+        "data-loss-near-miss",
+        "process"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:09:10.992935Z"
+    },
+    {
+      "id": "bug-084",
+      "timestamp": "2026-07-02T11:16:17.331Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/components/common/ContextPicker.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:16:17.331Z"
+    },
+    {
+      "id": "bug-085",
+      "timestamp": "2026-07-02T11:22:26.828Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/api/students.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:22:26.828Z"
+    },
+    {
+      "id": "bug-086",
+      "timestamp": "2026-07-02T11:22:42.795Z",
+      "error_message": "CSS fix: halqa",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx",
+      "root_cause": "halqa: firstHalqaId → halqaIds.join(\",\")",
+      "fix": "Changed halqa: firstHalqaId → halqaIds.join(\",\")",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:22:42.795Z"
+    },
+    {
+      "id": "bug-087",
+      "timestamp": "2026-07-02T11:22:53.870Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 7→13 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:22:53.870Z"
+    },
+    {
+      "id": "bug-088",
+      "timestamp": "2026-07-02T11:30:00.000Z",
+      "error_message": "User report: teacher has zero حلقات on #myhalqa but the 'طلاب الحلقة' tab on #students shows students anyway",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx",
+      "root_cause": "TeacherStudents.tsx computed `firstHalqaId = halqat[0]?._id` and called `useStudents({ halqa: firstHalqaId })`. When a teacher has zero halqat (confirmed via direct DB query — teacher id 6a4516cfda22032acf633b87 has no Halqa document referencing it at all), firstHalqaId is undefined, and api/students.ts's buildQuery() skips any falsy filter value, so it silently sent GET /students with NO filter — returning ALL 9 students in the database (belonging to other teachers' halqat) instead of none. This made a teacher with no halqa appear to have students. Same root pattern as the earlier TeacherAttendance.tsx `firstHalqa = halqat[0]` bug fixed via ContextPicker, but this file was outside that refactor's scope and was missed. Also would have under-fetched for a teacher with 2+ halqat (only showed the first one's roster).",
+      "fix": "(1) quran-hifz-server student.controller.ts getStudents: halqa query param now accepts a comma-separated list of ids, using $in when more than one. (2) quran-hifz/src/quran/api/students.ts: useStudents() now takes an optional second `{enabled}` arg passed through to react-query, so callers can explicitly gate the query instead of it silently firing with an empty filter. (3) TeacherStudents.tsx: aggregates ALL of the teacher's halqa ids (not just the first), passes them comma-joined, and gates the query on `!loadingHalqat && halqaIds.length > 0`; renders an explicit 'لا توجد حلقة مسندة لهذا المعلم' state when the teacher truly has none.",
+      "tags": [
+        "data-leak",
+        "unfiltered-query",
+        "halqa",
+        "teacher-students",
+        "react-query",
+        "tsx"
+      ],
+      "related_bugs": [
+        "bug-086",
+        "bug-087"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-02T11:30:00.000Z"
+    },
+    {
+      "id": "bug-089",
+      "timestamp": "2026-07-03T08:26:38.807Z",
+      "error_message": "Type error",
+      "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T08:26:38.807Z"
+    },
+    {
+      "id": "bug-090",
+      "timestamp": "2026-07-03T08:26:44.705Z",
+      "error_message": "Wrong reference: quranPlanSchema should be quranPlanCreateSchema",
+      "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "root_cause": "Used \"quranPlanSchema\" instead of \"quranPlanCreateSchema\"",
+      "fix": "Changed quranPlanSchema → quranPlanCreateSchema",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T08:26:44.705Z"
+    },
+    {
+      "id": "bug-091",
+      "timestamp": "2026-07-03T08:27:08.247Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz-server/src/app.ts",
+      "root_cause": "Had './routes/admin.routes'",
+      "fix": "Changed to './routes/quran-plan.routes'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T08:27:13.982Z"
+    },
+    {
+      "id": "bug-092",
+      "timestamp": "2026-07-03T09:14:19.541Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/models/QuranPlan.model.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 3→4 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:14:19.541Z"
+    },
+    {
+      "id": "bug-093",
+      "timestamp": "2026-07-03T09:14:35.616Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 3→4 lines (3 removed) | Also: const { teacher, halqa, student } = req.query;; if (teacher) filter.teacher = teacher;",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T09:14:51.709Z"
+    },
+    {
+      "id": "bug-094",
+      "timestamp": "2026-07-03T09:16:25.971Z",
+      "error_message": "CSS fix: value",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "value: \"تلاوة\",  label: \"تلاوة\",  icon: \"ti-microphone\" → \"specialTrack\", label: \"مسار استثنائي\", icon: \"ti-calendar-event\"",
+      "fix": "Changed value: \"تلاوة\",  label: \"تلاوة\",  icon: \"ti-microphone\" → \"specialTrack\", label: \"مسار استثنائي\", icon: \"ti-calendar-event\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 5,
+      "last_seen": "2026-07-03T09:17:19.266Z"
+    },
+    {
+      "id": "bug-095",
+      "timestamp": "2026-07-03T09:17:51.383Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 38→54 lines (9 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:17:51.383Z"
+    },
+    {
+      "id": "bug-096",
+      "timestamp": "2026-07-03T09:18:04.883Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "Had \"ti-users\"",
+      "fix": "Changed to \"12px 0\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:18:04.883Z"
+    },
+    {
+      "id": "bug-097",
+      "timestamp": "2026-07-03T09:24:37.576Z",
+      "error_message": "Missing await",
+      "file": "quran-hifz-server/src/seeds/seed.ts",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:24:37.576Z"
+    },
+    {
+      "id": "bug-098",
+      "timestamp": "2026-07-03T09:28:20.461Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/config/portals.ts",
+      "root_cause": "Had \"الخطط الفردية\"",
+      "fix": "Changed to \"الخطط القرآنية\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:28:20.461Z"
+    },
+    {
+      "id": "bug-099",
+      "timestamp": "2026-07-03T09:53:26.697Z",
+      "error_message": "CSS fix: pointRules",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "pointRules: form.pointsEnabled ? form.pointRules : [], → form.pointsEnabled ? form.pointRules.map((r) => ({ ...r, label: r.label.trim()",
+      "fix": "Changed pointRules: form.pointsEnabled ? form.pointRules : [], → form.pointsEnabled ? form.pointRules.map((r) => ({ ...r, label: r.label.trim()",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:53:26.697Z"
+    },
+    {
+      "id": "bug-100",
+      "timestamp": "2026-07-03T09:55:00.000Z",
+      "error_message": "Browser console shows repeated 'Maximum update depth exceeded' warnings immediately after teacher login, plus a pageerror 'Switched to client rendering because the server rendering errored: localStorage is not defined' on first navigation to any quran-hifz page in dev mode.",
+      "file": "quran-hifz/src/quran/context/ThemeContext.tsx (suspected; not yet root-caused)",
+      "root_cause": "NOT YET DIAGNOSED. Confirmed via Playwright E2E during the quran-plans feature build (2026-07-03) that this occurs on EVERY page load right after login — reproduced with zero navigation into the new TeacherPlans.tsx page, so it predates and is unrelated to that feature. Likely chain: TanStack Start SSR renders ThemeProvider, which reads `localStorage` during SSR (no `typeof window` guard) → SSR throws → dev server 'switches to client rendering' → the resulting remount/rehydrate appears to trigger a setState-in-effect loop somewhere in the auth/portal/theme context chain, logged by React as 'Maximum update depth exceeded'. App still functions (login, navigation, CRUD all work correctly per E2E testing), so this looks like a dev-mode-only cosmetic console spam issue, not a functional bug — but not confirmed for production builds.",
+      "fix": "NOT FIXED — out of scope for the quran-plans feature. Flagging for a future session: check ThemeContext.tsx for an SSR-unsafe `localStorage` read (needs `typeof window !== 'undefined'` guard) as the likely root cause of the initial SSR error; the update-depth loop may resolve once that's fixed, or may be a separate issue in AuthContext/PortalContext worth tracing independently.",
+      "tags": [
+        "pre-existing",
+        "ssr",
+        "react",
+        "console-warning",
+        "not-fixed",
+        "unrelated-to-quran-plans"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T09:55:00.000Z"
+    },
+    {
+      "id": "bug-101",
+      "timestamp": "2026-07-03T10:47:04.656Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "Had \"نطاق الحفظ — من فين لفين\"",
+      "fix": "Changed to \"نطاق الحفظ (من - إلى)\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:47:04.656Z"
+    },
+    {
+      "id": "bug-102",
+      "timestamp": "2026-07-03T10:50:29.820Z",
+      "error_message": "CSS fix: display",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "display: flex → none",
+      "fix": "Changed display: flex → none",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 4,
+      "last_seen": "2026-07-03T10:52:42.264Z"
+    },
+    {
+      "id": "bug-103",
+      "timestamp": "2026-07-03T10:51:54.881Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: {/* linked Quran plan */}; <div style={{",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T10:52:46.573Z"
+    },
+    {
+      "id": "bug-104",
+      "timestamp": "2026-07-03T10:53:05.836Z",
+      "error_message": "CSS fix: display",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "display: \"flex\", flexDirection: \"column\", gap: 14 → \"grid\", gridTemplateColumns: \"repeat(auto-fill,minmax(380px,1fr))\", gap: 16",
+      "fix": "Changed display: \"flex\", flexDirection: \"column\", gap: 14 → \"grid\", gridTemplateColumns: \"repeat(auto-fill,minmax(380px,1fr))\", gap: 16",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:53:05.836Z"
+    },
+    {
+      "id": "bug-105",
+      "timestamp": "2026-07-03T10:53:13.010Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:53:13.010Z"
+    },
+    {
+      "id": "bug-106",
+      "timestamp": "2026-07-03T10:53:50.471Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentStore.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:53:50.471Z"
+    },
+    {
+      "id": "bug-107",
+      "timestamp": "2026-07-03T10:53:55.517Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+      "root_cause": "Had \"flex\"",
+      "fix": "Changed to \"grid\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-07-03T10:54:05.090Z"
+    },
+    {
+      "id": "bug-108",
+      "timestamp": "2026-07-03T10:54:02.364Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentHifz.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:54:02.364Z"
+    },
+    {
+      "id": "bug-109",
+      "timestamp": "2026-07-03T10:54:09.754Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentDashboard.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T10:54:18.076Z"
+    },
+    {
+      "id": "bug-110",
+      "timestamp": "2026-07-03T10:54:18.885Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "No early return/throw for edge case: !trackId",
+      "fix": "Added guard clause: if (!trackId)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:54:18.885Z"
+    },
+    {
+      "id": "bug-111",
+      "timestamp": "2026-07-03T10:54:27.079Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/admin/AdminReports.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:54:27.079Z"
+    },
+    {
+      "id": "bug-112",
+      "timestamp": "2026-07-03T10:54:34.181Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentPoints.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:54:34.181Z"
+    },
+    {
+      "id": "bug-113",
+      "timestamp": "2026-07-03T10:54:42.743Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/admin/AdminDashboard.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T10:54:47.315Z"
+    },
+    {
+      "id": "bug-114",
+      "timestamp": "2026-07-03T10:54:59.849Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/parent/ParentDashboard.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T10:57:40.567Z"
+    },
+    {
+      "id": "bug-115",
+      "timestamp": "2026-07-03T10:55:07.295Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:55:07.295Z"
+    },
+    {
+      "id": "bug-116",
+      "timestamp": "2026-07-03T10:55:15.546Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:55:15.546Z"
+    },
+    {
+      "id": "bug-117",
+      "timestamp": "2026-07-03T10:55:30.607Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:55:30.607Z"
+    },
+    {
+      "id": "bug-118",
+      "timestamp": "2026-07-03T10:55:41.987Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:55:41.987Z"
+    },
+    {
+      "id": "bug-119",
+      "timestamp": "2026-07-03T10:55:48.850Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/components/common/ContextPicker.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:55:48.850Z"
+    },
+    {
+      "id": "bug-120",
+      "timestamp": "2026-07-03T10:57:37.766Z",
+      "error_message": "Wrong reference: String should be toAr",
+      "file": "quran-hifz/src/quran/pages/student/StudentPoints.tsx",
+      "root_cause": "Used \"String\" instead of \"toAr\"",
+      "fix": "Changed String → toAr",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -209,15 +1945,367 @@
       ],
       "related_bugs": [],
       "occurrences": 1,
-      "last_seen": "2026-07-12T17:26:27.886Z"
+      "last_seen": "2026-07-03T10:57:37.766Z"
     },
     {
-      "id": "bug-014",
-      "timestamp": "2026-07-12T17:26:32.186Z",
-      "error_message": "Wrong reference: cream should be bg",
-      "file": "quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
-      "root_cause": "Used \"cream\" instead of \"bg\"",
-      "fix": "Changed cream → bg",
+      "id": "bug-121",
+      "timestamp": "2026-07-03T10:57:44.328Z",
+      "error_message": "CSS fix: num",
+      "file": "quran-hifz/src/quran/pages/parent/ParentAttendance.tsx",
+      "root_cause": "num: String(absent),    label: \"غائب\",             icon: \"ti-alert-circle\",   variant: \"red\" → toAr(absent),      label: \"غائب\",             icon: \"ti-alert-circle\",   variant: \"red\"",
+      "fix": "Changed num: String(absent),    label: \"غائب\",             icon: \"ti-alert-circle\",   variant: \"red\" → toAr(absent),      label: \"غائب\",             icon: \"ti-alert-circle\",   variant: \"red\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:57:44.328Z"
+    },
+    {
+      "id": "bug-122",
+      "timestamp": "2026-07-03T10:58:03.757Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz-server/src/lib/quranRange.ts",
+      "root_cause": "No early return/throw for edge case: total <= 0",
+      "fix": "Added guard clause: if (total <= 0)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:58:03.757Z"
+    },
+    {
+      "id": "bug-123",
+      "timestamp": "2026-07-03T10:58:17.851Z",
+      "error_message": "CSS fix: 2",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "2: attendance table ─────────────────────────────────────── → attendance list ───────────────────────────────────────",
+      "fix": "Changed 2: attendance table ─────────────────────────────────────── → attendance list ───────────────────────────────────────",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:58:17.851Z"
+    },
+    {
+      "id": "bug-124",
+      "timestamp": "2026-07-03T10:59:30.969Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz-mobile/app/(portal)/student/points.tsx",
+      "root_cause": "Had 'للمستوى التالي'",
+      "fix": "Changed to '٧٤٠'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:59:30.969Z"
+    },
+    {
+      "id": "bug-125",
+      "timestamp": "2026-07-03T10:59:39.334Z",
+      "error_message": "CSS fix: background, display, margin",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "background: linkedPlan?.todayAssignment ? \"var(--green-pale)\" : \"var(--cream)\", → \"var(--green)\", color: \"#fff\", borderRadius: 99, padding: \"1px 8px\", fontSize: 10; display: \"flex\", alignItems: \"center\", justifyContent: \"space-between\", marginBottom: linkedPlan ? 6 : 0 → \"flex\", alignItems: \"center\", gap: 6; margin: 0, fontSize: 11, color: \"var(--text3)\" → \"6px 0 0\", fontSize: 11, color: \"var(--text3)\"",
+      "fix": "Changed background: linkedPlan?.todayAssignment ? \"var(--green-pale)\" : \"var(--cream)\", → \"var(--green)\", color: \"#fff\", borderRadius: 99, padding: \"1px 8px\", fontSize: 10; display: \"flex\", alignItems: \"center\", justifyContent: \"space-between\", marginBottom: linkedPlan ? 6 : 0 → \"flex\", alignItems: \"center\", gap: 6; margin: 0, fontSize: 11, color: \"var(--text3)\" → \"6px 0 0\", fontSize: 11, color: \"var(--text3)\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T10:59:58.590Z"
+    },
+    {
+      "id": "bug-126",
+      "timestamp": "2026-07-03T10:59:44.184Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/config/portals.ts",
+      "root_cause": "Had \"متجر الأدوات\"",
+      "fix": "Changed to \"متجر المكافآت\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T10:59:44.184Z"
+    },
+    {
+      "id": "bug-127",
+      "timestamp": "2026-07-03T11:00:13.228Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+      "root_cause": "Had \"../../context/useTopbar\"",
+      "fix": "Changed to \"react\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:00:13.228Z"
+    },
+    {
+      "id": "bug-128",
+      "timestamp": "2026-07-03T11:00:42.882Z",
+      "error_message": "CSS fix: marginTop, background",
+      "file": "quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+      "root_cause": "marginTop: 12, borderRadius: 10, padding: \"10px 12px\", → 8; background: linkedPlan.todayAssignment ? \"var(--green-pale)\" : \"var(--cream)\", → \"var(--green)\", color: \"#fff\", borderRadius: 99, padding: \"1px 8px\", fontSize: 10",
+      "fix": "Changed marginTop: 12, borderRadius: 10, padding: \"10px 12px\", → 8; background: linkedPlan.todayAssignment ? \"var(--green-pale)\" : \"var(--cream)\", → \"var(--green)\", color: \"#fff\", borderRadius: 99, padding: \"1px 8px\", fontSize: 10",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:00:42.882Z"
+    },
+    {
+      "id": "bug-129",
+      "timestamp": "2026-07-03T11:06:21.041Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "8 lines replaced/restructured",
+      "fix": "Rewrote 22→11 lines (8 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:06:21.041Z"
+    },
+    {
+      "id": "bug-130",
+      "timestamp": "2026-07-03T11:06:42.770Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "Had \"students\"",
+      "fix": "Changed to \"attendance\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T11:11:12.615Z"
+    },
+    {
+      "id": "bug-131",
+      "timestamp": "2026-07-03T11:09:10.663Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: {/* linked Quran plan (collapsible) */}; <div style={{",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T11:09:39.993Z"
+    },
+    {
+      "id": "bug-132",
+      "timestamp": "2026-07-03T11:11:22.844Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+      "root_cause": "Had \"grid\"",
+      "fix": "Changed to \"grid-collapse\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 4,
+      "last_seen": "2026-07-03T11:12:17.123Z"
+    },
+    {
+      "id": "bug-133",
+      "timestamp": "2026-07-03T11:12:00.751Z",
+      "error_message": "CSS fix: display",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "display: \"flex\", alignItems: \"center\", justifyContent: \"space-between\", → \"flex\", alignItems: \"center\", justifyContent: \"space-between\", flexWrap: \"wrap\", gap: 8,",
+      "fix": "Changed display: \"flex\", alignItems: \"center\", justifyContent: \"space-between\", → \"flex\", alignItems: \"center\", justifyContent: \"space-between\", flexWrap: \"wrap\", gap: 8,",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:12:00.751Z"
+    },
+    {
+      "id": "bug-134",
+      "timestamp": "2026-07-03T11:12:06.910Z",
+      "error_message": "Missing error handling in function",
+      "file": "../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/d9ad3c02-3ebc-4983-830f-edb85405fd09/scratchpad/pw-test/driver2.mjs",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:12:06.910Z"
+    },
+    {
+      "id": "bug-135",
+      "timestamp": "2026-07-03T11:12:11.659Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "root_cause": "Had \"pointer\"",
+      "fix": "Changed to \"wrap\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:12:11.659Z"
+    },
+    {
+      "id": "bug-136",
+      "timestamp": "2026-07-03T11:18:45.247Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/lib/quranRange.ts",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 41→91 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:18:45.247Z"
+    },
+    {
+      "id": "bug-137",
+      "timestamp": "2026-07-03T11:18:56.761Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz-server/src/lib/quranRange.ts",
+      "root_cause": "No early return/throw for edge case: !dayProgress",
+      "fix": "Added guard clause: if (!dayProgress)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:18:56.761Z"
+    },
+    {
+      "id": "bug-138",
+      "timestamp": "2026-07-03T11:19:44.352Z",
+      "error_message": "CSS fix: mode",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "mode: \"form\" → \"schedule\"",
+      "fix": "Changed mode: \"form\" → \"schedule\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T11:20:55.592Z"
+    },
+    {
+      "id": "bug-139",
+      "timestamp": "2026-07-03T11:20:03.014Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:20:03.014Z"
+    },
+    {
+      "id": "bug-140",
+      "timestamp": "2026-07-03T11:20:15.739Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 5→5 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:20:15.739Z"
+    },
+    {
+      "id": "bug-141",
+      "timestamp": "2026-07-03T11:25:56.828Z",
+      "error_message": "CSS fix: background, border-color, color",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "background: rgba(239,68,68,0.12) → var(--surface); border-color: rgba(239,68,68,0.3) → var(--border); color: var(--green) → var(--text2)",
+      "fix": "Changed background: rgba(239,68,68,0.12) → var(--surface); border-color: rgba(239,68,68,0.3) → var(--border); color: var(--green) → var(--text2)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-03T11:26:02.736Z"
+    },
+    {
+      "id": "bug-142",
+      "timestamp": "2026-07-03T11:26:54.814Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:26:54.814Z"
+    },
+    {
+      "id": "bug-143",
+      "timestamp": "2026-07-03T11:27:19.416Z",
+      "error_message": "Wrong reference: usePortal should be showPage",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "Used \"usePortal\" instead of \"showPage\"",
+      "fix": "Changed usePortal → showPage",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -225,15 +2313,354 @@
       ],
       "related_bugs": [],
       "occurrences": 1,
-      "last_seen": "2026-07-12T17:26:32.186Z"
+      "last_seen": "2026-07-03T11:27:19.416Z"
     },
     {
-      "id": "bug-015",
-      "timestamp": "2026-07-12T17:26:35.992Z",
-      "error_message": "Wrong reference: cream should be bg",
-      "file": "quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx",
-      "root_cause": "Used \"cream\" instead of \"bg\"",
-      "fix": "Changed cream → bg",
+      "id": "bug-144",
+      "timestamp": "2026-07-03T11:27:42.269Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:27:42.269Z"
+    },
+    {
+      "id": "bug-145",
+      "timestamp": "2026-07-03T11:27:59.726Z",
+      "error_message": "CSS fix: display, fontSize",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "display: \"flex\", alignItems: \"flex-start\", gap: 6, gridColumn: span ? \"1 / -1\" : undefined → \"flex\", alignItems: \"center\", gap: 3, textDecoration: \"underline\",; fontSize: 10, color: \"var(--text3)\", lineHeight: 1 → 11",
+      "fix": "Changed display: \"flex\", alignItems: \"flex-start\", gap: 6, gridColumn: span ? \"1 / -1\" : undefined → \"flex\", alignItems: \"center\", gap: 3, textDecoration: \"underline\",; fontSize: 10, color: \"var(--text3)\", lineHeight: 1 → 11",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:27:59.726Z"
+    },
+    {
+      "id": "bug-146",
+      "timestamp": "2026-07-03T11:40:36.848Z",
+      "error_message": "CSS fix: padding",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherHomework.tsx",
+      "root_cause": "padding: \"4px 8px\", fontSize: 11, width: 120 → \"8px 10px\", fontSize: 12, flex: 1",
+      "fix": "Changed padding: \"4px 8px\", fontSize: 11, width: 120 → \"8px 10px\", fontSize: 12, flex: 1",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:40:36.848Z"
+    },
+    {
+      "id": "bug-147",
+      "timestamp": "2026-07-03T11:41:44.210Z",
+      "error_message": "CSS fix: display, padding",
+      "file": "quran-hifz/src/quran/pages/admin/AdminParents.tsx",
+      "root_cause": "display: \"flex\", gap: 6 → \"inline-flex\", alignItems: \"center\", gap: 4,; padding: \"3px 9px\", fontSize: 12 → \"2px 8px\", border: \"1px solid var(--border)\",",
+      "fix": "Changed display: \"flex\", gap: 6 → \"inline-flex\", alignItems: \"center\", gap: 4,; padding: \"3px 9px\", fontSize: 12 → \"2px 8px\", border: \"1px solid var(--border)\",",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:41:44.210Z"
+    },
+    {
+      "id": "bug-148",
+      "timestamp": "2026-07-04T08:48:08.990Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T08:48:08.990Z"
+    },
+    {
+      "id": "bug-149",
+      "timestamp": "2026-07-04T08:56:23.573Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 6→3 lines (3 removed) | Also: repetitionCount: \"1\",; restrictNavigationRange: false, | Also: repetitionCount: String(item.repetitionCount),; restrictNavigationRange: item.restrictNavigationRa",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-07-04T08:56:35.433Z"
+    },
+    {
+      "id": "bug-150",
+      "timestamp": "2026-07-04T08:56:57.769Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/api/quran-plans.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 8→4 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T08:56:57.769Z"
+    },
+    {
+      "id": "bug-151",
+      "timestamp": "2026-07-04T08:57:02.178Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/models/QuranPlan.model.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 8→4 lines (3 removed) | Also: repetitionCount:         { type: Number, default: ; restrictNavigationRange: { type: Boolean, default:",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T08:57:07.246Z"
+    },
+    {
+      "id": "bug-152",
+      "timestamp": "2026-07-04T08:57:12.285Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 8→4 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T08:57:12.285Z"
+    },
+    {
+      "id": "bug-153",
+      "timestamp": "2026-07-04T08:58:05.376Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/admin/AdminKpis.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 48→59 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T08:58:05.376Z"
+    },
+    {
+      "id": "bug-154",
+      "timestamp": "2026-07-04T09:01:54.281Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "No early return/throw for edge case: id",
+      "fix": "Added guard clause: if (id)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:01:54.281Z"
+    },
+    {
+      "id": "bug-155",
+      "timestamp": "2026-07-04T09:06:23.711Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/e47eeed4-65f5-4f15-b91a-f98b52331c6e/scratchpad/pw-verify/driver.mjs",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:06:23.712Z"
+    },
+    {
+      "id": "bug-156",
+      "timestamp": "2026-07-04T09:11:25.979Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/context/PortalContext.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:11:25.979Z"
+    },
+    {
+      "id": "bug-157",
+      "timestamp": "2026-07-04T09:11:36.377Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/context/PortalContext.tsx",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 15→19 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:11:36.377Z"
+    },
+    {
+      "id": "bug-158",
+      "timestamp": "2026-07-04T09:11:42.401Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/controllers/attendance.controller.ts",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 29→39 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:11:42.401Z"
+    },
+    {
+      "id": "bug-159",
+      "timestamp": "2026-07-04T09:11:51.533Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/components/Topbar.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 4→5 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:11:51.533Z"
+    },
+    {
+      "id": "bug-160",
+      "timestamp": "2026-07-04T09:12:00.071Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz-server/src/controllers/attendance.controller.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:12:00.071Z"
+    },
+    {
+      "id": "bug-161",
+      "timestamp": "2026-07-04T09:20:04.576Z",
+      "error_message": "CSS fix: onSuccess",
+      "file": "quran-hifz-mobile/app/(portal)/teacher/attendance.tsx",
+      "root_cause": "onSuccess: () => { → (res) => {",
+      "fix": "Changed onSuccess: () => { → (res) => {",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:20:04.576Z"
+    },
+    {
+      "id": "bug-162",
+      "timestamp": "2026-07-04T00:00:00.000Z",
+      "error_message": "بيانات غير صالحة (Invalid data) shown every time the teacher clicked \"حفظ وإرسال إشعارات\" (save + notify) on the attendance page",
+      "file": "quran-hifz-server/src/controllers/attendance.controller.ts",
+      "root_cause": "bulkSchema/recordSchema required client-supplied day and time strings, but neither quran-hifz nor quran-hifz-mobile attendance mutation hooks ever sent them, so Zod validation always failed with a ZodError -> generic \"بيانات غير صالحة\" message. Separately, the notifications half of the feature was never implemented: bulkAttendance only wrote Attendance records, never created a Message, and Message.model.ts was missing the student field that parent.controller.ts.getChildMessages already queried by (so the parent per-child Messages tab was always empty even for any manually-created message).",
+      "fix": "Derive day/time server-side from date instead of requiring them in the request body. Added student field to Message schema. Added notifyAbsentParents() in attendance.controller.ts: looks up each absent student parent via ParentStudent, creates a Message per linked parent; students with no linked parent are skipped (not thrown) and returned as unnotified:[{id,name}] in the bulk response. TeacherAttendance.tsx (web) and teacher/attendance.tsx (mobile) now show a warning alert listing students whose parent could not be notified.",
+      "tags": [
+        "zod-validation",
+        "attendance",
+        "notifications",
+        "messages",
+        "parent-portal",
+        "user-reported"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T00:00:00.000Z"
+    },
+    {
+      "id": "bug-163",
+      "timestamp": "2026-07-04T09:25:38.912Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:25:38.912Z"
+    },
+    {
+      "id": "bug-164",
+      "timestamp": "2026-07-04T09:25:46.315Z",
+      "error_message": "CSS fix: status",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "status: statuses[s._id] ?? \"حاضر\", → statusFor(s._id),",
+      "fix": "Changed status: statuses[s._id] ?? \"حاضر\", → statusFor(s._id),",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:25:46.315Z"
+    },
+    {
+      "id": "bug-165",
+      "timestamp": "2026-07-04T09:25:53.113Z",
+      "error_message": "Wrong reference: statuses should be statusFor",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Used \"statuses\" instead of \"statusFor\"",
+      "fix": "Changed statuses → statusFor",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -241,7 +2668,2384 @@
       ],
       "related_bugs": [],
       "occurrences": 1,
-      "last_seen": "2026-07-12T17:26:35.992Z"
+      "last_seen": "2026-07-04T09:25:53.113Z"
+    },
+    {
+      "id": "bug-166",
+      "timestamp": "2026-07-04T09:26:06.510Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Had \"حاضر\"",
+      "fix": "Changed to \"غائب\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:26:06.510Z"
+    },
+    {
+      "id": "bug-167",
+      "timestamp": "2026-07-04T09:26:47.396Z",
+      "error_message": "Type error",
+      "file": "quran-hifz-mobile/app/(portal)/teacher/attendance.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:26:47.396Z"
+    },
+    {
+      "id": "bug-168",
+      "timestamp": "2026-07-04T09:26:59.342Z",
+      "error_message": "Wrong reference: statuses should be statusFor",
+      "file": "quran-hifz-mobile/app/(portal)/teacher/attendance.tsx",
+      "root_cause": "Used \"statuses\" instead of \"statusFor\"",
+      "fix": "Changed statuses → statusFor",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:26:59.342Z"
+    },
+    {
+      "id": "bug-169",
+      "timestamp": "2026-07-04T09:27:34.209Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz-mobile/lib/queries/attendance.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:27:34.209Z"
+    },
+    {
+      "id": "bug-170",
+      "timestamp": "2026-07-04T00:10:00.000Z",
+      "error_message": "Re-opening the attendance page for the same halqa/track later the same day always showed every student defaulting back to \"حاضر\", even for students already marked \"غائب\" and saved earlier that day",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "TeacherAttendance (web) and teacher/attendance.tsx (mobile) kept marked statuses only in local component state (statuses/setStatuses), initialized empty on every mount, and never fetched existing Attendance records for the selected context/today to seed it. So the UI looked like the previous save had been wiped, though the DB data itself was untouched.",
+      "fix": "Added a useAttendance({halqa|specialTrack, from: today, to: today}) query in both files to fetch today already-saved records for the selected context, merged via a statusFor(id) helper (local override > saved-today status > \"حاضر\" default) so unedited students keep their previously saved status on resubmit and re-opening the page mid-day reflects reality. Renamed local state from statuses to overrides to make the merge explicit. Also added the missing enabled guard to quran-hifz-mobile lib/queries/attendance.ts useAttendance (mirroring the webs version) since this was the first call site where the filters argument could be undefined.",
+      "tags": [
+        "attendance",
+        "state-management",
+        "react-query",
+        "user-reported",
+        "ux"
+      ],
+      "related_bugs": [
+        "bug-162"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T00:10:00.000Z"
+    },
+    {
+      "id": "bug-171",
+      "timestamp": "2026-07-04T09:32:58.617Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:32:58.617Z"
+    },
+    {
+      "id": "bug-172",
+      "timestamp": "2026-07-04T09:33:16.919Z",
+      "error_message": "CSS fix: background, color",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "background: #fdf0e8 → rgba(52,208,88,0.08); color: var(--brown) → #b91c1c",
+      "fix": "Changed background: #fdf0e8 → rgba(52,208,88,0.08); color: var(--brown) → #b91c1c",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:33:16.919Z"
+    },
+    {
+      "id": "bug-173",
+      "timestamp": "2026-07-04T09:33:23.077Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/components/common/Modal.tsx",
+      "root_cause": "Had \"ti ti-x\"",
+      "fix": "Changed to \"إغلاق\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:33:23.077Z"
+    },
+    {
+      "id": "bug-174",
+      "timestamp": "2026-07-04T09:33:46.447Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz/src/quran/pages/admin/AdminParents.tsx",
+      "root_cause": "No early return/throw for edge case: !q",
+      "fix": "Added guard clause: if (!q)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:33:46.447Z"
+    },
+    {
+      "id": "bug-175",
+      "timestamp": "2026-07-04T09:34:19.441Z",
+      "error_message": "CSS fix: display, fontSize, padding",
+      "file": "quran-hifz/src/quran/pages/admin/AdminParents.tsx",
+      "root_cause": "display: \"inline-flex\", alignItems: \"center\", gap: 4, → \"flex\", flexWrap: \"wrap\", gap: 6, justifyContent: \"flex-end\"; fontSize: 11, background: \"var(--bg2)\", borderRadius: 6, → 12, color: \"var(--text3)\"; padding: \"2px 8px\", border: \"1px solid var(--border)\", → \"3px 9px\", fontSize: 12",
+      "fix": "Changed display: \"inline-flex\", alignItems: \"center\", gap: 4, → \"flex\", flexWrap: \"wrap\", gap: 6, justifyContent: \"flex-end\"; fontSize: 11, background: \"var(--bg2)\", borderRadius: 6, → 12, color: \"var(--text3)\"; padding: \"2px 8px\", border: \"1px solid var(--border)\", → \"3px 9px\", fontSize: 12",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T09:34:34.864Z"
+    },
+    {
+      "id": "bug-176",
+      "timestamp": "2026-07-04T09:47:15.192Z",
+      "error_message": "Type error",
+      "file": "quran-hifz-server/src/lib/quranRange.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation | Also: import quranPageRangesJson from \"../data/quranPageRanges.jso; const PAGE_STARTS = quranPageRangesJson.map((p) => ({ number",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T09:47:21.690Z"
+    },
+    {
+      "id": "bug-177",
+      "timestamp": "2026-07-04T09:56:43.866Z",
+      "error_message": "Wrong reference: CUMULATIVE_BEFORE_TOTAL should be TOTAL_AYAHS",
+      "file": "quran-hifz-server/src/lib/quranRange.ts",
+      "root_cause": "Used \"CUMULATIVE_BEFORE_TOTAL\" instead of \"TOTAL_AYAHS\"",
+      "fix": "Changed CUMULATIVE_BEFORE_TOTAL → TOTAL_AYAHS",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:56:43.866Z"
+    },
+    {
+      "id": "bug-178",
+      "timestamp": "2026-07-04T09:57:51.012Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/test-slicing.ts",
+      "root_cause": "Had '../../../../../../Users/xontel/Downloads/mina wor",
+      "fix": "Changed to './lib/quranRange'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T09:57:51.012Z"
+    },
+    {
+      "id": "bug-179",
+      "timestamp": "2026-07-04T00:00:00.000Z",
+      "error_message": "Linked-children chips on AdminParents page (table row, mobile card, and Link Child modal) rendered with no visible background fill",
+      "file": "quran-hifz/src/quran/pages/admin/AdminParents.tsx",
+      "root_cause": "Inline style used background: var(--bg2), but --bg2 is never defined anywhere in quran.css (only --green/--gold/--brown/--cream/--white/--surface/--text*/--border* exist) — the property silently fell back to no fill, so the chip looked like plain bordered text instead of a filled pill. Same undefined var also used once in AdminStudents.tsx (not fixed there, out of scope for this pass).",
+      "fix": "Replaced all 3 occurrences with a new shared .child-chip / .child-chip-remove CSS class (using the existing var(--green-pale) fill) in quran.css, plus a dark-mode override, and extracted a module-scope ChildChip component to stop the markup being duplicated 3x in the file.",
+      "tags": [
+        "css",
+        "undefined-css-variable",
+        "design",
+        "admin-parents"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T00:00:00.000Z"
+    },
+    {
+      "id": "bug-180",
+      "timestamp": "2026-07-04T10:44:44.832Z",
+      "error_message": "Missing await",
+      "file": "quran-hifz-server/src/controllers/attendance.controller.ts",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T10:44:44.832Z"
+    },
+    {
+      "id": "bug-181",
+      "timestamp": "2026-07-04T10:45:00.084Z",
+      "error_message": "Type error",
+      "file": "quran-hifz-server/src/controllers/attendance.controller.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T10:45:00.084Z"
+    },
+    {
+      "id": "bug-182",
+      "timestamp": "2026-07-04T10:45:52.182Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz-server/src/controllers/evaluation.controller.ts",
+      "root_cause": "No early return/throw for edge case: r.attendanceStatus === 'غائب'",
+      "fix": "Added guard clause: if (r.attendanceStatus === 'غائب')",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T10:45:52.182Z"
+    },
+    {
+      "id": "bug-183",
+      "timestamp": "2026-07-04T10:47:43.663Z",
+      "error_message": "CSS fix: background, border-color, color",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "background: rgba(239,68,68,0.12) → var(--green); border-color: rgba(239,68,68,0.3) → var(--border); color: var(--green) → var(--text3)",
+      "fix": "Changed background: rgba(239,68,68,0.12) → var(--green); border-color: rgba(239,68,68,0.3) → var(--border); color: var(--green) → var(--text3)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T10:47:43.663Z"
+    },
+    {
+      "id": "bug-184",
+      "timestamp": "2026-07-04T10:48:43.452Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/router/pageRegistry.ts",
+      "root_cause": "Had \"../pages/teacher/TeacherEvaluate\"",
+      "fix": "Changed to \"../pages/teacher/TeacherRecordLesson\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T10:48:43.452Z"
+    },
+    {
+      "id": "bug-185",
+      "timestamp": "2026-07-04T10:49:40.256Z",
+      "error_message": "CSS fix: data",
+      "file": "quran-hifz/src/quran/pages/parent/ParentAttendance.tsx",
+      "root_cause": "data: records, isLoading → evaluations = []",
+      "fix": "Changed data: records, isLoading → evaluations = []",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T10:49:40.256Z"
+    },
+    {
+      "id": "bug-186",
+      "timestamp": "2026-07-04T10:49:50.878Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/parent/ParentAttendance.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 19→26 lines (2 removed) | Also: {(records ?? []).map((r, i) => (; ))}",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T10:50:03.293Z"
+    },
+    {
+      "id": "bug-187",
+      "timestamp": "2026-07-04T10:51:25.928Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/api/evaluations.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T10:51:25.928Z"
+    },
+    {
+      "id": "bug-188",
+      "timestamp": "2026-07-04T10:52:24.869Z",
+      "error_message": "Wrong reference: Skeleton should be SkeletonCard",
+      "file": "quran-hifz/src/quran/components/common/StudentReportPanel.tsx",
+      "root_cause": "Used \"Skeleton\" instead of \"SkeletonCard\"",
+      "fix": "Changed Skeleton → SkeletonCard",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T10:52:31.855Z"
+    },
+    {
+      "id": "bug-189",
+      "timestamp": "2026-07-04T10:53:04.357Z",
+      "error_message": "CSS fix: display",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherReports.tsx",
+      "root_cause": "display: \"grid\", gridTemplateColumns: \"repeat(3,1fr)\", gap: 14 → \"grid\", gridTemplateColumns: \"repeat(3,1fr)\", gap: 14, marginBottom: 16",
+      "fix": "Changed display: \"grid\", gridTemplateColumns: \"repeat(3,1fr)\", gap: 14 → \"grid\", gridTemplateColumns: \"repeat(3,1fr)\", gap: 14, marginBottom: 16",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T10:53:37.456Z"
+    },
+    {
+      "id": "bug-190",
+      "timestamp": "2026-07-04T10:53:58.280Z",
+      "error_message": "CSS fix: display",
+      "file": "quran-hifz/src/quran/pages/admin/AdminReports.tsx",
+      "root_cause": "display: \"grid\", gridTemplateColumns: \"repeat(3,1fr)\", gap: 14 → \"grid\", gridTemplateColumns: \"repeat(3,1fr)\", gap: 14, marginBottom: 16",
+      "fix": "Changed display: \"grid\", gridTemplateColumns: \"repeat(3,1fr)\", gap: 14 → \"grid\", gridTemplateColumns: \"repeat(3,1fr)\", gap: 14, marginBottom: 16",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T10:53:58.280Z"
+    },
+    {
+      "id": "bug-191",
+      "timestamp": "2026-07-04T11:00:56.836Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T11:00:56.836Z"
+    },
+    {
+      "id": "bug-192",
+      "timestamp": "2026-07-04T11:01:18.293Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 11→17 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T11:01:18.293Z"
+    },
+    {
+      "id": "bug-193",
+      "timestamp": "2026-07-04T11:03:31.139Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz-server/src/seeds/backfillPlans.ts",
+      "root_cause": "Had 'title teacher'",
+      "fix": "Changed to 'title teachers'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T11:03:31.139Z"
+    },
+    {
+      "id": "bug-194",
+      "timestamp": "2026-07-04T11:17:19.100Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx",
+      "root_cause": "Had \"حلقاتي\"",
+      "fix": "Changed to \"حلقاتي ومساراتي\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T11:17:19.100Z"
+    },
+    {
+      "id": "bug-195",
+      "timestamp": "2026-07-04T11:17:39.722Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 8→3 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T11:17:39.722Z"
+    },
+    {
+      "id": "bug-196",
+      "timestamp": "2026-07-04T11:17:41.787Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/30e55a91-0ae4-48f4-ae23-496451970a0b/scratchpad/verify.mjs",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T11:17:41.787Z"
+    },
+    {
+      "id": "bug-197",
+      "timestamp": "2026-07-04T11:38:07.213Z",
+      "error_message": "Wrong operator: ?? should be ||",
+      "file": "quran-hifz/src/quran/components/common/StudentReportPanel.tsx",
+      "root_cause": "Used \"??\" instead of \"||\"",
+      "fix": "Changed operator ?? → ||",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T11:38:07.213Z"
+    },
+    {
+      "id": "bug-198",
+      "timestamp": "2026-07-04T11:38:24.501Z",
+      "error_message": "Wrong reference: setSelectedId should be setPickedId",
+      "file": "quran-hifz/src/quran/components/common/StudentReportPanel.tsx",
+      "root_cause": "Used \"setSelectedId\" instead of \"setPickedId\"",
+      "fix": "Changed setSelectedId → setPickedId",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T11:38:24.501Z"
+    },
+    {
+      "id": "bug-199",
+      "timestamp": "2026-07-04T12:03:25.518Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherReports.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T12:03:25.518Z"
+    },
+    {
+      "id": "bug-200",
+      "timestamp": "2026-07-04T12:04:22.013Z",
+      "error_message": "CSS fix: halqa",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherReports.tsx",
+      "root_cause": "halqa: halqaIds.join(\",\") → ${h._id",
+      "fix": "Changed halqa: halqaIds.join(\",\") → ${h._id",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T12:04:22.013Z"
+    },
+    {
+      "id": "bug-201",
+      "timestamp": "2026-07-04T12:05:12.360Z",
+      "error_message": "CSS fix: data",
+      "file": "quran-hifz/src/quran/pages/admin/AdminReports.tsx",
+      "root_cause": "data: kpis = [], isLoading: kpisLoading → reportStudents = students",
+      "fix": "Changed data: kpis = [], isLoading: kpisLoading → reportStudents = students",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T12:05:12.360Z"
+    },
+    {
+      "id": "bug-202",
+      "timestamp": "2026-07-04T15:30:00.000Z",
+      "error_message": "Reports page mixed Arabic-Indic digits (new widgets: ٨٣٪) with Western digits (StudentReportPanel: 83%, 10/10, juz numbers) — user flagged \"problem with the arabic with the design\"",
+      "file": "quran-hifz/src/quran/components/common/StudentReportPanel.tsx",
+      "root_cause": "StudentReportPanel (older component) rendered plain Western digits in recharts axes/LabelList/tooltips + juz & comparison tables, while the new ReportsAnalytics widgets correctly used toAr/pct — placing them on the same page caused two digit systems to collide",
+      "fix": "Converted StudentReportPanel to toAr/pct everywhere (StatsRow, juz table, comparison table) and added tickFormatter/LabelList formatter/Tooltip formatter to radar/line/bar charts so all chart numbers render Arabic-Indic; verified via Playwright diag scan (leaf text with [0-9] → numbers: [])",
+      "tags": [
+        "arabic",
+        "digits",
+        "recharts",
+        "rtl",
+        "reports",
+        "consistency"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:30:00.000Z"
+    },
+    {
+      "id": "bug-203",
+      "timestamp": "2026-07-04T14:50:54.045Z",
+      "error_message": "CSS fix: background, border-color",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "background: rgba(239, 68, 68, 0.1) → linear-gradient(135deg, var(--green-pale) 0%, var(--gold-pale) 100%); border-color: rgba(239, 68, 68, 0.25) → var(--border2)",
+      "fix": "Changed background: rgba(239, 68, 68, 0.1) → linear-gradient(135deg, var(--green-pale) 0%, var(--gold-pale) 100%); border-color: rgba(239, 68, 68, 0.25) → var(--border2)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T14:50:54.045Z"
+    },
+    {
+      "id": "bug-204",
+      "timestamp": "2026-07-04T14:51:09.195Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "8 lines replaced/restructured",
+      "fix": "Rewrote 11→34 lines (8 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T14:51:09.195Z"
+    },
+    {
+      "id": "bug-205",
+      "timestamp": "2026-07-04T14:57:39.287Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→9 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T14:57:39.287Z"
+    },
+    {
+      "id": "bug-206",
+      "timestamp": "2026-07-04T14:58:35.436Z",
+      "error_message": "CSS fix: button, background",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "button: not(.active):hover { → disabled:hover,; background: var(--green-pale) → transparent",
+      "fix": "Changed button: not(.active):hover { → disabled:hover,; background: var(--green-pale) → transparent",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T14:58:35.436Z"
+    },
+    {
+      "id": "bug-207",
+      "timestamp": "2026-07-04T14:59:46.707Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/components/common/ReportsDashboard.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T14:59:46.707Z"
+    },
+    {
+      "id": "bug-208",
+      "timestamp": "2026-07-04T14:59:55.216Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/components/common/ReportsDashboard.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T14:59:55.216Z"
+    },
+    {
+      "id": "bug-209",
+      "timestamp": "2026-07-04T15:00:48.994Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/admin/AdminReports.tsx",
+      "root_cause": "Had \"../../components/common/ReportsAnalytics\"",
+      "fix": "Changed to \"../../components/common/ReportsDashboard\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:00:48.994Z"
+    },
+    {
+      "id": "bug-210",
+      "timestamp": "2026-07-04T15:00:50.078Z",
+      "error_message": "Wrong reference: ReportsAnalytics should be ReportsDashboard",
+      "file": "quran-hifz/src/quran/pages/admin/AdminReports.tsx",
+      "root_cause": "Used \"ReportsAnalytics\" instead of \"ReportsDashboard\"",
+      "fix": "Changed ReportsAnalytics → ReportsDashboard",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T15:01:17.687Z"
+    },
+    {
+      "id": "bug-211",
+      "timestamp": "2026-07-04T15:00:51.779Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherReports.tsx",
+      "root_cause": "Had \"../../components/common/ReportsAnalytics\"",
+      "fix": "Changed to \"../../components/common/ReportsDashboard\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:00:51.779Z"
+    },
+    {
+      "id": "bug-212",
+      "timestamp": "2026-07-04T15:00:52.764Z",
+      "error_message": "Wrong reference: ReportsAnalytics should be ReportsDashboard",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherReports.tsx",
+      "root_cause": "Used \"ReportsAnalytics\" instead of \"ReportsDashboard\"",
+      "fix": "Changed ReportsAnalytics → ReportsDashboard",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:00:52.764Z"
+    },
+    {
+      "id": "bug-213",
+      "timestamp": "2026-07-04T15:05:36.518Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:05:36.518Z"
+    },
+    {
+      "id": "bug-214",
+      "timestamp": "2026-07-04T15:06:56.806Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:06:56.806Z"
+    },
+    {
+      "id": "bug-215",
+      "timestamp": "2026-07-04T15:07:04.172Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 9→13 lines (3 removed) | Also: {alreadySubmitted && (; disabled={alreadySubmitted}",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-04T15:07:29.871Z"
+    },
+    {
+      "id": "bug-216",
+      "timestamp": "2026-07-04T15:07:52.578Z",
+      "error_message": "Wrong reference: alreadySubmitted should be locked",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Used \"alreadySubmitted\" instead of \"locked\"",
+      "fix": "Changed alreadySubmitted → locked",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:07:52.578Z"
+    },
+    {
+      "id": "bug-217",
+      "timestamp": "2026-07-04T15:09:16.121Z",
+      "error_message": "CSS fix: opacity, background, border-color",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "opacity: 0.4 → 0.8; background: transparent → rgba(239, 68, 68, 0.05); border-color: var(--border) → rgba(239, 68, 68, 0.6)",
+      "fix": "Changed opacity: 0.4 → 0.8; background: transparent → rgba(239, 68, 68, 0.05); border-color: var(--border) → rgba(239, 68, 68, 0.6)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 4,
+      "last_seen": "2026-07-04T15:10:07.510Z"
+    },
+    {
+      "id": "bug-218",
+      "timestamp": "2026-07-04T18:05:00.000Z",
+      "error_message": "GET /api/quran-plans?student=__none__ and GET /api/evaluations?student=__none__ both return 500 on initial mount",
+      "file": "quran-hifz/src/quran/components/common/StudentReportPanel.tsx",
+      "root_cause": "StudentReportPanel picks selectedId = pickedId || students[0]?._id || \"\" reactively; on first render before the students query resolves, selectedId is empty so it queries useQuranPlans/useEvaluations with the literal filter value student: \"__none__\" as a sentinel to mean \"fetch nothing yet\" — but the backend tries to treat \"__none__\" as a real ObjectId and throws, instead of the frontend using enabled:false to skip the request entirely.",
+      "fix": "NOT FIXED — discovered during visual verification of the new ReportsDashboard.tsx (which reuses StudentReportPanel unchanged) via Playwright network capture. Harmless/self-healing (next render resolves the real selectedId and the correct data loads a moment later), so left out of scope for this session's task. A real fix should either pass enabled: false to the two hooks when selectedId is empty, or have the backend controllers 400 instead of 500 on a malformed ObjectId.",
+      "tags": [
+        "pre-existing",
+        "not-fixed",
+        "evaluations",
+        "quran-plans",
+        "reports",
+        "__none__-sentinel"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T18:05:00.000Z"
+    },
+    {
+      "id": "bug-219",
+      "timestamp": "2026-07-04T20:30:00.000Z",
+      "error_message": "Teacher attendance day-slider showed the exact same day (weekday + day number) repeated for every chip — user: \"all the day show the same days\"",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "addDays() built the next date via new Date(iso+\"T00:00:00\") (local midnight) then setDate()+toISOString() (UTC). For any timezone ahead of UTC (this dev machine: Africa/Cairo, UTC+3), local midnight of day X+1 converts to UTC as day X at 21:00 — so toISOString().split(\"T\")[0] returned X again, a fixed point. Every loop iteration in buildDayChips() advanced cur to itself, so all 1095 chips (the guard cap) rendered the same iso/weekday/day-number. Confirmed by isolated node repro. today (new Date().toISOString().split(\"T\")[0]) had the same UTC-vs-local-date bug on a narrower scale (wrong during the first ~3 hours of each local day).",
+      "fix": "Rewrote addDays to pure UTC arithmetic: new Date(Date.UTC(y, m-1, d+n)).toISOString().split(\"T\")[0] — never touches local time, so the offset can't leak in. Rewrote today to build from now.getFullYear()/getMonth()/getDate() (local calendar date) instead of toISOString().",
+      "tags": [
+        "timezone",
+        "date-math",
+        "day-slider",
+        "attendance",
+        "utc-offset"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T20:30:00.000Z"
+    },
+    {
+      "id": "bug-220",
+      "timestamp": "2026-07-04T15:28:38.729Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:28:38.729Z"
+    },
+    {
+      "id": "bug-221",
+      "timestamp": "2026-07-04T15:30:13.205Z",
+      "error_message": "CSS fix: gap, margin-bottom",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "gap: 10px → 6px; margin-bottom: 16px → 10px",
+      "fix": "Changed gap: 10px → 6px; margin-bottom: 16px → 10px",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:30:13.205Z"
+    },
+    {
+      "id": "bug-222",
+      "timestamp": "2026-07-04T15:30:24.296Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Had `${toAr(avg.toFixed(1))}/${toAr(TOTAL_MAX)}`",
+      "fix": "Changed to `${toAr(Math.round(avg))}/${toAr(TOTAL_MAX)}`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:30:24.296Z"
+    },
+    {
+      "id": "bug-223",
+      "timestamp": "2026-07-04T15:39:30.728Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 6→12 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:39:30.728Z"
+    },
+    {
+      "id": "bug-224",
+      "timestamp": "2026-07-04T15:47:07.079Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/quran.css",
+      "root_cause": "38 lines replaced/restructured",
+      "fix": "Rewrote 109→297 lines (38 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:47:07.079Z"
+    },
+    {
+      "id": "bug-225",
+      "timestamp": "2026-07-04T15:56:59.459Z",
+      "error_message": "Wrong condition in logic",
+      "file": "quran-hifz/src/quran/components/common/ReportsDashboard.tsx",
+      "root_cause": "Condition was: if (evaluations.length < 4)",
+      "fix": "Changed to: if (evaluations.length < 8)",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T15:56:59.459Z"
+    },
+    {
+      "id": "bug-226",
+      "timestamp": "2026-07-04T18:50:00.000Z",
+      "error_message": "Hero trend-delta chip on the new bento ReportsDashboard.tsx showed a nonsensical \"+٥.٧\" swing next to a \"٧.٢/١٠\" average score",
+      "file": "quran-hifz/src/quran/components/common/ReportsDashboard.tsx",
+      "root_cause": "halfSplit (the half-over-half average comparison powering the hero delta chip and the 4 metric-tile arrows) only required evaluations.length >= 4 before computing a 3-vs-3 (or fewer) split. With exactly 6 real evaluation records in the test dataset, a 3-vs-3 split is noisy enough that one low outlier in one half can produce a delta larger than the average itself, which reads as broken/alarming even though the arithmetic was technically correct.",
+      "fix": "Raised the minimum sample requirement from evaluations.length < 4 to < 8, guaranteeing at least 4 samples per half before any delta chip renders. Caught during Playwright verification by extracting .hero-delta/.hero-number textContent via page.evaluate() and sanity-checking the numbers against each other, not just eyeballing the screenshot.",
+      "tags": [
+        "fixed",
+        "reports",
+        "evaluations",
+        "data-quality",
+        "small-sample-noise"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-04T18:50:00.000Z"
+    },
+    {
+      "id": "bug-227",
+      "timestamp": "2026-07-05T08:09:25.834Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/LoginPage.tsx",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 17→10 lines (7 removed) | Also: {/* Dev accounts */}; <div className=\"login-dev\">",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-05T08:09:32.334Z"
+    },
+    {
+      "id": "bug-228",
+      "timestamp": "2026-07-05T08:10:27.170Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T08:10:27.170Z"
+    },
+    {
+      "id": "bug-229",
+      "timestamp": "2026-07-05T08:10:49.135Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 25→34 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T08:10:49.135Z"
+    },
+    {
+      "id": "bug-230",
+      "timestamp": "2026-07-05T08:22:33.670Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/bbd609da-d480-4381-aa1d-3b8d4fbbf3f3/scratchpad/verify2.mjs",
+      "root_cause": "Had \"special-tracks\"",
+      "fix": "Changed to \"specialtracks\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T08:22:33.670Z"
+    },
+    {
+      "id": "bug-231",
+      "timestamp": "2026-07-05T08:42:19.614Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 5→3 lines (2 removed) | Also: pointsEnabled: item.pointsEnabled,; pointRules: item.pointRules, | Also: if (form.pointsEnabled && form.pointRules.some((r); setFormError(\"يرجى كتابة وصف لكل قاعدة نقاط، أو حذ",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-07-05T08:42:50.098Z"
+    },
+    {
+      "id": "bug-232",
+      "timestamp": "2026-07-06T10:56:44.333Z",
+      "error_message": "Wrong operator: !== should be ===",
+      "file": "quran-hifz-server/src/validators/context.ts",
+      "root_cause": "Used \"!==\" instead of \"===\"",
+      "fix": "Changed operator !== → ===",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T10:56:44.333Z"
+    },
+    {
+      "id": "bug-233",
+      "timestamp": "2026-07-06T10:59:06.937Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz-server/src/controllers/student.controller.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T10:59:06.937Z"
+    },
+    {
+      "id": "bug-234",
+      "timestamp": "2026-07-06T10:59:32.551Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/api/students.ts",
+      "root_cause": "Had \"masjid\"",
+      "fix": "Changed to \"plan\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T10:59:32.551Z"
+    },
+    {
+      "id": "bug-235",
+      "timestamp": "2026-07-06T11:05:22.901Z",
+      "error_message": "Wrong reference: ATTENDANCE_PREFILL_TRACK_KEY should be ATTENDANCE_PREFILL_CONTEXT_KEY",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "Used \"ATTENDANCE_PREFILL_TRACK_KEY\" instead of \"ATTENDANCE_PREFILL_CONTEXT_KEY\"",
+      "fix": "Changed ATTENDANCE_PREFILL_TRACK_KEY → ATTENDANCE_PREFILL_CONTEXT_KEY",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T11:05:22.901Z"
+    },
+    {
+      "id": "bug-236",
+      "timestamp": "2026-07-06T11:05:34.161Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/components/common/ContextPicker.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T11:05:34.161Z"
+    },
+    {
+      "id": "bug-237",
+      "timestamp": "2026-07-06T11:06:26.505Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "No early return/throw for edge case: !v",
+      "fix": "Added guard clause: if (!v)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-06T11:07:03.238Z"
+    },
+    {
+      "id": "bug-238",
+      "timestamp": "2026-07-06T11:06:42.676Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T11:06:42.676Z"
+    },
+    {
+      "id": "bug-239",
+      "timestamp": "2026-07-06T11:07:49.006Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "Had \"المسار\"",
+      "fix": "Changed to \"specialTrack\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-06T11:07:59.240Z"
+    },
+    {
+      "id": "bug-240",
+      "timestamp": "2026-07-06T11:10:55.853Z",
+      "error_message": "CSS fix: border, boxShadow",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "border: \"1px solid var(--border)\", overflow: \"hidden\", → \"2px solid transparent\", overflow: \"hidden\", cursor: \"pointer\",; boxShadow: \"0 1px 3px rgba(0,0,0,0.04)\", → \"0 1px 3px rgba(0,0,0,0.04)\", transition: \"border-color .15s\",",
+      "fix": "Changed border: \"1px solid var(--border)\", overflow: \"hidden\", → \"2px solid transparent\", overflow: \"hidden\", cursor: \"pointer\",; boxShadow: \"0 1px 3px rgba(0,0,0,0.04)\", → \"0 1px 3px rgba(0,0,0,0.04)\", transition: \"border-color .15s\",",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T11:10:55.853Z"
+    },
+    {
+      "id": "bug-241",
+      "timestamp": "2026-07-06T11:18:07.123Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "No early return/throw for edge case: e.attendanceStatus === \"غائب\"",
+      "fix": "Added guard clause: if (e.attendanceStatus === \"غائب\")",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T11:18:07.123Z"
+    },
+    {
+      "id": "bug-242",
+      "timestamp": "2026-07-06T11:18:23.701Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: <div className=\"att-list\" style={{ padding: 8 }}>; {track.enrolledStudents.map((s) => {",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-06T11:18:49.421Z"
+    },
+    {
+      "id": "bug-243",
+      "timestamp": "2026-07-06T11:21:39.947Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/api/special-tracks.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T11:21:39.947Z"
+    },
+    {
+      "id": "bug-244",
+      "timestamp": "2026-07-06T11:41:21.532Z",
+      "error_message": "CSS fix: onSuccess",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "onSuccess: onClose → onLinked",
+      "fix": "Changed onSuccess: onClose → onLinked",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T11:41:21.532Z"
+    },
+    {
+      "id": "bug-245",
+      "timestamp": "2026-07-06T11:53:24.345Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz/src/quran/lib/quranRange.ts",
+      "root_cause": "No early return/throw for edge case: isCleanBoundary",
+      "fix": "Added guard clause: if (isCleanBoundary)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T11:53:24.345Z"
+    },
+    {
+      "id": "bug-246",
+      "timestamp": "2026-07-06T11:53:53.478Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T11:53:53.478Z"
+    },
+    {
+      "id": "bug-247",
+      "timestamp": "2026-07-06T11:59:17.983Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "No early return/throw for edge case: id",
+      "fix": "Added guard clause: if (id)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T11:59:17.983Z"
+    },
+    {
+      "id": "bug-248",
+      "timestamp": "2026-07-06T12:03:43.845Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "Had \"hidden\"",
+      "fix": "Changed to \"normal\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:03:43.846Z"
+    },
+    {
+      "id": "bug-249",
+      "timestamp": "2026-07-06T12:04:48.055Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:04:48.055Z"
+    },
+    {
+      "id": "bug-250",
+      "timestamp": "2026-07-06T12:11:43.239Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "15 lines replaced/restructured",
+      "fix": "Rewrote 20→3 lines (15 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:11:43.239Z"
+    },
+    {
+      "id": "bug-251",
+      "timestamp": "2026-07-06T12:12:55.287Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:12:55.287Z"
+    },
+    {
+      "id": "bug-252",
+      "timestamp": "2026-07-06T12:13:43.906Z",
+      "error_message": "Missing error handling in EditPlanPanel",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:13:43.906Z"
+    },
+    {
+      "id": "bug-253",
+      "timestamp": "2026-07-06T12:20:14.373Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:20:14.374Z"
+    },
+    {
+      "id": "bug-254",
+      "timestamp": "2026-07-06T12:20:37.779Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 21→30 lines (9 removed) | Also: {openPlanSection === \"link\" && (; <LinkPlanPanel",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-06T12:21:10.643Z"
+    },
+    {
+      "id": "bug-255",
+      "timestamp": "2026-07-06T12:30:59.422Z",
+      "error_message": "Type error",
+      "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:30:59.422Z"
+    },
+    {
+      "id": "bug-256",
+      "timestamp": "2026-07-06T12:31:17.834Z",
+      "error_message": "Missing error handling in function",
+      "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:31:17.834Z"
+    },
+    {
+      "id": "bug-257",
+      "timestamp": "2026-07-06T12:32:37.371Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/api/quran-plans.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:32:37.371Z"
+    },
+    {
+      "id": "bug-258",
+      "timestamp": "2026-07-06T12:33:36.681Z",
+      "error_message": "CSS fix: marginTop",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "marginTop: 14, maxHeight: \"50vh\" → 14",
+      "fix": "Changed marginTop: 14, maxHeight: \"50vh\" → 14",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:33:36.681Z"
+    },
+    {
+      "id": "bug-259",
+      "timestamp": "2026-07-06T13:44:09.111Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "10 lines replaced/restructured",
+      "fix": "Rewrote 19→12 lines (10 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T13:44:09.111Z"
+    },
+    {
+      "id": "bug-260",
+      "timestamp": "2026-07-06T13:45:48.059Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "root_cause": "Had '../models/User.model'",
+      "fix": "Changed to '../middleware/error'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T13:45:48.059Z"
+    },
+    {
+      "id": "bug-261",
+      "timestamp": "2026-07-06T13:50:08.570Z",
+      "error_message": "Missing error handling in function",
+      "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T13:50:08.570Z"
+    },
+    {
+      "id": "bug-262",
+      "timestamp": "2026-07-06T13:51:25.390Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/api/quran-plans.ts",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 10→24 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T13:51:25.390Z"
+    },
+    {
+      "id": "bug-263",
+      "timestamp": "2026-07-06T13:52:54.913Z",
+      "error_message": "Missing error handling in handleScheduleToggle",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T13:52:54.913Z"
+    },
+    {
+      "id": "bug-264",
+      "timestamp": "2026-07-06T14:07:07.303Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T14:07:07.303Z"
+    },
+    {
+      "id": "bug-265",
+      "timestamp": "2026-07-06T14:09:08.084Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T14:09:08.084Z"
+    },
+    {
+      "id": "bug-266",
+      "timestamp": "2026-07-06T14:16:44.835Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T14:16:44.835Z"
+    },
+    {
+      "id": "bug-267",
+      "timestamp": "2026-07-06T14:37:44.441Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T14:37:44.441Z"
+    },
+    {
+      "id": "bug-268",
+      "timestamp": "2026-07-06T14:40:01.257Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T14:40:01.257Z"
+    },
+    {
+      "id": "bug-269",
+      "timestamp": "2026-07-06T14:40:26.674Z",
+      "error_message": "CSS fix: minWidth, padding",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "minWidth: 220 → 170; padding: \"4px 9px\", fontSize: 11 → \"6px 10px\", fontSize: 11",
+      "fix": "Changed minWidth: 220 → 170; padding: \"4px 9px\", fontSize: 11 → \"6px 10px\", fontSize: 11",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T14:40:26.674Z"
+    },
+    {
+      "id": "bug-270",
+      "timestamp": "2026-07-06T14:58:54.390Z",
+      "error_message": "CSS fix: position",
+      "file": "quran-hifz/src/quran/components/common/Donut.tsx",
+      "root_cause": "position: \"relative\", height: size, flexShrink: 0 → \"relative\", height: size, width: size, flexShrink: 0",
+      "fix": "Changed position: \"relative\", height: size, flexShrink: 0 → \"relative\", height: size, width: size, flexShrink: 0",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T14:58:54.390Z"
+    },
+    {
+      "id": "bug-271",
+      "timestamp": "2026-07-06T15:07:24.295Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/inspect2.mjs",
+      "root_cause": "Had \")].find(e => e.textContent === \"",
+      "fix": "Changed to \")].find(e => e.textContent.trim() === \"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-06T15:08:04.986Z"
+    },
+    {
+      "id": "bug-272",
+      "timestamp": "2026-07-10T12:45:51.075Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 43→65 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-10T12:45:51.075Z"
+    },
+    {
+      "id": "bug-273",
+      "timestamp": "2026-07-10T12:53:34.273Z",
+      "error_message": "Wrong return value",
+      "file": "quran-hifz-server/src/lib/planStudents.ts",
+      "root_cause": "Was returning: (track?.enrolledStudents ?? []) as Types.ObjectId[",
+      "fix": "Now returns: (track?.enrolledStudents ?? []) as unknown as Type",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-10T12:53:34.273Z"
+    },
+    {
+      "id": "bug-274",
+      "timestamp": "2026-07-10T12:54:57.376Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/api/student-plan-progress.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-10T12:54:57.376Z"
+    },
+    {
+      "id": "bug-275",
+      "timestamp": "2026-07-10T12:57:23.078Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-10T12:57:23.078Z"
+    },
+    {
+      "id": "bug-276",
+      "timestamp": "2026-07-10T13:06:17.500Z",
+      "error_message": "Type error",
+      "file": "quran-hifz-server/src/lib/studentPlanReflow.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-10T13:06:17.500Z"
+    },
+    {
+      "id": "bug-277",
+      "timestamp": "2026-07-10T13:10:59.552Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz-server/src/lib/studentPlanReflow.ts",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 23→30 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-10T13:10:59.552Z"
+    },
+    {
+      "id": "bug-278",
+      "timestamp": "2026-07-10T13:18:56.128Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/bc229491-e802-4bae-be3d-623c1ea2d188/scratchpad/verify.mjs",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 11→22 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-10T13:18:56.128Z"
+    },
+    {
+      "id": "bug-279",
+      "timestamp": "2026-07-10T13:00:00.000Z",
+      "error_message": "POST /quran-plans/:id/students/:studentId/progress/record returned 500: StudentPlanProgress validation failed — occurrences.N.surahEnd/ayahEnd/pageStart/pageEnd/juz required (value: undefined)",
+      "file": "quran-hifz-server/src/lib/studentPlanReflow.ts",
+      "root_cause": "initStudentOccurrences() cloned plan.schedule by spreading raw Mongoose subdocuments ({...s} on entries from a live QuranPlan document's [scheduleEntrySchema] array) instead of plain objects — spreading a Mongoose subdocument copies internal instance properties (__parentArray, , _doc) rather than the schema fields, so every field except whatever accidentally shared a name came through as undefined. The same bug independently existed in student-plan-progress.controller.ts's getStudentProgress (silent — leaked Mongoose internals into the JSON API response instead of crashing, since that path has no required-field validation on save).",
+      "fix": "Call plan.toObject() first, then map over the plain .schedule array — plan.toObject().schedule.map(s => ({...s, date: new Date(s.date)})) — matching the existing convention already used in quran-plan.controller.ts's withTodayAssignment. Fixed in both initStudentOccurrences (studentPlanReflow.ts) and getStudentProgress (student-plan-progress.controller.ts).",
+      "tags": [
+        "mongoose",
+        "subdocument-spread",
+        "validation-error",
+        "quran-plan",
+        "student-plan-progress"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-10T13:00:00.000Z"
+    },
+    {
+      "id": "bug-280",
+      "timestamp": "2026-07-10T13:30:17.974Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-10T13:30:17.974Z"
+    },
+    {
+      "id": "bug-281",
+      "timestamp": "2026-07-10T13:31:15.881Z",
+      "error_message": "Wrong reference: return should be planCoversStudent",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Used \"return\" instead of \"planCoversStudent\"",
+      "fix": "Changed return → planCoversStudent",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-10T13:31:15.881Z"
+    },
+    {
+      "id": "bug-282",
+      "timestamp": "2026-07-10T13:30:00.000Z",
+      "error_message": "User-reported: clicking \"عرض الخطة الفردية\" for a student in TeacherTrackDetail hit GET /quran-plans/:id/students/:studentId/progress 404 (\"هذا الطالب غير مشمول بهذه الخطة\")",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "TeacherTrackDetail resolves a track's \"linked plan\" via useQuranPlans({specialTrack: track._id}), which server-side just filters on QuranPlan.specialTrack being set (quran-plan.controller.ts getPlans) regardless of targetType. A plan can carry a stale specialTrack field (left over from before its targetType was switched to \"students\") while its actual students[] list only covers one specific student, not the whole track roster. The new per-student progress button/logic was shown unconditionally whenever any linkedPlan existed, without checking whether the specific student was actually in plan.students for a targetType:\"students\" plan — so the correct 404 (the student genuinely isn't covered) surfaced as a dead-end/confusing UI error for other track students.",
+      "fix": "Added planCoversStudent(plan, studentId) helper in TeacherTrackDetail.tsx (true for halqa/specialTrack-targeted plans; for targetType==='students' plans, only true if studentId is in plan.students) and gated the completion-page input, the 'عرض الخطة الفردية' button, and the recordOccurrence call in saveStudent() on it.",
+      "tags": [
+        "quran-plan",
+        "student-plan-progress",
+        "targetType",
+        "ui-guard",
+        "data-mismatch"
+      ],
+      "related_bugs": [
+        "bug-279"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-10T13:30:00.000Z"
+    },
+    {
+      "id": "bug-283",
+      "timestamp": "2026-07-11T08:18:33.690Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/api/student-plan-progress.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T08:18:33.690Z"
+    },
+    {
+      "id": "bug-284",
+      "timestamp": "2026-07-11T08:19:07.376Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: // Each student's own assigned portion for the selected day ; // the shared plan schedule (assignmentByDate) for anyone wi",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-11T08:19:49.748Z"
+    },
+    {
+      "id": "bug-285",
+      "timestamp": "2026-07-11T08:20:21.255Z",
+      "error_message": "Type error",
+      "file": "quran-hifz-server/src/controllers/student-plan-progress.controller.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T08:20:21.255Z"
+    },
+    {
+      "id": "bug-286",
+      "timestamp": "2026-07-11T08:21:26.596Z",
+      "error_message": "Missing guard clause",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "No early return/throw for edge case: !linkedPlan || !planCoversStudent(linkedPlan, studentId",
+      "fix": "Added guard clause: if (!linkedPlan || !planCoversStudent(linked)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T08:21:26.596Z"
+    },
+    {
+      "id": "bug-287",
+      "timestamp": "2026-07-11T08:21:39.549Z",
+      "error_message": "Wrong reference: return should be const",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Used \"return\" instead of \"const\"",
+      "fix": "Changed return → const",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-11T08:22:41.451Z"
+    },
+    {
+      "id": "bug-288",
+      "timestamp": "2026-07-11T08:21:51.227Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 10→31 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T08:21:51.227Z"
+    },
+    {
+      "id": "bug-289",
+      "timestamp": "2026-07-11T00:00:00.000Z",
+      "error_message": "User feedback: the shared \"الورد المقرر\" banner was still shown once above all students in TeacherTrackDetail, even though each student can now have a different individual assigned portion after the reflow feature",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "The students-tab UI still relied on a single shared assignmentByDate.get(effectiveDate) value (derived from the base plan's schedule) for the whole track, predating the per-student overlay feature — never updated to reflect that each covered student can now have their own diverging effectiveSchedule.",
+      "fix": "Removed the shared top-level .assignment-banner block entirely. Added useStudentPlanProgressList (new batched hook using @tanstack/react-query's useQueries, since calling useStudentPlanProgress in a .map() loop would violate rules of hooks for a dynamic-length list) to fetch every covered student's own effectiveSchedule in one hook call. Added assignmentForStudent(studentId) resolving each student's occurrence for the selected day (falling back to the shared plan schedule only for students with no individual overlay yet). Moved the richer .assignment-banner markup into each student's expanded row, and rewired completedPageFor/saveStudent/the completion-page input to use the per-student assignment instead of the old shared  variable. Also fixed a related gap while wiring this up: the backend's un-persisted branch of getStudentProgress returned bare ScheduleEntry objects (missing status/manualOverride/base* fields the frontend type always assumes), which would have crashed TeacherStudentPlanDetail for any student with no overlay yet (the common/default case) - normalized via initStudentOccurrences() so both branches return the same shape.",
+      "tags": [
+        "quran-plan",
+        "student-plan-progress",
+        "ui",
+        "per-student",
+        "useQueries"
+      ],
+      "related_bugs": [
+        "bug-279",
+        "bug-282"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T00:00:00.000Z"
+    },
+    {
+      "id": "bug-290",
+      "timestamp": "2026-07-11T08:42:03.659Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T08:42:03.659Z"
+    },
+    {
+      "id": "bug-291",
+      "timestamp": "2026-07-11T08:42:22.270Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T08:42:22.270Z"
+    },
+    {
+      "id": "bug-292",
+      "timestamp": "2026-07-11T08:49:58.276Z",
+      "error_message": "Missing error handling in function",
+      "file": "quran-hifz-server/src/controllers/student-plan-progress.controller.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T08:49:58.276Z"
+    },
+    {
+      "id": "bug-293",
+      "timestamp": "2026-07-11T08:50:49.772Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/api/student-plan-progress.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T08:50:49.772Z"
+    },
+    {
+      "id": "bug-294",
+      "timestamp": "2026-07-11T08:51:38.070Z",
+      "error_message": "CSS fix: margin",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherStudentPlanDetail.tsx",
+      "root_cause": "margin: \"12px 0 0\", fontSize: 11, color: \"var(--text3)\" → \"0 0 12px\", fontSize: 12, color: \"var(--text3)\"",
+      "fix": "Changed margin: \"12px 0 0\", fontSize: 11, color: \"var(--text3)\" → \"0 0 12px\", fontSize: 12, color: \"var(--text3)\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T08:51:38.070Z"
+    },
+    {
+      "id": "bug-295",
+      "timestamp": "2026-07-11T08:52:08.538Z",
+      "error_message": "Null/undefined access in ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T08:52:08.538Z"
+    },
+    {
+      "id": "bug-296",
+      "timestamp": "2026-07-11T08:52:33.488Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/api/quran-plans.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T08:52:33.488Z"
+    },
+    {
+      "id": "bug-297",
+      "timestamp": "2026-07-11T08:53:42.592Z",
+      "error_message": "CSS fix: plan",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx",
+      "root_cause": "plan: PlanFormHandoff extends { plan: infer P → QuranPlan, namePrefix = \"\"): FormFields {",
+      "fix": "Changed plan: PlanFormHandoff extends { plan: infer P → QuranPlan, namePrefix = \"\"): FormFields {",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-11T08:53:57.634Z"
+    },
+    {
+      "id": "bug-298",
+      "timestamp": "2026-07-11T08:54:06.407Z",
+      "error_message": "Wrong return value",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx",
+      "root_cause": "Was returning: fieldsFromPlan(handoff.plan, \"\");",
+      "fix": "Now returns: fieldsFromPlan(handoff.plan, \" (نسخة)\");",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T08:54:06.407Z"
+    },
+    {
+      "id": "bug-299",
+      "timestamp": "2026-07-11T08:55:24.853Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+      "root_cause": "11 lines replaced/restructured",
+      "fix": "Rewrote 19→12 lines (11 removed) | Also: {/* ════════ SCHEDULE BREAKDOWN ════════ */}; {modal?.mode === \"schedule\" && (",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-11T08:59:33.486Z"
+    },
+    {
+      "id": "bug-300",
+      "timestamp": "2026-07-11T08:57:45.809Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/api/quran-plans.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation | Also: /** sessionStorage key carrying the plan id from TeacherPlan; * click) to the dedicated TeacherPlanDetail page — same no-r",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-11T08:58:35.245Z"
+    },
+    {
+      "id": "bug-301",
+      "timestamp": "2026-07-11T08:58:10.244Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/api/quran-plans.ts",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 13→7 lines (5 removed) | Also: /** sessionStorage key carrying the plan id from T; * click) to the dedicated TeacherPlanDetail page —",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-11T09:02:51.089Z"
+    },
+    {
+      "id": "bug-302",
+      "timestamp": "2026-07-11T09:00:33.560Z",
+      "error_message": "Wrong reference: getName should be typeof",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
+      "root_cause": "Used \"getName\" instead of \"typeof\"",
+      "fix": "Changed getName → typeof",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T09:00:33.560Z"
+    },
+    {
+      "id": "bug-303",
+      "timestamp": "2026-07-11T09:03:23.232Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 5→10 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T09:03:23.232Z"
+    },
+    {
+      "id": "bug-304",
+      "timestamp": "2026-07-11T09:03:31.439Z",
+      "error_message": "Wrong reference: PLAN_PREFILL_TRACK_KEY should be PLAN_FORM_HANDOFF_KEY",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Used \"PLAN_PREFILL_TRACK_KEY\" instead of \"PLAN_FORM_HANDOFF_KEY\"",
+      "fix": "Changed PLAN_PREFILL_TRACK_KEY → PLAN_FORM_HANDOFF_KEY",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T09:03:31.439Z"
+    },
+    {
+      "id": "bug-305",
+      "timestamp": "2026-07-11T09:04:13.480Z",
+      "error_message": "CSS fix: section",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "section: \"edit\" | \"link\" | \"schedule\") { → \"link\" | \"schedule\") {",
+      "fix": "Changed section: \"edit\" | \"link\" | \"schedule\") { → \"link\" | \"schedule\") {",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T09:04:13.480Z"
+    },
+    {
+      "id": "bug-306",
+      "timestamp": "2026-07-11T09:08:07.468Z",
+      "error_message": "Type error",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T09:08:07.468Z"
+    },
+    {
+      "id": "bug-307",
+      "timestamp": "2026-07-11T09:08:26.600Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Had \"../../context/useTopbar\"",
+      "fix": "Changed to \"sonner\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T09:08:26.600Z"
+    },
+    {
+      "id": "bug-308",
+      "timestamp": "2026-07-11T09:08:50.180Z",
+      "error_message": "Significant refactor of ",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 17→11 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T09:08:50.180Z"
+    },
+    {
+      "id": "bug-309",
+      "timestamp": "2026-07-11T09:09:20.062Z",
+      "error_message": "CSS fix: fontSize, marginLeft",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "fontSize: 11, color: \"var(--text3)\", display: \"block\", marginBottom: 4 → 11, marginTop: 6, color: isFull ? \"var(--green)\" : \"#b45309\"; marginLeft: 4 → 3",
+      "fix": "Changed fontSize: 11, color: \"var(--text3)\", display: \"block\", marginBottom: 4 → 11, marginTop: 6, color: isFull ? \"var(--green)\" : \"#b45309\"; marginLeft: 4 → 3",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T09:09:20.062Z"
+    },
+    {
+      "id": "bug-310",
+      "timestamp": "2026-07-11T09:11:17.497Z",
+      "error_message": "Incorrect value in code",
+      "file": "quran-hifz/src/quran/api/quran-plans.ts",
+      "root_cause": "Had \"qh_plan_form_handoff\"",
+      "fix": "Changed to \"qh_plan_detail_id\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T09:11:17.497Z"
+    },
+    {
+      "id": "bug-311",
+      "timestamp": "2026-07-11T12:20:00.000Z",
+      "error_message": "While implementing the plan-form page-ify + per-student \"create individual plan\" feature, discovered the user was concurrently hand-editing TeacherPlans.tsx, pageRegistry.ts, quran-plans.ts, and TeacherStudents.tsx in their own editor to build a separate \"click a plan card to open TeacherPlanDetail\" feature (PLAN_DETAIL_ID_KEY, onOpen).",
+      "root_cause": "Repeated 'file modified since last read' system notes were treated as background-hook noise (based on earlier legitimate auto-bugscanner false positives this same session) instead of investigating that a live human was editing the same files concurrently. Overwrote TeacherPlans.tsx with a full-file rewrite twice without checking for concurrent edits first, which deleted the user's new TeacherPlanDetail.tsx file once via rm.",
+      "fix": "Stopped blind full-file rewrites of shared files; re-read current state before any further edit. Confirmed the user's onOpen/TeacherPlanDetail feature already coexists correctly with the planform/PLAN_FORM_HANDOFF_KEY additions with no further changes needed, verified clean with tsc --noEmit.",
+      "tags": [
+        "concurrent-edit",
+        "destructive-action",
+        "quran-plan"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T12:20:00.000Z"
+    },
+    {
+      "id": "bug-312",
+      "timestamp": "2026-07-11T13:00:00.000Z",
+      "error_message": "reflowAll's fallback default for a 'partial' occurrence missing completedThroughPage (o.basePageStart - 1) only made sense for forward-direction plans; for a reverse-direction plan it produced a negative shortfall instead of 'nothing done'.",
+      "root_cause": "Found while generalizing studentPlanReflow.ts for reverse-direction ranges (rangeStart allowed after rangeEnd in mushaf order). The fallback default wasn't updated when direction-awareness was added to reflowStudentPlan's shortfall formula (forward: pageEnd - completedThroughPage; backward: completedThroughPage - pageStart).",
+      "fix": "Made the fallback direction-aware in reflowAll: forward ? basePageStart - 1 : basePageEnd + 1, both representing 'the page just outside the occurrence's range on the rangeStart-facing side' regardless of direction.",
+      "tags": [
+        "quran-plan",
+        "reverse-direction",
+        "reflow",
+        "edge-case"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T13:00:00.000Z"
     }
   ]
 }

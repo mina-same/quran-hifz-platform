@@ -1,72 +1,20 @@
-import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
-import { Badge } from "../../components/common/Badge";
-import { ProgressBar } from "../../components/common/ProgressBar";
-import { HalqaRow } from "../../components/common/HalqaRow";
-import { useHalqat } from "../../api/halqat";
-import { toAr } from "../../../lib/format";
-
-function getName(v: unknown): string {
-  if (v && typeof v === "object" && "name" in v) return (v as { name: string }).name;
-  return "";
-}
 
 export function TeacherHalqa() {
-  const { showPage, user } = usePortal();
-  const { data: halqat = [], isLoading } = useHalqat({ teacher: user?.profileId });
-
   useTopbar("ti-school", "حلقاتي");
 
-  if (isLoading) {
-    return (
-      <div className="page-loading">
-        <i className="ti ti-loader-2" /> جارٍ التحميل...
-      </div>
-    );
-  }
-
-  const occupancyPct = (studentCount: number, capacity: number) =>
-    capacity > 0 ? Math.round((studentCount / capacity) * 100) : 0;
-
   return (
-    <div className="halqa-grid">
-      {halqat.map((h) => {
-        const occ = occupancyPct(h.studentCount ?? 0, h.capacity);
-        return (
-          <div key={h._id} className="halqa-card">
-            <div className="halqa-card-head">
-              <span className="halqa-card-name">{h.name}</span>
-              <Badge tone="gold">{getName(h.masjid) || "—"}</Badge>
-            </div>
-            <div className="halqa-card-body">
-              <HalqaRow label="المسجد" value={getName(h.masjid)} />
-              <HalqaRow label="المواعيد" value={h.days} valueStyle={{ fontSize: 11 }} />
-              <HalqaRow label="الطلاب" value={`${toAr(h.studentCount ?? 0)} / ${toAr(h.capacity)}`} />
-              <ProgressBar pct={occ} />
-              <div style={{ fontSize: 10, color: "var(--text2)", marginTop: 2 }}>{toAr(occ)}٪ إشغال</div>
-              <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-                <button
-                  className="topbar-btn btn-ghost"
-                  style={{ flex: 1, justifyContent: "center", fontSize: 11 }}
-                  onClick={() => showPage("students")}
-                >
-                  <i className="ti ti-users" /> الطلاب
-                </button>
-                <button
-                  className="topbar-btn btn-primary"
-                  style={{ flex: 1, justifyContent: "center", fontSize: 11 }}
-                  onClick={() => showPage("attendance")}
-                >
-                  <i className="ti ti-calendar-check" /> الحضور
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })}
-      {halqat.length === 0 && (
-        <div className="page-loading">لا توجد حلقات مسجلة لهذا المعلم</div>
-      )}
+    <div style={{ textAlign: "center", padding: "56px 0" }}>
+      <div style={{
+        width: 72, height: 72, borderRadius: 18,
+        background: "var(--green-pale)", color: "var(--green)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 32, margin: "0 auto 16px",
+      }}>
+        <i className="ti ti-school" />
+      </div>
+      <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--text)" }}>قريباً</p>
+      <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--text3)" }}>هذه الصفحة قيد التطوير حالياً</p>
     </div>
   );
 }

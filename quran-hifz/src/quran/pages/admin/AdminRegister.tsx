@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,9 +21,24 @@ const schema = z.object({
   level: z.string().min(1, "يرجى اختيار مستوى القراءة"),
   masjid: z.string().min(1, "يرجى اختيار المسجد"),
   halqa: z.string().min(1, "يرجى اختيار الحلقة"),
+  email: z.string().email("البريد الإلكتروني غير صحيح").optional().or(z.literal("")),
+  password: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
+
+type Credentials = { email: string; password: string };
+
+const OVERLAY: React.CSSProperties = {
+  position: "fixed", inset: 0, zIndex: 1000,
+  background: "rgba(0,0,0,0.45)",
+  display: "flex", alignItems: "center", justifyContent: "center",
+  padding: 16,
+};
+const DIALOG: React.CSSProperties = {
+  background: "white", borderRadius: 12, padding: 24, width: "100%", maxWidth: 400,
+  boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+};
 
 function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null;
@@ -36,6 +51,8 @@ export function AdminRegister() {
   const { data: masajid = [] } = useMasajid();
   const { data: halqat = [] } = useHalqat();
   const createStudent = useCreateStudent();
+
+  const [credentials, setCredentials] = useState<Credentials | null>(null);
 
   const {
     register,
@@ -53,16 +70,21 @@ export function AdminRegister() {
   );
 
   async function onSubmit(data: FormData) {
-    await createStudent.mutateAsync({
-      name: data.name,
-      guardian: "",
+    const body: Record<string, unknown> = {
+      name:          data.name,
+      guardian:      "",
       guardianPhone: data.guardianPhone,
-      halqa: data.halqa,
-      masjid: data.masjid,
-      path: masar?.name ?? "حفظ كامل",
-      status: "new",
-    });
+      halqa:         data.halqa,
+      masjid:        data.masjid,
+      path:          masar?.path ?? "حفظ كامل",
+      status:        "new",
+    };
+    if (data.email?.trim()) body.email    = data.email.trim();
+    if (data.password)      body.password = data.password;
+
+    const res = await createStudent.mutateAsync(body);
     reset();
+    if (res.credentials) setCredentials(res.credentials);
   }
 
   return (
@@ -148,7 +170,28 @@ export function AdminRegister() {
             </div>
           </div>
 
-          <div style={{ marginTop: 14, display: "flex", gap: 10 }}>
+          <hr className="divider" />
+
+          <div style={{ marginBottom: 14 }}>
+            <p style={{ margin: "0 0 12px", fontSize: 12, color: "var(--text2)", fontWeight: 600 }}>
+              <i className="ti ti-lock" style={{ marginLeft: 4 }} />
+              بيانات الدخول (اختياري — لمنح الطالب حساباً في النظام)
+            </p>
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label className="form-label">البريد الإلكتروني</label>
+                <input className="form-input" type="email" placeholder="student@example.com" dir="ltr" {...register("email")} />
+                <FieldError msg={errors.email?.message} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">كلمة المرور</label>
+                <input className="form-input" type="password" placeholder="6 أحرف على الأقل" dir="ltr" {...register("password")} />
+                <FieldError msg={errors.password?.message} />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 10 }}>
             <button
               type="submit"
               className="topbar-btn btn-primary"
@@ -165,14 +208,41 @@ export function AdminRegister() {
         </Card>
       </form>
 
-      {createStudent.isSuccess && (
-        <div style={{ marginTop: 12 }}>
-          <Alert tone="success">تم تسجيل الطالب بنجاح.</Alert>
-        </div>
-      )}
       {createStudent.isError && (
         <div style={{ marginTop: 12 }}>
           <Alert tone="warning">{(createStudent.error as Error).message}</Alert>
+        </div>
+      )}
+
+      {/* Credentials Success Modal */}
+      {credentials && (
+        <div style={OVERLAY} onClick={() => setCredentials(null)}>
+          <div style={DIALOG} onClick={(e) => e.stopPropagation()}>
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <i className="ti ti-circle-check" style={{ fontSize: 44, color: "#22c55e", display: "block" }} />
+              <h3 style={{ margin: "12px 0 4px", fontSize: 16 }}>تم تسجيل الطالب وإنشاء حسابه</h3>
+              <p style={{ margin: 0, fontSize: 13, color: "var(--text2)" }}>
+                احتفظ ببيانات الدخول وأرسلها للطالب
+              </p>
+            </div>
+            <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 10, padding: 16, marginBottom: 20 }}>
+              <div style={{ marginBottom: 10 }}>
+                <p style={{ margin: "0 0 4px", fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>البريد الإلكتروني</p>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, direction: "ltr", textAlign: "left" }}>{credentials.email}</p>
+              </div>
+              <div>
+                <p style={{ margin: "0 0 4px", fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>كلمة المرور</p>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, direction: "ltr", textAlign: "left" }}>{credentials.password}</p>
+              </div>
+            </div>
+            <button
+              className="topbar-btn btn-primary"
+              style={{ width: "100%", justifyContent: "center", padding: 10 }}
+              onClick={() => setCredentials(null)}
+            >
+              <i className="ti ti-check" /> حسناً
+            </button>
+          </div>
         </div>
       )}
     </>

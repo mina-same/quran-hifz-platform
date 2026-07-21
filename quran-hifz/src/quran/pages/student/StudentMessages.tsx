@@ -1,5 +1,6 @@
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
+import { SkeletonList } from "../../components/common/Skeleton";
 import { useMessages, useMarkRead } from "../../api/messages";
 
 export function StudentMessages() {
@@ -10,9 +11,9 @@ export function StudentMessages() {
 
   if (isLoading) {
     return (
-      <div className="page-loading">
-        <i className="ti ti-loader-2" /> جارٍ التحميل...
-      </div>
+      <Card>
+        <SkeletonList rows={5} avatar={true} />
+      </Card>
     );
   }
 

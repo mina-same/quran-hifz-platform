@@ -10,9 +10,10 @@ export const PORTALS: Record<string, PortalConfig> = {
         { id: 'myhifz',   icon: 'book',            label: 'خطة حفظي' },
       ]},
       { group: 'الأنشطة', items: [
-        { id: 'homework',   icon: 'microphone',     label: 'تسجيل الواجب', dot: true },
-        { id: 'attendance', icon: 'calendar-check', label: 'الحضور والغياب' },
-        { id: 'schedule',   icon: 'clock',          label: 'مواعيد حلقتي' },
+        { id: 'homework',       icon: 'microphone',     label: 'تسجيل الواجب', dot: true },
+        { id: 'attendance',     icon: 'calendar-check', label: 'الحضور والغياب' },
+        { id: 'schedule',       icon: 'clock',          label: 'مواعيد حلقتي' },
+        { id: 'special_tracks', icon: 'calendar-event', label: 'مساراتي الاستثنائية' },
       ]},
       { group: 'التواصل والتحفيز', items: [
         { id: 'messages', icon: 'message',  label: 'الرسائل' },
@@ -40,6 +41,9 @@ export const PORTALS: Record<string, PortalConfig> = {
         { id: 'grouphomework', icon: 'list-check',  label: 'واجب جماعي' },
         { id: 'plans',         icon: 'target',      label: 'الخطط الفردية' },
         { id: 'reports',       icon: 'chart-bar',   label: 'تقارير الطلاب' },
+      ]},
+      { group: 'المسارات الاستثنائية', items: [
+        { id: 'special_tracks', icon: 'calendar-event', label: 'مساراتي الاستثنائية' },
       ]},
     ],
   },

@@ -12,7 +12,12 @@ import { Student } from '../models/Student.model';
 import { HifzEntry } from '../models/HifzEntry.model';
 import { Attendance } from '../models/Attendance.model';
 import { Homework } from '../models/Homework.model';
+import { GroupHomework } from '../models/GroupHomework.model';
+import { LessonRecording } from '../models/LessonRecording.model';
+import { SpecialTrack } from '../models/SpecialTrack.model';
 import { KPI } from '../models/KPI.model';
+import { ParentStudent } from '../models/ParentStudent.model';
+import { QuranPlan } from '../models/QuranPlan.model';
 
 async function seed(): Promise<void> {
   await mongoose.connect(ENV.MONGO_URI);
@@ -28,7 +33,12 @@ async function seed(): Promise<void> {
     HifzEntry.deleteMany({}),
     Attendance.deleteMany({}),
     Homework.deleteMany({}),
+    GroupHomework.deleteMany({}),
+    LessonRecording.deleteMany({}),
+    SpecialTrack.deleteMany({}),
     KPI.deleteMany({}),
+    ParentStudent.deleteMany({}),
+    QuranPlan.deleteMany({}),
   ]);
   console.log('🗑   Cleared existing collections');
 
@@ -121,6 +131,105 @@ async function seed(): Promise<void> {
   ]);
   console.log(`📝  Seeded homework records`);
 
+  // ── Special Tracks (multi-teacher, many-to-many enrollment) ───────────────
+  const specialTracks = await SpecialTrack.insertMany([
+    {
+      title: 'دورة رمضان المكثفة',
+      type: 'رمضاني',
+      status: 'active',
+      startDate: new Date('2024-10-01'),
+      endDate: new Date('2024-12-01'),
+      daysPerWeek: 'السبت، الأحد، الثلاثاء',
+      timeSlot: '٨:٠٠ م - ٩:٣٠ م',
+      location: mFaruq.name,
+      isOnline: false,
+      teachers: [tNasir._id, tSaad._id],
+      maxStudents: 20,
+      enrolledStudents: [students[0]._id, students[2]._id],
+      notes: 'مسار مكثف لختم جزء إضافي خلال الفترة',
+    },
+  ]);
+  console.log(`🌙  Seeded ${specialTracks.length} special tracks`);
+  const [trackRamadan] = specialTracks;
+
+  // ── Group homework (one halqa-linked, one specialTrack-linked) ────────────
+  await GroupHomework.insertMany([
+    { halqa: hOmar._id, teacher: tNasir._id, title: 'مراجعة جماعية', description: 'مراجعة سورة البقرة كاملة', dueDay: 'الخميس', dueDate: new Date('2024-10-24') },
+    { specialTrack: trackRamadan._id, teacher: tNasir._id, title: 'ورد رمضان', description: 'حفظ نصف جزء إضافي', dueDay: 'الثلاثاء', dueDate: new Date('2024-10-29') },
+  ]);
+  console.log(`📋  Seeded group homework records`);
+
+  // ── Lesson recordings (one halqa-linked, one specialTrack-linked) ─────────
+  await LessonRecording.insertMany([
+    { student: students[0]._id, teacher: tNasir._id, halqa: hOmar._id, type: 'تسميع', segment: 'البقرة ١-٢٠', points: 9, teacherNote: 'أداء ممتاز' },
+    { student: students[0]._id, teacher: tNasir._id, specialTrack: trackRamadan._id, type: 'تسميع', segment: 'جزء إضافي', points: 8, teacherNote: 'التزام جيد بورد المسار' },
+  ]);
+  console.log(`🎙️  Seeded lesson recordings`);
+
+  // ── Special-track attendance (cross-halqa roster) ──────────────────────────
+  await Attendance.insertMany([
+    { student: students[0]._id, specialTrack: trackRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'حاضر' },
+    { student: students[2]._id, specialTrack: trackRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'غائب' },
+  ]);
+  console.log(`✅  Seeded special-track attendance records`);
+
+  // ── Quran plans (halqa-, students-, and specialTrack-targeted) ────────────
+  const today = new Date();
+  const inAMonth = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const ALL_WEEK_DAYS = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
+
+  await QuranPlan.insertMany([
+    {
+      name: 'خطة حفظ سورة البقرة',
+      type: 'حفظ',
+      description: 'حفظ سورة البقرة كاملة على مدار الشهر',
+      teacher: tNasir._id,
+      targetType: 'halqa',
+      halqa: hOmar._id,
+      days: ALL_WEEK_DAYS,
+      rangeStart: { surahNumber: 1, ayah: 1 },
+      rangeEnd: { surahNumber: 2, ayah: 286 },
+      pointsEnabled: true,
+      pointRules: [
+        { label: 'خطأ في التجويد', amount: 2, kind: 'خصم' },
+        { label: 'تلاوة ممتازة', amount: 5, kind: 'زيادة' },
+      ],
+      endType: 'activeDays',
+      activeDaysCount: 30,
+    },
+    {
+      name: 'مراجعة جزء عمّ',
+      type: 'مراجعة',
+      description: 'مراجعة أسبوعية لجزء عمّ',
+      teacher: tNasir._id,
+      targetType: 'students',
+      students: [students[0]._id, students[1]._id],
+      days: ['السبت', 'الاثنين', 'الأربعاء'],
+      rangeStart: { surahNumber: 78, ayah: 1 },
+      rangeEnd: { surahNumber: 114, ayah: 6 },
+      pointsEnabled: false,
+      endType: 'date',
+      startDate: today,
+      endDate: inAMonth,
+    },
+    {
+      name: 'ورد تلاوة المسار الرمضاني',
+      type: 'تلاوة',
+      description: 'ورد تلاوة يومي لمتابعي مسار رمضان المكثف',
+      teacher: tNasir._id,
+      targetType: 'specialTrack',
+      specialTrack: trackRamadan._id,
+      days: ['السبت', 'الأحد', 'الثلاثاء'],
+      rangeStart: { surahNumber: 1, ayah: 1 },
+      rangeEnd: { surahNumber: 2, ayah: 50 },
+      pointsEnabled: true,
+      pointRules: [{ label: 'إتمام الورد', amount: 3, kind: 'زيادة' }],
+      endType: 'activeDays',
+      activeDaysCount: 15,
+    },
+  ]);
+  console.log(`🎯  Seeded 3 Quran plans`);
+
   // ── KPIs ───────────────────────────────────────────────────────────────────
   await KPI.insertMany([
     { indicator: 'نسبة الحضور الكلية',             target: '٩٠٪',      actual: '٩١٪',      rating: 'ممتاز' },
@@ -133,18 +242,28 @@ async function seed(): Promise<void> {
   ]);
   console.log(`📊  Seeded ${7} KPIs`);
 
-  // ── Users (admin + one teacher + one student account) ─────────────────────
-  await Promise.all([
+  // ── Users (admin + teacher + student + parent) ────────────────────────────
+  const [, , , parentUser] = await Promise.all([
     new User({ name: 'مدير النظام',       email: 'admin@quran-hifz.sa',    password: 'admin123',   role: 'admin',   isActive: true }).save(),
     new User({ name: 'ناصر الحميداني',   email: 'nasir@quran-hifz.sa',    password: 'teacher123', role: 'teacher', profileId: tNasir._id,    isActive: true }).save(),
     new User({ name: 'عبدالله الحميداني', email: 'abdullah@quran-hifz.sa', password: 'student123', role: 'student', profileId: students[0]._id, isActive: true }).save(),
+    new User({ name: 'محمد الحميداني',   email: 'parent@quran-hifz.sa',   password: 'parent123',  role: 'parent',  isActive: true }).save(),
   ]);
-  console.log(`👤  Seeded 3 user accounts`);
+  console.log(`👤  Seeded 4 user accounts`);
+
+  // ── Parent → Student links ─────────────────────────────────────────────────
+  await ParentStudent.create([
+    { parent: parentUser._id, student: students[0]._id },
+    { parent: parentUser._id, student: students[1]._id },
+  ]);
+  console.log(`🔗  Linked parent to ${students[0].name} and ${students[1].name}`);
+
   console.log('\n──────────────────────────────────────────');
   console.log('🔑  Login credentials:');
   console.log('   Admin:   admin@quran-hifz.sa   / admin123');
   console.log('   Teacher: nasir@quran-hifz.sa   / teacher123');
   console.log('   Student: abdullah@quran-hifz.sa / student123');
+  console.log('   Parent:  parent@quran-hifz.sa  / parent123');
   console.log('──────────────────────────────────────────\n');
 
   await mongoose.disconnect();

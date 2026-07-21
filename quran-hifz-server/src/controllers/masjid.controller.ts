@@ -60,3 +60,13 @@ export async function updateMasjid(req: Request, res: Response, next: NextFuncti
     next(err);
   }
 }
+
+export async function deleteMasjid(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const masjid = await Masjid.findByIdAndDelete(req.params.id);
+    if (!masjid) throw new AppError('المسجد غير موجود', 404);
+    res.json({ success: true, message: 'تم حذف المسجد بنجاح' });
+  } catch (err) {
+    next(err);
+  }
+}

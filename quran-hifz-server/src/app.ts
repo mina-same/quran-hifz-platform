@@ -13,6 +13,7 @@ import teacherRoutes    from './routes/teacher.routes';
 import halqaRoutes      from './routes/halqa.routes';
 import masjidRoutes     from './routes/masjid.routes';
 import attendanceRoutes from './routes/attendance.routes';
+import evaluationRoutes from './routes/evaluation.routes';
 import hifzRoutes       from './routes/hifz.routes';
 import homeworkRoutes   from './routes/homework.routes';
 import messageRoutes    from './routes/message.routes';
@@ -22,6 +23,8 @@ import parentRoutes          from './routes/parent.routes';
 import specialTrackRoutes    from './routes/special-track.routes';
 import lessonRecordingRoutes from './routes/lesson-recording.routes';
 import groupHomeworkRoutes   from './routes/group-homework.routes';
+import quranPlanRoutes       from './routes/quran-plan.routes';
+import adminRoutes           from './routes/admin.routes';
 
 const app = express();
 
@@ -52,6 +55,7 @@ app.use('/api/teachers',   teacherRoutes);
 app.use('/api/halqat',     halqaRoutes);
 app.use('/api/masajid',    masjidRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/evaluations', evaluationRoutes);
 app.use('/api/hifz',       hifzRoutes);
 app.use('/api/homework',   homeworkRoutes);
 app.use('/api/messages',   messageRoutes);
@@ -61,6 +65,8 @@ app.use('/api/parent',            parentRoutes);
 app.use('/api/special-tracks',    specialTrackRoutes);
 app.use('/api/lesson-recordings', lessonRecordingRoutes);
 app.use('/api/group-homework',    groupHomeworkRoutes);
+app.use('/api/quran-plans',       quranPlanRoutes);
+app.use('/api/admin',            adminRoutes);
 
 // ── 404 & error handler ───────────────────────────────────────────────────────
 app.use(notFound);

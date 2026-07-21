@@ -10,26 +10,31 @@ import { AdminMasajid }       from "../pages/admin/AdminMasajid";
 import { AdminKpis }          from "../pages/admin/AdminKpis";
 import { AdminReports }       from "../pages/admin/AdminReports";
 import { AdminSpecialTracks } from "../pages/admin/AdminSpecialTracks";
+import { AdminParents }       from "../pages/admin/AdminParents";
 
-import { TeacherDashboard }     from "../pages/teacher/TeacherDashboard";
-import { TeacherHalqa }         from "../pages/teacher/TeacherHalqa";
-import { TeacherStudents }      from "../pages/teacher/TeacherStudents";
-import { TeacherAttendance }    from "../pages/teacher/TeacherAttendance";
-import { TeacherHomework }      from "../pages/teacher/TeacherHomework";
-import { TeacherPlans }         from "../pages/teacher/TeacherPlans";
-import { TeacherReports }       from "../pages/teacher/TeacherReports";
-import { TeacherEvaluate }      from "../pages/teacher/TeacherEvaluate";
-import { TeacherRecordLesson }  from "../pages/teacher/TeacherRecordLesson";
-import { TeacherGroupHomework } from "../pages/teacher/TeacherGroupHomework";
+import { TeacherDashboard }      from "../pages/teacher/TeacherDashboard";
+import { TeacherHalqa }          from "../pages/teacher/TeacherHalqa";
+import { TeacherStudents }       from "../pages/teacher/TeacherStudents";
+import { TeacherAttendance }     from "../pages/teacher/TeacherAttendance";
+import { TeacherHomework }       from "../pages/teacher/TeacherHomework";
+import { TeacherPlans }          from "../pages/teacher/TeacherPlans";
+import { TeacherPlanForm }       from "../pages/teacher/TeacherPlanForm";
+import { TeacherPlanDetail }     from "../pages/teacher/TeacherPlanDetail";
+import { TeacherReports }        from "../pages/teacher/TeacherReports";
+import { TeacherRecordLesson }   from "../pages/teacher/TeacherRecordLesson";
+import { TeacherGroupHomework }  from "../pages/teacher/TeacherGroupHomework";
+import { TeacherSpecialTracks }  from "../pages/teacher/TeacherSpecialTracks";
+import { TeacherTrackDetail }    from "../pages/teacher/TeacherTrackDetail";
 
-import { StudentDashboard }  from "../pages/student/StudentDashboard";
-import { StudentHifz }       from "../pages/student/StudentHifz";
-import { StudentHomework }   from "../pages/student/StudentHomework";
-import { StudentAttendance } from "../pages/student/StudentAttendance";
-import { StudentSchedule }   from "../pages/student/StudentSchedule";
-import { StudentMessages }   from "../pages/student/StudentMessages";
-import { StudentPoints }     from "../pages/student/StudentPoints";
-import { StudentStore }      from "../pages/student/StudentStore";
+import { StudentDashboard }      from "../pages/student/StudentDashboard";
+import { StudentHifz }           from "../pages/student/StudentHifz";
+import { StudentHomework }       from "../pages/student/StudentHomework";
+import { StudentAttendance }     from "../pages/student/StudentAttendance";
+import { StudentSchedule }       from "../pages/student/StudentSchedule";
+import { StudentMessages }       from "../pages/student/StudentMessages";
+import { StudentPoints }         from "../pages/student/StudentPoints";
+import { StudentStore }          from "../pages/student/StudentStore";
+import { StudentSpecialTracks }  from "../pages/student/StudentSpecialTracks";
 
 import { ParentDashboard }    from "../pages/parent/ParentDashboard";
 import { ParentTimeline }     from "../pages/parent/ParentTimeline";
@@ -49,6 +54,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     kpis:           AdminKpis,
     reports:        AdminReports,
     special_tracks: AdminSpecialTracks,
+    parents:        AdminParents,
   },
   teacher: {
     dashboard:     TeacherDashboard,
@@ -57,20 +63,24 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     attendance:    TeacherAttendance,
     homework:      TeacherHomework,
     plans:         TeacherPlans,
+    planform:      TeacherPlanForm,
+    plandetail:    TeacherPlanDetail,
     reports:       TeacherReports,
-    evaluate:      TeacherEvaluate,
     recordlesson:  TeacherRecordLesson,
     grouphomework: TeacherGroupHomework,
+    specialtracks: TeacherSpecialTracks,
+    trackdetail:   TeacherTrackDetail,
   },
   student: {
-    dashboard:  StudentDashboard,
-    myhifz:     StudentHifz,
-    homework:   StudentHomework,
-    attendance: StudentAttendance,
-    schedule:   StudentSchedule,
-    messages:   StudentMessages,
-    points:     StudentPoints,
-    store:      StudentStore,
+    dashboard:     StudentDashboard,
+    myhifz:        StudentHifz,
+    homework:      StudentHomework,
+    attendance:    StudentAttendance,
+    schedule:      StudentSchedule,
+    messages:      StudentMessages,
+    points:        StudentPoints,
+    store:         StudentStore,
+    specialtracks: StudentSpecialTracks,
   },
   parent: {
     dashboard:    ParentDashboard,

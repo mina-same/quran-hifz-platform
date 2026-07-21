@@ -5,7 +5,8 @@ export type Homework = {
   _id: string;
   student: { _id: string; name: string } | string;
   teacher: { _id: string; name: string } | string;
-  halqa: { _id: string; name: string } | string;
+  halqa?: { _id: string; name: string } | string;
+  specialTrack?: { _id: string; title: string } | string;
   type: string;
   segment: string;
   dueDate: string;
@@ -19,6 +20,7 @@ export type HomeworkFilters = {
   student?: string;
   teacher?: string;
   halqa?: string;
+  specialTrack?: string;
   status?: string;
 };
 
@@ -31,6 +33,7 @@ function buildQuery(f?: HomeworkFilters) {
   if (f.student) p.set("student", f.student);
   if (f.teacher) p.set("teacher", f.teacher);
   if (f.halqa) p.set("halqa", f.halqa);
+  if (f.specialTrack) p.set("specialTrack", f.specialTrack);
   if (f.status) p.set("status", f.status);
   const q = p.toString();
   return q ? `?${q}` : "";

@@ -6,21 +6,20 @@ import { Alert } from "../../components/common/Alert";
 import { Badge } from "../../components/common/Badge";
 import { useStats } from "../../api/stats";
 import { useHalqat } from "../../api/halqat";
+import { useSpecialTracks } from "../../api/special-tracks";
 import { useHomework } from "../../api/homework";
 import { toAr } from "../../../lib/format";
-
-function getName(v: unknown): string {
-  if (v && typeof v === "object" && "name" in v) return (v as { name: string }).name;
-  return "";
-}
+import { halqaToContext, trackToContext } from "../../components/common/ContextPicker";
 
 export function TeacherDashboard() {
   const { showPage, user } = usePortal();
   const { data: stats } = useStats();
   const { data: halqat = [] } = useHalqat({ teacher: user?.profileId });
+  const { data: tracks = [] } = useSpecialTracks(undefined, user?.profileId as string | undefined);
   const { data: pendingHW = [] } = useHomework({ teacher: user?.profileId, status: "معلق" });
 
-  const totalStudents = halqat.reduce((sum, h) => sum + (h.studentCount ?? 0), 0);
+  const contexts = [...halqat.map(halqaToContext), ...tracks.map(trackToContext)];
+  const totalStudents = contexts.reduce((sum, c) => sum + (c.studentCount ?? 0), 0);
 
   useTopbar(
     "ti-layout-dashboard",
@@ -35,25 +34,27 @@ export function TeacherDashboard() {
       <StatsRow
         items={[
           { num: toAr(totalStudents), label: "طلابي الكلي", icon: "ti-users" },
-          { num: toAr(halqat.length), label: "حلقاتي", icon: "ti-school", variant: "gold" },
+          { num: toAr(contexts.length), label: "حلقاتي ومساراتي", icon: "ti-school", variant: "gold" },
           { num: toAr(stats?.avgAttendancePct ?? 0) + "٪", label: "متوسط الحضور", icon: "ti-calendar-check", variant: "blue" },
           { num: toAr(pendingHW.length), label: "واجبات معلقة", icon: "ti-microphone", variant: "red" },
         ]}
       />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-        <Card icon="ti-school" title="حلقاتي">
-          {halqat.length === 0 && (
-            <div className="page-loading">لا توجد حلقات مسجلة</div>
+      <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+        <Card icon="ti-school" title="حلقاتي ومساراتي">
+          {contexts.length === 0 && (
+            <div className="page-loading">لا توجد حلقات أو مسارات مسجلة</div>
           )}
-          {halqat.map((h) => (
-            <div key={h._id} className="halqa-row-item">
-              <span className="h-name">{h.name}</span>
-              <Badge tone="gold">{getName(h.masjid) || "—"}</Badge>
+          {contexts.map((c) => (
+            <div key={`${c.kind}-${c.id}`} className="halqa-row-item">
+              <span className="h-name">
+                <i className={`ti ${c.kind === "halqa" ? "ti-school" : "ti-calendar-event"}`} style={{ fontSize: 11 }} /> {c.title}
+              </span>
+              <Badge tone="gold">{c.subtitle || "—"}</Badge>
               <span className="h-info">
-                <i className="ti ti-clock" style={{ fontSize: 11 }} /> {h.time}
+                <i className="ti ti-clock" style={{ fontSize: 11 }} /> {c.scheduleLabel || "—"}
               </span>
               <span className="h-info">
-                <i className="ti ti-users" style={{ fontSize: 11 }} /> {toAr(h.studentCount ?? 0)} طالب
+                <i className="ti ti-users" style={{ fontSize: 11 }} /> {toAr(c.studentCount ?? 0)} طالب
               </span>
             </div>
           ))}
@@ -77,6 +78,38 @@ export function TeacherDashboard() {
           </button>
         </Card>
       </div>
+
+      {/* أفضل الطلاب هذا الأسبوع */}
+      <Card icon="ti-trophy" title="أفضل الطلاب هذا الأسبوع">
+        <div className="tbl-wrap">
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>الطالب</th>
+                <th>الحلقة</th>
+                <th>صفحات الحفظ</th>
+                <th>الحضور</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { rank: "١", name: "عبدالله الحميداني", halqa: "عمر بن الخطاب", pages: "٥ صفحات", attend: "١٠٠٪" },
+                { rank: "٢", name: "فيصل العمري",       halqa: "عثمان بن عفان", pages: "٤ صفحات", attend: "١٠٠٪" },
+                { rank: "٣", name: "سعد الشهري",        halqa: "عمر بن الخطاب", pages: "٣ صفحات", attend: "٧٥٪"  },
+              ].map((s) => (
+                <tr key={s.rank}>
+                  <td style={{ fontWeight: 700, color: "var(--gold)" }}>{s.rank}</td>
+                  <td style={{ fontWeight: 600 }}>{s.name}</td>
+                  <td>حلقة {s.halqa}</td>
+                  <td><Badge tone="gold">{s.pages}</Badge></td>
+                  <td>{s.attend}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </>
   );
 }

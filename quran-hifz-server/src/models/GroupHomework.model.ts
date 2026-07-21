@@ -1,7 +1,9 @@
 import { Schema, model, Document } from 'mongoose';
+import { applyContextValidation } from '../validators/context';
 
 export interface IGroupHomework extends Document {
-  halqa: Schema.Types.ObjectId;
+  halqa?: Schema.Types.ObjectId;
+  specialTrack?: Schema.Types.ObjectId;
   teacher: Schema.Types.ObjectId;
   title: string;
   description: string;
@@ -13,7 +15,8 @@ export interface IGroupHomework extends Document {
 
 const groupHomeworkSchema = new Schema<IGroupHomework>(
   {
-    halqa:       { type: Schema.Types.ObjectId, ref: 'Halqa', required: true },
+    halqa:        { type: Schema.Types.ObjectId, ref: 'Halqa' },
+    specialTrack: { type: Schema.Types.ObjectId, ref: 'SpecialTrack' },
     teacher:     { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
     title:       { type: String, required: true, trim: true },
     description: { type: String, required: true },
@@ -22,5 +25,8 @@ const groupHomeworkSchema = new Schema<IGroupHomework>(
   },
   { timestamps: true },
 );
+
+groupHomeworkSchema.index({ specialTrack: 1, dueDate: -1 });
+applyContextValidation(groupHomeworkSchema);
 
 export const GroupHomework = model<IGroupHomework>('GroupHomework', groupHomeworkSchema);

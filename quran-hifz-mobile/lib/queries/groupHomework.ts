@@ -3,7 +3,8 @@ import { get, post, del } from '@/lib/api';
 
 export type GroupHomework = {
   _id: string;
-  halqa: { _id: string; name: string } | string;
+  halqa?: { _id: string; name: string } | string;
+  specialTrack?: { _id: string; title: string } | string;
   teacher: { _id: string; name: string } | string;
   title: string;
   description: string;
@@ -11,13 +12,27 @@ export type GroupHomework = {
   dueDate: string;
 };
 
+export type GroupHomeworkFilters = {
+  halqa?: string;
+  specialTrack?: string;
+};
+
 type ListResponse = { success: boolean; count: number; data: GroupHomework[] };
 type SingleResponse = { success: boolean; data: GroupHomework };
 
-export function useGroupHomework(halqa?: string) {
+function buildQuery(filters?: GroupHomeworkFilters) {
+  if (!filters) return '';
+  const params = new URLSearchParams();
+  if (filters.halqa) params.set('halqa', filters.halqa);
+  if (filters.specialTrack) params.set('specialTrack', filters.specialTrack);
+  const q = params.toString();
+  return q ? `?${q}` : '';
+}
+
+export function useGroupHomework(filters?: GroupHomeworkFilters) {
   return useQuery({
-    queryKey: ['group-homework', halqa],
-    queryFn: () => get<ListResponse>(`/group-homework${halqa ? `?halqa=${halqa}` : ''}`).then((r) => r.data),
+    queryKey: ['group-homework', filters],
+    queryFn: () => get<ListResponse>(`/group-homework${buildQuery(filters)}`).then((r) => r.data),
   });
 }
 

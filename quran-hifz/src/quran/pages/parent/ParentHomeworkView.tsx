@@ -4,6 +4,7 @@ import { useChildHomework } from "../../api/parent";
 import { Alert } from "../../components/common/Alert";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
+import { SkeletonList } from "../../components/common/Skeleton";
 
 export function ParentHomeworkView() {
   const { activeChild } = useParentContext();
@@ -20,7 +21,7 @@ export function ParentHomeworkView() {
 
       <Card icon="ti-users" title="الواجبات الجماعية">
         {isLoading ? (
-          <div style={{ padding: "1rem", color: "var(--text-muted)" }}>جارٍ التحميل...</div>
+          <SkeletonList rows={4} avatar={true} />
         ) : groupHWs.length === 0 ? (
           <p style={{ color: "var(--text2)", padding: 16, textAlign: "center", fontSize: 12 }}>
             لا توجد واجبات جماعية

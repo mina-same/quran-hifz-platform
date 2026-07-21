@@ -29,7 +29,7 @@ export default function TeacherPlans() {
   });
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         <Card noPadding>
           <CardHeader title="خطط الحفظ السنوية" style={{ padding: 16, paddingBottom: 8 }} />

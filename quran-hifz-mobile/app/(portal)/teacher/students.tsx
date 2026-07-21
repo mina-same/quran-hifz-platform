@@ -45,7 +45,7 @@ export default function TeacherStudents() {
   }));
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         {isError && <Alert variant="error">تعذر تحميل الطلاب</Alert>}
 

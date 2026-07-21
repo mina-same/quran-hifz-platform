@@ -1,6 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { get, post, put, del } from "../../lib/api";
 
+/** sessionStorage key used to hand off "open this track's detail page" from the
+ * Special Tracks list to TeacherTrackDetail, which reads it on mount to know
+ * which track to show (the hash-based router has no room for per-page params). */
+export const TRACK_DETAIL_ID_KEY = "qh_track_detail_id";
+
+export type EnrolledStudent = { _id: string; name: string };
+export type TrackTeacher    = { _id: string; name: string };
+
 export type SpecialTrack = {
   _id: string;
   title: string;
@@ -11,19 +19,26 @@ export type SpecialTrack = {
   daysPerWeek: string;
   timeSlot: string;
   location: string;
-  teacher: { _id: string; name: string } | string;
+  isOnline: boolean;
+  meetLink?: string;
+  teachers: (TrackTeacher | string)[];
   maxStudents: number;
-  enrolledStudents: string[];
+  enrolledStudents: (EnrolledStudent | string)[];
   notes?: string;
 };
 
-type ListResponse = { success: boolean; count: number; data: SpecialTrack[] };
+type ListResponse   = { success: boolean; count: number; data: SpecialTrack[] };
 type SingleResponse = { success: boolean; data: SpecialTrack };
 
-export function useSpecialTracks(status?: string) {
+export function useSpecialTracks(status?: string, teacherId?: string, studentId?: string) {
+  const params = new URLSearchParams();
+  if (status)    params.set("status",  status);
+  if (teacherId) params.set("teacher", teacherId);
+  if (studentId) params.set("student", studentId);
+  const qs = params.toString() ? `?${params.toString()}` : "";
   return useQuery({
-    queryKey: ["special-tracks", status],
-    queryFn: () => get<ListResponse>(`/special-tracks${status ? `?status=${status}` : ""}`).then((r) => r.data),
+    queryKey: ["special-tracks", status ?? "", teacherId ?? "", studentId ?? ""],
+    queryFn: () => get<ListResponse>(`/special-tracks${qs}`).then((r) => r.data),
   });
 }
 
@@ -48,6 +63,24 @@ export function useDeleteTrack() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => del(`/special-tracks/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["special-tracks"] }),
+  });
+}
+
+export function useEnrollStudent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, studentId }: { id: string; studentId: string }) =>
+      post<SingleResponse>(`/special-tracks/${id}/enroll`, { studentId }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["special-tracks"] }),
+  });
+}
+
+export function useUnenrollStudent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, studentId }: { id: string; studentId: string }) =>
+      post<SingleResponse>(`/special-tracks/${id}/unenroll`, { studentId }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["special-tracks"] }),
   });
 }

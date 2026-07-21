@@ -2,16 +2,18 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { Homework } from '../models/Homework.model';
 import { AppError } from '../middleware/error';
+import { contextRefinement } from '../validators/context';
 
 const homeworkSchema = z.object({
-  student: z.string().min(1),
-  teacher: z.string().min(1),
-  halqa:   z.string().min(1),
+  student:      z.string().min(1),
+  teacher:      z.string().min(1),
+  halqa:        z.string().min(1).optional(),
+  specialTrack: z.string().min(1).optional(),
   type:    z.string().min(1),
   segment: z.string().min(1),
   dueDate: z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
   notes:   z.string().optional(),
-});
+}).superRefine(contextRefinement);
 
 const reviewSchema = z.object({
   status:      z.enum(['مراجع', 'معلق', 'متأخر']).optional(),
@@ -22,16 +24,19 @@ const reviewSchema = z.object({
 
 export async function getHomework(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { student, teacher, halqa, status } = req.query;
+    const { student, teacher, halqa, specialTrack, status } = req.query;
     const filter: Record<string, unknown> = {};
-    if (student) filter.student = student;
-    if (teacher) filter.teacher = teacher;
-    if (halqa)   filter.halqa   = halqa;
-    if (status)  filter.status  = status;
+    if (student)      filter.student      = student;
+    if (teacher)      filter.teacher      = teacher;
+    if (halqa)        filter.halqa        = halqa;
+    if (specialTrack) filter.specialTrack = specialTrack;
+    if (status)       filter.status       = status;
 
     const homework = await Homework.find(filter)
       .populate('student', 'name')
       .populate('teacher', 'name')
+      .populate('halqa', 'name')
+      .populate('specialTrack', 'title')
       .sort({ dueDate: -1 });
 
     res.json({ success: true, count: homework.length, data: homework });

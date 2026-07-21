@@ -1,50 +1,32 @@
-import { useTopbar } from "../../context/useTopbar";
+import { useStudents } from "../../api/students";
+import { useTeachers } from "../../api/teachers";
+import { useKpis } from "../../api/kpis";
+import { useHalqat } from "../../api/halqat";
+import { useSpecialTracks } from "../../api/special-tracks";
+import { ReportsDashboard } from "../../components/common/ReportsDashboard";
 
-type Report = [string, string, "" | "gold" | "blue"];
-const REPORTS: Report[] = [
-  ["تقرير الحضور الشهري", "ti-calendar", "blue"],
-  ["تقرير إنجاز الحفظ", "ti-book", ""],
-  ["تقرير مؤشرات الأداء", "ti-target", "gold"],
-  ["تقرير المعلمين", "ti-chalkboard", ""],
-  ["تقرير الطلاب الموهوبين", "ti-star", "gold"],
-  ["تقرير مالي للمجلس", "ti-report-money", "blue"],
-];
-
-function colorVar(c: Report[2]) {
-  if (c === "gold") return "var(--gold)";
-  if (c === "blue") return "var(--text2)";
-  return "var(--green)";
-}
-
+/** Admin reports — full school cohort. KPIs + teachers are org-wide widgets
+ *  surfaced in addition to the student analytics. */
 export function AdminReports() {
-  useTopbar(
-    "ti-chart-bar",
-    "التقارير",
-    <button className="topbar-btn btn-primary">
-      <i className="ti ti-download" /> تصدير PDF
-    </button>,
-  );
+  const { data: teachers = [] } = useTeachers();
+  const { data: kpis = [] } = useKpis();
+  const { data: halqat = [] } = useHalqat();
+  const { data: tracks = [] } = useSpecialTracks();
+  // Pre-warm the full students query so the StatsRow/KPIs render instantly
+  // once the user lands — ReportsDashboard re-queries under the active scope.
+  useStudents();
+
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 }}>
-      {REPORTS.map((r) => (
-        <div
-          key={r[0]}
-          className="card"
-          style={{ textAlign: "center", cursor: "pointer", padding: 24 }}
-        >
-          <i
-            className={`ti ${r[1]}`}
-            style={{ fontSize: 36, color: colorVar(r[2]), marginBottom: 10, display: "block" }}
-          />
-          <div style={{ fontWeight: 700, fontSize: 13 }}>{r[0]}</div>
-          <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 4 }}>
-            آخر تحديث: هذا الشهر
-          </div>
-          <button className="topbar-btn btn-ghost" style={{ marginTop: 12 }}>
-            <i className="ti ti-download" /> تحميل
-          </button>
-        </div>
-      ))}
-    </div>
+    <ReportsDashboard
+      topbarIcon="ti-chart-bar"
+      topbarTitle="التقارير والتحليلات"
+      baseFilter={{}}
+      halqat={halqat}
+      tracks={tracks}
+      kpis={kpis}
+      teachers={teachers}
+      showAdmin
+      scopeAllLabel="كل طلاب المدرسة"
+    />
   );
 }

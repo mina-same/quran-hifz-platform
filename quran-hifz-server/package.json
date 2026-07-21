@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed": "ts-node src/seeds/seed.ts",
-    "import-real-data": "ts-node src/seeds/import-real-halaqat.ts",
+    "backfill-plans": "ts-node src/seeds/backfillPlans.ts",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {

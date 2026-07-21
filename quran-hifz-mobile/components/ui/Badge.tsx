@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { theme } from '@/lib/theme';
 
-type Variant = 'green' | 'gold' | 'red' | 'blue' | 'gray';
+export type BadgeVariant = 'green' | 'gold' | 'red' | 'blue' | 'gray';
+type Variant = BadgeVariant;
 
 const VARIANT_STYLES: Record<Variant, { bg: string; text: string }> = {
   green: { bg: '#DCFCE7', text: '#166534' },

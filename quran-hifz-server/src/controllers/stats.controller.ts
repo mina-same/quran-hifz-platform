@@ -5,6 +5,7 @@ import { Halqa } from '../models/Halqa.model';
 import { Masjid } from '../models/Masjid.model';
 import { Attendance } from '../models/Attendance.model';
 import { Homework } from '../models/Homework.model';
+import { SpecialTrack } from '../models/SpecialTrack.model';
 
 export async function getDashboardStats(_req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -13,6 +14,7 @@ export async function getDashboardStats(_req: Request, res: Response, next: Next
       activeStudents,
       totalTeachers,
       totalHalqat,
+      totalSpecialTracks,
       totalMasajid,
       pendingHomework,
       lateHomework,
@@ -21,6 +23,7 @@ export async function getDashboardStats(_req: Request, res: Response, next: Next
       Student.countDocuments({ status: 'active' }),
       Teacher.countDocuments({ status: 'active' }),
       Halqa.countDocuments(),
+      SpecialTrack.countDocuments(),
       Masjid.countDocuments(),
       Homework.countDocuments({ status: 'معلق' }),
       Homework.countDocuments({ status: 'متأخر' }),
@@ -47,6 +50,7 @@ export async function getDashboardStats(_req: Request, res: Response, next: Next
         activeStudents,
         totalTeachers,
         totalHalqat,
+        totalSpecialTracks,
         totalMasajid,
         pendingHomework,
         lateHomework,

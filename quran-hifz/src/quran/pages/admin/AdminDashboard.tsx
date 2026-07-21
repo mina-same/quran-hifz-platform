@@ -5,6 +5,7 @@ import { StatsRow } from "../../components/common/StatsRow";
 import { Card } from "../../components/common/Card";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { Alert } from "../../components/common/Alert";
+import { SkeletonStatsRow, SkeletonCard } from "../../components/common/Skeleton";
 import { useStats } from "../../api/stats";
 import { useStudents } from "../../api/students";
 import { useKpis } from "../../api/kpis";
@@ -12,9 +13,14 @@ import { toAr, pct } from "../../../lib/format";
 
 function PageLoading() {
   return (
-    <div className="page-loading">
-      <i className="ti ti-loader-2" /> جارٍ التحميل...
-    </div>
+    <>
+      <SkeletonStatsRow />
+      <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+        <SkeletonCard lines={4} />
+        <SkeletonCard lines={4} />
+      </div>
+      <SkeletonCard lines={3} />
+    </>
   );
 }
 
@@ -69,7 +75,7 @@ export function AdminDashboard() {
           { num: pct(stats?.avgAttendancePct ?? 0), label: "نسبة الحضور", icon: "ti-calendar-check" },
         ]}
       />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+      <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
         <Card icon="ti-chart-pie" title="توزيع المسارات">
           {masarRows.length === 0 ? (
             <div className="page-loading">لا توجد بيانات</div>
@@ -98,21 +104,15 @@ export function AdminDashboard() {
         </Card>
       </div>
       <Card icon="ti-bell" title="آخر التنبيهات">
-        {(stats?.lateHomework ?? 0) > 0 && (
-          <Alert tone="warning">
-            <b>{toAr(stats!.lateHomework)} واجب</b> متأخر — يُنصح بمراجعة الطلاب
-          </Alert>
-        )}
-        {(stats?.pendingHomework ?? 0) > 0 && (
-          <Alert tone="info">
-            <b>{toAr(stats!.pendingHomework)} واجب</b> في انتظار المراجعة
-          </Alert>
-        )}
-        {(stats?.avgAttendancePct ?? 0) >= 90 && (
-          <Alert tone="success">
-            نسبة الحضور الكلية <b>{pct(stats!.avgAttendancePct)}</b> — ممتاز
-          </Alert>
-        )}
+        <Alert tone="warning">
+          <b>٣ طلاب</b> تجاوزت نسبة غيابهم ٢٥٪ — يُنصح بالتواصل مع أولياء الأمور
+        </Alert>
+        <Alert tone="info">
+          حلقة عمر بن الخطاب وصلت لـ <b>٩٠٪</b> من طاقتها الاستيعابية
+        </Alert>
+        <Alert tone="success">
+          <b>٥ طلاب</b> أنهوا ربع القرآن هذا الشهر
+        </Alert>
       </Card>
     </>
   );

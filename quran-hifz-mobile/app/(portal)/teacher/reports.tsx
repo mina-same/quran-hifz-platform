@@ -26,7 +26,7 @@ export default function TeacherReports() {
   const { data: students = [], isLoading, isError } = useStudents({ halqa: firstHalqaId });
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
         {isLoading && (
           <View style={styles.loadingBox}>
