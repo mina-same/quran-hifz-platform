@@ -381,6 +381,10 @@ export function TeacherTrackDetail() {
     return { scheduledSet: set, scheduledSorted: sorted, assignmentByDate: byDate, dayChips: chips, effectiveDate: effective };
   }, [linkedPlan, selectedDate, today]);
 
+  // No active plan (no scheduled days) → attendance/evaluation can't be saved
+  // until a plan is added, so the save controls are disabled.
+  const noActivePlan = scheduledSorted.length === 0;
+
   // Block an actual tab close/refresh/URL navigation while a day edit is
   // unsaved — browsers show their own built-in confirmation text (custom
   // messages are ignored by modern browsers), but it does stop the leave.
@@ -538,12 +542,23 @@ export function TeacherTrackDetail() {
   }
   function createNewPlan() {
     if (!track) return;
-    sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "create", trackId: track._id }));
+    // Plans are halqa-based. If this teacher has exactly one halqa in the track,
+    // pre-select it; otherwise open the form on the halqa flow with no pick.
+    const halqaId = myHalqaIdsInTrack.length === 1 ? myHalqaIdsInTrack[0] : undefined;
+    sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "create", halqaId }));
     showPage("planform");
   }
   function editLinkedPlan() {
     if (!linkedPlan) return;
     sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "edit", plan: linkedPlan }));
+    showPage("planform");
+  }
+  // Plans are halqa-based: open the plan form pre-selected on this student's
+  // halqa (covers the whole halqa), available even with no track-level plan.
+  function createPlanForStudent(studentId: string) {
+    const st = rosterStudents.find((s) => s._id === studentId);
+    const halqaId = st ? (typeof st.halqa === "object" ? st.halqa._id : st.halqa) : undefined;
+    sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "create", halqaId }));
     showPage("planform");
   }
 
@@ -727,8 +742,8 @@ export function TeacherTrackDetail() {
 
           {scheduledSorted.length === 0 && (
             <Alert tone="warning">
-              لا يوجد خطة حفظ نشطة لهذا المسار — لا يمكن تحديد يوم محدد لتسجيل الحضور والتقييم، لكن
-              يمكنك تسجيل حضور اليوم مباشرة أدناه. أضف خطة من تبويب "الخطة" أولاً لتفعيل التقويم.
+              لا يوجد خطة حفظ نشطة لهذا المسار — لا يمكن تسجيل الحضور والتقييم قبل إضافة خطة.
+              أضف خطة من تبويب "الخطة" أولاً لتفعيل التسجيل والتقويم.
             </Alert>
           )}
 
@@ -908,6 +923,17 @@ export function TeacherTrackDetail() {
                             <IndividualPlanPanel planId={linkedPlan._id} studentId={id} studentName={name} basePlan={linkedPlan} />
                           )}
 
+                          {!hasIndividualPlan && (
+                            <button
+                              type="button"
+                              className="topbar-btn btn-ghost"
+                              style={{ fontSize: 11, padding: "5px 10px", marginBottom: 4, color: "var(--green)", borderColor: "rgba(26,92,42,0.25)" }}
+                              onClick={(ev) => { ev.stopPropagation(); createPlanForStudent(id); }}
+                            >
+                              <i className="ti ti-plus" /> أضف خطة للحلقة
+                            </button>
+                          )}
+
                           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
                             {isFutureDay ? (
                               <button className="topbar-btn btn-ghost" style={{ padding: "8px 18px" }} disabled>
@@ -918,7 +944,7 @@ export function TeacherTrackDetail() {
                                 <i className="ti ti-edit" /> تعديل
                               </button>
                             ) : (
-                              <button className="topbar-btn btn-primary" style={{ padding: "8px 18px" }} onClick={() => saveStudent(id, name)} disabled={bulkEvaluate.isPending}>
+                              <button className="topbar-btn btn-primary" style={{ padding: "8px 18px" }} onClick={() => saveStudent(id, name)} disabled={bulkEvaluate.isPending || noActivePlan} title={noActivePlan ? "أضف خطة أولاً لتفعيل الحفظ" : undefined}>
                                 {bulkEvaluate.isPending && lastSavedId === id
                                   ? <><i className="ti ti-loader-2" style={{ animation: "spin 1s linear infinite" }} /> جارٍ الحفظ...</>
                                   : isUnlocked

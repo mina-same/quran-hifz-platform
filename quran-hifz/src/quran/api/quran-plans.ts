@@ -11,7 +11,10 @@ export const PLAN_DETAIL_ID_KEY = "qh_plan_detail_id";
 
 export const PLAN_FORM_HANDOFF_KEY = "qh_plan_form_handoff";
 export type PlanFormHandoff =
-  | { mode: "create"; trackId?: string }
+  // Plans are halqa-based. `halqaId` pre-selects the halqa target so the track
+  // detail's "create plan" buttons open the form ready on that halqa. (`trackId`
+  // is legacy and no longer emitted by the UI.)
+  | { mode: "create"; trackId?: string; halqaId?: string }
   | { mode: "edit" | "duplicate"; plan: QuranPlan };
 
 export type PlanType = "حفظ" | "مراجعة" | "ترتيل" | "تلاوة";

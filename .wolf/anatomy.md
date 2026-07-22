@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T10:51:51.781Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T12:20:16.184Z
 > Files: 451 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/
@@ -594,7 +594,7 @@
 - `masajid.ts` — Exports Masjid, useMasajid, useMasjid, useCreateMasjid + 2 more (~461 tok)
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
-- `quran-plans.ts` — sessionStorage key used to hand off "open the plan form" from wherever a (~1675 tok)
+- `quran-plans.ts` — sessionStorage key used to hand off "open the plan form" from wherever a (~1740 tok)
 - `special-tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~891 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~166 tok)
 - `student-plan-progress.ts` — False when the student has no individual overlay yet — `effectiveSchedule` (~1673 tok)
@@ -704,14 +704,14 @@
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
 - `TeacherPlanDetail.tsx` — surahName — renders table (~3558 tok)
-- `TeacherPlanForm.tsx` — Create/edit plan form; tracks saved `planRecord` (no auto-nav on save, toast instead) and shows a "طلاب الخطة" roster card (halqa/specialTrack/students) with per-student `IndividualPlanPanel` (~7100 tok)
+- `TeacherPlanForm.tsx` — PLAN_TYPES — renders form (~7647 tok)
 - `TeacherPlans.tsx` — surahName (~4262 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
 - `TeacherSpecialTracks.tsx` — surahName (~2758 tok)
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2468 tok)
-- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~17250 tok)
+- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~17705 tok)
 
 ## quran-hifz/src/quran/router/
 

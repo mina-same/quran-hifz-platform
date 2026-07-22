@@ -77,3 +77,7 @@
 ### 2026-07-22 — Perl in-place edit on Arabic text needs -Mutf8
 - With `perl -CSD -i -pe s///` on UTF-8/Arabic files, regex literals are treated as raw bytes and silently never match (edit runs, changes nothing). MUST add `-Mutf8` so pattern literals decode as UTF-8. Verify with a match test before the -i run.
 - zsh does NOT word-split unquoted `$FILES`; pass file args explicitly or use `${=FILES}`.
+
+### Key Learning — Track detail: attendance/eval works without a plan (by design)
+- In TeacherTrackDetail, the Quran plan only drives the assigned daily portion (الورد) and the calendar day. Attendance + evaluation scores can be recorded/saved with NO plan (see the warning at ~L730). The "تم تسجيل حضور وتقييم" banner only shows when a saved evaluation record exists for that student+date — nothing auto-saves.
+- Per-student "individual plans" derive from the track plan (IndividualPlanPanel needs basePlan=linkedPlan). Added `createPlanForStudent` + `{mode:create,students:[id]}` handoff so a standalone student plan can be made even with no track plan (teacher portal; plan owner = teacherId).

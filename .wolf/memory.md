@@ -1901,3 +1901,30 @@
 | 13:51 | Created quran-hifz-server/src/seeds/list-users.ts | — | ~146 |
 | 13:51 | Created quran-hifz-server/src/seeds/list-users.ts | — | ~540 |
 | 13:52 | Session end: 61 writes across 19 files (wipe-all.ts, Halqa.model.ts, import-real-halaqat.ts, halqa.controller.ts, halqat.ts) | 35 reads | ~84735 tok |
+| 14:13 | Edited quran-hifz/src/quran/api/quran-plans.ts | 3→6 lines | ~101 |
+| 14:13 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | CSS: students | ~91 |
+| 14:13 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: studentId, students | ~153 |
+| 14:13 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | expanded (+11 lines) | ~251 |
+| --:-- | Added per-student plan button (أضف خطة لهذا الطالب) in track detail — works with no track plan; extended PlanFormHandoff with students prefill | TeacherTrackDetail.tsx, TeacherPlanForm.tsx, quran-plans.ts | typechecks clean | ~sm |
+| 14:18 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | expanded (+11 lines) | ~227 |
+| 14:19 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | added 1 import(s) | ~50 |
+| 14:32 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | 5→5 lines | ~56 |
+| 14:33 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | added nullish coalescing | ~297 |
+| 14:33 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | expanded (+25 lines) | ~500 |
+| 14:33 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | CSS: opacity, 5, flexWrap | ~528 |
+| 14:33 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | 5→6 lines | ~76 |
+| 14:34 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | CSS: scope, withoutPlanIds | ~423 |
+| --:-- | Plan form: show student level badge + plan-status (لديه خطة/بدون خطة); added halqa scope toggle (كل الطلاب / فقط من ليس لديه خطة) → creates students-target plan for the without-plan subset | TeacherPlanForm.tsx | typechecks clean; teacher-only sees own halqat (already) | ~med |
+| 14:45 | Session end: 73 writes across 21 files (wipe-all.ts, Halqa.model.ts, import-real-halaqat.ts, halqa.controller.ts, halqat.ts) | 38 reads | ~113916 tok |
+| 14:48 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | 5→6 lines | ~117 |
+| 15:03 | Edited quran-hifz/src/quran/api/quran-plans.ts | 6→6 lines | ~101 |
+| 15:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | CSS: halqa | ~44 |
+| 15:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | modified createNewPlan() | ~122 |
+| 15:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: halqa-based, _id | ~141 |
+| 15:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 4→4 lines | ~69 |
+| --:-- | Plans are halqa-only now: removed طلاب محددون + مسار target options; track-detail create-plan buttons redirect to halqa flow via {mode:create,halqaId} handoff (per-student button → student's halqa, relabeled أضف خطة للحلقة) | TeacherPlanForm.tsx, TeacherTrackDetail.tsx, quran-plans.ts | typechecks clean | ~med |
+| 15:04 | Session end: 79 writes across 21 files (wipe-all.ts, Halqa.model.ts, import-real-halaqat.ts, halqa.controller.ts, halqat.ts) | 38 reads | ~114786 tok |
+| 15:07 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | 5→5 lines | ~52 |
+| 15:19 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 3→7 lines | ~105 |
+| 15:19 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 8→8 lines | ~225 |
+| 15:20 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 2→2 lines | ~47 |
