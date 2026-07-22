@@ -1937,3 +1937,33 @@
 | 15:40 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | 3→3 lines | ~62 |
 | --:-- | Track detail: disabled per-student save when no active plan (noActivePlan) + reworded warning. Plan form: removed كل الطلاب/فقط من ليس لديه خطة scope + بدون خطة badges (kept level); per-student individual plan stays gated on saving halqa plan first | TeacherTrackDetail.tsx, TeacherPlanForm.tsx | typechecks clean | ~med |
 | 15:41 | Session end: 90 writes across 21 files (wipe-all.ts, Halqa.model.ts, import-real-halaqat.ts, halqa.controller.ts, halqat.ts) | 38 reads | ~115178 tok |
+| 16:12 | Session end: 90 writes across 21 files (wipe-all.ts, Halqa.model.ts, import-real-halaqat.ts, halqa.controller.ts, halqat.ts) | 38 reads | ~115178 tok |
+
+## Session: 2026-07-22 17:00
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-22 17:00
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:01 | Created quran-hifz-server/src/seeds/rename-email-domain.ts | — | ~282 |
+| 17:02 | Edited quran-hifz-server/src/seeds/import-real-halaqat.ts | "rawad.com" → "Tahfeez.com" | ~10 |
+| 17:02 | Edited quran-hifz-server/src/seeds/ensure-admin.ts | "admin@rawad.com" → "admin@Tahfeez.com" | ~10 |
+| 17:02 | Edited quran-hifz-server/package.json | 1→2 lines | ~37 |
+| 17:04 | Session end: 4 writes across 4 files (rename-email-domain.ts, import-real-halaqat.ts, ensure-admin.ts, package.json) | 0 reads | ~339 tok |
+| 17:05 | Session end: 4 writes across 4 files (rename-email-domain.ts, import-real-halaqat.ts, ensure-admin.ts, package.json) | 0 reads | ~339 tok |
+| 17:13 | Edited quran-hifz-server/src/controllers/student.controller.ts | 4→5 lines | ~82 |
+| 17:13 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | CSS: level | ~61 |
+| 17:14 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | inline fix | ~49 |
+| 17:14 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | CSS: level | ~101 |
+| 17:14 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | CSS: level | ~92 |
+| 17:14 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | 3→4 lines | ~39 |
+| 17:14 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | modified toAr() | ~78 |
+| 17:15 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | expanded (+13 lines) | ~194 |
+| 17:15 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | CSS: studentLevel | ~69 |
+| 17:15 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | added 1 condition(s) | ~62 |
+| 17:16 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | CSS: marginBottom | ~128 |
+| --:-- | Student level: كل 74 طالب عندهم level بالفعل. أضفت level لمخطط السيرفر + عمود المستوى في جدول AdminStudents + حقل رقم في نموذجي التعديل (AdminStudents) والإضافة (AdminRegister). ملاحظة: AdminRegister بقى فيه حقلين مستوى (قراءة فئوي + رقم) | student.controller.ts, AdminStudents.tsx, AdminRegister.tsx | typechecks clean | ~med |
+| 17:17 | Session end: 15 writes across 7 files (rename-email-domain.ts, import-real-halaqat.ts, ensure-admin.ts, package.json, student.controller.ts) | 2 reads | ~9537 tok |

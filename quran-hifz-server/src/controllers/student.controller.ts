@@ -13,6 +13,7 @@ const studentSchema = z.object({
   guardian:         z.string().optional(),
   guardianPhone:    z.string().optional(),
   lastMemorization: z.string().optional(),
+  level:            z.coerce.number().int().min(1, 'المستوى بين ١ و١٠').max(10, 'المستوى بين ١ و١٠').optional(),
   totalPages:       z.number().optional(),
   status:           z.enum(['active', 'inactive', 'new']).optional(),
   email:            z.string().email('البريد الإلكتروني غير صحيح').optional(),

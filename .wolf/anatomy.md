@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T12:40:21.787Z
-> Files: 451 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T14:16:03.546Z
+> Files: 452 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/
 
@@ -360,7 +360,7 @@
 
 - `.gitignore` — Git ignore rules (~10 tok)
 - `package-lock.json` — npm lock file (~23821 tok)
-- `package.json` — Node.js package manifest (~325 tok)
+- `package.json` — Node.js package manifest (~345 tok)
 - `tsconfig.json` — TypeScript configuration (~128 tok)
 - `vercel.json` (~54 tok)
 
@@ -398,7 +398,7 @@
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
 - `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~3440 tok)
-- `student.controller.ts` — Zod schemas: studentSchema (~1756 tok)
+- `student.controller.ts` — Zod schemas: studentSchema (~1549 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1398 tok)
 
 ## quran-hifz-server/src/data/
@@ -464,9 +464,10 @@
 ## quran-hifz-server/src/seeds/
 
 - `backfillPlans.ts` — Additive-only script — for every Halqa or SpecialTrack that has no QuranPlan (~1052 tok)
-- `ensure-admin.ts` — Idempotent admin bootstrap. Run:  npm run ensure-admin (~420 tok)
-- `import-real-halaqat.ts` — One-time import of real special-track/halqa/teacher/student data. (~1863 tok)
+- `ensure-admin.ts` — Idempotent admin bootstrap. Run:  npm run ensure-admin (~421 tok)
+- `import-real-halaqat.ts` — One-time import of real special-track/halqa/teacher/student data. (~1864 tok)
 - `list-users.ts` — Default seed passwords by role (import-real-halaqat.ts + ensure-admin.ts). (~540 tok)
+- `rename-email-domain.ts` — One-off: rewrite every user's email domain to a new one, keeping the (~282 tok)
 - `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~4682 tok)
 - `wipe-all.ts` — One-time full wipe of the local dev database before importing real data. (~559 tok)
 
@@ -668,10 +669,10 @@
 - `AdminKpis.tsx` — RATING_TONE — renders table (~743 tok)
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~2682 tok)
 - `AdminParents.tsx` — EMPTY_ADD, ChildChip — renders table, modal, search bar, avatars (~5900 tok)
-- `AdminRegister.tsx` — schema — renders form (~3078 tok)
+- `AdminRegister.tsx` — schema — renders form (~3237 tok)
 - `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~324 tok)
 - `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13438 tok)
-- `AdminStudents.tsx` — PATH_TONE — renders table (~5092 tok)
+- `AdminStudents.tsx` — PATH_TONE — renders table (~5297 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4598 tok)
 
 ## quran-hifz/src/quran/pages/parent/

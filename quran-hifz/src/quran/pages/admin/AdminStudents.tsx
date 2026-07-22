@@ -31,6 +31,7 @@ function getObjId(h: unknown): string {
 type EditFormFields = {
   name: string;
   path: string;
+  level: string;
   halqa: string;
   masjid: string;
   guardianPhone: string;
@@ -65,7 +66,7 @@ export function AdminStudents() {
   const [pathFilter, setPathFilter] = useState("");
   const [editItem, setEditItem] = useState<Student | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [form, setForm] = useState<EditFormFields>({ name: "", path: "", halqa: "", masjid: "", guardianPhone: "", status: "active", email: "", password: "" });
+  const [form, setForm] = useState<EditFormFields>({ name: "", path: "", level: "", halqa: "", masjid: "", guardianPhone: "", status: "active", email: "", password: "" });
   const [formError, setFormError] = useState("");
   const [selectedParentId, setSelectedParentId] = useState<string>("");
 
@@ -75,6 +76,7 @@ export function AdminStudents() {
     setForm({
       name:          s.name,
       path:          s.path,
+      level:         s.level != null ? String(s.level) : "",
       halqa:         getObjId(s.halqa),
       masjid:        getObjId(s.masjid),
       guardianPhone: s.guardianPhone,
@@ -107,6 +109,7 @@ export function AdminStudents() {
         masjid:        form.masjid || undefined,
         guardianPhone: form.guardianPhone.trim(),
         status:        form.status,
+        ...(form.level.trim() && { level: Number(form.level) }),
         ...(form.email.trim()  && { email:    form.email.trim() }),
         ...(form.password      && { password: form.password }),
       });
@@ -184,6 +187,7 @@ export function AdminStudents() {
                 <tr>
                   <th>الاسم</th>
                   <th>المسار</th>
+                  <th>المستوى</th>
                   <th>الحلقة</th>
                   <th>المسجد</th>
                   <th>الحضور</th>
@@ -198,6 +202,7 @@ export function AdminStudents() {
                   <tr key={s._id}>
                     <td style={{ fontWeight: 600 }}>{s.name}</td>
                     <td><Badge tone={PATH_TONE[s.path] ?? "blue"}>{s.path}</Badge></td>
+                    <td>{s.level != null ? toAr(s.level) : "—"}</td>
                     <td>{getObjName(s.halqa)}</td>
                     <td>{getObjName(s.masjid)}</td>
                     <td>{pct(s.attendancePct)}</td>
@@ -280,6 +285,19 @@ export function AdminStudents() {
                   <option value="عشرة أجزاء">عشرة أجزاء</option>
                   <option value="خمسة أجزاء">خمسة أجزاء</option>
                 </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">المستوى (رقم من ١ إلى ١٠)</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  min={1}
+                  max={10}
+                  placeholder="مثال: ٣"
+                  value={form.level}
+                  onChange={(e) => setField("level", e.target.value)}
+                />
               </div>
 
               <div className="form-group">

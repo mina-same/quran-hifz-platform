@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "seed": "ts-node src/seeds/seed.ts",
     "ensure-admin": "ts-node src/seeds/ensure-admin.ts",
+    "rename-email-domain": "ts-node src/seeds/rename-email-domain.ts",
     "backfill-plans": "ts-node src/seeds/backfillPlans.ts",
     "lint": "eslint src --ext .ts"
   },

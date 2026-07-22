@@ -19,6 +19,10 @@ const schema = z.object({
     .min(1, "جوال ولي الأمر مطلوب")
     .regex(/^05\d{8}$/, "صيغة الجوال: 05XXXXXXXX"),
   level: z.string().min(1, "يرجى اختيار مستوى القراءة"),
+  studentLevel: z
+    .string()
+    .optional()
+    .refine((v) => !v || (Number(v) >= 1 && Number(v) <= 10), "المستوى بين ١ و١٠"),
   masjid: z.string().min(1, "يرجى اختيار المسجد"),
   halqa: z.string().min(1, "يرجى اختيار الحلقة"),
   email: z.string().email("البريد الإلكتروني غير صحيح").optional().or(z.literal("")),
@@ -79,6 +83,7 @@ export function AdminRegister() {
       path:          masar?.path ?? "حفظ كامل",
       status:        "new",
     };
+    if (data.studentLevel)  body.level    = Number(data.studentLevel);
     if (data.email?.trim()) body.email    = data.email.trim();
     if (data.password)      body.password = data.password;
 
@@ -132,6 +137,12 @@ export function AdminRegister() {
               <option value="بالغ">بالغ ويريد التصحيح</option>
             </select>
             <FieldError msg={errors.level?.message} />
+          </div>
+
+          <div className="form-group" style={{ marginBottom: 14 }}>
+            <label className="form-label">المستوى (رقم من ١ إلى ١٠)</label>
+            <input className="form-input" type="number" min={1} max={10} placeholder="مثال: ٣" {...register("studentLevel")} />
+            <FieldError msg={errors.studentLevel?.message} />
           </div>
 
           {masar && (

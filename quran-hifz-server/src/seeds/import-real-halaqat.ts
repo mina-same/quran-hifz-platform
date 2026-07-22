@@ -25,7 +25,7 @@ const COURSE_MASJID: Record<string, string> = {
   'raidat-itqan-girls': 'مركز العماير',
 };
 
-const EMAIL_DOMAIN = 'rawad.com';
+const EMAIL_DOMAIN = 'Tahfeez.com';
 const ROLE_PASSWORD: Record<'teacher' | 'student', string> = {
   teacher: 'teacher@123',
   student: 'student@123',
