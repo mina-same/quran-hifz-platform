@@ -14,6 +14,8 @@ import {
   type EnrolledStudent,
   type TrackTeacher,
 } from "../../api/special-tracks";
+import { useHalqat } from "../../api/halqat";
+import { useStudents } from "../../api/students";
 import {
   useQuranPlans,
   useUpdateQuranPlan,
@@ -212,6 +214,24 @@ export function TeacherTrackDetail() {
   const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, teacherId);
   const track = tracks.find((t) => t._id === trackId);
 
+  // This track's real roster lives on its halaqat, not on `enrolledStudents`
+  // (that field is for tracks with no halqa layer — direct enrollment). Scope
+  // it further to just the halaqat *this* teacher teaches within the track,
+  // so a teacher only ever sees their own students here, not every halqa's.
+  const { data: myHalqat = [] } = useHalqat({ teacher: teacherId });
+  const myHalqaIdsInTrack = myHalqat
+    .filter((h) => {
+      const t = h.specialTrack;
+      const tId = t && typeof t === "object" ? t._id : t;
+      return !!track && tId === track._id;
+    })
+    .map((h) => h._id);
+  const { data: rosterStudents = [] } = useStudents(
+    { halqa: myHalqaIdsInTrack.join(",") },
+    { enabled: myHalqaIdsInTrack.length > 0 },
+  );
+  const roster: (EnrolledStudent | string)[] = rosterStudents.map((s) => ({ _id: s._id, name: s.name }));
+
   const [tab, setTab] = useState<TabKey>("students");
   // Only one of the plan tab's expandable sections (link-another-plan /
   // schedule table) can be open at once — opening one closes the others.
@@ -250,7 +270,7 @@ export function TeacherTrackDetail() {
   // student's own progress in one batched hook call.
   const coveredStudentIds = useMemo(() => {
     if (!track || !linkedPlan) return [];
-    return track.enrolledStudents.map(getEnrolledId).filter((id) => planCoversStudent(linkedPlan, id));
+    return roster.map(getEnrolledId).filter((id) => planCoversStudent(linkedPlan, id));
   }, [track, linkedPlan]);
   const progressByStudentId = useStudentPlanProgressList(linkedPlan?._id, coveredStudentIds);
 
@@ -549,7 +569,7 @@ export function TeacherTrackDetail() {
   if (!track) return <Alert tone="danger">هذا المسار غير موجود أو لم تعد مُسنَداً إليه.</Alert>;
 
   const cfg = STATUS_CFG[track.status];
-  const enrolled = track.enrolledStudents.length;
+  const enrolled = roster.length;
   const pct = Math.min(100, Math.round((enrolled / track.maxStudents) * 100));
   const barClr = pct >= 90 ? "#ef4444" : pct >= 70 ? "#f59e0b" : "var(--green)";
   // Each student's own assigned portion for the selected day — falls back to
@@ -723,7 +743,7 @@ export function TeacherTrackDetail() {
               <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>لا يوجد طلاب مسجّلون بعد</div>
             ) : (
               <div className="att-list">
-                {track.enrolledStudents.map((s) => {
+                {roster.map((s) => {
                   const name = getEnrolledName(s);
                   const id = getEnrolledId(s);
                   const e = evalFor(id);

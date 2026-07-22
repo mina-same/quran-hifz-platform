@@ -6,6 +6,7 @@ export type Halqa = {
   name: string;
   teacher: { _id: string; name: string } | string;
   masjid: { _id: string; name: string; location: string } | string;
+  specialTrack?: { _id: string; title: string } | string | null;
   days: string;
   time: string;
   capacity: number;

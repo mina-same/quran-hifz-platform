@@ -59,6 +59,13 @@ export function TeacherStudents() {
 
   const { data: myTracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, user?.profileId as string | undefined);
 
+  // Map halqaId -> track title, for students enrolled via their halqa (not directly)
+  const halqaTrackMap = new Map<string, string>();
+  for (const h of halqat) {
+    const t = h.specialTrack;
+    if (t && typeof t === "object") halqaTrackMap.set(h._id, t.title);
+  }
+
   // Map studentId -> track titles they're enrolled in (across teacher's tracks)
   const studentTracksMap = new Map<string, string[]>();
   for (const track of myTracks) {
@@ -72,17 +79,22 @@ export function TeacherStudents() {
   const studentIds = new Set(students.map((s) => s._id));
 
   const rows: Row[] = [
-    ...students.map((s) => ({
-      id: s._id,
-      name: s.name,
-      halqaId: getId(s.halqa) || null,
-      halqaName: getName(s.halqa),
-      guardian: s.guardian || "—",
-      guardianPhone: s.guardianPhone || "—",
-      lastMemorization: s.lastMemorization || "—",
-      homeworkStatus: s.homeworkStatus,
-      tracks: studentTracksMap.get(s._id) ?? [],
-    })),
+    ...students.map((s) => {
+      const halqaId = getId(s.halqa) || null;
+      const inheritedTrack = halqaId ? halqaTrackMap.get(halqaId) : undefined;
+      const tracks = studentTracksMap.get(s._id) ?? [];
+      return {
+        id: s._id,
+        name: s.name,
+        halqaId,
+        halqaName: getName(s.halqa),
+        guardian: s.guardian || "—",
+        guardianPhone: s.guardianPhone || "—",
+        lastMemorization: s.lastMemorization || "—",
+        homeworkStatus: s.homeworkStatus,
+        tracks: inheritedTrack && !tracks.includes(inheritedTrack) ? [...tracks, inheritedTrack] : tracks,
+      };
+    }),
     // students enrolled only in a special track (not in teacher's halqa)
     ...Array.from(studentTracksMap.entries())
       .filter(([id]) => !studentIds.has(id))

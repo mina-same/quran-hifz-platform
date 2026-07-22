@@ -5,6 +5,7 @@ export type Student = {
   _id: string;
   name: string;
   path: string;
+  level?: number;
   halqa: { _id: string; name: string } | string;
   masjid: { _id: string; name: string } | string;
   attendancePct: number;

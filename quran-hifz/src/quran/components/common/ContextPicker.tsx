@@ -27,6 +27,14 @@ export function halqaToContext(h: Halqa): TeachingContext {
   };
 }
 
+/** A track with no direct enrollment isn't a valid attendance/homework
+ * context on its own — its real students live on its halaqat instead, which
+ * already appear as their own halqa contexts. Filter tracks through this
+ * before mapping with trackToContext. */
+export function hasDirectEnrollment(t: SpecialTrack): boolean {
+  return t.enrolledStudents.length > 0;
+}
+
 export function trackToContext(t: SpecialTrack): TeachingContext {
   return {
     kind: "specialTrack",

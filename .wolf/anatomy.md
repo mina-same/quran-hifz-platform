@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-12T12:10:20.576Z
-> Files: 447 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-21T22:37:14.700Z
+> Files: 449 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/
 
@@ -386,7 +386,7 @@
 - `auth.controller.ts` — Zod schemas: loginSchema (~481 tok)
 - `evaluation.controller.ts` — Fixed-weight evaluation rubric: حضور 3 + حفظ 4 + تجويد 2 + تلاوة 1 = 10. (~1524 tok)
 - `group-homework.controller.ts` — Zod schemas: groupHomeworkSchema (~495 tok)
-- `halqa.controller.ts` — Zod schemas: halqaSchema (~878 tok)
+- `halqa.controller.ts` — Zod schemas: halqaSchema (~889 tok)
 - `hifz.controller.ts` — Zod schemas: entrySchema (~739 tok)
 - `homework.controller.ts` — Zod schemas: homeworkSchema, reviewSchema (~750 tok)
 - `kpi.controller.ts` — Zod schemas: kpiSchema (~389 tok)
@@ -424,7 +424,7 @@
 - `Attendance.model.ts` — Exports IAttendance, Attendance (~378 tok)
 - `Evaluation.model.ts` — Exports IEvaluationScores, IEvaluation, Evaluation (~541 tok)
 - `GroupHomework.model.ts` — Exports IGroupHomework, GroupHomework (~242 tok)
-- `Halqa.model.ts` — Exports IHalqa, Halqa (~336 tok)
+- `Halqa.model.ts` — Exports IHalqa, Halqa (~366 tok)
 - `HifzEntry.model.ts` — Exports IHifzEntry, HifzEntry (~267 tok)
 - `Homework.model.ts` — Exports IHomework, Homework (~373 tok)
 - `IndividualPlan.model.ts` — Exports IIndividualPlan, IndividualPlan (~302 tok)
@@ -464,7 +464,9 @@
 ## quran-hifz-server/src/seeds/
 
 - `backfillPlans.ts` — Additive-only script — for every Halqa or SpecialTrack that has no QuranPlan (~1052 tok)
+- `import-real-halaqat.ts` — One-time import of real special-track/halqa/teacher/student data. (~1724 tok)
 - `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~4682 tok)
+- `wipe-all.ts` — One-time full wipe of the local dev database before importing real data. (~559 tok)
 
 ## quran-hifz-server/src/types/
 
@@ -582,7 +584,7 @@
 - `attendance.ts` — ATTENDANCE_PREFILL_TRACK_KEY (bare track-id sessionStorage handoff), AttendanceRecord/Filters, useAttendance, useRecordAttendance, useBulkAttendance. halqa/specialTrack only, no `plan` field (~699 tok)
 - `evaluations.ts` — EvaluationRecord/Filters, useEvaluations (pass `undefined` to skip fetching), useBulkEvaluate. halqa/specialTrack only, no `plan` field (~709 tok)
 - `group-homework.ts` — Exports GroupHomework, useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework (~359 tok)
-- `halqat.ts` — Exports Halqa, HalqaFilters, useHalqat, useHalqa + 3 more (~589 tok)
+- `halqat.ts` — Exports Halqa, HalqaFilters, useHalqat, useHalqa + 3 more (~608 tok)
 - `hifz.ts` — Exports HifzEntry, useHifz, useUpsertHifz, useDeleteHifz (~388 tok)
 - `homework.ts` — Exports Homework, HomeworkFilters, useHomework, useCreateHomework + 2 more (~628 tok)
 - `kpis.ts` — Exports Kpi, useKpis, useCreateKpi, useUpdateKpi (~314 tok)
@@ -594,7 +596,7 @@
 - `special-tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~891 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~166 tok)
 - `student-plan-progress.ts` — False when the student has no individual overlay yet — `effectiveSchedule` (~1673 tok)
-- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~803 tok)
+- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~788 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~504 tok)
 
 ## quran-hifz/src/quran/components/
@@ -612,7 +614,7 @@
 - `Badge.tsx` — Badge (~83 tok)
 - `BentoTile.tsx` — Bento-grid tile: a flatter, lighter-weight alternative to `Card` — small (~313 tok)
 - `Card.tsx` — Card (~181 tok)
-- `ContextPicker.tsx` — Unified shape for "teaching context" — a Halqa or a SpecialTrack only (~1166 tok)
+- `ContextPicker.tsx` — Unified shape for "teaching context" — either a Halqa or a SpecialTrack. (~1352 tok)
 - `DaysOfWeekPicker.tsx` — WEEK_DAYS (~481 tok)
 - `Donut.tsx` — Reusable donut chart with a centered label and optional legend. (~766 tok)
 - `FormSection.tsx` — FormSection (~195 tok)
@@ -693,11 +695,11 @@
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~11698 tok)
-- `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1419 tok)
+- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~11712 tok)
+- `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1433 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
-- `TeacherGroupHomework.tsx` — STUDENTS (~2926 tok)
-- `TeacherHalqa.tsx` — TeacherHalqa (~210 tok)
+- `TeacherGroupHomework.tsx` — STUDENTS (~2940 tok)
+- `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
 - `TeacherPlanDetail.tsx` — surahName — renders table (~3558 tok)
 - `TeacherPlanForm.tsx` — Create/edit plan form; tracks saved `planRecord` (no auto-nav on save, toast instead) and shows a "طلاب الخطة" roster card (halqa/specialTrack/students) with per-student `IndividualPlanPanel` (~7100 tok)
@@ -706,8 +708,8 @@
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
 - `TeacherSpecialTracks.tsx` — surahName (~2758 tok)
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
-- `TeacherStudents.tsx` — Single unified table (halqa students + special-track-only students merged by id), one filter dropdown (كل الطلاب / per-halqa / per-track) replaces old tab UI. Shows guardian name/phone + track badges columns (~2700 tok)
-- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~16992 tok)
+- `TeacherStudents.tsx` — HW_TONE — renders table (~2468 tok)
+- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~17250 tok)
 
 ## quran-hifz/src/quran/router/
 

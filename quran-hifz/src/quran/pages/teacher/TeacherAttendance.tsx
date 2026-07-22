@@ -9,6 +9,7 @@ import {
   ContextPicker,
   halqaToContext,
   trackToContext,
+  hasDirectEnrollment,
   type TeachingContext,
 } from "../../components/common/ContextPicker";
 import { SkeletonCard, SkeletonTable } from "../../components/common/Skeleton";
@@ -143,7 +144,7 @@ export function TeacherAttendance() {
 
   const contexts: TeachingContext[] = [
     ...halqat.map(halqaToContext),
-    ...tracks.map(trackToContext),
+    ...tracks.filter(hasDirectEnrollment).map(trackToContext),
   ];
 
   // Deep link from the Special Tracks page's "تسجيل الحضور" button.

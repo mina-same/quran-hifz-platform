@@ -7,7 +7,7 @@ import { useSpecialTracks } from "../../api/special-tracks";
 import { Card } from "../../components/common/Card";
 import { Alert } from "../../components/common/Alert";
 import { Badge } from "../../components/common/Badge";
-import { ContextPicker, halqaToContext, trackToContext, type TeachingContext } from "../../components/common/ContextPicker";
+import { ContextPicker, halqaToContext, trackToContext, hasDirectEnrollment, type TeachingContext } from "../../components/common/ContextPicker";
 import { SkeletonCard, SkeletonList } from "../../components/common/Skeleton";
 
 const STUDENTS = ["عبدالله الحميداني", "يوسف الزهراني", "أحمد الشهري", "فارس العسيري", "سالم الدوسري"];
@@ -98,7 +98,7 @@ export function TeacherGroupHomework() {
   const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, user?.profileId as string | undefined);
   const contexts: TeachingContext[] = [
     ...halqat.map(halqaToContext),
-    ...tracks.map(trackToContext),
+    ...tracks.filter(hasDirectEnrollment).map(trackToContext),
   ];
 
   const { data: homeworks, isLoading } = useGroupHomework(

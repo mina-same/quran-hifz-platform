@@ -25,6 +25,7 @@ export async function getHalqat(req: Request, res: Response, next: NextFunction)
     const halqat = await Halqa.find(filter)
       .populate('teacher', 'name specialty')
       .populate('masjid',  'name location')
+      .populate('specialTrack', 'title')
       .sort({ name: 1 });
 
     const enriched = await Promise.all(

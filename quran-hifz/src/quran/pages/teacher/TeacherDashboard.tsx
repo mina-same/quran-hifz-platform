@@ -9,7 +9,7 @@ import { useHalqat } from "../../api/halqat";
 import { useSpecialTracks } from "../../api/special-tracks";
 import { useHomework } from "../../api/homework";
 import { toAr } from "../../../lib/format";
-import { halqaToContext, trackToContext } from "../../components/common/ContextPicker";
+import { halqaToContext, trackToContext, hasDirectEnrollment } from "../../components/common/ContextPicker";
 
 export function TeacherDashboard() {
   const { showPage, user } = usePortal();
@@ -18,7 +18,7 @@ export function TeacherDashboard() {
   const { data: tracks = [] } = useSpecialTracks(undefined, user?.profileId as string | undefined);
   const { data: pendingHW = [] } = useHomework({ teacher: user?.profileId, status: "معلق" });
 
-  const contexts = [...halqat.map(halqaToContext), ...tracks.map(trackToContext)];
+  const contexts = [...halqat.map(halqaToContext), ...tracks.filter(hasDirectEnrollment).map(trackToContext)];
   const totalStudents = contexts.reduce((sum, c) => sum + (c.studentCount ?? 0), 0);
 
   useTopbar(

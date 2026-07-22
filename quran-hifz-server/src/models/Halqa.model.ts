@@ -4,7 +4,7 @@ export interface IHalqa extends Document {
   name: string;
   teacher: Types.ObjectId;
   masjid: Types.ObjectId;
-  course?: Types.ObjectId;
+  specialTrack?: Types.ObjectId;
   days: string;
   time: string;
   capacity: number;
@@ -19,7 +19,7 @@ const halqaSchema = new Schema<IHalqa>(
     name:          { type: String, required: true, trim: true },
     teacher:       { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
     masjid:        { type: Schema.Types.ObjectId, ref: 'Masjid',  required: true },
-    course:        { type: Schema.Types.ObjectId, ref: 'Course' },
+    specialTrack:  { type: Schema.Types.ObjectId, ref: 'SpecialTrack' },
     days:          { type: String, required: true },
     time:          { type: String, required: true },
     capacity:      { type: Number, default: 15, min: 1 },
