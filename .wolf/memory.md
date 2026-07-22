@@ -1928,3 +1928,12 @@
 | 15:19 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 3→7 lines | ~105 |
 | 15:19 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 8→8 lines | ~225 |
 | 15:20 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 2→2 lines | ~47 |
+| 15:38 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | 2→2 lines | ~19 |
+| 15:38 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | removed 14 lines | ~7 |
+| 15:39 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | reduced (-8 lines) | ~189 |
+| 15:39 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | removed 31 lines | ~86 |
+| 15:39 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | reduced (-15 lines) | ~278 |
+| 15:40 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | 6→5 lines | ~71 |
+| 15:40 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | 3→3 lines | ~62 |
+| --:-- | Track detail: disabled per-student save when no active plan (noActivePlan) + reworded warning. Plan form: removed كل الطلاب/فقط من ليس لديه خطة scope + بدون خطة badges (kept level); per-student individual plan stays gated on saving halqa plan first | TeacherTrackDetail.tsx, TeacherPlanForm.tsx | typechecks clean | ~med |
+| 15:41 | Session end: 90 writes across 21 files (wipe-all.ts, Halqa.model.ts, import-real-halaqat.ts, halqa.controller.ts, halqat.ts) | 38 reads | ~115178 tok |

@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
 import {
-  useCreateQuranPlan, useUpdateQuranPlan, useQuranPlans,
+  useCreateQuranPlan, useUpdateQuranPlan,
   PLAN_FORM_HANDOFF_KEY,
   type PlanFormHandoff, type PlanType, type RangePoint, type QuranPlan,
 } from "../../api/quran-plans";
@@ -26,8 +26,8 @@ const PLAN_TYPES: { value: PlanType; label: string; icon: string; fg: string; bg
 ];
 
 // Plans are halqa-based only. "طلاب محددون" and "مسار" targets are intentionally
-// not offered here — per-student differentiation happens inside the halqa flow
-// (the "فقط من ليس لديه خطة" scope + individual per-student plans).
+// not offered here — per-student differentiation happens via individual plans,
+// managed per student after the halqa plan is saved.
 const TARGET_TYPES: { value: "halqa" | "students" | "specialTrack"; label: string; icon: string }[] = [
   { value: "halqa",        label: "حلقة كاملة",    icon: "ti-school" },
 ];
@@ -124,19 +124,6 @@ export function TeacherPlanForm() {
   const { data: halqaStudents = [] } = useStudents({ halqa: form.halqa }, { enabled: form.targetType === "halqa" && !!form.halqa });
   const { data: trackStudents = [] } = useStudents({ specialTrack: form.specialTrack }, { enabled: form.targetType === "specialTrack" && !!form.specialTrack });
 
-  // Which students already have a plan that names them directly (targetType
-  // "students"). A student covered only by a whole-halqa plan is NOT counted —
-  // per the chosen definition — so the "students without a plan" scope below
-  // still includes them.
-  const { data: teacherPlans = [] } = useQuranPlans({ teacher: teacherId });
-  const studentsWithNamedPlan = new Set<string>();
-  for (const p of teacherPlans) {
-    if (p.targetType === "students") (p.students ?? []).forEach((st) => studentsWithNamedPlan.add(getId(st)));
-  }
-
-  // Scope only applies to a whole-halqa target: apply to all students, or only
-  // to those who don't yet have a named plan.
-  const [halqaScope, setHalqaScope] = useState<"all" | "withoutPlan">("all");
   const rosterStudents =
     form.targetType === "halqa" ? halqaStudents :
     form.targetType === "specialTrack" ? trackStudents :
@@ -153,14 +140,6 @@ export function TeacherPlanForm() {
     if (form.endType === "activeDays" && !form.activeDaysCount) { setFormError("يرجى تحديد عدد الأيام النشطة"); return; }
     if (form.endType === "date" && !form.endDate) { setFormError("يرجى تحديد تاريخ الانتهاء"); return; }
 
-    // "Only students without a plan" scope: send as a students-target plan
-    // limited to the halqa students who don't already have a named plan.
-    const useWithoutPlan = form.targetType === "halqa" && halqaScope === "withoutPlan";
-    const withoutPlanIds = halqaStudents.filter((s) => !studentsWithNamedPlan.has(s._id)).map((s) => s._id);
-    if (useWithoutPlan && withoutPlanIds.length === 0) {
-      setFormError("كل طلاب الحلقة لديهم خطة بالفعل — لا يوجد من تُطبَّق عليه الخطة"); return;
-    }
-
     // rangeStart may deliberately sit after rangeEnd in mushaf order — a
     // reverse-direction plan (e.g. starting at An-Nas and working backward
     // toward Al-Fatiha) — so no ordering check here.
@@ -168,9 +147,9 @@ export function TeacherPlanForm() {
     const body: Record<string, unknown> = {
       name: form.name.trim(), type: form.type, description: form.description.trim() || undefined,
       teacher: teacherId,
-      targetType: useWithoutPlan ? "students" : form.targetType,
-      halqa: (form.targetType === "halqa" && !useWithoutPlan) ? form.halqa : undefined,
-      students: useWithoutPlan ? withoutPlanIds : (form.targetType === "students" ? form.students : undefined),
+      targetType: form.targetType,
+      halqa: form.targetType === "halqa" ? form.halqa : undefined,
+      students: form.targetType === "students" ? form.students : undefined,
       specialTrack: form.targetType === "specialTrack" ? form.specialTrack : undefined,
       days: form.days,
       rangeStart: form.rangeStart, rangeEnd: form.rangeEnd,
@@ -312,31 +291,6 @@ export function TeacherPlanForm() {
               <option value="">— اختر حلقة —</option>
               {halqat.map((h) => <option key={h._id} value={h._id}>{h.name}</option>)}
             </select>
-
-            {form.halqa && (
-              <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
-                {([
-                  { v: "all",         label: "كل طلاب الحلقة",          icon: "ti-users" },
-                  { v: "withoutPlan", label: "فقط من ليس لديه خطة",     icon: "ti-user-plus" },
-                ] as const).map((opt) => (
-                  <button
-                    key={opt.v}
-                    type="button"
-                    onClick={() => setHalqaScope(opt.v)}
-                    style={{
-                      flex: "1 1 160px", padding: "9px 0", borderRadius: 9, cursor: "pointer",
-                      border: `2px solid ${halqaScope === opt.v ? "var(--green)" : "var(--border)"}`,
-                      background: halqaScope === opt.v ? "var(--green-pale)" : "var(--cream)",
-                      color: halqaScope === opt.v ? "var(--green)" : "var(--text2)",
-                      fontWeight: halqaScope === opt.v ? 700 : 400, fontSize: 12,
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                    }}
-                  >
-                    <i className={`ti ${opt.icon}`} /> {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         )}
         {form.targetType === "students" && (
@@ -372,11 +326,8 @@ export function TeacherPlanForm() {
             </div>
           )}
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {rosterStudents.map((s) => {
-              const hasNamedPlan = studentsWithNamedPlan.has(s._id);
-              const willSkip = form.targetType === "halqa" && halqaScope === "withoutPlan" && hasNamedPlan;
-              return (
-              <div key={s._id} style={{ border: "1px solid var(--border)", borderRadius: 10, padding: "10px 12px", opacity: willSkip ? 0.5 : 1 }}>
+            {rosterStudents.map((s) => (
+              <div key={s._id} style={{ border: "1px solid var(--border)", borderRadius: 10, padding: "10px 12px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                   <span style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flexWrap: "wrap" }}>
                     <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>{s.name}</span>
@@ -387,18 +338,6 @@ export function TeacherPlanForm() {
                         borderRadius: 99, padding: "2px 8px",
                       }}>
                         المستوى {toAr(s.level)}
-                      </span>
-                    )}
-                    <span style={{
-                      fontSize: 10, fontWeight: 700, flexShrink: 0, borderRadius: 99, padding: "2px 8px",
-                      background: hasNamedPlan ? "var(--gold-pale)" : "var(--cream)",
-                      color: hasNamedPlan ? "#92400e" : "var(--text3)",
-                    }}>
-                      {hasNamedPlan ? "لديه خطة" : "بدون خطة"}
-                    </span>
-                    {willSkip && (
-                      <span style={{ fontSize: 10, fontWeight: 700, flexShrink: 0, color: "var(--text3)" }}>
-                        — سيُستثنى
                       </span>
                     )}
                   </span>
@@ -422,8 +361,7 @@ export function TeacherPlanForm() {
                   <IndividualPlanPanel planId={planRecord._id} studentId={s._id} studentName={s.name} basePlan={planRecord} />
                 )}
               </div>
-              );
-            })}
+            ))}
           </div>
         </Card>
       )}

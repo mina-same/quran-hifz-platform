@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T12:20:16.184Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T12:40:21.787Z
 > Files: 451 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/
@@ -704,7 +704,7 @@
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
 - `TeacherPlanDetail.tsx` — surahName — renders table (~3558 tok)
-- `TeacherPlanForm.tsx` — PLAN_TYPES — renders form (~7647 tok)
+- `TeacherPlanForm.tsx` — PLAN_TYPES — renders form (~6635 tok)
 - `TeacherPlans.tsx` — surahName (~4262 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
