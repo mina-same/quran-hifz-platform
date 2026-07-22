@@ -31,6 +31,13 @@ const ROLE_PASSWORD: Record<'teacher' | 'student', string> = {
   student: 'student@123',
 };
 
+// Source dataset has no admin account — seed one so the imported DB is usable.
+const ADMIN_ACCOUNT = {
+  name:     'مدير النظام',
+  email:    `admin@${EMAIL_DOMAIN}`,
+  password: 'admin@123',
+};
+
 function toNewEmail(originalEmail: string): string {
   const localPart = originalEmail.split('@')[0];
   return `${localPart}@${EMAIL_DOMAIN}`;
@@ -82,6 +89,16 @@ async function importData(): Promise<void> {
   let teacherCount = 0;
   let studentCount = 0;
   let userCount = 0;
+
+  await new User({
+    name:     ADMIN_ACCOUNT.name,
+    email:    ADMIN_ACCOUNT.email,
+    password: ADMIN_ACCOUNT.password,
+    role:     'admin',
+    isActive: true,
+  }).save();
+  userCount++;
+  console.log(`👤  Seeded admin account: ${ADMIN_ACCOUNT.email}`);
 
   for (const courseJson of data.courses) {
     const masjidName = COURSE_MASJID[courseJson.id] ?? courseJson.name;
@@ -169,7 +186,7 @@ async function importData(): Promise<void> {
   console.log(`🕌  Halaqat:  ${halqaCount} (expected ${data.totals.halaqat})`);
   console.log(`👨‍🏫  Teachers: ${teacherCount} (expected ${data.totals.teachers})`);
   console.log(`🧑‍🎓  Students: ${studentCount} (expected ${data.totals.students})`);
-  console.log(`👤  Users:    ${userCount} (expected ${data.totals.accounts})`);
+  console.log(`👤  Users:    ${userCount} (expected ${data.totals.accounts + 1} — includes 1 admin)`);
 
   await mongoose.disconnect();
   console.log('✅  Import complete — database disconnected');

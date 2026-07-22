@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed": "ts-node src/seeds/seed.ts",
+    "ensure-admin": "ts-node src/seeds/ensure-admin.ts",
     "backfill-plans": "ts-node src/seeds/backfillPlans.ts",
     "lint": "eslint src --ext .ts"
   },

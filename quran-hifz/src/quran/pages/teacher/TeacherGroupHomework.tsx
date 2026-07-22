@@ -155,7 +155,7 @@ export function TeacherGroupHomework() {
         contexts={contexts}
         onSelect={setSelected}
         emptyLabel="لا توجد حلقات أو مسارات مسجلة لهذا المعلم"
-        heading="اختر الحلقة أو المسار الاستثنائي لإسناد واجب جماعي له"
+        heading="اختر الحلقة أو المسار لإسناد واجب جماعي له"
         actionLabel="إسناد واجب جماعي"
         actionIcon="ti-list-check"
       />

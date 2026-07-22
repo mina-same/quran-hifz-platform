@@ -55,6 +55,13 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     reports:        AdminReports,
     special_tracks: AdminSpecialTracks,
     parents:        AdminParents,
+    // Admin reuses the teacher's track detail (and the pages it navigates to).
+    // `specialtracks` (no underscore) aliases the tracks list so the detail's
+    // back button lands back here under the admin portal.
+    trackdetail:    TeacherTrackDetail,
+    specialtracks:  AdminSpecialTracks,
+    planform:       TeacherPlanForm,
+    attendance:     TeacherAttendance,
   },
   teacher: {
     dashboard:     TeacherDashboard,

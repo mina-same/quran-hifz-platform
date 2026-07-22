@@ -30,7 +30,7 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
       { group: "الأنشطة", items: [
         { id: "attendance",    icon: "ti-calendar-check",  label: "الحضور والغياب" },
         { id: "schedule",      icon: "ti-clock",           label: "مواعيد حلقتي" },
-        { id: "specialtracks", icon: "ti-calendar-event",  label: "مساراتي الاستثنائية" },
+        { id: "specialtracks", icon: "ti-calendar-event",  label: "مساراتي" },
       ]},
       { group: "النقاط والمكافآت", items: [
         { id: "points", icon: "ti-star",          label: "نقاطي" },
@@ -50,7 +50,7 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
       ]},
       { group: "الحلقات", items: [
         { id: "myhalqa",       icon: "ti-school",          label: "حلقاتي" },
-        { id: "specialtracks", icon: "ti-calendar-event",  label: "مساراتي الاستثنائية" },
+        { id: "specialtracks", icon: "ti-calendar-event",  label: "مساراتي" },
         { id: "students",      icon: "ti-users",           label: "طلابي" },
         { id: "attendance",    icon: "ti-calendar-check",  label: "الحضور والتقييم",    dot: true },
         { id: "recordlesson",  icon: "ti-player-record",   label: "سجّل درس الحلقة",   dot: true },
@@ -79,7 +79,7 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
       { group: "الحلقات والمساجد", items: [
         { id: "halqat",         icon: "ti-school",          label: "الحلقات" },
         { id: "masajid",        icon: "ti-building-arch",   label: "المساجد" },
-        { id: "special_tracks", icon: "ti-calendar-event",  label: "المسارات الاستثنائية", dot: true },
+        { id: "special_tracks", icon: "ti-calendar-event",  label: "المسارات", dot: true },
       ]},
       { group: "التقارير", items: [
         { id: "kpis",    icon: "ti-target",    label: "مؤشرات الأداء" },

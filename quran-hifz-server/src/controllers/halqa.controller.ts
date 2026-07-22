@@ -8,6 +8,7 @@ const halqaSchema = z.object({
   name:          z.string().min(2, 'اسم الحلقة مطلوب'),
   teacher:       z.string().min(1, 'المعلم مطلوب'),
   masjid:        z.string().min(1, 'المسجد مطلوب'),
+  specialTrack:  z.string().min(1, 'المسار مطلوب'),
   days:          z.string().min(1, 'أيام الحلقة مطلوبة'),
   time:          z.string().min(1, 'وقت الحلقة مطلوب'),
   capacity:      z.number().min(1).optional(),

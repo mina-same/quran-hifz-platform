@@ -164,7 +164,7 @@ export function TeacherStudents() {
                 </optgroup>
               )}
               {myTracks.length > 0 && (
-                <optgroup label="المسارات الاستثنائية">
+                <optgroup label="المسارات">
                   {myTracks.map((t) => (
                     <option key={t._id} value={`track:${t._id}`}>{t.title}</option>
                   ))}
@@ -179,7 +179,7 @@ export function TeacherStudents() {
                 <tr>
                   <th>الطالب</th>
                   <th>الحلقة</th>
-                  <th>المسارات الاستثنائية</th>
+                  <th>المسارات</th>
                   <th>ولي الأمر</th>
                   <th>رقم ولي الأمر</th>
                   <th>آخر حفظ</th>

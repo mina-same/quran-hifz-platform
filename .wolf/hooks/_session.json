@@ -141,6 +141,41 @@
       "count": 2,
       "tokens": 2926,
       "first_read": "2026-07-21T22:36:49.611Z"
+    },
+    "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/seeds/seed.ts": {
+      "count": 1,
+      "tokens": 4682,
+      "first_read": "2026-07-22T09:46:42.478Z"
+    },
+    "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/seeds/import-real-halaqat.ts": {
+      "count": 1,
+      "tokens": 1724,
+      "first_read": "2026-07-22T09:47:01.877Z"
+    },
+    "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx": {
+      "count": 1,
+      "tokens": 210,
+      "first_read": "2026-07-22T09:53:41.680Z"
+    },
+    "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/api/halqat.ts": {
+      "count": 1,
+      "tokens": 608,
+      "first_read": "2026-07-22T09:54:07.606Z"
+    },
+    "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminMasajid.tsx": {
+      "count": 1,
+      "tokens": 2682,
+      "first_read": "2026-07-22T09:54:20.654Z"
+    },
+    "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx": {
+      "count": 1,
+      "tokens": 2758,
+      "first_read": "2026-07-22T09:57:45.452Z"
+    },
+    "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx": {
+      "count": 2,
+      "tokens": 13252,
+      "first_read": "2026-07-22T10:21:21.327Z"
     }
   },
   "files_written": [
@@ -347,13 +382,175 @@
       "action": "edit",
       "tokens": 11,
       "at": "2026-07-21T22:37:14.727Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/seeds/import-real-halaqat.ts",
+      "action": "edit",
+      "tokens": 100,
+      "at": "2026-07-22T09:47:46.845Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/seeds/import-real-halaqat.ts",
+      "action": "edit",
+      "tokens": 94,
+      "at": "2026-07-22T09:47:52.907Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/seeds/import-real-halaqat.ts",
+      "action": "edit",
+      "tokens": 30,
+      "at": "2026-07-22T09:48:03.631Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/seeds/ensure-admin.ts",
+      "action": "create",
+      "tokens": 420,
+      "at": "2026-07-22T09:52:25.430Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/package.json",
+      "action": "edit",
+      "tokens": 28,
+      "at": "2026-07-22T09:52:30.400Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "action": "create",
+      "tokens": 3378,
+      "at": "2026-07-22T09:55:17.266Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "action": "edit",
+      "tokens": 22,
+      "at": "2026-07-22T09:55:59.003Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/controllers/halqa.controller.ts",
+      "action": "edit",
+      "tokens": 77,
+      "at": "2026-07-22T10:07:54.770Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "action": "edit",
+      "tokens": 58,
+      "at": "2026-07-22T10:08:04.979Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "action": "edit",
+      "tokens": 42,
+      "at": "2026-07-22T10:08:12.523Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "action": "edit",
+      "tokens": 65,
+      "at": "2026-07-22T10:08:18.562Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "action": "edit",
+      "tokens": 54,
+      "at": "2026-07-22T10:08:30.975Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "action": "edit",
+      "tokens": 50,
+      "at": "2026-07-22T10:08:39.983Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "action": "edit",
+      "tokens": 105,
+      "at": "2026-07-22T10:08:47.253Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "action": "edit",
+      "tokens": 179,
+      "at": "2026-07-22T10:09:02.760Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "action": "edit",
+      "tokens": 90,
+      "at": "2026-07-22T10:09:14.316Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminHalqat.tsx",
+      "action": "edit",
+      "tokens": 92,
+      "at": "2026-07-22T10:09:20.357Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "action": "edit",
+      "tokens": 73,
+      "at": "2026-07-22T10:22:04.024Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "action": "edit",
+      "tokens": 102,
+      "at": "2026-07-22T10:22:14.852Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "action": "edit",
+      "tokens": 332,
+      "at": "2026-07-22T10:22:29.181Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "action": "edit",
+      "tokens": 81,
+      "at": "2026-07-22T10:22:36.822Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "action": "edit",
+      "tokens": 42,
+      "at": "2026-07-22T10:22:43.127Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "action": "edit",
+      "tokens": 84,
+      "at": "2026-07-22T10:22:55.551Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+      "action": "edit",
+      "tokens": 77,
+      "at": "2026-07-22T10:23:08.930Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/router/pageRegistry.ts",
+      "action": "edit",
+      "tokens": 148,
+      "at": "2026-07-22T10:25:23.317Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/seeds/list-users.ts",
+      "action": "create",
+      "tokens": 146,
+      "at": "2026-07-22T10:51:14.284Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/seeds/list-users.ts",
+      "action": "create",
+      "tokens": 540,
+      "at": "2026-07-22T10:51:51.802Z"
     }
   ],
   "edit_counts": {
     "quran-hifz-server/src/seeds/wipe-all.ts": 4,
     "quran-hifz-server/src/models/Halqa.model.ts": 2,
-    "quran-hifz-server/src/seeds/import-real-halaqat.ts": 9,
-    "quran-hifz-server/src/controllers/halqa.controller.ts": 1,
+    "quran-hifz-server/src/seeds/import-real-halaqat.ts": 12,
+    "quran-hifz-server/src/controllers/halqa.controller.ts": 2,
     "quran-hifz/src/quran/api/halqat.ts": 1,
     "quran-hifz/src/quran/pages/teacher/TeacherHalqa.tsx": 2,
     "quran-hifz/src/quran/api/students.ts": 1,
@@ -362,11 +559,17 @@
     "quran-hifz/src/quran/components/common/ContextPicker.tsx": 1,
     "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx": 2,
     "quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx": 2,
-    "quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx": 2
+    "quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx": 2,
+    "quran-hifz-server/src/seeds/ensure-admin.ts": 1,
+    "quran-hifz-server/package.json": 1,
+    "quran-hifz/src/quran/pages/admin/AdminHalqat.tsx": 11,
+    "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx": 7,
+    "quran-hifz/src/quran/router/pageRegistry.ts": 1,
+    "quran-hifz-server/src/seeds/list-users.ts": 2
   },
-  "anatomy_hits": 23,
+  "anatomy_hits": 30,
   "anatomy_misses": 5,
-  "repeated_reads_warned": 9,
+  "repeated_reads_warned": 10,
   "cerebrum_warnings": 0,
-  "stop_count": 10
+  "stop_count": 14
 }

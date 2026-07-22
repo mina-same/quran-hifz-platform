@@ -125,7 +125,7 @@ function TrackCard({ track, onOpen }: { track: SpecialTrack; onOpen: (t: Special
 
 /* ════════════════════════════════════════════════ */
 export function TeacherSpecialTracks() {
-  useTopbar("ti-calendar-event", "مساراتي الاستثنائية");
+  useTopbar("ti-calendar-event", "مساراتي");
   const { user, showPage } = usePortal();
   const teacherId = user?.profileId as string | undefined;
 

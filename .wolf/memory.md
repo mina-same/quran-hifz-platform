@@ -1868,3 +1868,36 @@
 | 01:37 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | inline fix | ~10 |
 | 01:37 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | inline fix | ~11 |
 | 01:37 | Session end: 34 writes across 13 files (wipe-all.ts, Halqa.model.ts, import-real-halaqat.ts, halqa.controller.ts, halqat.ts) | 28 reads | ~52310 tok |
+| 12:47 | Edited quran-hifz-server/src/seeds/import-real-halaqat.ts | expanded (+7 lines) | ~100 |
+| 12:47 | Edited quran-hifz-server/src/seeds/import-real-halaqat.ts | modified for() | ~94 |
+| 12:48 | Edited quran-hifz-server/src/seeds/import-real-halaqat.ts | "👤  Users:    ${userCount" → "👤  Users:    ${userCount" | ~30 |
+| 12:48 | Session end: 37 writes across 13 files (wipe-all.ts, Halqa.model.ts, import-real-halaqat.ts, halqa.controller.ts, halqat.ts) | 30 reads | ~58940 tok |
+| 12:52 | Created quran-hifz-server/src/seeds/ensure-admin.ts | — | ~420 |
+| 12:52 | Edited quran-hifz-server/package.json | 1→2 lines | ~28 |
+| 12:52 | Session end: 39 writes across 15 files (wipe-all.ts, Halqa.model.ts, import-real-halaqat.ts, halqa.controller.ts, halqat.ts) | 30 reads | ~59388 tok |
+| 12:55 | Created quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | — | ~3378 |
+| 12:55 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | "amber" → "gold" | ~22 |
+| 13:07 | Edited quran-hifz-server/src/controllers/halqa.controller.ts | 4→5 lines | ~77 |
+| 13:08 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | added 1 import(s) | ~58 |
+| 13:08 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | 2→3 lines | ~42 |
+| 13:08 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | 4→5 lines | ~65 |
+| 13:08 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | 8→9 lines | ~54 |
+| 13:08 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | 4→5 lines | ~50 |
+| 13:08 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | 12→13 lines | ~105 |
+| 13:09 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | expanded (+10 lines) | ~179 |
+| 13:09 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | CSS: title | ~90 |
+| 13:09 | Edited quran-hifz/src/quran/pages/admin/AdminHalqat.tsx | 3→6 lines | ~92 |
+| --:-- | Built AdminHalqat CRUD page (was placeholder); added required مسار selector + server specialTrack schema; renamed المسارات الاستثنائية→المسارات across 8 files; added ensure-admin seed | AdminHalqat.tsx, halqa.controller.ts, ensure-admin.ts, +8 label files | typechecks clean | ~large |
+| 13:22 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | CSS: onOpen | ~73 |
+| 13:22 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | CSS: cursor | ~102 |
+| 13:22 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | 22→22 lines | ~332 |
+| 13:22 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | 4→4 lines | ~81 |
+| 13:22 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | 3→4 lines | ~42 |
+| 13:22 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | added 1 import(s) | ~84 |
+| 13:23 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | CSS: track | ~77 |
+| 13:25 | Edited quran-hifz/src/quran/router/pageRegistry.ts | expanded (+7 lines) | ~148 |
+| --:-- | Admin مسارات cards now click-to-open teacher TrackDetail (kept manage/edit/delete via stopPropagation); registered admin routes trackdetail/specialtracks/planform/attendance | AdminSpecialTracks.tsx, pageRegistry.ts | typechecks clean | ~med |
+| 13:26 | Session end: 59 writes across 18 files (wipe-all.ts, Halqa.model.ts, import-real-halaqat.ts, halqa.controller.ts, halqat.ts) | 35 reads | ~84049 tok |
+| 13:51 | Created quran-hifz-server/src/seeds/list-users.ts | — | ~146 |
+| 13:51 | Created quran-hifz-server/src/seeds/list-users.ts | — | ~540 |
+| 13:52 | Session end: 61 writes across 19 files (wipe-all.ts, Halqa.model.ts, import-real-halaqat.ts, halqa.controller.ts, halqat.ts) | 35 reads | ~84735 tok |

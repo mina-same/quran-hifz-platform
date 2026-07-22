@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-21T22:37:14.700Z
-> Files: 449 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T10:51:51.781Z
+> Files: 451 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/
 
@@ -360,7 +360,7 @@
 
 - `.gitignore` — Git ignore rules (~10 tok)
 - `package-lock.json` — npm lock file (~23821 tok)
-- `package.json` — Node.js package manifest (~308 tok)
+- `package.json` — Node.js package manifest (~325 tok)
 - `tsconfig.json` — TypeScript configuration (~128 tok)
 - `vercel.json` (~54 tok)
 
@@ -386,7 +386,7 @@
 - `auth.controller.ts` — Zod schemas: loginSchema (~481 tok)
 - `evaluation.controller.ts` — Fixed-weight evaluation rubric: حضور 3 + حفظ 4 + تجويد 2 + تلاوة 1 = 10. (~1524 tok)
 - `group-homework.controller.ts` — Zod schemas: groupHomeworkSchema (~495 tok)
-- `halqa.controller.ts` — Zod schemas: halqaSchema (~889 tok)
+- `halqa.controller.ts` — Zod schemas: halqaSchema (~904 tok)
 - `hifz.controller.ts` — Zod schemas: entrySchema (~739 tok)
 - `homework.controller.ts` — Zod schemas: homeworkSchema, reviewSchema (~750 tok)
 - `kpi.controller.ts` — Zod schemas: kpiSchema (~389 tok)
@@ -464,7 +464,9 @@
 ## quran-hifz-server/src/seeds/
 
 - `backfillPlans.ts` — Additive-only script — for every Halqa or SpecialTrack that has no QuranPlan (~1052 tok)
-- `import-real-halaqat.ts` — One-time import of real special-track/halqa/teacher/student data. (~1724 tok)
+- `ensure-admin.ts` — Idempotent admin bootstrap. Run:  npm run ensure-admin (~420 tok)
+- `import-real-halaqat.ts` — One-time import of real special-track/halqa/teacher/student data. (~1863 tok)
+- `list-users.ts` — Default seed passwords by role (import-real-halaqat.ts + ensure-admin.ts). (~540 tok)
 - `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~4682 tok)
 - `wipe-all.ts` — One-time full wipe of the local dev database before importing real data. (~559 tok)
 
@@ -662,13 +664,13 @@
 ## quran-hifz/src/quran/pages/admin/
 
 - `AdminDashboard.tsx` — PageLoading (~1287 tok)
-- `AdminHalqat.tsx` — AdminHalqat (~210 tok)
+- `AdminHalqat.tsx` — OVERLAY — renders modal (~3688 tok)
 - `AdminKpis.tsx` — RATING_TONE — renders table (~743 tok)
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~2682 tok)
 - `AdminParents.tsx` — EMPTY_ADD, ChildChip — renders table, modal, search bar, avatars (~5900 tok)
 - `AdminRegister.tsx` — schema — renders form (~3078 tok)
 - `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~324 tok)
-- `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13252 tok)
+- `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13438 tok)
 - `AdminStudents.tsx` — PATH_TONE — renders table (~5092 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4598 tok)
 
@@ -713,7 +715,7 @@
 
 ## quran-hifz/src/quran/router/
 
-- `pageRegistry.ts` — Exports PAGE_REGISTRY (~1244 tok)
+- `pageRegistry.ts` — Exports PAGE_REGISTRY (~1351 tok)
 
 ## quran-hifz/src/routes/
 

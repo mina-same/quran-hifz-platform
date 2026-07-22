@@ -262,7 +262,7 @@ function TrackCard({ track }: { track: SpecialTrack }) {
 }
 
 export function StudentSpecialTracks() {
-  useTopbar("ti-star", "مساراتي الاستثنائية");
+  useTopbar("ti-star", "مساراتي");
   const { user } = usePortal();
 
   const { data: tracks = [], isLoading } = useSpecialTracks(
@@ -290,7 +290,7 @@ export function StudentSpecialTracks() {
             <i className="ti ti-star" />
           </div>
           <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--text)" }}>
-            لم تُسجَّل في أي مسار استثنائي
+            لم تُسجَّل في أي مسار
           </p>
           <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--text3)", maxWidth: 280, marginInline: "auto" }}>
             تواصل مع معلمك أو الإدارة للانضمام إلى أحد البرامج الاستثنائية

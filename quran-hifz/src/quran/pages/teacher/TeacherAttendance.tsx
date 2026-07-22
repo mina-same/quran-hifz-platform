@@ -502,7 +502,7 @@ export function TeacherAttendance() {
         contexts={contexts}
         onSelect={setSelected}
         emptyLabel="لا توجد حلقات أو مسارات مسجلة لهذا المعلم"
-        heading="اختر الحلقة أو المسار الاستثنائي لتسجيل حضور وتقييم اليوم"
+        heading="اختر الحلقة أو المسار لتسجيل حضور وتقييم اليوم"
         actionLabel="أخذ الحضور والتقييم"
         actionIcon="ti-calendar-check"
       />

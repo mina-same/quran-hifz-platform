@@ -27,7 +27,7 @@ const PLAN_TYPES: { value: PlanType; label: string; icon: string; fg: string; bg
 const TARGET_TYPES: { value: "halqa" | "students" | "specialTrack"; label: string; icon: string }[] = [
   { value: "halqa",        label: "حلقة كاملة",    icon: "ti-school" },
   { value: "students",     label: "طلاب محددون",   icon: "ti-user" },
-  { value: "specialTrack", label: "مسار استثنائي", icon: "ti-calendar-event" },
+  { value: "specialTrack", label: "مسار", icon: "ti-calendar-event" },
 ];
 
 type FormFields = {
@@ -133,7 +133,7 @@ export function TeacherPlanForm() {
     if (form.days.length === 0) { setFormError("يرجى اختيار يوم واحد على الأقل"); return; }
     if (form.targetType === "halqa" && !form.halqa) { setFormError("يرجى اختيار حلقة"); return; }
     if (form.targetType === "students" && form.students.length === 0) { setFormError("يرجى اختيار طالب واحد على الأقل"); return; }
-    if (form.targetType === "specialTrack" && !form.specialTrack) { setFormError("يرجى اختيار المسار الاستثنائي"); return; }
+    if (form.targetType === "specialTrack" && !form.specialTrack) { setFormError("يرجى اختيار المسار"); return; }
     if (form.endType === "activeDays" && !form.activeDaysCount) { setFormError("يرجى تحديد عدد الأيام النشطة"); return; }
     if (form.endType === "date" && !form.endDate) { setFormError("يرجى تحديد تاريخ الانتهاء"); return; }
 
@@ -299,13 +299,13 @@ export function TeacherPlanForm() {
         )}
         {form.targetType === "specialTrack" && (
           <div className="form-group">
-            <label className="form-label">المسار الاستثنائي <span>*</span></label>
+            <label className="form-label">المسار <span>*</span></label>
             <select className="form-input" value={form.specialTrack} onChange={(e) => sf("specialTrack", e.target.value)}>
               <option value="">— اختر مساراً —</option>
               {specialTracks.map((t) => <option key={t._id} value={t._id}>{t.title}</option>)}
             </select>
             {specialTracks.length === 0 && (
-              <p style={{ margin: "6px 0 0", fontSize: 11, color: "var(--text3)" }}>لا يوجد مسارات استثنائية مرتبطة بك بعد</p>
+              <p style={{ margin: "6px 0 0", fontSize: 11, color: "var(--text3)" }}>لا يوجد مسارات مرتبطة بك بعد</p>
             )}
           </div>
         )}

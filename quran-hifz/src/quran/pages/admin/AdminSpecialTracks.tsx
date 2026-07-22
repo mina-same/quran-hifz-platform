@@ -1,8 +1,10 @@
 import { useState, type CSSProperties } from "react";
 import { useTopbar } from "../../context/useTopbar";
+import { usePortal } from "../../context/PortalContext";
 import {
   useSpecialTracks, useCreateTrack, useUpdateTrack, useDeleteTrack,
   useEnrollStudent, useUnenrollStudent,
+  TRACK_DETAIL_ID_KEY,
   type SpecialTrack, type EnrolledStudent, type TrackTeacher,
 } from "../../api/special-tracks";
 import { useTeachers } from "../../api/teachers";
@@ -95,6 +97,12 @@ export function AdminSpecialTracks() {
   const deleteTrack    = useDeleteTrack();
   const enrollStudent  = useEnrollStudent();
   const unenrollSt     = useUnenrollStudent();
+  const { showPage }   = usePortal();
+
+  function openDetail(track: SpecialTrack) {
+    sessionStorage.setItem(TRACK_DETAIL_ID_KEY, track._id);
+    showPage("trackdetail");
+  }
 
   const [modal,         setModal]         = useState<Modal>(null);
   const [deleteId,      setDeleteId]      = useState<string | null>(null);
@@ -186,7 +194,7 @@ export function AdminSpecialTracks() {
     } catch (e) { setFormError((e as Error).message); }
   }
 
-  useTopbar("ti-calendar-event", "المسارات الاستثنائية",
+  useTopbar("ti-calendar-event", "المسارات",
     <button className="topbar-btn btn-primary" onClick={openAdd}>
       <i className="ti ti-plus" /> مسار جديد
     </button>,
@@ -215,7 +223,7 @@ export function AdminSpecialTracks() {
             <i className="ti ti-calendar-event" />
           </div>
           <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--text)" }}>لا توجد مسارات بعد</p>
-          <p style={{ margin: "6px 0 20px", fontSize: 13, color: "var(--text3)" }}>أضف أول مسار استثنائي</p>
+          <p style={{ margin: "6px 0 20px", fontSize: 13, color: "var(--text3)" }}>أضف أول مسار</p>
           <button className="topbar-btn btn-primary" style={{ padding: "10px 24px" }} onClick={openAdd}>
             <i className="ti ti-plus" /> مسار جديد
           </button>
@@ -229,7 +237,7 @@ export function AdminSpecialTracks() {
               <SectionHeader label="المسارات النشطة" count={active.length} color="var(--green)" />
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14 }}>
                 {active.map((t) => (
-                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} />
+                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} onOpen={openDetail} />
                 ))}
               </div>
             </section>
@@ -239,7 +247,7 @@ export function AdminSpecialTracks() {
               <SectionHeader label="المسارات القادمة" count={upcoming.length} color="#d97706" />
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14 }}>
                 {upcoming.map((t) => (
-                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} />
+                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} onOpen={openDetail} />
                 ))}
               </div>
             </section>
@@ -249,7 +257,7 @@ export function AdminSpecialTracks() {
               <SectionHeader label="المسارات المنتهية" count={ended.length} color="var(--text3)" />
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14, opacity: 0.75 }}>
                 {ended.map((t) => (
-                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} />
+                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} onOpen={openDetail} />
                 ))}
               </div>
             </section>
@@ -276,7 +284,7 @@ export function AdminSpecialTracks() {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "var(--text)" }}>
-                    {"item" in modal && modal.item ? "تعديل المسار" : "مسار استثنائي جديد"}
+                    {"item" in modal && modal.item ? "تعديل المسار" : "مسار جديد"}
                   </h3>
                   <p style={{ margin: 0, fontSize: 11, color: "var(--text3)" }}>أدخل بيانات المسار بالكامل</p>
                 </div>
@@ -680,12 +688,13 @@ export function AdminSpecialTracks() {
 
 /* ── track card (module scope so it doesn't remount on every keystroke/state change in AdminSpecialTracks) ── */
 function TrackCard({
-  t, onManageStudents, onEdit, onDelete,
+  t, onManageStudents, onEdit, onDelete, onOpen,
 }: {
   t: SpecialTrack;
   onManageStudents: (t: SpecialTrack) => void;
   onEdit: (t: SpecialTrack) => void;
   onDelete: (id: string) => void;
+  onOpen: (t: SpecialTrack) => void;
 }) {
   const cfg     = STATUS_CFG[t.status];
   const enrolled = t.enrolledStudents.length;
@@ -697,7 +706,14 @@ function TrackCard({
   const [planOpen, setPlanOpen] = useState(false);
 
   return (
-    <div className="track-card">
+    <div
+      className="track-card"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(t)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(t); } }}
+      style={{ cursor: "pointer" }}
+    >
       {/* coloured top strip */}
       <div style={{ height: 4, background: cfg.bar }} />
 
@@ -724,7 +740,7 @@ function TrackCard({
             <button
               className="topbar-btn btn-ghost"
               style={{ padding: "5px 11px", fontSize: 12, color: "var(--green)", borderColor: "rgba(26,92,42,0.25)" }}
-              onClick={() => onManageStudents(t)}
+              onClick={(e) => { e.stopPropagation(); onManageStudents(t); }}
             >
               <i className="ti ti-users" />
               {enrolled > 0 && (
@@ -733,13 +749,13 @@ function TrackCard({
                 </span>
               )}
             </button>
-            <button className="topbar-btn btn-ghost" style={{ padding: "5px 11px", fontSize: 12 }} onClick={() => onEdit(t)}>
+            <button className="topbar-btn btn-ghost" style={{ padding: "5px 11px", fontSize: 12 }} onClick={(e) => { e.stopPropagation(); onEdit(t); }}>
               <i className="ti ti-pencil" />
             </button>
             <button
               className="topbar-btn btn-ghost"
               style={{ padding: "5px 11px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.25)" }}
-              onClick={() => onDelete(t._id)}
+              onClick={(e) => { e.stopPropagation(); onDelete(t._id); }}
             >
               <i className="ti ti-trash" />
             </button>
@@ -814,7 +830,7 @@ function TrackCard({
           background: linkedPlan?.todayAssignment ? "var(--green-pale)" : "var(--cream)",
         }}>
           <div
-            onClick={() => linkedPlan && setPlanOpen((o) => !o)}
+            onClick={(e) => { e.stopPropagation(); linkedPlan && setPlanOpen((o) => !o); }}
             style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8, cursor: linkedPlan ? "pointer" : "default" }}
           >
             <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, fontWeight: 700, color: linkedPlan?.todayAssignment ? "var(--green)" : "var(--text3)" }}>
@@ -869,6 +885,7 @@ function TrackCard({
         {t.isOnline && t.meetLink && (
           <a
             href={t.meetLink} target="_blank" rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
             style={{
               marginTop: 10, display: "inline-flex", alignItems: "center", gap: 6,
               fontSize: 12, color: "#1d4ed8", background: "#eff6ff",
