@@ -1979,3 +1979,29 @@
 | 17:36 | Edited quran-hifz-server/package.json | 1→2 lines | ~38 |
 | $(date +%H:%M) | rebuild emails from first name (compound عبد-names whole), suffix dups | seeds/regenerate-emails-from-names.ts, package.json, ACCOUNTS.md | 80/80 rewritten, ACCOUNTS regenerated | ~3k |
 | 17:36 | Session end: 3 writes across 2 files (regenerate-emails-from-names.ts, package.json) | 2 reads | ~3339 tok |
+
+## Session: 2026-07-22 17:45
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:48 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | CSS: startDate, startDate | ~236 |
+| 17:48 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | CSS: startDate | ~37 |
+| 17:48 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | added 2 condition(s) | ~132 |
+| 17:48 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | CSS: startDate | ~37 |
+| 17:48 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | expanded (+15 lines) | ~231 |
+| 17:49 | Add editable start date (تاريخ البداية, past allowed) to plan form | TeacherPlanForm.tsx | done | ~3k |
+| 17:49 | Session end: 5 writes across 1 files (TeacherPlanForm.tsx) | 5 reads | ~17951 tok |
+| 17:56 | Created quran-hifz-server/src/_verify_reverse.ts | — | ~422 |
+| 17:57 | Session end: 6 writes across 2 files (TeacherPlanForm.tsx, _verify_reverse.ts) | 5 reads | ~18373 tok |
+| 17:59 | Edited quran-hifz/src/quran/lib/quranRange.ts | added optional chaining | ~1539 |
+| 18:00 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | 2→2 lines | ~22 |
+| 18:00 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | modified fmtDate() | ~170 |
+| 18:00 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | added error handling | ~458 |
+| 18:00 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | modified toAr() | ~866 |
+| 18:01 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | 2→2 lines | ~47 |
+| 18:01 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | CSS: pageStart | ~142 |
+| 18:02 | Live daily schedule preview at bottom of plan form + client computeScheduleBreakdown | quranRange.ts, TeacherPlanForm.tsx | done | ~5k |
+| 18:02 | Session end: 13 writes across 3 files (TeacherPlanForm.tsx, _verify_reverse.ts, quranRange.ts) | 7 reads | ~26433 tok |
+| 18:07 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | expanded (+12 lines) | ~404 |
+| 18:07 | Reverse plan: swap من/إلى columns (+pages) in preview to read in plan direction | TeacherPlanForm.tsx | done | ~1k |
+| 18:08 | Session end: 14 writes across 3 files (TeacherPlanForm.tsx, _verify_reverse.ts, quranRange.ts) | 7 reads | ~26837 tok |

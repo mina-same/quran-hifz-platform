@@ -108,3 +108,141 @@ export function fractionalPage(point: RangePoint, edge: "start" | "end"): { valu
   if (isCleanBoundary) return { value: page, isPartial: false };
   return { value: page + Math.round((posInPage / pageLen) * 10) / 10, isPartial: true };
 }
+
+// ── Live schedule breakdown (client-side mirror of the server's quranRange.ts) ──
+// Kept in sync manually with quran-hifz-server/src/lib/quranRange.ts, same
+// byte-for-byte-logic convention as the SURAHS/JUZ_STARTS data copies. Used to
+// preview a plan's day-by-day division in TeacherPlanForm before it's saved
+// (the server computes the identical breakdown for saved plans).
+
+/** Sat..Fri order, matches the 7 toggle chips shown in the plan-builder UI. */
+export const WEEK_DAYS = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"] as const;
+
+/** Arabic weekday label for JS Date#getDay() (0=Sunday..6=Saturday). */
+const DAY_BY_JS_INDEX = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+
+const SURAH_BY_NUMBER = new Map(SURAHS.map((s) => [s.number, s]));
+
+export function surahName(surahNumber: number): string {
+  return SURAH_BY_NUMBER.get(surahNumber)?.name ?? "";
+}
+
+function dateOnly(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function dayLabel(d: Date): string {
+  return DAY_BY_JS_INDEX[d.getDay()];
+}
+
+/** Count how many dates in [from, to] (inclusive, date-only) fall on one of `days`. */
+function countMatchingDays(from: Date, to: Date, days: string[]): number {
+  let count = 0;
+  const cursor = dateOnly(from);
+  const end = dateOnly(to);
+  while (cursor.getTime() <= end.getTime()) {
+    if (days.includes(dayLabel(cursor))) count++;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return count;
+}
+
+export type PlanScheduleInput = {
+  days: string[];
+  startDate: Date;
+  endType: "activeDays" | "date";
+  activeDaysCount?: number;
+  endDate?: Date;
+  rangeStart: RangePoint;
+  rangeEnd: RangePoint;
+};
+
+/** Total occurrence count for the plan's schedule. */
+export function countOccurrences(plan: PlanScheduleInput): number {
+  if (plan.endType === "activeDays") return plan.activeDaysCount ?? 0;
+  if (!plan.endDate) return 0;
+  return countMatchingDays(plan.startDate, plan.endDate, plan.days);
+}
+
+export type TodayAssignment = {
+  surahStart: number;
+  ayahStart: number;
+  surahEnd: number;
+  ayahEnd: number;
+  pageStart: number;
+  pageEnd: number;
+};
+
+/** The ayah slice for a given 0-based occurrence index — page-aligned, so
+ * intermediate days start/end on a clean page boundary; only the first day
+ * (anchored at rangeStart) and last day (anchored at rangeEnd) may be partial
+ * pages. Handles reverse-direction plans (rangeStart after rangeEnd in mushaf
+ * order): the sequence of days runs backward, but each day still reads forward. */
+function sliceForOccurrence(plan: PlanScheduleInput, occurrenceIndex: number, occurrenceCount: number): TodayAssignment | null {
+  const startFlat = toFlatIndex(plan.rangeStart);
+  const endFlat = toFlatIndex(plan.rangeEnd);
+  const forward = endFlat >= startFlat;
+  const anchorPage = pageOfFlatIndex(startFlat);
+  const finalPage = pageOfFlatIndex(endFlat);
+  const totalPages = Math.abs(finalPage - anchorPage) + 1;
+  const dailyPages = Math.floor(totalPages / occurrenceCount);
+  const isLast = occurrenceIndex === occurrenceCount - 1;
+
+  if (dailyPages === 0 && !isLast) return null;
+
+  const step = forward ? 1 : -1;
+  const blockNearStartPage = anchorPage + occurrenceIndex * dailyPages * step;
+  const blockNearEndPage = isLast ? finalPage : blockNearStartPage + (dailyPages - 1) * step;
+  const loPage = Math.min(blockNearStartPage, blockNearEndPage);
+  const hiPage = Math.max(blockNearStartPage, blockNearEndPage);
+
+  let start = fromFlatIndex(firstFlatOfPage(loPage));
+  let end = fromFlatIndex(lastFlatOfPage(hiPage));
+  if (occurrenceIndex === 0) { if (forward) start = plan.rangeStart; else end = plan.rangeStart; }
+  if (isLast) { if (forward) end = plan.rangeEnd; else start = plan.rangeEnd; }
+
+  return {
+    surahStart: start.surahNumber, ayahStart: start.ayah,
+    surahEnd: end.surahNumber, ayahEnd: end.ayah,
+    pageStart: loPage, pageEnd: hiPage,
+  };
+}
+
+export type ScheduleEntry = TodayAssignment & {
+  occurrenceIndex: number; // 1-based
+  date: string; // ISO date
+  juz: number;
+};
+
+/** Safety cap on how many calendar days computeScheduleBreakdown will walk. */
+const SCHEDULE_WALK_LIMIT_DAYS = 3650;
+
+/** Full day-by-day breakdown of the plan: which ayah slice (and which juz') is
+ * due on each occurrence date, from start to finish. */
+export function computeScheduleBreakdown(plan: PlanScheduleInput): ScheduleEntry[] {
+  const occurrenceCount = countOccurrences(plan);
+  if (occurrenceCount <= 0) return [];
+
+  const entries: ScheduleEntry[] = [];
+  const cursor = dateOnly(plan.startDate);
+  let occurrenceIndex = 0;
+  let walked = 0;
+
+  while (occurrenceIndex < occurrenceCount && walked < SCHEDULE_WALK_LIMIT_DAYS) {
+    if (plan.days.includes(dayLabel(cursor))) {
+      const slice = sliceForOccurrence(plan, occurrenceIndex, occurrenceCount);
+      if (slice) {
+        entries.push({
+          ...slice,
+          occurrenceIndex: occurrenceIndex + 1,
+          date: cursor.toISOString(),
+          juz: juzOfFlatIndex(toFlatIndex({ surahNumber: slice.surahStart, ayah: slice.ayahStart })),
+        });
+      }
+      occurrenceIndex++;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+    walked++;
+  }
+  return entries;
+}

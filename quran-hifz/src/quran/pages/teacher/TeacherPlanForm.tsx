@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
@@ -13,10 +13,15 @@ import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudentPlanProgressList } from "../../api/student-plan-progress";
 import { toAr } from "../../../lib/format";
 import { Card } from "../../components/common/Card";
+import { Badge } from "../../components/common/Badge";
 import { DaysOfWeekPicker } from "../../components/common/DaysOfWeekPicker";
 import { SurahPointFields } from "../../components/common/SurahRangePicker";
 import { IndividualPlanPanel } from "../../components/common/IndividualPlanPanel";
-import { countRangeAyahs, pageRangeOfAyahRange } from "../../lib/quranRange";
+import { countRangeAyahs, pageRangeOfAyahRange, computeScheduleBreakdown, surahName } from "../../lib/quranRange";
+
+function fmtDate(d: string) {
+  return new Date(d).toLocaleDateString("ar-SA", { year: "numeric", month: "short", day: "numeric" });
+}
 
 const PLAN_TYPES: { value: PlanType; label: string; icon: string; fg: string; bg: string }[] = [
   { value: "حفظ",    label: "حفظ",    icon: "ti-book-2",    fg: "var(--green)", bg: "var(--green-pale)" },
@@ -41,6 +46,7 @@ type FormFields = {
   students: string[];
   specialTrack: string;
   days: string[];
+  startDate: string;
   rangeStart: RangePoint;
   rangeEnd: RangePoint;
   endType: "activeDays" | "date";
@@ -48,10 +54,18 @@ type FormFields = {
   endDate: string;
 };
 
+/** Today as a local `YYYY-MM-DD` string — built from local calendar fields
+ * (not toISOString, which is UTC and drifts a day for TZs ahead of UTC). */
+function todayISO(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 const EMPTY: FormFields = {
   name: "", type: "حفظ", description: "",
   targetType: "halqa", halqa: "", students: [], specialTrack: "",
   days: [],
+  startDate: todayISO(),
   rangeStart: { surahNumber: 1, ayah: 1 },
   rangeEnd:   { surahNumber: 1, ayah: 1 },
   endType: "activeDays",
@@ -71,6 +85,7 @@ function fieldsFromPlan(plan: QuranPlan, nameSuffix = ""): FormFields {
     students: (plan.students ?? []).map(getId),
     specialTrack: plan.specialTrack ? getId(plan.specialTrack) : "",
     days: plan.days,
+    startDate: plan.startDate ? plan.startDate.split("T")[0] : todayISO(),
     rangeStart: plan.rangeStart,
     rangeEnd: plan.rangeEnd,
     endType: plan.endType,
@@ -137,8 +152,10 @@ export function TeacherPlanForm() {
     if (form.targetType === "halqa" && !form.halqa) { setFormError("يرجى اختيار حلقة"); return; }
     if (form.targetType === "students" && form.students.length === 0) { setFormError("يرجى اختيار طالب واحد على الأقل"); return; }
     if (form.targetType === "specialTrack" && !form.specialTrack) { setFormError("يرجى اختيار المسار"); return; }
+    if (!form.startDate) { setFormError("يرجى تحديد تاريخ البداية"); return; }
     if (form.endType === "activeDays" && !form.activeDaysCount) { setFormError("يرجى تحديد عدد الأيام النشطة"); return; }
     if (form.endType === "date" && !form.endDate) { setFormError("يرجى تحديد تاريخ الانتهاء"); return; }
+    if (form.endType === "date" && form.endDate && form.endDate < form.startDate) { setFormError("تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية"); return; }
 
     // rangeStart may deliberately sit after rangeEnd in mushaf order — a
     // reverse-direction plan (e.g. starting at An-Nas and working backward
@@ -152,6 +169,7 @@ export function TeacherPlanForm() {
       students: form.targetType === "students" ? form.students : undefined,
       specialTrack: form.targetType === "specialTrack" ? form.specialTrack : undefined,
       days: form.days,
+      startDate: form.startDate || undefined,
       rangeStart: form.rangeStart, rangeEnd: form.rangeEnd,
       endType: form.endType,
       activeDaysCount: form.endType === "activeDays" ? Number(form.activeDaysCount) : undefined,
@@ -179,6 +197,33 @@ export function TeacherPlanForm() {
   const rangeIsReversed =
     form.rangeStart.surahNumber > form.rangeEnd.surahNumber ||
     (form.rangeStart.surahNumber === form.rangeEnd.surahNumber && form.rangeStart.ayah > form.rangeEnd.ayah);
+
+  // Live day-by-day preview of how the range divides across the plan's days —
+  // computed client-side from the current form state (the server produces the
+  // identical breakdown once the plan is saved). Empty until enough is filled in.
+  const schedulePreview = useMemo(() => {
+    if (form.days.length === 0) return [];
+    if (form.endType === "activeDays" && !form.activeDaysCount) return [];
+    if (form.endType === "date" && !form.endDate) return [];
+    if (!form.startDate) return [];
+    try {
+      return computeScheduleBreakdown({
+        days: form.days,
+        startDate: new Date(`${form.startDate}T00:00:00`),
+        endType: form.endType,
+        activeDaysCount: form.endType === "activeDays" ? Number(form.activeDaysCount) : undefined,
+        endDate: form.endType === "date" && form.endDate ? new Date(`${form.endDate}T00:00:00`) : undefined,
+        rangeStart: form.rangeStart,
+        rangeEnd: form.rangeEnd,
+      });
+    } catch {
+      return [];
+    }
+  }, [form.days, form.startDate, form.endType, form.activeDaysCount, form.endDate, form.rangeStart, form.rangeEnd]);
+
+  const requestedOccurrences =
+    form.endType === "activeDays" ? Number(form.activeDaysCount || 0) : schedulePreview.length;
+  const previewShortfall = requestedOccurrences > 0 && schedulePreview.length < requestedOccurrences;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -397,8 +442,23 @@ export function TeacherPlanForm() {
         </div>
       </Card>
 
-      {/* ── End condition card ── */}
-      <Card icon="ti-calendar-due" title="تاريخ الانتهاء">
+      {/* ── Duration card — start date + end condition ── */}
+      <Card icon="ti-calendar-due" title="مدة الخطة">
+        <div className="form-group">
+          <label className="form-label">تاريخ البداية <span>*</span></label>
+          <input
+            className="form-input"
+            type="date"
+            dir="ltr"
+            value={form.startDate}
+            onChange={(e) => sf("startDate", e.target.value)}
+          />
+          <p style={{ margin: "6px 0 0", fontSize: 11, color: "var(--text3)" }}>
+            يمكن اختيار تاريخ في الماضي إذا كانت الخطة قد بدأت بالفعل
+          </p>
+        </div>
+
+        <div style={{ fontSize: 11, color: "var(--text3)", fontWeight: 700, margin: "16px 0 8px" }}>نهاية الخطة</div>
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           {([
             { value: "activeDays" as const, label: "عدد الأيام النشطة" },
@@ -431,6 +491,79 @@ export function TeacherPlanForm() {
             <label className="form-label">تاريخ الانتهاء <span>*</span></label>
             <input className="form-input" type="date" dir="ltr" value={form.endDate} onChange={(e) => sf("endDate", e.target.value)} />
           </div>
+        )}
+      </Card>
+
+      {/* ── Live schedule preview ── */}
+      <Card icon="ti-calendar-stats" title="التقسيمة اليومية (معاينة)">
+        {schedulePreview.length === 0 ? (
+          <p style={{ margin: "16px 0", fontSize: 13, color: "var(--text3)", textAlign: "center" }}>
+            اختر النطاق والأيام وتاريخ البداية والانتهاء لعرض تقسيمة الوِرد على الأيام
+          </p>
+        ) : (
+          <>
+            <div style={{
+              marginBottom: 12, padding: "10px 12px", borderRadius: 10,
+              background: "var(--cream)", fontSize: 12, color: "var(--text2)",
+              display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
+            }}>
+              <i className="ti ti-info-circle" style={{ color: "var(--green)" }} />
+              <span>عدد الأيام: <strong>{schedulePreview.length}</strong></span>
+              {rangeIsReversed && (
+                <span style={{ color: "#92400e", fontWeight: 600 }}>
+                  · خطة بالعكس — كل يوم يُقرأ بترتيبه الطبيعي، والترتيب بين الأيام يتراجع في المصحف
+                </span>
+              )}
+            </div>
+            {previewShortfall && (
+              <div style={{
+                marginBottom: 12, padding: "10px 12px", borderRadius: 10,
+                background: "#fffbeb", border: "1px solid rgba(217,119,6,0.25)",
+                fontSize: 12, color: "#92400e",
+              }}>
+                <i className="ti ti-alert-triangle" style={{ marginLeft: 4 }} />
+                عدد الأيام المطلوب أكبر من عدد صفحات النطاق — بعض الأيام لن يكون لها نصيب. قلّل عدد الأيام أو وسّع النطاق.
+              </div>
+            )}
+            <div className="tbl-wrap" style={{ maxHeight: 360, overflowY: "auto" }}>
+              <table className="tbl">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>التاريخ</th>
+                    <th>الجزء</th>
+                    <th>من</th>
+                    <th>إلى</th>
+                    <th>الصفحات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {schedulePreview.map((s) => {
+                    // For a reverse plan, show "من" as the point nearer the plan's
+                    // start (rangeStart side) and "إلى" nearer its end — i.e. swap
+                    // the natural low→high slice endpoints so the columns read in
+                    // the plan's own direction, not mushaf order.
+                    const from = rangeIsReversed
+                      ? { surah: s.surahEnd, ayah: s.ayahEnd, page: s.pageEnd }
+                      : { surah: s.surahStart, ayah: s.ayahStart, page: s.pageStart };
+                    const to = rangeIsReversed
+                      ? { surah: s.surahStart, ayah: s.ayahStart, page: s.pageStart }
+                      : { surah: s.surahEnd, ayah: s.ayahEnd, page: s.pageEnd };
+                    return (
+                      <tr key={s.occurrenceIndex}>
+                        <td>{s.occurrenceIndex}</td>
+                        <td>{fmtDate(s.date)}</td>
+                        <td><Badge tone="green">جزء {s.juz}</Badge></td>
+                        <td>{surahName(from.surah)} : {from.ayah}</td>
+                        <td>{surahName(to.surah)} : {to.ayah}</td>
+                        <td>{from.page === to.page ? from.page : `${from.page} - ${to.page}`}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
 

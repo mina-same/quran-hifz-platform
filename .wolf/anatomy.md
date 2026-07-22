@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T14:36:11.934Z
-> Files: 453 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T15:07:11.881Z
+> Files: 455 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/
 
@@ -371,6 +371,7 @@
 ## quran-hifz-server/src/
 
 - `_verify_juz.ts` — Plan: Al-Baqarah 1:1 through Al-Baqarah 2:286 (juz 1-3), daily, 10 active days, started 5 days ago. (~358 tok)
+- `_verify_reverse.ts` — Declares show (~422 tok)
 - `app.ts` — API routes: GET (1 endpoints) (~881 tok)
 - `server.ts` — Declares bootstrap (~198 tok)
 
@@ -468,8 +469,8 @@
 - `import-real-halaqat.ts` — One-time import of real special-track/halqa/teacher/student data. (~1864 tok)
 - `list-users.ts` — Default seed passwords by role (import-real-halaqat.ts + ensure-admin.ts). (~540 tok)
 - `regenerate-emails-from-names.ts` — One-off: rebuild every teacher/student email from their (Arabic) name. (~1112 tok)
-- `rename-email-domain.ts` — One-off: rewrite every user's email domain to a new one, keeping the (~282 tok)
 - `regenerate-emails-from-names.ts` — One-off: rebuild teacher/student emails from Arabic first name (compound عبد-names kept whole) via curated transliteration map; numeric suffix on dup; admin untouched. `npm run regenerate-emails` (~700 tok)
+- `rename-email-domain.ts` — One-off: rewrite every user's email domain to a new one, keeping the (~282 tok)
 - `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~4682 tok)
 - `wipe-all.ts` — One-time full wipe of the local dev database before importing real data. (~559 tok)
 
@@ -657,7 +658,7 @@
 ## quran-hifz/src/quran/lib/
 
 - `evaluationRubric.ts` — Exports MAX_SCORES, TOTAL_MAX (~34 tok)
-- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~1258 tok)
+- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~2752 tok)
 
 ## quran-hifz/src/quran/pages/
 
@@ -707,7 +708,7 @@
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
 - `TeacherPlanDetail.tsx` — surahName — renders table (~3558 tok)
-- `TeacherPlanForm.tsx` — PLAN_TYPES — renders form (~6635 tok)
+- `TeacherPlanForm.tsx` — Today as a local `YYYY-MM-DD` string — built from local calendar fields (~8484 tok)
 - `TeacherPlans.tsx` — surahName (~4262 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
