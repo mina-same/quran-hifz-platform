@@ -13,7 +13,6 @@ import { useHalqat } from "../../api/halqat";
 const schema = z.object({
   name: z.string().min(2, "الاسم مطلوب (٢ أحرف على الأقل)"),
   age: z.string().min(1, "العمر مطلوب").refine((v) => Number(v) >= 4 && Number(v) <= 80, "العمر بين ٤ و٨٠"),
-  grade: z.string().optional(),
   guardianPhone: z
     .string()
     .min(1, "جوال ولي الأمر مطلوب")
@@ -106,15 +105,6 @@ export function AdminRegister() {
               <label className="form-label">العمر <span>*</span></label>
               <input className="form-input" type="number" placeholder="بالسنوات" min={4} max={80} {...register("age")} />
               <FieldError msg={errors.age?.message} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">الصف الدراسي</label>
-              <select className="form-input" {...register("grade")}>
-                <option value="">اختر</option>
-                {["روضة","أول ابتدائي","ثاني ابتدائي","ثالث ابتدائي","رابع ابتدائي","خامس ابتدائي","سادس ابتدائي","أول متوسط","ثاني متوسط","ثالث متوسط","ثانوي فأعلى","بالغ"].map((g) => (
-                  <option key={g}>{g}</option>
-                ))}
-              </select>
             </div>
             <div className="form-group">
               <label className="form-label">جوال ولي الأمر <span>*</span></label>

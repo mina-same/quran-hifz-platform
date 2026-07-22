@@ -10,6 +10,8 @@
     "seed": "ts-node src/seeds/seed.ts",
     "ensure-admin": "ts-node src/seeds/ensure-admin.ts",
     "rename-email-domain": "ts-node src/seeds/rename-email-domain.ts",
+    "regenerate-emails": "ts-node src/seeds/regenerate-emails-from-names.ts",
+    "list-users": "ts-node src/seeds/list-users.ts",
     "backfill-plans": "ts-node src/seeds/backfillPlans.ts",
     "lint": "eslint src --ext .ts"
   },

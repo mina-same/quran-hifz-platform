@@ -1967,3 +1967,15 @@
 | 17:16 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | CSS: marginBottom | ~128 |
 | --:-- | Student level: كل 74 طالب عندهم level بالفعل. أضفت level لمخطط السيرفر + عمود المستوى في جدول AdminStudents + حقل رقم في نموذجي التعديل (AdminStudents) والإضافة (AdminRegister). ملاحظة: AdminRegister بقى فيه حقلين مستوى (قراءة فئوي + رقم) | student.controller.ts, AdminStudents.tsx, AdminRegister.tsx | typechecks clean | ~med |
 | 17:17 | Session end: 15 writes across 7 files (rename-email-domain.ts, import-real-halaqat.ts, ensure-admin.ts, package.json, student.controller.ts) | 2 reads | ~9537 tok |
+| 17:26 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | removed 11 lines | ~35 |
+| 17:26 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | 3→2 lines | ~37 |
+
+## Session: 2026-07-22 17:30
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:34 | Created quran-hifz-server/src/seeds/regenerate-emails-from-names.ts | — | ~1112 |
+| 17:34 | Edited quran-hifz-server/package.json | 1→2 lines | ~43 |
+| 17:36 | Edited quran-hifz-server/package.json | 1→2 lines | ~38 |
+| $(date +%H:%M) | rebuild emails from first name (compound عبد-names whole), suffix dups | seeds/regenerate-emails-from-names.ts, package.json, ACCOUNTS.md | 80/80 rewritten, ACCOUNTS regenerated | ~3k |
+| 17:36 | Session end: 3 writes across 2 files (regenerate-emails-from-names.ts, package.json) | 2 reads | ~3339 tok |

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T14:16:03.546Z
-> Files: 452 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T14:36:11.934Z
+> Files: 453 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/
 
@@ -360,7 +360,7 @@
 
 - `.gitignore` — Git ignore rules (~10 tok)
 - `package-lock.json` — npm lock file (~23821 tok)
-- `package.json` — Node.js package manifest (~345 tok)
+- `package.json` — Node.js package manifest (~382 tok)
 - `tsconfig.json` — TypeScript configuration (~128 tok)
 - `vercel.json` (~54 tok)
 
@@ -467,7 +467,9 @@
 - `ensure-admin.ts` — Idempotent admin bootstrap. Run:  npm run ensure-admin (~421 tok)
 - `import-real-halaqat.ts` — One-time import of real special-track/halqa/teacher/student data. (~1864 tok)
 - `list-users.ts` — Default seed passwords by role (import-real-halaqat.ts + ensure-admin.ts). (~540 tok)
+- `regenerate-emails-from-names.ts` — One-off: rebuild every teacher/student email from their (Arabic) name. (~1112 tok)
 - `rename-email-domain.ts` — One-off: rewrite every user's email domain to a new one, keeping the (~282 tok)
+- `regenerate-emails-from-names.ts` — One-off: rebuild teacher/student emails from Arabic first name (compound عبد-names kept whole) via curated transliteration map; numeric suffix on dup; admin untouched. `npm run regenerate-emails` (~700 tok)
 - `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~4682 tok)
 - `wipe-all.ts` — One-time full wipe of the local dev database before importing real data. (~559 tok)
 
@@ -669,7 +671,7 @@
 - `AdminKpis.tsx` — RATING_TONE — renders table (~743 tok)
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~2682 tok)
 - `AdminParents.tsx` — EMPTY_ADD, ChildChip — renders table, modal, search bar, avatars (~5900 tok)
-- `AdminRegister.tsx` — schema — renders form (~3237 tok)
+- `AdminRegister.tsx` — schema — renders form (~3079 tok)
 - `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~324 tok)
 - `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13438 tok)
 - `AdminStudents.tsx` — PATH_TONE — renders table (~5297 tok)
