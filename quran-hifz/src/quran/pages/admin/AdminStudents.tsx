@@ -3,13 +3,12 @@ import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { Badge, type BadgeTone } from "../../components/common/Badge";
-import { ProgressBar } from "../../components/common/ProgressBar";
 import { SkeletonTable } from "../../components/common/Skeleton";
 import { useStudents, useUpdateStudent, useDeleteStudent, type Student } from "../../api/students";
 import { useHalqat } from "../../api/halqat";
 import { useMasajid } from "../../api/masajid";
 import { useAdminParents, useStudentParent, useSetStudentParent } from "../../api/admin-parents";
-import { toAr, pct } from "../../../lib/format";
+import { toAr } from "../../../lib/format";
 
 const PATH_TONE: Record<string, BadgeTone> = {
   "حفظ كامل": "gold",
@@ -150,6 +149,13 @@ export function AdminStudents() {
     return matchSearch && matchPath;
   });
 
+  // Map each student id → its linked parent account (from the parents list,
+  // where every parent carries its children).
+  const parentByStudentId = new Map<string, { name: string; email: string }>();
+  for (const p of parents) {
+    for (const c of p.children) parentByStudentId.set(c._id, { name: p.name, email: p.email });
+  }
+
   return (
     <>
       <Card>
@@ -175,7 +181,7 @@ export function AdminStudents() {
           </select>
         </div>
 
-        {isLoading && <SkeletonTable cols={9} rows={6} />}
+        {isLoading && <SkeletonTable cols={7} rows={6} />}
         {error && (
           <div style={{ color: "#ef4444", padding: 12, fontSize: 13 }}>تعذّر تحميل بيانات الطلاب</div>
         )}
@@ -190,8 +196,6 @@ export function AdminStudents() {
                   <th>المستوى</th>
                   <th>الحلقة</th>
                   <th>المسجد</th>
-                  <th>الحضور</th>
-                  <th>التقدم</th>
                   <th>ولي الأمر</th>
                   <th>الحالة</th>
                   <th />
@@ -205,12 +209,14 @@ export function AdminStudents() {
                     <td>{s.level != null ? toAr(s.level) : "—"}</td>
                     <td>{getObjName(s.halqa)}</td>
                     <td>{getObjName(s.masjid)}</td>
-                    <td>{pct(s.attendancePct)}</td>
-                    <td style={{ minWidth: 90 }}>
-                      <ProgressBar pct={s.progressPct} />
-                      <span style={{ fontSize: 10, color: "var(--text2)" }}>{pct(s.progressPct)}</span>
+                    <td style={{ fontSize: 12 }}>
+                      {(() => {
+                        const par = parentByStudentId.get(s._id);
+                        return par
+                          ? <span dir="ltr" style={{ color: "var(--text2)" }}>{par.email}</span>
+                          : <span style={{ color: "var(--text3)" }}>—</span>;
+                      })()}
                     </td>
-                    <td style={{ fontSize: 12, color: "var(--text2)" }} dir="ltr">{s.guardianPhone}</td>
                     <td>
                       <Badge tone={s.status === "active" ? "green" : s.status === "new" ? "gold" : "gray"}>
                         {s.status === "active" ? "نشط" : s.status === "new" ? "جديد" : "غير نشط"}
@@ -240,7 +246,7 @@ export function AdminStudents() {
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={9} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                    <td colSpan={8} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
                       لا توجد نتائج
                     </td>
                   </tr>

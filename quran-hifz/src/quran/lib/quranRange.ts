@@ -109,6 +109,35 @@ export function fractionalPage(point: RangePoint, edge: "start" | "end"): { valu
   return { value: page + Math.round((posInPage / pageLen) * 10) / 10, isPartial: true };
 }
 
+/** A reverse-direction plan: rangeStart sits after rangeEnd in mushaf order. */
+export function isReversedRange(rangeStart: RangePoint, rangeEnd: RangePoint): boolean {
+  return toFlatIndex(rangeStart) > toFlatIndex(rangeEnd);
+}
+
+type OrientableSlice = {
+  surahStart: number; ayahStart: number; surahEnd: number; ayahEnd: number;
+  pageStart: number; pageEnd: number;
+};
+
+/** Reorders a slice's endpoints for *display* in the plan's own direction:
+ * returned unchanged for a forward plan, endpoint-swapped for a reverse plan
+ * (so "من" reads as the point nearer the plan's start). Storage/computation
+ * always stay low→high — this only flips presentation. */
+export function orientSlice<T extends OrientableSlice>(slice: T, reversed: boolean): OrientableSlice {
+  if (!reversed) {
+    return {
+      surahStart: slice.surahStart, ayahStart: slice.ayahStart,
+      surahEnd: slice.surahEnd, ayahEnd: slice.ayahEnd,
+      pageStart: slice.pageStart, pageEnd: slice.pageEnd,
+    };
+  }
+  return {
+    surahStart: slice.surahEnd, ayahStart: slice.ayahEnd,
+    surahEnd: slice.surahStart, ayahEnd: slice.ayahStart,
+    pageStart: slice.pageEnd, pageEnd: slice.pageStart,
+  };
+}
+
 // ── Live schedule breakdown (client-side mirror of the server's quranRange.ts) ──
 // Kept in sync manually with quran-hifz-server/src/lib/quranRange.ts, same
 // byte-for-byte-logic convention as the SURAHS/JUZ_STARTS data copies. Used to

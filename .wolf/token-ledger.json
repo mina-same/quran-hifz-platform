@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-06-27T12:42:49.696Z",
   "lifetime": {
-    "total_tokens_estimated": 8041399,
-    "total_reads": 3329,
-    "total_writes": 4631,
-    "total_sessions": 74,
-    "anatomy_hits": 2800,
-    "anatomy_misses": 450,
-    "repeated_reads_blocked": 1932,
-    "estimated_savings_vs_bare_cli": 18605330
+    "total_tokens_estimated": 8198362,
+    "total_reads": 3354,
+    "total_writes": 4691,
+    "total_sessions": 75,
+    "anatomy_hits": 2824,
+    "anatomy_misses": 451,
+    "repeated_reads_blocked": 1947,
+    "estimated_savings_vs_bare_cli": 18747498
   },
   "sessions": [
     {
@@ -45828,6 +45828,507 @@
         "writes_count": 14,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 7
+      }
+    },
+    {
+      "id": "session-2026-07-27-1048",
+      "started": "2026-07-27T07:48:41.235Z",
+      "ended": "2026-07-27T08:18:27.291Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 11712,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 157,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 753,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 162,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 11712,
+        "output_tokens_estimated": 1072,
+        "reads_count": 1,
+        "writes_count": 3,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-07-27-1048",
+      "started": "2026-07-27T07:48:41.235Z",
+      "ended": "2026-07-27T08:29:26.854Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 11712,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
+          "tokens_estimated": 3578,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+          "tokens_estimated": 4262,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+          "tokens_estimated": 13438,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+          "tokens_estimated": 4339,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+          "tokens_estimated": 2758,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 17925,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx",
+          "tokens_estimated": 3848,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 157,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 753,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 162,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/lib/quranRange.ts",
+          "tokens_estimated": 361,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
+          "tokens_estimated": 82,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
+          "tokens_estimated": 67,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
+          "tokens_estimated": 184,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+          "tokens_estimated": 68,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+          "tokens_estimated": 183,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+          "tokens_estimated": 173,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+          "tokens_estimated": 206,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+          "tokens_estimated": 111,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 102,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 588,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 162,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 230,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx",
+          "tokens_estimated": 21,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx",
+          "tokens_estimated": 577,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 61860,
+        "output_tokens_estimated": 4653,
+        "reads_count": 8,
+        "writes_count": 24,
+        "repeated_reads_blocked": 7,
+        "anatomy_lookups": 8
+      }
+    },
+    {
+      "id": "session-2026-07-27-1048",
+      "started": "2026-07-27T07:48:41.235Z",
+      "ended": "2026-07-27T09:03:31.391Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 11712,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
+          "tokens_estimated": 3578,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+          "tokens_estimated": 4262,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+          "tokens_estimated": 13438,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+          "tokens_estimated": 4339,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+          "tokens_estimated": 2758,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 17925,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx",
+          "tokens_estimated": 3848,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+          "tokens_estimated": 5297,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/ACCOUNTS.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/models/User.model.ts",
+          "tokens_estimated": 383,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/models/ParentStudent.model.ts",
+          "tokens_estimated": 172,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/seeds/regenerate-emails-from-names.ts",
+          "tokens_estimated": 1112,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/seeds/list-users.ts",
+          "tokens_estimated": 540,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/controllers/admin.controller.ts",
+          "tokens_estimated": 1450,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/api/admin-parents.ts",
+          "tokens_estimated": 787,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 157,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 753,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+          "tokens_estimated": 162,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/lib/quranRange.ts",
+          "tokens_estimated": 361,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
+          "tokens_estimated": 82,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
+          "tokens_estimated": 67,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
+          "tokens_estimated": 184,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+          "tokens_estimated": 68,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
+          "tokens_estimated": 183,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
+          "tokens_estimated": 173,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
+          "tokens_estimated": 206,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
+          "tokens_estimated": 111,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 102,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 588,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 162,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+          "tokens_estimated": 230,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx",
+          "tokens_estimated": 21,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx",
+          "tokens_estimated": 577,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/seeds/create-parent-accounts.ts",
+          "tokens_estimated": 786,
+          "action": "create"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/package.json",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-server/src/seeds/list-users.ts",
+          "tokens_estimated": 7,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+          "tokens_estimated": 135,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+          "tokens_estimated": 155,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+          "tokens_estimated": 17,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+          "tokens_estimated": 44,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+          "tokens_estimated": 147,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+          "tokens_estimated": 61,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 71601,
+        "output_tokens_estimated": 6065,
+        "reads_count": 16,
+        "writes_count": 33,
+        "repeated_reads_blocked": 7,
+        "anatomy_lookups": 15
       }
     }
   ],

@@ -5,6 +5,7 @@ import { Badge } from "../../components/common/Badge";
 import { useSpecialTracks, TRACK_DETAIL_ID_KEY, type SpecialTrack } from "../../api/special-tracks";
 import { useQuranPlans } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
+import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 
 function surahName(n: number) {
@@ -112,9 +113,10 @@ function TrackCard({ track, onOpen }: { track: SpecialTrack; onOpen: (t: Special
               <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />الجزء المطلوب اليوم
             </div>
             <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
-              {surahName(linkedPlan.todayAssignment.surahStart)} : {linkedPlan.todayAssignment.ayahStart}
-              {" — "}
-              {surahName(linkedPlan.todayAssignment.surahEnd)} : {linkedPlan.todayAssignment.ayahEnd}
+              {(() => {
+                const a = orientSlice(linkedPlan.todayAssignment, isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd));
+                return <>{surahName(a.surahStart)} : {a.ayahStart}{" — "}{surahName(a.surahEnd)} : {a.ayahEnd}</>;
+              })()}
             </div>
           </div>
         )}

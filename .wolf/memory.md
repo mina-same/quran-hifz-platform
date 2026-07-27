@@ -2005,3 +2005,52 @@
 | 18:07 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | expanded (+12 lines) | ~404 |
 | 18:07 | Reverse plan: swap من/إلى columns (+pages) in preview to read in plan direction | TeacherPlanForm.tsx | done | ~1k |
 | 18:08 | Session end: 14 writes across 3 files (TeacherPlanForm.tsx, _verify_reverse.ts, quranRange.ts) | 7 reads | ~26837 tok |
+
+## Session: 2026-07-27 10:48
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-27 10:48
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:17 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | modified plan() | ~157 |
+| 11:17 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | expanded (+11 lines) | ~753 |
+| 11:17 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 3→6 lines | ~162 |
+| 11:18 | Reverse plan: swap من/إلى + pages display in attendance assignment banner & actual-ward hint (display only) | TeacherAttendance.tsx | done | ~1k |
+| 11:18 | Session end: 3 writes across 1 files (TeacherAttendance.tsx) | 1 reads | ~12784 tok |
+| 11:20 | Edited quran-hifz/src/quran/lib/quranRange.ts | added 1 condition(s) | ~361 |
+| 11:21 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx | added 1 import(s) | ~82 |
+| 11:21 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx | 2→4 lines | ~67 |
+| 11:22 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx | 11→14 lines | ~172 |
+| 11:22 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx | 10→13 lines | ~184 |
+| 11:22 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | added 1 import(s) | ~68 |
+| 11:23 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | 11→14 lines | ~183 |
+| 11:23 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | added 1 import(s) | ~32 |
+| 11:23 | Edited quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx | 9→12 lines | ~173 |
+| 11:23 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | added 1 import(s) | ~32 |
+| 11:24 | Edited quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx | 11→14 lines | ~206 |
+| 11:24 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | added 1 import(s) | ~32 |
+| 11:24 | Edited quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | 5→6 lines | ~111 |
+| 11:25 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | inline fix | ~32 |
+| 11:25 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 2→5 lines | ~102 |
+| 11:26 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: fontWeight, color | ~588 |
+| 11:26 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 3→6 lines | ~166 |
+| 11:26 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 8→11 lines | ~162 |
+| 11:27 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 7→8 lines | ~230 |
+| 11:27 | Edited quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | inline fix | ~21 |
+| 11:28 | Edited quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | modified if() | ~577 |
+| 11:28 | Reverse-plan display swap applied everywhere ward shown (orientSlice/isReversedRange helpers) | quranRange.ts + 7 pages | done | ~6k |
+| 11:29 | Session end: 24 writes across 9 files (TeacherAttendance.tsx, quranRange.ts, TeacherPlanDetail.tsx, TeacherPlans.tsx, AdminSpecialTracks.tsx) | 8 reads | ~66513 tok |
+| 11:56 | Created quran-hifz-server/src/seeds/create-parent-accounts.ts | — | ~786 |
+| 11:57 | Edited quran-hifz-server/package.json | 2→3 lines | ~60 |
+| 11:57 | Edited quran-hifz-server/src/seeds/list-users.ts | "parent123" → "parent@123" | ~7 |
+| 11:57 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | 8→7 lines | ~135 |
+| 11:58 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | modified for() | ~155 |
+| 11:58 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | 9 → 7 | ~17 |
+| 11:58 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | 7→5 lines | ~44 |
+| 11:58 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | pct() → get() | ~147 |
+| 11:58 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | 5→5 lines | ~61 |
+| 12:02 | AdminStudents: drop الحضور/التقدم cols, show parent email; add create-parent-accounts script (74 parents p.<email>, parent@123); regen ACCOUNTS.md (155) | AdminStudents.tsx, create-parent-accounts.ts, list-users.ts, package.json, ACCOUNTS.md | done | ~8k |
+| 12:03 | Session end: 33 writes across 13 files (TeacherAttendance.tsx, quranRange.ts, TeacherPlanDetail.tsx, TeacherPlans.tsx, AdminSpecialTracks.tsx) | 16 reads | ~77666 tok |

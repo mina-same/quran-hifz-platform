@@ -8,6 +8,7 @@ import {
   type PlanHalqa,
 } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
+import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 
@@ -281,17 +282,20 @@ function PlanCard({
           <div style={{ fontSize: 11, fontWeight: 700, color: plan.todayAssignment ? "var(--green)" : "var(--text3)", marginBottom: plan.todayAssignment ? 4 : 0 }}>
             <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />الجزء المطلوب اليوم
           </div>
-          {plan.todayAssignment ? (
+          {plan.todayAssignment ? (() => {
+            const a = orientSlice(plan.todayAssignment, isReversedRange(plan.rangeStart, plan.rangeEnd));
+            return (
             <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
-              {surahName(plan.todayAssignment.surahStart)} : {plan.todayAssignment.ayahStart}
+              {surahName(a.surahStart)} : {a.ayahStart}
               {" — "}
-              {surahName(plan.todayAssignment.surahEnd)} : {plan.todayAssignment.ayahEnd}
+              {surahName(a.surahEnd)} : {a.ayahEnd}
               <span style={{ fontWeight: 400, color: "var(--text2)" }}>
-                {" "}(صفحة {plan.todayAssignment.pageStart}
-                {plan.todayAssignment.pageEnd !== plan.todayAssignment.pageStart ? ` - ${plan.todayAssignment.pageEnd}` : ""})
+                {" "}(صفحة {a.pageStart}
+                {a.pageEnd !== a.pageStart ? ` - ${a.pageEnd}` : ""})
               </span>
             </div>
-          ) : (
+            );
+          })() : (
             <div style={{ fontSize: 11, color: "var(--text3)" }}>لا يوجد جزء مخصص لليوم</div>
           )}
         </div>

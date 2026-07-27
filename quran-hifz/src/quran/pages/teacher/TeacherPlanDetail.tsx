@@ -7,6 +7,7 @@ import {
   type RangePoint,
 } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
+import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCard } from "../../components/common/Skeleton";
@@ -77,6 +78,8 @@ export function TeacherPlanDetail() {
   }
 
   const typeCfg = PLAN_TYPE_CFG[plan.type] ?? PLAN_TYPE_CFG["حفظ"];
+  // Reverse-direction plan → display "من/إلى" in the plan's own direction.
+  const reversed = isReversedRange(plan.rangeStart, plan.rangeEnd);
   const targetLabel =
     plan.targetType === "halqa" ? getName(plan.halqa!) :
     plan.targetType === "specialTrack" ? (plan.specialTrack ? (typeof plan.specialTrack === "object" ? plan.specialTrack.title : plan.specialTrack) : "—") :
@@ -169,17 +172,20 @@ export function TeacherPlanDetail() {
           <div style={{ fontSize: 12, fontWeight: 700, color: plan.todayAssignment ? "var(--green)" : "var(--text3)", marginBottom: plan.todayAssignment ? 5 : 0 }}>
             <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />الجزء المطلوب اليوم
           </div>
-          {plan.todayAssignment ? (
+          {plan.todayAssignment ? (() => {
+            const a = orientSlice(plan.todayAssignment, reversed);
+            return (
             <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 600 }}>
-              {surahName(plan.todayAssignment.surahStart)} : {plan.todayAssignment.ayahStart}
+              {surahName(a.surahStart)} : {a.ayahStart}
               {" — "}
-              {surahName(plan.todayAssignment.surahEnd)} : {plan.todayAssignment.ayahEnd}
+              {surahName(a.surahEnd)} : {a.ayahEnd}
               <span style={{ fontWeight: 400, color: "var(--text2)" }}>
-                {" "}(صفحة {plan.todayAssignment.pageStart}
-                {plan.todayAssignment.pageEnd !== plan.todayAssignment.pageStart ? ` - ${plan.todayAssignment.pageEnd}` : ""})
+                {" "}(صفحة {a.pageStart}
+                {a.pageEnd !== a.pageStart ? ` - ${a.pageEnd}` : ""})
               </span>
             </div>
-          ) : (
+            );
+          })() : (
             <div style={{ fontSize: 12, color: "var(--text3)" }}>لا يوجد جزء مخصص لليوم</div>
           )}
         </div>
@@ -205,16 +211,19 @@ export function TeacherPlanDetail() {
                 </tr>
               </thead>
               <tbody>
-                {plan.schedule.map((s) => (
+                {plan.schedule.map((s) => {
+                  const a = orientSlice(s, reversed);
+                  return (
                   <tr key={s.occurrenceIndex}>
                     <td>{s.occurrenceIndex}</td>
                     <td>{fmtDate(s.date)}</td>
                     <td><Badge tone="green">جزء {s.juz}</Badge></td>
-                    <td>{surahName(s.surahStart)} : {s.ayahStart}</td>
-                    <td>{surahName(s.surahEnd)} : {s.ayahEnd}</td>
-                    <td>{s.pageStart === s.pageEnd ? s.pageStart : `${s.pageStart} - ${s.pageEnd}`}</td>
+                    <td>{surahName(a.surahStart)} : {a.ayahStart}</td>
+                    <td>{surahName(a.surahEnd)} : {a.ayahEnd}</td>
+                    <td>{a.pageStart === a.pageEnd ? a.pageStart : `${a.pageStart} - ${a.pageEnd}`}</td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -2,7 +2,7 @@
 
 > مُولَّد من قاعدة البيانات الحيّة. كلمات المرور مُشفّرة في القاعدة؛ القيم أدناه هي كلمات المرور الافتراضية التي تضبطها سكربتات البذر.
 
-**عدد الحسابات: 81**
+**عدد الحسابات: 155**
 
 ## المدير (Admin) — 1
 
@@ -105,4 +105,85 @@
 | 72 | وافي عايض حسن | wafi@tahfeez.com |
 | 73 | وتين سالم محمد | wateen@tahfeez.com |
 | 74 | زينة فهد محمد | zina@tahfeez.com |
+
+## أولياء الأمور (Parents) — 74
+
+كلمة المرور: `parent@123`
+
+| # | الاسم | البريد الإلكتروني |
+|---|------|------------------|
+| 1 | ولي أمر عبد العزيز سعد عبد الله | p.abdulaziz@tahfeez.com |
+| 2 | ولي أمر عبد الله مبارك عبد الله | p.abdullah2@tahfeez.com |
+| 3 | ولي أمر عبد الله ناصر عايض | p.abdullah3@tahfeez.com |
+| 4 | ولي أمر عبد الله مسعود عايض | p.abdullah@tahfeez.com |
+| 5 | ولي أمر عبد الرحمن سعود حسن | p.abdulrahman2@tahfeez.com |
+| 6 | ولي أمر عبد الرحمن علي عبد الرحمن | p.abdulrahman@tahfeez.com |
+| 7 | ولي أمر عائشة عايض حسن | p.aisha@tahfeez.com |
+| 8 | ولي أمر العنود علي عبد الرحمن | p.alanoud2@tahfeez.com |
+| 9 | ولي أمر العنود حمد فهيد | p.alanoud3@tahfeez.com |
+| 10 | ولي أمر العنود فهد محمد | p.alanoud@tahfeez.com |
+| 11 | ولي أمر الكادي سالم محمد | p.alkadi@tahfeez.com |
+| 12 | ولي أمر الريم حسن زويح | p.alreem@tahfeez.com |
+| 13 | ولي أمر امينة حسن القحطاني | p.amina@tahfeez.com |
+| 14 | ولي أمر اسما عايض حسن | p.asma@tahfeez.com |
+| 15 | ولي أمر عايض عبد الله عايض زيدان | p.ayed2@tahfeez.com |
+| 16 | ولي أمر عايض فهد محمد | p.ayed3@tahfeez.com |
+| 17 | ولي أمر عايض جاسر عايض | p.ayed4@tahfeez.com |
+| 18 | ولي أمر عايض مبارك عبد الله | p.ayed@tahfeez.com |
+| 19 | ولي أمر بدر فهد محمد | p.badr@tahfeez.com |
+| 20 | ولي أمر دلال حسن القحطاني | p.dalal@tahfeez.com |
+| 21 | ولي أمر فهد عايض حسن | p.fahd@tahfeez.com |
+| 22 | ولي أمر فجحان جاسر عايض | p.fajhan2@tahfeez.com |
+| 23 | ولي أمر فجحان سعد عايض زيدان | p.fajhan3@tahfeez.com |
+| 24 | ولي أمر فجحان عبد الله عايض | p.fajhan@tahfeez.com |
+| 25 | ولي أمر فلوه عبد الله | p.falwa@tahfeez.com |
+| 26 | ولي أمر فارس ناصر عبد الله | p.fares@tahfeez.com |
+| 27 | ولي أمر فاطمة هارون | p.fatima2@tahfeez.com |
+| 28 | ولي أمر فاطمة سعد الحميداني | p.fatima@tahfeez.com |
+| 29 | ولي أمر فضة عوض | p.fidda@tahfeez.com |
+| 30 | ولي أمر غالية سعد الحميداني | p.ghalia@tahfeez.com |
+| 31 | ولي أمر حماس فواز | p.hamas@tahfeez.com |
+| 32 | ولي أمر حسن علي عبد الرحمن | p.hasan@tahfeez.com |
+| 33 | ولي أمر هيا عايض حسن | p.haya@tahfeez.com |
+| 34 | ولي أمر جاسر محمد جاسر | p.jasser@tahfeez.com |
+| 35 | ولي أمر جواهر فهد محمد | p.jawaher2@tahfeez.com |
+| 36 | ولي أمر جواهر ظافر جربوع | p.jawaher@tahfeez.com |
+| 37 | ولي أمر جازا فجحان عايض | p.jaza@tahfeez.com |
+| 38 | ولي أمر خالد حمد فهيد | p.khalid@tahfeez.com |
+| 39 | ولي أمر مها ناصر سعد الحميداني | p.maha@tahfeez.com |
+| 40 | ولي أمر مريم عايض حسن | p.maryam2@tahfeez.com |
+| 41 | ولي أمر مريم سعد الحميداني | p.maryam@tahfeez.com |
+| 42 | ولي أمر مسعود محمد مسعود | p.masoud2@tahfeez.com |
+| 43 | ولي أمر مسعود فهد محمد | p.masoud3@tahfeez.com |
+| 44 | ولي أمر مزا مهدي محمد | p.maza@tahfeez.com |
+| 45 | ولي أمر مشعل سعيد فهيد | p.mishaal@tahfeez.com |
+| 46 | ولي أمر محمد مسعود جاسر | p.mohammed@tahfeez.com |
+| 47 | ولي أمر معيض سعيد فهيد | p.muaid@tahfeez.com |
+| 48 | ولي أمر مبارك مهدي مبارك | p.mubarak@tahfeez.com |
+| 49 | ولي أمر منيرة سعد الحميداني | p.munira@tahfeez.com |
+| 50 | ولي أمر مسفر فهد محمد | p.musfir@tahfeez.com |
+| 51 | ولي أمر نايف عبد الله محمد | p.naif2@tahfeez.com |
+| 52 | ولي أمر نايف سعيد فهيد | p.naif@tahfeez.com |
+| 53 | ولي أمر ناصر متعب ناصر | p.nasser@tahfeez.com |
+| 54 | ولي أمر نوف حمد فهيد | p.nouf@tahfeez.com |
+| 55 | ولي أمر نورة حمد فهيد | p.noura2@tahfeez.com |
+| 56 | ولي أمر نورة مهدي محمد | p.noura@tahfeez.com |
+| 57 | ولي أمر قمرا محمد عايض | p.qamra2@tahfeez.com |
+| 58 | ولي أمر قمرا عبد الله القحطاني | p.qamra@tahfeez.com |
+| 59 | ولي أمر راكان عبد الله عايض | p.rakan2@tahfeez.com |
+| 60 | ولي أمر راكان فهد محمد | p.rakan@tahfeez.com |
+| 61 | ولي أمر رزان عايض حسن | p.razan@tahfeez.com |
+| 62 | ولي أمر سعد مسفر سعد | p.saad2@tahfeez.com |
+| 63 | ولي أمر سعد مبارك عبد الله | p.saad@tahfeez.com |
+| 64 | ولي أمر سعيد فهد محمد | p.saeed@tahfeez.com |
+| 65 | ولي أمر سارة عايض حسن | p.sara@tahfeez.com |
+| 66 | ولي أمر سعود سعد عبد الله | p.saud2@tahfeez.com |
+| 67 | ولي أمر سعود عايض حسن | p.saud@tahfeez.com |
+| 68 | ولي أمر شيخة عبد الله عايض | p.shaikha@tahfeez.com |
+| 69 | ولي أمر سعاد احمد | p.suad@tahfeez.com |
+| 70 | ولي أمر سلطان حمد فهيد | p.sultan@tahfeez.com |
+| 71 | ولي أمر سمو سلطان عبد الله | p.sumu@tahfeez.com |
+| 72 | ولي أمر وافي عايض حسن | p.wafi@tahfeez.com |
+| 73 | ولي أمر وتين سالم محمد | p.wateen@tahfeez.com |
+| 74 | ولي أمر زينة فهد محمد | p.zina@tahfeez.com |
 

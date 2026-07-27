@@ -190,6 +190,13 @@ export function TeacherAttendance() {
   // (below) hang off of, same "one linked plan" model as TeacherTrackDetail.
   const linkedPlan = plans.find((p) => p.targetType === (selected?.kind === "specialTrack" ? "specialTrack" : "halqa")) ?? plans[0];
 
+  // A reverse-direction plan (rangeStart sits after rangeEnd in mushaf order):
+  // the day's assignment is still recited/stored low→high internally, but the
+  // "من/إلى" display is swapped so the teacher reads it in the plan's own
+  // direction (from the plan's start point back toward its end).
+  const rangeReversed = !!linkedPlan &&
+    toFlatIndex(linkedPlan.rangeStart) > toFlatIndex(linkedPlan.rangeEnd);
+
   // Day slider state — "" means "not yet chosen", falls back to defaultDate.
   const [selectedDate, setSelectedDate] = useState("");
 
@@ -642,7 +649,16 @@ export function TeacherAttendance() {
 
                     {isExpanded && (
                       <div style={{ padding: "10px 2px 4px" }}>
-                        {assignment ? (
+                        {assignment ? (() => {
+                          // Swap the displayed endpoints for a reverse plan so the
+                          // banner reads in the plan's own direction (back→front).
+                          const from = rangeReversed
+                            ? { surah: assignment.surahEnd, ayah: assignment.ayahEnd, page: assignment.pageEnd }
+                            : { surah: assignment.surahStart, ayah: assignment.ayahStart, page: assignment.pageStart };
+                          const to = rangeReversed
+                            ? { surah: assignment.surahStart, ayah: assignment.ayahStart, page: assignment.pageStart }
+                            : { surah: assignment.surahEnd, ayah: assignment.ayahEnd, page: assignment.pageEnd };
+                          return (
                           <div className="assignment-banner" style={{ marginBottom: 10 }}>
                             <div className="assignment-icon">
                               <i className="ti ti-book-2" />
@@ -650,19 +666,20 @@ export function TeacherAttendance() {
                             <div className="assignment-body">
                               <div className="assignment-label">
                                 <i className="ti ti-clipboard-text" /> الورد المقرر
+                                {rangeReversed && <span style={{ fontWeight: 400, color: "var(--text3)" }}> · بالعكس</span>}
                               </div>
                               <div className="assignment-range">
-                                <span>{surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)}</span>
+                                <span>{surahName(from.surah)} : {toAr(from.ayah)}</span>
                                 <i className="ti ti-arrow-left assignment-arrow" />
-                                <span>{surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}</span>
+                                <span>{surahName(to.surah)} : {toAr(to.ayah)}</span>
                               </div>
                             </div>
                             <div className="assignment-meta">
                               <span className="assignment-pill">
                                 <i className="ti ti-file-text" />
-                                {assignment.pageEnd !== assignment.pageStart
-                                  ? `من صفحة ${toAr(assignment.pageStart)} إلى صفحة ${toAr(assignment.pageEnd)}`
-                                  : `صفحة ${toAr(assignment.pageStart)}`}
+                                {from.page !== to.page
+                                  ? `من صفحة ${toAr(from.page)} إلى صفحة ${toAr(to.page)}`
+                                  : `صفحة ${toAr(from.page)}`}
                               </span>
                               <span className="assignment-pill">
                                 <i className="ti ti-bookmark" />
@@ -670,7 +687,8 @@ export function TeacherAttendance() {
                               </span>
                             </div>
                           </div>
-                        ) : (
+                          );
+                        })() : (
                           <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10 }}>لا يوجد جزء مخصص لهذا اليوم</div>
                         )}
 
@@ -706,7 +724,10 @@ export function TeacherAttendance() {
                                   onChange={(v) => setCompletedPoint(s._id, clampToAssignment(v, assignment))}
                                 />
                                 <span style={{ fontSize: 11, color: "var(--text3)" }}>
-                                  من {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)} إلى {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}
+                                  {rangeReversed
+                                    ? <>من {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)} إلى {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)}</>
+                                    : <>من {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)} إلى {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}</>
+                                  }
                                 </span>
                                 {!isFull && !controlsLocked && (
                                   <button

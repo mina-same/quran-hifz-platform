@@ -32,7 +32,7 @@ import { useRecordStudentOccurrence, useStudentPlanProgressList } from "../../ap
 import { IndividualPlanPanel, planCoversStudent } from "../../components/common/IndividualPlanPanel";
 import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
-import { fractionalPage, toFlatIndex, fromFlatIndex } from "../../lib/quranRange";
+import { fractionalPage, toFlatIndex, fromFlatIndex, isReversedRange, orientSlice } from "../../lib/quranRange";
 import { toAr } from "../../../lib/format";
 
 /** Formats a schedule day's page position: a clean page boundary shows as a
@@ -263,6 +263,9 @@ export function TeacherTrackDetail() {
   // "specialTrack") over a narrower students-only plan that merely still
   // points at it, regardless of which was created/updated more recently.
   const linkedPlan = linkedPlans.find((p) => p.targetType === "specialTrack") ?? linkedPlans[0];
+  // Reverse-direction plan → display the assigned ward in the plan's own
+  // direction ("من" nearer the plan's start). Display-only; storage stays low→high.
+  const rangeReversed = !!linkedPlan && isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd);
 
   // Each student can now have their own effective schedule (absence/shortfall
   // reflow, manual per-student overrides), so "today's assigned portion" is
@@ -794,7 +797,9 @@ export function TeacherTrackDetail() {
 
                       {isExpanded && (
                         <div style={{ padding: "10px 2px 4px" }}>
-                          {assignment ? (
+                          {assignment ? (() => {
+                            const a = orientSlice(assignment, rangeReversed);
+                            return (
                             <div className="assignment-banner" style={{ marginBottom: 10 }}>
                               <div className="assignment-icon">
                                 <i className="ti ti-book-2" />
@@ -802,19 +807,20 @@ export function TeacherTrackDetail() {
                               <div className="assignment-body">
                                 <div className="assignment-label">
                                   <i className="ti ti-clipboard-text" /> الورد المقرر
+                                  {rangeReversed && <span style={{ fontWeight: 400, color: "var(--text3)" }}> · بالعكس</span>}
                                 </div>
                                 <div className="assignment-range">
-                                  <span>{surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)}</span>
+                                  <span>{surahName(a.surahStart)} : {toAr(a.ayahStart)}</span>
                                   <i className="ti ti-arrow-left assignment-arrow" />
-                                  <span>{surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}</span>
+                                  <span>{surahName(a.surahEnd)} : {toAr(a.ayahEnd)}</span>
                                 </div>
                               </div>
                               <div className="assignment-meta">
                                 <span className="assignment-pill">
                                   <i className="ti ti-file-text" />
-                                  {assignment.pageEnd !== assignment.pageStart
-                                    ? `من صفحة ${toAr(assignment.pageStart)} إلى صفحة ${toAr(assignment.pageEnd)}`
-                                    : `صفحة ${toAr(assignment.pageStart)}`}
+                                  {a.pageEnd !== a.pageStart
+                                    ? `من صفحة ${toAr(a.pageStart)} إلى صفحة ${toAr(a.pageEnd)}`
+                                    : `صفحة ${toAr(a.pageStart)}`}
                                 </span>
                                 <span className="assignment-pill">
                                   <i className="ti ti-bookmark" />
@@ -822,7 +828,8 @@ export function TeacherTrackDetail() {
                                 </span>
                               </div>
                             </div>
-                          ) : (
+                            );
+                          })() : (
                             <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10 }}>لا يوجد جزء مخصص لهذا اليوم</div>
                           )}
 
@@ -858,7 +865,10 @@ export function TeacherTrackDetail() {
                                     onChange={(v) => setCompletedPoint(id, clampToAssignment(v, assignment))}
                                   />
                                   <span style={{ fontSize: 11, color: "var(--text3)" }}>
-                                    من {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)} إلى {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}
+                                    {rangeReversed
+                                      ? <>من {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)} إلى {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)}</>
+                                      : <>من {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)} إلى {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}</>
+                                    }
                                   </span>
                                   {!isFull && !controlsLocked && (
                                     <button
@@ -985,14 +995,17 @@ export function TeacherTrackDetail() {
                 <div style={{ fontSize: 11, fontWeight: 700, color: linkedPlan.todayAssignment ? "var(--green)" : "var(--text3)", marginBottom: linkedPlan.todayAssignment ? 4 : 0 }}>
                   <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />الجزء المطلوب اليوم
                 </div>
-                {linkedPlan.todayAssignment ? (
+                {linkedPlan.todayAssignment ? (() => {
+                  const a = orientSlice(linkedPlan.todayAssignment, rangeReversed);
+                  return (
                   <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
-                    {surahName(linkedPlan.todayAssignment.surahStart)} : {linkedPlan.todayAssignment.ayahStart}
+                    {surahName(a.surahStart)} : {a.ayahStart}
                     {" — "}
-                    {surahName(linkedPlan.todayAssignment.surahEnd)} : {linkedPlan.todayAssignment.ayahEnd} (صفحة {linkedPlan.todayAssignment.pageStart}
-                    {linkedPlan.todayAssignment.pageEnd !== linkedPlan.todayAssignment.pageStart ? ` - ${linkedPlan.todayAssignment.pageEnd}` : ""})
+                    {surahName(a.surahEnd)} : {a.ayahEnd} (صفحة {a.pageStart}
+                    {a.pageEnd !== a.pageStart ? ` - ${a.pageEnd}` : ""})
                   </div>
-                ) : (
+                  );
+                })() : (
                   <div style={{ fontSize: 11, color: "var(--text3)" }}>لا يوجد جزء مخصص لليوم</div>
                 )}
               </div>
@@ -1053,12 +1066,13 @@ export function TeacherTrackDetail() {
                               <td>{toAr(s.occurrenceIndex)}</td>
                               <td>{fmtDayLabel(toDateOnly(s.date))}</td>
                               <td><Badge tone="green">جزء {toAr(s.juz)}</Badge></td>
-                              <td>{surahName(s.surahStart)} : {toAr(s.ayahStart)}</td>
-                              <td>{surahName(s.surahEnd)} : {toAr(s.ayahEnd)}</td>
+                              <td>{surahName(rangeReversed ? s.surahEnd : s.surahStart)} : {toAr(rangeReversed ? s.ayahEnd : s.ayahStart)}</td>
+                              <td>{surahName(rangeReversed ? s.surahStart : s.surahEnd)} : {toAr(rangeReversed ? s.ayahStart : s.ayahEnd)}</td>
                               <td>
-                                {pageLabel({ surahNumber: s.surahStart, ayah: s.ayahStart }, "start")}
-                                {" - "}
-                                {pageLabel({ surahNumber: s.surahEnd, ayah: s.ayahEnd }, "end")}
+                                {rangeReversed
+                                  ? <>{pageLabel({ surahNumber: s.surahEnd, ayah: s.ayahEnd }, "end")}{" - "}{pageLabel({ surahNumber: s.surahStart, ayah: s.ayahStart }, "start")}</>
+                                  : <>{pageLabel({ surahNumber: s.surahStart, ayah: s.ayahStart }, "start")}{" - "}{pageLabel({ surahNumber: s.surahEnd, ayah: s.ayahEnd }, "end")}</>
+                                }
                               </td>
                               <td>
                                 {linkedPlan.scheduleIsPersisted && (

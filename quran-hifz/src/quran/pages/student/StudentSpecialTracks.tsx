@@ -7,6 +7,7 @@ import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { useSpecialTracks, type SpecialTrack, type TrackTeacher } from "../../api/special-tracks";
 import { useQuranPlans } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
+import { isReversedRange, orientSlice } from "../../lib/quranRange";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -207,17 +208,20 @@ function TrackCard({ track }: { track: SpecialTrack }) {
                   </div>
                 )}
                 <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
-                  {linkedPlan.todayAssignment ? (
+                  {linkedPlan.todayAssignment ? (() => {
+                    const a = orientSlice(linkedPlan.todayAssignment, isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd));
+                    return (
                     <>
-                      مقرَّر اليوم: {surahName(linkedPlan.todayAssignment.surahStart)} : {linkedPlan.todayAssignment.ayahStart}
+                      مقرَّر اليوم: {surahName(a.surahStart)} : {a.ayahStart}
                       {" — "}
-                      {surahName(linkedPlan.todayAssignment.surahEnd)} : {linkedPlan.todayAssignment.ayahEnd}
+                      {surahName(a.surahEnd)} : {a.ayahEnd}
                       <span style={{ fontWeight: 400, color: "var(--text2)" }}>
-                        {" "}(صفحة {linkedPlan.todayAssignment.pageStart}
-                        {linkedPlan.todayAssignment.pageEnd !== linkedPlan.todayAssignment.pageStart ? ` - ${linkedPlan.todayAssignment.pageEnd}` : ""})
+                        {" "}(صفحة {a.pageStart}
+                        {a.pageEnd !== a.pageStart ? ` - ${a.pageEnd}` : ""})
                       </span>
                     </>
-                  ) : (
+                    );
+                  })() : (
                     <span style={{ fontWeight: 400, color: "var(--text3)" }}>لا يوجد جزء مخصص لليوم</span>
                   )}
                 </div>

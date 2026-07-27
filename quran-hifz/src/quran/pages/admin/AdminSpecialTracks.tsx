@@ -12,6 +12,7 @@ import { useMasajid } from "../../api/masajid";
 import { useStudents } from "../../api/students";
 import { useQuranPlans } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
+import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { FormSection } from "../../components/common/FormSection";
@@ -863,15 +864,18 @@ function TrackCard({
               )}
 
               <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2 }}>
-                {linkedPlan.todayAssignment ? (
+                {linkedPlan.todayAssignment ? (() => {
+                  const a = orientSlice(linkedPlan.todayAssignment, isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd));
+                  return (
                   <>
-                    مقرَّر اليوم: {surahName(linkedPlan.todayAssignment.surahStart)} : {linkedPlan.todayAssignment.ayahStart}
+                    مقرَّر اليوم: {surahName(a.surahStart)} : {a.ayahStart}
                     {" — "}
-                    {surahName(linkedPlan.todayAssignment.surahEnd)} : {linkedPlan.todayAssignment.ayahEnd}
-                    {" "}(صفحة {linkedPlan.todayAssignment.pageStart}
-                    {linkedPlan.todayAssignment.pageEnd !== linkedPlan.todayAssignment.pageStart ? ` - ${linkedPlan.todayAssignment.pageEnd}` : ""})
+                    {surahName(a.surahEnd)} : {a.ayahEnd}
+                    {" "}(صفحة {a.pageStart}
+                    {a.pageEnd !== a.pageStart ? ` - ${a.pageEnd}` : ""})
                   </>
-                ) : "لا يوجد جزء مخصص لليوم"}
+                  );
+                })() : "لا يوجد جزء مخصص لليوم"}
               </div>
             </div>
           )}

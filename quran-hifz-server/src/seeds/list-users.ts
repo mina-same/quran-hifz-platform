@@ -11,7 +11,7 @@ const ROLE_PASSWORD: Record<string, string> = {
   admin:   'admin@123',
   teacher: 'teacher@123',
   student: 'student@123',
-  parent:  'parent123',
+  parent:  'parent@123',
 };
 
 const ROLE_LABEL: Record<string, string> = {

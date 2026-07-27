@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T15:07:11.881Z
-> Files: 455 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-27T08:58:50.017Z
+> Files: 456 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/
 
@@ -360,7 +360,7 @@
 
 - `.gitignore` — Git ignore rules (~10 tok)
 - `package-lock.json` — npm lock file (~23821 tok)
-- `package.json` — Node.js package manifest (~382 tok)
+- `package.json` — Node.js package manifest (~404 tok)
 - `tsconfig.json` — TypeScript configuration (~128 tok)
 - `vercel.json` (~54 tok)
 
@@ -465,6 +465,7 @@
 ## quran-hifz-server/src/seeds/
 
 - `backfillPlans.ts` — Additive-only script — for every Halqa or SpecialTrack that has no QuranPlan (~1052 tok)
+- `create-parent-accounts.ts` — Additive, idempotent: create one parent account per student and link it. (~786 tok)
 - `ensure-admin.ts` — Idempotent admin bootstrap. Run:  npm run ensure-admin (~421 tok)
 - `import-real-halaqat.ts` — One-time import of real special-track/halqa/teacher/student data. (~1864 tok)
 - `list-users.ts` — Default seed passwords by role (import-real-halaqat.ts + ensure-admin.ts). (~540 tok)
@@ -626,7 +627,7 @@
 - `FormSection.tsx` — FormSection (~195 tok)
 - `HalqaRow.tsx` — HalqaRow (~104 tok)
 - `HonorBoard.tsx` — Podium-style top-3 showcase (crown/medal icons, RTL-correct rank order via array index not DOM order) — visually distinct from `Leaderboard`'s ranked-row list. Degrades gracefully with <3 rows (~584 tok)
-- `IndividualPlanPanel.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~3848 tok)
+- `IndividualPlanPanel.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~4086 tok)
 - `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
@@ -658,7 +659,7 @@
 ## quran-hifz/src/quran/lib/
 
 - `evaluationRubric.ts` — Exports MAX_SCORES, TOTAL_MAX (~34 tok)
-- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~2752 tok)
+- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~3089 tok)
 
 ## quran-hifz/src/quran/pages/
 
@@ -674,8 +675,8 @@
 - `AdminParents.tsx` — EMPTY_ADD, ChildChip — renders table, modal, search bar, avatars (~5900 tok)
 - `AdminRegister.tsx` — schema — renders form (~3079 tok)
 - `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~324 tok)
-- `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13438 tok)
-- `AdminStudents.tsx` — PATH_TONE — renders table (~5297 tok)
+- `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13471 tok)
+- `AdminStudents.tsx` — PATH_TONE — renders table (~5357 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4598 tok)
 
 ## quran-hifz/src/quran/pages/parent/
@@ -696,26 +697,26 @@
 - `StudentMessages.tsx` — StudentMessages (~768 tok)
 - `StudentPoints.tsx` — MY_POINTS (~1322 tok)
 - `StudentSchedule.tsx` — getId (~840 tok)
-- `StudentSpecialTracks.tsx` — surahName (~4339 tok)
+- `StudentSpecialTracks.tsx` — surahName (~4351 tok)
 - `StudentStore.tsx` — MY_POINTS (~882 tok)
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~11712 tok)
+- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~12145 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1433 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
 - `TeacherGroupHomework.tsx` — STUDENTS (~2940 tok)
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
-- `TeacherPlanDetail.tsx` — surahName — renders table (~3558 tok)
+- `TeacherPlanDetail.tsx` — surahName — renders table (~3637 tok)
 - `TeacherPlanForm.tsx` — Today as a local `YYYY-MM-DD` string — built from local calendar fields (~8484 tok)
-- `TeacherPlans.tsx` — surahName (~4262 tok)
+- `TeacherPlans.tsx` — surahName (~4282 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
-- `TeacherSpecialTracks.tsx` — surahName (~2758 tok)
+- `TeacherSpecialTracks.tsx` — surahName (~2791 tok)
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2468 tok)
-- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~17705 tok)
+- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~18001 tok)
 
 ## quran-hifz/src/quran/router/
 
