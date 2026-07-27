@@ -18,10 +18,13 @@ router.delete('/:id', authorize('teacher'), deletePlan);
 router.post('/:id/schedule/generate', authorize('teacher'), generateSchedule);
 router.put('/:id/schedule/:occurrenceIndex', authorize('teacher'), updateScheduleEntry);
 
+// Admin's #trackdetail page reuses the exact same TeacherTrackDetail/
+// IndividualPlanPanel components (see pageRegistry.ts) — the individual-plan
+// panel must work identically for both roles, not just teacher.
 router.get('/:id/students/:studentId/progress',                 getStudentProgress);
-router.post('/:id/students/:studentId/progress/record',         authorize('teacher'), recordOccurrence);
-router.put('/:id/students/:studentId/schedule/:occurrenceIndex', authorize('teacher'), updateStudentScheduleEntry);
-router.post('/:id/students/:studentId/progress/reflow',         authorize('teacher'), reflowNow);
-router.post('/:id/students/:studentId/progress/init',           authorize('teacher'), initStudentProgress);
+router.post('/:id/students/:studentId/progress/record',         authorize('teacher', 'admin'), recordOccurrence);
+router.put('/:id/students/:studentId/schedule/:occurrenceIndex', authorize('teacher', 'admin'), updateStudentScheduleEntry);
+router.post('/:id/students/:studentId/progress/reflow',         authorize('teacher', 'admin'), reflowNow);
+router.post('/:id/students/:studentId/progress/init',           authorize('teacher', 'admin'), initStudentProgress);
 
 export default router;

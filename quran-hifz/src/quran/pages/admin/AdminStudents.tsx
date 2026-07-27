@@ -21,6 +21,12 @@ function getObjName(h: unknown): string {
   if (h && typeof h === "object" && "name" in h) return (h as { name: string }).name;
   return "";
 }
+function getTrackTitle(halqa: Student["halqa"]): string {
+  if (!halqa || typeof halqa !== "object") return "";
+  const t = halqa.specialTrack;
+  if (t && typeof t === "object" && "title" in t) return t.title;
+  return "";
+}
 function getObjId(h: unknown): string {
   if (h && typeof h === "object" && "_id" in h) return (h as { _id: string })._id;
   if (typeof h === "string") return h;
@@ -205,7 +211,14 @@ export function AdminStudents() {
                 {filtered.map((s) => (
                   <tr key={s._id}>
                     <td style={{ fontWeight: 600 }}>{s.name}</td>
-                    <td><Badge tone={PATH_TONE[s.path] ?? "blue"}>{s.path}</Badge></td>
+                    <td>
+                      {(() => {
+                        const trackTitle = getTrackTitle(s.halqa);
+                        if (trackTitle) return <Badge tone="green">{trackTitle}</Badge>;
+                        if (s.path) return <Badge tone={PATH_TONE[s.path] ?? "blue"}>{s.path}</Badge>;
+                        return <span style={{ color: "var(--text3)" }}>—</span>;
+                      })()}
+                    </td>
                     <td>{s.level != null ? toAr(s.level) : "—"}</td>
                     <td>{getObjName(s.halqa)}</td>
                     <td>{getObjName(s.masjid)}</td>

@@ -2,6 +2,7 @@
 
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
+| 2026-07-27 22:15 | Added "الملف الشخصي" (account/profile) tab for student + teacher portals: view email, edit display name, change password (current+new+confirm). Backend: PUT /auth/profile (syncs Teacher/Student.name too, kept in sync with User.name), PUT /auth/change-password (verifies currentPassword via comparePassword). Frontend: new shared AccountSettings.tsx page + api/account.ts hooks, AuthContext gained updateUser() so sidebar name updates live, nav item added to both portals.ts configs + pageRegistry.ts. Verified end-to-end via Playwright (teacher atiqa@tahfeez.com + student abdulaziz@tahfeez.com): name edit reflects in sidebar immediately, wrong-current-password shows warning alert, correct password change round-tripped (change → logout → login with new password → change back → login with original) all succeeded. tsc --noEmit clean on both server and web (2 pre-existing unrelated errors in ParentHomeworkView.tsx/sitemap route, untouched). | quran-hifz-server/src/controllers/auth.controller.ts, routes/auth.routes.ts, quran-hifz/src/quran/api/account.ts (new), pages/common/AccountSettings.tsx (new), context/AuthContext.tsx, config/portals.ts, router/pageRegistry.ts | complete | ~9000 |
 | 2026-07-06 | User then said the whole plan-detail feature (previous entry below) was a mistake and asked to remove it, keeping only the Special Tracks work. Reverted via `git checkout HEAD --` (nothing had been committed) on every file touched solely for the plan feature — quran-hifz-server/{validators/context.ts, models/Attendance.model.ts, models/Evaluation.model.ts, controllers/attendance.controller.ts, controllers/evaluation.controller.ts, controllers/student.controller.ts} and quran-hifz/src/quran/{api/attendance.ts, api/evaluations.ts, api/students.ts, api/quran-plans.ts, components/common/ContextPicker.tsx, pages/teacher/TeacherAttendance.tsx, pages/teacher/TeacherPlans.tsx, pages/teacher/TeacherSpecialTracks.tsx, api/special-tracks.ts, router/pageRegistry.ts} — all fully restored to original, plus deleted the untracked TeacherPlanDetail.tsx. This undid the 3-way attendance/evaluation context (plan support) entirely, back to the original halqa/specialTrack-only XOR. Then rebuilt the Special Tracks version cleanly on top of the clean baseline: added a NEW dedicated detail page `TeacherTrackDetail.tsx` (registry key "trackdetail", reached by clicking a track card; reads id from new `TRACK_DETAIL_ID_KEY` sessionStorage key in api/special-tracks.ts) containing everything the old inline `TrackCard` used to render (info grid, teachers, capacity bar, linked-plan collapsible section incl. LinkPlanModal, meet link) PLUS the per-student expandable attendance/points rows (reusing original ATTENDANCE_PREFILL_TRACK_KEY, unmodified specialTrack-only evaluate/attendance APIs — no backend changes needed this time). `TeacherSpecialTracks.tsx` itself was slimmed down to simple, clickable summary cards (status strip, badges, time/days, capacity bar, today's-target teaser) matching the visual language of TeacherPlans' PlanCard — click anywhere on a card opens the detail page. tsc/eslint clean. **Lesson: when a multi-file cross-cutting change (shared backend context, shared components) turns out to be premised on a misunderstood target page, `git checkout HEAD -- <files>` is far cleaner than trying to manually un-diff each edit — verify with `git status`/`git diff --stat` afterward that only the intended files remain touched.** | quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx (new), TeacherSpecialTracks.tsx, api/special-tracks.ts, router/pageRegistry.ts | complete | ~4200 |
 | 2026-07-06 (REVERTED, see entry above) | User clarified the "expand student row → today's part + attendance/points + save" request was actually meant for the Special Tracks page (#specialtracks), not Plans (kept the plan-detail work below as-is, unreverted). Added the same expandable-row feature into TeacherSpecialTracks.tsx's TrackCard student list (its "تسجيل الحضور" group button already existed) — reused .att-row/.eval-* CSS, useEvaluations({specialTrack, from:today, to:today}) for prefill, single-record useBulkEvaluate({specialTrack, ...}) per student save; today's part sourced from the track's linkedPlan.todayAssignment (falls back to "لا يوجد جزء مخصص لليوم" if no plan linked). tsc/eslint clean | quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | complete | ~2600 |
 | 2026-07-06 (REVERTED, see entry above) | Added teacher plan detail page: clicking a plan card in TeacherPlans opens TeacherPlanDetail (new page, "plandetail" registry key) showing plan info + student roster with per-student expandable rows (arrow toggle) to record today's attendance+points and save individually, plus a "تسجيل الحضور الجماعي" button deep-linking into TeacherAttendance. Extended Attendance/Evaluation to a 3-way context (halqa \| specialTrack \| plan) server-side (models, contextRefinement validator, both bulk controllers) so "طلاب محددون" plans with no halqa/track can still record attendance/evaluations against the plan itself; added students.controller plan-filter resolving members regardless of plan.targetType; generalized the old ATTENDANCE_PREFILL_TRACK_KEY sessionStorage handoff into ATTENDANCE_PREFILL_CONTEXT_KEY ({kind,id} JSON) shared by TeacherSpecialTracks and the new plan detail page; tsc --noEmit clean on both server and web | quran-hifz-server/src/validators/context.ts, models/Attendance.model.ts, models/Evaluation.model.ts, controllers/attendance.controller.ts, controllers/evaluation.controller.ts, controllers/student.controller.ts, quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx (new), TeacherPlans.tsx, TeacherAttendance.tsx, TeacherSpecialTracks.tsx, components/common/ContextPicker.tsx, api/quran-plans.ts, api/attendance.ts, api/evaluations.ts, api/students.ts, router/pageRegistry.ts | complete | ~9000 |
@@ -2054,3 +2055,123 @@
 | 11:58 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | 5→5 lines | ~61 |
 | 12:02 | AdminStudents: drop الحضور/التقدم cols, show parent email; add create-parent-accounts script (74 parents p.<email>, parent@123); regen ACCOUNTS.md (155) | AdminStudents.tsx, create-parent-accounts.ts, list-users.ts, package.json, ACCOUNTS.md | done | ~8k |
 | 12:03 | Session end: 33 writes across 13 files (TeacherAttendance.tsx, quranRange.ts, TeacherPlanDetail.tsx, TeacherPlans.tsx, AdminSpecialTracks.tsx) | 16 reads | ~77666 tok |
+
+## Session: 2026-07-27 21:47
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-27 21:47
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 21:50 | Edited quran-hifz-server/src/controllers/student.controller.ts | added 1 import(s) | ~63 |
+| 21:50 | Edited quran-hifz-server/src/controllers/student.controller.ts | added optional chaining | ~318 |
+| 21:50 | Edited quran-hifz/src/quran/api/students.ts | 7→9 lines | ~72 |
+| 21:50 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | CSS: guardianContact | ~63 |
+| 21:50 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | CSS: guardianContact | ~34 |
+| 21:51 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | CSS: guardianContact | ~40 |
+| 21:51 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | 2→2 lines | ~21 |
+| 21:51 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | 2→2 lines | ~64 |
+| 21:53 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw/driver.mjs | — | ~301 |
+
+## Session: 2026-07-27 21:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 21:55 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw/driver.mjs | async() → waitForTimeout() | ~92 |
+| 22:10 | Fixed empty "ولي الأمر" col in teacher students view | quran-hifz-server/src/controllers/student.controller.ts, quran-hifz/src/quran/api/students.ts, quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | Fixed — verified live via Playwright as atiqa@tahfeez.com | ~1400 |
+
+## Session: 2026-07-27 21:57
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 21:58 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw2/driver.mjs | — | ~517 |
+| 21:59 | Edited quran-hifz-server/src/controllers/auth.controller.ts | expanded (+9 lines) | ~132 |
+| 21:59 | Edited quran-hifz-server/src/controllers/auth.controller.ts | added 2 import(s) | ~66 |
+| 21:59 | Edited quran-hifz-server/src/controllers/auth.controller.ts | added error handling | ~497 |
+| 22:00 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw2/driver2.mjs | — | ~486 |
+| 22:00 | Edited quran-hifz-server/src/routes/auth.routes.ts | 8→10 lines | ~128 |
+| 22:00 | Created quran-hifz/src/quran/api/account.ts | — | ~258 |
+| 22:00 | Edited quran-hifz/src/quran/context/AuthContext.tsx | CSS: updateUser, patch | ~64 |
+| 22:01 | Edited quran-hifz/src/quran/context/AuthContext.tsx | CSS: patch | ~140 |
+| 22:01 | Edited quran-hifz/src/quran/config/portals.ts | 6→9 lines | ~73 |
+| 22:01 | Edited quran-hifz/src/quran/config/portals.ts | 8→11 lines | ~122 |
+| 22:01 | Created quran-hifz/src/quran/pages/common/AccountSettings.tsx | — | ~1819 |
+| 22:02 | Edited quran-hifz/src/quran/pages/common/AccountSettings.tsx | modified if() | ~164 |
+| 22:02 | Edited quran-hifz/src/quran/router/pageRegistry.ts | added 1 import(s) | ~40 |
+| 22:02 | Edited quran-hifz/src/quran/router/pageRegistry.ts | 14→16 lines | ~142 |
+| 22:03 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw2/driver3.mjs | — | ~375 |
+| 22:03 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | inline fix | ~43 |
+| 22:04 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/3ed61a2b-68a1-458f-bad6-5a76c5824937/scratchpad/test_account.mjs | — | ~842 |
+| 22:35 | Investigated "المسار عمال بيحمل" report | quran-hifz/src/quran/pages/admin/AdminStudents.tsx | Root cause was 2 things: (1) transient backend respawn during my earlier edit, self-resolved (warm load ~375ms); (2) empty path badge for real students with no path set — fixed to show "—" | ~2600 |
+| 22:06 | Session end: 18 writes across 12 files (driver.mjs, auth.controller.ts, driver2.mjs, auth.routes.ts, account.ts) | 18 reads | ~18182 tok |
+| 22:07 | Session end: 18 writes across 12 files (driver.mjs, auth.controller.ts, driver2.mjs, auth.routes.ts, account.ts) | 18 reads | ~18182 tok |
+
+## Session: 2026-07-27 22:10
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 22:15 | Edited quran-hifz-server/src/controllers/student.controller.ts | 4→4 lines | ~72 |
+| 22:15 | Edited quran-hifz/src/quran/api/students.ts | inline fix | ~30 |
+| 22:15 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | CSS: halqa | ~105 |
+| 22:15 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | added 2 condition(s) | ~129 |
+| 22:17 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw3/verify.mjs | — | ~279 |
+
+## Session: 2026-07-27 22:17
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 22:50 | Fixed real bug: AdminStudents "المسار" col read wrong field | quran-hifz-server/src/controllers/student.controller.ts, quran-hifz/src/quran/api/students.ts, quran-hifz/src/quran/pages/admin/AdminStudents.tsx | Fixed — user pointed out track data lives inside halqa→specialTrack, not Student.path. Verified live | ~2000 |
+| 22:21 | Edited quran-hifz/src/quran/lib/quranRange.ts | added nullish coalescing | ~670 |
+| 22:21 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | inline fix | ~35 |
+| 22:21 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | added optional chaining | ~173 |
+| 22:21 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 4→5 lines | ~133 |
+| 22:22 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 4→5 lines | ~95 |
+| 22:22 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 3→3 lines | ~80 |
+| 22:22 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 2→2 lines | ~58 |
+| 22:22 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | CSS: direction | ~197 |
+| 22:22 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 13→13 lines | ~294 |
+| 22:22 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 1→4 lines | ~50 |
+| 22:23 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | added optional chaining | ~173 |
+| 22:23 | Edited quran-hifz-server/src/lib/planStudents.ts | added 1 condition(s) | ~597 |
+| 22:23 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 4→5 lines | ~130 |
+| 22:23 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 3→4 lines | ~65 |
+| 22:23 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 2→2 lines | ~60 |
+| 22:24 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: direction | ~200 |
+| 22:24 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 13→13 lines | ~301 |
+| 22:24 | Edited quran-hifz-server/src/lib/studentPlanReflow.ts | inline fix | ~19 |
+| 22:24 | Edited quran-hifz-server/src/controllers/student-plan-progress.controller.ts | inline fix | ~32 |
+| 22:24 | Edited quran-hifz-server/src/controllers/student-plan-progress.controller.ts | modified if() | ~169 |
+| 22:24 | Edited quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | 3→1 lines | ~17 |
+| 22:25 | Edited quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | added nullish coalescing | ~141 |
+| 22:25 | Edited quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | removed 5 lines | ~18 |
+| 22:25 | Edited quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | added nullish coalescing | ~120 |
+| 22:25 | Edited quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | inline fix | ~26 |
+| 22:26 | Created quran-hifz-server/src/_verify_cleanup.ts | — | ~124 |
+| 22:27 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw4/driver.mjs | — | ~739 |
+| 23:40 | Direction-aware "الورد الفعلي" vs "الورد المقرر": added isReversedSchedule/dayFinishPoint/dayShortfallAyahs | quran-hifz/src/quran/lib/quranRange.ts | 3 helpers added | ~700 |
+| 23:42 | Wired reverse-aware completion into attendance + track roster (default point, "الورد كامل", shortfall, done/partial) | TeacherAttendance.tsx, TeacherTrackDetail.tsx | fixed | ~1200 |
+| 23:44 | done-status completedThrough now direction-aware; isForwardDoc exported | student-plan-progress.controller.ts, studentPlanReflow.ts | fixed | ~300 |
+| 23:45 | Individual plan panel direction now read from student's own schedule, not base plan | IndividualPlanPanel.tsx | fixed | ~200 |
+| 23:47 | tsc --noEmit both projects | — | clean (4 pre-existing errors in ParentHomeworkView/sitemap only) | ~150 |
+| 22:27 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw4/driver.mjs | added 1 condition(s) | ~134 |
+| 22:28 | Session end: 28 writes across 9 files (quranRange.ts, TeacherAttendance.tsx, TeacherTrackDetail.tsx, planStudents.ts, studentPlanReflow.ts) | 9 reads | ~54997 tok |
+| 22:29 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw4/driver.mjs | inline fix | ~17 |
+| 22:30 | Created quran-hifz-server/src/_verify_cleanup2.ts | — | ~124 |
+| 23:15 | Fixed real bug: individual-plan creation 404'd for specialTrack-targeted plans | quran-hifz-server/src/lib/planStudents.ts | Fixed — getPlanStudentIds now unions track.enrolledStudents with students in linked halaqat. Verified live end-to-end via Playwright as nasser2@tahfeez.com | ~3200 |
+| 22:31 | Session end: 30 writes across 10 files (quranRange.ts, TeacherAttendance.tsx, TeacherTrackDetail.tsx, planStudents.ts, studentPlanReflow.ts) | 10 reads | ~55139 tok |
+| 22:39 | Edited quran-hifz-server/src/routes/quran-plan.routes.ts | 5→8 lines | ~218 |
+| 22:40 | Created quran-hifz-server/src/_verify_cleanup3.ts | — | ~124 |
+| 22:41 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw5/driver.mjs | — | ~784 |
+| 22:42 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw5/driver2.mjs | — | ~599 |
+
+## Session: 2026-07-27 22:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 22:46 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | expanded (+8 lines) | ~236 |
+| 22:47 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 12→10 lines | ~191 |
+| 22:49 | Created quran-hifz-server/src/_verify_cleanup4.ts | — | ~124 |
+| 23:45 | Fixed admin access + real useMemo staleness bug on individual-plan button | quran-hifz-server/src/routes/quran-plan.routes.ts, quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | Fixed both — routes now allow admin (was teacher-only), and coveredStudentIds useMemo now depends on rosterStudents (was missing, froze at empty roster). Verified live: button correctly shows عرض vs أنشئ after fix | ~3800 |
+| 22:53 | Session end: 3 writes across 2 files (TeacherTrackDetail.tsx, _verify_cleanup4.ts) | 6 reads | ~18992 tok |

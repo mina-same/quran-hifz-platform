@@ -28,6 +28,7 @@ type AuthContextValue = {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateUser: (patch: Partial<Pick<AuthUser, "name">>) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -81,8 +82,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateUser = useCallback((patch: Partial<Pick<AuthUser, "name">>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...patch };
+      setStoredUser(next);
+      return next;
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

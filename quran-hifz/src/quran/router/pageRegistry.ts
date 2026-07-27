@@ -36,6 +36,8 @@ import { StudentPoints }         from "../pages/student/StudentPoints";
 import { StudentStore }          from "../pages/student/StudentStore";
 import { StudentSpecialTracks }  from "../pages/student/StudentSpecialTracks";
 
+import { AccountSettings }    from "../pages/common/AccountSettings";
+
 import { ParentDashboard }    from "../pages/parent/ParentDashboard";
 import { ParentTimeline }     from "../pages/parent/ParentTimeline";
 import { ParentRecordings }   from "../pages/parent/ParentRecordings";
@@ -77,6 +79,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     grouphomework: TeacherGroupHomework,
     specialtracks: TeacherSpecialTracks,
     trackdetail:   TeacherTrackDetail,
+    account:       AccountSettings,
   },
   student: {
     dashboard:     StudentDashboard,
@@ -88,6 +91,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     points:        StudentPoints,
     store:         StudentStore,
     specialtracks: StudentSpecialTracks,
+    account:       AccountSettings,
   },
   parent: {
     dashboard:    ParentDashboard,

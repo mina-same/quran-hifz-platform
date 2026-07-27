@@ -39,6 +39,9 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
       { group: "التواصل", items: [
         { id: "messages", icon: "ti-message", label: "الرسائل" },
       ]},
+      { group: "الحساب", items: [
+        { id: "account", icon: "ti-user-circle", label: "الملف الشخصي" },
+      ]},
     ],
   },
   teacher: {
@@ -60,6 +63,9 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "homework", icon: "ti-microphone", label: "مراجعة الواجبات", dot: true },
         { id: "plans",    icon: "ti-target",     label: "الخطط القرآنية" },
         { id: "reports",  icon: "ti-chart-bar",  label: "تقارير الطلاب" },
+      ]},
+      { group: "الحساب", items: [
+        { id: "account", icon: "ti-user-circle", label: "الملف الشخصي" },
       ]},
     ],
   },

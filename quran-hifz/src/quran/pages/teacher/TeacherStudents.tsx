@@ -40,7 +40,7 @@ type Row = {
   halqaId: string | null;
   halqaName: string;
   guardian: string;
-  guardianPhone: string;
+  guardianContact: string;
   lastMemorization: string;
   homeworkStatus: string | null;
   tracks: string[];
@@ -88,8 +88,8 @@ export function TeacherStudents() {
         name: s.name,
         halqaId,
         halqaName: getName(s.halqa),
-        guardian: s.guardian || "—",
-        guardianPhone: s.guardianPhone || "—",
+        guardian: s.parentName || s.guardian || "—",
+        guardianContact: s.parentEmail || s.guardianPhone || "—",
         lastMemorization: s.lastMemorization || "—",
         homeworkStatus: s.homeworkStatus,
         tracks: inheritedTrack && !tracks.includes(inheritedTrack) ? [...tracks, inheritedTrack] : tracks,
@@ -108,7 +108,7 @@ export function TeacherStudents() {
           halqaId: null,
           halqaName: "—",
           guardian: "—",
-          guardianPhone: "—",
+          guardianContact: "—",
           lastMemorization: "—",
           homeworkStatus: null,
           tracks,
@@ -181,7 +181,7 @@ export function TeacherStudents() {
                   <th>الحلقة</th>
                   <th>المسارات</th>
                   <th>ولي الأمر</th>
-                  <th>رقم ولي الأمر</th>
+                  <th>التواصل</th>
                   <th>آخر حفظ</th>
                   <th>الدرس</th>
                   <th>إجراء</th>
@@ -202,7 +202,7 @@ export function TeacherStudents() {
                       ) : "—"}
                     </td>
                     <td style={{ fontSize: 12, color: "var(--text2)" }}>{r.guardian}</td>
-                    <td style={{ fontSize: 12, color: "var(--text2)", direction: "ltr", textAlign: "right" }}>{r.guardianPhone}</td>
+                    <td style={{ fontSize: 12, color: "var(--text2)", direction: "ltr", textAlign: "right" }}>{r.guardianContact}</td>
                     <td style={{ fontSize: 12, color: "var(--text2)" }}>{r.lastMemorization}</td>
                     <td>
                       {r.homeworkStatus ? (

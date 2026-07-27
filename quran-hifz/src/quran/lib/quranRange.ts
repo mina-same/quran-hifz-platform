@@ -114,6 +114,46 @@ export function isReversedRange(rangeStart: RangePoint, rangeEnd: RangePoint): b
   return toFlatIndex(rangeStart) > toFlatIndex(rangeEnd);
 }
 
+/** A student's own schedule can run a different direction than the shared plan
+ * it hangs off (a custom-range individual plan), so direction for anything
+ * per-student must be inferred from that student's own occurrences — mirrors
+ * the server's `isForwardDoc` in studentPlanReflow.ts. A single occurrence
+ * tells us nothing (its own endpoints are always stored low→high), so returns
+ * null when there's nothing to compare and the caller should fall back to the
+ * base plan's own direction. */
+export function isReversedSchedule(
+  entries?: { occurrenceIndex: number; basePageStart?: number; pageStart: number }[],
+): boolean | null {
+  if (!entries || entries.length < 2) return null;
+  const sorted = [...entries].sort((a, b) => a.occurrenceIndex - b.occurrenceIndex);
+  const first = sorted[0].basePageStart ?? sorted[0].pageStart;
+  const second = sorted[1].basePageStart ?? sorted[1].pageStart;
+  return second < first;
+}
+
+type DaySlice = { surahStart: number; ayahStart: number; surahEnd: number; ayahEnd: number };
+
+/** The point a day's ward *ends* at in the plan's own direction: the slice's
+ * high end for a forward plan, its low end for a reverse one — a reverse plan's
+ * day is worked from the end of the mushaf backward, so "finished it all" means
+ * the student reached the slice's *first* ayah, not its last. Slices are always
+ * stored low→high regardless of direction, hence the swap. */
+export function dayFinishPoint(slice: DaySlice, reversed: boolean): RangePoint {
+  return reversed
+    ? { surahNumber: slice.surahStart, ayah: slice.ayahStart }
+    : { surahNumber: slice.surahEnd, ayah: slice.ayahEnd };
+}
+
+/** How much of the day's ward is still undone given the point the student
+ * actually reached, measured in the plan's own direction (0 = the whole ward is
+ * done). This is the shortfall the server will redistribute across the
+ * student's remaining days. */
+export function dayShortfallAyahs(slice: DaySlice, reversed: boolean, reached: RangePoint): number {
+  const reachedFlat = toFlatIndex(reached);
+  const finishFlat = toFlatIndex(dayFinishPoint(slice, reversed));
+  return Math.max(0, reversed ? reachedFlat - finishFlat : finishFlat - reachedFlat);
+}
+
 type OrientableSlice = {
   surahStart: number; ayahStart: number; surahEnd: number; ayahEnd: number;
   pageStart: number; pageEnd: number;

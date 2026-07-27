@@ -6,7 +6,7 @@ export type Student = {
   name: string;
   path: string;
   level?: number;
-  halqa: { _id: string; name: string } | string;
+  halqa: { _id: string; name: string; specialTrack?: { _id: string; title: string } | string } | string;
   masjid: { _id: string; name: string } | string;
   attendancePct: number;
   progressPct: number;
@@ -18,6 +18,8 @@ export type Student = {
   status: "active" | "inactive" | "new";
   homeworkStatus: "submitted" | "pending" | "late";
   email: string | null;
+  parentName: string | null;
+  parentEmail: string | null;
 };
 
 export type StudentFilters = {

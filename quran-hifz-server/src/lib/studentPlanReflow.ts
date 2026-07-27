@@ -59,7 +59,7 @@ function occurrenceFlatRange(o: { surahStart: number; ayahStart: number; surahEn
  * custom-range individual plan can run a different direction than the base
  * plan. A single occurrence tells us nothing (its own pageStart/pageEnd are
  * always low/high regardless of direction); need at least two to compare. */
-function isForwardDoc(doc: IStudentPlanProgress): boolean {
+export function isForwardDoc(doc: IStudentPlanProgress): boolean {
   if (doc.occurrences.length < 2) return true;
   const sorted = [...doc.occurrences].sort((a, b) => a.occurrenceIndex - b.occurrenceIndex);
   return sorted[1].basePageStart >= sorted[0].basePageStart;

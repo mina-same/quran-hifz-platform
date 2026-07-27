@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { Student } from '../models/Student.model';
 import { User } from '../models/User.model';
 import { SpecialTrack } from '../models/SpecialTrack.model';
+import { ParentStudent } from '../models/ParentStudent.model';
 import { AppError } from '../middleware/error';
 
 const studentSchema = z.object({
@@ -39,13 +40,32 @@ export async function getStudents(req: Request, res: Response, next: NextFunctio
     }
 
     const students = await Student.find(filter)
-      .populate('halqa',  'name time days')
+      .populate({ path: 'halqa', select: 'name time days specialTrack', populate: { path: 'specialTrack', select: 'title' } })
       .populate('masjid', 'name location')
       .sort({ createdAt: -1 });
 
-    const userDocs = await User.find({ role: 'student', profileId: { $in: students.map((s) => s._id) } }).select('profileId email');
+    const studentIds = students.map((s) => s._id);
+    const userDocs = await User.find({ role: 'student', profileId: { $in: studentIds } }).select('profileId email');
     const emailMap = new Map(userDocs.map((u) => [String(u.profileId), u.email]));
-    const enriched = students.map((s) => ({ ...s.toObject(), email: emailMap.get(String(s._id)) ?? null }));
+
+    const links = await ParentStudent.find({ student: { $in: studentIds } }).select('parent student');
+    const parentUserDocs = await User.find({ role: 'parent', _id: { $in: links.map((l) => l.parent) } }).select('name email');
+    const parentUserMap = new Map(parentUserDocs.map((u) => [String(u._id), { name: u.name, email: u.email }]));
+    const parentMap = new Map(
+      links
+        .map((l) => [String(l.student), parentUserMap.get(String(l.parent))] as const)
+        .filter((pair): pair is [string, { name: string; email: string }] => !!pair[1]),
+    );
+
+    const enriched = students.map((s) => {
+      const parent = parentMap.get(String(s._id));
+      return {
+        ...s.toObject(),
+        email: emailMap.get(String(s._id)) ?? null,
+        parentName: parent?.name ?? null,
+        parentEmail: parent?.email ?? null,
+      };
+    });
 
     res.json({ success: true, count: enriched.length, data: enriched });
   } catch (err) {

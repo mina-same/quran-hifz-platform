@@ -24,7 +24,7 @@ import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from "../../
 import { useRecordStudentOccurrence, useStudentPlanProgressList } from "../../api/student-plan-progress";
 import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
-import { toFlatIndex, fromFlatIndex } from "../../lib/quranRange";
+import { toFlatIndex, fromFlatIndex, isReversedSchedule, dayFinishPoint, dayShortfallAyahs } from "../../lib/quranRange";
 import { toAr, pct } from "../../../lib/format";
 
 function surahName(n: number) {
@@ -385,8 +385,14 @@ export function TeacherAttendance() {
   function unlockStudent(studentId: string) {
     setUnlockedIds((prev) => new Set(prev).add(studentId));
   }
+  /** Direction of this student's own ward. Their individual overlay can run the
+   * opposite way to the shared plan (a custom-range individual plan), so infer
+   * it from their own schedule first and only fall back to the base plan. */
+  function reversedForStudent(studentId: string): boolean {
+    return isReversedSchedule(progressByStudentId[studentId]?.effectiveSchedule) ?? rangeReversed;
+  }
   function completedPointFor(studentId: string, forAssignment: ScheduleEntry): RangePoint {
-    return completionOverrides[studentId] ?? { surahNumber: forAssignment.surahEnd, ayah: forAssignment.ayahEnd };
+    return completionOverrides[studentId] ?? dayFinishPoint(forAssignment, reversedForStudent(studentId));
   }
   function setCompletedPoint(studentId: string, point: RangePoint) {
     setCompletionOverrides((prev) => ({ ...prev, [studentId]: point }));
@@ -438,9 +444,10 @@ export function TeacherAttendance() {
             return;
           }
           const completedPoint = completedPointFor(studentId, studentAssignment);
-          const completedFlat = toFlatIndex(completedPoint);
-          const assignmentEndFlat = toFlatIndex({ surahNumber: studentAssignment.surahEnd, ayah: studentAssignment.ayahEnd });
-          const status = e.attendanceStatus === "غائب" ? "absent" : completedFlat < assignmentEndFlat ? "partial" : "done";
+          // Shortfall is measured in the plan's own direction — for a reverse
+          // plan the undone part is the low side of the day's slice, not the high one.
+          const shortfall = dayShortfallAyahs(studentAssignment, reversedForStudent(studentId), completedPoint);
+          const status = e.attendanceStatus === "غائب" ? "absent" : shortfall > 0 ? "partial" : "done";
 
           if (status === "done") {
             toast.success("تم حفظ الحضور والتقييم بنجاح", { id: toastId });
@@ -652,10 +659,11 @@ export function TeacherAttendance() {
                         {assignment ? (() => {
                           // Swap the displayed endpoints for a reverse plan so the
                           // banner reads in the plan's own direction (back→front).
-                          const from = rangeReversed
+                          const reversed = reversedForStudent(s._id);
+                          const from = reversed
                             ? { surah: assignment.surahEnd, ayah: assignment.ayahEnd, page: assignment.pageEnd }
                             : { surah: assignment.surahStart, ayah: assignment.ayahStart, page: assignment.pageStart };
-                          const to = rangeReversed
+                          const to = reversed
                             ? { surah: assignment.surahStart, ayah: assignment.ayahStart, page: assignment.pageStart }
                             : { surah: assignment.surahEnd, ayah: assignment.ayahEnd, page: assignment.pageEnd };
                           return (
@@ -666,7 +674,7 @@ export function TeacherAttendance() {
                             <div className="assignment-body">
                               <div className="assignment-label">
                                 <i className="ti ti-clipboard-text" /> الورد المقرر
-                                {rangeReversed && <span style={{ fontWeight: 400, color: "var(--text3)" }}> · بالعكس</span>}
+                                {reversed && <span style={{ fontWeight: 400, color: "var(--text3)" }}> · بالعكس</span>}
                               </div>
                               <div className="assignment-range">
                                 <span>{surahName(from.surah)} : {toAr(from.ayah)}</span>
@@ -708,11 +716,13 @@ export function TeacherAttendance() {
                         </div>
 
                         {!isAbsent && assignment && (() => {
+                          // "وصل إلى" and the leftover are both measured in the plan's
+                          // own direction: a reverse day is worked from its high end
+                          // down, so it's complete once the student reaches its low end.
+                          const reversedHere = reversedForStudent(s._id);
                           const actualPoint = completedPointFor(s._id, assignment);
-                          const assignmentEndFlat = toFlatIndex({ surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd });
-                          const actualFlat = toFlatIndex(actualPoint);
-                          const isFull = actualFlat >= assignmentEndFlat;
-                          const shortfallAyahs = assignmentEndFlat - actualFlat;
+                          const shortfallAyahs = dayShortfallAyahs(assignment, reversedHere, actualPoint);
+                          const isFull = shortfallAyahs === 0;
                           return (
                             <div style={{ border: "1px dashed var(--border)", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
                               <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text2)", display: "block", marginBottom: 6 }}>
@@ -724,7 +734,7 @@ export function TeacherAttendance() {
                                   onChange={(v) => setCompletedPoint(s._id, clampToAssignment(v, assignment))}
                                 />
                                 <span style={{ fontSize: 11, color: "var(--text3)" }}>
-                                  {rangeReversed
+                                  {reversedHere
                                     ? <>من {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)} إلى {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)}</>
                                     : <>من {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)} إلى {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}</>
                                   }
@@ -734,7 +744,7 @@ export function TeacherAttendance() {
                                     type="button"
                                     className="topbar-btn btn-ghost"
                                     style={{ fontSize: 11, padding: "4px 10px" }}
-                                    onClick={() => setCompletedPoint(s._id, { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd })}
+                                    onClick={() => setCompletedPoint(s._id, dayFinishPoint(assignment, reversedHere))}
                                   >
                                     الورد كامل
                                   </button>

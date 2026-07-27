@@ -9,7 +9,7 @@ import {
   type StudentOccurrence,
 } from "../../api/student-plan-progress";
 import type { RangePoint, QuranPlan } from "../../api/quran-plans";
-import { fractionalPage, isReversedRange } from "../../lib/quranRange";
+import { fractionalPage, isReversedRange, isReversedSchedule } from "../../lib/quranRange";
 import { SURAHS } from "../../data/surahs";
 import { toAr } from "../../../lib/format";
 
@@ -102,6 +102,11 @@ export function IndividualPlanPanel({
   const [error, setError] = useState("");
 
   if (isLoading || !progress) return <SkeletonCard lines={3} />;
+
+  // Reverse schedule → display "من—إلى" in its own direction. This student's
+  // overlay can run the opposite way to the base plan (a custom range they were
+  // given), so read the direction off their own occurrences first.
+  const reversed = isReversedSchedule(progress.effectiveSchedule) ?? isReversedRange(basePlan.rangeStart, basePlan.rangeEnd);
 
   function startEdit(entry: StudentOccurrence) {
     setEditingIndex(entry.occurrenceIndex);
@@ -200,8 +205,6 @@ export function IndividualPlanPanel({
                 s.baseSurahStart !== s.surahStart || s.baseAyahStart !== s.ayahStart ||
                 s.baseSurahEnd !== s.surahEnd || s.baseAyahEnd !== s.ayahEnd;
               const cfg = OCCURRENCE_STATUS_CFG[s.status];
-              // Reverse plan → display "من—إلى" in the plan's own direction.
-              const reversed = isReversedRange(basePlan.rangeStart, basePlan.rangeEnd);
               const baseFrom = reversed ? { s: s.baseSurahEnd, a: s.baseAyahEnd } : { s: s.baseSurahStart, a: s.baseAyahStart };
               const baseTo = reversed ? { s: s.baseSurahStart, a: s.baseAyahStart } : { s: s.baseSurahEnd, a: s.baseAyahEnd };
               const curFrom = reversed ? { s: s.surahEnd, a: s.ayahEnd } : { s: s.surahStart, a: s.ayahStart };

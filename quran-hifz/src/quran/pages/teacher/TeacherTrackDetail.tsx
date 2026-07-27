@@ -32,7 +32,10 @@ import { useRecordStudentOccurrence, useStudentPlanProgressList } from "../../ap
 import { IndividualPlanPanel, planCoversStudent } from "../../components/common/IndividualPlanPanel";
 import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
-import { fractionalPage, toFlatIndex, fromFlatIndex, isReversedRange, orientSlice } from "../../lib/quranRange";
+import {
+  fractionalPage, toFlatIndex, fromFlatIndex, isReversedRange, orientSlice,
+  isReversedSchedule, dayFinishPoint, dayShortfallAyahs,
+} from "../../lib/quranRange";
 import { toAr } from "../../../lib/format";
 
 /** Formats a schedule day's page position: a clean page boundary shows as a
@@ -271,10 +274,16 @@ export function TeacherTrackDetail() {
   // reflow, manual per-student overrides), so "today's assigned portion" is
   // no longer one shared value for the whole track — fetch every covered
   // student's own progress in one batched hook call.
+  // Depends on `rosterStudents` (the stable react-query reference), not the
+  // derived `roster` array — `roster` is a brand-new array every render, so
+  // without `rosterStudents` here this locked onto whatever roster existed at
+  // the moment `track`/`linkedPlan` first settled (often still empty, since
+  // useStudents resolves later) and never recomputed once the real roster
+  // arrived, leaving every student's progress permanently empty.
   const coveredStudentIds = useMemo(() => {
     if (!track || !linkedPlan) return [];
     return roster.map(getEnrolledId).filter((id) => planCoversStudent(linkedPlan, id));
-  }, [track, linkedPlan]);
+  }, [track, linkedPlan, rosterStudents]);
   const progressByStudentId = useStudentPlanProgressList(linkedPlan?._id, coveredStudentIds);
 
   const generateSchedule = useGenerateSchedule();
@@ -454,8 +463,14 @@ export function TeacherTrackDetail() {
   function unlockStudent(studentId: string) {
     setUnlockedIds((prev) => new Set(prev).add(studentId));
   }
+  /** Direction of this student's own ward. Their individual overlay can run the
+   * opposite way to the shared plan (a custom-range individual plan), so infer
+   * it from their own schedule first and only fall back to the base plan. */
+  function reversedForStudent(studentId: string): boolean {
+    return isReversedSchedule(progressByStudentId[studentId]?.effectiveSchedule) ?? rangeReversed;
+  }
   function completedPointFor(studentId: string, forAssignment: ScheduleEntry): RangePoint {
-    return completionOverrides[studentId] ?? { surahNumber: forAssignment.surahEnd, ayah: forAssignment.ayahEnd };
+    return completionOverrides[studentId] ?? dayFinishPoint(forAssignment, reversedForStudent(studentId));
   }
   function setCompletedPoint(studentId: string, point: RangePoint) {
     setCompletionOverrides((prev) => ({ ...prev, [studentId]: point }));
@@ -491,9 +506,10 @@ export function TeacherTrackDetail() {
           return;
         }
         const completedPoint = completedPointFor(studentId, studentAssignment);
-        const completedFlat = toFlatIndex(completedPoint);
-        const assignmentEndFlat = toFlatIndex({ surahNumber: studentAssignment.surahEnd, ayah: studentAssignment.ayahEnd });
-        const status = e.attendanceStatus === "غائب" ? "absent" : completedFlat < assignmentEndFlat ? "partial" : "done";
+        // Shortfall is measured in the plan's own direction — for a reverse plan
+        // the undone part is the low side of the day's slice, not the high one.
+        const shortfall = dayShortfallAyahs(studentAssignment, reversedForStudent(studentId), completedPoint);
+        const status = e.attendanceStatus === "غائب" ? "absent" : shortfall > 0 ? "partial" : "done";
 
         if (status === "done") {
           toast.success("تم حفظ الحضور والتقييم بنجاح", { id: toastId });
@@ -798,7 +814,8 @@ export function TeacherTrackDetail() {
                       {isExpanded && (
                         <div style={{ padding: "10px 2px 4px" }}>
                           {assignment ? (() => {
-                            const a = orientSlice(assignment, rangeReversed);
+                            const reversed = reversedForStudent(id);
+                            const a = orientSlice(assignment, reversed);
                             return (
                             <div className="assignment-banner" style={{ marginBottom: 10 }}>
                               <div className="assignment-icon">
@@ -807,7 +824,7 @@ export function TeacherTrackDetail() {
                               <div className="assignment-body">
                                 <div className="assignment-label">
                                   <i className="ti ti-clipboard-text" /> الورد المقرر
-                                  {rangeReversed && <span style={{ fontWeight: 400, color: "var(--text3)" }}> · بالعكس</span>}
+                                  {reversed && <span style={{ fontWeight: 400, color: "var(--text3)" }}> · بالعكس</span>}
                                 </div>
                                 <div className="assignment-range">
                                   <span>{surahName(a.surahStart)} : {toAr(a.ayahStart)}</span>
@@ -849,11 +866,13 @@ export function TeacherTrackDetail() {
                           </div>
 
                           {!isAbsent && assignment && (() => {
+                            // "وصل إلى" and the leftover are both measured in the plan's
+                            // own direction: a reverse day is worked from its high end
+                            // down, so it's complete once the student reaches its low end.
+                            const reversedHere = reversedForStudent(id);
                             const actualPoint = completedPointFor(id, assignment);
-                            const assignmentEndFlat = toFlatIndex({ surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd });
-                            const actualFlat = toFlatIndex(actualPoint);
-                            const isFull = actualFlat >= assignmentEndFlat;
-                            const shortfallAyahs = assignmentEndFlat - actualFlat;
+                            const shortfallAyahs = dayShortfallAyahs(assignment, reversedHere, actualPoint);
+                            const isFull = shortfallAyahs === 0;
                             return (
                               <div style={{ border: "1px dashed var(--border)", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
                                 <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text2)", display: "block", marginBottom: 6 }}>
@@ -865,7 +884,7 @@ export function TeacherTrackDetail() {
                                     onChange={(v) => setCompletedPoint(id, clampToAssignment(v, assignment))}
                                   />
                                   <span style={{ fontSize: 11, color: "var(--text3)" }}>
-                                    {rangeReversed
+                                    {reversedHere
                                       ? <>من {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)} إلى {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)}</>
                                       : <>من {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)} إلى {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}</>
                                     }
@@ -875,7 +894,7 @@ export function TeacherTrackDetail() {
                                       type="button"
                                       className="topbar-btn btn-ghost"
                                       style={{ fontSize: 11, padding: "4px 10px" }}
-                                      onClick={() => setCompletedPoint(id, { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd })}
+                                      onClick={() => setCompletedPoint(id, dayFinishPoint(assignment, reversedHere))}
                                     >
                                       الورد كامل
                                     </button>

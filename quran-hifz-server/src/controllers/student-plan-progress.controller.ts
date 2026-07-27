@@ -5,7 +5,7 @@ import { StudentPlanProgress } from '../models/StudentPlanProgress.model';
 import { AppError } from '../middleware/error';
 import { SURAHS } from '../data/surahs';
 import { isStudentInPlan } from '../lib/planStudents';
-import { initStudentOccurrences, reflowStudentPlan, reflowAll } from '../lib/studentPlanReflow';
+import { initStudentOccurrences, reflowStudentPlan, reflowAll, isForwardDoc } from '../lib/studentPlanReflow';
 import { toFlatIndex, pageOfFlatIndex, juzOfFlatIndex } from '../lib/quranRange';
 
 const SURAH_BY_NUMBER = new Map(SURAHS.map((s) => [s.number, s]));
@@ -92,8 +92,13 @@ export async function recordOccurrence(req: Request, res: Response, next: NextFu
 
     if (data.status === 'done') {
       entry.status = 'done';
-      entry.completedThroughSurah = entry.surahEnd;
-      entry.completedThroughAyah = entry.ayahEnd;
+      // "Completed through" is the point the day's ward *finishes* at in the
+      // student's own direction — the slice's low end for a reverse-direction
+      // schedule (worked from the end of the mushaf backward), even though the
+      // slice itself is always stored low→high.
+      const forward = isForwardDoc(doc);
+      entry.completedThroughSurah = forward ? entry.surahEnd : entry.surahStart;
+      entry.completedThroughAyah = forward ? entry.ayahEnd : entry.ayahStart;
     } else if (data.status === 'absent') {
       reflowStudentPlan(doc, data.occurrenceIndex, { kind: 'absent' });
     } else {

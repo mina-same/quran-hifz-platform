@@ -5046,6 +5046,142 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-11T13:00:00.000Z"
+    },
+    {
+      "id": "bug-313",
+      "timestamp": "2026-07-27T22:10:00.000Z",
+      "error_message": "عند المدرس ول الامر فاضي (guardian column blank on teacher's students page, #students)",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx",
+      "root_cause": "TeacherStudents.tsx rendered s.guardian/s.guardianPhone directly from the Student document, but those legacy fields default to '' and are empty for every real imported student — the actual guardian relationship now lives in ParentStudent + a role:'parent' User (see 2026-07-27 parent-accounts feature). AdminStudents.tsx had already been fixed to resolve this via the admin-only /admin/parents endpoint, but that endpoint is role-gated to admin (admin.routes.ts authorize('admin')) so teachers could never reach it, leaving the teacher page unfixed.",
+      "fix": "Enriched the shared GET /students endpoint (student.controller.ts getStudents) to look up ParentStudent by student id, then the linked parent User, and attach parentName/parentEmail to every student object (mirrors the existing self email-enrichment pattern from bug-050). Added parentName/parentEmail to the frontend Student type (quran-hifz/src/quran/api/students.ts) and updated TeacherStudents.tsx to show s.parentName || s.guardian and s.parentEmail || s.guardianPhone. Verified live via Playwright logged in as atiqa@tahfeez.com/teacher@123 at #students.",
+      "tags": [
+        "guardian",
+        "parent-link",
+        "teacher-portal",
+        "students",
+        "backend-enrichment"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-27T22:10:00.000Z"
+    },
+    {
+      "id": "bug-314",
+      "timestamp": "2026-07-27T22:35:00.000Z",
+      "error_message": "المسار عند كل طالب عمال بيحمل ومافيش حاجه بتظهر (path/track column keeps loading, nothing shows, on admin #students page)",
+      "file": "quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+      "root_cause": "Two separate causes traced via live network inspection with Playwright: (1) the bug-313 edit to student.controller.ts triggered a ts-node-dev --respawn (confirmed PID change on :5001), and the user's live tab hit /api/students during that restart window, getting a transient 502 that made the page look stuck on the skeleton loader forever — not a real bug, warm reload afterward resolved in ~375ms. (2) A real, separate bug: the 'المسار' column rendered <Badge tone={PATH_TONE[s.path] ?? 'blue'}>{s.path}</Badge>, which renders an empty colored pill (easily mistaken for a stuck loading state) because Student.path is undefined for every one of the 74 real imported students (import-real-halaqat.ts never set it).",
+      "fix": "No fix needed for (1) — confirmed transient via warm-reload timing test. Fixed (2) by guarding the path badge: render '—' (matching the app's existing convention for missing data) when s.path is falsy instead of an empty Badge.",
+      "tags": [
+        "loading-state",
+        "empty-state",
+        "admin-portal",
+        "students",
+        "dev-server-respawn"
+      ],
+      "related_bugs": [
+        "bug-313"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-27T22:35:00.000Z"
+    },
+    {
+      "id": "bug-315",
+      "timestamp": "2026-07-27T22:50:00.000Z",
+      "error_message": "لسه المسار فاضي اليع (still empty after bug-314's '—' placeholder fix) — المسار جوا حلقات (user: the track is inside the halaqat)",
+      "file": "quran-hifz/src/quran/pages/admin/AdminStudents.tsx",
+      "root_cause": "bug-314 only cosmetically hid the empty Student.path badge behind '—'; it didn't address that the column was reading the wrong field entirely. Student.path (the حفظ كامل/عشرون جزء enum) was never set for any real imported student. But real track data already exists via Student.halqa -> Halqa.specialTrack -> SpecialTrack.title (import-real-halaqat.ts links every halqa to its course at import time). TeacherStudents.tsx already derived this correctly; AdminStudents.tsx never did.",
+      "fix": "student.controller.ts getStudents now nested-populates halqa.specialTrack (title). AdminStudents.tsx's المسار column now shows that track title as a Badge (falls back to the legacy path enum badge, then '—' only if neither exists). Frontend Student type's halqa field extended with an optional specialTrack. Verified live via Playwright as admin@tahfeez.com: real track titles now render for all students.",
+      "tags": [
+        "wrong-field",
+        "admin-portal",
+        "students",
+        "special-track",
+        "backend-enrichment"
+      ],
+      "related_bugs": [
+        "bug-314"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-27T22:50:00.000Z"
+    },
+    {
+      "id": "bug-316",
+      "timestamp": "2026-07-27T23:45:00.000Z",
+      "error_message": "الورد الفعلي/الورد المقرر غلط لما الخطة ماشية بالعكس (من ورا لقدام) — a reverse-direction plan always recorded the day as complete and showed the wrong leftover ayah count",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+      "root_cause": "A day's slice is always stored low->high, but a reverse plan works it from its HIGH end downward, so the day's finish point is the slice's START, not its END. The attendance UI hardcoded the forward assumption in 4 places: the completion picker defaulted to {surahEnd, ayahEnd} (= 'nothing done' in reverse, yet treated as full), 'الورد كامل' set the same wrong point, isFull was actualFlat >= assignmentEndFlat, and shortfall was assignmentEndFlat - actualFlat (measured from the wrong end). Net effect: every reverse-plan day saved as status 'done', so no shortfall was ever redistributed. The server's reflowStudentPlan was already direction-aware (isForwardDoc), so only the client's framing was wrong — plus recordOccurrence's 'done' branch stamping completedThrough = entry.surahEnd for reverse docs. Direction was also taken from the shared plan only, ignoring that a student's own overlay can run the opposite way (custom-range individual plan).",
+      "fix": "Added isReversedSchedule (mirrors server isForwardDoc, infers direction from a student's own occurrences), dayFinishPoint and dayShortfallAyahs to quran-hifz/src/quran/lib/quranRange.ts, and used them for the default completion point, the 'الورد كامل' button, isFull/shortfall display and the done-vs-partial decision in both TeacherAttendance.tsx and TeacherTrackDetail.tsx; per-student direction now overrides the base plan's. Server: exported isForwardDoc and made recordOccurrence's 'done' branch stamp completedThrough = entry.surahStart/ayahStart for a reverse doc. IndividualPlanPanel now reads direction from the student's own schedule too.",
+      "tags": [
+        "reverse-plan",
+        "direction",
+        "attendance",
+        "student-plan-progress",
+        "reflow",
+        "quranRange"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-27T23:45:00.000Z"
+    },
+    {
+      "id": "bug-316",
+      "timestamp": "2026-07-27T23:15:00.000Z",
+      "error_message": "انشاء خطه فرديه بيفضل يحمل و مش بيعمل حاجه (create-individual-plan button keeps loading and does nothing) on #trackdetail",
+      "file": "quran-hifz-server/src/lib/planStudents.ts",
+      "root_cause": "getPlanStudentIds's specialTrack branch only checked SpecialTrack.enrolledStudents, which import-real-halaqat.ts deliberately leaves empty for every real track (real rosters live on the linked halaqat instead). isStudentInPlan therefore returned false for every real student under a targetType:'specialTrack' plan, so loadPlanAndValidateStudent 404'd on every init/record/reflow/updateScheduleEntry call. IndividualPlanPanel.tsx's initProgress.mutate(...) call has no onError/setError handler, so the failure was completely silent -- the button's spinner just flickered and reverted, reading as 'keeps loading and does nothing.' Frontend's planCoversStudent already assumed specialTrack plans cover the whole roster (so the button was shown), but the backend disagreed -- a frontend/backend membership-check mismatch.",
+      "fix": "getPlanStudentIds's specialTrack branch now unions SpecialTrack.enrolledStudents with Student.find({halqa: {$in: <halaqat linked to this track>}}), matching TeacherTrackDetail.tsx's own client-side roster derivation. Verified end-to-end live via Playwright as nasser2@tahfeez.com: individual plan creation now succeeds and shows the saved schedule table. Cleaned up the test StudentPlanProgress doc afterward (throwaway script, since it hit the shared Atlas DB).",
+      "tags": [
+        "silent-failure",
+        "membership-check",
+        "special-track",
+        "individual-plan",
+        "teacher-portal",
+        "backend"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-27T23:15:00.000Z"
+    },
+    {
+      "id": "bug-317",
+      "timestamp": "2026-07-27T23:45:00.000Z",
+      "error_message": "Individual-plan section on #trackdetail didn't work for admin like it did for teacher",
+      "file": "quran-hifz-server/src/routes/quran-plan.routes.ts",
+      "root_cause": "Admin's #trackdetail page reuses TeacherTrackDetail (pageRegistry.ts), but the four student-progress mutation routes (record/updateStudentScheduleEntry/reflow/init) were authorize('teacher') only -- admin got a silent 403 (no onError handler on the frontend, same silent-failure shape as bug-316).",
+      "fix": "Widened authorize('teacher') to authorize('teacher', 'admin') on exactly those 4 routes. Left the plan-level CRUD routes (createPlan/updatePlan/deletePlan/generateSchedule/plan-level updateScheduleEntry) untouched -- out of the requested scope (individual-plan panel only).",
+      "tags": [
+        "role-authorization",
+        "admin-portal",
+        "individual-plan",
+        "backend"
+      ],
+      "related_bugs": [
+        "bug-316",
+        "bug-318"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-27T23:45:00.000Z"
+    },
+    {
+      "id": "bug-318",
+      "timestamp": "2026-07-27T23:45:00.000Z",
+      "error_message": "\"أنشئ خطة فردية\" (create) button shown for a student who already has a saved individual plan, on #trackdetail -- should show \"عرض الخطة الفردية\" (view)",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "coveredStudentIds's useMemo(() => roster.map(...).filter(...), [track, linkedPlan]) referenced `roster` in its body but never listed it (or its stable source rosterStudents) as a dependency. track/linkedPlan (cached queries) typically settle before rosterStudents (a separate, slower useStudents fetch) resolves, so the memo froze at its first computation -- usually against an empty roster -- and never recomputed once real student data arrived. progressByStudentId (fed by coveredStudentIds) stayed empty forever, so every student's row button read the 'create' label even when a real persisted plan existed. Not role-specific -- affected teacher too, just surfaced while checking admin parity. Confirmed via a genuinely fresh Playwright browser context (no stale cache possible) plus a timed poll (2s snapshot still wrong, 4s snapshot correct) -- single-timepoint checks would have looked like the fix failed.",
+      "fix": "Added rosterStudents (the stable react-query reference, not the derived roster array which is a fresh reference every render) to the useMemo's dependency array.",
+      "tags": [
+        "react-hooks",
+        "stale-closure",
+        "use-memo",
+        "individual-plan",
+        "frontend"
+      ],
+      "related_bugs": [
+        "bug-317"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-27T23:45:00.000Z"
     }
   ]
 }
