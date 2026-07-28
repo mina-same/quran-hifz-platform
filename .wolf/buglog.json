@@ -1612,20 +1612,20 @@
       "id": "bug-100",
       "timestamp": "2026-07-03T09:55:00.000Z",
       "error_message": "Browser console shows repeated 'Maximum update depth exceeded' warnings immediately after teacher login, plus a pageerror 'Switched to client rendering because the server rendering errored: localStorage is not defined' on first navigation to any quran-hifz page in dev mode.",
-      "file": "quran-hifz/src/quran/context/ThemeContext.tsx (suspected; not yet root-caused)",
-      "root_cause": "NOT YET DIAGNOSED. Confirmed via Playwright E2E during the quran-plans feature build (2026-07-03) that this occurs on EVERY page load right after login — reproduced with zero navigation into the new TeacherPlans.tsx page, so it predates and is unrelated to that feature. Likely chain: TanStack Start SSR renders ThemeProvider, which reads `localStorage` during SSR (no `typeof window` guard) → SSR throws → dev server 'switches to client rendering' → the resulting remount/rehydrate appears to trigger a setState-in-effect loop somewhere in the auth/portal/theme context chain, logged by React as 'Maximum update depth exceeded'. App still functions (login, navigation, CRUD all work correctly per E2E testing), so this looks like a dev-mode-only cosmetic console spam issue, not a functional bug — but not confirmed for production builds.",
-      "fix": "NOT FIXED — out of scope for the quran-plans feature. Flagging for a future session: check ThemeContext.tsx for an SSR-unsafe `localStorage` read (needs `typeof window !== 'undefined'` guard) as the likely root cause of the initial SSR error; the update-depth loop may resolve once that's fixed, or may be a separate issue in AuthContext/PortalContext worth tracing independently.",
+      "file": "quran-hifz/src/quran/context/ThemeContext.tsx, quran-hifz/src/quran/context/PortalContext.tsx",
+      "root_cause": "CONFIRMED (2026-07-28): ThemeProvider (quran-hifz/src/quran/context/ThemeContext.tsx) read localStorage.getItem and window.matchMedia inside its useState initializer with no typeof window guard. TanStack Start SSR renders this component on the server (no window/localStorage global there) -> throws during renderToReadableStream -> dev server logs \"Error in renderToReadableStream: TypeError: Cannot read properties of undefined (reading getItem)\" and falls back to client-only rendering, which then produces the Maximum update depth exceeded / hydration warnings previously observed. Same-shaped bug found in PortalContext.tsx too: readHash() (used as the page state useState lazy initializer) read window.location.hash with no guard — would have crashed SSR again immediately after the ThemeContext fix.",
+      "fix": "FIXED (2026-07-28): guarded the useState initializer with `if (typeof window === \"undefined\") return \"light\";` before touching localStorage/matchMedia, so SSR gets a deterministic light-theme default and only reads the real saved/OS preference once mounted on the client. Reported by user pasting the live dev-server crash trace. Also guarded PortalContext.tsx readHash() with the same typeof window check.",
       "tags": [
-        "pre-existing",
         "ssr",
-        "react",
+        "fixed",
         "console-warning",
-        "not-fixed",
-        "unrelated-to-quran-plans"
+        "react",
+        "unrelated-to-quran-plans",
+        "pre-existing"
       ],
       "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-07-03T09:55:00.000Z"
+      "occurrences": 2,
+      "last_seen": "2026-07-28T23:50:00.000Z"
     },
     {
       "id": "bug-101",
@@ -5182,6 +5182,46 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-07-27T23:45:00.000Z"
+    },
+    {
+      "id": "bug-319",
+      "timestamp": "2026-07-28T23:42:00.000Z",
+      "error_message": "Teacher reported (Arabic): in الورد الفعلي, picking a surah from the dropdown to mark where a student stopped does nothing — selection does not register — and it happens on students whose plan direction is بالعكس (reversed). Same symptom in the attendance/غياب recording UI.",
+      "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx, quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "CompactSurahAyah (the actual-completion surah+ayah picker) always listed all 114 surahs, but onChange ran the picked point through clampToAssignment(v, assignment), which silently snaps any point outside the days own narrow assigned slice back to the nearest boundary (surahStart or surahEnd). Since a single days assignment usually sits entirely inside one surah, picking any other surah just bounced back on the next render, looking unresponsive. Reversed-direction plans made this most visible because the default completion point (dayFinishPoint) starts at the low end (surahStart) instead of the high end, so more of the pickers range felt broken.",
+      "fix": "Added an optional bounds={lo,hi} prop to both files own CompactSurahAyah copies (duplicated per existing per-file convention). When bounds is passed, the surah <select> only lists surahs that intersect [lo,hi] and the ayah <select> only lists ayat inside that range, so every visible option is guaranteed to stick. Passed bounds={assignment.surahStart/ayahStart .. assignment.surahEnd/ayahEnd} at both actual-completion call sites. The unrelated raw-schedule-row-edit CompactSurahAyah usage in TeacherTrackDetail.tsx (dayRangeStart/dayRangeEnd) and the one in IndividualPlanPanel.tsx were left unbounded on purpose — they edit a plans free-form range, not a bounded days completion point.",
+      "tags": [
+        "teacher-attendance",
+        "actual-completion",
+        "الورد-الفعلي",
+        "surah-picker",
+        "reversed-plan",
+        "clamp",
+        "ux"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-28T23:42:00.000Z"
+    },
+    {
+      "id": "bug-320",
+      "timestamp": "2026-07-29T00:05:00.000Z",
+      "error_message": "Teacher reported (Arabic): when the actual completed werd is less than the assigned werd for that day, the plan needs to adjust — today's own \"assigned\" slice should shrink to match what was actually done, and the leftover should be redistributed across the remaining days.",
+      "file": "quran-hifz-server/src/lib/studentPlanReflow.ts",
+      "root_cause": "reflowStudentPlan()'s 'partial' branch correctly redistributed the shortfall across FUTURE pending occurrences (the pool), but never touched the TRIGGERED (today's) occurrence's own surahStart/ayahStart/surahEnd/ayahEnd — those kept showing the full original assignment forever, even after the day was marked partial and its shortfall pushed forward. The schema already had base*/current field pairs (baseSurahEnd vs surahEnd etc.) and IndividualPlanPanel.tsx already renders an 'الأصلي' (struck-through, from base*) vs 'الحالي' (live, from current fields) comparison plus a جزئي/partial badge — clearly designed for exactly this shrink-on-partial behavior — but the current fields were never actually written for the triggered day, so 'الحالي' == 'الأصلي' always for a partial day, silently defeating that UI.",
+      "fix": "In the shortfallAyahs > 0 branch (after the existing shortfallAyahs <= 0 early-return), shrink triggered's own boundary to the completedThrough point on the undone side (surahEnd/ayahEnd for a forward day, surahStart/ayahStart for reversed), and recompute pageStart/pageEnd/juz from the new boundary via the already-imported pageOfFlatIndex/juzOfFlatIndex. base* fields are left untouched so the original assignment is still visible for history/audit. Verified via a throwaway script: a 3-day forward plan (2:1-10 / 2:11-20 / 2:21-30), partial-completing day 1 at 2:5 shrinks day 1 to 2:1-2:5 (status partial) and correctly redistributes the 5-ayah shortfall across days 2-3 (2:6-17, 2:18-30).",
+      "tags": [
+        "student-plan-reflow",
+        "partial-completion",
+        "الورد-الفعلي",
+        "individual-plan",
+        "schedule-shrink"
+      ],
+      "related_bugs": [
+        "bug-316"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-29T00:05:00.000Z"
     }
   ]
 }

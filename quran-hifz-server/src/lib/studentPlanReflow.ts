@@ -106,6 +106,21 @@ export function reflowStudentPlan(doc: IStudentPlanProgress, triggerIndex: numbe
       doc.lastReflowedAt = new Date();
       return;
     }
+    // Today's own assigned slice shrinks down to exactly what the student
+    // actually completed — the undone remainder is redistributed to the pool
+    // below, not left sitting on today's own "الورد المقرر" as if it were
+    // still due today. `base*` still holds the original assignment, so the
+    // schedule table's "الأصلي" vs "الحالي" columns keep showing both.
+    if (forward) {
+      triggered.surahEnd = event.completedThroughSurah;
+      triggered.ayahEnd = event.completedThroughAyah;
+    } else {
+      triggered.surahStart = event.completedThroughSurah;
+      triggered.ayahStart = event.completedThroughAyah;
+    }
+    triggered.pageStart = pageOfFlatIndex(toFlatIndex({ surahNumber: triggered.surahStart, ayah: triggered.ayahStart }));
+    triggered.pageEnd = pageOfFlatIndex(toFlatIndex({ surahNumber: triggered.surahEnd, ayah: triggered.ayahEnd }));
+    triggered.juz = juzOfFlatIndex(toFlatIndex({ surahNumber: triggered.surahStart, ayah: triggered.ayahStart }));
   }
 
   const pool = doc.occurrences

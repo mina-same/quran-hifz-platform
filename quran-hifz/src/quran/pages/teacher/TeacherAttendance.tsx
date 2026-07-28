@@ -34,12 +34,35 @@ function surahName(n: number) {
 const compactInputStyle = { fontSize: 12, padding: "6px 8px" };
 
 /** Compact surah+ayah picker for the "actual completion" input — duplicated
- * from TeacherTrackDetail.tsx's copy (per-file convention in this codebase). */
-function CompactSurahAyah({ value, onChange, disabled }: { value: RangePoint; onChange: (v: RangePoint) => void; disabled?: boolean }) {
+ * from TeacherTrackDetail.tsx's copy (per-file convention in this codebase).
+ *
+ * `bounds`, when given, restricts BOTH selects to only the surahs/ayat that
+ * actually fall inside the day's assigned slice. Without this, the surah
+ * select listed all 114 surahs but any pick outside the assignment's own
+ * range was silently snapped back by the caller's clamp — on a day whose
+ * whole slice sits inside a single surah (the common case), every surah
+ * except that one appeared to do nothing when picked, since the value bounced
+ * straight back on the next render. Pre-filtering the options means every
+ * choice the teacher can see is one that actually sticks. */
+function CompactSurahAyah({ value, onChange, disabled, bounds }: { value: RangePoint; onChange: (v: RangePoint) => void; disabled?: boolean; bounds?: { lo: RangePoint; hi: RangePoint } }) {
   const surah = SURAHS.find((s) => s.number === value.surahNumber) ?? SURAHS[0];
+  const loFlat = bounds ? toFlatIndex(bounds.lo) : undefined;
+  const hiFlat = bounds ? toFlatIndex(bounds.hi) : undefined;
+  function ayahsOf(s: typeof surah): number[] {
+    const all = Array.from({ length: s.ayahCount }, (_, i) => i + 1);
+    if (loFlat == null || hiFlat == null) return all;
+    return all.filter((n) => {
+      const f = toFlatIndex({ surahNumber: s.number, ayah: n });
+      return f >= loFlat && f <= hiFlat;
+    });
+  }
+  const surahs = loFlat == null || hiFlat == null ? SURAHS : SURAHS.filter((s) => ayahsOf(s).length > 0);
+  const ayahs = ayahsOf(surah);
   function setSurah(surahNumber: number) {
     const s = SURAHS.find((x) => x.number === surahNumber) ?? SURAHS[0];
-    onChange({ surahNumber, ayah: Math.min(value.ayah, s.ayahCount) });
+    const opts = ayahsOf(s);
+    const ayah = opts.length ? (opts.includes(value.ayah) ? value.ayah : opts[0]) : Math.min(value.ayah, s.ayahCount);
+    onChange({ surahNumber, ayah });
   }
   function setAyah(ayah: number) {
     onChange({ ...value, ayah: Math.max(1, Math.min(ayah || 1, surah.ayahCount)) });
@@ -47,10 +70,10 @@ function CompactSurahAyah({ value, onChange, disabled }: { value: RangePoint; on
   return (
     <div style={{ display: "flex", gap: 5 }}>
       <select className="form-input" style={{ ...compactInputStyle, flex: "1 1 auto", minWidth: 90 }} value={value.surahNumber} disabled={disabled} onChange={(e) => setSurah(Number(e.target.value))}>
-        {SURAHS.map((s) => <option key={s.number} value={s.number}>{s.number}. {s.name}</option>)}
+        {surahs.map((s) => <option key={s.number} value={s.number}>{s.number}. {s.name}</option>)}
       </select>
       <select className="form-input" style={{ ...compactInputStyle, width: 62, flexShrink: 0 }} value={value.ayah} disabled={disabled} onChange={(e) => setAyah(Number(e.target.value))}>
-        {Array.from({ length: surah.ayahCount }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}</option>)}
+        {ayahs.map((n) => <option key={n} value={n}>{n}</option>)}
       </select>
     </div>
   );
@@ -731,6 +754,10 @@ export function TeacherAttendance() {
                               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                                 <CompactSurahAyah
                                   value={actualPoint} disabled={controlsLocked}
+                                  bounds={{
+                                    lo: { surahNumber: assignment.surahStart, ayah: assignment.ayahStart },
+                                    hi: { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd },
+                                  }}
                                   onChange={(v) => setCompletedPoint(s._id, clampToAssignment(v, assignment))}
                                 />
                                 <span style={{ fontSize: 11, color: "var(--text3)" }}>

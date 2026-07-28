@@ -44,6 +44,7 @@ export function useSetTopbar() {
 
 /* ── hash helpers ── */
 function readHash(): string {
+  if (typeof window === "undefined") return "dashboard";
   const h = window.location.hash.slice(1); // strip leading #
   return h || "dashboard";
 }

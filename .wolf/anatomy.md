@@ -1,7 +1,11 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-27T19:49:09.522Z
-> Files: 473 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-28T20:59:07.282Z
+> Files: 475 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/0ca66137-6f29-449d-9592-1795c237755f/scratchpad/
+
+- `fix_bug100.py` (~233 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/19c64da1-1686-4cdc-b163-4c7548543fe4/scratchpad/
 
@@ -403,6 +407,7 @@
 - `_verify_cleanup4.ts` — Declares main (~124 tok)
 - `_verify_juz.ts` — Plan: Al-Baqarah 1:1 through Al-Baqarah 2:286 (juz 1-3), daily, 10 active days, started 5 days ago. (~358 tok)
 - `_verify_reverse.ts` — Declares show (~422 tok)
+- `_verify_teacher_profileid.ts` — Declares run (~332 tok)
 - `app.ts` — API routes: GET (1 endpoints) (~881 tok)
 - `server.ts` — Declares bootstrap (~198 tok)
 
@@ -443,7 +448,7 @@
 - `notify.ts` — Builds one Message per student (skipping students with no linked parent (~600 tok)
 - `planStudents.ts` — Resolves which students are covered by a plan, branching on `targetType` (~654 tok)
 - `quranRange.ts` — Standard 604-page Madani mushaf boundary table (surah:ayah each page starts at). (~4207 tok)
-- `studentPlanReflow.ts` — Builds a fresh per-student occurrence array — `base*` and current fields (~3093 tok)
+- `studentPlanReflow.ts` — Builds a fresh per-student occurrence array — `base*` and current fields (~3376 tok)
 
 ## quran-hifz-server/src/middleware/
 
@@ -680,8 +685,8 @@
 
 - `AuthContext.tsx` — AuthContext (~780 tok)
 - `ParentContext.tsx` — ParentContext (~206 tok)
-- `PortalContext.tsx` — TopbarValueContext (~1255 tok)
-- `ThemeContext.tsx` — ThemeContext (~307 tok)
+- `PortalContext.tsx` — TopbarValueContext (~1272 tok)
+- `ThemeContext.tsx` — ThemeContext (~323 tok)
 - `useTopbar.ts` — Declarative topbar setter for a page component. (~107 tok)
 
 ## quran-hifz/src/quran/data/
@@ -740,7 +745,7 @@
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~12347 tok)
+- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~12798 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1433 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
 - `TeacherGroupHomework.tsx` — STUDENTS (~2940 tok)
@@ -754,7 +759,7 @@
 - `TeacherSpecialTracks.tsx` — surahName (~2791 tok)
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2471 tok)
-- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~18338 tok)
+- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~18810 tok)
 
 ## quran-hifz/src/quran/router/
 
