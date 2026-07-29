@@ -1,8 +1,9 @@
-import { ScrollView, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Alert from '@/components/ui/Alert';
+import { SkeletonRows } from '@/components/ui/Skeleton';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useStudent } from '@/lib/queries/students';
 import { useHalqa } from '@/lib/queries/halqat';
@@ -24,17 +25,22 @@ export default function StudentSchedule() {
   const authUser = usePortalStore((s) => s.authUser);
   const studentId = authUser?.profileId;
 
-  const { data: student, isLoading: studentLoading, isError: studentError } = useStudent(studentId);
+  const { data: student, isLoading: studentLoading, isError: studentError, isRefetching: studentRefetching, refetch: refetchStudent } = useStudent(studentId);
   const halqaId = student ? getId(student.halqa) : undefined;
-  const { data: halqa, isLoading: halqaLoading, isError: halqaError } = useHalqa(halqaId);
+  const { data: halqa, isLoading: halqaLoading, isError: halqaError, isRefetching: halqaRefetching, refetch: refetchHalqa } = useHalqa(halqaId);
 
   const isLoading = studentLoading || (!!halqaId && halqaLoading);
+  const isRefetching = studentRefetching || (!!halqaId && halqaRefetching);
+  const onRefresh = () => {
+    refetchStudent();
+    if (halqaId) refetchHalqa();
+  };
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safe} edges={['bottom']}>
-        <View style={styles.loading}>
-          <ActivityIndicator color={theme.green} size="large" />
+        <View style={styles.page}>
+          <SkeletonRows count={5} />
         </View>
       </SafeAreaView>
     );
@@ -56,7 +62,13 @@ export default function StudentSchedule() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={[theme.green]} tintColor={theme.green} />
+        }
+      >
         {!halqa ? (
           <Card>
             <Text style={styles.emptyText}>لا توجد حلقة مسجلة بعد</Text>
@@ -124,7 +136,6 @@ export default function StudentSchedule() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.bg },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   page: { padding: theme.pagePadding, gap: 14 },
   emptyText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted, textAlign: 'center', paddingVertical: 20 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },

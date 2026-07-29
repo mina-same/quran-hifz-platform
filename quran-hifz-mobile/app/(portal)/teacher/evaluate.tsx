@@ -1,74 +1,296 @@
-import { useState } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
+import { useMemo, useState } from 'react';
+import { ScrollView, View, Text, Pressable, StyleSheet, RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { IconCircleCheck, IconLock } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
-import { theme } from '@/lib/theme';
+import Alert from '@/components/ui/Alert';
+import Button from '@/components/ui/Button';
+import { SkeletonRows } from '@/components/ui/Skeleton';
+import FormTextarea from '@/components/forms/FormTextarea';
+import ContextCard, { halqaToContext, trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
+import { useHalqat } from '@/lib/queries/halqat';
+import { useSpecialTracks } from '@/lib/queries/specialTracks';
+import { useStudents } from '@/lib/queries/students';
+import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from '@/lib/queries/evaluations';
+import { MAX_SCORES, TOTAL_MAX } from '@/lib/evaluationRubric';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
-const STUDENTS = ['عبدالله الحميداني', 'محمد القحطاني', 'يوسف الشمري', 'عمر العتيبي'];
-const RATINGS  = ['ممتاز', 'جيد جداً', 'جيد', 'مقبول'];
+type ScoreCategory = 'hifz' | 'tajweed' | 'talawah';
+const CATEGORY_LABELS: Record<ScoreCategory, string> = { hifz: 'حفظ', tajweed: 'تجويد', talawah: 'تلاوة' };
+
+type StudentEval = { attendanceStatus: 'حاضر' | 'غائب'; hifz: number; tajweed: number; talawah: number; note: string };
+
+/** Scores start at 0 so the teacher consciously awards points rather than
+ * every student defaulting to full marks. */
+function blankEval(): StudentEval {
+  return { attendanceStatus: 'حاضر', hifz: 0, tajweed: 0, talawah: 0, note: '' };
+}
+function totalOf(e: StudentEval): number {
+  if (e.attendanceStatus === 'غائب') return 0;
+  return MAX_SCORES.attendance + e.hifz + e.tajweed + e.talawah;
+}
 
 export default function TeacherEvaluate() {
-  const [student, setStudent] = useState(0);
-  const [rating, setRating]   = useState(0);
-  const [segment, setSegment] = useState('');
-  const [points, setPoints]   = useState('');
-  const [note, setNote]       = useState('');
-  const [saved, setSaved]     = useState(false);
+  const theme = useAppTheme();
+  const profileId = usePortalStore((s) => s.authUser?.profileId);
+  const [selected, setSelected] = useState<TeachingContext | null>(null);
+  const [overrides, setOverrides] = useState<Record<string, StudentEval>>({});
+  const [saved, setSaved] = useState(false);
+
+  const { data: halqat = [], isLoading: loadingHalqat, refetch: refetchHalqat, isRefetching: refetchingHalqat } = useHalqat({ teacher: profileId });
+  const { data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useSpecialTracks(undefined, profileId);
+
+  const contextFilter = selected
+    ? selected.kind === 'halqa' ? { halqa: selected.id } : { specialTrack: selected.id }
+    : undefined;
+
+  const { data: students = [], isLoading: loadingStudents, refetch: refetchStudents, isRefetching: refetchingStudents } = useStudents(contextFilter);
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // Today's already-saved evaluations for this context — prefill + once-a-day lock.
+  const { data: savedToday = [], refetch: refetchEvaluations, isRefetching: refetchingEvaluations } = useEvaluations(
+    contextFilter ? { ...contextFilter, from: today, to: today } : undefined,
+  );
+  const savedById: Record<string, StudentEval> = {};
+  for (const r of savedToday) {
+    const id = typeof r.student === 'string' ? r.student : r.student._id;
+    savedById[id] = {
+      attendanceStatus: r.attendanceStatus,
+      hifz: r.scores.hifz,
+      tajweed: r.scores.tajweed,
+      talawah: r.scores.talawah,
+      note: r.note ?? '',
+    };
+  }
+  const alreadySubmitted = savedToday.length > 0;
+
+  const evalFor = (studentId: string): StudentEval => overrides[studentId] ?? savedById[studentId] ?? blankEval();
+  function setAttendance(studentId: string, status: 'حاضر' | 'غائب') {
+    setOverrides((p) => ({ ...p, [studentId]: { ...evalFor(studentId), attendanceStatus: status } }));
+  }
+  function setScore(studentId: string, category: ScoreCategory, value: number) {
+    setOverrides((p) => ({ ...p, [studentId]: { ...evalFor(studentId), [category]: value } }));
+  }
+  function setNote(studentId: string, note: string) {
+    setOverrides((p) => ({ ...p, [studentId]: { ...evalFor(studentId), note } }));
+  }
+
+  const bulkEvaluate = useBulkEvaluate();
 
   function handleSave() {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    if (!selected || alreadySubmitted) return;
+    const records: BulkEvaluateRecord[] = students.map((s) => {
+      const e = evalFor(s._id);
+      return {
+        student: s._id,
+        attendanceStatus: e.attendanceStatus,
+        hifz: e.hifz,
+        tajweed: e.tajweed,
+        talawah: e.talawah,
+        note: e.note.trim() || undefined,
+      };
+    });
+    bulkEvaluate.mutate(
+      {
+        teacher: profileId!,
+        ...(selected.kind === 'halqa' ? { halqa: selected.id } : { specialTrack: selected.id }),
+        date: today,
+        records,
+      },
+      {
+        onSuccess: () => {
+          setSaved(true);
+          setTimeout(() => setSaved(false), 4000);
+        },
+      },
+    );
+  }
+
+  const isLoading = loadingHalqat || loadingTracks;
+  const isRefreshing = refetchingHalqat || refetchingTracks || refetchingStudents || refetchingEvaluations;
+  function handleRefresh() {
+    refetchHalqat();
+    refetchTracks();
+    refetchStudents();
+    refetchEvaluations();
+  }
+
+  const styles = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+    backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
+    studentRow: { paddingVertical: 14, gap: 10 },
+    rowBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
+    studentName: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
+    toggleRow: { flexDirection: 'row', gap: 8 },
+    toggleBtn: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: theme.radiusSm,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    toggleText: {
+      fontSize: 12,
+      fontFamily: theme.fontCairo,
+      color: theme.text,
+    },
+    categoryBlock: { gap: 6 },
+    categoryLabel: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.textMuted },
+    chipRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
+    chip: {
+      minWidth: 32,
+      alignItems: 'center',
+      paddingVertical: 6,
+      paddingHorizontal: 10,
+      borderRadius: theme.radiusSm,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    chipText: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    totalRow: { flexDirection: 'row', justifyContent: 'flex-end' },
+    totalText: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.green },
+  }), [theme]);
+
+  if (!selected) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        <ScrollView
+          contentContainerStyle={styles.page}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.green]} tintColor={theme.green} />}
+        >
+          {isLoading && <SkeletonRows count={4} rowHeight={72} />}
+          {!isLoading && halqat.length === 0 && tracks.length === 0 && (
+            <Text style={styles.muted}>لا توجد حلقات أو مسارات مسندة إليك</Text>
+          )}
+          {halqat.map((h) => (
+            <Pressable key={h._id} onPress={() => setSelected(halqaToContext(h))}>
+              <ContextCard context={halqaToContext(h)} />
+            </Pressable>
+          ))}
+          {tracks.map((t) => (
+            <Pressable key={t._id} onPress={() => setSelected(trackToContext(t))}>
+              <ContextCard context={trackToContext(t)} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+    );
   }
 
   return (
-    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
-        {saved && <Text style={s.successBanner}>تم حفظ التقييم بنجاح ✓</Text>}
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <ScrollView
+          contentContainerStyle={styles.page}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.green]} tintColor={theme.green} />}
+        >
+        {saved && (
+          <Alert variant="success" icon={<IconCircleCheck size={18} color={theme.green} />}>
+            تم حفظ التقييم بنجاح.
+          </Alert>
+        )}
+        {bulkEvaluate.isError && (
+          <Alert variant="error">{(bulkEvaluate.error as Error).message}</Alert>
+        )}
+        {alreadySubmitted && (
+          <Alert variant="success" icon={<IconLock size={18} color={theme.green} />}>
+            تم تسجيل التقييم لهذا اليوم بالفعل. اختر يومًا آخر أو راجع السجل لاحقًا للتعديل.
+          </Alert>
+        )}
+
+        <Pressable onPress={() => { setSelected(null); setOverrides({}); }}>
+          <Text style={styles.backLink}>‹ رجوع لاختيار الحلقة/المسار</Text>
+        </Pressable>
+
         <Card>
-          <CardHeader title="تقييم الطالب" />
-          <Text style={s.label}>الطالب</Text>
-          <View style={s.pills}>
-            {STUDENTS.map((st, i) => (
-              <Pressable key={st} onPress={() => setStudent(i)} style={[s.pill, student === i && s.pillActive]}>
-                <Text style={[s.pillText, student === i && s.pillTextActive]}>{st}</Text>
-              </Pressable>
-            ))}
-          </View>
-          <Text style={s.label}>المقطع / الآيات</Text>
-          <TextInput style={s.input} placeholder="مثال: البقرة ٢٤٠-٢٤٥" value={segment} onChangeText={setSegment} />
-          <Text style={s.label}>النقاط</Text>
-          <TextInput style={s.input} placeholder="٠ — ١٠٠٠" keyboardType="number-pad" value={points} onChangeText={setPoints} />
-          <Text style={s.label}>التقييم العام</Text>
-          <View style={s.pills}>
-            {RATINGS.map((r, i) => (
-              <Pressable key={r} onPress={() => setRating(i)} style={[s.pill, rating === i && s.pillActive]}>
-                <Text style={[s.pillText, rating === i && s.pillTextActive]}>{r}</Text>
-              </Pressable>
-            ))}
-          </View>
-          <Text style={s.label}>ملاحظات</Text>
-          <TextInput style={[s.input, { minHeight: 80 }]} placeholder="ملاحظاتك للطالب وولي الأمر..." value={note} onChangeText={setNote} multiline textAlignVertical="top" />
-          <Pressable style={s.saveBtn} onPress={handleSave}>
-            <Text style={s.saveBtnText}>حفظ التقييم</Text>
-          </Pressable>
+          <CardHeader title={`${selected.title} — ${today}`} />
+
+          {loadingStudents && <View style={{ paddingHorizontal: 4 }}><SkeletonRows count={3} rowHeight={140} gap={14} /></View>}
+          {!loadingStudents && students.length === 0 && (
+            <Text style={styles.muted}>لا يوجد طلاب</Text>
+          )}
+
+          {students.map((st, i) => {
+            const e = evalFor(st._id);
+            const isAbsent = e.attendanceStatus === 'غائب';
+            const total = totalOf(e);
+            return (
+              <View key={st._id} style={[styles.studentRow, i < students.length - 1 && styles.rowBorder]}>
+                <Text style={styles.studentName}>{st.name}</Text>
+
+                <View style={styles.toggleRow}>
+                  <Pressable
+                    disabled={alreadySubmitted}
+                    onPress={() => setAttendance(st._id, 'حاضر')}
+                    style={[styles.toggleBtn, !isAbsent && { backgroundColor: theme.green + '20', borderColor: theme.green }]}
+                  >
+                    <Text style={[styles.toggleText, !isAbsent && { color: theme.green, fontFamily: theme.fontCairoBold }]}>حاضر</Text>
+                  </Pressable>
+                  <Pressable
+                    disabled={alreadySubmitted}
+                    onPress={() => setAttendance(st._id, 'غائب')}
+                    style={[styles.toggleBtn, isAbsent && { backgroundColor: theme.red + '20', borderColor: theme.red }]}
+                  >
+                    <Text style={[styles.toggleText, isAbsent && { color: theme.red, fontFamily: theme.fontCairoBold }]}>غائب</Text>
+                  </Pressable>
+                </View>
+
+                {!isAbsent && (
+                  <>
+                    {(['hifz', 'tajweed', 'talawah'] as ScoreCategory[]).map((cat) => (
+                      <View key={cat} style={styles.categoryBlock}>
+                        <Text style={styles.categoryLabel}>{CATEGORY_LABELS[cat]} (٠-{MAX_SCORES[cat]})</Text>
+                        <View style={styles.chipRow}>
+                          {Array.from({ length: MAX_SCORES[cat] + 1 }, (_, n) => n).map((n) => {
+                            const active = e[cat] === n;
+                            return (
+                              <Pressable
+                                key={n}
+                                disabled={alreadySubmitted}
+                                onPress={() => setScore(st._id, cat, n)}
+                                style={[styles.chip, active && { backgroundColor: theme.green, borderColor: theme.green }]}
+                              >
+                                <Text style={[styles.chipText, active && { color: theme.white }]}>{n}</Text>
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    ))}
+                    <View style={styles.totalRow}>
+                      <Text style={styles.totalText}>{total}/{TOTAL_MAX}</Text>
+                    </View>
+                  </>
+                )}
+
+                <FormTextarea
+                  rows={2}
+                  editable={!alreadySubmitted}
+                  placeholder="ملاحظات (اختياري)"
+                  value={e.note}
+                  onChangeText={(v) => setNote(st._id, v)}
+                />
+              </View>
+            );
+          })}
         </Card>
-      </ScrollView>
+
+        <Button
+          label={alreadySubmitted ? 'تم الإرسال لهذا اليوم' : bulkEvaluate.isPending ? 'جارٍ الحفظ...' : 'حفظ التقييم'}
+          onPress={handleSave}
+          disabled={alreadySubmitted || bulkEvaluate.isPending || students.length === 0}
+          fullWidth
+        />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.cream },
-  page: { padding: 16 },
-  successBanner: { backgroundColor: '#f0fdf4', color: '#15803d', fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, marginBottom: 12, textAlign: 'center' },
-  label: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 6, marginTop: 12 },
-  input: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo, fontSize: 13, color: theme.text, backgroundColor: theme.white },
-  pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
-  pill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: theme.border, backgroundColor: theme.white },
-  pillActive: { backgroundColor: theme.green, borderColor: theme.green },
-  pillText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.text },
-  pillTextActive: { color: theme.white, fontFamily: theme.fontCairoBold },
-  saveBtn: { backgroundColor: theme.green, borderRadius: 8, padding: 12, marginTop: 16, alignItems: 'center' },
-  saveBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 14 },
-});

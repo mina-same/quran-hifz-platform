@@ -1,21 +1,19 @@
-import { useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Pressable } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, Pressable, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 import ProgressBar from '@/components/ui/ProgressBar';
+import { SkeletonRows } from '@/components/ui/Skeleton';
 import {
   useSpecialTracks,
   type SpecialTrack,
-  type EnrolledStudent,
   type TrackTeacher,
 } from '@/lib/queries/specialTracks';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { theme } from '@/lib/theme';
 
-function getEnrolledName(v: EnrolledStudent | string) {
-  return typeof v === 'object' ? v.name : v;
-}
 function getTeacherName(v: TrackTeacher | string) {
   return typeof v === 'object' ? v.name : v;
 }
@@ -26,8 +24,7 @@ function fmtDate(d: string) {
 const STATUS_LABEL: Record<SpecialTrack['status'], string> = { active: 'نشط', upcoming: 'قادم', ended: 'منتهي' };
 const STATUS_VARIANT: Record<SpecialTrack['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
 
-function TrackCard({ track }: { track: SpecialTrack }) {
-  const [open, setOpen] = useState(track.status === 'active');
+function TrackCard({ track, onOpenDetail }: { track: SpecialTrack; onOpenDetail: () => void }) {
   const enrolled = track.enrolledStudents.length;
   const pct = track.maxStudents > 0 ? Math.min(100, Math.round((enrolled / track.maxStudents) * 100)) : 0;
 
@@ -82,39 +79,32 @@ function TrackCard({ track }: { track: SpecialTrack }) {
         <Text style={s.meetLink}>رابط الجلسة: {track.meetLink}</Text>
       )}
 
-      <Pressable style={s.toggleBtn} onPress={() => setOpen((o) => !o)}>
-        <Text style={s.toggleBtnText}>طلاب هذا المسار ({enrolled}) {open ? '▲' : '▼'}</Text>
-      </Pressable>
-
-      {open && (
-        <View style={s.studentsList}>
-          {enrolled === 0 ? (
-            <Text style={s.muted}>لا يوجد طلاب مسجّلون بعد</Text>
-          ) : (
-            track.enrolledStudents.map((st, i) => (
-              <View key={i} style={[s.studentRow, i > 0 && s.border]}>
-                <Text style={s.studentName}>{getEnrolledName(st)}</Text>
-              </View>
-            ))
-          )}
-        </View>
-      )}
+      <Button label={`عرض التفاصيل (${enrolled} طالب)`} variant="secondary" onPress={onOpenDetail} fullWidth />
     </Card>
   );
 }
 
 export default function TeacherSpecialTracks() {
+  const router = useRouter();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
-  const { data: tracks = [], isLoading } = useSpecialTracks(undefined, profileId);
+  const { data: tracks = [], isLoading, refetch, isRefetching } = useSpecialTracks(undefined, profileId);
 
   const active = tracks.filter((t) => t.status === 'active');
   const upcoming = tracks.filter((t) => t.status === 'upcoming');
   const ended = tracks.filter((t) => t.status === 'ended');
 
+  function openDetail(id: string) {
+    router.push({ pathname: '/(portal)/teacher/track-detail', params: { id } } as any);
+  }
+
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
-        {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.green]} tintColor={theme.green} />}
+      >
+        {isLoading && <SkeletonRows count={3} rowHeight={220} gap={14} />}
 
         {!isLoading && tracks.length === 0 && (
           <Text style={s.muted}>لا توجد مسارات مُسنَدة إليك</Text>
@@ -123,19 +113,19 @@ export default function TeacherSpecialTracks() {
         {active.length > 0 && (
           <>
             <Text style={s.sectionTitle}>المسارات النشطة ({active.length})</Text>
-            {active.map((t) => <TrackCard key={t._id} track={t} />)}
+            {active.map((t) => <TrackCard key={t._id} track={t} onOpenDetail={() => openDetail(t._id)} />)}
           </>
         )}
         {upcoming.length > 0 && (
           <>
             <Text style={s.sectionTitle}>المسارات القادمة ({upcoming.length})</Text>
-            {upcoming.map((t) => <TrackCard key={t._id} track={t} />)}
+            {upcoming.map((t) => <TrackCard key={t._id} track={t} onOpenDetail={() => openDetail(t._id)} />)}
           </>
         )}
         {ended.length > 0 && (
           <>
             <Text style={s.sectionTitle}>المسارات المنتهية ({ended.length})</Text>
-            {ended.map((t) => <TrackCard key={t._id} track={t} />)}
+            {ended.map((t) => <TrackCard key={t._id} track={t} onOpenDetail={() => openDetail(t._id)} />)}
           </>
         )}
       </ScrollView>
@@ -161,10 +151,4 @@ const s = StyleSheet.create({
   capacityLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
   capacityValue: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.text },
   meetLink: { fontSize: 11, color: theme.blue, fontFamily: theme.fontCairo, marginBottom: 10 },
-  toggleBtn: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, alignItems: 'center' },
-  toggleBtnText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
-  studentsList: { marginTop: 8 },
-  studentRow: { paddingVertical: 8 },
-  border: { borderTopWidth: 1, borderTopColor: theme.border },
-  studentName: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text },
 });

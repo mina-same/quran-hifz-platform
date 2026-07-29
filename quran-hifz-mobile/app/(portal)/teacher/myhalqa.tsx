@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
-import { ScrollView, View, StyleSheet, Text } from 'react-native';
+import { ScrollView, View, RefreshControl, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ContextCard, { halqaToContext, trackToContext } from '@/components/domain/ContextCard';
 import Button from '@/components/ui/Button';
+import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useHalqat } from '@/lib/queries/halqat';
 import { useSpecialTracks } from '@/lib/queries/specialTracks';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -14,15 +15,42 @@ export default function TeacherHalqa() {
   const router = useRouter();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
 
-  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: profileId });
-  const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, profileId);
+  const {
+    data: halqat = [],
+    isLoading: loadingHalqat,
+    refetch: refetchHalqat,
+    isRefetching: refetchingHalqat,
+  } = useHalqat({ teacher: profileId });
+  const {
+    data: tracks = [],
+    isLoading: loadingTracks,
+    refetch: refetchTracks,
+    isRefetching: refetchingTracks,
+  } = useSpecialTracks(undefined, profileId);
 
   const isLoading = loadingHalqat || loadingTracks;
+  const isRefreshing = refetchingHalqat || refetchingTracks;
+  const onRefresh = () => {
+    refetchHalqat();
+    refetchTracks();
+  };
+
+  const styles = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    actions: { flexDirection: 'row', gap: 8, flex: 1 },
+    actionBtn: { flex: 1 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+  }), [theme]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
-        {isLoading && <Text style={styles.muted}>جارٍ التحميل...</Text>}
+      <ScrollView
+        contentContainerStyle={styles.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={[theme.green]} tintColor={theme.green} />}
+      >
+        {isLoading && <SkeletonRows count={3} rowHeight={92} />}
 
         {!isLoading && halqat.length === 0 && tracks.length === 0 && (
           <Text style={styles.muted}>لا توجد حلقات أو مسارات مسندة إليك</Text>
@@ -77,11 +105,3 @@ export default function TeacherHalqa() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: theme.pagePadding, gap: 14 },
-  actions: { flexDirection: 'row', gap: 8, flex: 1 },
-  actionBtn: { flex: 1 },
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
-});

@@ -14,6 +14,7 @@ import { theme } from '@/lib/theme';
 import FormInput from '@/components/forms/FormInput';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
+import QuranStudyIllustration from '@/components/illustrations/QuranStudyIllustration';
 
 type FormData = { email: string; password: string };
 
@@ -63,8 +64,11 @@ export default function LoginScreen() {
         <SafeAreaView style={styles.safe}>
           <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
             <View style={styles.header}>
-              <Image source={require('@/assets/logo.png')} style={styles.logo} resizeMode="contain" />
-              <Text style={styles.title}>الجمعية الخيرية لتحفيظ القرآن الكريم بالعماير</Text>
+              <QuranStudyIllustration size={190} />
+              <View style={styles.brandRow}>
+                <Image source={require('@/assets/logo.png')} style={styles.logo} resizeMode="contain" />
+                <Text style={styles.title}>الجمعية الخيرية لتحفيظ القرآن الكريم بالعماير</Text>
+              </View>
               <Text style={styles.sub}>سجّل الدخول للمتابعة</Text>
             </View>
 
@@ -168,12 +172,13 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   bg: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(201,149,42,0.05)' },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(201,149,42,0.05)' },
   safe: { flex: 1 },
   scroll: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 40, paddingHorizontal: 20, gap: 0 },
-  header: { alignItems: 'center', marginBottom: 28 },
-  logo: { width: 90, height: 90, marginBottom: 16 },
-  title: { fontSize: 18, fontFamily: theme.fontAmiriBold, color: theme.white, textAlign: 'center', lineHeight: 28, marginBottom: 6 },
+  header: { alignItems: 'center', marginBottom: 24 },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 },
+  logo: { width: 40, height: 40 },
+  title: { flexShrink: 1, fontSize: 15, fontFamily: theme.fontAmiriBold, color: theme.white, textAlign: 'center', lineHeight: 22, marginBottom: 6 },
   sub: { fontSize: 13, color: 'rgba(255,255,255,0.6)', fontFamily: theme.fontCairo },
   card: { width: '100%', backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)', borderRadius: 16, padding: 20, gap: 14 },
   field: { gap: 6 },

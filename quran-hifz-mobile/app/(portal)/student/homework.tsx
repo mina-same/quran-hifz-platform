@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AyahBar from '@/components/ui/AyahBar';
 import Card from '@/components/ui/Card';
@@ -16,12 +16,18 @@ function getTitle(v: { title: string } | string | undefined): string {
 
 export default function StudentHomework() {
   const profileId = usePortalStore((s) => s.authUser?.profileId);
-  const { data: homework = [], isLoading } = useHomework({ student: profileId, status: 'معلق' });
+  const { data: homework = [], isLoading, isRefetching, refetch } = useHomework({ student: profileId, status: 'معلق' });
   const today = homework[0];
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.green]} tintColor={theme.green} />
+        }
+      >
         <AyahBar />
 
         {/* Today's assignment */}

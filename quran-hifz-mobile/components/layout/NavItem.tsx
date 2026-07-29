@@ -1,38 +1,10 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
-import {
-  IconHome, IconBook, IconMicrophone, IconCalendarCheck,
-  IconClock, IconMessage, IconLayoutDashboard, IconSchool,
-  IconUsers, IconChalkboard, IconTarget, IconChartBar,
-  IconUserPlus, IconBuildingArch, IconCalendarEvent, IconStar,
-  IconVideo, IconListCheck, IconGift, IconTimeline,
-} from '@tabler/icons-react-native';
+import { IconHome } from '@tabler/icons-react-native';
 import type { NavItem as NavItemType } from '@/lib/types/portal';
 import type { PortalType } from '@/lib/types/portal';
 import { theme } from '@/lib/theme';
-
-const ICON_MAP: Record<string, React.ComponentType<{ size: number; color: string }>> = {
-  home:               IconHome,
-  book:               IconBook,
-  microphone:         IconMicrophone,
-  'calendar-check':   IconCalendarCheck,
-  clock:              IconClock,
-  message:            IconMessage,
-  'layout-dashboard': IconLayoutDashboard,
-  school:             IconSchool,
-  users:              IconUsers,
-  chalkboard:         IconChalkboard,
-  target:             IconTarget,
-  'chart-bar':        IconChartBar,
-  'user-plus':        IconUserPlus,
-  'building-arch':    IconBuildingArch,
-  'calendar-event':   IconCalendarEvent,
-  star:               IconStar,
-  video:              IconVideo,
-  'list-check':       IconListCheck,
-  gift:               IconGift,
-  timeline:           IconTimeline,
-};
+import { ICON_MAP } from './iconMap';
 
 interface Props {
   item: NavItemType;

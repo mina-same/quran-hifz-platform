@@ -1,14 +1,14 @@
-import { ScrollView, Text, View, StyleSheet } from 'react-native';
+import { useMemo } from 'react';
+import { ScrollView, Text, View, StyleSheet, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge, { type BadgeVariant } from '@/components/ui/Badge';
-import DataTable from '@/components/ui/DataTable';
+import { SkeletonRows } from '@/components/ui/Skeleton';
 import FormSelect from '@/components/forms/FormSelect';
-import { useHomework } from '@/lib/queries/homework';
-import { useGradeHomework } from '@/lib/queries/homework';
+import { useHomework, useGradeHomework } from '@/lib/queries/homework';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 function getName(v: { name: string } | string | undefined): string {
   if (!v) return '—';
@@ -28,57 +28,65 @@ const RATING_OPTS = [
 ];
 
 export default function TeacherHomework() {
+  const theme = useAppTheme();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
-  const { data: homework = [], isLoading } = useHomework({ teacher: profileId });
+  const { data: homework = [], isLoading, refetch, isRefetching } = useHomework({ teacher: profileId });
   const gradeHW = useGradeHomework();
 
-  const rows = homework.map((h) => ({
-    student: <Text style={styles.bold}>{getName(h.student)}</Text>,
-    type: <Badge label={h.type} variant="blue" />,
-    segment: <Text style={styles.muted}>{h.segment}</Text>,
-    source: <Text style={styles.muted}>{h.specialTrack ? `مسار: ${getTitle(h.specialTrack)}` : getName(h.halqa)}</Text>,
-    date: <Text style={styles.muted}>{h.dueDate ? new Date(h.dueDate).toLocaleDateString('ar-SA') : '—'}</Text>,
-    status: <Badge label={h.status} variant={STATUS_VARIANT[h.status] ?? 'gray'} />,
-    rating: (
-      <FormSelect
-        value={h.rating ?? ''}
-        onChange={(v) => gradeHW.mutate({ id: h._id, rating: v, status: 'مراجع' })}
-        options={RATING_OPTS}
-        placeholder="اختر التقييم"
-      />
-    ),
-  }));
+  const styles = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    row: { paddingVertical: 14, gap: 8 },
+    rowBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
+    rowHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+    name: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
+    muted: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    infoItem: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    empty: { textAlign: 'center', color: theme.textMuted, fontFamily: theme.fontCairo, fontSize: 13, paddingVertical: 24 },
+  }), [theme]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.green]} tintColor={theme.green} />}
+      >
         <Card noPadding>
-          <CardHeader title="واجبات الطلاب" style={{ padding: 16, paddingBottom: 8 }} />
-          {isLoading && <View style={styles.loading}><Text style={styles.muted}>جارٍ التحميل...</Text></View>}
-          {!isLoading && (
-            <DataTable
-              columns={[
-                { key: 'student', label: 'الطالب', flex: 2 },
-                { key: 'type', label: 'نوع الواجب', flex: 1 },
-                { key: 'segment', label: 'المقطع', flex: 2 },
-                { key: 'source', label: 'المصدر', flex: 2 },
-                { key: 'date', label: 'التاريخ', flex: 1 },
-                { key: 'status', label: 'الحالة', flex: 1 },
-                { key: 'rating', label: 'التقييم', flex: 2 },
-              ]}
-              rows={rows}
-            />
-          )}
+          <CardHeader title={`واجبات الطلاب (${homework.length})`} style={{ padding: 16, paddingBottom: 8 }} />
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            {isLoading && <SkeletonRows count={5} />}
+            {!isLoading && homework.length === 0 && <Text style={styles.empty}>لا توجد واجبات بعد</Text>}
+
+            {!isLoading && homework.map((h, i) => (
+              <View key={h._id} style={[styles.row, i < homework.length - 1 && styles.rowBorder]}>
+                <View style={styles.rowHead}>
+                  <Text style={styles.name} numberOfLines={1}>{getName(h.student)}</Text>
+                  <Badge label={h.status} variant={STATUS_VARIANT[h.status] ?? 'gray'} />
+                </View>
+
+                <View style={styles.infoGrid}>
+                  <Text style={styles.infoItem}>{h.type}</Text>
+                  <Text style={styles.infoItem}>·</Text>
+                  <Text style={styles.infoItem}>{h.segment}</Text>
+                  <Text style={styles.infoItem}>·</Text>
+                  <Text style={styles.infoItem}>{h.specialTrack ? `مسار: ${getTitle(h.specialTrack)}` : getName(h.halqa)}</Text>
+                  <Text style={styles.infoItem}>·</Text>
+                  <Text style={styles.infoItem}>{h.dueDate ? new Date(h.dueDate).toLocaleDateString('ar-SA') : '—'}</Text>
+                </View>
+
+                <FormSelect
+                  value={h.rating ?? ''}
+                  onChange={(v) => gradeHW.mutate({ id: h._id, rating: v, status: 'مراجع' })}
+                  options={RATING_OPTS}
+                  placeholder="اختر التقييم"
+                />
+              </View>
+            ))}
+          </View>
         </Card>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: theme.pagePadding, gap: 14 },
-  bold: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
-  muted: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
-  loading: { padding: 24, alignItems: 'center' },
-});

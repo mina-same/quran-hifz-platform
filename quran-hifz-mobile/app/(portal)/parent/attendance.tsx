@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import StatsRow from '@/components/ui/StatsRow';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
+import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useParentChildren, useChildAttendance } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -15,7 +16,7 @@ export default function ParentAttendance() {
   const { data: children = [] } = useParentChildren();
   const childId = selectedChildId ?? children[0]?._id;
 
-  const { data: records = [], isLoading } = useChildAttendance(childId);
+  const { data: records = [], isLoading, isRefetching, refetch } = useChildAttendance(childId);
 
   const present = records.filter((r) => r.status === 'حاضر').length;
   const absent = records.filter((r) => r.status === 'غائب').length;
@@ -43,11 +44,17 @@ export default function ParentAttendance() {
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.green} colors={[theme.green]} />
+        }
+      >
         <StatsRow stats={STATS} />
         <Card>
           <CardHeader title="سجل الحضور" />
-          {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
+          {isLoading && <SkeletonRows count={4} rowHeight={48} />}
           {!isLoading && records.length === 0 && <Text style={s.muted}>لا توجد سجلات حضور</Text>}
           {records.map((r, i) => (
             <View key={r._id} style={[s.row, i > 0 && s.border]}>

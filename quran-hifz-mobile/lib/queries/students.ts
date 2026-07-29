@@ -1,21 +1,26 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { get, post } from '@/lib/api';
+import { get, post, put, del } from '@/lib/api';
 
 export type Student = {
   _id: string;
   name: string;
   path: string;
-  halqa: { _id: string; name: string } | string;
+  level?: number;
+  halqa: { _id: string; name: string; specialTrack?: { _id: string; title: string } | string } | string;
   masjid: { _id: string; name: string } | string;
   attendancePct: number;
   progressPct: number;
   progressPages: number;
   totalPages: number;
+  /** Legacy fields — real guardian identity comes from parentName/parentEmail below. */
   guardian: string;
   guardianPhone: string;
   lastMemorization: string;
   status: 'active' | 'inactive' | 'new';
   homeworkStatus: 'submitted' | 'pending' | 'late';
+  email: string | null;
+  parentName: string | null;
+  parentEmail: string | null;
 };
 
 export type StudentFilters = {
@@ -28,6 +33,7 @@ export type StudentFilters = {
 
 type ListResponse = { success: boolean; count: number; data: Student[] };
 type SingleResponse = { success: boolean; data: Student };
+type CreateResponse = { success: boolean; data: Student; credentials?: { email: string; password: string } };
 
 function buildQuery(filters?: StudentFilters) {
   if (!filters) return '';
@@ -41,10 +47,11 @@ function buildQuery(filters?: StudentFilters) {
   return q ? `?${q}` : '';
 }
 
-export function useStudents(filters?: StudentFilters) {
+export function useStudents(filters?: StudentFilters, opts?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['students', filters],
     queryFn: () => get<ListResponse>(`/students${buildQuery(filters)}`).then((r) => r.data),
+    enabled: opts?.enabled,
   });
 }
 
@@ -59,7 +66,24 @@ export function useStudent(id: string | undefined) {
 export function useCreateStudent() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: Record<string, unknown>) => post<SingleResponse>('/students', body),
+    mutationFn: (body: Record<string, unknown>) => post<CreateResponse>('/students', body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['students'] }),
+  });
+}
+
+export function useUpdateStudent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) =>
+      put<SingleResponse>(`/students/${id}`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['students'] }),
+  });
+}
+
+export function useDeleteStudent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => del(`/students/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['students'] }),
   });
 }

@@ -1,7 +1,20 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-28T20:59:07.282Z
-> Files: 475 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-29T12:49:05.405Z
+> Files: 515 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
+
+- `append_bugs.py` — Declares styles (~2054 tok)
+
+## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/pw/
+
+- `login_teacher.mjs` — Declares browser (~312 tok)
+- `login_teacher2.mjs` — Declares browser (~305 tok)
+- `shot_devtest.mjs` — Declares browser (~187 tok)
+- `shot.mjs` — Declares browser (~172 tok)
+- `smoke_tour.mjs` — Declares browser (~452 tok)
+- `smoke_tour2.mjs` — Declares browser (~383 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/0ca66137-6f29-449d-9592-1795c237755f/scratchpad/
 
@@ -125,6 +138,7 @@
 - `ethereal-popping-babbage.md` — دمج الحضور والتقييم + تطوير صفحة التقارير (~2555 tok)
 - `partitioned-percolating-phoenix.md` — خطة قرآنية — Teacher Quran Plan Builder (~3202 tok)
 - `replicated-twirling-pearl.md` — Show the target roster in the plan form, with per-student individual-plan management (~1233 tok)
+- `snappy-jumping-kernighan.md` — Mobile Parity + Redesign: bring `quran-hifz-mobile` up to `quran-hifz` (web) + `quran-hifz-server` (~2753 tok)
 
 ## ./
 
@@ -234,10 +248,10 @@
 - `global.css` — Styles: 3 rules (~17 tok)
 - `LICENSE` — Project license (~295 tok)
 - `metro.config.js` — Declares config (~66 tok)
-- `nativewind-env.d.ts` — / <reference types="nativewind/types" /> (~46 tok)
+- `nativewind-env.d.ts` — / <reference types="nativewind/types" /> (~54 tok)
 - `package-lock.json` — npm lock file (~62494 tok)
 - `package.json` — Node.js package manifest (~436 tok)
-- `tailwind.config.js` — Tailwind CSS configuration (~214 tok)
+- `tailwind.config.js` (~220 tok)
 - `tsconfig.json` — TypeScript configuration (~87 tok)
 
 ## quran-hifz-mobile/.claude/
@@ -256,8 +270,9 @@
 
 ## quran-hifz-mobile/app/
 
-- `_layout.tsx` — queryClient (~639 tok)
-- `index.tsx` — getHalqaName — renders form, modal (~2409 tok)
+- `_devtest.tsx` — DevTest (~780 tok)
+- `_layout.tsx` — queryClient (~674 tok)
+- `index.tsx` — getHalqaName — renders form, modal (~2490 tok)
 
 ## quran-hifz-mobile/app/(portal)/
 
@@ -265,95 +280,125 @@
 
 ## quran-hifz-mobile/app/(portal)/admin/
 
-- `_layout.tsx` — AdminTabLayout (~514 tok)
-- `dashboard.tsx` — kpiVariant — renders table (~1207 tok)
-- `halqat.tsx` — AdminHalqat (~285 tok)
-- `kpis.tsx` — ratingVariant — renders table (~831 tok)
-- `masajid.tsx` — AdminMasajid (~344 tok)
-- `register.tsx` — PATHS — renders form (~1798 tok)
-- `reports.tsx` — EXPORT_BTNS (~1090 tok)
-- `special_tracks.tsx` — getTeacherId — renders form (~4966 tok)
-- `students.tsx` — AdminStudents — renders table (~972 tok)
-- `teachers.tsx` — ratingVariant — renders table (~756 tok)
+- `_layout.tsx` — AdminTabLayout (~564 tok)
+- `dashboard.tsx` — kpiVariant (~1273 tok)
+- `halqat.tsx` — AdminHalqat (~246 tok)
+- `kpis.tsx` — ratingVariant (~842 tok)
+- `masajid.tsx` — AdminMasajid (~305 tok)
+- `parents.tsx` — EMPTY_ADD — renders form (~4595 tok)
+- `register.tsx` — PATHS — renders form (~1824 tok)
+- `reports.tsx` — AdminReports (~562 tok)
+- `special_tracks.tsx` — getTeacherId — renders form (~5282 tok)
+- `students.tsx` — المسار: real track lives one hop away via halqa.specialTrack, not the unused legacy `path` enum. (~1577 tok)
+- `teachers.tsx` — ratingVariant (~776 tok)
+- `track-detail.tsx` — AdminTrackDetailRoute (~474 tok)
 
 ## quran-hifz-mobile/app/(portal)/parent/
 
 - `_layout.tsx` — ParentTabLayout (~445 tok)
-- `attendance.tsx` — ParentAttendance (~819 tok)
-- `dashboard.tsx` — CHILD (~877 tok)
-- `homework_view.tsx` — ParentHomeworkView (~832 tok)
-- `messages.tsx` — MSGS (~670 tok)
-- `recordings.tsx` — ParentRecordings (~649 tok)
-- `timeline.tsx` — TL (~894 tok)
+- `attendance.tsx` — ParentAttendance, real data (useChildAttendance) + pull-to-refresh + SkeletonRows (~960 tok)
+- `dashboard.tsx` — ParentDashboard, real data (useParentChildren/useChildHifz/useChildMessages) + pull-to-refresh + SkeletonRows; "الجلسة القادمة" still static, no backend field (~1050 tok)
+- `homework_view.tsx` — ParentHomeworkView, real data (useChildHomework) + pull-to-refresh + SkeletonRows (~990 tok)
+- `messages.tsx` — ParentMessages, now wired to useChildMessages (was mock MSGS) + pull-to-refresh + SkeletonRows (~740 tok)
+- `recordings.tsx` — ParentRecordings, real data (useChildRecordings) + pull-to-refresh + SkeletonRows (~790 tok)
+- `timeline.tsx` — TL, still hardcoded hijri-milestone mock — no backend juz/milestone-history endpoint exists to wire it to (~894 tok)
 
 ## quran-hifz-mobile/app/(portal)/student/
 
-- `_layout.tsx` — StudentTabLayout (~503 tok)
-- `attendance.tsx` — StudentAttendance — renders table (~811 tok)
-- `dashboard.tsx` — STATS (~1468 tok)
-- `homework.tsx` — getTitle (~905 tok)
-- `messages.tsx` — StudentMessages (~912 tok)
-- `myhifz.tsx` — StudentHifz — renders table (~1106 tok)
-- `points.tsx` — MY_PTS (~984 tok)
-- `schedule.tsx` — DAYS (~1534 tok)
-- `special_tracks.tsx` — getTeacherName (~1788 tok)
+- `_layout.tsx` — StudentTabLayout (~528 tok)
+- `attendance.tsx` — StudentAttendance (~1082 tok)
+- `dashboard.tsx` — getName (~2009 tok)
+- `homework.tsx` — getTitle (~970 tok)
+- `messages.tsx` — StudentMessages (~1185 tok)
+- `myhifz.tsx` — StudentHifz (~1688 tok)
+- `points.tsx` — MY_PTS (~989 tok)
+- `schedule.tsx` — DAYS (~1854 tok)
+- `settings.tsx` — StudentSettings (~47 tok)
+- `special_tracks.tsx` — getTeacherName (~1852 tok)
 - `store.tsx` — MY_PTS (~1012 tok)
 
 ## quran-hifz-mobile/app/(portal)/teacher/
 
-- `_layout.tsx` — TeacherTabLayout (~580 tok)
-- `attendance.tsx` — OPTIONS (~2385 tok)
-- `dashboard.tsx` — STATS — renders table (~1104 tok)
-- `evaluate.tsx` — STUDENTS (~1127 tok)
-- `grouphomework.tsx` — DAYS (~2497 tok)
-- `homework.tsx` — getName — renders form, table (~1014 tok)
-- `myhalqa.tsx` — TeacherHalqa (~918 tok)
-- `plans.tsx` — statusVariant — renders table (~695 tok)
-- `recordlesson.tsx` — LESSON_TYPES (~2667 tok)
-- `reports.tsx` — TeacherReports (~708 tok)
-- `special_tracks.tsx` — getEnrolledName (~2112 tok)
-- `students.tsx` — hwVariant — renders table (~726 tok)
+- `_layout.tsx` — TeacherTabLayout (~681 tok)
+- `attendance.tsx` — OPTIONS (~4348 tok)
+- `dashboard.tsx` — getName (~1383 tok)
+- `evaluate.tsx` — Scores start at 0 so the teacher consciously awards points rather than (~3688 tok)
+- `grouphomework.tsx` — DAYS (~2777 tok)
+- `homework.tsx` — getName — renders form (~1264 tok)
+- `myhalqa.tsx` — TeacherHalqa (~1077 tok)
+- `plan-detail.tsx` — STATUS_VARIANT (~2476 tok)
+- `plan-form.tsx` — PLAN_TYPES — renders form (~4185 tok)
+- `plans.tsx` — STATUS_VARIANT (~1529 tok)
+- `recordlesson.tsx` — LESSON_TYPES (~3004 tok)
+- `reports.tsx` — TeacherReports (~642 tok)
+- `settings.tsx` — TeacherSettings (~47 tok)
+- `special_tracks.tsx` — getTeacherName (~1976 tok)
+- `students.tsx` — hwVariant (~1434 tok)
+- `track-detail.tsx` — TeacherTrackDetailRoute (~475 tok)
 
 ## quran-hifz-mobile/components/domain/
 
+- `AccountSettingsScreen.tsx` — Shared "الملف الشخصي" screen for student + teacher portals (admin/parent (~1761 tok)
 - `AudioRecorder.tsx` — AudioRecorder — uses useState, useEffect (~1336 tok)
+- `ContextCard.tsx` — Normalized TeachingContext (halqa|specialTrack) card + halqaToContext/trackToContext mappers (~950 tok)
 - `HalqaCard.tsx` — HalqaCard (~746 tok)
+- `IndividualPlanPanel.tsx` — The shared halqa/track plan this student's overlay hangs off — used as the (~1783 tok)
 - `MasjidAccordion.tsx` — MasjidAccordion — uses useState (~1036 tok)
+- `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~5750 tok)
+- `ScheduleTable.tsx` — Whether the plan/schedule this belongs to runs in reverse mushaf order — (~477 tok)
+- `SurahAyahPicker.tsx` — When given, restricts BOTH pickers to only the surahs/ayat that fall inside (~828 tok)
+- `TrackDetail.tsx` — Admin reuses this same drill-down (role parity, per backend routes that (~4445 tok)
 
 ## quran-hifz-mobile/components/forms/
 
+- `FormDatePicker.tsx` — ISO date string, e.g. "2026-07-29". Empty string means unset. (~926 tok)
 - `FormGroup.tsx` — FormGroup (~249 tok)
-- `FormInput.tsx` — FormInput (~230 tok)
-- `FormSelect.tsx` — FormSelect — renders modal — uses useState (~974 tok)
+- `FormInput.tsx` — FormInput (~236 tok)
+- `FormSelect.tsx` — FormSelect (~856 tok)
 - `FormTextarea.tsx` — FormTextarea (~266 tok)
+
+## quran-hifz-mobile/components/illustrations/
+
+- `QuranStudyIllustration.tsx` — Base line/fill tone for the figure (should read well against the screen's background). (~919 tok)
 
 ## quran-hifz-mobile/components/layout/
 
 - `DrawerContent.tsx` — DrawerContent — uses useRouter (~1139 tok)
-- `NavItem.tsx` — ICON_MAP (~815 tok)
+- `iconMap.ts` — Exports ICON_MAP (~359 tok)
+- `MoreSheet.tsx` — MoreSheet (~1884 tok)
+- `NavItem.tsx` — NavItem (~516 tok)
 
 ## quran-hifz-mobile/components/ui/
 
 - `Alert.tsx` — COLORS (~403 tok)
 - `AyahBar.tsx` — AyahBar (~234 tok)
 - `Badge.tsx` — VARIANT_STYLES (~305 tok)
+- `BottomSheet.tsx` — Snap points as percentages of screen height, e.g. ['40%', '80%']. Defaults to a single auto-sizing s (~572 tok)
 - `Button.tsx` — VARIANTS (~564 tok)
 - `Card.tsx` — Card (~201 tok)
 - `CardHeader.tsx` — CardHeader (~277 tok)
 - `DataTable.tsx` — DataTable (~724 tok)
+- `Donut.tsx` — Multi-segment ring chart with a centered label — the mobile-native equivalent of the web's recharts- (~1034 tok)
+- `HonorBoard.tsx` — Exactly the top 3, already sorted best-first. Degrades gracefully with fewer than 3. (~541 tok)
+- `Leaderboard.tsx` — Ranked list with an avatar + inline meter per row — variant 'leader' (top achievers) or 'watch' (nee (~670 tok)
 - `ProgressBar.tsx` — ProgressBar (~380 tok)
+- `ScopeTabs.tsx` — Segmented control used to scope report/dashboard widgets (all / per-halqa / per-track, etc). (~418 tok)
+- `Skeleton.tsx` — A stacked group of skeleton rows — for card-list screens waiting on their first fetch. (~400 tok)
 - `StatBox.tsx` — StatBox (~376 tok)
 - `StatsRow.tsx` — StatsRow (~150 tok)
+- `Tile.tsx` — 1 = half-width tile, 2 = full-width tile — mirrors the web BentoTile's span prop. (~477 tok)
 
 ## quran-hifz-mobile/lib/
 
-- `api.ts` — Exports ApiError, get, post, put + 2 more (~451 tok)
+- `api.ts` — Exports ApiError, get, post, put + 2 more (~456 tok)
 - `auth-storage.ts` — Exports getToken, setToken, clearToken (~229 tok)
-- `theme.ts` — Exports theme, Theme (~279 tok)
+- `evaluationRubric.ts` — Manual mirror of quran-hifz/src/quran/lib/evaluationRubric.ts (no shared (~112 tok)
+- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~3700 tok)
+- `theme.ts` — Exports ThemeMode, buildTheme, theme, Theme (~652 tok)
 
 ## quran-hifz-mobile/lib/constants/
 
-- `portals.ts` — Exports PORTALS, PORTAL_ROUTES (~1243 tok)
+- `portals.ts` — Exports PORTALS, PORTAL_ROUTES (~1330 tok)
 
 ## quran-hifz-mobile/lib/data/
 
@@ -363,7 +408,10 @@
 
 ## quran-hifz-mobile/lib/queries/
 
+- `adminParents.ts` — Exports ParentUser, useAdminParents, useCreateParent, useLinkChild + 2 more (~567 tok)
 - `attendance.ts` — Exports AttendanceRecord, AttendanceFilters, useAttendance, useRecordAttendance + 2 more (~699 tok)
+- `auth.ts` — Exports MeUser, useMe, useUpdateProfile, useChangePassword (~263 tok)
+- `evaluations.ts` — Pass `undefined` to skip fetching (e.g. before a context is selected); pass an (~692 tok)
 - `halqat.ts` — Exports Halqa, HalqaFilters, useHalqat, useHalqa (~366 tok)
 - `hifz.ts` — Exports HifzEntry, useHifz (~155 tok)
 - `homework.ts` — Exports Homework, HomeworkFilters, useHomework, useCreateHomework + 2 more (~699 tok)
@@ -371,14 +419,15 @@
 - `masajid.ts` — Exports Masjid, useMasajid, useMasjid (~189 tok)
 - `messages.ts` — Exports Message, useMessages (~154 tok)
 - `parent.ts` — Exports ParentChild, ChildHifzEntry, ChildAttendanceRecord, ChildHomework + 9 more (~896 tok)
+- `quranPlan.ts` — Freezes the plan's live-computed schedule into the DB — after this, `schedule` (~2600 tok)
 - `specialTracks.ts` — Exports EnrolledStudent, TrackTeacher, SpecialTrack, useSpecialTracks + 5 more (~801 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~165 tok)
-- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent (~488 tok)
+- `students.ts` — Legacy fields — real guardian identity comes from parentName/parentEmail below. (~845 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher (~225 tok)
 
 ## quran-hifz-mobile/lib/store/
 
-- `portalStore.ts` — Exports AuthUser, usePortalStore (~941 tok)
+- `portalStore.ts` — Exports AuthUser, usePortalStore (~1308 tok)
 
 ## quran-hifz-mobile/lib/types/
 

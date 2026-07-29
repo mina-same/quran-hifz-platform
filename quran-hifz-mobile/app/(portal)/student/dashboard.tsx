@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AyahBar from '@/components/ui/AyahBar';
 import StatsRow from '@/components/ui/StatsRow';
@@ -7,6 +7,7 @@ import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import ProgressBar from '@/components/ui/ProgressBar';
 import Alert from '@/components/ui/Alert';
+import { SkeletonRows } from '@/components/ui/Skeleton';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useStudent } from '@/lib/queries/students';
 import { useHomework } from '@/lib/queries/homework';
@@ -21,16 +22,21 @@ export default function StudentDashboard() {
   const authUser = usePortalStore((s) => s.authUser);
   const studentId = authUser?.profileId;
 
-  const { data: student, isLoading: studentLoading, isError: studentError } = useStudent(studentId);
-  const { data: homework = [], isLoading: hwLoading } = useHomework({ student: studentId });
+  const { data: student, isLoading: studentLoading, isError: studentError, isRefetching: studentRefetching, refetch: refetchStudent } = useStudent(studentId);
+  const { data: homework = [], isLoading: hwLoading, isRefetching: hwRefetching, refetch: refetchHw } = useHomework({ student: studentId });
 
   const isLoading = studentLoading || hwLoading;
+  const isRefetching = studentRefetching || hwRefetching;
+  const onRefresh = () => {
+    refetchStudent();
+    refetchHw();
+  };
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safe} edges={['bottom']}>
-        <View style={styles.loading}>
-          <ActivityIndicator color={theme.green} size="large" />
+        <View style={styles.page}>
+          <SkeletonRows count={6} />
         </View>
       </SafeAreaView>
     );
@@ -51,7 +57,7 @@ export default function StudentDashboard() {
   const STATS = [
     { label: 'صفحات محفوظة', value: student.progressPages, color: theme.green },
     { label: 'نسبة الحضور', value: `${student.attendancePct}٪`, color: theme.gold },
-    { label: 'واجبات مراجعة', value: submittedCount, color: '#3B82F6' },
+    { label: 'واجبات مراجعة', value: submittedCount, color: theme.blue },
     { label: 'نسبة الإنجاز', value: `${student.progressPct}٪`, color: theme.red },
   ];
 
@@ -61,7 +67,13 @@ export default function StudentDashboard() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={[theme.green]} tintColor={theme.green} />
+        }
+      >
         <AyahBar />
 
         <StatsRow stats={STATS} />
@@ -132,7 +144,6 @@ export default function StudentDashboard() {
 
 const styles = StyleSheet.create({
   safe:  { flex: 1, backgroundColor: theme.bg },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   page:  { padding: theme.pagePadding, gap: 14 },
   twoCol:{ flexDirection: 'row', gap: 12 },
   half:  { flex: 1 },

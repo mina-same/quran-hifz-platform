@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
+import { ScrollView, View, Text, TextInput, StyleSheet, Pressable, RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
+import { SkeletonRows } from '@/components/ui/Skeleton';
 import ContextCard, { halqaToContext, trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
 import { useHalqat } from '@/lib/queries/halqat';
 import { useSpecialTracks } from '@/lib/queries/specialTracks';
@@ -20,10 +21,10 @@ export default function TeacherGroupHomework() {
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({ title: '', desc: '', dueDay: DAYS[0] });
 
-  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: profileId });
-  const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, profileId);
+  const { data: halqat = [], isLoading: loadingHalqat, refetch: refetchHalqat, isRefetching: refetchingHalqat } = useHalqat({ teacher: profileId });
+  const { data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useSpecialTracks(undefined, profileId);
 
-  const { data: homeworks = [], isLoading: loadingHw } = useGroupHomework(
+  const { data: homeworks = [], isLoading: loadingHw, refetch: refetchHw, isRefetching: refetchingHw } = useGroupHomework(
     selected
       ? selected.kind === 'halqa'
         ? { halqa: selected.id }
@@ -34,6 +35,12 @@ export default function TeacherGroupHomework() {
   const deleteHW = useDeleteGroupHomework();
 
   const isLoading = loadingHalqat || loadingTracks;
+  const isRefreshing = refetchingHalqat || refetchingTracks || refetchingHw;
+  function handleRefresh() {
+    refetchHalqat();
+    refetchTracks();
+    refetchHw();
+  }
 
   async function handleAdd() {
     if (!selected || !form.title.trim() || !form.desc.trim()) return;
@@ -53,8 +60,12 @@ export default function TeacherGroupHomework() {
   if (!selected) {
     return (
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
-        <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
-          {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
+        <ScrollView
+          contentContainerStyle={s.page}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.green]} tintColor={theme.green} />}
+        >
+          {isLoading && <SkeletonRows count={4} rowHeight={72} />}
           {!isLoading && halqat.length === 0 && tracks.length === 0 && (
             <Text style={s.muted}>لا توجد حلقات أو مسارات مسندة إليك</Text>
           )}
@@ -75,7 +86,13 @@ export default function TeacherGroupHomework() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.green]} tintColor={theme.green} />}
+      >
         <Pressable onPress={() => setSelected(null)}>
           <Text style={s.backLink}>‹ رجوع لاختيار الحلقة/المسار</Text>
         </Pressable>
@@ -115,7 +132,7 @@ export default function TeacherGroupHomework() {
 
         <Card>
           <CardHeader title="الواجبات الجماعية الحالية" />
-          {loadingHw && <Text style={s.muted}>جارٍ التحميل...</Text>}
+          {loadingHw && <SkeletonRows count={3} rowHeight={64} />}
           {!loadingHw && homeworks.length === 0 && <Text style={s.muted}>لا توجد واجبات جماعية بعد</Text>}
           {homeworks.map((hw, i) => (
             <View key={hw._id} style={[s.hwItem, i > 0 && s.border]}>
@@ -131,6 +148,7 @@ export default function TeacherGroupHomework() {
           ))}
         </Card>
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -140,15 +158,15 @@ const s = StyleSheet.create({
   page: { padding: 16, gap: 14 },
   muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
   backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
-  successBanner: { backgroundColor: '#f0fdf4', color: '#15803d', fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
-  errorBanner: { backgroundColor: '#fef2f2', color: '#991B1B', fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
+  successBanner: { backgroundColor: theme.greenPale, color: theme.green, fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
+  errorBanner: { backgroundColor: theme.redPale, color: theme.red, fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
   addBtn: { backgroundColor: theme.green, borderRadius: 8, padding: 12, alignItems: 'center' },
   addBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 14 },
   label: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 6, marginTop: 10 },
   input: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo, fontSize: 13, color: theme.text, backgroundColor: theme.white },
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
-  chipActive: { backgroundColor: '#DCFCE7', borderColor: theme.green },
+  chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
   chipText: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
   chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
   row: { flexDirection: 'row', gap: 12, marginTop: 12 },

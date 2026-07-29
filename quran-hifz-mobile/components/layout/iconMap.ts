@@ -1,0 +1,33 @@
+import {
+  IconHome, IconBook, IconMicrophone, IconCalendarCheck,
+  IconClock, IconMessage, IconLayoutDashboard, IconSchool,
+  IconUsers, IconChalkboard, IconTarget, IconChartBar,
+  IconUserPlus, IconBuildingArch, IconCalendarEvent, IconStar,
+  IconVideo, IconListCheck, IconGift, IconTimeline,
+  IconUserCircle, IconUserHeart,
+} from '@tabler/icons-react-native';
+
+export const ICON_MAP: Record<string, React.ComponentType<{ size: number; color: string }>> = {
+  home:               IconHome,
+  book:               IconBook,
+  microphone:         IconMicrophone,
+  'calendar-check':   IconCalendarCheck,
+  clock:              IconClock,
+  message:            IconMessage,
+  'layout-dashboard': IconLayoutDashboard,
+  school:             IconSchool,
+  users:              IconUsers,
+  chalkboard:         IconChalkboard,
+  target:             IconTarget,
+  'chart-bar':        IconChartBar,
+  'user-plus':        IconUserPlus,
+  'building-arch':    IconBuildingArch,
+  'calendar-event':   IconCalendarEvent,
+  star:               IconStar,
+  video:              IconVideo,
+  'list-check':       IconListCheck,
+  gift:               IconGift,
+  timeline:           IconTimeline,
+  'user-circle':      IconUserCircle,
+  'user-heart':       IconUserHeart,
+};

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Modal, View, Text, Pressable, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useRouter } from 'expo-router';
 import { IconX, IconLogout, IconSun, IconMoon } from '@tabler/icons-react-native';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -8,6 +8,7 @@ import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { PORTALS } from '@/lib/constants/portals';
 import type { PortalType, NavGroup } from '@/lib/types/portal';
 import { ICON_MAP } from './iconMap';
+import BottomSheet from '@/components/ui/BottomSheet';
 
 interface Props {
   visible: boolean;
@@ -18,18 +19,12 @@ interface Props {
 
 export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props) {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const { height: screenHeight } = useWindowDimensions();
   const theme = useAppTheme();
   const { user, logout, themeMode, toggleTheme } = usePortalStore();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // Cycled per tile so consecutive tiles never repeat the same accent color.
   const ACCENT_COLORS = [theme.green, theme.gold, theme.blue, theme.red, theme.brown];
-
-  // Bounded by the top safe-area inset (notch/status bar/Dynamic Island),
-  // not a flat percentage, so a tall sheet can never render under it.
-  const maxSheetHeight = Math.min(screenHeight * 0.75, screenHeight - insets.top - 24);
 
   const groups: NavGroup[] = PORTALS[portal].nav
     .map((g) => ({ ...g, items: g.items.filter((i) => hiddenIds.includes(i.id)) }))
@@ -49,10 +44,8 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose} />
-      <View style={[styles.sheet, { maxHeight: maxSheetHeight, paddingBottom: insets.bottom + 12 }]}>
-        <View style={styles.handle} />
+    <BottomSheet visible={visible} onClose={onClose} snapPoints={['75%']}>
+      <View style={styles.sheetInner}>
         <View style={styles.header}>
           <Text style={styles.title}>المزيد</Text>
           <Pressable onPress={onClose} hitSlop={8}>
@@ -60,7 +53,7 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
           </Pressable>
         </View>
 
-        <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
+        <BottomSheetScrollView style={styles.list} showsVerticalScrollIndicator={false}>
           {groups.map((g) => (
             <View key={g.group} style={styles.group}>
               <Text style={styles.groupLabel}>{g.group}</Text>
@@ -86,7 +79,7 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
               </View>
             </View>
           ))}
-        </ScrollView>
+        </BottomSheetScrollView>
 
         <View style={styles.footer}>
           <View style={styles.avatar}>
@@ -108,33 +101,14 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
           </Pressable>
         </View>
       </View>
-    </Modal>
+    </BottomSheet>
   );
 }
 
 function createStyles(theme: ReturnType<typeof useAppTheme>) {
   return StyleSheet.create({
-    backdrop: {
+    sheetInner: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.4)',
-    },
-    sheet: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: theme.card,
-      borderTopLeftRadius: theme.radius,
-      borderTopRightRadius: theme.radius,
-    },
-    handle: {
-      alignSelf: 'center',
-      width: 40,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: theme.border,
-      marginTop: 10,
-      marginBottom: 4,
     },
     header: {
       flexDirection: 'row',

@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
+import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useParentChildren, useChildHomework } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -14,7 +15,7 @@ export default function ParentHomeworkView() {
   const { data: children = [] } = useParentChildren();
   const childId = selectedChildId ?? children[0]?._id;
 
-  const { data, isLoading } = useChildHomework(childId);
+  const { data, isLoading, isRefetching, refetch } = useChildHomework(childId);
   const group = data?.group ?? [];
   const individual = data?.individual ?? [];
 
@@ -31,11 +32,16 @@ export default function ParentHomeworkView() {
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
-        {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
-
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.green} colors={[theme.green]} />
+        }
+      >
         <Card>
           <CardHeader title="الواجبات الجماعية" />
+          {isLoading && <SkeletonRows count={2} rowHeight={44} />}
           {!isLoading && group.length === 0 && <Text style={s.muted}>لا توجد واجبات جماعية</Text>}
           {group.map((hw, i) => (
             <View key={hw._id} style={[s.item, i > 0 && s.border]}>
@@ -46,6 +52,7 @@ export default function ParentHomeworkView() {
         </Card>
         <Card>
           <CardHeader title="الواجبات الفردية" />
+          {isLoading && <SkeletonRows count={2} rowHeight={44} />}
           {!isLoading && individual.length === 0 && <Text style={s.muted}>لا توجد واجبات فردية</Text>}
           {individual.map((hw, i) => (
             <View key={hw._id} style={[s.item, i > 0 && s.border]}>

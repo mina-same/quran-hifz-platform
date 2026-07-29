@@ -1,12 +1,15 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import { ScrollView, View, Text, StyleSheet, Pressable, RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import { SkeletonRows } from '@/components/ui/Skeleton';
 import FormInput from '@/components/forms/FormInput';
 import FormSelect from '@/components/forms/FormSelect';
+import FormDatePicker from '@/components/forms/FormDatePicker';
 import {
   useSpecialTracks,
   useCreateTrack,
@@ -20,7 +23,7 @@ import {
 } from '@/lib/queries/specialTracks';
 import { useTeachers } from '@/lib/queries/teachers';
 import { useStudents } from '@/lib/queries/students';
-import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { theme } from '@/lib/theme';
 
 function getTeacherId(v: TrackTeacher | string) {
   return typeof v === 'object' ? v._id : v;
@@ -62,9 +65,17 @@ const EMPTY: FormFields = {
 };
 
 export default function AdminSpecialTracks() {
-  const { data: tracks = [], isLoading } = useSpecialTracks();
-  const { data: teachers = [] } = useTeachers();
-  const { data: allStudents = [] } = useStudents();
+  const router = useRouter();
+  const { data: tracks = [], isLoading, isRefetching, refetch } = useSpecialTracks();
+  const { data: teachers = [], isRefetching: teachersRefetching, refetch: refetchTeachers } = useTeachers();
+  const { data: allStudents = [], isRefetching: studentsRefetching, refetch: refetchStudents } = useStudents();
+
+  const refreshing = isRefetching || teachersRefetching || studentsRefetching;
+  const onRefresh = () => {
+    refetch();
+    refetchTeachers();
+    refetchStudents();
+  };
 
   const createTrack = useCreateTrack();
   const updateTrack = useUpdateTrack();
@@ -165,7 +176,13 @@ export default function AdminSpecialTracks() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.green]} tintColor={theme.green} />}
+      >
         {saved && <Text style={s.successBanner}>تم حفظ المسار الاستثنائي ✓</Text>}
 
         <Pressable style={s.addBtn} onPress={openAdd}>
@@ -251,10 +268,10 @@ export default function AdminSpecialTracks() {
             />
 
             <Text style={s.label}>تاريخ البداية</Text>
-            <FormInput placeholder="YYYY-MM-DD" value={form.startDate} onChangeText={(v) => sf('startDate', v)} />
+            <FormDatePicker value={form.startDate} onChange={(v) => sf('startDate', v)} />
 
             <Text style={s.label}>تاريخ النهاية</Text>
-            <FormInput placeholder="YYYY-MM-DD" value={form.endDate} onChangeText={(v) => sf('endDate', v)} />
+            <FormDatePicker value={form.endDate} onChange={(v) => sf('endDate', v)} minimumDate={form.startDate ? new Date(form.startDate) : undefined} />
 
             <Text style={s.label}>الحد الأقصى للطلاب</Text>
             <FormInput placeholder="30" keyboardType="number-pad" value={form.maxStudents} onChangeText={(v) => sf('maxStudents', v)} />
@@ -269,7 +286,7 @@ export default function AdminSpecialTracks() {
           </Card>
         )}
 
-        {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
+        {isLoading && <SkeletonRows count={4} />}
 
         {!isLoading && tracks.length === 0 && <Text style={s.muted}>لا توجد مسارات استثنائية بعد</Text>}
 
@@ -287,6 +304,9 @@ export default function AdminSpecialTracks() {
               <View style={s.trackFoot}>
                 <Text style={s.trackInfo}>المسجّلون: {enrolled}/{t.maxStudents}</Text>
                 <View style={s.actionsRow}>
+                  <Pressable onPress={() => router.push({ pathname: '/(portal)/admin/track-detail', params: { id: t._id } } as any)}>
+                    <Text style={s.linkText}>التفاصيل</Text>
+                  </Pressable>
                   <Pressable onPress={() => { setStudentsPanelId(t._id); setAddStudentId(''); }}>
                     <Text style={s.linkText}>الطلاب</Text>
                   </Pressable>
@@ -347,6 +367,7 @@ export default function AdminSpecialTracks() {
           );
         })}
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
+import { ScrollView, View, Text, TextInput, StyleSheet, Pressable, RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconMicrophone, IconPlayerStop, IconSend } from '@tabler/icons-react-native';
 import {
@@ -11,6 +11,7 @@ import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Alert from '@/components/ui/Alert';
 import Badge from '@/components/ui/Badge';
+import { SkeletonRows } from '@/components/ui/Skeleton';
 import ContextCard, { halqaToContext, trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
 import { useHalqat } from '@/lib/queries/halqat';
 import { useSpecialTracks } from '@/lib/queries/specialTracks';
@@ -119,10 +120,10 @@ export default function TeacherRecordLesson() {
   const [selected, setSelected] = useState<TeachingContext | null>(null);
   const [, forceRerender] = useState(0);
 
-  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: profileId });
-  const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, profileId);
+  const { data: halqat = [], isLoading: loadingHalqat, refetch: refetchHalqat, isRefetching: refetchingHalqat } = useHalqat({ teacher: profileId });
+  const { data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useSpecialTracks(undefined, profileId);
 
-  const { data: students = [], isLoading: loadingStudents } = useStudents(
+  const { data: students = [], isLoading: loadingStudents, refetch: refetchStudents, isRefetching: refetchingStudents } = useStudents(
     selected
       ? selected.kind === 'halqa'
         ? { halqa: selected.id }
@@ -131,12 +132,22 @@ export default function TeacherRecordLesson() {
   );
 
   const isLoading = loadingHalqat || loadingTracks;
+  const isRefreshing = refetchingHalqat || refetchingTracks || refetchingStudents;
+  function handleRefresh() {
+    refetchHalqat();
+    refetchTracks();
+    refetchStudents();
+  }
 
   if (!selected) {
     return (
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
-        <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
-          {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
+        <ScrollView
+          contentContainerStyle={s.page}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.green]} tintColor={theme.green} />}
+        >
+          {isLoading && <SkeletonRows count={4} rowHeight={72} />}
           {!isLoading && halqat.length === 0 && tracks.length === 0 && (
             <Text style={s.muted}>لا توجد حلقات أو مسارات مسندة إليك</Text>
           )}
@@ -157,20 +168,27 @@ export default function TeacherRecordLesson() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.green]} tintColor={theme.green} />}
+      >
         <Pressable onPress={() => setSelected(null)}>
           <Text style={s.backLink}>‹ رجوع لاختيار الحلقة/المسار</Text>
         </Pressable>
 
         <Alert variant="info">سجّل واجب كل طالب صوتياً — يُرسل تلقائياً للطالب وولي أمره فور الانتهاء.</Alert>
 
-        {loadingStudents && <Text style={s.muted}>جارٍ تحميل الطلاب...</Text>}
+        {loadingStudents && <SkeletonRows count={3} rowHeight={160} gap={14} />}
         {!loadingStudents && students.length === 0 && <Text style={s.muted}>لا يوجد طلاب في هذا السياق</Text>}
 
         {students.map((st) => (
           <StudentRecorderCard key={st._id} student={st} context={selected} onSent={() => forceRerender((n) => n + 1)} />
         ))}
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -181,7 +199,7 @@ const s = StyleSheet.create({
   muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
   backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
   studentHead: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
-  avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: '#DCFCE7', alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: theme.greenPale, alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontSize: 18, fontFamily: theme.fontCairoBold, color: theme.green },
   studentName: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
   lastHifz: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
@@ -189,7 +207,7 @@ const s = StyleSheet.create({
   input: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo, fontSize: 13, color: theme.text, backgroundColor: theme.white },
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
-  chipActive: { backgroundColor: '#DCFCE7', borderColor: theme.green },
+  chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
   chipText: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
   chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
   recArea: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },

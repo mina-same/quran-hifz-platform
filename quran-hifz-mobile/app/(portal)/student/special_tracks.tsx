@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
@@ -90,7 +90,7 @@ function TrackCard({ track }: { track: SpecialTrack }) {
 export default function StudentSpecialTracks() {
   const theme = useAppTheme();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
-  const { data: tracks = [], isLoading } = useSpecialTracks(undefined, undefined, profileId);
+  const { data: tracks = [], isLoading, isRefetching, refetch } = useSpecialTracks(undefined, undefined, profileId);
 
   const s = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },
@@ -105,7 +105,13 @@ export default function StudentSpecialTracks() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.green]} tintColor={theme.green} />
+        }
+      >
         {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
 
         {!isLoading && tracks.length === 0 && (

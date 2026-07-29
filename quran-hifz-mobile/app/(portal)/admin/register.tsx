@@ -32,6 +32,7 @@ const RELATION = [
 ];
 
 export default function AdminRegister() {
+  const theme = useAppTheme();
   const [selectedPath, setSelectedPath] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const halqaOptions = HALQAT.map((h) => ({ value: h.id, label: `${h.name} — ${h.mosque}` }));
@@ -41,6 +42,26 @@ export default function AdminRegister() {
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 5000);
   };
+
+  const styles = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
+    gridItem: { width: '47%' },
+    formCol: { gap: 14 },
+    pathResult: {
+      marginTop: 14,
+      backgroundColor: '#F0FDF4',
+      borderRadius: theme.radiusSm,
+      padding: 14,
+      gap: 10,
+    },
+    pathTitle: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.green },
+    pathGrid: { flexDirection: 'row', gap: 12 },
+    pathItem: { flex: 1, gap: 4 },
+    pathLabel: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    pathValue: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.green },
+  }), [theme]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -132,23 +153,3 @@ export default function AdminRegister() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: theme.pagePadding, gap: 14 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
-  gridItem: { width: '47%' },
-  formCol: { gap: 14 },
-  pathResult: {
-    marginTop: 14,
-    backgroundColor: '#F0FDF4',
-    borderRadius: theme.radiusSm,
-    padding: 14,
-    gap: 10,
-  },
-  pathTitle: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.green },
-  pathGrid: { flexDirection: 'row', gap: 12 },
-  pathItem: { flex: 1, gap: 4 },
-  pathLabel: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
-  pathValue: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.green },
-});

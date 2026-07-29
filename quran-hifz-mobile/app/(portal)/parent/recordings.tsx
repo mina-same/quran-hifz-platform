@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
+import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useParentChildren, useChildRecordings } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -13,7 +14,7 @@ export default function ParentRecordings() {
   const { data: children = [] } = useParentChildren();
   const childId = selectedChildId ?? children[0]?._id;
 
-  const { data: recordings = [], isLoading } = useChildRecordings(childId);
+  const { data: recordings = [], isLoading, isRefetching, refetch } = useChildRecordings(childId);
 
   const s = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },
@@ -29,10 +30,16 @@ export default function ParentRecordings() {
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.green} colors={[theme.green]} />
+        }
+      >
         <Card>
           <CardHeader title="الدروس المسجّلة" />
-          {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
+          {isLoading && <SkeletonRows count={4} rowHeight={56} />}
           {!isLoading && recordings.length === 0 && <Text style={s.muted}>لا توجد دروس مسجّلة</Text>}
           {recordings.map((r, i) => (
             <View key={r._id} style={[s.item, i > 0 && s.border]}>

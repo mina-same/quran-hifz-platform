@@ -1,0 +1,182 @@
+import { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ScrollView, View, Text, StyleSheet, Pressable, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { IconArrowRight } from '@tabler/icons-react-native';
+import Card from '@/components/ui/Card';
+import CardHeader from '@/components/ui/CardHeader';
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
+import ProgressBar from '@/components/ui/ProgressBar';
+import { SkeletonRows } from '@/components/ui/Skeleton';
+import ScheduleTable from '@/components/domain/ScheduleTable';
+import { useQuranPlan, useDeleteQuranPlan, type QuranPlan } from '@/lib/queries/quranPlan';
+import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
+import { theme } from '@/lib/theme';
+
+const STATUS_VARIANT: Record<QuranPlan['status'], 'green' | 'gold' | 'gray'> = {
+  'نشطة': 'green',
+  'متوقفة': 'gold',
+  'منتهية': 'gray',
+};
+
+function targetLabel(plan: QuranPlan): string {
+  if (plan.targetType === 'halqa') return typeof plan.halqa === 'object' ? plan.halqa?.name ?? '—' : '—';
+  if (plan.targetType === 'specialTrack') return typeof plan.specialTrack === 'object' ? plan.specialTrack?.title ?? '—' : '—';
+  return `${plan.students?.length ?? 0} طالب محدد`;
+}
+
+export default function TeacherPlanDetail() {
+  const router = useRouter();
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { data: plan, isLoading, isRefetching, refetch } = useQuranPlan(id);
+  const deletePlan = useDeleteQuranPlan();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  async function handleDelete() {
+    if (!id) return;
+    await deletePlan.mutateAsync(id);
+    router.back();
+  }
+
+  return (
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
+      <View style={s.header}>
+        <Pressable onPress={() => router.back()} hitSlop={10}>
+          <IconArrowRight size={22} color={theme.text} />
+        </Pressable>
+        <Text style={s.headerTitle} numberOfLines={1}>{plan?.name ?? 'تفاصيل الخطة'}</Text>
+        <View style={{ width: 22 }} />
+      </View>
+
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.green]} tintColor={theme.green} />}
+      >
+        {isLoading && <SkeletonRows count={3} rowHeight={80} />}
+
+        {!isLoading && !plan && <Text style={s.muted}>تعذّر العثور على الخطة</Text>}
+
+        {plan && (() => {
+          const reversed = isReversedRange(plan.rangeStart, plan.rangeEnd);
+          const assignment = plan.todayAssignment ? orientSlice(plan.todayAssignment, reversed) : null;
+          const progressPct = plan.progress?.percent ?? 0;
+          const progressLabel = plan.juzProgress ? `${plan.juzProgress.completed} / ${plan.juzProgress.total} جزء` : undefined;
+
+          return (
+            <>
+              <Card>
+                <View style={s.headRow}>
+                  <Badge label={plan.status} variant={STATUS_VARIANT[plan.status]} />
+                  <Text style={s.typeTag}>{plan.type}</Text>
+                </View>
+
+                <View style={s.infoGrid}>
+                  <View style={s.infoItem}>
+                    <Text style={s.infoLabel}>الهدف</Text>
+                    <Text style={s.infoValue}>{targetLabel(plan)}</Text>
+                  </View>
+                  <View style={s.infoItem}>
+                    <Text style={s.infoLabel}>الأيام</Text>
+                    <Text style={s.infoValue}>{plan.days.join('، ')}</Text>
+                  </View>
+                  <View style={s.infoItem}>
+                    <Text style={s.infoLabel}>من</Text>
+                    <Text style={s.infoValue}>{surahName(plan.rangeStart.surahNumber)}:{plan.rangeStart.ayah}</Text>
+                  </View>
+                  <View style={s.infoItem}>
+                    <Text style={s.infoLabel}>إلى</Text>
+                    <Text style={s.infoValue}>{surahName(plan.rangeEnd.surahNumber)}:{plan.rangeEnd.ayah}</Text>
+                  </View>
+                  <View style={s.infoItem}>
+                    <Text style={s.infoLabel}>عدد الصفحات</Text>
+                    <Text style={s.infoValue}>{plan.pageRange.pageCount}</Text>
+                  </View>
+                  <View style={s.infoItem}>
+                    <Text style={s.infoLabel}>{plan.endType === 'date' ? 'ينتهي في' : 'عدد الأيام النشطة'}</Text>
+                    <Text style={s.infoValue}>
+                      {plan.endType === 'date'
+                        ? (plan.endDate ? new Date(plan.endDate).toLocaleDateString('ar-SA') : '—')
+                        : (plan.activeDaysCount ?? '—')}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={{ marginTop: 12 }}>
+                  <ProgressBar value={progressPct} label={progressLabel} />
+                </View>
+              </Card>
+
+              <Card>
+                <CardHeader title="الورد المقرر اليوم" />
+                <View style={[s.assignmentBox, { backgroundColor: assignment ? theme.greenPale : theme.cream }]}>
+                  {assignment ? (
+                    <Text style={s.assignmentText}>
+                      {surahName(assignment.surahStart)}:{assignment.ayahStart} — {surahName(assignment.surahEnd)}:{assignment.ayahEnd}
+                    </Text>
+                  ) : (
+                    <Text style={s.muted}>لا يوجد جزء مخصص لليوم</Text>
+                  )}
+                </View>
+              </Card>
+
+              <Card noPadding>
+                <CardHeader title="تقسيم الأجزاء على الأيام" style={{ padding: 16, paddingBottom: 8 }} />
+                <ScheduleTable entries={plan.schedule} reversed={reversed} />
+              </Card>
+
+              {!confirmDelete ? (
+                <View style={s.actionsRow}>
+                  <Button
+                    label="تعديل"
+                    variant="secondary"
+                    style={{ flex: 1 }}
+                    onPress={() => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'edit', id: plan._id } } as any)}
+                  />
+                  <Button label="حذف" variant="danger" style={{ flex: 1 }} onPress={() => setConfirmDelete(true)} />
+                </View>
+              ) : (
+                <Card>
+                  <Text style={s.confirmText}>هل أنت متأكد من حذف هذه الخطة؟ لا يمكن التراجع عن هذا الإجراء.</Text>
+                  <View style={s.actionsRow}>
+                    <Button label="إلغاء" variant="ghost" style={{ flex: 1 }} onPress={() => setConfirmDelete(false)} />
+                    <Button
+                      label={deletePlan.isPending ? 'جارٍ الحذف...' : 'تأكيد الحذف'}
+                      variant="danger"
+                      style={{ flex: 1 }}
+                      disabled={deletePlan.isPending}
+                      onPress={handleDelete}
+                    />
+                  </View>
+                </Card>
+              )}
+            </>
+          );
+        })()}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const s = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: theme.bg },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12, backgroundColor: theme.card,
+    borderBottomWidth: 1, borderBottomColor: theme.border,
+  },
+  headerTitle: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text, flex: 1, textAlign: 'center' },
+  page: { padding: theme.pagePadding, gap: 14 },
+  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+  headRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+  infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  infoItem: { width: '46%' },
+  infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
+  infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
+  assignmentBox: { borderRadius: 10, padding: 12 },
+  assignmentText: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.greenDark },
+  actionsRow: { flexDirection: 'row', gap: 10 },
+  confirmText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text, textAlign: 'center', marginBottom: 12 },
+});

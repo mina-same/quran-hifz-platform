@@ -1,23 +1,25 @@
 import { useMemo } from 'react';
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
+import { SkeletonRows } from '@/components/ui/Skeleton';
+import { useParentChildren, useChildMessages } from '@/lib/queries/parent';
+import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
-
-const MSGS = [
-  { from: 'أ. ناصر الحميداني', text: 'أحسن عبدالله في مراجعة آل عمران هذا الأسبوع', time: 'أمس' },
-  { from: 'نظام الجمعية',      text: 'تذكير: موعد حلقة الفجر غداً السبت ٦:١٥', time: 'اليوم' },
-  { from: 'إدارة الجمعية',     text: 'عبدالله انتقل لمستوى نجم ⭐ بعد ٧٠٠ نقطة', time: 'اليوم' },
-  { from: 'نظام الجمعية',      text: 'تم استلام واجب عبدالله ✓ — ٨٥٠ نقطة', time: 'اليوم' },
-];
 
 export default function ParentMessages() {
   const theme = useAppTheme();
+  const selectedChildId = usePortalStore((s) => s.selectedChildId);
+  const { data: children = [] } = useParentChildren();
+  const childId = selectedChildId ?? children[0]?._id;
+
+  const { data: messages = [], isLoading, isRefetching, refetch } = useChildMessages(childId);
 
   const s = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.cream },
     page: { padding: 16 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
     item: { flexDirection: 'row', gap: 12, paddingVertical: 12, alignItems: 'flex-start' },
     border: { borderTopWidth: 1, borderTopColor: theme.border },
     avatar: { width: 38, height: 38, borderRadius: 19, backgroundColor: theme.greenPale, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
@@ -30,23 +32,34 @@ export default function ParentMessages() {
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={s.page} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.green} colors={[theme.green]} />
+        }
+      >
         <Card>
           <CardHeader title="الرسائل الواردة" />
-          {MSGS.map((m, i) => (
-            <View key={i} style={[s.item, i && s.border]}>
-              <View style={s.avatar}>
-                <Text style={s.avatarText}>{m.from[0]}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <View style={s.head}>
-                  <Text style={s.from}>{m.from}</Text>
-                  <Text style={s.time}>{m.time}</Text>
+          {isLoading && <SkeletonRows count={4} rowHeight={56} />}
+          {!isLoading && messages.length === 0 && <Text style={s.muted}>لا توجد رسائل</Text>}
+          {messages.map((m, i) => {
+            const from = typeof m.sender === 'object' ? m.sender.name : 'إدارة الجمعية';
+            return (
+              <View key={m._id} style={[s.item, i > 0 && s.border]}>
+                <View style={s.avatar}>
+                  <Text style={s.avatarText}>{from[0]}</Text>
                 </View>
-                <Text style={s.text}>{m.text}</Text>
+                <View style={{ flex: 1 }}>
+                  <View style={s.head}>
+                    <Text style={s.from}>{from}</Text>
+                    <Text style={s.time}>{new Date(m.createdAt).toLocaleDateString('ar-SA')}</Text>
+                  </View>
+                  <Text style={s.text}>{m.body}</Text>
+                </View>
               </View>
-            </View>
-          ))}
+            );
+          })}
         </Card>
       </ScrollView>
     </SafeAreaView>

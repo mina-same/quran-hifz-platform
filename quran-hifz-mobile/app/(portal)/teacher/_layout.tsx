@@ -22,11 +22,15 @@ export default function TeacherTabLayout() {
       <Tabs.Screen name="homework"   options={{ title: 'الواجبات',      tabBarIcon: ({ color, size }) => <IconMicrophone       size={size} color={color} />, tabBarBadge: '3' }} />
       {/* Accessible via drawer only */}
       <Tabs.Screen name="plans"         options={{ href: null, title: 'الخطط' }} />
+      <Tabs.Screen name="plan-form"     options={{ href: null, title: 'خطة حفظ' }} />
+      <Tabs.Screen name="plan-detail"   options={{ href: null, title: 'تفاصيل الخطة' }} />
       <Tabs.Screen name="reports"       options={{ href: null, title: 'التقارير' }} />
       <Tabs.Screen name="evaluate"      options={{ href: null, title: 'تقييم الجلسة' }} />
       <Tabs.Screen name="recordlesson"  options={{ href: null, title: 'تسجيل الدرس' }} />
       <Tabs.Screen name="grouphomework" options={{ href: null, title: 'واجب جماعي' }} />
       <Tabs.Screen name="special_tracks" options={{ href: null, title: 'المسارات الاستثنائية' }} />
+      <Tabs.Screen name="track-detail"  options={{ href: null, title: 'تفاصيل المسار' }} />
+      <Tabs.Screen name="settings" options={{ href: null, title: 'الملف الشخصي' }} />
     </Tabs>
   );
 }

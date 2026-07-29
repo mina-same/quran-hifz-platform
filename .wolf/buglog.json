@@ -5222,6 +5222,177 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-07-29T00:05:00.000Z"
+    },
+    {
+      "id": "bug-321",
+      "timestamp": "2026-07-29T10:04:24.322933Z",
+      "error_message": "quran-hifz-mobile: npx tsc --noEmit fails with 142 errors (half-finished dark-mode migration)",
+      "file": "quran-hifz-mobile/lib/theme.ts, lib/hooks/useAppTheme.ts, lib/store/portalStore.ts, components/layout/MoreSheet.tsx",
+      "root_cause": "useAppTheme() imported a buildTheme(mode) that did not exist in lib/theme.ts (only a static theme object), usePortalStore was missing themeMode/toggleTheme/completeOnboarding, and MoreSheet.tsx imported a components/layout/iconMap module that was never created (ICON_MAP lived inline in NavItem.tsx instead).",
+      "fix": "Added buildTheme(mode) to lib/theme.ts (light/dark surface variants over the existing token set, plus missing cream/greenPale tokens used by the gamification screens), added themeMode/toggleTheme (persisted via AsyncStorage) and completeOnboarding to portalStore.ts, and extracted ICON_MAP into components/layout/iconMap.ts (imported by both NavItem.tsx and MoreSheet.tsx).",
+      "tags": [
+        "mobile",
+        "typescript",
+        "theme",
+        "build-fix"
+      ],
+      "related_bugs": [
+        "bug-322",
+        "bug-323",
+        "bug-324",
+        "bug-325",
+        "bug-326"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-29T10:04:24.322933Z"
+    },
+    {
+      "id": "bug-322",
+      "timestamp": "2026-07-29T10:04:24.322933Z",
+      "error_message": "91 of the 142 tsc errors were 'Cannot find name theme' across every admin screen + teacher/myhalqa.tsx",
+      "file": "quran-hifz-mobile/app/(portal)/admin/*.tsx, app/(portal)/teacher/myhalqa.tsx",
+      "root_cause": "Each screen had already been migrated to a component-scope const styles = useMemo(() => StyleSheet.create({...}), [theme]) driven by useAppTheme(), but a leftover module-scope const styles = StyleSheet.create({...}) (dead code, shadowed at runtime) from before the migration was never deleted, and it referenced a bare theme identifier with no import in scope. register.tsx/reports.tsx never got the useMemo migration at all (useAppTheme imported but never called), and admin/special_tracks.tsx referenced theme.* in a module-scope StyleSheet with no theme import at all.",
+      "fix": "Deleted the dead trailing StyleSheet.create blocks in dashboard/halqat/kpis/masajid/students/teachers.tsx. Wired register.tsx and reports.tsx to actually call useAppTheme() and moved their styles into the same useMemo pattern. Moved myhalqa.tsx's already-called theme into a useMemo-wrapped styles block. Added a static import { theme } from '@/lib/theme' to admin/special_tracks.tsx (module-scope styles there do not need per-render reactivity).",
+      "tags": [
+        "mobile",
+        "typescript",
+        "dead-code",
+        "theme"
+      ],
+      "related_bugs": [
+        "bug-321"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-29T10:04:24.322933Z"
+    },
+    {
+      "id": "bug-323",
+      "timestamp": "2026-07-29T10:04:24.322933Z",
+      "error_message": "lib/queries/attendance.ts declared useBulkAttendance twice (TS2323/TS2393 duplicate function implementation)",
+      "file": "quran-hifz-mobile/lib/queries/attendance.ts",
+      "root_cause": "A stale earlier draft of useBulkAttendance (halqa-only, untyped response) was left in the file alongside the real, later version that also supports specialTrack and a typed BulkAttendanceResponse (matching the notify-parents feature already shipped on web/server).",
+      "fix": "Deleted the stale duplicate, keeping the specialTrack-aware typed version.",
+      "tags": [
+        "mobile",
+        "typescript",
+        "duplicate-code"
+      ],
+      "related_bugs": [
+        "bug-321"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-29T10:04:24.322933Z"
+    },
+    {
+      "id": "bug-324",
+      "timestamp": "2026-07-29T10:04:24.322933Z",
+      "error_message": "<ProgressBar pct={pct} /> - Property pct does not exist on type Props (parent/dashboard.tsx, student/points.tsx)",
+      "file": "quran-hifz-mobile/app/(portal)/parent/dashboard.tsx, app/(portal)/student/points.tsx",
+      "root_cause": "components/ui/ProgressBar.tsx takes a value prop, not pct - call sites used the wrong prop name.",
+      "fix": "Changed both call sites to <ProgressBar value={pct} />.",
+      "tags": [
+        "mobile",
+        "typescript",
+        "prop-mismatch"
+      ],
+      "related_bugs": [
+        "bug-321"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-29T10:04:24.322933Z"
+    },
+    {
+      "id": "bug-325",
+      "timestamp": "2026-07-29T10:04:24.322933Z",
+      "error_message": "borderTopWidth: 0 | {...} is not assignable to ViewStyle (parent/dashboard.tsx, parent/messages.tsx, student/points.tsx)",
+      "file": "quran-hifz-mobile/app/(portal)/parent/dashboard.tsx, app/(portal)/parent/messages.tsx, app/(portal)/student/points.tsx",
+      "root_cause": "List row separators were conditionally styled with `i && styles.border` - when the array index i is 0 (falsy but not boolean), the expression evaluates to the number 0, and React Native's style prop type does not accept a literal 0, only false/undefined/ViewStyle.",
+      "fix": "Changed every occurrence to `i > 0 && styles.border` so the falsy branch is a real boolean.",
+      "tags": [
+        "mobile",
+        "typescript",
+        "react-native-gotcha"
+      ],
+      "related_bugs": [
+        "bug-321"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-29T10:04:24.322933Z"
+    },
+    {
+      "id": "bug-326",
+      "timestamp": "2026-07-29T10:04:24.322933Z",
+      "error_message": "Misc scattered mobile build errors: missing theme.cream/greenPale tokens, missing @react-navigation/drawer install, StatusBar backgroundColor prop removed in expo-status-bar (SDK 56), StyleSheet.absoluteFillObject typo, missing *.css module declaration, orphaned onboarding.tsx referencing non-existent store fields",
+      "file": "quran-hifz-mobile/lib/theme.ts, package.json/node_modules, app/_layout.tsx, app/index.tsx, nativewind-env.d.ts, app/onboarding.tsx",
+      "root_cause": "Accumulated small drift: two theme tokens used only by the vestigial gamification screens (points/store/evaluate) were never added (already flagged as bug-011 on 2026-07-01 and never fixed); @react-navigation/drawer was declared in package.json but never actually npm-installed; expo-status-bar dropped the backgroundColor prop in the SDK 56 upgrade (Android edge-to-edge model) per this project's own AGENTS.md warning that Expo APIs changed; a typo (absoluteFillObject vs absoluteFill); NativeWind v4 does not ship its own *.css ambient module declaration so the global.css side-effect import had no type; app/onboarding.tsx was written assuming a completeOnboarding store action that was never added and the screen is not yet wired into any navigator.",
+      "fix": "Added cream/greenPale to lib/theme.ts; ran npm install to sync node_modules; removed the backgroundColor prop from <StatusBar>; fixed the absoluteFill typo; added declare module '*.css'; to nativewind-env.d.ts; added completeOnboarding (persists a qh_onboarded AsyncStorage flag) to portalStore - the onboarding screen itself remains unwired into the navigator, out of scope for a build fix.",
+      "tags": [
+        "mobile",
+        "typescript",
+        "expo-sdk",
+        "dependencies"
+      ],
+      "related_bugs": [
+        "bug-011",
+        "bug-321"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-29T10:04:24.322933Z"
+    },
+    {
+      "id": "bug-327",
+      "timestamp": "2026-07-29T11:52:44.870413Z",
+      "error_message": "Self-caught during build (never shipped/ran): first draft of the admin-only KPI-scorecard Tile color mapping in ReportsScreen.tsx used a nested nonsense ternary indexing `theme[...]` with a nonexistent 'gray' branch check against a Badge variant that never equals 'gray' for any real KPI rating, and evalHalqaName() referenced a `.title` field that doesn't exist on EvaluationRecord.halqa (only `.name` does).",
+      "file": "quran-hifz-mobile/components/domain/ReportsScreen.tsx",
+      "root_cause": "Wrote the KPI tone->color lookup as an inline ternary chain keyed off Badge's variant type instead of a small typed helper, and copy-pasted the web ReportsDashboard.tsx's evalHalqaName (which reads SpecialTrack.title-shaped data) without checking the mobile EvaluationRecord.halqa type actually only carries {_id,name}.",
+      "fix": "Added a small `kpiToneColor(rating, theme)` helper mapping KPI['rating'] -> theme color string, used by the KPI Tile; fixed evalHalqaName to read `.name` only, matching lib/queries/evaluations.ts's EvaluationRecord.halqa type ({_id,name}|string).",
+      "tags": [
+        "auto-detected",
+        "self-review",
+        "type-fix",
+        "tsx",
+        "mobile",
+        "reports"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-29T11:52:44.870674Z"
+    },
+    {
+      "id": "bug-328",
+      "timestamp": "2026-07-29T00:00:00Z",
+      "error_message": "Parent portal messages.tsx and dashboard.tsx rendered hardcoded mock arrays (MSGS, CHILD, NOTIFS) even though lib/queries/parent.ts already exported real hooks (useChildMessages, useParentChildren, useChildHifz) that other parent screens (attendance/homework/recordings) were already using.",
+      "file": "quran-hifz-mobile/app/(portal)/parent/messages.tsx, quran-hifz-mobile/app/(portal)/parent/dashboard.tsx",
+      "root_cause": "These two screens were never migrated off their original mock-data scaffolding during the mobile parity push, even though the matching real hooks existed and were already wired into sibling screens in the same folder.",
+      "fix": "messages.tsx now uses useParentChildren + useChildMessages(childId) directly (same selectedChildId pattern as attendance/homework/recordings). dashboard.tsx now uses useParentChildren + useChildHifz(childId) + useChildMessages(childId), porting the same totalJuz/level derivation logic already used by the web ParentDashboard.tsx (quran-hifz/src/quran/pages/parent/ParentDashboard.tsx) so both apps compute it identically. The dashboard's 'teacher' row and timeline.tsx's full mock journey were left as-is / noted as gaps since no backend field or endpoint backs them (web ParentDashboard also hardcodes 'الجلسة القادمة' and its own NOTIFICATIONS mock, so that half is a pre-existing cross-app gap, not mobile-only).",
+      "tags": [
+        "parent-portal",
+        "mock-data",
+        "mobile",
+        "design-polish",
+        "react-query"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-29T00:00:00Z"
+    },
+    {
+      "id": "bug-329",
+      "timestamp": "2026-07-29T00:00:00.000Z",
+      "error_message": "Design-polish pass on admin portal: kpis.tsx and dashboard.tsx hardcoded backgroundColor/color as literal hex string \"#3B82F6\" in their STATS arrays even though it exactly matches lib/theme.ts base.blue token.",
+      "file": "quran-hifz-mobile/app/(portal)/admin/kpis.tsx, quran-hifz-mobile/app/(portal)/admin/dashboard.tsx",
+      "root_cause": "Stat color literals were typed as raw hex instead of referencing theme.blue, drifting from the design-token convention the rest of the file already follows (theme.green/theme.gold/theme.red used alongside it).",
+      "fix": "Replaced the literal '#3B82F6' with theme.blue in both files' STATS arrays.",
+      "tags": [
+        "style-fix",
+        "theme-token",
+        "tsx",
+        "mobile",
+        "admin-portal"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-29T00:00:00.000Z"
     }
   ]
 }

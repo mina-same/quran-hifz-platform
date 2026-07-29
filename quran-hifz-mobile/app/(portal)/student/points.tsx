@@ -38,12 +38,12 @@ export default function StudentPoints() {
         <Card>
           <CardHeader title={`التقدم نحو المستوى التالي — ${NEXT} نقطة`} />
           <Text style={s.pct}>{pct}٪</Text>
-          <ProgressBar pct={pct} />
+          <ProgressBar value={pct} />
         </Card>
         <Card>
           <CardHeader title="المتصدرون" />
           {LEADERS.map((l, i) => (
-            <View key={i} style={[s.row, i && s.border, l.me && s.myRow]}>
+            <View key={i} style={[s.row, i > 0 && s.border, l.me && s.myRow]}>
               <Text style={s.rankIcon}>{l.rank}</Text>
               <Text style={[s.name, l.me && s.meName]}>{l.name}</Text>
               <Text style={s.pts}>{l.pts}</Text>
@@ -53,7 +53,7 @@ export default function StudentPoints() {
         <Card>
           <CardHeader title="آخر النقاط" />
           {HISTORY.map((h, i) => (
-            <View key={i} style={[s.row, i && s.border]}>
+            <View key={i} style={[s.row, i > 0 && s.border]}>
               <Text style={s.day}>{h.day}</Text>
               <Text style={[s.name, { flex: 1 }]}>{h.reason}</Text>
               <Text style={s.earned}>{h.pts}</Text>

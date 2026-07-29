@@ -25,6 +25,8 @@ export default function AdminTabLayout() {
       <Tabs.Screen name="teachers"       options={{ href: null, title: 'المعلمون' }} />
       <Tabs.Screen name="masajid"        options={{ href: null, title: 'المساجد' }} />
       <Tabs.Screen name="special_tracks" options={{ href: null, title: 'المسارات الاستثنائية' }} />
+      <Tabs.Screen name="track-detail" options={{ href: null, title: 'تفاصيل المسار' }} />
+      <Tabs.Screen name="parents" options={{ href: null, title: 'أولياء الأمور' }} />
     </Tabs>
   );
 }

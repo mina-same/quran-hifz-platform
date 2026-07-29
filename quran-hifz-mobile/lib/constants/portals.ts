@@ -20,6 +20,9 @@ export const PORTALS: Record<string, PortalConfig> = {
         { id: 'points',   icon: 'star',     label: 'نقاطي والمتصدرون' },
         { id: 'store',    icon: 'gift',     label: 'متجر المكافآت' },
       ]},
+      { group: 'الحساب', items: [
+        { id: 'settings', icon: 'user-circle', label: 'الملف الشخصي' },
+      ]},
     ],
   },
   teacher: {
@@ -45,6 +48,9 @@ export const PORTALS: Record<string, PortalConfig> = {
       { group: 'المسارات الاستثنائية', items: [
         { id: 'special_tracks', icon: 'calendar-event', label: 'مساراتي الاستثنائية' },
       ]},
+      { group: 'الحساب', items: [
+        { id: 'settings', icon: 'user-circle', label: 'الملف الشخصي' },
+      ]},
     ],
   },
   admin: {
@@ -58,6 +64,7 @@ export const PORTALS: Record<string, PortalConfig> = {
         { id: 'students', icon: 'users',       label: 'إدارة الطلاب' },
         { id: 'register', icon: 'user-plus',   label: 'تسجيل طالب جديد' },
         { id: 'teachers', icon: 'chalkboard',  label: 'المعلمون' },
+        { id: 'parents',  icon: 'user-heart',  label: 'أولياء الأمور' },
       ]},
       { group: 'الحلقات والمساجد', items: [
         { id: 'halqat',  icon: 'school',        label: 'الحلقات' },

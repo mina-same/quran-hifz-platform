@@ -6,7 +6,6 @@ import StatsRow from '@/components/ui/StatsRow';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
-import DataTable from '@/components/ui/DataTable';
 import ProgressBar from '@/components/ui/ProgressBar';
 import HalqaCard from '@/components/domain/HalqaCard';
 import { STUDENTS } from '@/lib/data/students';
@@ -21,36 +20,25 @@ export default function AdminDashboard() {
   const styles = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },
     page: { padding: theme.pagePadding, gap: 14 },
-    bold: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    row: { paddingVertical: 14, gap: 8 },
+    rowBorder: { borderTopWidth: 1, borderTopColor: theme.border },
+    rowHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+    bold: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, flex: 1 },
     cell: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    infoItem: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    progressWrap: { gap: 4 },
   }), [theme]);
 
   const STATS = [
     { label: 'الطلاب المسجلون', value: STUDENTS.length, color: theme.green },
     { label: 'المعلمون',         value: '٥',             color: theme.gold },
-    { label: 'الحلقات',          value: HALQAT.length,   color: '#3B82F6' },
+    { label: 'الحلقات',          value: HALQAT.length,   color: theme.blue },
     { label: 'المساجد',          value: MASAJID.length,  color: theme.red },
   ];
 
-  const kpiRows = KPIS.slice(0, 4).map((k) => ({
-    indicator: <Text style={styles.bold}>{k.indicator}</Text>,
-    target:    <Text style={styles.cell}>{k.target}</Text>,
-    actual:    <Text style={styles.cell}>{k.actual}</Text>,
-    rating:    <Badge label={k.rating} variant={kpiVariant(k.rating) as any} />,
-  }));
-
-  const recentRows = STUDENTS.slice(0, 5).map((s) => ({
-    name:     <Text style={styles.bold}>{s.name}</Text>,
-    path:     <Badge label={s.path} variant="gold" />,
-    halqa:    <Text style={styles.cell}>{s.halqa}</Text>,
-    mosque:   <Text style={styles.cell}>{s.mosque}</Text>,
-    progress: (
-      <View style={{ minWidth: 80 }}>
-        <Text style={[styles.cell, { fontSize: 11, marginBottom: 2 }]}>{s.progressPct}٪</Text>
-        <ProgressBar value={s.progressPct} showPercent={false} />
-      </View>
-    ),
-  }));
+  const topKpis = KPIS.slice(0, 4);
+  const recentStudents = STUDENTS.slice(0, 5);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -66,39 +54,47 @@ export default function AdminDashboard() {
         {/* KPIs */}
         <Card noPadding>
           <CardHeader title="مؤشرات الأداء" style={{ padding: 16, paddingBottom: 8 }} />
-          <DataTable
-            columns={[
-              { key: 'indicator', label: 'المؤشر',    flex: 2 },
-              { key: 'target',    label: 'المستهدف',  flex: 1 },
-              { key: 'actual',    label: 'الفعلي',    flex: 1 },
-              { key: 'rating',    label: 'التقييم',   flex: 1 },
-            ]}
-            rows={kpiRows}
-          />
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            {topKpis.map((k, i) => (
+              <View key={i} style={[styles.row, i > 0 && styles.rowBorder]}>
+                <View style={styles.rowHead}>
+                  <Text style={styles.bold} numberOfLines={2}>{k.indicator}</Text>
+                  <Badge label={k.rating} variant={kpiVariant(k.rating) as any} />
+                </View>
+                <View style={styles.infoGrid}>
+                  <Text style={styles.infoItem}>المستهدف: {k.target}</Text>
+                  <Text style={styles.infoItem}>·</Text>
+                  <Text style={styles.infoItem}>الفعلي: {k.actual}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
         </Card>
 
         {/* Recent registrations */}
         <Card noPadding>
           <CardHeader title="آخر التسجيلات" style={{ padding: 16, paddingBottom: 8 }} />
-          <DataTable
-            columns={[
-              { key: 'name',     label: 'الاسم',   flex: 2 },
-              { key: 'path',     label: 'المسار',  flex: 1 },
-              { key: 'halqa',    label: 'الحلقة',  flex: 2 },
-              { key: 'mosque',   label: 'المسجد',  flex: 2 },
-              { key: 'progress', label: 'التقدم',  flex: 2 },
-            ]}
-            rows={recentRows}
-          />
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            {recentStudents.map((s, i) => (
+              <View key={s.id} style={[styles.row, i > 0 && styles.rowBorder]}>
+                <View style={styles.rowHead}>
+                  <Text style={styles.bold} numberOfLines={1}>{s.name}</Text>
+                  <Badge label={s.path} variant="gold" />
+                </View>
+                <View style={styles.infoGrid}>
+                  <Text style={styles.infoItem}>الحلقة: {s.halqa}</Text>
+                  <Text style={styles.infoItem}>·</Text>
+                  <Text style={styles.infoItem}>المسجد: {s.mosque}</Text>
+                </View>
+                <View style={styles.progressWrap}>
+                  <Text style={styles.cell}>التقدم {s.progressPct}٪</Text>
+                  <ProgressBar value={s.progressPct} showPercent={false} />
+                </View>
+              </View>
+            ))}
+          </View>
         </Card>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: theme.pagePadding, gap: 14 },
-  bold: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
-  cell: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
-});

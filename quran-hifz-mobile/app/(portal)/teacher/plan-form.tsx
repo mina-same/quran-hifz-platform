@@ -1,0 +1,329 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ScrollView, View, Text, StyleSheet, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { IconArrowRight } from '@tabler/icons-react-native';
+import Card from '@/components/ui/Card';
+import CardHeader from '@/components/ui/CardHeader';
+import Button from '@/components/ui/Button';
+import Alert from '@/components/ui/Alert';
+import FormGroup from '@/components/forms/FormGroup';
+import FormInput from '@/components/forms/FormInput';
+import FormTextarea from '@/components/forms/FormTextarea';
+import FormSelect from '@/components/forms/FormSelect';
+import FormDatePicker from '@/components/forms/FormDatePicker';
+import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
+import ScheduleTable from '@/components/domain/ScheduleTable';
+import { useHalqat } from '@/lib/queries/halqat';
+import { useQuranPlan, useCreateQuranPlan, useUpdateQuranPlan, type PlanType } from '@/lib/queries/quranPlan';
+import { computeScheduleBreakdown, isReversedRange, WEEK_DAYS, type RangePoint } from '@/lib/quranRange';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { theme } from '@/lib/theme';
+
+const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة', 'ترتيل', 'تلاوة'];
+
+function todayISO(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+type FormFields = {
+  name: string;
+  type: PlanType;
+  description: string;
+  halqa: string;
+  days: string[];
+  startDate: string;
+  rangeStart: RangePoint;
+  rangeEnd: RangePoint;
+  endType: 'activeDays' | 'date';
+  activeDaysCount: string;
+  endDate: string;
+};
+
+const EMPTY: FormFields = {
+  name: '', type: 'حفظ', description: '', halqa: '',
+  days: [], startDate: todayISO(),
+  rangeStart: { surahNumber: 1, ayah: 1 }, rangeEnd: { surahNumber: 1, ayah: 1 },
+  endType: 'activeDays', activeDaysCount: '', endDate: '',
+};
+
+export default function TeacherPlanForm() {
+  const router = useRouter();
+  const params = useLocalSearchParams<{ mode?: string; id?: string; halqaId?: string }>();
+  const isEdit = params.mode === 'edit' && !!params.id;
+  const profileId = usePortalStore((s) => s.authUser?.profileId);
+
+  const { data: existingPlan } = useQuranPlan(isEdit ? params.id : undefined);
+  const { data: halqat = [] } = useHalqat({ teacher: profileId });
+
+  const createPlan = useCreateQuranPlan();
+  const updatePlan = useUpdateQuranPlan();
+
+  const [form, setForm] = useState<FormFields>(() => ({
+    ...EMPTY,
+    halqa: params.halqaId ?? '',
+  }));
+  const [formError, setFormError] = useState('');
+  const [prefilled, setPrefilled] = useState(false);
+  // A plan created before the mobile "halqa-only" picker (or one linked to a
+  // specialTrack via the track-detail "link plan" action) may have a non-halqa
+  // target — this form doesn't offer changing that, matches the web form's
+  // "targetType editing not offered here" convention.
+  const [lockedTarget, setLockedTarget] = useState<{ targetType: string; label: string } | null>(null);
+
+  useEffect(() => {
+    if (isEdit && existingPlan && !prefilled) {
+      setForm({
+        name: existingPlan.name,
+        type: existingPlan.type,
+        description: existingPlan.description ?? '',
+        halqa: existingPlan.targetType === 'halqa'
+          ? (typeof existingPlan.halqa === 'object' ? existingPlan.halqa?._id ?? '' : existingPlan.halqa ?? '')
+          : '',
+        days: existingPlan.days,
+        startDate: existingPlan.startDate ? existingPlan.startDate.split('T')[0] : todayISO(),
+        rangeStart: existingPlan.rangeStart,
+        rangeEnd: existingPlan.rangeEnd,
+        endType: existingPlan.endType,
+        activeDaysCount: existingPlan.activeDaysCount ? String(existingPlan.activeDaysCount) : '',
+        endDate: existingPlan.endDate ? existingPlan.endDate.split('T')[0] : '',
+      });
+      if (existingPlan.targetType !== 'halqa') {
+        const label = existingPlan.targetType === 'specialTrack'
+          ? `مسار: ${typeof existingPlan.specialTrack === 'object' ? existingPlan.specialTrack?.title ?? '' : ''}`
+          : `${existingPlan.students?.length ?? 0} طالب محدد`;
+        setLockedTarget({ targetType: existingPlan.targetType, label });
+      }
+      setPrefilled(true);
+    }
+  }, [isEdit, existingPlan, prefilled]);
+
+  function sf<K extends keyof FormFields>(k: K, v: FormFields[K]) {
+    setForm((f) => ({ ...f, [k]: v }));
+  }
+
+  function toggleDay(day: string) {
+    setForm((f) => ({
+      ...f,
+      days: f.days.includes(day) ? f.days.filter((d) => d !== day) : [...f.days, day],
+    }));
+  }
+
+  const rangeIsReversed = useMemo(() => isReversedRange(form.rangeStart, form.rangeEnd), [form.rangeStart, form.rangeEnd]);
+
+  const schedulePreview = useMemo(() => {
+    if (form.days.length === 0) return [];
+    if (form.endType === 'activeDays' && !form.activeDaysCount) return [];
+    if (form.endType === 'date' && !form.endDate) return [];
+    if (!form.startDate) return [];
+    try {
+      return computeScheduleBreakdown({
+        days: form.days,
+        startDate: new Date(`${form.startDate}T00:00:00`),
+        endType: form.endType,
+        activeDaysCount: form.endType === 'activeDays' ? Number(form.activeDaysCount) : undefined,
+        endDate: form.endType === 'date' ? new Date(`${form.endDate}T00:00:00`) : undefined,
+        rangeStart: form.rangeStart,
+        rangeEnd: form.rangeEnd,
+      });
+    } catch {
+      return [];
+    }
+  }, [form.days, form.startDate, form.endType, form.activeDaysCount, form.endDate, form.rangeStart, form.rangeEnd]);
+
+  const requestedOccurrences = form.endType === 'activeDays' ? Number(form.activeDaysCount || 0) : schedulePreview.length;
+  const previewShortfall = requestedOccurrences > 0 && schedulePreview.length < requestedOccurrences;
+
+  async function handleSubmit() {
+    if (!form.name.trim()) return setFormError('اسم الخطة مطلوب');
+    if (form.days.length === 0) return setFormError('يرجى اختيار يوم واحد على الأقل');
+    if (!lockedTarget && !form.halqa) return setFormError('يرجى اختيار حلقة');
+    if (!form.startDate) return setFormError('يرجى تحديد تاريخ البداية');
+    if (form.endType === 'activeDays' && !form.activeDaysCount) return setFormError('يرجى تحديد عدد الأيام النشطة');
+    if (form.endType === 'date' && !form.endDate) return setFormError('يرجى تحديد تاريخ الانتهاء');
+    if (form.endType === 'date' && form.endDate < form.startDate) return setFormError('تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية');
+
+    const body: Record<string, unknown> = {
+      name: form.name.trim(),
+      type: form.type,
+      description: form.description.trim() || undefined,
+      days: form.days,
+      startDate: form.startDate,
+      rangeStart: form.rangeStart,
+      rangeEnd: form.rangeEnd,
+      endType: form.endType,
+      activeDaysCount: form.endType === 'activeDays' ? Number(form.activeDaysCount) : undefined,
+      endDate: form.endType === 'date' ? form.endDate : undefined,
+    };
+    if (!lockedTarget) {
+      body.targetType = 'halqa';
+      body.halqa = form.halqa;
+    }
+    if (!isEdit) body.teacher = profileId;
+
+    try {
+      setFormError('');
+      if (isEdit && params.id) await updatePlan.mutateAsync({ id: params.id, ...body });
+      else await createPlan.mutateAsync(body);
+      router.back();
+    } catch (e) {
+      setFormError((e as Error).message);
+    }
+  }
+
+  const isPending = createPlan.isPending || updatePlan.isPending;
+
+  return (
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
+      <View style={s.header}>
+        <Pressable onPress={() => router.back()} hitSlop={10}>
+          <IconArrowRight size={22} color={theme.text} />
+        </Pressable>
+        <Text style={s.headerTitle}>{isEdit ? 'تعديل الخطة' : 'خطة حفظ جديدة'}</Text>
+        <View style={{ width: 22 }} />
+      </View>
+
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={s.page} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          {!!formError && (
+            <Alert variant="error">{formError}</Alert>
+          )}
+
+        <Card>
+          <FormGroup label="اسم الخطة" required>
+            <FormInput placeholder="مثال: حفظ جزء عم" value={form.name} onChangeText={(v) => sf('name', v)} />
+          </FormGroup>
+
+          <View style={{ height: 12 }} />
+          <FormGroup label="نوع الخطة" required>
+            <View style={s.chipRow}>
+              {PLAN_TYPES.map((t) => (
+                <Pressable key={t} style={[s.chip, form.type === t && s.chipActive]} onPress={() => sf('type', t)}>
+                  <Text style={[s.chipText, form.type === t && s.chipTextActive]}>{t}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </FormGroup>
+
+          <View style={{ height: 12 }} />
+          <FormGroup label="الوصف">
+            <FormTextarea placeholder="اختياري" value={form.description} onChangeText={(v) => sf('description', v)} rows={3} />
+          </FormGroup>
+
+          <View style={{ height: 12 }} />
+          {lockedTarget ? (
+            <FormGroup label="الفئة المستهدفة">
+              <Text style={s.lockedText}>{lockedTarget.label} (لا يمكن تغييرها من هنا)</Text>
+            </FormGroup>
+          ) : (
+            <FormGroup label="الحلقة" required>
+              <FormSelect
+                value={form.halqa}
+                onChange={(v) => sf('halqa', v)}
+                options={halqat.map((h) => ({ value: h._id, label: h.name }))}
+                placeholder="اختر حلقة"
+              />
+            </FormGroup>
+          )}
+        </Card>
+
+        <Card>
+          <CardHeader title="الأيام" />
+          <View style={s.chipRow}>
+            {WEEK_DAYS.map((d) => (
+              <Pressable key={d} style={[s.chip, form.days.includes(d) && s.chipActive]} onPress={() => toggleDay(d)}>
+                <Text style={[s.chipText, form.days.includes(d) && s.chipTextActive]}>{d}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </Card>
+
+        <Card>
+          <CardHeader title="نطاق الحفظ" />
+          <FormGroup label="من">
+            <SurahAyahPicker value={form.rangeStart} onChange={(v) => sf('rangeStart', v)} />
+          </FormGroup>
+          <View style={{ height: 12 }} />
+          <FormGroup label="إلى">
+            <SurahAyahPicker value={form.rangeEnd} onChange={(v) => sf('rangeEnd', v)} />
+          </FormGroup>
+          {rangeIsReversed && (
+            <Text style={s.reverseHint}>⟲ هذا النطاق بالعكس (من نهاية المصحف نحو البداية) — سيُعرض كل يوم بترتيبه الصحيح.</Text>
+          )}
+        </Card>
+
+        <Card>
+          <CardHeader title="مدة الخطة" />
+          <FormGroup label="تاريخ البداية" required>
+            <FormDatePicker value={form.startDate} onChange={(v) => sf('startDate', v)} />
+          </FormGroup>
+
+          <View style={{ height: 12 }} />
+          <View style={s.rowGroup}>
+            <Pressable style={[s.toggleBtn, form.endType === 'activeDays' && s.toggleBtnActive]} onPress={() => sf('endType', 'activeDays')}>
+              <Text style={[s.toggleBtnText, form.endType === 'activeDays' && s.toggleBtnTextActive]}>عدد أيام نشطة</Text>
+            </Pressable>
+            <Pressable style={[s.toggleBtn, form.endType === 'date' && s.toggleBtnActive]} onPress={() => sf('endType', 'date')}>
+              <Text style={[s.toggleBtnText, form.endType === 'date' && s.toggleBtnTextActive]}>تاريخ انتهاء محدد</Text>
+            </Pressable>
+          </View>
+
+          <View style={{ height: 12 }} />
+          {form.endType === 'activeDays' ? (
+            <FormGroup label="عدد الأيام النشطة" required>
+              <FormInput placeholder="مثال: 30" keyboardType="number-pad" value={form.activeDaysCount} onChangeText={(v) => sf('activeDaysCount', v)} />
+            </FormGroup>
+          ) : (
+            <FormGroup label="تاريخ الانتهاء" required>
+              <FormDatePicker value={form.endDate} onChange={(v) => sf('endDate', v)} minimumDate={form.startDate ? new Date(form.startDate) : undefined} />
+            </FormGroup>
+          )}
+        </Card>
+
+        {schedulePreview.length > 0 && (
+          <Card noPadding>
+            <CardHeader title="التقسيمة اليومية (معاينة)" style={{ padding: 16, paddingBottom: 8 }} />
+            {previewShortfall && (
+              <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+                <Alert variant="warning">عدد الأيام المطلوب أكبر من عدد الصفحات المتاحة للتوزيع.</Alert>
+              </View>
+            )}
+            <ScheduleTable entries={schedulePreview} reversed={rangeIsReversed} />
+          </Card>
+        )}
+
+        <Button
+          label={isPending ? 'جارٍ الحفظ...' : isEdit ? 'حفظ التعديلات' : 'إنشاء الخطة'}
+          onPress={handleSubmit}
+          disabled={isPending}
+          fullWidth
+        />
+      </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const s = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: theme.bg },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 12, backgroundColor: theme.card,
+    borderBottomWidth: 1, borderBottomColor: theme.border,
+  },
+  headerTitle: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text },
+  page: { padding: theme.pagePadding, gap: 14 },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
+  chipText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+  chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
+  lockedText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted, textAlign: 'right' },
+  reverseHint: { fontSize: 11, color: theme.gold, fontFamily: theme.fontCairo, marginTop: 10, textAlign: 'right' },
+  rowGroup: { flexDirection: 'row', gap: 8 },
+  toggleBtn: { flex: 1, borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },
+  toggleBtnActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
+  toggleBtnText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
+  toggleBtnTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
+});

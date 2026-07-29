@@ -81,15 +81,3 @@ export function useBulkAttendance() {
     },
   });
 }
-
-export function useBulkAttendance() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (body: { halqa: string; date: string; records: { student: string; status: string }[] }) =>
-      post('/attendance/bulk', body),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['attendance'] });
-      qc.invalidateQueries({ queryKey: ['students'] });
-    },
-  });
-}

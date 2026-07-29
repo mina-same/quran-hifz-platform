@@ -1,30 +1,33 @@
-import { ScrollView, View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
+import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useMessages, useMarkRead } from '@/lib/queries/messages';
 import { theme } from '@/lib/theme';
 
 export default function StudentMessages() {
-  const { data: messages = [], isLoading } = useMessages();
+  const { data: messages = [], isLoading, isRefetching, refetch } = useMessages();
   const markRead = useMarkRead();
   const unreadCount = messages.filter((m) => !m.readAt).length;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.green]} tintColor={theme.green} />
+        }
+      >
         <Card>
           <CardHeader
             title="صندوق الرسائل"
             right={unreadCount > 0 ? <Badge label={`${unreadCount} غير مقروء`} variant="red" /> : undefined}
           />
 
-          {isLoading && (
-            <View style={{ paddingVertical: 24, alignItems: 'center' }}>
-              <ActivityIndicator color={theme.green} />
-            </View>
-          )}
+          {isLoading && <SkeletonRows count={4} rowHeight={64} />}
 
           {!isLoading && messages.length === 0 && (
             <Text style={styles.empty}>لا توجد رسائل بعد</Text>
