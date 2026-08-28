@@ -24,7 +24,7 @@ import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from "../../
 import { useRecordStudentOccurrence, useStudentPlanProgressList } from "../../api/student-plan-progress";
 import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
-import { toFlatIndex, fromFlatIndex, isReversedSchedule, dayFinishPoint, dayShortfallAyahs } from "../../lib/quranRange";
+import { toFlatIndex, fromFlatIndex, isReversedSchedule, dayFinishPoint, dayDeltaAyahs, planFinishPoint } from "../../lib/quranRange";
 import { toAr, pct } from "../../../lib/format";
 
 function surahName(n: number) {
@@ -420,12 +420,30 @@ export function TeacherAttendance() {
   function setCompletedPoint(studentId: string, point: RangePoint) {
     setCompletionOverrides((prev) => ({ ...prev, [studentId]: point }));
   }
-  /** Clamps a teacher-picked completion point to the day's own assigned range
-   * — always low→high internally regardless of the plan's overall direction. */
-  function clampToAssignment(point: RangePoint, assignment: ScheduleEntry): RangePoint {
-    const loFlat = toFlatIndex({ surahNumber: assignment.surahStart, ayah: assignment.ayahStart });
-    const hiFlat = toFlatIndex({ surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd });
+  /** Clamps a teacher-picked completion point to what the student could
+   * plausibly have reached: no earlier than the start of the day's own ward,
+   * and no further than the end of their whole plan — a keen student may
+   * recite past today's ward into the following days, but never past the plan
+   * itself. Both bounds are read in the plan's own direction, then applied
+   * low→high the way slices are always stored. */
+  function clampReached(point: RangePoint, assignment: ScheduleEntry, studentId: string): RangePoint {
+    const reversed = reversedForStudent(studentId);
+    const dayStart = reversed
+      ? { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd }
+      : { surahNumber: assignment.surahStart, ayah: assignment.ayahStart };
+    const finish = planFinishPoint(progressByStudentId[studentId]?.effectiveSchedule ?? [], reversed)
+      ?? dayFinishPoint(assignment, reversed);
+    const loFlat = Math.min(toFlatIndex(dayStart), toFlatIndex(finish));
+    const hiFlat = Math.max(toFlatIndex(dayStart), toFlatIndex(finish));
     return fromFlatIndex(Math.max(loFlat, Math.min(hiFlat, toFlatIndex(point))));
+  }
+  /** The picker's own selectable window — the same bounds as `clampReached`,
+   * obtained by clamping the mushaf's own extremes. */
+  function reachedBounds(assignment: ScheduleEntry, studentId: string) {
+    return {
+      lo: clampReached({ surahNumber: 1, ayah: 1 }, assignment, studentId),
+      hi: clampReached({ surahNumber: 114, ayah: 6 }, assignment, studentId),
+    };
   }
   // Each student's own assigned portion for the selected day — falls back to
   // the shared plan schedule (assignmentByDate) for anyone with no individual
@@ -467,12 +485,13 @@ export function TeacherAttendance() {
             return;
           }
           const completedPoint = completedPointFor(studentId, studentAssignment);
-          // Shortfall is measured in the plan's own direction — for a reverse
-          // plan the undone part is the low side of the day's slice, not the high one.
-          const shortfall = dayShortfallAyahs(studentAssignment, reversedForStudent(studentId), completedPoint);
-          const status = e.attendanceStatus === "غائب" ? "absent" : shortfall > 0 ? "partial" : "done";
+          // Signed in the plan's own direction — for a reverse plan the undone part
+          // is the low side of the day's slice, not the high one. Negative = fell
+          // short of the day's ward, positive = recited past it.
+          const delta = dayDeltaAyahs(studentAssignment, reversedForStudent(studentId), completedPoint);
+          const status = e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
 
-          if (status === "done") {
+          if (status === "done" && delta === 0) {
             toast.success("تم حفظ الحضور والتقييم بنجاح", { id: toastId });
             recordOccurrence.mutate({ planId: linkedPlan._id, studentId, occurrenceIndex: studentAssignment.occurrenceIndex, status });
             return;
@@ -481,22 +500,28 @@ export function TeacherAttendance() {
           toast.loading(
             status === "absent"
               ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
-              : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`,
+                : delta > 0
+                  ? `جاري تعديل باقي أيام خطة ${studentName} بعد التسميع الإضافي...`
+                  : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`,
             { id: toastId },
           );
           recordOccurrence.mutate(
             {
               planId: linkedPlan._id, studentId, occurrenceIndex: studentAssignment.occurrenceIndex,
               status,
-              completedThroughSurah: status === "partial" ? completedPoint.surahNumber : undefined,
-              completedThroughAyah: status === "partial" ? completedPoint.ayah : undefined,
+              // Sent for an over-achievement too (status "done"), so the server can
+              // take the surplus off the student's remaining days.
+              completedThroughSurah: status === "absent" ? undefined : completedPoint.surahNumber,
+              completedThroughAyah: status === "absent" ? undefined : completedPoint.ayah,
             },
             {
               onSuccess: (res) => {
                 toast.success(
                   status === "absent"
                     ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
-                    : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`,
+                      : delta > 0
+                        ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
+                        : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`,
                   { id: toastId },
                 );
                 if (res.data.overflowPages > 0) {
@@ -744,8 +769,8 @@ export function TeacherAttendance() {
                           // down, so it's complete once the student reaches its low end.
                           const reversedHere = reversedForStudent(s._id);
                           const actualPoint = completedPointFor(s._id, assignment);
-                          const shortfallAyahs = dayShortfallAyahs(assignment, reversedHere, actualPoint);
-                          const isFull = shortfallAyahs === 0;
+                          const delta = dayDeltaAyahs(assignment, reversedHere, actualPoint);
+                          const isFull = delta === 0;
                           return (
                             <div style={{ border: "1px dashed var(--border)", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
                               <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text2)", display: "block", marginBottom: 6 }}>
@@ -754,11 +779,8 @@ export function TeacherAttendance() {
                               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                                 <CompactSurahAyah
                                   value={actualPoint} disabled={controlsLocked}
-                                  bounds={{
-                                    lo: { surahNumber: assignment.surahStart, ayah: assignment.ayahStart },
-                                    hi: { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd },
-                                  }}
-                                  onChange={(v) => setCompletedPoint(s._id, clampToAssignment(v, assignment))}
+                                  bounds={reachedBounds(assignment, s._id)}
+                                  onChange={(v) => setCompletedPoint(s._id, clampReached(v, assignment, s._id))}
                                 />
                                 <span style={{ fontSize: 11, color: "var(--text3)" }}>
                                   {reversedHere
@@ -777,10 +799,12 @@ export function TeacherAttendance() {
                                   </button>
                                 )}
                               </div>
-                              <div style={{ fontSize: 11, marginTop: 6, color: isFull ? "var(--green)" : "#b45309" }}>
+                              <div style={{ fontSize: 11, marginTop: 6, color: isFull || delta > 0 ? "var(--green)" : "#b45309" }}>
                                 {isFull
                                   ? <><i className="ti ti-check" style={{ marginLeft: 3 }} />سيُسجَّل كمكتمل</>
-                                  : <><i className="ti ti-arrow-forward-up" style={{ marginLeft: 3 }} />سيتم تعويض {toAr(shortfallAyahs)} آية في باقي أيام خطته</>
+                                  : delta > 0
+                                    ? <><i className="ti ti-arrow-down" style={{ marginLeft: 3 }} />سمّع {toAr(delta)} آية إضافية — سيتم خصمها من باقي أيام خطته</>
+                                    : <><i className="ti ti-arrow-forward-up" style={{ marginLeft: 3 }} />سيتم تعويض {toAr(-delta)} آية في باقي أيام خطته</>
                                 }
                               </div>
                             </div>

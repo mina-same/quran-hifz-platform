@@ -17,7 +17,7 @@ import { Badge } from "../../components/common/Badge";
 import { DaysOfWeekPicker } from "../../components/common/DaysOfWeekPicker";
 import { SurahPointFields } from "../../components/common/SurahRangePicker";
 import { IndividualPlanPanel } from "../../components/common/IndividualPlanPanel";
-import { countRangeAyahs, pageRangeOfAyahRange, computeScheduleBreakdown, surahName } from "../../lib/quranRange";
+import { countRangeAyahs, pageRangeOfAyahRange, computeScheduleBreakdown, surahName, WEEK_DAYS } from "../../lib/quranRange";
 
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString("ar-SA", { year: "numeric", month: "short", day: "numeric" });
@@ -430,54 +430,91 @@ export function TeacherPlanForm() {
         {/* Holidays — active days the plan pauses on (Eid, exams, travel).
             A holiday consumes no occurrence, so its portion shifts to the
             next working day and the plan's content is never lost. */}
-        <div style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 14 }}>
-          <div style={{ fontSize: 11, color: "var(--text3)", fontWeight: 700, marginBottom: 8 }}>
-            أيام العطلات (استثناءات)
+        <div style={{ marginTop: 18, borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+            <i className="ti ti-calendar-off" style={{ fontSize: 15, color: "var(--gold)" }} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>أيام العطلات</span>
+            {form.holidays.length > 0 && (
+              <span style={{
+                borderRadius: 999, padding: "1px 8px", background: "var(--gold-pale)",
+                color: "var(--brown)", fontSize: 11, fontWeight: 700,
+              }}>
+                {form.holidays.length}
+              </span>
+            )}
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+
+          <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
             <input
               className="form-input"
               type="date"
               dir="ltr"
               value={holidayDraft}
+              min={form.startDate || undefined}
+              max={form.endType === "date" && form.endDate ? form.endDate : undefined}
               onChange={(e) => setHolidayDraft(e.target.value)}
               style={{ flex: 1 }}
             />
             <button
               type="button"
-              className="btn btn-ghost"
+              className="topbar-btn btn-primary"
               disabled={!holidayDraft || form.holidays.includes(holidayDraft)}
               onClick={() => { addHoliday(holidayDraft); setHolidayDraft(""); }}
+              style={{
+                padding: "0 18px", whiteSpace: "nowrap",
+                opacity: !holidayDraft || form.holidays.includes(holidayDraft) ? 0.45 : 1,
+                cursor: !holidayDraft || form.holidays.includes(holidayDraft) ? "not-allowed" : "pointer",
+              }}
             >
               <i className="ti ti-plus" /> إضافة
             </button>
           </div>
+
           {form.holidays.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-              {form.holidays.map((h) => (
-                <span
-                  key={h}
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: 6,
-                    borderRadius: 999, padding: "4px 10px", background: "var(--cream)",
-                    border: "1px solid var(--border)", fontSize: 12, color: "var(--text2)",
-                  }}
-                >
-                  <span dir="ltr">{h}</span>
-                  <button
-                    type="button"
-                    onClick={() => sf("holidays", form.holidays.filter((d) => d !== h))}
-                    style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text3)", padding: 0, lineHeight: 1 }}
-                    aria-label={`حذف عطلة ${h}`}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+              {form.holidays.map((h) => {
+                // WEEK_DAYS runs Sat..Fri while getDay() runs Sun..Sat, hence the +1 shift.
+                const weekday = WEEK_DAYS[(new Date(`${h}T00:00:00`).getDay() + 1) % 7];
+                const active = form.days.includes(weekday);
+                return (
+                  <span
+                    key={h}
+                    title={active
+                      ? `${weekday} — يوم نشط، سيتم تخطيه`
+                      : `${weekday} — ليس من أيام الخطة أصلًا، لا أثر لهذه العطلة`}
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: 8,
+                      paddingInlineStart: 12, paddingInlineEnd: 5, paddingBlock: 5,
+                      borderRadius: 999, fontSize: 12, fontWeight: 600,
+                      background: active ? "var(--gold-pale)" : "var(--cream)",
+                      border: `1px solid ${active ? "rgba(201, 149, 42, 0.35)" : "var(--border)"}`,
+                      color: active ? "var(--brown)" : "var(--text3)",
+                    }}
                   >
-                    <i className="ti ti-x" />
-                  </button>
-                </span>
-              ))}
+                    <i className="ti ti-calendar-off" style={{ fontSize: 13, opacity: 0.65 }} />
+                    <span>{fmtDate(`${h}T00:00:00`)}</span>
+                    <button
+                      type="button"
+                      onClick={() => sf("holidays", form.holidays.filter((d) => d !== h))}
+                      aria-label={`حذف عطلة ${h}`}
+                      style={{
+                        display: "grid", placeItems: "center", width: 20, height: 20,
+                        borderRadius: 999, border: "none", cursor: "pointer",
+                        background: "rgba(0, 0, 0, 0.06)", color: "inherit", padding: 0,
+                      }}
+                    >
+                      <i className="ti ti-x" style={{ fontSize: 11 }} />
+                    </button>
+                  </span>
+                );
+              })}
             </div>
           )}
-          <p style={{ margin: "8px 0 0", fontSize: 11, color: "var(--text3)" }}>
-            لا يُحتسب يوم العطلة ضمن أيام الخطة حتى لو وافق يومًا نشطًا — ينتقل نصيبه إلى يوم العمل التالي
+
+          <p style={{ margin: "10px 0 0", fontSize: 11, color: "var(--text3)", lineHeight: 1.7 }}>
+            لا يُحتسب يوم العطلة ضمن أيام الخطة حتى لو وافق يومًا نشطًا — ينتقل نصيبه إلى يوم العمل التالي.
+            <br />
+            العطلة التي لا توافق يومًا من أيام الخطة تظهر بلون باهت لأنه لا أثر لها.
           </p>
         </div>
       </Card>

@@ -153,3 +153,10 @@ disagrees with what the server saves. The two client copies are a subset: they h
 `countMatchingDays`/`countOccurrences`/`computeScheduleBreakdown` but NOT
 `computeTodayAssignment`/`computePlanProgress`. Only the mobile copy has tests
 (`quran-hifz-mobile/lib/quranRange.test.ts`, run with `npx jest`).
+
+### Buttons use `.topbar-btn` as the base class, everywhere (2026-08-28)
+`quran.css` defines NO `.btn` class. `.btn-primary`, `.btn-ghost`, `.btn-danger`, `.btn-gold`
+are colour modifiers with no layout of their own — padding/radius/font/flex all sit on
+`.topbar-btn`, which despite its name is the base class for every button in the app,
+including form buttons. Writing `className="btn btn-ghost"` yields an unstyled button.
+Always: `className="topbar-btn btn-primary"`.

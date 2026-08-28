@@ -83,7 +83,9 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
     const pages = occ.pageStart === occ.pageEnd
       ? String(occ.pageStart)
       : reversed ? `${occ.pageEnd} - ${occ.pageStart}` : `${occ.pageStart} - ${occ.pageEnd}`;
-    const statusLabel = STATUS_LABEL[occ.status] + (occ.manualOverride ? ' · معدَّلة يدويًا' : '');
+    const statusLabel = STATUS_LABEL[occ.status]
+      + (occ.noWard ? ' · لا ورد' : '')
+      + (occ.manualOverride ? ' · معدَّلة يدويًا' : '');
 
     return {
       idx: occ.occurrenceIndex,
@@ -91,8 +93,10 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
       base: changed
         ? <Text style={s.strike}>{surahName(baseOriented.surahStart)}:{baseOriented.ayahStart} — {surahName(baseOriented.surahEnd)}:{baseOriented.ayahEnd}</Text>
         : '—',
-      current: `${surahName(curOriented.surahStart)}:${curOriented.ayahStart} — ${surahName(curOriented.surahEnd)}:${curOriented.ayahEnd}`,
-      pages,
+      current: occ.noWard
+        ? 'لا يوجد ورد'
+        : `${surahName(curOriented.surahStart)}:${curOriented.ayahStart} — ${surahName(curOriented.surahEnd)}:${curOriented.ayahEnd}`,
+      pages: occ.noWard ? '—' : pages,
       status: <Badge label={statusLabel} variant={STATUS_VARIANT[occ.status]} />,
     };
   });

@@ -2578,3 +2578,4 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 15:40 | Added per-plan holidays (YYYY-MM-DD) — skipped days consume no occurrence | quranRange.ts ×3, QuranPlan.model.ts, quran-plan.controller.ts, studentPlanReflow.ts, TeacherPlanForm.tsx, plan-form.tsx, quran-plans.ts, quranPlan.ts | 38/38 jest pass, 3 suites typecheck clean | ~48k |
+| 16:05 | Restyled the holidays field (was unstyled — wrong button base class) | TeacherPlanForm.tsx | tsc clean, no new errors | ~9k |

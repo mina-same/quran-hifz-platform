@@ -218,11 +218,13 @@ export function IndividualPlanPanel({
                     <td style={{ color: changed ? "var(--text3)" : "inherit", textDecoration: changed ? "line-through" : "none" }}>
                       {changed ? `${surahName(baseFrom.s)}:${toAr(baseFrom.a)} — ${surahName(baseTo.s)}:${toAr(baseTo.a)}` : "—"}
                     </td>
-                    <td>{surahName(curFrom.s)}:{toAr(curFrom.a)} — {surahName(curTo.s)}:{toAr(curTo.a)}</td>
-                    <td>{reversed
+                    <td>{s.noWard
+                      ? <span style={{ color: "var(--text3)" }}>لا يوجد ورد</span>
+                      : <>{surahName(curFrom.s)}:{toAr(curFrom.a)} — {surahName(curTo.s)}:{toAr(curTo.a)}</>}</td>
+                    <td>{s.noWard ? "—" : reversed
                       ? `${pageLabel({ surahNumber: s.surahEnd, ayah: s.ayahEnd }, "end")} - ${pageLabel({ surahNumber: s.surahStart, ayah: s.ayahStart }, "start")}`
                       : `${pageLabel({ surahNumber: s.surahStart, ayah: s.ayahStart }, "start")} - ${pageLabel({ surahNumber: s.surahEnd, ayah: s.ayahEnd }, "end")}`}</td>
-                    <td><Badge tone={cfg.tone}>{cfg.label}{s.manualOverride ? " · معدَّلة يدويًا" : ""}</Badge></td>
+                    <td><Badge tone={cfg.tone}>{cfg.label}{s.noWard ? " · لا ورد" : ""}{s.manualOverride ? " · معدَّلة يدويًا" : ""}</Badge></td>
                     <td>
                       <button className="topbar-btn btn-ghost" style={{ padding: "4px 9px", fontSize: 11 }} onClick={() => startEdit(s)}>
                         <i className="ti ti-pencil" />

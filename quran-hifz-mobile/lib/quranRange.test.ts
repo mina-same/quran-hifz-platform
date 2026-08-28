@@ -11,6 +11,8 @@ import {
   isReversedSchedule,
   dayFinishPoint,
   dayShortfallAyahs,
+  dayDeltaAyahs,
+  planFinishPoint,
   orientSlice,
   surahName,
   countOccurrences,
@@ -174,6 +176,58 @@ describe('dayFinishPoint / dayShortfallAyahs', () => {
 
   it('never returns a negative shortfall (overshoot clamps to 0)', () => {
     expect(dayShortfallAyahs(slice, false, { surahNumber: 3, ayah: 1 })).toBe(0);
+  });
+});
+
+describe('dayDeltaAyahs', () => {
+  const slice = { surahStart: 2, ayahStart: 1, surahEnd: 2, ayahEnd: 20 };
+
+  it('is zero when the student reached exactly the day\'s finish point', () => {
+    expect(dayDeltaAyahs(slice, false, { surahNumber: 2, ayah: 20 })).toBe(0);
+    expect(dayDeltaAyahs(slice, true, { surahNumber: 2, ayah: 1 })).toBe(0);
+  });
+
+  it('is negative for a shortfall, in either direction', () => {
+    expect(dayDeltaAyahs(slice, false, { surahNumber: 2, ayah: 15 })).toBe(-5);
+    expect(dayDeltaAyahs(slice, true, { surahNumber: 2, ayah: 10 })).toBe(-9);
+  });
+
+  it('is positive when the student recited past the day\'s ward', () => {
+    expect(dayDeltaAyahs(slice, false, { surahNumber: 2, ayah: 27 })).toBe(7);
+  });
+
+  it('is positive past the ward for a reversed day too (further down the mushaf)', () => {
+    const reversedSlice = { surahStart: 2, ayahStart: 21, surahEnd: 2, ayahEnd: 40 };
+    expect(dayDeltaAyahs(reversedSlice, true, { surahNumber: 2, ayah: 14 })).toBe(7);
+  });
+});
+
+describe('planFinishPoint', () => {
+  const entries = [
+    { occurrenceIndex: 2, surahStart: 2, ayahStart: 21, surahEnd: 2, ayahEnd: 40, baseSurahStart: 2, baseAyahStart: 21, baseSurahEnd: 2, baseAyahEnd: 40 },
+    { occurrenceIndex: 1, surahStart: 2, ayahStart: 1, surahEnd: 2, ayahEnd: 20, baseSurahStart: 2, baseAyahStart: 1, baseSurahEnd: 2, baseAyahEnd: 20 },
+  ];
+
+  it('returns the last occurrence\'s original high end for a forward plan', () => {
+    expect(planFinishPoint(entries, false)).toEqual({ surahNumber: 2, ayah: 40 });
+  });
+
+  it('returns the last occurrence\'s original low end for a reversed plan', () => {
+    expect(planFinishPoint(entries, true)).toEqual({ surahNumber: 2, ayah: 21 });
+  });
+
+  it('ignores reflowed current endpoints in favour of the pinned base ones', () => {
+    const reflowed = [{ ...entries[1] }, { ...entries[0], surahEnd: 2, ayahEnd: 35 }];
+    expect(planFinishPoint(reflowed, false)).toEqual({ surahNumber: 2, ayah: 40 });
+  });
+
+  it('falls back to current endpoints when there are no base ones (shared plan schedule)', () => {
+    expect(planFinishPoint([{ occurrenceIndex: 1, surahStart: 2, ayahStart: 1, surahEnd: 2, ayahEnd: 20 }], false))
+      .toEqual({ surahNumber: 2, ayah: 20 });
+  });
+
+  it('returns null for an empty schedule', () => {
+    expect(planFinishPoint([], false)).toBeNull();
   });
 });
 

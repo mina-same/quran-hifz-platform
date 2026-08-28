@@ -14,7 +14,7 @@ import { useSpecialTracks } from '@/lib/queries/specialTracks';
 import { useStudents } from '@/lib/queries/students';
 import { useAttendance, useBulkAttendance } from '@/lib/queries/attendance';
 import { useQuranPlans, useStudentPlanProgressList, useRecordStudentOccurrence } from '@/lib/queries/quranPlan';
-import { dayFinishPoint, dayShortfallAyahs, isReversedSchedule, isReversedRange, type RangePoint, type ScheduleEntry } from '@/lib/quranRange';
+import { dayFinishPoint, dayDeltaAyahs, planFinishPoint, toFlatIndex, fromFlatIndex, isReversedSchedule, isReversedRange, type RangePoint, type ScheduleEntry } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -129,6 +129,31 @@ export default function TeacherAttendance() {
   function completedPointFor(studentId: string, assignment: ScheduleEntry): RangePoint {
     return completionOverrides[studentId] ?? dayFinishPoint(assignment, reversedForStudent(studentId));
   }
+  /** Clamps a teacher-picked completion point to what the student could
+   * plausibly have reached: no earlier than the start of the day's own ward,
+   * and no further than the end of their whole plan — a keen student may
+   * recite past today's ward into the following days, but never past the plan
+   * itself. Both bounds are read in the plan's own direction, then applied
+   * low→high the way slices are always stored. */
+  function clampReached(point: RangePoint, assignment: ScheduleEntry, studentId: string): RangePoint {
+    const reversed = reversedForStudent(studentId);
+    const dayStart = reversed
+      ? { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd }
+      : { surahNumber: assignment.surahStart, ayah: assignment.ayahStart };
+    const finish = planFinishPoint(progressByStudentId[studentId]?.effectiveSchedule ?? [], reversed)
+      ?? dayFinishPoint(assignment, reversed);
+    const loFlat = Math.min(toFlatIndex(dayStart), toFlatIndex(finish));
+    const hiFlat = Math.max(toFlatIndex(dayStart), toFlatIndex(finish));
+    return fromFlatIndex(Math.max(loFlat, Math.min(hiFlat, toFlatIndex(point))));
+  }
+  /** The picker's own selectable window — the same bounds as `clampReached`,
+   * obtained by clamping the mushaf's own extremes. */
+  function reachedBounds(assignment: ScheduleEntry, studentId: string) {
+    return {
+      lo: clampReached({ surahNumber: 1, ayah: 1 }, assignment, studentId),
+      hi: clampReached({ surahNumber: 114, ayah: 6 }, assignment, studentId),
+    };
+  }
 
   function handleSave() {
     if (!selected) return;
@@ -157,16 +182,21 @@ export default function TeacherAttendance() {
                 continue;
               }
               const completedPoint = completedPointFor(studentId, assignment);
-              const shortfall = dayShortfallAyahs(assignment, reversedForStudent(studentId), completedPoint);
+              // Signed in the plan's own direction: negative = fell short of
+              // the day's ward, positive = recited past it. Either way the
+              // point is sent, so the server can settle the difference against
+              // the student's remaining days (heavier for a shortfall, lighter
+              // for a surplus).
+              const delta = dayDeltaAyahs(assignment, reversedForStudent(studentId), completedPoint);
               recordOccurrence.mutate(
-                shortfall > 0
-                  ? {
+                delta === 0
+                  ? { planId: linkedPlan._id, studentId, occurrenceIndex: assignment.occurrenceIndex, status: 'done' }
+                  : {
                       planId: linkedPlan._id, studentId, occurrenceIndex: assignment.occurrenceIndex,
-                      status: 'partial',
+                      status: delta < 0 ? 'partial' : 'done',
                       completedThroughSurah: completedPoint.surahNumber,
                       completedThroughAyah: completedPoint.ayah,
-                    }
-                  : { planId: linkedPlan._id, studentId, occurrenceIndex: assignment.occurrenceIndex, status: 'done' },
+                    },
               );
             }
           }
@@ -324,20 +354,21 @@ export default function TeacherAttendance() {
                 if (!assignment || statusFor(st._id) === 'غائب') return null;
                 const reversed = reversedForStudent(st._id);
                 const completedPoint = completedPointFor(st._id, assignment);
-                const shortfall = dayShortfallAyahs(assignment, reversed, completedPoint);
+                const delta = dayDeltaAyahs(assignment, reversed, completedPoint);
                 return (
                   <View style={styles.completionBox}>
                     <Text style={styles.completionLabel}>الورد الفعلي — وصل إلى</Text>
                     <SurahAyahPicker
                       value={completedPoint}
-                      onChange={(v) => setCompletionOverrides((p) => ({ ...p, [st._id]: v }))}
-                      bounds={{
-                        lo: { surahNumber: assignment.surahStart, ayah: assignment.ayahStart },
-                        hi: { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd },
-                      }}
+                      onChange={(v) => setCompletionOverrides((p) => ({ ...p, [st._id]: clampReached(v, assignment, st._id) }))}
+                      bounds={reachedBounds(assignment, st._id)}
                     />
-                    <Text style={[styles.completionHint, { color: shortfall === 0 ? theme.green : theme.gold }]}>
-                      {shortfall === 0 ? 'سيُسجَّل كمكتمل' : `سيتم تعويض ${shortfall} آية في باقي أيام خطته`}
+                    <Text style={[styles.completionHint, { color: delta >= 0 ? theme.green : theme.gold }]}>
+                      {delta === 0
+                        ? 'سيُسجَّل كمكتمل'
+                        : delta > 0
+                          ? `سمّع ${delta} آية إضافية — سيتم خصمها من باقي أيام خطته`
+                          : `سيتم تعويض ${-delta} آية في باقي أيام خطته`}
                     </Text>
                   </View>
                 );
