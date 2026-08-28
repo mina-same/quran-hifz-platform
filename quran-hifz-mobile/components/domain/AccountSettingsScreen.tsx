@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { ScrollView, View, Text, Switch, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as LocalAuthentication from 'expo-local-authentication';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Alert from '@/components/ui/Alert';
@@ -21,9 +22,19 @@ import type { ApiError } from '@/lib/api';
 export default function AccountSettingsScreen() {
   const theme = useAppTheme();
   const updateUserName = usePortalStore((s) => s.updateUserName);
+  const biometricEnabled = usePortalStore((s) => s.biometricEnabled);
+  const setBiometricEnabled = usePortalStore((s) => s.setBiometricEnabled);
   const { data: me, isLoading } = useMe();
   const updateProfile = useUpdateProfile();
   const changePassword = useChangePassword();
+
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  useEffect(() => {
+    LocalAuthentication.hasHardwareAsync()
+      .then((hw) => hw ? LocalAuthentication.isEnrolledAsync() : false)
+      .then(setBiometricAvailable)
+      .catch(() => setBiometricAvailable(false));
+  }, []);
 
   const [name, setName] = useState('');
   const [nameError, setNameError] = useState('');
@@ -43,6 +54,8 @@ export default function AccountSettingsScreen() {
     safe: { flex: 1, backgroundColor: theme.bg },
     page: { padding: theme.pagePadding, gap: 14 },
     loadingBox: { paddingVertical: 24, alignItems: 'center' },
+    switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+    switchLabel: { flex: 1, fontSize: 13, fontFamily: theme.fontCairo, color: theme.text, textAlign: 'right' },
   }), [theme]);
 
   async function handleSaveName() {
@@ -146,6 +159,20 @@ export default function AccountSettingsScreen() {
             )}
           </View>
         </Card>
+
+        {biometricAvailable && (
+          <Card>
+            <CardHeader title="تسجيل الدخول ببصمة الوجه/الإصبع" />
+            <View style={styles.switchRow}>
+              <Text style={styles.switchLabel}>اطلب التحقق البيومتري عند فتح التطبيق</Text>
+              <Switch
+                value={biometricEnabled}
+                onValueChange={setBiometricEnabled}
+                trackColor={{ true: theme.green, false: theme.border }}
+              />
+            </View>
+          </Card>
+        )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

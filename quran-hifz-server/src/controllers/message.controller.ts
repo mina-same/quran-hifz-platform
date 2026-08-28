@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { Message } from '../models/Message.model';
 import { AppError } from '../middleware/error';
+import { sendPushToUsers } from '../lib/push';
 
 const messageSchema = z.object({
   recipient:      z.string().min(1, 'المستلم مطلوب'),
@@ -38,6 +39,7 @@ export async function sendMessage(req: Request, res: Response, next: NextFunctio
   try {
     const data = messageSchema.parse(req.body);
     const message = await Message.create({ ...data, sender: req.user!.id });
+    await sendPushToUsers([{ userId: data.recipient, title: data.senderName, body: data.body }]);
     res.status(201).json({ success: true, data: message });
   } catch (err) {
     next(err);

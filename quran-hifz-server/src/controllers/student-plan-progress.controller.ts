@@ -5,7 +5,7 @@ import { StudentPlanProgress } from '../models/StudentPlanProgress.model';
 import { AppError } from '../middleware/error';
 import { SURAHS } from '../data/surahs';
 import { isStudentInPlan } from '../lib/planStudents';
-import { initStudentOccurrences, reflowStudentPlan, reflowAll, isForwardDoc } from '../lib/studentPlanReflow';
+import { initStudentOccurrences, reflowStudentPlan, reflowAll, isForwardDoc, docFinishPoint } from '../lib/studentPlanReflow';
 import { toFlatIndex, pageOfFlatIndex, juzOfFlatIndex } from '../lib/quranRange';
 
 const SURAH_BY_NUMBER = new Map(SURAHS.map((s) => [s.number, s]));
@@ -76,9 +76,12 @@ const recordOccurrenceSchema = z.object({
 });
 
 /** Records what actually happened on one of a student's scheduled
- * occurrences (finished / partially finished / absent) and, when there's a
- * shortfall, reflows the remainder across the student's own remaining days —
- * lazily creating the per-student overlay on first use. */
+ * occurrences (finished / partially finished / absent) and reflows the
+ * remainder across the student's own remaining days whenever what they
+ * actually recited differs from what was assigned — in either direction: a
+ * shortfall is added onto the following days, a surplus (recited past the
+ * day's ward) is taken off them. Lazily creates the per-student overlay on
+ * first use. */
 export async function recordOccurrence(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id: planId, studentId } = req.params;
@@ -90,7 +93,35 @@ export async function recordOccurrence(req: Request, res: Response, next: NextFu
     const entry = doc.occurrences.find((o) => o.occurrenceIndex === data.occurrenceIndex);
     if (!entry) throw new AppError('لم يتم العثور على هذا اليوم في خطة الطالب', 404);
 
-    if (data.status === 'done') {
+    if (data.status === 'absent') {
+      reflowStudentPlan(doc, data.occurrenceIndex, { kind: 'absent' });
+    } else if (data.completedThroughSurah != null && data.completedThroughAyah != null) {
+      const surah = SURAH_BY_NUMBER.get(data.completedThroughSurah);
+      if (surah && data.completedThroughAyah > surah.ayahCount) {
+        throw new AppError(`سورة ${surah.name} تحتوي على ${surah.ayahCount} آية فقط`, 400);
+      }
+      // The reached point is bounded by the day's own start on one side and by
+      // the end of the student's whole plan on the other — never by the day's
+      // own ward, since a keen student may recite past it and eat into the
+      // following days (reflow settles the surplus against them). Both bounds
+      // are read in the student's own direction.
+      const forward = isForwardDoc(doc);
+      const step = forward ? 1 : -1;
+      const completedFlat = toFlatIndex({ surahNumber: data.completedThroughSurah, ayah: data.completedThroughAyah });
+      const dayStartFlat = toFlatIndex(forward
+        ? { surahNumber: entry.surahStart, ayah: entry.ayahStart }
+        : { surahNumber: entry.surahEnd, ayah: entry.ayahEnd });
+      const planFinishFlat = toFlatIndex(docFinishPoint(doc, forward));
+      if ((completedFlat - dayStartFlat) * step < 0) {
+        throw new AppError('النقطة التي وصل إليها الطالب لا يمكن أن تكون قبل بداية ورد اليوم — سجّل غياباً إن لم يسمّع شيئاً', 400);
+      }
+      if ((planFinishFlat - completedFlat) * step < 0) {
+        throw new AppError('النقطة التي وصل إليها الطالب تتجاوز نهاية خطته', 400);
+      }
+      reflowStudentPlan(doc, data.occurrenceIndex, {
+        kind: 'reached', completedThroughSurah: data.completedThroughSurah, completedThroughAyah: data.completedThroughAyah,
+      });
+    } else {
       entry.status = 'done';
       // "Completed through" is the point the day's ward *finishes* at in the
       // student's own direction — the slice's low end for a reverse-direction
@@ -99,22 +130,6 @@ export async function recordOccurrence(req: Request, res: Response, next: NextFu
       const forward = isForwardDoc(doc);
       entry.completedThroughSurah = forward ? entry.surahEnd : entry.surahStart;
       entry.completedThroughAyah = forward ? entry.ayahEnd : entry.ayahStart;
-    } else if (data.status === 'absent') {
-      reflowStudentPlan(doc, data.occurrenceIndex, { kind: 'absent' });
-    } else {
-      const surah = SURAH_BY_NUMBER.get(data.completedThroughSurah!);
-      if (surah && data.completedThroughAyah! > surah.ayahCount) {
-        throw new AppError(`سورة ${surah.name} تحتوي على ${surah.ayahCount} آية فقط`, 400);
-      }
-      const completedFlat = toFlatIndex({ surahNumber: data.completedThroughSurah!, ayah: data.completedThroughAyah! });
-      const entryStartFlat = toFlatIndex({ surahNumber: entry.surahStart, ayah: entry.ayahStart });
-      const entryEndFlat = toFlatIndex({ surahNumber: entry.surahEnd, ayah: entry.ayahEnd });
-      if (completedFlat < entryStartFlat || completedFlat > entryEndFlat) {
-        throw new AppError('النقطة التي وصل إليها الطالب يجب أن تقع ضمن الورد المقرر لهذا اليوم', 400);
-      }
-      reflowStudentPlan(doc, data.occurrenceIndex, {
-        kind: 'partial', completedThroughSurah: data.completedThroughSurah!, completedThroughAyah: data.completedThroughAyah!,
-      });
     }
 
     await doc.save();

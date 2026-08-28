@@ -111,13 +111,37 @@ function dayLabel(d: Date): string {
   return DAY_BY_JS_INDEX[d.getDay()];
 }
 
-/** Count how many dates in [from, to] (inclusive, date-only) fall on one of `days`. */
-function countMatchingDays(from: Date, to: Date, days: string[]): number {
+/** Local calendar key (YYYY-MM-DD) for a date — the same shape holidays are
+ * stored in, compared on local calendar fields like dateOnly/dayLabel do. */
+function dateKey(d: Date): string {
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${month}-${day}`;
+}
+
+const NO_HOLIDAYS: ReadonlySet<string> = new Set<string>();
+
+/** The plan's holidays as a lookup set — built once per top-level call and
+ * threaded through the walkers instead of being rebuilt inside their loops. */
+function holidaySet(plan: PlanScheduleInput): ReadonlySet<string> {
+  return plan.holidays && plan.holidays.length > 0 ? new Set(plan.holidays) : NO_HOLIDAYS;
+}
+
+/** Whether `d` earns an occurrence: one of the plan's selected weekdays, and
+ * not a holiday. A holiday never consumes an occurrence — the day's content
+ * simply lands on the next working day instead. */
+function isOccurrenceDay(d: Date, days: string[], holidays: ReadonlySet<string>): boolean {
+  return days.includes(dayLabel(d)) && !holidays.has(dateKey(d));
+}
+
+/** Count how many dates in [from, to] (inclusive, date-only) fall on one of `days`
+ * and are not holidays. */
+function countMatchingDays(from: Date, to: Date, days: string[], holidays: ReadonlySet<string>): number {
   let count = 0;
   const cursor = dateOnly(from);
   const end = dateOnly(to);
   while (cursor.getTime() <= end.getTime()) {
-    if (days.includes(dayLabel(cursor))) count++;
+    if (isOccurrenceDay(cursor, days, holidays)) count++;
     cursor.setDate(cursor.getDate() + 1);
   }
   return count;
@@ -129,6 +153,9 @@ export type PlanScheduleInput = {
   endType: 'activeDays' | 'date';
   activeDaysCount?: number;
   endDate?: Date;
+  /** Calendar days (YYYY-MM-DD) excluded from the plan even when they fall on
+   * one of `days` — they produce no occurrence at all. */
+  holidays?: string[];
   rangeStart: RangePoint;
   rangeEnd: RangePoint;
 };
@@ -140,7 +167,7 @@ export type PlanScheduleInput = {
  */
 export function countOccurrences(plan: PlanScheduleInput): number {
   if (plan.endType === 'activeDays') return plan.activeDaysCount ?? 0;
-  return countMatchingDays(plan.startDate, plan.endDate!, plan.days);
+  return countMatchingDays(plan.startDate, plan.endDate!, plan.days, holidaySet(plan));
 }
 
 export type TodayAssignment = {
@@ -207,14 +234,16 @@ export function computeTodayAssignment(plan: PlanScheduleInput, today: Date = ne
   const todayDate = dateOnly(today);
   const startDate = dateOnly(plan.startDate);
 
-  if (!plan.days.includes(dayLabel(todayDate))) return null;
+  const holidays = holidaySet(plan);
+
+  if (!isOccurrenceDay(todayDate, plan.days, holidays)) return null;
   if (todayDate.getTime() < startDate.getTime()) return null;
   if (plan.endType === 'date' && todayDate.getTime() > dateOnly(plan.endDate!).getTime()) return null;
 
   const occurrenceCount = countOccurrences(plan);
   if (occurrenceCount <= 0) return null;
 
-  const occurrenceIndex = countMatchingDays(startDate, todayDate, plan.days) - 1;
+  const occurrenceIndex = countMatchingDays(startDate, todayDate, plan.days, holidays) - 1;
   if (occurrenceIndex < 0 || occurrenceIndex >= occurrenceCount) return null;
 
   return sliceForOccurrence(plan, occurrenceIndex, occurrenceCount);
@@ -238,12 +267,13 @@ export function computeScheduleBreakdown(plan: PlanScheduleInput): ScheduleEntry
   if (occurrenceCount <= 0) return [];
 
   const entries: ScheduleEntry[] = [];
+  const holidays = holidaySet(plan);
   const cursor = dateOnly(plan.startDate);
   let occurrenceIndex = 0;
   let walked = 0;
 
   while (occurrenceIndex < occurrenceCount && walked < SCHEDULE_WALK_LIMIT_DAYS) {
-    if (plan.days.includes(dayLabel(cursor))) {
+    if (isOccurrenceDay(cursor, plan.days, holidays)) {
       const slice = sliceForOccurrence(plan, occurrenceIndex, occurrenceCount);
       if (slice) {
         entries.push({
@@ -287,7 +317,7 @@ export function computePlanProgress(plan: PlanScheduleInput, today: Date = new D
       ? dateOnly(plan.endDate)
       : todayDate;
 
-  const completed = Math.min(countMatchingDays(startDate, cappedToday, plan.days), total);
+  const completed = Math.min(countMatchingDays(startDate, cappedToday, plan.days, holidaySet(plan)), total);
   const percent = Math.round((completed / total) * 100);
   return { completed, total, percent };
 }

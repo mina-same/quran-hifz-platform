@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import type { Halqa } from '@/lib/types/halqa';
+import type { Halqa } from '@/lib/queries/halqat';
 import ProgressBar from '@/components/ui/ProgressBar';
 import Badge from '@/components/ui/Badge';
 import { theme } from '@/lib/theme';
@@ -9,22 +9,29 @@ interface Props {
   actions?: React.ReactNode;
 }
 
+function nameOf(v: { name: string } | string | undefined): string {
+  if (v && typeof v === 'object') return v.name;
+  if (typeof v === 'string') return v;
+  return '—';
+}
+
 export default function HalqaCard({ halqa, actions }: Props) {
-  const capacityPct = Math.round((halqa.studentCount / halqa.capacity) * 100);
+  const studentCount = halqa.studentCount ?? 0;
+  const capacityPct = halqa.capacity > 0 ? Math.round((studentCount / halqa.capacity) * 100) : 0;
 
   return (
     <View style={styles.card}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerName}>{halqa.name}</Text>
-        <Badge label={`${halqa.studentCount} طالب`} variant="gold" />
+        <Badge label={`${studentCount} طالب`} variant="gold" />
       </View>
 
       {/* Details */}
       <View style={styles.body}>
         {[
-          { label: 'المعلم',       value: halqa.teacher },
-          { label: 'المسجد',       value: halqa.mosque },
+          { label: 'المعلم',       value: nameOf(halqa.teacher) },
+          { label: 'المسجد',       value: nameOf(halqa.masjid) },
           { label: 'الأوقات',      value: halqa.time },
           { label: 'الأيام',       value: halqa.days },
           { label: 'نسبة الحضور',  value: `${halqa.attendancePct}٪` },
@@ -36,7 +43,7 @@ export default function HalqaCard({ halqa, actions }: Props) {
         ))}
 
         <Text style={styles.capacityLabel}>
-          الطاقة الاستيعابية ({halqa.studentCount}/{halqa.capacity})
+          الطاقة الاستيعابية ({studentCount}/{halqa.capacity})
         </Text>
         <ProgressBar value={capacityPct} showPercent={false} />
 

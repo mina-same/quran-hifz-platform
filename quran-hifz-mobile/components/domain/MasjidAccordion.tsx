@@ -3,15 +3,25 @@ import { View, Text, Pressable, StyleSheet, LayoutAnimation } from 'react-native
 import {
   IconBuildingArch, IconChevronDown, IconChevronUp, IconUsers,
 } from '@tabler/icons-react-native';
-import type { Masjid } from '@/lib/types/halqa';
+import type { Masjid } from '@/lib/queries/masajid';
+import type { Halqa } from '@/lib/queries/halqat';
 import Badge from '@/components/ui/Badge';
 import { theme } from '@/lib/theme';
 
-interface Props {
-  masjid: Masjid;
+function nameOf(v: { name: string } | string | undefined): string {
+  if (v && typeof v === 'object') return v.name;
+  if (typeof v === 'string') return v;
+  return '—';
 }
 
-export default function MasjidAccordion({ masjid }: Props) {
+interface Props {
+  masjid: Masjid;
+  /** This masjid's own halqat — the real /masajid endpoint doesn't nest them,
+   * so the caller resolves them from a separate useHalqat() list. */
+  halqat: Halqa[];
+}
+
+export default function MasjidAccordion({ masjid, halqat }: Props) {
   const [open, setOpen] = useState(false);
 
   const toggle = () => {
@@ -28,7 +38,7 @@ export default function MasjidAccordion({ masjid }: Props) {
           <Text style={styles.location}>— {masjid.location}</Text>
         </View>
         <View style={styles.triggerRight}>
-          <Badge label={`${masjid.halqat.length} حلقات`} variant="green" />
+          <Badge label={`${halqat.length} حلقات`} variant="green" />
           {open
             ? <IconChevronUp size={16} color={theme.textMuted} />
             : <IconChevronDown size={16} color={theme.textMuted} />}
@@ -37,14 +47,15 @@ export default function MasjidAccordion({ masjid }: Props) {
 
       {open && (
         <View style={styles.content}>
-          {masjid.halqat.map((halqa) => (
-            <View key={halqa.id} style={styles.halqaRow}>
+          {halqat.length === 0 && <Text style={styles.halqaMeta}>لا توجد حلقات في هذا المسجد</Text>}
+          {halqat.map((halqa) => (
+            <View key={halqa._id} style={styles.halqaRow}>
               <Text style={styles.halqaName}>{halqa.name}</Text>
-              <Text style={styles.halqaMeta}>{halqa.teacher} • {halqa.time}</Text>
+              <Text style={styles.halqaMeta}>{nameOf(halqa.teacher)} • {halqa.time}</Text>
               <View style={styles.halqaBottom}>
                 <View style={styles.countRow}>
                   <IconUsers size={12} color={theme.textMuted} />
-                  <Text style={styles.countText}>{halqa.studentCount}/{halqa.capacity}</Text>
+                  <Text style={styles.countText}>{halqa.studentCount ?? 0}/{halqa.capacity}</Text>
                 </View>
                 <Badge label={`${halqa.attendancePct}٪ حضور`} variant="green" />
               </View>

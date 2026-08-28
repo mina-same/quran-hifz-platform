@@ -38,6 +38,12 @@ export interface IQuranPlan extends Document {
 
   days: string[];
   startDate: Date;
+  /** Calendar days (YYYY-MM-DD) the plan pauses on — Eid, exams, travel.
+   * A holiday produces no occurrence even when it lands on one of `days`,
+   * so the day's portion shifts onto the next working day. Stored as plain
+   * date strings, not Dates: a holiday is a calendar day, and a Date would
+   * re-introduce a midnight/timezone shift on every read. */
+  holidays: string[];
 
   rangeStart: IRangePoint;
   rangeEnd: IRangePoint;
@@ -112,6 +118,11 @@ const quranPlanSchema = new Schema<IQuranPlan>(
       validate: [(v: string[]) => v.length > 0, 'يجب اختيار يوم واحد على الأقل'],
     },
     startDate: { type: Date, required: true, default: Date.now },
+    holidays:  {
+      type: [String],
+      default: [],
+      validate: [(v: string[]) => v.every((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)), 'تاريخ عطلة غير صالح'],
+    },
 
     rangeStart: { type: rangePointSchema, required: true },
     rangeEnd:   { type: rangePointSchema, required: true },

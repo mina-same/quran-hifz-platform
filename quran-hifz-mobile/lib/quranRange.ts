@@ -144,14 +144,42 @@ export function dayFinishPoint(slice: DaySlice, reversed: boolean): RangePoint {
     : { surahNumber: slice.surahEnd, ayah: slice.ayahEnd };
 }
 
-/** How much of the day's ward is still undone given the point the student
- * actually reached, measured in the plan's own direction (0 = the whole ward is
- * done). This is the shortfall the server will redistribute across the
- * student's remaining days. */
-export function dayShortfallAyahs(slice: DaySlice, reversed: boolean, reached: RangePoint): number {
+/** Where the point the student actually reached sits relative to the day's own
+ * finish point, signed in the plan's own direction: negative = fell short of
+ * the assigned ward, positive = recited past it, 0 = exactly the ward. The
+ * server settles either sign against the student's remaining days — a
+ * shortfall makes them heavier, a surplus makes them lighter. */
+export function dayDeltaAyahs(slice: DaySlice, reversed: boolean, reached: RangePoint): number {
   const reachedFlat = toFlatIndex(reached);
   const finishFlat = toFlatIndex(dayFinishPoint(slice, reversed));
-  return Math.max(0, reversed ? reachedFlat - finishFlat : finishFlat - reachedFlat);
+  return reversed ? finishFlat - reachedFlat : reachedFlat - finishFlat;
+}
+
+/** How much of the day's ward is still undone given the point the student
+ * actually reached, measured in the plan's own direction (0 = the whole ward is
+ * done, or more). This is the shortfall the server will redistribute across the
+ * student's remaining days. */
+export function dayShortfallAyahs(slice: DaySlice, reversed: boolean, reached: RangePoint): number {
+  return Math.max(0, -dayDeltaAyahs(slice, reversed, reached));
+}
+
+type FinishBoundEntry = DaySlice & {
+  occurrenceIndex: number;
+  baseSurahStart?: number; baseAyahStart?: number;
+  baseSurahEnd?: number; baseAyahEnd?: number;
+};
+
+/** The very last point a schedule ever reaches, in its own direction — the
+ * finish point of its final occurrence, read off the original (`base*`)
+ * endpoints so it stays put no matter how the days in between were reflowed.
+ * This is the ceiling for "سمّع أكثر من المقرر": a student may run ahead into
+ * the following days' ward, but never past the end of their own plan. */
+export function planFinishPoint(entries: FinishBoundEntry[], reversed: boolean): RangePoint | null {
+  if (entries.length === 0) return null;
+  const last = entries.reduce((a, b) => (b.occurrenceIndex > a.occurrenceIndex ? b : a));
+  return reversed
+    ? { surahNumber: last.baseSurahStart ?? last.surahStart, ayah: last.baseAyahStart ?? last.ayahStart }
+    : { surahNumber: last.baseSurahEnd ?? last.surahEnd, ayah: last.baseAyahEnd ?? last.ayahEnd };
 }
 
 type OrientableSlice = {
@@ -203,13 +231,36 @@ function dayLabel(d: Date): string {
   return DAY_BY_JS_INDEX[d.getDay()];
 }
 
+/** Local calendar key (YYYY-MM-DD) for a date — the same shape holidays are
+ * stored in, compared on local calendar fields like dateOnly/dayLabel do. */
+function dateKey(d: Date): string {
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${month}-${day}`;
+}
+
+const NO_HOLIDAYS: ReadonlySet<string> = new Set<string>();
+
+/** The plan's holidays as a lookup set — built once per top-level call and
+ * threaded through the walkers instead of being rebuilt inside their loops. */
+function holidaySet(plan: PlanScheduleInput): ReadonlySet<string> {
+  return plan.holidays && plan.holidays.length > 0 ? new Set(plan.holidays) : NO_HOLIDAYS;
+}
+
+/** Whether `d` earns an occurrence: one of the plan's selected weekdays, and
+ * not a holiday. A holiday never consumes an occurrence — the day's content
+ * simply lands on the next working day instead. */
+function isOccurrenceDay(d: Date, days: string[], holidays: ReadonlySet<string>): boolean {
+  return days.includes(dayLabel(d)) && !holidays.has(dateKey(d));
+}
+
 /** Count how many dates in [from, to] (inclusive, date-only) fall on one of `days`. */
-function countMatchingDays(from: Date, to: Date, days: string[]): number {
+function countMatchingDays(from: Date, to: Date, days: string[], holidays: ReadonlySet<string>): number {
   let count = 0;
   const cursor = dateOnly(from);
   const end = dateOnly(to);
   while (cursor.getTime() <= end.getTime()) {
-    if (days.includes(dayLabel(cursor))) count++;
+    if (isOccurrenceDay(cursor, days, holidays)) count++;
     cursor.setDate(cursor.getDate() + 1);
   }
   return count;
@@ -221,6 +272,9 @@ export type PlanScheduleInput = {
   endType: "activeDays" | "date";
   activeDaysCount?: number;
   endDate?: Date;
+  /** Calendar days (YYYY-MM-DD) excluded from the plan even when they fall on
+   * one of `days` — they produce no occurrence at all. */
+  holidays?: string[];
   rangeStart: RangePoint;
   rangeEnd: RangePoint;
 };
@@ -229,7 +283,7 @@ export type PlanScheduleInput = {
 export function countOccurrences(plan: PlanScheduleInput): number {
   if (plan.endType === "activeDays") return plan.activeDaysCount ?? 0;
   if (!plan.endDate) return 0;
-  return countMatchingDays(plan.startDate, plan.endDate, plan.days);
+  return countMatchingDays(plan.startDate, plan.endDate, plan.days, holidaySet(plan));
 }
 
 export type TodayAssignment = {
@@ -292,12 +346,13 @@ export function computeScheduleBreakdown(plan: PlanScheduleInput): ScheduleEntry
   if (occurrenceCount <= 0) return [];
 
   const entries: ScheduleEntry[] = [];
+  const holidays = holidaySet(plan);
   const cursor = dateOnly(plan.startDate);
   let occurrenceIndex = 0;
   let walked = 0;
 
   while (occurrenceIndex < occurrenceCount && walked < SCHEDULE_WALK_LIMIT_DAYS) {
-    if (plan.days.includes(dayLabel(cursor))) {
+    if (isOccurrenceDay(cursor, plan.days, holidays)) {
       const slice = sliceForOccurrence(plan, occurrenceIndex, occurrenceCount);
       if (slice) {
         entries.push({

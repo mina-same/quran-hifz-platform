@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { Student } from '../models/Student.model';
 import { ParentStudent } from '../models/ParentStudent.model';
 import { Message } from '../models/Message.model';
+import { sendPushToUsers } from './push';
 
 export type NotifySenderCtx = { senderId: string; senderName: string; senderRole: string };
 
@@ -46,6 +47,13 @@ export async function notifyParents(
     }];
   });
 
-  if (messages.length) await Message.insertMany(messages);
+  if (messages.length) {
+    await Message.insertMany(messages);
+    await sendPushToUsers(messages.map((m) => ({
+      userId: String(m.recipient),
+      title: ctx.senderName,
+      body: m.body,
+    })));
+  }
   return { notified: messages.length, unnotified };
 }

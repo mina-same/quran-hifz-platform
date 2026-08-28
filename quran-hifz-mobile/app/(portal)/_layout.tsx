@@ -1,8 +1,11 @@
 import { Drawer } from 'expo-router/drawer';
 import DrawerContent from '@/components/layout/DrawerContent';
 import { theme } from '@/lib/theme';
+import { usePushNotifications } from '@/lib/hooks/usePushNotifications';
 
 export default function PortalLayout() {
+  usePushNotifications();
+
   return (
     <Drawer
       drawerContent={() => <DrawerContent />}

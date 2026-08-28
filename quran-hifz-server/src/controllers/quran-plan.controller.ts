@@ -34,6 +34,7 @@ const quranPlanSchema = z.object({
 
   days:      z.array(z.enum(WEEK_DAYS)).min(1),
   startDate: z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح').optional(),
+  holidays:  z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'تاريخ عطلة غير صالح')).optional(),
 
   rangeStart: rangePointSchema,
   rangeEnd:   rangePointSchema,
@@ -83,6 +84,7 @@ function withTodayAssignment(plan: InstanceType<typeof QuranPlan>) {
   const scheduleInput = {
     days:            plan.days,
     startDate:       plan.startDate,
+    holidays:        plan.holidays,
     endType:         plan.endType,
     activeDaysCount: plan.activeDaysCount,
     endDate:         plan.endDate,
@@ -191,7 +193,7 @@ export async function generateSchedule(req: Request, res: Response, next: NextFu
     if (!plan) throw new AppError('الخطة غير موجودة', 404);
 
     const scheduleInput = {
-      days: plan.days, startDate: plan.startDate,
+      days: plan.days, startDate: plan.startDate, holidays: plan.holidays,
       endType: plan.endType, activeDaysCount: plan.activeDaysCount, endDate: plan.endDate,
       rangeStart: plan.rangeStart, rangeEnd: plan.rangeEnd,
     };

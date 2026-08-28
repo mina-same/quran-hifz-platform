@@ -5393,6 +5393,81 @@
       "related_bugs": [],
       "occurrences": 2,
       "last_seen": "2026-07-29T00:00:00.000Z"
+    },
+    {
+      "id": "bug-330",
+      "timestamp": "2026-07-30T09:37:14.483256Z",
+      "error_message": "npx expo run:ios fails at pod install: 'The React-Core-prebuilt pod failed to validate due to 1 error: ERROR | attributes: Missing required attribute source'",
+      "file": "quran-hifz-mobile/ios/Podfile.properties.json",
+      "root_cause": "This Expo SDK 56 / RN 0.85.3 combo's default iOS build mode links a precompiled React-Core.xcframework ('prebuilt RN core') rather than compiling React Native from source, and the shipped prebuilt podspec for this exact version is malformed (missing the podspec 'source' attribute) - a genuine upstream packaging bug, not a project misconfiguration. Deleting node_modules/ios and retrying pod install reproduced the identical failure, ruling out a stale-cache cause.",
+      "fix": "Set \"ios.buildReactNativeFromSource\": \"true\" in ios/Podfile.properties.json, which flips the Podfile's `ENV['RCT_USE_PREBUILT_RNCORE']` to '0' - forces CocoaPods to compile React Native (and Expo modules) from source instead of linking the broken prebuilt binary. Confirmed via `pod install` log: '[ReactNativeCore] Building from source: true'. Trade-off: first build takes much longer (compiles all of RN/Expo native source) since there's no precompiled artifact to link.",
+      "tags": [
+        "mobile",
+        "ios",
+        "cocoapods",
+        "expo-sdk",
+        "native-build"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-30T09:37:14.483256Z"
+    },
+    {
+      "id": "bug-331",
+      "timestamp": "2026-07-30T09:37:14.483256Z",
+      "error_message": "npx jest fails with 'TypeError: this._moduleMocker.clearMocksOnScope is not a function' immediately on any test file, before any test runs",
+      "file": "quran-hifz-mobile/package.json, jest.config.js",
+      "root_cause": "npm auto-resolved jest@30.4.2 and jest-expo@57.0.3 (jest-expo's latest published version) when installed without explicit version pins, but this project's Expo SDK is 56 and its RN version is 0.85.3 - jest-expo's major version tracks the Expo SDK major version, so 57.x is for SDK 57, not 56. The resulting dependency tree ended up with a genuine split: top-level jest-mock@30.4.1 (which jest-runtime@30 expects, including the newer clearMocksOnScope API) vs several nested jest-mock@29.7.0 copies pulled in by @react-native/jest-preset and jest-environment-jsdom (both resolved for RN/jest-preset versions expecting jest@29), which lack that method.",
+      "fix": "Pinned the whole jest toolchain to the SDK-56-era 29.x line instead of mixing majors: jest@29.7.0, @types/jest@29, jest-expo@56.0.5, @react-native/jest-preset@0.85.3 (exact match to react-native@0.85.3). Also needed a full `rm -rf node_modules && npm install --legacy-peer-deps` afterward since incremental installs left node_modules in an inconsistent partial state (a separate follow-on issue, see bug-332). General lesson: when installing jest-expo/@react-native/jest-preset for an Expo/RN project, always pin explicit versions matching the project's Expo SDK / RN version - never let npm auto-resolve 'latest' for these two packages specifically.",
+      "tags": [
+        "mobile",
+        "jest",
+        "testing",
+        "dependency-version-skew"
+      ],
+      "related_bugs": [
+        "bug-332"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-30T09:37:14.483256Z"
+    },
+    {
+      "id": "bug-332",
+      "timestamp": "2026-07-30T09:37:14.483256Z",
+      "error_message": "After fixing the jest version pins, tests failed with 'Cannot find module expo-modules-core from node_modules/jest-expo/src/preset/setup.js' - even after a full clean node_modules reinstall",
+      "file": "quran-hifz-mobile/package.json",
+      "root_cause": "npm's hoisting algorithm nested expo-modules-core under node_modules/expo/node_modules/expo-modules-core instead of hoisting it to the top-level node_modules/ (likely due to a version-range difference somewhere else in the dependency graph triggering non-hoisted resolution). jest-expo's setup.js does a plain `require('expo-modules-core')` from its own location in node_modules/jest-expo/, and Node's module resolution walking up the directory tree never finds it nested under a sibling package.",
+      "fix": "Ran `npx expo install expo-modules-core` to add it as an explicit top-level dependency, forcing npm to hoist it. General lesson: if jest-expo (or any tool requiring a peer package by bare import rather than relative path) reports a 'Cannot find module' for a package that IS actually installed somewhere in node_modules, check for nested-vs-hoisted placement with `find node_modules -iname <pkg> -type d` before assuming it's genuinely missing.",
+      "tags": [
+        "mobile",
+        "jest",
+        "npm",
+        "module-resolution"
+      ],
+      "related_bugs": [
+        "bug-331"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-30T09:37:14.483256Z"
+    },
+    {
+      "id": "bug-334",
+      "timestamp": "2026-08-28T12:14:47.387591",
+      "error_message": "quranRange.test.ts: expected ['2026-01-01', ...] received ['2025-12-31', ...] — schedule entry dates off by one day",
+      "file": "quran-hifz-mobile/lib/quranRange.test.ts",
+      "root_cause": "computeScheduleBreakdown stores `date` as cursor.toISOString() where cursor is LOCAL midnight. Slicing the ISO string with .split('T')[0] reads it back in UTC, which shifts back a day for any timezone ahead of UTC (Cairo +2).",
+      "fix": "Read entry dates back through local calendar fields (new Date(e.date) then getFullYear/getMonth/getDate) instead of slicing the UTC ISO string. Same reason plan holidays are stored as plain YYYY-MM-DD strings rather than Dates.",
+      "tags": [
+        "timezone",
+        "date",
+        "quranRange",
+        "schedule",
+        "iso-string",
+        "holidays"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T12:14:47.387591"
     }
   ]
 }

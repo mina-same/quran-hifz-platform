@@ -33,6 +33,7 @@ type FormFields = {
   description: string;
   halqa: string;
   days: string[];
+  holidays: string[];
   startDate: string;
   rangeStart: RangePoint;
   rangeEnd: RangePoint;
@@ -43,7 +44,7 @@ type FormFields = {
 
 const EMPTY: FormFields = {
   name: '', type: 'حفظ', description: '', halqa: '',
-  days: [], startDate: todayISO(),
+  days: [], holidays: [], startDate: todayISO(),
   rangeStart: { surahNumber: 1, ayah: 1 }, rangeEnd: { surahNumber: 1, ayah: 1 },
   endType: 'activeDays', activeDaysCount: '', endDate: '',
 };
@@ -82,6 +83,7 @@ export default function TeacherPlanForm() {
           ? (typeof existingPlan.halqa === 'object' ? existingPlan.halqa?._id ?? '' : existingPlan.halqa ?? '')
           : '',
         days: existingPlan.days,
+        holidays: existingPlan.holidays ?? [],
         startDate: existingPlan.startDate ? existingPlan.startDate.split('T')[0] : todayISO(),
         rangeStart: existingPlan.rangeStart,
         rangeEnd: existingPlan.rangeEnd,
@@ -103,6 +105,12 @@ export default function TeacherPlanForm() {
     setForm((f) => ({ ...f, [k]: v }));
   }
 
+  /** Adds a holiday date, keeping the list deduped and chronological. */
+  function addHoliday(date: string) {
+    if (!date) return;
+    setForm((f) => (f.holidays.includes(date) ? f : { ...f, holidays: [...f.holidays, date].sort() }));
+  }
+
   function toggleDay(day: string) {
     setForm((f) => ({
       ...f,
@@ -120,6 +128,7 @@ export default function TeacherPlanForm() {
     try {
       return computeScheduleBreakdown({
         days: form.days,
+        holidays: form.holidays,
         startDate: new Date(`${form.startDate}T00:00:00`),
         endType: form.endType,
         activeDaysCount: form.endType === 'activeDays' ? Number(form.activeDaysCount) : undefined,
@@ -130,7 +139,7 @@ export default function TeacherPlanForm() {
     } catch {
       return [];
     }
-  }, [form.days, form.startDate, form.endType, form.activeDaysCount, form.endDate, form.rangeStart, form.rangeEnd]);
+  }, [form.days, form.holidays, form.startDate, form.endType, form.activeDaysCount, form.endDate, form.rangeStart, form.rangeEnd]);
 
   const requestedOccurrences = form.endType === 'activeDays' ? Number(form.activeDaysCount || 0) : schedulePreview.length;
   const previewShortfall = requestedOccurrences > 0 && schedulePreview.length < requestedOccurrences;
@@ -149,6 +158,7 @@ export default function TeacherPlanForm() {
       type: form.type,
       description: form.description.trim() || undefined,
       days: form.days,
+      holidays: form.holidays,
       startDate: form.startDate,
       rangeStart: form.rangeStart,
       rangeEnd: form.rangeEnd,
@@ -237,6 +247,26 @@ export default function TeacherPlanForm() {
               </Pressable>
             ))}
           </View>
+
+          {/* Holidays — active days the plan pauses on (Eid, exams, travel). A
+              holiday consumes no occurrence, so its portion moves to the next
+              working day rather than being lost. */}
+          <View style={{ height: 14 }} />
+          <FormGroup label="أيام العطلات (استثناءات)">
+            <FormDatePicker value="" onChange={(v) => addHoliday(v)} />
+            {form.holidays.length > 0 && (
+              <View style={[s.chipRow, { marginTop: 10 }]}>
+                {form.holidays.map((h) => (
+                  <Pressable key={h} style={s.chip} onPress={() => sf('holidays', form.holidays.filter((d) => d !== h))}>
+                    <Text style={s.chipText}>{h}  ✕</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+            <Text style={s.holidayHint}>
+              لا يُحتسب يوم العطلة ضمن أيام الخطة حتى لو وافق يومًا نشطًا — ينتقل نصيبه إلى يوم العمل التالي
+            </Text>
+          </FormGroup>
         </Card>
 
         <Card>
@@ -320,6 +350,7 @@ const s = StyleSheet.create({
   chipText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
   chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
   lockedText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted, textAlign: 'right' },
+  holidayHint: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 8, textAlign: 'right' },
   reverseHint: { fontSize: 11, color: theme.gold, fontFamily: theme.fontCairo, marginTop: 10, textAlign: 'right' },
   rowGroup: { flexDirection: 'row', gap: 8 },
   toggleBtn: { flex: 1, borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },

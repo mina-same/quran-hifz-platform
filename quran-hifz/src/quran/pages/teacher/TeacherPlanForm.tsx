@@ -46,6 +46,7 @@ type FormFields = {
   students: string[];
   specialTrack: string;
   days: string[];
+  holidays: string[];
   startDate: string;
   rangeStart: RangePoint;
   rangeEnd: RangePoint;
@@ -65,6 +66,7 @@ const EMPTY: FormFields = {
   name: "", type: "حفظ", description: "",
   targetType: "halqa", halqa: "", students: [], specialTrack: "",
   days: [],
+  holidays: [],
   startDate: todayISO(),
   rangeStart: { surahNumber: 1, ayah: 1 },
   rangeEnd:   { surahNumber: 1, ayah: 1 },
@@ -85,6 +87,7 @@ function fieldsFromPlan(plan: QuranPlan, nameSuffix = ""): FormFields {
     students: (plan.students ?? []).map(getId),
     specialTrack: plan.specialTrack ? getId(plan.specialTrack) : "",
     days: plan.days,
+    holidays: plan.holidays ?? [],
     startDate: plan.startDate ? plan.startDate.split("T")[0] : todayISO(),
     rangeStart: plan.rangeStart,
     rangeEnd: plan.rangeEnd,
@@ -128,6 +131,13 @@ export function TeacherPlanForm() {
     return EMPTY;
   });
   const [formError, setFormError] = useState("");
+  const [holidayDraft, setHolidayDraft] = useState("");
+
+  /** Adds a holiday date, keeping the list deduped and chronological. */
+  function addHoliday(date: string) {
+    if (!date || form.holidays.includes(date)) return;
+    sf("holidays", [...form.holidays, date].sort());
+  }
 
   function sf<K extends keyof FormFields>(k: K, v: FormFields[K]) {
     setForm((p) => ({ ...p, [k]: v }));
@@ -169,6 +179,7 @@ export function TeacherPlanForm() {
       students: form.targetType === "students" ? form.students : undefined,
       specialTrack: form.targetType === "specialTrack" ? form.specialTrack : undefined,
       days: form.days,
+      holidays: form.holidays,
       startDate: form.startDate || undefined,
       rangeStart: form.rangeStart, rangeEnd: form.rangeEnd,
       endType: form.endType,
@@ -209,6 +220,7 @@ export function TeacherPlanForm() {
     try {
       return computeScheduleBreakdown({
         days: form.days,
+        holidays: form.holidays,
         startDate: new Date(`${form.startDate}T00:00:00`),
         endType: form.endType,
         activeDaysCount: form.endType === "activeDays" ? Number(form.activeDaysCount) : undefined,
@@ -219,7 +231,7 @@ export function TeacherPlanForm() {
     } catch {
       return [];
     }
-  }, [form.days, form.startDate, form.endType, form.activeDaysCount, form.endDate, form.rangeStart, form.rangeEnd]);
+  }, [form.days, form.holidays, form.startDate, form.endType, form.activeDaysCount, form.endDate, form.rangeStart, form.rangeEnd]);
 
   const requestedOccurrences =
     form.endType === "activeDays" ? Number(form.activeDaysCount || 0) : schedulePreview.length;
@@ -414,6 +426,60 @@ export function TeacherPlanForm() {
       {/* ── Days card ── */}
       <Card icon="ti-calendar-week" title="أيام الخطة">
         <DaysOfWeekPicker value={form.days} onChange={(days) => sf("days", days)} />
+
+        {/* Holidays — active days the plan pauses on (Eid, exams, travel).
+            A holiday consumes no occurrence, so its portion shifts to the
+            next working day and the plan's content is never lost. */}
+        <div style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 14 }}>
+          <div style={{ fontSize: 11, color: "var(--text3)", fontWeight: 700, marginBottom: 8 }}>
+            أيام العطلات (استثناءات)
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <input
+              className="form-input"
+              type="date"
+              dir="ltr"
+              value={holidayDraft}
+              onChange={(e) => setHolidayDraft(e.target.value)}
+              style={{ flex: 1 }}
+            />
+            <button
+              type="button"
+              className="btn btn-ghost"
+              disabled={!holidayDraft || form.holidays.includes(holidayDraft)}
+              onClick={() => { addHoliday(holidayDraft); setHolidayDraft(""); }}
+            >
+              <i className="ti ti-plus" /> إضافة
+            </button>
+          </div>
+          {form.holidays.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+              {form.holidays.map((h) => (
+                <span
+                  key={h}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    borderRadius: 999, padding: "4px 10px", background: "var(--cream)",
+                    border: "1px solid var(--border)", fontSize: 12, color: "var(--text2)",
+                  }}
+                >
+                  <span dir="ltr">{h}</span>
+                  <button
+                    type="button"
+                    onClick={() => sf("holidays", form.holidays.filter((d) => d !== h))}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text3)", padding: 0, lineHeight: 1 }}
+                    aria-label={`حذف عطلة ${h}`}
+                  >
+                    <i className="ti ti-x" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <p style={{ margin: "8px 0 0", fontSize: 11, color: "var(--text3)" }}>
+            لا يُحتسب يوم العطلة ضمن أيام الخطة حتى لو وافق يومًا نشطًا — ينتقل نصيبه إلى يوم العمل التالي
+          </p>
+        </div>
       </Card>
 
       {/* ── Range card ── */}

@@ -2485,3 +2485,96 @@
 | 15:48 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/pw/smoke_tour.mjs | — | ~452 |
 | 15:49 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/pw/smoke_tour2.mjs | — | ~383 |
 | 15:50 | Session end: 171 writes across 55 files (FormInput.tsx, FormDatePicker.tsx, special_tracks.tsx, Donut.tsx, ScopeTabs.tsx) | 131 reads | ~258942 tok |
+| 16:32 | Created quran-hifz-mobile/components/domain/HalqaCard.tsx | — | ~816 |
+| 16:33 | Edited quran-hifz-mobile/components/domain/MasjidAccordion.tsx | CSS: v, name, halqat | ~181 |
+| 16:33 | Edited quran-hifz-mobile/components/domain/MasjidAccordion.tsx | added nullish coalescing | ~329 |
+| 16:33 | Created quran-hifz-mobile/app/(portal)/admin/halqat.tsx | — | ~423 |
+| 16:33 | Created quran-hifz-mobile/app/(portal)/admin/masajid.tsx | — | ~692 |
+| 16:34 | Created quran-hifz-mobile/app/(portal)/admin/teachers.tsx | — | ~954 |
+| 16:34 | Created quran-hifz-mobile/app/(portal)/admin/kpis.tsx | — | ~1020 |
+| 16:35 | Created quran-hifz-mobile/app/(portal)/admin/dashboard.tsx | — | ~1944 |
+| 16:38 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/pw/smoke_tour3.mjs | — | ~344 |
+| 16:40 | Session end: 180 writes across 60 files (FormInput.tsx, FormDatePicker.tsx, special_tracks.tsx, Donut.tsx, ScopeTabs.tsx) | 136 reads | ~268118 tok |
+| 17:10 | Session end: 180 writes across 60 files (FormInput.tsx, FormDatePicker.tsx, special_tracks.tsx, Donut.tsx, ScopeTabs.tsx) | 136 reads | ~268118 tok |
+
+## Session: 2026-07-29 17:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-29 17:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-30 11:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-30 11:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:01 | Created quran-hifz-mobile/jest.config.js | — | ~33 |
+| 12:02 | Edited quran-hifz-mobile/package.json | 6→7 lines | ~46 |
+| 12:02 | Created quran-hifz-mobile/lib/quranRange.test.ts | — | ~2859 |
+| 12:03 | Edited quran-hifz-mobile/ios/Podfile.properties.json | 2→3 lines | ~22 |
+| 12:13 | Edited quran-hifz-mobile/lib/quranRange.test.ts | 6→6 lines | ~90 |
+| 12:13 | Edited quran-hifz-mobile/lib/quranRange.test.ts | 14→15 lines | ~177 |
+| 12:14 | Edited quran-hifz-mobile/lib/quranRange.test.ts | 4→9 lines | ~154 |
+| 12:15 | Edited quran-hifz-mobile/lib/quranRange.test.ts | 2→3 lines | ~16 |
+| 12:15 | Edited quran-hifz-mobile/lib/quranRange.test.ts | 4→5 lines | ~43 |
+| 12:17 | Edited quran-hifz-mobile/app.json | expanded (+21 lines) | ~163 |
+| 12:18 | Edited quran-hifz-mobile/app/_layout.tsx | added 1 condition(s) | ~573 |
+| 12:18 | Edited quran-hifz-mobile/app/_layout.tsx | inline fix | ~10 |
+| 12:19 | Edited quran-hifz-mobile/lib/store/portalStore.ts | 2→3 lines | ~38 |
+| 12:20 | Edited quran-hifz-mobile/lib/store/portalStore.ts | 4→9 lines | ~125 |
+| 12:20 | Edited quran-hifz-mobile/lib/store/portalStore.ts | modified if() | ~496 |
+| 12:20 | Edited quran-hifz-mobile/lib/store/portalStore.ts | 8→9 lines | ~109 |
+| 12:20 | Edited quran-hifz-mobile/lib/store/portalStore.ts | expanded (+7 lines) | ~96 |
+| 12:21 | Created quran-hifz-mobile/components/domain/BiometricLockScreen.tsx | — | ~1123 |
+| 12:22 | Edited quran-hifz-mobile/app/_layout.tsx | added 1 import(s) | ~38 |
+| 12:22 | Edited quran-hifz-mobile/app/_layout.tsx | 3→4 lines | ~63 |
+| 12:22 | Edited quran-hifz-mobile/app/_layout.tsx | modified return() | ~94 |
+| 12:23 | Edited quran-hifz-mobile/app/_layout.tsx | 9→10 lines | ~107 |
+| 12:23 | Edited quran-hifz-mobile/components/domain/AccountSettingsScreen.tsx | added 1 import(s) | ~248 |
+| 12:24 | Edited quran-hifz-mobile/components/domain/AccountSettingsScreen.tsx | modified isEnrolledAsync() | ~194 |
+| 12:24 | Edited quran-hifz-mobile/components/domain/AccountSettingsScreen.tsx | CSS: true, false | ~172 |
+| 12:24 | Edited quran-hifz-mobile/components/domain/AccountSettingsScreen.tsx | 2→4 lines | ~85 |
+| 12:29 | Edited quran-hifz-server/src/models/User.model.ts | 3→4 lines | ~59 |
+| 12:29 | Edited quran-hifz-server/src/models/User.model.ts | 2→3 lines | ~40 |
+| 12:29 | Created quran-hifz-server/src/lib/push.ts | — | ~389 |
+| 12:30 | Edited quran-hifz-server/src/lib/notify.ts | added 1 import(s) | ~69 |
+| 12:30 | Edited quran-hifz-server/src/lib/notify.ts | modified if() | ~238 |
+| 12:30 | Edited quran-hifz-server/src/controllers/message.controller.ts | added 1 import(s) | ~66 |
+| 12:30 | Edited quran-hifz-server/src/controllers/message.controller.ts | 3→4 lines | ~81 |
+| 12:31 | Edited quran-hifz-server/src/controllers/auth.controller.ts | 4→8 lines | ~84 |
+| 12:31 | Edited quran-hifz-server/src/controllers/auth.controller.ts | modified registerPushToken() | ~148 |
+| 12:31 | Edited quran-hifz-server/src/routes/auth.routes.ts | 10→11 lines | ~152 |
+| 12:32 | Edited quran-hifz-mobile/lib/queries/auth.ts | modified useChangePassword() | ~112 |
+| 12:33 | Created quran-hifz-mobile/lib/hooks/usePushNotifications.ts | — | ~587 |
+| 12:34 | Edited quran-hifz-mobile/app/(portal)/_layout.tsx | modified PortalLayout() | ~85 |
+| 12:36 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/append_bugs2.py | — | ~1440 |
+| 12:40 | Session end: 40 writes across 18 files (jest.config.js, package.json, quranRange.test.ts, Podfile.properties.json, app.json) | 13 reads | ~19796 tok |
+
+## Session: 2026-08-28 11:55
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-28 11:55
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-28 11:55
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-28 12:13
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:40 | Added per-plan holidays (YYYY-MM-DD) — skipped days consume no occurrence | quranRange.ts ×3, QuranPlan.model.ts, quran-plan.controller.ts, studentPlanReflow.ts, TeacherPlanForm.tsx, plan-form.tsx, quran-plans.ts, quranPlan.ts | 38/38 jest pass, 3 suites typecheck clean | ~48k |

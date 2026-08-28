@@ -44,6 +44,8 @@ export type QuranPlan = {
   specialTrack?: PlanSpecialTrack | string;
 
   days: string[];
+  /** Calendar days (YYYY-MM-DD) the plan pauses on — see quranRange. */
+  holidays: string[];
   startDate: string;
 
   rangeStart: RangePoint;

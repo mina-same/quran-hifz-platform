@@ -13,6 +13,9 @@ export type StudentOccurrence = ScheduleEntry & {
   completedThroughAyah?: number;
   manualOverride: boolean;
   carryOverNote?: string;
+  /** This day has no ward left: the student ran far enough ahead that the
+   * plan's content ran out before its days did. */
+  noWard?: boolean;
 };
 
 export type StudentPlanProgressResponse = {

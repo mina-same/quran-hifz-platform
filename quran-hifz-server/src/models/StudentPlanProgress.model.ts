@@ -35,6 +35,10 @@ export interface IStudentOccurrence {
   // overwritten by a later absence/shortfall.
   manualOverride: boolean;
   carryOverNote?: string;
+  // Set when the student ran so far ahead of their ward that the plan's
+  // content ran out before its days did: this day has nothing left to
+  // memorize. Stays `pending` so a later absence can reclaim it.
+  noWard?: boolean;
 }
 
 export interface IStudentPlanProgress extends Document {
@@ -75,6 +79,7 @@ const studentOccurrenceSchema = new Schema<IStudentOccurrence>(
     completedThroughAyah:   { type: Number },
     manualOverride:        { type: Boolean, default: false },
     carryOverNote:         { type: String },
+    noWard:                { type: Boolean, default: false },
   },
   { _id: false },
 );

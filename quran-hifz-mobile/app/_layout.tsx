@@ -1,8 +1,9 @@
 import '../global.css';
 import { useEffect } from 'react';
-import { ActivityIndicator, I18nManager, Platform, UIManager, View } from 'react-native';
+import { I18nManager, Platform, UIManager } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -16,8 +17,8 @@ import {
   Amiri_400Regular,
   Amiri_700Bold,
 } from '@expo-google-fonts/amiri';
-import { theme } from '@/lib/theme';
 import { usePortalStore } from '@/lib/store/portalStore';
+import BiometricLockScreen from '@/components/domain/BiometricLockScreen';
 
 // Enable RTL for Arabic
 if (!I18nManager.isRTL) {
@@ -29,6 +30,12 @@ if (!I18nManager.isRTL) {
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
+// Keep the native branded splash (configured via app.json's expo-splash-screen
+// plugin) on screen until fonts + auth hydration are both ready, instead of
+// swapping to a JS-rendered loading view — avoids a flash between the native
+// splash and first paint.
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const queryClient = new QueryClient();
 
@@ -42,18 +49,21 @@ export default function RootLayout() {
   });
   const isHydrating = usePortalStore((s) => s.isHydrating);
   const authUser = usePortalStore((s) => s.authUser);
+  const isLocked = usePortalStore((s) => s.isLocked);
   const hydrate = usePortalStore((s) => s.hydrate);
 
   useEffect(() => {
     hydrate();
   }, [hydrate]);
 
-  if (!fontsLoaded || isHydrating) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.green }}>
-        <ActivityIndicator color={theme.white} size="large" />
-      </View>
-    );
+  const ready = fontsLoaded && !isHydrating;
+
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync().catch(() => {});
+  }, [ready]);
+
+  if (!ready) {
+    return null;
   }
 
   return (
@@ -61,6 +71,9 @@ export default function RootLayout() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <BottomSheetModalProvider>
           <StatusBar style="light" />
+          {authUser && isLocked ? (
+            <BiometricLockScreen />
+          ) : (
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Protected guard={!!authUser}>
               <Stack.Screen name="(portal)" />
@@ -69,6 +82,7 @@ export default function RootLayout() {
               <Stack.Screen name="index" />
             </Stack.Protected>
           </Stack>
+          )}
         </BottomSheetModalProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>

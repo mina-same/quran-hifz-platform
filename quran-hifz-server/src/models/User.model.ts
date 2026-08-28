@@ -11,6 +11,7 @@ export interface IUser extends Document {
   profileId?: Schema.Types.ObjectId;  // ref to Student / Teacher doc
   isActive: boolean;
   mustChangePassword: boolean;
+  pushToken?: string; // Expo push token for the mobile app, registered post-login
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidate: string): Promise<boolean>;
@@ -25,6 +26,7 @@ const userSchema = new Schema<IUser>(
     profileId: { type: Schema.Types.ObjectId, refPath: 'roleModel' },
     isActive:  { type: Boolean, default: true },
     mustChangePassword: { type: Boolean, default: false },
+    pushToken: { type: String },
   },
   { timestamps: true },
 );

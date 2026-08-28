@@ -8,6 +8,7 @@ import { getToken, setToken, clearToken } from '@/lib/auth-storage';
 
 const THEME_MODE_KEY = 'qh_theme_mode';
 const ONBOARDED_KEY = 'qh_onboarded';
+const BIOMETRIC_ENABLED_KEY = 'qh_biometric_enabled';
 
 interface TopbarState {
   icon: string;
@@ -64,6 +65,11 @@ interface PortalStore {
   isHydrating: boolean;
   selectedChildId: string | null;
   themeMode: ThemeMode;
+  /** Whether the user opted into Face ID/Touch ID re-auth (Account Settings). Persisted. */
+  biometricEnabled: boolean;
+  /** True right after a token-based (re)hydrate when biometricEnabled is on — gates the
+   * app behind a lock screen until unlock() succeeds, even though authUser is already set. */
+  isLocked: boolean;
 
   portal: PortalType | null;
   user: PortalUser | null;
@@ -78,6 +84,8 @@ interface PortalStore {
   toggleTheme: () => void;
   completeOnboarding: () => Promise<void>;
   updateUserName: (name: string) => void;
+  setBiometricEnabled: (enabled: boolean) => Promise<void>;
+  unlock: () => void;
 }
 
 export const usePortalStore = create<PortalStore>()((set, get) => ({
@@ -85,20 +93,24 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
   isHydrating: true,
   selectedChildId: null,
   themeMode: 'light',
+  biometricEnabled: false,
+  isLocked: false,
   portal: null,
   user: null,
   navGroups: [],
   topbar: { icon: 'home', title: 'لوحة التحكم', actionsKey: '' },
 
   hydrate: async () => {
-    const [token, storedMode] = await Promise.all([
+    const [token, storedMode, storedBiometric] = await Promise.all([
       getToken().catch(() => null),
       AsyncStorage.getItem(THEME_MODE_KEY).catch(() => null),
+      AsyncStorage.getItem(BIOMETRIC_ENABLED_KEY).catch(() => null),
     ]);
     const themeMode: ThemeMode = storedMode === 'dark' ? 'dark' : 'light';
+    const biometricEnabled = storedBiometric === '1';
 
     if (!token) {
-      set({ isHydrating: false, themeMode });
+      set({ isHydrating: false, themeMode, biometricEnabled });
       return;
     }
     try {
@@ -109,10 +121,16 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
         role: res.user.role,
         profileId: res.user.profileId,
       };
-      set({ authUser, isHydrating: false, themeMode, ...enterPortal(authUser.role, authUser) });
+      // A stored session resuming silently is exactly what biometric lock guards against —
+      // gate behind isLocked so the lock screen must clear before any portal screen renders.
+      set({
+        authUser, isHydrating: false, themeMode, biometricEnabled,
+        isLocked: biometricEnabled,
+        ...enterPortal(authUser.role, authUser),
+      });
     } catch {
       await clearToken();
-      set({ authUser: null, isHydrating: false, themeMode });
+      set({ authUser: null, isHydrating: false, themeMode, biometricEnabled });
     }
   },
 
@@ -125,12 +143,13 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
       profileId: res.user.profileId,
     };
     await setToken(res.token).catch(() => {});
-    set({ authUser, ...enterPortal(authUser.role, authUser) });
+    // A fresh password login already proves identity — no extra lock screen needed.
+    set({ authUser, isLocked: false, ...enterPortal(authUser.role, authUser) });
   },
 
   logout: async () => {
     await clearToken();
-    set({ authUser: null, portal: null, user: null, navGroups: [], selectedChildId: null });
+    set({ authUser: null, portal: null, user: null, navGroups: [], selectedChildId: null, isLocked: false });
   },
 
   setSelectedChild: (id) => set({ selectedChildId: id }),
@@ -146,6 +165,13 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
   completeOnboarding: async () => {
     await AsyncStorage.setItem(ONBOARDED_KEY, '1').catch(() => {});
   },
+
+  setBiometricEnabled: async (enabled) => {
+    await AsyncStorage.setItem(BIOMETRIC_ENABLED_KEY, enabled ? '1' : '0').catch(() => {});
+    set({ biometricEnabled: enabled });
+  },
+
+  unlock: () => set({ isLocked: false }),
 
   // Keeps the drawer/more-sheet display name in sync right after an
   // account-settings name edit, without a full re-login or /auth/me refetch.

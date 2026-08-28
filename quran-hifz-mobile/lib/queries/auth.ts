@@ -32,3 +32,9 @@ export function useChangePassword() {
       put<{ success: boolean; message: string }>('/auth/change-password', body),
   });
 }
+
+export function useRegisterPushToken() {
+  return useMutation({
+    mutationFn: (token: string) => put<{ success: boolean }>('/auth/push-token', { token }),
+  });
+}

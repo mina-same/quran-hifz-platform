@@ -21,6 +21,10 @@ const changePasswordSchema = z.object({
   newPassword:      z.string().min(6, 'كلمة المرور الجديدة يجب أن تكون ٦ أحرف على الأقل'),
 });
 
+const pushTokenSchema = z.object({
+  token: z.string().min(1, 'رمز الإشعارات مطلوب'),
+});
+
 function signToken(id: string, role: string, name: string): string {
   return jwt.sign({ id, role, name }, ENV.JWT_SECRET, { expiresIn: ENV.JWT_EXPIRES_IN } as jwt.SignOptions);
 }
@@ -103,6 +107,16 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
     await user.save();
 
     res.json({ success: true, message: 'تم تغيير كلمة المرور بنجاح' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function registerPushToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { token } = pushTokenSchema.parse(req.body);
+    await User.findByIdAndUpdate(req.user!.id, { pushToken: token });
+    res.json({ success: true });
   } catch (err) {
     next(err);
   }
