@@ -323,7 +323,7 @@
 ## quran-hifz-mobile/app/(portal)/teacher/
 
 - `_layout.tsx` — TeacherTabLayout (~681 tok)
-- `attendance.tsx` — OPTIONS (~4348 tok)
+- `attendance.tsx` — Teacher "الحضور والتقييم" — full parity with web TeacherAttendance: day slider over the plan schedule (disabled un-planned days + notice), per-student expandable rows (avatar, status/score summary), حاضر/غائب toggle, الورد الفعلي picker with clamped bounds + "الورد كامل", حفظ/تجويد/تلاوة score chips, per-student save via /evaluations/bulk + plan-occurrence reflow, save-then-تعديل lock, سجل الجلسات, أبرز الطلاب leaderboards (~9000 tok)
 - `dashboard.tsx` — getName (~1383 tok)
 - `evaluate.tsx` — Scores start at 0 so the teacher consciously awards points rather than (~3688 tok)
 - `grouphomework.tsx` — DAYS (~2777 tok)
@@ -366,10 +366,10 @@
 
 ## quran-hifz-mobile/components/layout/
 
-- `DrawerContent.tsx` — DrawerContent — uses useRouter (~1139 tok)
+- (removed) `DrawerContent.tsx` — DrawerContent — uses useRouter (~1139 tok)
 - `iconMap.ts` — Exports ICON_MAP (~359 tok)
 - `MoreSheet.tsx` — MoreSheet (~1884 tok)
-- `NavItem.tsx` — NavItem (~516 tok)
+- (removed) `NavItem.tsx` — NavItem (~516 tok)
 
 ## quran-hifz-mobile/components/ui/
 

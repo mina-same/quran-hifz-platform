@@ -5852,7 +5852,7 @@
       "error_message": "\"المزيد\" (More) tab on the teacher navbar does nothing — opens a blank screen",
       "file": "quran-hifz-mobile/app/(portal)/teacher/_layout.tsx",
       "root_cause": "teacher/more.tsx is a placeholder that returns null, and the layout never registered a <Tabs.Screen name=\"more\">. expo-router auto-added the route as a plain tab, so tapping it navigated to the empty screen. components/layout/MoreSheet.tsx existed but was imported nowhere in the app.",
-      "fix": "registered the more tab with an IconDots icon + listeners.tabPress that calls e.preventDefault() and opens <MoreSheet portal=\"teacher\" hiddenIds={MORE_IDS}> instead of navigating. MORE_IDS lists the teacher nav items with no tab of their own.",
+      "fix": "registered the more tab with an IconDots icon + listeners.tabPress that calls e.preventDefault() and opens <MoreSheet portal=\"teacher\" hiddenIds={MORE_IDS}> instead of navigating. MORE_IDS lists the teacher nav items with no tab of their own. | Round 2: the same wiring applied to student/admin/parent, and the side drawer removed entirely — app/(portal)/_layout.tsx is now a plain Stack (headerShown false), DrawerContent.tsx and NavItem.tsx deleted. Root StatusBar switched from style=\"light\" to theme-driven, because portal screens no longer sit under the drawer's dark green header.",
       "tags": [
         "expo-router",
         "tabs",
@@ -5861,8 +5861,8 @@
         "navigation"
       ],
       "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-28T14:56:01.517981"
+      "occurrences": 2,
+      "last_seen": "2026-08-28T15:01:49.424176"
     }
   ]
 }

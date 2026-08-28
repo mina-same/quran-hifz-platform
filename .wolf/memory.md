@@ -2624,3 +2624,5 @@
 | 14:37 | Onboarding: LTR dots (row-reverse under forced RTL), swipe gesture via RNGH Pan, theme toggle button added | quran-hifz-mobile/app/onboarding.tsx | tsc clean; swipe + dot order verified on expo web | ~8k |
 | 14:47 | Button: dropped Pressable function-style (NativeWind interop drops it on native); box is now a plain View with array style | quran-hifz-mobile/components/ui/Button.tsx | tsc clean; unverified on device | ~7k |
 | 14:56 | Wired teacher "المزيد" tab to MoreSheet (was an unregistered route rendering null) | quran-hifz-mobile/app/(portal)/teacher/_layout.tsx | tsc clean; student/admin/parent still unwired | ~9k |
+| 15:01 | Removed the side drawer app-wide; wired "المزيد" bottom sheet into all four portal tab bars | quran-hifz-mobile/app/(portal)/_layout.tsx + 4 portal _layout.tsx, app/_layout.tsx | tsc clean; DrawerContent/NavItem deleted; unverified on device | ~14k |
+| 15:07 | Ported web TeacherAttendance to mobile at full parity (day slider, scoring, per-student save+lock, history, leaderboards) | quran-hifz-mobile/app/(portal)/teacher/attendance.tsx | tsc clean; 389→852 lines; unverified on device | ~45k |
