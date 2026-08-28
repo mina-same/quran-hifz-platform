@@ -598,7 +598,7 @@
       "first_read": "2026-07-29T12:31:42.138Z"
     },
     "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-mobile/lib/queries/stats.ts": {
-      "count": 1,
+      "count": 2,
       "tokens": 165,
       "first_read": "2026-07-29T12:31:51.357Z"
     },
@@ -656,6 +656,16 @@
       "count": 1,
       "tokens": 0,
       "first_read": "2026-07-29T12:50:00.053Z"
+    },
+    "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-mobile/components/domain/HalqaCard.tsx": {
+      "count": 1,
+      "tokens": 746,
+      "first_read": "2026-07-29T13:31:36.483Z"
+    },
+    "/Users/xontel/Downloads/mina work/quran-hifz-platform/quran-hifz-mobile/components/domain/MasjidAccordion.tsx": {
+      "count": 1,
+      "tokens": 1036,
+      "first_read": "2026-07-29T13:31:36.732Z"
     }
   },
   "files_written": [
@@ -1758,9 +1768,9 @@
     "../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/pw/smoke_tour.mjs": 1,
     "../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/pw/smoke_tour2.mjs": 1
   },
-  "anatomy_hits": 117,
+  "anatomy_hits": 119,
   "anatomy_misses": 9,
-  "repeated_reads_warned": 188,
+  "repeated_reads_warned": 189,
   "cerebrum_warnings": 0,
   "stop_count": 12
 }
