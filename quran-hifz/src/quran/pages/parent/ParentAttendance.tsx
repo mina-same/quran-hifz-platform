@@ -9,34 +9,36 @@ import { SkeletonTable } from "../../components/common/Skeleton";
 import { toAr, pct } from "../../../lib/format";
 
 const STATUS_TONE: Record<string, "green" | "gold" | "red"> = {
-  "حاضر":   "green",
-  "متأخر":  "gold",
-  "غائب":   "red",
+  حاضر: "green",
+  متأخر: "gold",
+  غائب: "red",
 };
 
 export function ParentAttendance() {
   const { activeChild } = useParentContext();
   const { data: records, isLoading } = useChildAttendance(activeChild?._id);
-  const { data: evaluations = [] } = useEvaluations(activeChild?._id ? { student: activeChild._id } : undefined);
+  const { data: evaluations = [] } = useEvaluations(
+    activeChild?._id ? { student: activeChild._id } : undefined,
+  );
 
   useTopbar("ti-calendar-check", `سجل حضور ${activeChild?.name ?? "—"}`, <></>);
 
   const evalByDate = new Map(evaluations.map((e) => [new Date(e.date).toDateString(), e]));
 
-  const present  = records?.filter((r) => r.status === "حاضر").length  ?? 0;
-  const late     = records?.filter((r) => r.status === "متأخر").length ?? 0;
-  const absent   = records?.filter((r) => r.status === "غائب").length  ?? 0;
-  const total    = records?.length ?? 0;
-  const attendPct = total ? Math.round((present / total) * 100) : activeChild?.attendancePct ?? 0;
+  const present = records?.filter((r) => r.status === "حاضر").length ?? 0;
+  const late = records?.filter((r) => r.status === "متأخر").length ?? 0;
+  const absent = records?.filter((r) => r.status === "غائب").length ?? 0;
+  const total = records?.length ?? 0;
+  const attendPct = total ? Math.round((present / total) * 100) : (activeChild?.attendancePct ?? 0);
 
   return (
     <>
       <StatsRow
         items={[
-          { num: pct(attendPct),   label: "نسبة الحضور",     icon: "ti-chart-bar" },
-          { num: toAr(present),     label: "جلسة حضرها",      icon: "ti-calendar-check", variant: "gold" },
-          { num: toAr(late),        label: "تأخر",             icon: "ti-clock",          variant: "blue" },
-          { num: toAr(absent),      label: "غائب",             icon: "ti-alert-circle",   variant: "red" },
+          { num: pct(attendPct), label: "نسبة الحضور", icon: "ti-chart-bar" },
+          { num: toAr(present), label: "جلسة حضرها", icon: "ti-calendar-check", variant: "gold" },
+          { num: toAr(late), label: "تأخر", icon: "ti-clock", variant: "blue" },
+          { num: toAr(absent), label: "غائب", icon: "ti-alert-circle", variant: "red" },
         ]}
       />
       <Card icon="ti-calendar" title="سجل الحضور">
@@ -64,7 +66,9 @@ export function ParentAttendance() {
                         <td>{new Date(r.date).toLocaleDateString("ar-SA")}</td>
                         <td>{r.day}</td>
                         <td>{r.time}</td>
-                        <td><Badge tone={STATUS_TONE[r.status] ?? "green"}>{r.status}</Badge></td>
+                        <td>
+                          <Badge tone={STATUS_TONE[r.status] ?? "green"}>{r.status}</Badge>
+                        </td>
                         <td style={{ fontWeight: 700, color: "var(--green)" }}>
                           {evalForDay ? `${evalForDay.total}/10` : "—"}
                         </td>
@@ -84,7 +88,9 @@ export function ParentAttendance() {
                 return (
                   <div key={i} className="rc-card">
                     <div className="rc-card-head">
-                      <span className="rc-card-title">{new Date(r.date).toLocaleDateString("ar-SA")}</span>
+                      <span className="rc-card-title">
+                        {new Date(r.date).toLocaleDateString("ar-SA")}
+                      </span>
                       <Badge tone={STATUS_TONE[r.status] ?? "green"}>{r.status}</Badge>
                     </div>
                     <div className="rc-row">
@@ -97,7 +103,9 @@ export function ParentAttendance() {
                     </div>
                     <div className="rc-row">
                       <span className="rc-row-label">التقييم</span>
-                      <span style={{ fontWeight: 700, color: "var(--green)" }}>{evalForDay ? `${evalForDay.total}/10` : "—"}</span>
+                      <span style={{ fontWeight: 700, color: "var(--green)" }}>
+                        {evalForDay ? `${evalForDay.total}/10` : "—"}
+                      </span>
                     </div>
                     <div className="rc-row">
                       <span className="rc-row-label">ملاحظة</span>

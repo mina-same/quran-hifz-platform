@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, LayoutAnimation } from 'react-native';
+import { View, StyleSheet, LayoutAnimation } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import {
   IconBuildingArch, IconChevronDown, IconChevronUp, IconUsers,
 } from '@tabler/icons-react-native';

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
-import { ScrollView, View, RefreshControl, StyleSheet, Text } from 'react-native';
+import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ContextCard, { halqaToContext, trackToContext } from '@/components/domain/ContextCard';
 import Button from '@/components/ui/Button';

@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
 import { theme } from '@/lib/theme';
 
 export interface Column {
@@ -78,13 +79,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: theme.fontCairoBold,
     color: theme.green,
-    textAlign: 'right',
   },
   cellText: {
     fontSize: 13,
     fontFamily: theme.fontCairo,
     color: theme.text,
-    textAlign: 'right',
   },
   empty: {
     paddingVertical: 40,

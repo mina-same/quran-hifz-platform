@@ -4,6 +4,8 @@ export interface NavItem {
   id: string;
   icon: string;
   label: string;
+  /** One-line hint shown under the label in the "المزيد" sheet. */
+  desc?: string;
   dot?: boolean;
 }
 

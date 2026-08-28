@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
 import { theme } from '@/lib/theme';
 
 interface Props {
@@ -27,13 +28,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: theme.fontCairoBold,
     color: theme.text,
-    textAlign: 'right',
   },
   required: { color: theme.red },
   error: {
     fontSize: 12,
     color: theme.red,
     fontFamily: theme.fontCairo,
-    textAlign: 'right',
   },
 });

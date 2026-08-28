@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Pressable, type StyleProp, type ViewStyle } from 'react-native';
+import { medium } from '@/lib/haptics';
 
 interface TabButtonProps {
   children?: ReactNode;
@@ -22,6 +23,7 @@ export function createMoreTabButton(onPress: () => void) {
   return function MoreTabButton({ children, style, testID, 'aria-label': ariaLabel }: TabButtonProps) {
     return (
       <Pressable
+        onPressIn={() => medium()}
         onPress={onPress}
         style={style}
         testID={testID}

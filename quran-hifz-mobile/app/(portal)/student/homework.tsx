@@ -1,4 +1,5 @@
-import { ScrollView, View, Text, RefreshControl, StyleSheet } from 'react-native';
+import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AyahBar from '@/components/ui/AyahBar';
 import Card from '@/components/ui/Card';

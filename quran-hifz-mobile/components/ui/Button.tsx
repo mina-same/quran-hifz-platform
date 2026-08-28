@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Pressable, View, Text, StyleSheet, ViewStyle, ActivityIndicator, Platform } from 'react-native';
+import { Pressable, View, StyleSheet, ViewStyle, ActivityIndicator, Platform } from 'react-native';
+import Text from '@/components/ui/Text';
 import { theme } from '@/lib/theme';
+import { tap, medium } from '@/lib/haptics';
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';
 type Size = 'sm' | 'default' | 'lg';
@@ -15,6 +17,12 @@ interface Props {
   icon?: React.ReactNode;
   style?: ViewStyle;
   fullWidth?: boolean;
+  /**
+   * Press feedback. Defaults to a light tap ('medium' for `danger`, which is
+   * usually destructive). Pass 'none' when the screen fires its own haptic for
+   * this press and the two would double up.
+   */
+  haptic?: 'tap' | 'medium' | 'none';
 }
 
 const VARIANTS: Record<Variant, { bg: string; text: string; border?: string; elevated?: boolean }> = {
@@ -33,11 +41,12 @@ const SIZES: Record<Size, { height: number; paddingHorizontal: number; fontSize:
 };
 
 export default function Button({
-  label, onPress, variant = 'primary', size = 'default', disabled, loading, icon, style, fullWidth,
+  label, onPress, variant = 'primary', size = 'default', disabled, loading, icon, style, fullWidth, haptic,
 }: Props) {
   const v = VARIANTS[variant];
   const s = SIZES[size];
   const [pressed, setPressed] = useState(false);
+  const kind = haptic ?? (variant === 'danger' ? 'medium' : 'tap');
 
   // The coloured box is a plain View with a plain style array: NativeWind's JSX
   // interop (jsxImportSource: 'nativewind') drops `style={({ pressed }) => …}`
@@ -46,7 +55,12 @@ export default function Button({
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
-      onPressIn={() => setPressed(true)}
+      onPressIn={() => {
+        // Fires at finger-down so the feedback lands with the touch. A disabled
+        // or loading button is inert, so it stays silent.
+        if (!disabled && !loading && kind !== 'none') (kind === 'medium' ? medium : tap)();
+        setPressed(true);
+      }}
       onPressOut={() => setPressed(false)}
       style={fullWidth ? styles.fullWidth : styles.selfStart}
     >

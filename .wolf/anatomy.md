@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-30T09:36:51.059Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-28T13:36:17.073Z
 > Files: 523 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
@@ -349,16 +349,16 @@
 - `IndividualPlanPanel.tsx` — The shared halqa/track plan this student's overlay hangs off — used as the (~1783 tok)
 - `MasjidAccordion.tsx` — This masjid's own halqat — the real /masajid endpoint doesn't nest them, (~1180 tok)
 - `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~5750 tok)
-- `ScheduleTable.tsx` — Whether the plan/schedule this belongs to runs in reverse mushaf order — (~477 tok)
+- `ScheduleSheet.tsx` — Day-by-day plan breakdown as a bottom sheet of compact cards (replaced the 6-column ScheduleTable). Exports scheduleItems()/fmtShortDate()/fmtPages() + the ScheduleItem shape. (~1700 tok)
 - `SurahAyahPicker.tsx` — When given, restricts BOTH pickers to only the surahs/ayat that fall inside (~828 tok)
 - `TrackDetail.tsx` — Admin reuses this same drill-down (role parity, per backend routes that (~4445 tok)
 
 ## quran-hifz-mobile/components/forms/
 
-- `FormDatePicker.tsx` — ISO date string, e.g. "2026-07-29". Empty string means unset. (~926 tok)
+- `FormDatePicker.tsx` — ISO date string, e.g. "2026-07-29". Empty string means unset. iOS sheet is dynamically sized (no snapPoints) with a header + إلغاء/تم footer. (~1300 tok)
 - `FormGroup.tsx` — FormGroup (~249 tok)
 - `FormInput.tsx` — FormInput (~236 tok)
-- `FormSelect.tsx` — FormSelect (~856 tok)
+- `FormSelect.tsx` — FormSelect — single-snap-point sheet (multi-snap locks the list), Arabic-normalised search above 12 options, getItemLayout + initialScrollIndex, per-row scroll tick haptic. (~1900 tok)
 - `FormTextarea.tsx` — FormTextarea (~266 tok)
 
 ## quran-hifz-mobile/components/illustrations/
@@ -366,24 +366,25 @@
 
 ## quran-hifz-mobile/components/layout/
 
-- (removed) `DrawerContent.tsx` — DrawerContent — uses useRouter (~1139 tok)
 - `iconMap.ts` — Exports ICON_MAP (~359 tok)
 - `MoreSheet.tsx` — MoreSheet (~1884 tok)
-- (removed) `NavItem.tsx` — NavItem (~516 tok)
 
 ## quran-hifz-mobile/components/ui/
 
 - `Alert.tsx` — COLORS (~403 tok)
 - `AyahBar.tsx` — AyahBar (~234 tok)
 - `Badge.tsx` — VARIANT_STYLES (~305 tok)
-- `BottomSheet.tsx` — Snap points as percentages of screen height, e.g. ['40%', '80%']. Defaults to a single auto-sizing s (~572 tok)
+- `BottomSheet.tsx` — Snap points as percentages of screen height, e.g. ['40%', '80%']. Defaults to a single auto-sizing s (~1285 tok)
 - `Button.tsx` — shadcn-style button: VARIANTS (primary/secondary/danger/ghost/outline) + SIZES (sm 36 / default 44 / lg 52) with fixed heights, radius, pressed + disabled states (~700 tok)
 - `Card.tsx` — Card (~201 tok)
 - `CardHeader.tsx` — CardHeader (~277 tok)
-- `DataTable.tsx` — DataTable (~724 tok)
+- `DataTable.tsx` — DataTable — generic column table. UNUSED on mobile since the schedule tables moved to ScheduleSheet; too wide for a phone, prefer a sheet of cards. (~724 tok)
+- `SheetTriggerRow.tsx` — "Tap to open a sheet" settings-style row (icon + label + trailing summary + chevron, 56pt). Used wherever a wide table used to expand inline. (~600 tok)
 - `Donut.tsx` — Multi-segment ring chart with a centered label — the mobile-native equivalent of the web's recharts- (~1034 tok)
 - `HonorBoard.tsx` — Exactly the top 3, already sorted best-first. Degrades gracefully with fewer than 3. (~541 tok)
 - `Leaderboard.tsx` — Ranked list with an avatar + inline meter per row — variant 'leader' (top achievers) or 'watch' (nee (~670 tok)
+- `Pressable.tsx` — Drop-in haptic replacement for RN's <Pressable>: fires lib/haptics on onPressIn (haptic="tap"|"select"|"medium"|"none"), medium on long-press, silent when disabled (~330 tok)
+- `Text.tsx` — Drop-in replacement for RN's <Text> that applies textStart (RN swaps left/right text alignment under forced RTL, so a bare <Text> or `textAlign: 'right'` renders visually LEFT). Import Text from here, never from 'react-native' (~300 tok)
 - `ProgressBar.tsx` — ProgressBar (~380 tok)
 - `ScopeTabs.tsx` — Segmented control used to scope report/dashboard widgets (all / per-halqa / per-track, etc). (~418 tok)
 - `Skeleton.tsx` — A stacked group of skeleton rows — for card-list screens waiting on their first fetch. (~400 tok)
@@ -400,6 +401,7 @@
 - `api.ts` — Exports ApiError, get, post, put + 2 more (~456 tok)
 - `auth-storage.ts` — Exports getToken, setToken, clearToken (~229 tok)
 - `evaluationRubric.ts` — Manual mirror of quran-hifz/src/quran/lib/evaluationRubric.ts (no shared (~112 tok)
+- `haptics.ts` — App-wide haptic taxonomy over expo-haptics: tap/select/medium/success/warning/error + setHapticsEnabled. Native only, Android uses performAndroidHapticsAsync, every call fire-and-forget (~560 tok)
 - `quranRange.test.ts` — / <reference types="jest" /> (~3014 tok)
 - `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~3700 tok)
 - `theme.ts` — Exports ThemeMode, buildTheme, theme, Theme (~652 tok)
@@ -831,6 +833,6 @@
 
 - `__root.tsx` — Root: SEO head (Arabic OG, Twitter card, JSON-LD, favicon, lang=ar dir=rtl), RootShell, error/404 components (~1611 tok)
 - `index.tsx` — Landing page route with per-page Arabic SEO head overrides (~200 tok)
+- `MoreTabButton.tsx` — Factory for the "المزيد" tab-bar button; opens the MoreSheet on press instead of navigating. (~180 tok)
 - `README.md` — Project documentation (~207 tok)
 - `sitemap[.]xml.ts` — API route: serves /sitemap.xml dynamically from request origin (~159 tok)
-- `MoreTabButton.tsx` — Factory for the "المزيد" tab-bar button; opens the MoreSheet on press instead of navigating. (~180 tok)

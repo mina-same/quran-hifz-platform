@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
 import type { Halqa } from '@/lib/queries/halqat';
 import ProgressBar from '@/components/ui/ProgressBar';
 import Badge from '@/components/ui/Badge';

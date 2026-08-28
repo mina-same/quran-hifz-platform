@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, View, Text, Pressable, RefreshControl, StyleSheet } from 'react-native';
+import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   IconCircleCheck, IconChevronDown, IconChevronUp, IconChevronLeft, IconChevronRight,
@@ -28,6 +30,7 @@ import {
 } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { success, warning, error } from '@/lib/haptics';
 
 // ── helpers (mirrored from the web page) ───────────────────────────────────
 function surahName(n: number): string {
@@ -329,6 +332,7 @@ export default function TeacherAttendance() {
       },
       {
         onSuccess: (res) => {
+          success();
           setUnnotified(res.unnotified);
           // Feed the day's outcome into the student's individual plan overlay so
           // an absence or a shortfall is redistributed over their remaining days.
@@ -365,12 +369,14 @@ export default function TeacherAttendance() {
                       : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`,
                 );
                 if (res.data.overflowPages > 0) {
+                  warning();
                   setSavedNotice(`لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`);
                 }
               },
             },
           );
         },
+        onError: () => error(),
       },
     );
   }
@@ -528,6 +534,7 @@ export default function TeacherAttendance() {
         ) : scheduledSorted.length > 0 ? (
           <View style={styles.slider}>
             <Pressable
+              haptic="select"
               onPress={() => { if (activeIdx > 0) setSelectedDate(scheduledSorted[activeIdx - 1]); }}
               style={[styles.sliderArrow, activeIdx <= 0 && styles.sliderArrowOff]}
               disabled={activeIdx <= 0}
@@ -546,6 +553,7 @@ export default function TeacherAttendance() {
                 const isSel = d.iso === effectiveDate;
                 return (
                   <Pressable
+                    haptic="select"
                     key={d.iso}
                     onPress={() => {
                       if (!enabled) {
@@ -570,6 +578,7 @@ export default function TeacherAttendance() {
               })}
             </ScrollView>
             <Pressable
+              haptic="select"
               onPress={() => { if (activeIdx >= 0 && activeIdx < scheduledSorted.length - 1) setSelectedDate(scheduledSorted[activeIdx + 1]); }}
               style={[styles.sliderArrow, activeIdx >= scheduledSorted.length - 1 && styles.sliderArrowOff]}
               disabled={activeIdx >= scheduledSorted.length - 1}
@@ -680,6 +689,7 @@ export default function TeacherAttendance() {
 
                     <View style={styles.toggleRow}>
                       <Pressable
+                        haptic="select"
                         disabled={locked}
                         onPress={() => setAttendance(st._id, 'حاضر')}
                         style={[
@@ -692,6 +702,7 @@ export default function TeacherAttendance() {
                         <Text style={[styles.toggleText, !isAbsent && { color: theme.green, fontFamily: theme.fontCairoBold }]}>حاضر</Text>
                       </Pressable>
                       <Pressable
+                        haptic="select"
                         disabled={locked}
                         onPress={() => setAttendance(st._id, 'غائب')}
                         style={[
@@ -756,6 +767,7 @@ export default function TeacherAttendance() {
                             const active = !isAbsent && e[cat] === n;
                             return (
                               <Pressable
+                                haptic="select"
                                 key={n}
                                 disabled={isAbsent || locked}
                                 onPress={() => setScore(st._id, cat, n)}

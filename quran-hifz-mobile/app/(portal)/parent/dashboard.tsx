@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { ScrollView, View, Text, StyleSheet, RefreshControl } from 'react-native';
+import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
+import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AyahBar from '@/components/ui/AyahBar';
 import StatsRow from '@/components/ui/StatsRow';

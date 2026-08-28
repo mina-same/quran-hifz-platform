@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ScrollView, View, Text, StyleSheet, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
+import { ScrollView, View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { IconArrowRight, IconCalendarOff, IconX } from '@tabler/icons-react-native';
+import { IconArrowRight, IconCalendarOff, IconCalendarEvent, IconX } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Button from '@/components/ui/Button';
@@ -13,12 +15,14 @@ import FormTextarea from '@/components/forms/FormTextarea';
 import FormSelect from '@/components/forms/FormSelect';
 import FormDatePicker from '@/components/forms/FormDatePicker';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
-import ScheduleTable from '@/components/domain/ScheduleTable';
+import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
+import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet';
 import { useHalqat } from '@/lib/queries/halqat';
 import { useQuranPlan, useCreateQuranPlan, useUpdateQuranPlan, type PlanType } from '@/lib/queries/quranPlan';
 import { computeScheduleBreakdown, isReversedRange, WEEK_DAYS, type RangePoint } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { theme } from '@/lib/theme';
+import { success, error } from '@/lib/haptics';
 
 const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة', 'ترتيل', 'تلاوة'];
 
@@ -73,6 +77,7 @@ export default function TeacherPlanForm() {
   }));
   const [formError, setFormError] = useState('');
   const [prefilled, setPrefilled] = useState(false);
+  const [showSchedule, setShowSchedule] = useState(false);
   // A plan created before the mobile "halqa-only" picker (or one linked to a
   // specialTrack via the track-detail "link plan" action) may have a non-halqa
   // target — this form doesn't offer changing that, matches the web form's
@@ -182,8 +187,10 @@ export default function TeacherPlanForm() {
       setFormError('');
       if (isEdit && params.id) await updatePlan.mutateAsync({ id: params.id, ...body });
       else await createPlan.mutateAsync(body);
+      success();
       router.back();
     } catch (e) {
+      error();
       setFormError((e as Error).message);
     }
   }
@@ -215,7 +222,7 @@ export default function TeacherPlanForm() {
           <FormGroup label="نوع الخطة" required>
             <View style={s.chipRow}>
               {PLAN_TYPES.map((t) => (
-                <Pressable key={t} style={[s.chip, form.type === t && s.chipActive]} onPress={() => sf('type', t)}>
+                <Pressable haptic="select" key={t} style={[s.chip, form.type === t && s.chipActive]} onPress={() => sf('type', t)}>
                   <Text style={[s.chipText, form.type === t && s.chipTextActive]}>{t}</Text>
                 </Pressable>
               ))}
@@ -248,7 +255,7 @@ export default function TeacherPlanForm() {
           <CardHeader title="الأيام" />
           <View style={s.chipRow}>
             {WEEK_DAYS.map((d) => (
-              <Pressable key={d} style={[s.chip, form.days.includes(d) && s.chipActive]} onPress={() => toggleDay(d)}>
+              <Pressable haptic="select" key={d} style={[s.chip, form.days.includes(d) && s.chipActive]} onPress={() => toggleDay(d)}>
                 <Text style={[s.chipText, form.days.includes(d) && s.chipTextActive]}>{d}</Text>
               </Pressable>
             ))}
@@ -324,10 +331,10 @@ export default function TeacherPlanForm() {
 
           <View style={{ height: 12 }} />
           <View style={s.rowGroup}>
-            <Pressable style={[s.toggleBtn, form.endType === 'activeDays' && s.toggleBtnActive]} onPress={() => sf('endType', 'activeDays')}>
+            <Pressable haptic="select" style={[s.toggleBtn, form.endType === 'activeDays' && s.toggleBtnActive]} onPress={() => sf('endType', 'activeDays')}>
               <Text style={[s.toggleBtnText, form.endType === 'activeDays' && s.toggleBtnTextActive]}>عدد أيام نشطة</Text>
             </Pressable>
-            <Pressable style={[s.toggleBtn, form.endType === 'date' && s.toggleBtnActive]} onPress={() => sf('endType', 'date')}>
+            <Pressable haptic="select" style={[s.toggleBtn, form.endType === 'date' && s.toggleBtnActive]} onPress={() => sf('endType', 'date')}>
               <Text style={[s.toggleBtnText, form.endType === 'date' && s.toggleBtnTextActive]}>تاريخ انتهاء محدد</Text>
             </Pressable>
           </View>
@@ -345,16 +352,28 @@ export default function TeacherPlanForm() {
         </Card>
 
         {schedulePreview.length > 0 && (
-          <Card noPadding>
-            <CardHeader title="التقسيمة اليومية (معاينة)" style={{ padding: 16, paddingBottom: 8 }} />
+          <Card>
+            <CardHeader title="التقسيمة اليومية (معاينة)" />
             {previewShortfall && (
-              <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+              <View style={{ paddingBottom: 8 }}>
                 <Alert variant="warning">عدد الأيام المطلوب أكبر من عدد الصفحات المتاحة للتوزيع.</Alert>
               </View>
             )}
-            <ScheduleTable entries={schedulePreview} reversed={rangeIsReversed} />
+            <SheetTriggerRow
+              label="عرض التقسيمة اليومية"
+              value={`${schedulePreview.length} يوم`}
+              icon={<IconCalendarEvent size={17} color={theme.green} />}
+              onPress={() => setShowSchedule(true)}
+            />
           </Card>
         )}
+
+        <ScheduleSheet
+          visible={showSchedule}
+          onClose={() => setShowSchedule(false)}
+          title="التقسيمة اليومية (معاينة)"
+          items={scheduleItems(schedulePreview, rangeIsReversed)}
+        />
 
         <Button
           label={isPending ? 'جارٍ الحفظ...' : isEdit ? 'حفظ التعديلات' : 'إنشاء الخطة'}
@@ -382,7 +401,7 @@ const s = StyleSheet.create({
   chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
   chipText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
   chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
-  lockedText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted, textAlign: 'right' },
+  lockedText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
   holidayHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
   holidayTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
   holidayCount: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 1, backgroundColor: theme.goldPale },
@@ -399,8 +418,8 @@ const s = StyleSheet.create({
     width: 20, height: 20, borderRadius: 999, alignItems: 'center', justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.06)',
   },
-  holidayHint: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 10, lineHeight: 18, textAlign: 'right' },
-  reverseHint: { fontSize: 11, color: theme.gold, fontFamily: theme.fontCairo, marginTop: 10, textAlign: 'right' },
+  holidayHint: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 10, lineHeight: 18 },
+  reverseHint: { fontSize: 11, color: theme.gold, fontFamily: theme.fontCairo, marginTop: 10 },
   rowGroup: { flexDirection: 'row', gap: 8 },
   toggleBtn: { flex: 1, borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },
   toggleBtnActive: { backgroundColor: theme.greenPale, borderColor: theme.green },

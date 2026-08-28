@@ -1,5 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ScrollView, View, Text, StyleSheet, Pressable } from 'react-native';
+import { ScrollView, View, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconArrowRight } from '@tabler/icons-react-native';
 import TrackDetail from '@/components/domain/TrackDetail';

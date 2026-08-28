@@ -1,14 +1,17 @@
 import { useMemo, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
-import DataTable from '@/components/ui/DataTable';
+import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
+import ScheduleSheet, { fmtShortDate, fmtPages, type ScheduleItem } from '@/components/domain/ScheduleSheet';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import {
   useStudentPlanProgress, useInitStudentPlanProgress, useReflowStudentPlan,
   type QuranPlan, type StudentOccurrenceStatus,
 } from '@/lib/queries/quranPlan';
+import { IconCalendarEvent } from '@tabler/icons-react-native';
 import { isReversedRange, isReversedSchedule, orientSlice, surahName, type RangePoint } from '@/lib/quranRange';
 import { theme } from '@/lib/theme';
 
@@ -42,6 +45,7 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
 
   const [customStart, setCustomStart] = useState<RangePoint>(basePlan.rangeStart);
   const [customEnd, setCustomEnd] = useState<RangePoint>(basePlan.rangeEnd);
+  const [showSchedule, setShowSchedule] = useState(false);
 
   const reversed = useMemo(
     () => isReversedSchedule(progress?.effectiveSchedule) ?? isReversedRange(basePlan.rangeStart, basePlan.rangeEnd),
@@ -72,7 +76,9 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
     );
   }
 
-  const rows = progress.effectiveSchedule.map((occ) => {
+  // One card per occurrence: the six-column table this replaced could only be
+  // read by scrolling sideways inside an already-nested, already-scrolling row.
+  const items: ScheduleItem[] = progress.effectiveSchedule.map((occ) => {
     const changed = occ.baseSurahStart !== occ.surahStart || occ.baseAyahStart !== occ.ayahStart
       || occ.baseSurahEnd !== occ.surahEnd || occ.baseAyahEnd !== occ.ayahEnd;
     const baseOriented = orientSlice(
@@ -80,26 +86,26 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
       reversed,
     );
     const curOriented = orientSlice(occ, reversed);
-    const pages = occ.pageStart === occ.pageEnd
-      ? String(occ.pageStart)
-      : reversed ? `${occ.pageEnd} - ${occ.pageStart}` : `${occ.pageStart} - ${occ.pageEnd}`;
     const statusLabel = STATUS_LABEL[occ.status]
       + (occ.noWard ? ' · لا ورد' : '')
       + (occ.manualOverride ? ' · معدَّلة يدويًا' : '');
 
     return {
-      idx: occ.occurrenceIndex,
-      date: new Date(occ.date).toLocaleDateString('ar-SA'),
-      base: changed
-        ? <Text style={s.strike}>{surahName(baseOriented.surahStart)}:{baseOriented.ayahStart} — {surahName(baseOriented.surahEnd)}:{baseOriented.ayahEnd}</Text>
-        : '—',
-      current: occ.noWard
+      key: `${occ.occurrenceIndex}-${occ.date}`,
+      index: occ.occurrenceIndex,
+      date: fmtShortDate(occ.date),
+      range: occ.noWard
         ? 'لا يوجد ورد'
         : `${surahName(curOriented.surahStart)}:${curOriented.ayahStart} — ${surahName(curOriented.surahEnd)}:${curOriented.ayahEnd}`,
-      pages: occ.noWard ? '—' : pages,
-      status: <Badge label={statusLabel} variant={STATUS_VARIANT[occ.status]} />,
+      pages: occ.noWard ? '—' : fmtPages(curOriented.pageStart, curOriented.pageEnd),
+      strikeRange: changed
+        ? `${surahName(baseOriented.surahStart)}:${baseOriented.ayahStart} — ${surahName(baseOriented.surahEnd)}:${baseOriented.ayahEnd}`
+        : undefined,
+      badge: { label: statusLabel, variant: STATUS_VARIANT[occ.status] },
     };
   });
+
+  const doneCount = progress.effectiveSchedule.filter((o) => o.status === 'done').length;
 
   return (
     <View style={s.box}>
@@ -119,16 +125,18 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
         </Alert>
       )}
 
-      <DataTable
-        columns={[
-          { key: 'idx', label: '#', flex: 0.5 },
-          { key: 'date', label: 'التاريخ', flex: 1.2 },
-          { key: 'base', label: 'الأصلي', flex: 1.6 },
-          { key: 'current', label: 'الحالي', flex: 1.6 },
-          { key: 'pages', label: 'الصفحات', flex: 1 },
-          { key: 'status', label: 'الحالة', flex: 1.3 },
-        ]}
-        rows={rows}
+      <SheetTriggerRow
+        label="التوزيع اليومي للطالب"
+        value={`${doneCount} / ${items.length} مكتمل`}
+        icon={<IconCalendarEvent size={17} color={theme.green} />}
+        onPress={() => setShowSchedule(true)}
+      />
+
+      <ScheduleSheet
+        visible={showSchedule}
+        onClose={() => setShowSchedule(false)}
+        title={`توزيع ${studentName}`}
+        items={items}
       />
     </View>
   );
@@ -136,9 +144,8 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
 
 const s = StyleSheet.create({
   box: { gap: 10, marginTop: 10 },
-  boxTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, textAlign: 'right' },
-  label: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted, textAlign: 'right' },
+  boxTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+  label: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
   muted: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 10 },
   headRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  strike: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted, textDecorationLine: 'line-through', textAlign: 'right' },
 });

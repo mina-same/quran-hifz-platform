@@ -1,4 +1,6 @@
-import { ScrollView, View, Text, Pressable, RefreshControl, StyleSheet } from 'react-native';
+import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';

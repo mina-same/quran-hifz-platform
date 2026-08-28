@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
 import Svg, { Polyline } from 'react-native-svg';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';

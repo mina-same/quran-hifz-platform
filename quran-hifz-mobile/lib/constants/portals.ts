@@ -1,105 +1,361 @@
-import type { PortalConfig } from '@/lib/types/portal';
+import type { PortalConfig } from "@/lib/types/portal";
 
 export const PORTALS: Record<string, PortalConfig> = {
   student: {
-    badge: 'بوابة الطالب',
-    user: { name: 'عبدالله الحميداني', role: 'طالب — حلقة عمر بن الخطاب', initials: 'عح' },
+    badge: "بوابة الطالب",
+    user: {
+      name: "عبدالله الحميداني",
+      role: "طالب — حلقة عمر بن الخطاب",
+      initials: "عح",
+    },
     nav: [
-      { group: 'الرئيسية', items: [
-        { id: 'dashboard', icon: 'home',           label: 'لوحتي' },
-        { id: 'myhifz',   icon: 'book',            label: 'خطة حفظي' },
-      ]},
-      { group: 'الأنشطة', items: [
-        { id: 'homework',       icon: 'microphone',     label: 'تسجيل الواجب', dot: true },
-        { id: 'attendance',     icon: 'calendar-check', label: 'الحضور والغياب' },
-        { id: 'schedule',       icon: 'clock',          label: 'مواعيد حلقتي' },
-        { id: 'special_tracks', icon: 'calendar-event', label: 'مساراتي الاستثنائية' },
-      ]},
-      { group: 'التواصل والتحفيز', items: [
-        { id: 'messages', icon: 'message',  label: 'الرسائل' },
-        { id: 'points',   icon: 'star',     label: 'نقاطي والمتصدرون' },
-        { id: 'store',    icon: 'gift',     label: 'متجر المكافآت' },
-      ]},
-      { group: 'الحساب', items: [
-        { id: 'settings', icon: 'user-circle', label: 'الملف الشخصي' },
-      ]},
+      {
+        group: "الرئيسية",
+        items: [
+          {
+            id: "dashboard",
+            icon: "home",
+            label: "لوحتي",
+            desc: "نظرة عامة على يومك",
+          },
+          {
+            id: "myhifz",
+            icon: "book",
+            label: "خطة حفظي",
+            desc: "خطتك في الحفظ والمراجعة",
+          },
+        ],
+      },
+      {
+        group: "الأنشطة",
+        items: [
+          {
+            id: "homework",
+            icon: "microphone",
+            label: "تسجيل الواجب",
+            desc: "سجّل تلاوتك وأرسلها",
+            dot: true,
+          },
+          {
+            id: "attendance",
+            icon: "calendar-check",
+            label: "الحضور والغياب",
+            desc: "سجل حضورك في الحلقة",
+          },
+          {
+            id: "schedule",
+            icon: "clock",
+            label: "مواعيد حلقتي",
+            desc: "أوقات حلقتك الأسبوعية",
+          },
+          {
+            id: "special_tracks",
+            icon: "calendar-event",
+            label: "مساراتي الاستثنائية",
+            desc: "عرض مساراتك الاستثنائية",
+          },
+        ],
+      },
+      {
+        group: "التواصل والتحفيز",
+        items: [
+          {
+            id: "messages",
+            icon: "message",
+            label: "الرسائل",
+            desc: "رسائلك مع المعلم",
+          },
+          {
+            id: "points",
+            icon: "star",
+            label: "نقاطي والمتصدرون",
+            desc: "نقاطك وترتيبك بين الطلاب",
+          },
+          {
+            id: "store",
+            icon: "gift",
+            label: "متجر المكافآت",
+            desc: "استبدل نقاطك بمكافآت",
+          },
+        ],
+      },
+      {
+        group: "الحساب",
+        items: [
+          {
+            id: "settings",
+            icon: "user-circle",
+            label: "الملف الشخصي",
+            desc: "تعديل بياناتك الشخصية",
+          },
+        ],
+      },
     ],
   },
   teacher: {
-    badge: 'بوابة المعلم',
-    user: { name: 'ناصر الحميداني', role: 'معلم — حلقة عمر بن الخطاب', initials: 'نح' },
+    badge: "بوابة المعلم",
+    user: {
+      name: "ناصر الحميداني",
+      role: "معلم — حلقة عمر بن الخطاب",
+      initials: "نح",
+    },
     nav: [
-      { group: 'الرئيسية', items: [
-        { id: 'dashboard', icon: 'layout-dashboard', label: 'لوحة التحكم' },
-      ]},
-      { group: 'الحلقات', items: [
-        { id: 'myhalqa',    icon: 'school',          label: 'حلقاتي' },
-        { id: 'students',   icon: 'users',           label: 'طلابي' },
-        { id: 'attendance', icon: 'calendar-check',  label: 'الحضور اليومي', dot: true },
-      ]},
-      { group: 'التقييم', items: [
-        { id: 'homework',      icon: 'microphone',  label: 'مراجعة الواجبات', dot: true },
-        { id: 'evaluate',      icon: 'star',        label: 'تقييم الجلسة' },
-        { id: 'recordlesson',  icon: 'video',       label: 'تسجيل الدرس' },
-        { id: 'grouphomework', icon: 'list-check',  label: 'واجب جماعي' },
-        { id: 'plans',         icon: 'target',      label: 'الخطط الفردية' },
-        { id: 'reports',       icon: 'chart-bar',   label: 'تقارير الطلاب' },
-      ]},
-      { group: 'المسارات الاستثنائية', items: [
-        { id: 'special_tracks', icon: 'calendar-event', label: 'مساراتي الاستثنائية' },
-      ]},
-      { group: 'الحساب', items: [
-        { id: 'settings', icon: 'user-circle', label: 'الملف الشخصي' },
-      ]},
+      {
+        group: "الرئيسية",
+        items: [
+          {
+            id: "dashboard",
+            icon: "layout-dashboard",
+            label: "لوحة التحكم",
+            desc: "نظرة عامة على حلقاتك",
+          },
+        ],
+      },
+      {
+        group: "الحلقات",
+        items: [
+          {
+            id: "myhalqa",
+            icon: "school",
+            label: "حلقاتي",
+            desc: "إدارة حلقاتك ومواعيدها",
+          },
+          {
+            id: "students",
+            icon: "users",
+            label: "طلابي",
+            desc: "متابعة طلاب حلقاتك",
+          },
+          {
+            id: "attendance",
+            icon: "calendar-check",
+            label: "الحضور اليومي",
+            desc: "تسجيل حضور اليوم",
+            dot: true,
+          },
+        ],
+      },
+      {
+        group: "التقييم",
+        items: [
+          {
+            id: "homework",
+            icon: "microphone",
+            label: "مراجعة الواجبات",
+            desc: "الاستماع للتلاوات وتقييمها",
+            dot: true,
+          },
+          {
+            id: "evaluate",
+            icon: "star",
+            label: "تقييم الجلسة",
+            desc: "قيم جلسة المراجعة",
+          },
+          {
+            id: "recordlesson",
+            icon: "video",
+            label: "تسجيل الدرس",
+            desc: "سجل دروسك الصوتية",
+          },
+          {
+            id: "grouphomework",
+            icon: "list-check",
+            label: "واجب جماعي",
+            desc: "متابعة واجبات المجموعة",
+          },
+          {
+            id: "plans",
+            icon: "target",
+            label: "الخطط الفردية",
+            desc: "تحديد أهدافك اليومية",
+          },
+          {
+            id: "reports",
+            icon: "chart-bar",
+            label: "تقارير الطلاب",
+            desc: "عرض أداء الطلاب",
+          },
+        ],
+      },
+      {
+        group: "المسارات الاستثنائية",
+        items: [
+          {
+            id: "special_tracks",
+            icon: "calendar-event",
+            label: "مساراتي الاستثنائية",
+            desc: "عرض مساراتك الاستثنائية",
+          },
+        ],
+      },
+      {
+        group: "الحساب",
+        items: [
+          {
+            id: "settings",
+            icon: "user-circle",
+            label: "الملف الشخصي",
+            desc: "تعديل بياناتك الشخصية",
+          },
+        ],
+      },
     ],
   },
   admin: {
-    badge: 'بوابة الإدارة',
-    user: { name: 'إدارة الجمعية', role: 'مدير النظام', initials: 'إد' },
+    badge: "بوابة الإدارة",
+    user: { name: "إدارة الجمعية", role: "مدير النظام", initials: "إد" },
     nav: [
-      { group: 'الرئيسية', items: [
-        { id: 'dashboard', icon: 'layout-dashboard', label: 'لوحة التحكم' },
-      ]},
-      { group: 'الطلاب والمعلمون', items: [
-        { id: 'students', icon: 'users',       label: 'إدارة الطلاب' },
-        { id: 'register', icon: 'user-plus',   label: 'تسجيل طالب جديد' },
-        { id: 'teachers', icon: 'chalkboard',  label: 'المعلمون' },
-        { id: 'parents',  icon: 'user-heart',  label: 'أولياء الأمور' },
-      ]},
-      { group: 'الحلقات والمساجد', items: [
-        { id: 'halqat',  icon: 'school',        label: 'الحلقات' },
-        { id: 'masajid', icon: 'building-arch', label: 'المساجد' },
-      ]},
-      { group: 'التقارير والبرامج', items: [
-        { id: 'kpis',           icon: 'target',         label: 'مؤشرات الأداء' },
-        { id: 'reports',        icon: 'chart-bar',      label: 'التقارير' },
-        { id: 'special_tracks', icon: 'calendar-event', label: 'المسارات الاستثنائية', dot: true },
-      ]},
+      {
+        group: "الرئيسية",
+        items: [
+          {
+            id: "dashboard",
+            icon: "layout-dashboard",
+            label: "لوحة التحكم",
+            desc: "نظرة عامة على الجمعية",
+          },
+        ],
+      },
+      {
+        group: "الطلاب والمعلمون",
+        items: [
+          {
+            id: "students",
+            icon: "users",
+            label: "إدارة الطلاب",
+            desc: "بيانات الطلاب وحلقاتهم",
+          },
+          {
+            id: "register",
+            icon: "user-plus",
+            label: "تسجيل طالب جديد",
+            desc: "إضافة طالب إلى حلقة",
+          },
+          {
+            id: "teachers",
+            icon: "chalkboard",
+            label: "المعلمون",
+            desc: "بيانات المعلمين وحلقاتهم",
+          },
+          {
+            id: "parents",
+            icon: "user-heart",
+            label: "أولياء الأمور",
+            desc: "حسابات أولياء الأمور وربطها",
+          },
+        ],
+      },
+      {
+        group: "الحلقات والمساجد",
+        items: [
+          {
+            id: "halqat",
+            icon: "school",
+            label: "الحلقات",
+            desc: "إدارة الحلقات ومواعيدها",
+          },
+          {
+            id: "masajid",
+            icon: "building-arch",
+            label: "المساجد",
+            desc: "إدارة المساجد ومقارها",
+          },
+        ],
+      },
+      {
+        group: "التقارير والبرامج",
+        items: [
+          {
+            id: "kpis",
+            icon: "target",
+            label: "مؤشرات الأداء",
+            desc: "مؤشرات أداء الجمعية",
+          },
+          {
+            id: "reports",
+            icon: "chart-bar",
+            label: "التقارير",
+            desc: "تقارير الحفظ والحضور",
+          },
+          {
+            id: "special_tracks",
+            icon: "calendar-event",
+            label: "المسارات الاستثنائية",
+            desc: "متابعة المسارات الاستثنائية",
+            dot: true,
+          },
+        ],
+      },
     ],
   },
   parent: {
-    badge: 'بوابة ولي الأمر',
-    user: { name: 'عبدالحميد الحميداني', role: 'ولي أمر — عبدالله الحميداني', initials: 'عح' },
+    badge: "بوابة ولي الأمر",
+    user: {
+      name: "عبدالحميد الحميداني",
+      role: "ولي أمر — عبدالله الحميداني",
+      initials: "عح",
+    },
     nav: [
-      { group: 'الرئيسية', items: [
-        { id: 'dashboard', icon: 'home', label: 'لوحتي' },
-      ]},
-      { group: 'متابعة الطالب', items: [
-        { id: 'timeline',      icon: 'timeline',       label: 'مسيرة الحفظ' },
-        { id: 'recordings',    icon: 'microphone',     label: 'الدروس المسجّلة', dot: true },
-        { id: 'homework_view', icon: 'list-check',     label: 'واجبات ابني', dot: true },
-        { id: 'attendance',    icon: 'calendar-check', label: 'سجل الحضور' },
-      ]},
-      { group: 'التواصل', items: [
-        { id: 'messages', icon: 'message', label: 'الرسائل' },
-      ]},
+      {
+        group: "الرئيسية",
+        items: [
+          {
+            id: "dashboard",
+            icon: "home",
+            label: "لوحتي",
+            desc: "نظرة عامة على ابنك",
+          },
+        ],
+      },
+      {
+        group: "متابعة الطالب",
+        items: [
+          {
+            id: "timeline",
+            icon: "timeline",
+            label: "مسيرة الحفظ",
+            desc: "تقدم ابنك في الحفظ",
+          },
+          {
+            id: "recordings",
+            icon: "microphone",
+            label: "الدروس المسجّلة",
+            desc: "استمع لتلاوات ابنك",
+            dot: true,
+          },
+          {
+            id: "homework_view",
+            icon: "list-check",
+            label: "واجبات ابني",
+            desc: "متابعة واجبات ابنك",
+            dot: true,
+          },
+          {
+            id: "attendance",
+            icon: "calendar-check",
+            label: "سجل الحضور",
+            desc: "سجل حضور ابنك",
+          },
+        ],
+      },
+      {
+        group: "التواصل",
+        items: [
+          {
+            id: "messages",
+            icon: "message",
+            label: "الرسائل",
+            desc: "رسائلك مع المعلم",
+          },
+        ],
+      },
     ],
   },
 };
 
 export const PORTAL_ROUTES: Record<string, string> = {
-  student: '/(portal)/student/dashboard',
-  teacher: '/(portal)/teacher/dashboard',
-  admin:   '/(portal)/admin/dashboard',
-  parent:  '/(portal)/parent/dashboard',
+  student: "/(portal)/student/dashboard",
+  teacher: "/(portal)/teacher/dashboard",
+  admin: "/(portal)/admin/dashboard",
+  parent: "/(portal)/parent/dashboard",
 };

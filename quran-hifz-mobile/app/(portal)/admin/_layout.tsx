@@ -4,6 +4,7 @@ import {
   IconLayoutDashboard, IconUsers, IconSchool, IconTarget, IconChartBar, IconDots,
 } from '@tabler/icons-react-native';
 import { theme } from '@/lib/theme';
+import { tap } from '@/lib/haptics';
 import MoreSheet from '@/components/layout/MoreSheet';
 import { createMoreTabButton } from '@/components/layout/MoreTabButton';
 
@@ -19,6 +20,9 @@ export default function AdminTabLayout() {
   return (
     <>
     <Tabs
+      // Every tab press ticks. The "المزيد" tab never reaches this listener —
+      // its custom tabBarButton short-circuits navigation and fires its own.
+      screenListeners={{ tabPress: () => tap() }}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: theme.green,

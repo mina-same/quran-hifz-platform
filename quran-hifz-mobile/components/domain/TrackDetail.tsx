@@ -1,13 +1,16 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import ProgressBar from '@/components/ui/ProgressBar';
 import { SkeletonRows } from '@/components/ui/Skeleton';
-import ScheduleTable from '@/components/domain/ScheduleTable';
+import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
+import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet';
 import IndividualPlanPanel from '@/components/domain/IndividualPlanPanel';
 import {
   useSpecialTracks, type SpecialTrack, type EnrolledStudent, type TrackTeacher,
@@ -19,6 +22,7 @@ import {
 import { isReversedRange, isReversedSchedule, orientSlice, surahName } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { theme } from '@/lib/theme';
+import { IconCalendarEvent } from '@tabler/icons-react-native';
 
 function getEnrolledId(v: EnrolledStudent | string) { return typeof v === 'object' ? v._id : v; }
 function getEnrolledName(v: EnrolledStudent | string) { return typeof v === 'object' ? v.name : v; }
@@ -87,6 +91,11 @@ export default function TrackDetail({ trackId, role }: Props) {
   const progressByStudent = useStudentPlanProgressList(linkedPlan?._id, roster.map((r) => r._id));
 
   const planReversed = linkedPlan ? isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd) : false;
+
+  const scheduleRows = useMemo(
+    () => (linkedPlan ? scheduleItems(linkedPlan.schedule, planReversed) : []),
+    [linkedPlan, planReversed],
+  );
 
   function assignmentForStudent(studentId: string) {
     const p = progressByStudent[studentId];
@@ -196,11 +205,14 @@ export default function TrackDetail({ trackId, role }: Props) {
               )}
             </View>
             {linkedPlan.schedule.length > 0 && (
-              <Pressable style={s.toggleBtn} onPress={() => setShowSchedule((v) => !v)}>
-                <Text style={s.toggleBtnText}>عرض توزيع الأيام والصفحات {showSchedule ? '▲' : '▼'}</Text>
-              </Pressable>
+              <SheetTriggerRow
+                label="توزيع الأيام والصفحات"
+                value={`${linkedPlan.schedule.length} يوم`}
+                icon={<IconCalendarEvent size={17} color={theme.green} />}
+                onPress={() => setShowSchedule(true)}
+                style={{ marginTop: 12 }}
+              />
             )}
-            {showSchedule && <ScheduleTable entries={linkedPlan.schedule} reversed={planReversed} />}
           </>
         ) : (
           <>
@@ -281,6 +293,13 @@ export default function TrackDetail({ trackId, role }: Props) {
           })}
         </View>
       </Card>
+
+      <ScheduleSheet
+        visible={showSchedule}
+        onClose={() => setShowSchedule(false)}
+        title="توزيع الأيام والصفحات"
+        items={scheduleRows}
+      />
     </View>
   );
 }
@@ -304,8 +323,6 @@ const s = StyleSheet.create({
   assignmentBox: { borderRadius: 10, padding: 10, marginTop: 10 },
   assignmentText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.greenDark },
   actionsRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
-  toggleBtn: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, alignItems: 'center', marginTop: 12 },
-  toggleBtnText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
   linkPanel: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: theme.border, gap: 8 },
   linkPanelTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
   linkRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: theme.border },

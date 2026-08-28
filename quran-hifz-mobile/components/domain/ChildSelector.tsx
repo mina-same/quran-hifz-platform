@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { useParentChildren } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { theme } from '@/lib/theme';
@@ -59,6 +61,7 @@ export default function ChildSelector() {
         const active = child._id === selectedChildId;
         return (
           <Pressable
+            haptic="select"
             key={child._id}
             onPress={() => setSelectedChild(child._id)}
             style={[s.pill, active && s.pillActive]}

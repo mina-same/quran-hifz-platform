@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
+import Text from '@/components/ui/Text';
 import { theme } from '@/lib/theme';
 
 interface Props {

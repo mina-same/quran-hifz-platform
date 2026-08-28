@@ -1,4 +1,5 @@
-import { ScrollView, View, Text, StyleSheet, Pressable, RefreshControl } from 'react-native';
+import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
+import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Card from '@/components/ui/Card';

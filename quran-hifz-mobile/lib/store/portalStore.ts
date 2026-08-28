@@ -5,10 +5,12 @@ import type { ThemeMode } from '@/lib/theme';
 import { PORTALS } from '@/lib/constants/portals';
 import { get as apiGet, post as apiPost, setUnauthorizedHandler } from '@/lib/api';
 import { getToken, setToken, clearToken } from '@/lib/auth-storage';
+import { setHapticsEnabled as applyHapticsEnabled } from '@/lib/haptics';
 
 const THEME_MODE_KEY = 'qh_theme_mode';
 const ONBOARDED_KEY = 'qh_onboarded';
 const BIOMETRIC_ENABLED_KEY = 'qh_biometric_enabled';
+const HAPTICS_ENABLED_KEY = 'qh_haptics_enabled';
 
 interface TopbarState {
   icon: string;
@@ -67,6 +69,8 @@ interface PortalStore {
   themeMode: ThemeMode;
   /** Whether the user opted into Face ID/Touch ID re-auth (Account Settings). Persisted. */
   biometricEnabled: boolean;
+  /** Whether presses vibrate (Account Settings). Persisted, default on. */
+  hapticsEnabled: boolean;
   /** False until the onboarding slides have been seen once. Persisted. */
   hasOnboarded: boolean;
   /** Set when a request came back 401 and the session was dropped — the login
@@ -90,6 +94,7 @@ interface PortalStore {
   completeOnboarding: () => Promise<void>;
   updateUserName: (name: string) => void;
   setBiometricEnabled: (enabled: boolean) => Promise<void>;
+  setHapticsEnabled: (enabled: boolean) => Promise<void>;
   unlock: () => void;
   /** Drops the session after a 401. Token is already cleared by the API layer. */
   handleUnauthorized: () => void;
@@ -102,6 +107,7 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
   selectedChildId: null,
   themeMode: 'light',
   biometricEnabled: false,
+  hapticsEnabled: true,
   hasOnboarded: false,
   sessionExpired: false,
   isLocked: false,
@@ -111,18 +117,22 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
   topbar: { icon: 'home', title: 'لوحة التحكم', actionsKey: '' },
 
   hydrate: async () => {
-    const [token, storedMode, storedBiometric, storedOnboarded] = await Promise.all([
+    const [token, storedMode, storedBiometric, storedOnboarded, storedHaptics] = await Promise.all([
       getToken().catch(() => null),
       AsyncStorage.getItem(THEME_MODE_KEY).catch(() => null),
       AsyncStorage.getItem(BIOMETRIC_ENABLED_KEY).catch(() => null),
       AsyncStorage.getItem(ONBOARDED_KEY).catch(() => null),
+      AsyncStorage.getItem(HAPTICS_ENABLED_KEY).catch(() => null),
     ]);
     const themeMode: ThemeMode = storedMode === 'dark' ? 'dark' : 'light';
     const biometricEnabled = storedBiometric === '1';
     const hasOnboarded = storedOnboarded === '1';
+    // Opt-out, not opt-in: only an explicit '0' turns haptics off.
+    const hapticsEnabled = storedHaptics !== '0';
+    applyHapticsEnabled(hapticsEnabled);
 
     if (!token) {
-      set({ isHydrating: false, themeMode, biometricEnabled, hasOnboarded });
+      set({ isHydrating: false, themeMode, biometricEnabled, hapticsEnabled, hasOnboarded });
       return;
     }
     try {
@@ -136,13 +146,13 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
       // A stored session resuming silently is exactly what biometric lock guards against —
       // gate behind isLocked so the lock screen must clear before any portal screen renders.
       set({
-        authUser, isHydrating: false, themeMode, biometricEnabled, hasOnboarded,
+        authUser, isHydrating: false, themeMode, biometricEnabled, hapticsEnabled, hasOnboarded,
         isLocked: biometricEnabled,
         ...enterPortal(authUser.role, authUser),
       });
     } catch {
       await clearToken();
-      set({ authUser: null, isHydrating: false, themeMode, biometricEnabled, hasOnboarded });
+      set({ authUser: null, isHydrating: false, themeMode, biometricEnabled, hapticsEnabled, hasOnboarded });
     }
   },
 
@@ -183,6 +193,13 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
   setBiometricEnabled: async (enabled) => {
     await AsyncStorage.setItem(BIOMETRIC_ENABLED_KEY, enabled ? '1' : '0').catch(() => {});
     set({ biometricEnabled: enabled });
+  },
+
+  setHapticsEnabled: async (enabled) => {
+    // Apply before persisting so the toggle's own feedback matches the new state.
+    applyHapticsEnabled(enabled);
+    await AsyncStorage.setItem(HAPTICS_ENABLED_KEY, enabled ? '1' : '0').catch(() => {});
+    set({ hapticsEnabled: enabled });
   },
 
   unlock: () => set({ isLocked: false }),

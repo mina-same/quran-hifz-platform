@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, View, Text, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { ScrollView, View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconCircleCheck } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';

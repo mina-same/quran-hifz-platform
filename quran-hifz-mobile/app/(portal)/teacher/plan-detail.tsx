@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ScrollView, View, Text, StyleSheet, Pressable, RefreshControl } from 'react-native';
+import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { IconArrowRight } from '@tabler/icons-react-native';
+import { IconArrowRight, IconCalendarEvent } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import ProgressBar from '@/components/ui/ProgressBar';
 import { SkeletonRows } from '@/components/ui/Skeleton';
-import ScheduleTable from '@/components/domain/ScheduleTable';
+import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
+import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet';
 import { useQuranPlan, useDeleteQuranPlan, type QuranPlan } from '@/lib/queries/quranPlan';
 import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
 import { theme } from '@/lib/theme';
@@ -32,6 +35,7 @@ export default function TeacherPlanDetail() {
   const { data: plan, isLoading, isRefetching, refetch } = useQuranPlan(id);
   const deletePlan = useDeleteQuranPlan();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showSchedule, setShowSchedule] = useState(false);
 
   async function handleDelete() {
     if (!id) return;
@@ -121,10 +125,23 @@ export default function TeacherPlanDetail() {
                 </View>
               </Card>
 
-              <Card noPadding>
-                <CardHeader title="تقسيم الأجزاء على الأيام" style={{ padding: 16, paddingBottom: 8 }} />
-                <ScheduleTable entries={plan.schedule} reversed={reversed} />
+              <Card>
+                <CardHeader title="تقسيم الأجزاء على الأيام" />
+                <SheetTriggerRow
+                  label="عرض التوزيع اليومي"
+                  value={`${plan.schedule.length} يوم`}
+                  icon={<IconCalendarEvent size={17} color={theme.green} />}
+                  onPress={() => setShowSchedule(true)}
+                  disabled={plan.schedule.length === 0}
+                />
               </Card>
+
+              <ScheduleSheet
+                visible={showSchedule}
+                onClose={() => setShowSchedule(false)}
+                title="تقسيم الأجزاء على الأيام"
+                items={scheduleItems(plan.schedule, reversed)}
+              />
 
               {!confirmDelete ? (
                 <View style={s.actionsRow}>

@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
-import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -84,6 +86,7 @@ export default function OnboardingScreen() {
 
       <View style={styles.topbar}>
         <Pressable
+          haptic="select"
           onPress={toggleTheme}
           hitSlop={8}
           style={styles.themeBtn}

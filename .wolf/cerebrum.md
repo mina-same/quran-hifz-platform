@@ -5,10 +5,16 @@
 > Last updated: 2026-07-28
 
 ## User Preferences
+- Mobile-first is the standing bar for quran-hifz-mobile: "make sure the design match the mobile vibe and mobile frandlly". Wide multi-column tables are NOT acceptable on the phone — a horizontally scrolling DataTable nested inside an already-scrolling page reads as broken. Move that content into a bottom sheet of compact cards (see ScheduleSheet.tsx) fronted by a SheetTriggerRow, rather than expanding it inline.
+- The user wants pickers to *feel* physical: a selection-tick haptic as rows scroll past, not just on tap ("this vibrations of the picker to fell live").
 
 <!-- How the user likes things done. Code style, tools, patterns, communication. -->
 
 ## Key Learnings
+- @gorhom/bottom-sheet LOCKS its scrollable whenever the sheet is not at its HIGHEST snap point: `useScrollEventsHandlersDefault` calls `scrollTo(0, lockPosition)` on every onScroll/onEndDrag/onMomentumEnd while SCROLLABLE_STATUS is LOCKED. So ANY sheet holding a scrollable list must use a SINGLE snap point — multi-snap (e.g. ['50%','80%']) makes the list snap back to where the drag started, which users report as "it goes back to the start". Applies to BottomSheetFlatList/ScrollView alike.
+- BottomSheetFlatList's TYPES omit `onScroll`/`scrollEventThrottle`/`decelerationRate`, but the runtime does forward a provided `onScroll` (via runOnJS inside useScrollHandler). Rather than cast, use `onViewableItemsChanged` + `viewabilityConfig` for per-row work — it passes straight through `...rest` and costs no per-frame JS bridge hop.
+- The mobile app has no Expo-template SafeAreaProvider by default — it was added to app/_layout.tsx on 2026-08-28. `SafeAreaView` from react-native-safe-area-context works without it (native view), but `useSafeAreaInsets()` THROWS. Check the provider is present before adding the hook anywhere.
+- The shared BottomSheet (components/ui/BottomSheet.tsx) now pays the bottom safe-area inset itself, so sheet content must NOT add its own home-indicator padding.
 - `<Alert>` (components/ui/Alert.tsx) now wraps text-only children itself, but the general RN rule still applies: any JSX with an interpolation is an ARRAY of children, so a component that special-cases `typeof children === 'string'` will crash with "Text strings must be rendered within a <Text> component". Check that when adding children-based components.
 - Mobile `hydrate()` restores a session WITHOUT navigating, so the (portal) group's first registered screen is where every role lands on resume. Any role→portal routing must be enforced in app/(portal)/_layout.tsx (pathname vs authUser.role), not assumed from login-time navigation.
 - Read-only DB audits are easy: copy a script into quran-hifz-server/ (so `mongoose` resolves), read MONGO_URI out of its .env, and run it with node. Confirmed 0 dangling User.profileId values as of 2026-08-28.
@@ -77,8 +83,14 @@
 - The teacher's "وصل إلى" picker is bounded by [start of today's ward .. end of the student's whole plan], not by today's ward — that's what makes recording an over-achievement possible at all (`clampReached`/`reachedBounds` + `planFinishPoint`).
 - `TeacherAttendance.tsx` and `TeacherTrackDetail.tsx` carry near-identical attendance/completion blocks (indentation differs by 2 spaces). Any change to one needs the same change in the other, plus `app/(portal)/teacher/attendance.tsx` on mobile.
 - Web/mobile screen pairings for the Quran-plan feature set: `TeacherPlanForm.tsx` ↔ `app/(portal)/teacher/plan-form.tsx`, `TeacherAttendance.tsx` ↔ `app/(portal)/teacher/attendance.tsx`, `IndividualPlanPanel.tsx` ↔ `components/domain/IndividualPlanPanel.tsx`. `TeacherTrackDetail.tsx` has **no** mobile counterpart for its attendance/completion block — mobile's `components/domain/TrackDetail.tsx` is a read-only drill-down by design (2026-07-29 scope cut), so web changes there land on mobile only via `attendance.tsx`.
+- Haptics are centralised in mobile `lib/haptics.ts` (tap/select/medium/success/warning/error) and `components/ui/Pressable.tsx` — NEVER import `expo-haptics` in a screen. Use the ui `Pressable` (fires on onPressIn) instead of RN's; pass haptic="select" for value changes (chips, filters, toggles, option pickers) and haptic="medium" for destructive actions and record start/stop. Shared `Button` already taps (danger → medium).
+- Tab-bar haptics go through `<Tabs screenListeners={{ tabPress: () => tap() }}>` in each role `_layout.tsx`, not a custom tabBarButton. The "المزيد" tab never reaches that listener — its `createMoreTabButton` short-circuits navigation, so it fires its own medium().
+- expo-haptics SDK 56: on Android the docs steer away from impactAsync/notificationAsync (raw Vibrator) toward `performAndroidHapticsAsync(AndroidHaptics.*)`. lib/haptics.ts branches on Platform for exactly this. expo-haptics was already in package.json AND already in ios/Podfile.lock, so no prebuild/rebuild was needed.
 
 ## Do-Not-Repeat
+- 2026-08-28 — Do not give a bottom sheet a fixed percentage snap point when its content has an intrinsic height (an inline iOS DateTimePicker is ~340pt): the footer button gets laid out past the sheet's bottom edge and disappears. Omit snapPoints so `enableDynamicSizing` measures the content, and give the picker a fixed-height wrapper so paging months doesn't resize the sheet.
+- 2026-08-28 — Do not use multiple snap points on a sheet containing a scrollable list (see the LOCKED-scrollable learning above). Single snap point only.
+- 2026-08-28 — Do not port a web DataTable straight onto a phone screen. `components/ui/DataTable.tsx` is now unused on mobile; the schedule views use ScheduleSheet.tsx (cards in a sheet) instead.
 
 - [2026-08-28] **This monorepo lived at `~/Downloads/mina work/` — a path with a SPACE — which broke `expo-constants`' iOS build phase.** That phase runs `bash -l -c "$PODS_TARGET_SRCROOT/../scripts/get-app-config-ios.sh"`; `bash -c` treats its argument as a command line and word-splits it, so the build died with `No such file or directory: /Users/xontel/Downloads/mina`. User fixed it by renaming to `~/Downloads/mina-work` (same-volume rename, instant, no copy) — CocoaPods uses relative paths so `ios/` needed no edits and there were zero stale absolute refs. **Keep this repo on a space-free path.** If it ever moves back, the alternative fix is a Podfile `post_install` hook re-quoting that one script, but a rename is strictly better.
 - [2026-08-28] **NEVER delete anything under `~/Library/Developer/Xcode/DerivedData` while an Xcode build is running** — check `ps -Ao pid,comm | grep -Ei 'xcodebuild|SWBBuildService'` first. I removed `ModuleCache.noindex` to reclaim 851 MB during a user-started build and it failed with `error: no such file or directory: .../ModuleCache.noindex/Session.modulevalidation` in targets React-graphics and React-featureflags. Harmless (Xcode regenerates the cache; just rebuild) but it wasted a long build. Orphaned per-project DerivedData dirs left behind by a project MOVE are safe to delete — the path hash changes, so the old dir can never be reused again.
@@ -117,6 +129,8 @@
 - [2026-07-30] `quran-hifz-mobile` native iOS builds (`npx expo run:ios`) require `"ios.buildReactNativeFromSource": "true"` in `ios/Podfile.properties.json` — the default prebuilt-RN-core pod for this Expo 56/RN 0.85.3 combo is genuinely broken upstream (podspec missing `source` attribute). If `ios/` ever gets regenerated from scratch (`expo prebuild --clean` or a fresh `rm -rf ios`), re-add this property before running `pod install`, or it'll fail again. See bug-330.
 - [2026-07-30] For this project's Jest setup, always pin `jest@29.7.0`, `@types/jest@29`, `jest-expo@56.0.5`, `@react-native/jest-preset@0.85.3` exactly — letting npm auto-resolve "latest" for `jest`/`jest-expo` pulls in jest 30 + jest-expo 57, which target a newer Expo SDK than this project's 56 and silently break test running with a `clearMocksOnScope is not a function` error (a `jest-mock` version split across the dependency tree). See bug-331/bug-332.
 - [2026-07-30] Backend now supports push notifications: `User.pushToken` (Expo push token, registered via `PUT /auth/push-token`), sent via `quran-hifz-server/src/lib/push.ts`'s `sendPushToUsers()` — wired into both `notify.ts`'s `notifyParents` (attendance/evaluation notifications) and `message.controller.ts`'s `sendMessage` (direct parent-teacher chat). Best-effort/fire-and-forget — never throws, so a push-service outage can't break the underlying in-app `Message` save. Mobile side registers the token once per authenticated session via `lib/hooks/usePushNotifications.ts`, but needs an actual EAS project ID (`app.json`'s `expo.extra.eas.projectId`) to get a real Expo push token — without one, the hook silently no-ops (by design, not a bug) since there's nothing to register against yet. Whoever sets up the EAS project should verify this end-to-end afterward.
+- 2026-08-28: A concurrent session rewrote `components/layout/MoreSheet.tsx` mid-task and silently clobbered edits already applied to it. When a task sweeps many files, re-verify the edits actually landed at the end (e.g. grep for the marker import across the tree) rather than trusting the earlier write.
+- 2026-08-28: Sweeping `import { ... Pressable ... } from 'react-native'` with a single-line regex misses multi-line import blocks (app/index.tsx). Match the import body across newlines, then verify with a tree-wide grep for any remaining raw usage.
 
 ## Decision Log
 
@@ -192,3 +206,50 @@ Always: `className="topbar-btn btn-primary"`.
 so it hugs content height and any `flex: 1` child renders at height 0 — the sheet opens but looks empty.
 With fixed `snapPoints`, pass `bottom: 0` (the one edge the library never overwrites) to make it fill.
 Never do this when `enableDynamicSizing` is on — the sheet height is derived from this view's measured height.
+
+### Never call BottomSheetModal.dismiss() before present() (2026-08-28)
+In a controlled `visible` wrapper around @gorhom/bottom-sheet v5, an `else dismiss()` branch fires on first mount
+and permanently pins the modal's internal status at `DISMISSING` (forceClose() hits a null inner-sheet ref, so no
+callback ever clears it). `handlePortalRender` then refuses to render forever — present() silently does nothing.
+Guard with a `wasPresented` ref, and clear it in `onDismiss` too since the library resets to INITIAL on unmount.
+
+### User Preference — MoreSheet design (2026-08-28)
+The user's reference screenshot IS the target: one rounded card per row (64pt min height), tinted icon chip on
+the leading side, bold label + muted one-line subtitle, chevron on the trailing side, muted group label above
+each section. They asked for it "exactly like the screenshot" AFTER first saying to move away from it — when a
+design direction is ambiguous here, ASK with the screenshot in hand rather than reasoning about density.
+Subtitles live in `desc` on NavItem in lib/constants/portals.ts. Accent colour is per ICON (ACCENT_BY_ICON in
+MoreSheet), not per position, so an item keeps its colour across portals.
+Concurrent Claude sessions edit this repo — check `git status` before large rewrites.
+- 2026-08-28 (haptics): fire on `onPressIn`, not `onPress` — feedback lands with the finger instead of trailing it; accepted trade-off is a buzz on a press the user drags away from and cancels (standard iOS). Deliberately NO haptics on scroll, RefreshControl pull-to-refresh (33 files have one), or navigation transitions — constant buzzing is the fastest way to get the feature switched off. Web is a no-op even though expo-haptics supports it. Preference persisted as `qh_haptics_enabled`, opt-OUT (only an explicit '0' disables), exposed as a Switch in AccountSettingsScreen.
+
+### Two mobile layout traps hit in MoreSheet (2026-08-28)
+1. `style={({ pressed }) => [...]}` on <Pressable> can be dropped wholesale in this app — the row lost its
+   background, border, padding AND flexDirection, collapsing to a default column. Object/array styles work.
+   `components/ui/SheetTriggerRow.tsx` still uses the callback form and is likely affected the same way.
+2. ~~`textAlign: 'auto'` resolves to LEFT here, so every Arabic <Text> in a full-width container needs an
+   explicit `textAlign: 'right'`.~~ **WRONG — corrected 2026-08-28, see the RTL text-alignment entry below.**
+   `textAlign: 'right'` renders visually LEFT under forced RTL. Text inside a content-sized flex row child
+   is unaffected either way, which is what hides the bug.
+
+### User Preference — MoreSheet group labels sit LEFT (2026-08-28)
+التقييم / المسارات الاستثنائية / الحساب / الخروج are explicitly `textAlign: 'left'`, against the RTL flow of the
+rest of the sheet. The row titles and subtitles stay right-aligned. Do not "correct" the group labels to right.
+
+### RTL text alignment — `textAlign: 'right'` renders visually LEFT (2026-08-28)
+The app forces RTL (`I18nManager.forceRTL(true)` in app/_layout.tsx), and RN then **swaps left/right text
+alignment**: `effectiveParagraphStyle` in node_modules/react-native/Libraries/Text/RCTTextAttributes.mm turns
+NSTextAlignmentRight into NSTextAlignmentLeft whenever the view's layout direction is RTL. So on a <Text>,
+`textAlign: 'right'` puts Arabic on the visual LEFT, and an unset alignment resolves left too. `<TextInput>`
+does NOT get the swap (FormInput/FormTextarea/FormSelect's search field keep `textAlign: 'right'` and are
+correct). This is why input labels, DataTable cells and every bottom-sheet header sat on the left.
+**Fix:** `components/ui/Text.tsx` wraps RN's <Text> and applies `textStart` to all of it; import Text from
+'@/components/ui/Text', never from 'react-native'. `textStart` (= 'left', visually right) and `textEnd`
+(= 'right', visually left) are exported from lib/theme.ts — use those tokens, never a bare literal.
+Note `I18nManager.swapLeftAndRightInRTL(false)` does NOT help: it governs Yoga layout props, while the text
+swap keys off the view's layout direction independently.
+
+### Bottom sheets must pay the safe-area inset once, in components/ui/BottomSheet.tsx
+Content pinned at the bottom of a sheet (a footer, a "تم" button) gets swallowed by the home indicator.
+The shared wrapper adds `paddingBottom: 24 + insets.bottom` for every sheet — never add a magic paddingBottom
+at the call site. Insets resolve because expo-router's ExpoRoot mounts SafeAreaProvider above app/_layout.tsx.

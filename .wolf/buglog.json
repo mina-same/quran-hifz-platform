@@ -5946,6 +5946,116 @@
       ],
       "occurrences": 2,
       "last_seen": "2026-08-28T15:55:58.682379"
+    },
+    {
+      "id": "bug-358",
+      "timestamp": "2026-08-28T16:19:27.826067",
+      "error_message": "User (3rd report): \"still i keep click in more and not working\" — no bottom sheet ever appears, anywhere in the app",
+      "file": "quran-hifz-mobile/components/ui/BottomSheet.tsx",
+      "root_cause": "The controlled wrapper ran `if (visible) present(); else dismiss();` in a useEffect, so EVERY BottomSheet called dismiss() on its first mount (visible always starts false). In @gorhom/bottom-sheet v5, BottomSheetModal.handleDismiss() on a never-presented modal takes the non-early-exit branch (status is INITIAL, not CLOSED/MINIMIZED): it sets statusRef = MODAL_STATUS.DISMISSING and calls bottomSheetRef.current?.forceClose() — but bottomSheetRef is null because nothing is mounted yet, so no animation callback ever runs to clear the status. The modal is then stuck in DISMISSING, and handlePortalRender short-circuits with `if ([MODAL_STATUS.DISMISSING].includes(statusRef.current)) return;`, so a later present() mounts state but renders nothing into the portal. Silent: no error, no warning. Affected MoreSheet, FormSelect, FormDatePicker and all four admin/parents sheets — no sheet in the app had ever opened.",
+      "fix": "BottomSheet.tsx tracks `wasPresented` in a ref and only calls dismiss() for a true->false transition, never on first mount. onDismiss also clears the flag before calling onClose, because the library resets the modal to INITIAL during unmount — without that, the visible->false render after a swipe-to-dismiss would re-poison the modal and break every subsequent open. npx tsc --noEmit clean.",
+      "tags": [
+        "mobile",
+        "bottom-sheet",
+        "gorhom",
+        "modal-status",
+        "dismissing",
+        "portal",
+        "more-sheet",
+        "root-cause"
+      ],
+      "related_bugs": [
+        "bug-353",
+        "bug-357"
+      ],
+      "occurrences": 3,
+      "last_seen": "2026-08-28T16:19:27.826067"
+    },
+    {
+      "id": "bug-359",
+      "timestamp": "2026-08-28T16:29:54.336549",
+      "error_message": "handleSend() in recordlesson.tsx awaited createRecording.mutateAsync() with no catch — a failed save rejected the async press handler (unhandled promise rejection) instead of being handled",
+      "file": "quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx",
+      "root_cause": "mutateAsync rejects on error; the handler had no try/catch, so the rejection escaped the onPress handler and setSent(true)/onSent() were skipped only as a side effect of the throw",
+      "fix": "Wrapped the mutateAsync call in try/catch: the catch fires the error haptic and returns early (failure is already surfaced via createRecording.isError), success haptic + setSent/onSent run only on the resolved path",
+      "tags": [
+        "react-query",
+        "mutateAsync",
+        "unhandled-rejection",
+        "error-handling",
+        "haptics",
+        "mobile"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T16:29:54.336549"
+    },
+    {
+      "id": "bug-360",
+      "timestamp": "2026-08-28T16:36:28.899664",
+      "error_message": "MoreSheet rows render as a bare vertical stack — no card background, border or padding; icon chip, label and chevron each on their own line; Arabic group labels left-aligned",
+      "file": "quran-hifz-mobile/components/layout/MoreSheet.tsx",
+      "root_cause": "Two independent defects. (1) The rows used the callback form `style={({ pressed }) => [...]}`; the whole style was dropped, leaving a default column View. The header's close button, the ONLY control in the sheet using a plain object style, rendered correctly through the same <Pressable> wrapper — so the callback form, not the wrapper, is what fails here. Measured evidence: chip/title/desc/chevron sat at 4 stacked y-offsets totalling exactly the sum of their intrinsic heights (113pt) with no padding or gap. (2) `textAlign: 'auto'` resolves to LEFT in this build, so Arabic Text in a full-width container aligns left; text only looked correct where it was a content-sized flex child in a row (the header title).",
+      "fix": "Rows now take a plain object/array style (`style={styles.row}`), pressed-tint dropped in favour of the haptic press-in feedback. Added explicit `textAlign: 'right'` to groupLabel/rowLabel/rowDesc/title/userName/userRole.",
+      "tags": [
+        "mobile",
+        "more-sheet",
+        "pressable",
+        "style-callback",
+        "rtl",
+        "textalign",
+        "layout"
+      ],
+      "related_bugs": [
+        "bug-357",
+        "bug-358"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T16:36:28.899664"
+    },
+    {
+      "id": "bug-361",
+      "timestamp": "2026-08-28T17:20:00Z",
+      "error_message": "User: on the create-plan surah picker sheet — 'when scroll down it scroll but when stop scrolling in the center and continue scrolling it go from the start agin'",
+      "file": "quran-hifz-mobile/components/forms/FormSelect.tsx",
+      "root_cause": "FormSelect opened its sheet with snapPoints={['50%','80%']}. @gorhom/bottom-sheet marks the scrollable LOCKED whenever the sheet sits below its HIGHEST snap point (useScrollEventsHandlersDefault: SCROLLABLE_STATUS.LOCKED -> scrollTo(0, lockPosition) on every onScroll / onEndDrag / onMomentumEnd). At the 50% snap the 114-item surah list was therefore force-scrolled back to the offset the drag started from, which reads as 'jumps back to the start'.",
+      "fix": "Single snap point (['85%']) so the sheet is always EXTENDED and the list is UNLOCKED. Also added a header, Arabic-normalised search for lists >= 12 options, fixed 52pt rows + getItemLayout + initialScrollIndex (opens on the current value), and a selection-tick haptic per row scrolled past via onViewableItemsChanged.",
+      "tags": [
+        "mobile",
+        "bottom-sheet",
+        "gorhom",
+        "scroll",
+        "formselect",
+        "snap-points",
+        "haptics"
+      ],
+      "related_bugs": [
+        "bug-357",
+        "bug-358",
+        "bug-360"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T17:20:00Z"
+    },
+    {
+      "id": "bug-362",
+      "timestamp": "2026-08-28T16:53:13.961994",
+      "error_message": "User (Arabic/English, with screenshot of teacher/plan-form): 'alot of text around the app is on the left not right? like the header title of inputs and header of bottom sheets this is wrong'",
+      "file": "quran-hifz-mobile/components/ui/Text.tsx",
+      "root_cause": "The app forces RTL (I18nManager.forceRTL in app/_layout.tsx) and React Native then SWAPS left/right text alignment — effectiveParagraphStyle in RCTTextAttributes.mm maps NSTextAlignmentRight to NSTextAlignmentLeft when the view's layout direction is RTL. So FormGroup/CardHeader/DataTable/MoreSheet's `textAlign: 'right'` rendered visually LEFT, and Text with no textAlign resolved left as well. A previous session had recorded the opposite rule in cerebrum ('needs an explicit textAlign: right'), which spread the wrong fix. <TextInput> is unaffected by the swap, which is why inputs looked correct while their labels did not.",
+      "fix": "Added lib/theme.ts textStart/textEnd tokens ('left' = visually right) with the RN source reference, plus components/ui/Text.tsx wrapping RN <Text> with textAlign: textStart as a base style (call-site styles still override). Swept all 69 files importing Text from 'react-native' onto the wrapper and deleted the 15 harmful `textAlign: 'right'` entries from <Text> styles, keeping them on the 4 <TextInput> styles. Corrected the wrong cerebrum guidance.",
+      "tags": [
+        "rtl",
+        "i18nmanager",
+        "textalign",
+        "arabic",
+        "mobile",
+        "layout",
+        "forcertl"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T16:53:13.961994"
     }
   ]
 }

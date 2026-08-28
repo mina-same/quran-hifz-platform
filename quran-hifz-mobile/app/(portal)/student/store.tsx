@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Pressable } from 'react-native';
+import { ScrollView, View, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconBook, IconStar, IconAward, IconGift } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import { theme } from '@/lib/theme';
+import { success, error } from '@/lib/haptics';
 
 const MY_PTS = 740;
 const ITEMS = [
@@ -18,7 +21,8 @@ export default function StudentStore() {
   const [redeemed, setRedeemed] = useState<number | null>(null);
 
   function handleRedeem(id: number, pts: number) {
-    if (pts > MY_PTS) return;
+    if (pts > MY_PTS) { error(); return; } // not enough points — say so in the hand
+    success();
     setRedeemed(id);
     setTimeout(() => setRedeemed(null), 4000);
   }

@@ -1,14 +1,16 @@
 import { useMemo } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useRouter } from 'expo-router';
-import { IconX, IconLogout, IconSun, IconMoon } from '@tabler/icons-react-native';
+import { IconX, IconLogout, IconSun, IconMoon, IconChevronLeft } from '@tabler/icons-react-native';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { PORTALS } from '@/lib/constants/portals';
 import type { PortalType, NavGroup } from '@/lib/types/portal';
 import { ICON_MAP } from './iconMap';
 import BottomSheet from '@/components/ui/BottomSheet';
+import Pressable from '@/components/ui/Pressable';
 
 interface Props {
   visible: boolean;
@@ -17,20 +19,49 @@ interface Props {
   hiddenIds: string[];
 }
 
+/**
+ * Accent per icon rather than per position, so an item keeps the same colour no
+ * matter which portal or group it lands in — the teacher sheet's target/red,
+ * list-check/blue, video/gold, star/green, chart-bar/brown run comes out of this.
+ */
+const ACCENT_BY_ICON: Record<string, keyof ReturnType<typeof useAppTheme> & string> = {
+  target: 'red',
+  'list-check': 'blue',
+  video: 'gold',
+  star: 'green',
+  'chart-bar': 'brown',
+  'calendar-event': 'green',
+  'user-circle': 'amber',
+  clock: 'blue',
+  gift: 'gold',
+  'user-plus': 'blue',
+  chalkboard: 'brown',
+  'user-heart': 'red',
+  'building-arch': 'gold',
+  microphone: 'red',
+  message: 'blue',
+  school: 'green',
+  users: 'blue',
+  timeline: 'brown',
+  'calendar-check': 'green',
+  book: 'green',
+  home: 'green',
+  'layout-dashboard': 'green',
+};
+
 export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props) {
   const router = useRouter();
   const theme = useAppTheme();
-  const { user, logout, themeMode, toggleTheme } = usePortalStore();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { user, logout, themeMode, toggleTheme } = usePortalStore();
 
-  // Cycled per tile so consecutive tiles never repeat the same accent color.
-  const ACCENT_COLORS = [theme.green, theme.gold, theme.blue, theme.red, theme.brown];
+  // Icon washes sit on the row surface, so dark mode needs a stronger alpha than
+  // light to read as a tint rather than as dirt.
+  const tint = theme.mode === 'dark' ? '33' : '1A';
 
   const groups: NavGroup[] = PORTALS[portal].nav
     .map((g) => ({ ...g, items: g.items.filter((i) => hiddenIds.includes(i.id)) }))
     .filter((g) => g.items.length > 0);
-
-  let tileIndex = -1;
 
   const handleNavigate = (id: string) => {
     onClose();
@@ -44,41 +75,69 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
   };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} snapPoints={['75%']}>
+    <BottomSheet visible={visible} onClose={onClose} snapPoints={['80%']}>
       <View style={styles.sheetInner}>
         <View style={styles.header}>
           <Text style={styles.title}>المزيد</Text>
-          <Pressable onPress={onClose} hitSlop={8}>
-            <IconX size={20} color={theme.textMuted} />
+          <Pressable onPress={onClose} hitSlop={10} style={styles.closeBtn}>
+            <IconX size={19} color={theme.text} />
           </Pressable>
         </View>
+        <View style={styles.headerRule} />
 
-        <BottomSheetScrollView style={styles.list} showsVerticalScrollIndicator={false}>
+        <BottomSheetScrollView
+          style={styles.list}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        >
           {groups.map((g) => (
             <View key={g.group} style={styles.group}>
               <Text style={styles.groupLabel}>{g.group}</Text>
-              <View style={styles.tileGrid}>
-                {g.items.map((item) => {
-                  const Icon = ICON_MAP[item.icon] ?? IconX;
-                  tileIndex += 1;
-                  const color = ACCENT_COLORS[tileIndex % ACCENT_COLORS.length];
-                  return (
-                    <Pressable
-                      key={item.id}
-                      style={({ pressed }) => [styles.tile, { borderTopColor: color }, pressed && styles.tilePressed]}
-                      onPress={() => handleNavigate(item.id)}
-                    >
-                      <View style={styles.tileContent}>
-                        <Icon size={22} color={color} />
-                        <Text style={styles.tileLabel} numberOfLines={2}>{item.label}</Text>
-                      </View>
-                      {item.dot && <View style={styles.tileDot} />}
-                    </Pressable>
-                  );
-                })}
-              </View>
+
+              {g.items.map((item) => {
+                const Icon = ICON_MAP[item.icon] ?? IconX;
+                const accent = (theme[ACCENT_BY_ICON[item.icon] ?? 'green'] ?? theme.green) as string;
+                return (
+                  <Pressable
+                    key={item.id}
+                    style={styles.row}
+                    onPress={() => handleNavigate(item.id)}
+                  >
+                    <View style={[styles.iconWrap, { backgroundColor: `${accent}${tint}` }]}>
+                      <Icon size={20} color={accent} />
+                    </View>
+                    <View style={styles.rowText}>
+                      <Text style={styles.rowLabel} numberOfLines={1}>{item.label}</Text>
+                      {!!item.desc && (
+                        <Text style={styles.rowDesc} numberOfLines={1}>{item.desc}</Text>
+                      )}
+                    </View>
+                    {item.dot && <View style={styles.rowDot} />}
+                    <IconChevronLeft size={18} color={theme.textMuted} />
+                  </Pressable>
+                );
+              })}
             </View>
           ))}
+
+          {/* Logout reads as one of the menu rows, but it is an action rather than
+              a destination — hence the red treatment and no chevron. */}
+          <View style={styles.group}>
+            <Text style={styles.groupLabel}>الخروج</Text>
+            <Pressable
+              haptic="medium"
+              style={[styles.row, styles.logoutRow]}
+              onPress={handleLogout}
+            >
+              <View style={[styles.iconWrap, { backgroundColor: `${theme.red}${tint}` }]}>
+                <IconLogout size={20} color={theme.red} />
+              </View>
+              <View style={styles.rowText}>
+                <Text style={[styles.rowLabel, { color: theme.red }]} numberOfLines={1}>تسجيل الخروج</Text>
+                <Text style={styles.rowDesc} numberOfLines={1}>الخروج من حسابك في التطبيق</Text>
+              </View>
+            </Pressable>
+          </View>
         </BottomSheetScrollView>
 
         <View style={styles.footer}>
@@ -89,15 +148,12 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
             <Text style={styles.userName} numberOfLines={1}>{user?.name}</Text>
             <Text style={styles.userRole} numberOfLines={1}>{user?.role}</Text>
           </View>
-          <Pressable onPress={toggleTheme} hitSlop={8} style={styles.logoutBtn}>
+          <Pressable haptic="select" onPress={toggleTheme} hitSlop={8} style={styles.footerBtn}>
             {themeMode === 'dark' ? (
-              <IconSun size={18} color={theme.textMuted} />
+              <IconSun size={17} color={theme.textMuted} />
             ) : (
-              <IconMoon size={18} color={theme.textMuted} />
+              <IconMoon size={17} color={theme.textMuted} />
             )}
-          </Pressable>
-          <Pressable onPress={handleLogout} hitSlop={8} style={styles.logoutBtn}>
-            <IconLogout size={18} color={theme.textMuted} />
           </Pressable>
         </View>
       </View>
@@ -114,112 +170,144 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingHorizontal: 18,
-      paddingVertical: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.border,
+      paddingHorizontal: 22,
+      paddingTop: 6,
+      paddingBottom: 16,
     },
     title: {
-      fontSize: 15,
+      fontSize: theme.fontSize.xl,
       fontFamily: theme.fontCairoBold,
       color: theme.text,
     },
-    list: {
-      // Takes the space between the header and the footer so the footer stays
-      // pinned and the tiles scroll instead of overflowing the sheet.
-      flex: 1,
-      paddingTop: 4,
-    },
-    group: {
-      marginTop: 8,
-    },
-    groupLabel: {
-      paddingHorizontal: 18,
-      paddingTop: 8,
-      paddingBottom: 4,
-      fontSize: 10,
-      color: theme.textMuted,
-      fontFamily: theme.fontCairo,
-      letterSpacing: 1,
-      textTransform: 'uppercase',
-    },
-    tileGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 10,
-      paddingHorizontal: 18,
-      paddingTop: 4,
-    },
-    tile: {
-      width: '31%',
-      aspectRatio: 1,
+    closeBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: theme.radiusFull,
       backgroundColor: theme.card,
       borderWidth: 1,
       borderColor: theme.border,
-      borderTopWidth: 3,
-      borderRadius: theme.radius,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...theme.shadow.sm,
+    },
+    headerRule: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: theme.border,
+      marginHorizontal: 22,
+    },
+    list: {
+      flex: 1,
+    },
+    listContent: {
+      paddingHorizontal: 22,
+      paddingBottom: theme.space.lg,
+    },
+    group: {
+      marginTop: theme.space.lg,
+    },
+    groupLabel: {
+      // Deliberately left, against the RTL flow of everything else in the sheet:
+      // the section labels read as quiet markers down the far edge rather than
+      // as headings competing with the row titles they sit above.
+      textAlign: 'left',
+      fontSize: theme.fontSize.sm,
+      color: theme.textMuted,
+      fontFamily: theme.fontCairo,
+      marginBottom: theme.space.sm,
+    },
+    /**
+     * Styled with a plain object, never `style={({ pressed }) => ...}`. The
+     * function form is the one thing the header's close button did NOT use, and
+     * it is the only difference between that button rendering correctly and
+     * these rows losing their background, border, padding and flexDirection
+     * entirely — the row collapsed into a bare vertical stack. Press feedback
+     * comes from the haptic on press-in instead.
+     */
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.space.md,
+      paddingHorizontal: theme.space.md,
+      paddingVertical: 11,
+      marginBottom: 10,
+      minHeight: 64,
+      backgroundColor: theme.bg,
+      borderWidth: 1,
+      borderColor: theme.border,
+      borderRadius: 14,
+    },
+    logoutRow: {
+      borderColor: `${theme.red}44`,
+    },
+    iconWrap: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    tilePressed: {
-      backgroundColor: theme.bg,
+    rowText: {
+      flex: 1,
     },
-    tileContent: {
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: 6,
-      paddingHorizontal: 6,
-    },
-    tileLabel: {
-      fontSize: 11,
+    rowLabel: {
+      fontSize: theme.fontSize.lg,
       color: theme.text,
-      fontFamily: theme.fontCairo,
-      textAlign: 'center',
+      fontFamily: theme.fontCairoBold,
     },
-    tileDot: {
-      position: 'absolute',
-      top: 8,
-      right: 8,
-      width: 7,
-      height: 7,
-      borderRadius: 4,
+    rowDesc: {
+      fontSize: theme.fontSize.sm,
+      color: theme.textMuted,
+      fontFamily: theme.fontCairo,
+      marginTop: 2,
+    },
+    rowDot: {
+      width: 8,
+      height: 8,
+      borderRadius: theme.radiusFull,
       backgroundColor: theme.gold,
     },
     footer: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 10,
-      paddingHorizontal: 18,
-      paddingTop: 14,
-      marginTop: 8,
+      gap: theme.space.md,
+      paddingHorizontal: 22,
+      paddingTop: theme.space.md,
       borderTopWidth: 1,
       borderTopColor: theme.border,
     },
     avatar: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: theme.bg,
+      width: 38,
+      height: 38,
+      borderRadius: theme.radiusFull,
+      backgroundColor: `${theme.green}1A`,
       alignItems: 'center',
       justifyContent: 'center',
     },
     avatarText: {
-      fontSize: 13,
+      fontSize: theme.fontSize.base,
       color: theme.green,
       fontFamily: theme.fontCairoBold,
     },
     userInfo: { flex: 1 },
     userName: {
-      fontSize: 13,
+      fontSize: theme.fontSize.base,
       color: theme.text,
       fontFamily: theme.fontCairoBold,
     },
     userRole: {
-      fontSize: 11,
+      fontSize: theme.fontSize.xs,
       color: theme.textMuted,
       fontFamily: theme.fontCairo,
       marginTop: 1,
     },
-    logoutBtn: { padding: 6 },
+    footerBtn: {
+      width: 34,
+      height: 34,
+      borderRadius: theme.radiusSm,
+      borderWidth: 1,
+      borderColor: theme.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
   });
 }

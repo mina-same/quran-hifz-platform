@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, View, Text, Switch, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { ScrollView, View, Switch, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as LocalAuthentication from 'expo-local-authentication';
 import Card from '@/components/ui/Card';
@@ -13,6 +14,7 @@ import { useMe, useUpdateProfile, useChangePassword } from '@/lib/queries/auth';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import type { ApiError } from '@/lib/api';
+import { success, error, select } from '@/lib/haptics';
 
 /**
  * Shared "الملف الشخصي" screen for student + teacher portals (admin/parent
@@ -24,6 +26,8 @@ export default function AccountSettingsScreen() {
   const updateUserName = usePortalStore((s) => s.updateUserName);
   const biometricEnabled = usePortalStore((s) => s.biometricEnabled);
   const setBiometricEnabled = usePortalStore((s) => s.setBiometricEnabled);
+  const hapticsOn = usePortalStore((s) => s.hapticsEnabled);
+  const setHapticsOn = usePortalStore((s) => s.setHapticsEnabled);
   const { data: me, isLoading } = useMe();
   const updateProfile = useUpdateProfile();
   const changePassword = useChangePassword();
@@ -55,12 +59,13 @@ export default function AccountSettingsScreen() {
     page: { padding: theme.pagePadding, gap: 14 },
     loadingBox: { paddingVertical: 24, alignItems: 'center' },
     switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-    switchLabel: { flex: 1, fontSize: 13, fontFamily: theme.fontCairo, color: theme.text, textAlign: 'right' },
+    switchLabel: { flex: 1, fontSize: 13, fontFamily: theme.fontCairo, color: theme.text },
   }), [theme]);
 
   async function handleSaveName() {
     setNameSaved(false);
     if (name.trim().length < 2) {
+      error();
       setNameError('الاسم مطلوب (٢ أحرف على الأقل)');
       return;
     }
@@ -68,25 +73,29 @@ export default function AccountSettingsScreen() {
     try {
       const res = await updateProfile.mutateAsync(name.trim());
       updateUserName(res.user.name);
+      success();
       setNameSaved(true);
     } catch {
+      error();
       // surfaced via updateProfile.isError below
     }
   }
 
   async function handleChangePassword() {
     setPwSaved(false);
-    if (!currentPassword) { setPwError('كلمة المرور الحالية مطلوبة'); return; }
-    if (newPassword.length < 6) { setPwError('كلمة المرور الجديدة يجب أن تكون ٦ أحرف على الأقل'); return; }
-    if (newPassword !== confirmPassword) { setPwError('كلمتا المرور غير متطابقتين'); return; }
+    if (!currentPassword) { error(); setPwError('كلمة المرور الحالية مطلوبة'); return; }
+    if (newPassword.length < 6) { error(); setPwError('كلمة المرور الجديدة يجب أن تكون ٦ أحرف على الأقل'); return; }
+    if (newPassword !== confirmPassword) { error(); setPwError('كلمتا المرور غير متطابقتين'); return; }
     setPwError('');
     try {
       await changePassword.mutateAsync({ currentPassword, newPassword });
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      success();
       setPwSaved(true);
     } catch {
+      error();
       // surfaced via changePassword.isError below
     }
   }
@@ -167,12 +176,26 @@ export default function AccountSettingsScreen() {
               <Text style={styles.switchLabel}>اطلب التحقق البيومتري عند فتح التطبيق</Text>
               <Switch
                 value={biometricEnabled}
-                onValueChange={setBiometricEnabled}
+                onValueChange={(v) => { select(); setBiometricEnabled(v); }}
                 trackColor={{ true: theme.green, false: theme.border }}
               />
             </View>
           </Card>
         )}
+
+        <Card>
+          <CardHeader title="الاهتزاز عند اللمس" />
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>اهتزاز خفيف عند الضغط على الأزرار والقوائم</Text>
+            <Switch
+              value={hapticsOn}
+              // The store applies the new value synchronously, so the tick fires
+              // only when switching ON — silence is the right confirmation for OFF.
+              onValueChange={(v) => { setHapticsOn(v); select(); }}
+              trackColor={{ true: theme.green, false: theme.border }}
+            />
+          </View>
+        </Card>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

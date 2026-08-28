@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, View, Text, Pressable, StyleSheet, RefreshControl } from 'react-native';
+import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconUserPlus, IconPencil, IconX, IconCircleCheck, IconLink } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';
@@ -34,7 +36,7 @@ function ChildChip({ name, onRemove, theme }: { name: string; onRemove: () => vo
       paddingHorizontal: 10, paddingVertical: 4,
     }}>
       <Text style={{ fontSize: 12, fontFamily: theme.fontCairo, color: theme.green }}>{name}</Text>
-      <Pressable onPress={onRemove} hitSlop={6}>
+      <Pressable haptic="medium" onPress={onRemove} hitSlop={6}>
         <IconX size={13} color={theme.green} />
       </Pressable>
     </View>

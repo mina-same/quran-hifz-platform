@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Pressable, RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  ScrollView, View, TextInput, StyleSheet, RefreshControl, KeyboardAvoidingView, Platform,
+} from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconMicrophone, IconPlayerStop, IconSend } from '@tabler/icons-react-native';
 import {
@@ -19,6 +23,7 @@ import { useStudents, type Student } from '@/lib/queries/students';
 import { useCreateRecording } from '@/lib/queries/lessonRecordings';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { theme } from '@/lib/theme';
+import { success, error } from '@/lib/haptics';
 
 const LESSON_TYPES = ['حفظ جديد', 'مراجعة قريبة', 'مراجعة بعيدة', 'تحسين تلاوة', 'اختبار'];
 
@@ -46,14 +51,20 @@ function StudentRecorderCard({ student, context, onSent }: { student: Student; c
 
   async function handleSend() {
     if (!segment.trim()) return;
-    await createRecording.mutateAsync({
-      student: student._id,
-      ...(context.kind === 'halqa' ? { halqa: context.id } : { specialTrack: context.id }),
-      type,
-      segment,
-      points: Number(points) || 0,
-      teacherNote: note,
-    });
+    try {
+      await createRecording.mutateAsync({
+        student: student._id,
+        ...(context.kind === 'halqa' ? { halqa: context.id } : { specialTrack: context.id }),
+        type,
+        segment,
+        points: Number(points) || 0,
+        teacherNote: note,
+      });
+    } catch {
+      error();
+      return; // failure is surfaced by createRecording.isError
+    }
+    success();
     setSent(true);
     onSent();
   }
@@ -78,7 +89,7 @@ function StudentRecorderCard({ student, context, onSent }: { student: Student; c
           <Text style={s.label}>نوع الواجب</Text>
           <View style={s.chipsRow}>
             {LESSON_TYPES.map((t) => (
-              <Pressable key={t} style={[s.chip, type === t && s.chipActive]} onPress={() => setType(t)}>
+              <Pressable haptic="select" key={t} style={[s.chip, type === t && s.chipActive]} onPress={() => setType(t)}>
                 <Text style={[s.chipText, type === t && s.chipTextActive]}>{t}</Text>
               </Pressable>
             ))}
@@ -88,7 +99,7 @@ function StudentRecorderCard({ student, context, onSent }: { student: Student; c
           <TextInput style={s.input} placeholder="البقرة ٢٤٠-٢٤٥" value={segment} onChangeText={setSegment} textAlign="right" placeholderTextColor={theme.textMuted} />
 
           <View style={s.recArea}>
-            <Pressable style={[s.recBtn, state.isRecording && s.recBtnStop]} onPress={handleToggle}>
+            <Pressable haptic="medium" style={[s.recBtn, state.isRecording && s.recBtnStop]} onPress={handleToggle}>
               {state.isRecording ? <IconPlayerStop size={18} color={theme.white} /> : <IconMicrophone size={18} color={theme.white} />}
               <Text style={s.recBtnText}>{state.isRecording ? 'إيقاف' : hasStopped ? 'تسجيل جديد' : 'ابدأ التسجيل'}</Text>
             </Pressable>

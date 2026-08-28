@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet, LayoutAnimation } from 'react-native';
+import { View, StyleSheet, LayoutAnimation } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import {
   useAudioRecorder,
   useAudioRecorderState,
@@ -12,6 +14,7 @@ import {
 } from '@tabler/icons-react-native';
 import Alert from '@/components/ui/Alert';
 import { theme } from '@/lib/theme';
+import { success } from '@/lib/haptics';
 
 export default function AudioRecorder() {
   const [done, setDone] = useState(false);
@@ -53,6 +56,7 @@ export default function AudioRecorder() {
   };
 
   const handleSend = () => {
+    success();
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setDone(true);
   };
@@ -84,6 +88,7 @@ export default function AudioRecorder() {
       )}
       <View style={styles.btns}>
         <Pressable
+          haptic="medium"
           onPress={handleToggle}
           style={[styles.btn, state.isRecording ? styles.btnStop : styles.btnStart]}
         >

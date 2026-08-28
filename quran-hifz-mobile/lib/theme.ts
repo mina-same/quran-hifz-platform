@@ -96,3 +96,24 @@ export function buildTheme(mode: ThemeMode) {
 
 export const theme = buildTheme('light');
 export type Theme = typeof theme;
+
+/**
+ * Text alignment under this app's forced RTL (`I18nManager.forceRTL(true)` in
+ * app/_layout.tsx).
+ *
+ * React Native swaps left/right **text** alignment whenever the view's layout
+ * direction is RTL — see `effectiveParagraphStyle` in
+ * node_modules/react-native/Libraries/Text/RCTTextAttributes.mm, which turns
+ * NSTextAlignmentRight into NSTextAlignmentLeft and vice versa. So on a <Text>,
+ * `textAlign: 'right'` renders visually LEFT: the exact opposite of how it reads.
+ * Leaving it off is no better — an unset alignment resolves visually left here too.
+ *
+ * Use these tokens on <Text> styles instead of a literal. components/ui/Text.tsx
+ * already applies `textStart` to every <Text> in the app, so a style only needs
+ * one of these when it wants something other than the default.
+ *
+ * <TextInput> does NOT get the swap (its alignment is applied to the native field
+ * directly) — keep writing `textAlign: 'right'` there, as FormInput/FormTextarea do.
+ */
+export const textStart = 'left' as const;  // visually RIGHT — where an Arabic line starts
+export const textEnd = 'right' as const;   // visually LEFT — where an Arabic line ends

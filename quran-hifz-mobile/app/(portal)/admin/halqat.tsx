@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { ScrollView, Text, StyleSheet, RefreshControl } from 'react-native';
+import { ScrollView, StyleSheet, RefreshControl } from 'react-native';
+import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HalqaCard from '@/components/domain/HalqaCard';
 import { SkeletonRows } from '@/components/ui/Skeleton';

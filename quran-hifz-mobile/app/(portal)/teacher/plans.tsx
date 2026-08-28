@@ -1,5 +1,7 @@
 import { useRouter } from 'expo-router';
-import { ScrollView, View, Text, StyleSheet, Pressable, RefreshControl } from 'react-native';
+import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconPlus } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';

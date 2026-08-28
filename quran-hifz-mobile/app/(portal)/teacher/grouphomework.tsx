@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Pressable, RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  ScrollView, View, TextInput, StyleSheet, RefreshControl, KeyboardAvoidingView, Platform,
+} from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
@@ -114,7 +118,7 @@ export default function TeacherGroupHomework() {
             <Text style={s.label}>موعد التسليم</Text>
             <View style={s.chipsRow}>
               {DAYS.map((d) => (
-                <Pressable key={d} style={[s.chip, form.dueDay === d && s.chipActive]} onPress={() => setForm((f) => ({ ...f, dueDay: d }))}>
+                <Pressable haptic="select" key={d} style={[s.chip, form.dueDay === d && s.chipActive]} onPress={() => setForm((f) => ({ ...f, dueDay: d }))}>
                   <Text style={[s.chipText, form.dueDay === d && s.chipTextActive]}>{d}</Text>
                 </Pressable>
               ))}
@@ -140,7 +144,7 @@ export default function TeacherGroupHomework() {
               <Text style={s.hwDesc}>{hw.description}</Text>
               <View style={s.hwFoot}>
                 <Badge label={`موعد: ${hw.dueDay}`} variant="gold" />
-                <Pressable onPress={() => deleteHW.mutate(hw._id)} disabled={deleteHW.isPending}>
+                <Pressable haptic="medium" onPress={() => deleteHW.mutate(hw._id)} disabled={deleteHW.isPending}>
                   <Text style={s.delText}>حذف</Text>
                 </Pressable>
               </View>
@@ -162,7 +166,7 @@ const s = StyleSheet.create({
   errorBanner: { backgroundColor: theme.redPale, color: theme.red, fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
   addBtn: { backgroundColor: theme.green, borderRadius: 8, padding: 12, alignItems: 'center' },
   addBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 14 },
-  label: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 6, marginTop: 10 },
+  label: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 6, marginTop: 10 , textAlign: 'left'},
   input: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo, fontSize: 13, color: theme.text, backgroundColor: theme.white },
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },

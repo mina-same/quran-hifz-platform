@@ -1,5 +1,7 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Pressable, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
 import { theme } from '@/lib/theme';
+import { select } from '@/lib/haptics';
 
 export interface ScopeOption {
   value: string;
@@ -21,7 +23,11 @@ export default function ScopeTabs({ options, value, onChange }: Props) {
         return (
           <Pressable
             key={opt.value}
-            onPress={() => onChange(opt.value)}
+            onPress={() => {
+              // Silent when re-tapping the active tab — nothing changed.
+              if (!active) select();
+              onChange(opt.value);
+            }}
             style={[styles.tab, active && styles.tabActive]}
           >
             <Text style={[styles.label, active && styles.labelActive]} numberOfLines={1}>

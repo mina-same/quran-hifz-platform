@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ScrollView, View, Text, StyleSheet, Pressable, RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
+import { ScrollView, View, StyleSheet, RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
@@ -222,7 +224,7 @@ export default function AdminSpecialTracks() {
               {teachers.map((t) => {
                 const selected = form.teachers.includes(t._id);
                 return (
-                  <Pressable key={t._id} style={[s.teacherChip, selected && s.teacherChipActive]} onPress={() => toggleTeacher(t._id)}>
+                  <Pressable haptic="select" key={t._id} style={[s.teacherChip, selected && s.teacherChipActive]} onPress={() => toggleTeacher(t._id)}>
                     <Text style={[s.teacherChipText, selected && s.teacherChipTextActive]}>{t.name}</Text>
                   </Pressable>
                 );
@@ -231,12 +233,14 @@ export default function AdminSpecialTracks() {
 
             <View style={s.rowGroup}>
               <Pressable
+                haptic="select"
                 style={[s.onlineToggle, !form.isOnline && s.onlineToggleActive]}
                 onPress={() => sf('isOnline', false)}
               >
                 <Text style={[s.onlineToggleText, !form.isOnline && s.onlineToggleTextActive]}>حضوري</Text>
               </Pressable>
               <Pressable
+                haptic="select"
                 style={[s.onlineToggle, form.isOnline && s.onlineToggleActive]}
                 onPress={() => sf('isOnline', true)}
               >
@@ -313,7 +317,7 @@ export default function AdminSpecialTracks() {
                   <Pressable onPress={() => openEdit(t)}>
                     <Text style={s.linkText}>تعديل</Text>
                   </Pressable>
-                  <Pressable onPress={() => deleteTrack.mutate(t._id)} disabled={deleteTrack.isPending}>
+                  <Pressable haptic="medium" onPress={() => deleteTrack.mutate(t._id)} disabled={deleteTrack.isPending}>
                     <Text style={s.delText}>حذف</Text>
                   </Pressable>
                 </View>
@@ -350,6 +354,7 @@ export default function AdminSpecialTracks() {
                       <View key={getEnrolledId(st)} style={s.studentRow}>
                         <Text style={s.studentName}>{getEnrolledName(st)}</Text>
                         <Pressable
+                          haptic="medium"
                           onPress={() => unenrollStudent.mutate({ id: t._id, studentId: getEnrolledId(st) })}
                           disabled={unenrollStudent.isPending}
                         >

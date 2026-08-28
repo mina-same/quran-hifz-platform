@@ -2645,3 +2645,30 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 15:56 | Fixed "المزيد" tab: BottomSheetView content collapse + custom tabBarButton | components/ui/BottomSheet.tsx, components/layout/MoreSheet.tsx, components/layout/MoreTabButton.tsx, app/(portal)/*/_layout.tsx | tsc clean, bug-357 logged | ~45k |
+
+## Session: 2026-08-28 16:17
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:19 | Root cause of dead bottom sheets: dismiss() on first mount poisons BottomSheetModal status | components/ui/BottomSheet.tsx | tsc clean, bug-358 logged | ~30k |
+| 16:25 | Redesigned MoreSheet: grouped inset list, group-anchored accents, no per-row cards/chevrons/subtitles | components/layout/MoreSheet.tsx | tsc clean | ~20k |
+
+## Session: 2026-08-28 16:26
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:29 | MoreSheet rebuilt to match screenshot (row cards + subtitles + chevrons) and logout row added | components/layout/MoreSheet.tsx, lib/constants/portals.ts, lib/types/portal.ts | tsc clean | ~25k |
+| 17:05 | App-wide haptics: lib/haptics.ts taxonomy + components/ui/Pressable.tsx wrapper; wired Button, ScopeTabs, MoreTabButton, all 4 tab bars, FormSelect/FormDatePicker, 22 screens/domain components, outcome haptics on save/login/unlock paths, settings toggle (qh_haptics_enabled) | lib/haptics.ts, components/ui/Pressable.tsx, 30+ files | tsc clean, 47 tests pass | ~55k |
+| 16:36 | Edited quran-hifz-mobile/components/ui/BottomSheet.tsx | added 1 import(s) | ~100 |
+| 16:36 | Edited quran-hifz-mobile/components/ui/BottomSheet.tsx | CSS: paddingBottom | ~185 |
+| 16:36 | Edited quran-hifz-mobile/components/ui/BottomSheet.tsx | 3→3 lines | ~40 |
+| 16:36 | Fixed MoreSheet row collapse (style callback) + RTL text alignment | components/layout/MoreSheet.tsx | tsc clean, bug-359 | ~35k |
+| 16:36 | Session end: 3 writes across 1 files (BottomSheet.tsx) | 1 reads | ~897 tok |
+| 16:43 | MoreSheet group labels left-aligned; verified shared sheet bottom-inset padding | components/layout/MoreSheet.tsx | tsc clean | ~12k |
+| 16:43 | Session end: 3 writes across 1 files (BottomSheet.tsx) | 1 reads | ~897 tok |
+| 17:22 | Mobile schedule tables → bottom sheets of compact cards: new ScheduleSheet.tsx + SheetTriggerRow.tsx, wired into TrackDetail, IndividualPlanPanel, plan-detail, plan-form; deleted ScheduleTable.tsx | components/domain/ScheduleSheet.tsx, components/ui/SheetTriggerRow.tsx, components/domain/{TrackDetail,IndividualPlanPanel}.tsx, app/(portal)/teacher/{plan-detail,plan-form}.tsx | tsc clean, 47 tests pass | ~30k |
+| 17:22 | Fixed clipped confirm button on the iOS date sheet (dynamic sizing + header/footer) and made BottomSheet pay the bottom safe-area inset; added missing SafeAreaProvider at root | components/forms/FormDatePicker.tsx, components/ui/BottomSheet.tsx, app/_layout.tsx | tsc clean, bug-360 | ~12k |
+| 17:22 | Fixed surah-picker list snapping back to the top mid-scroll (multi-snap locks @gorhom's scrollable); added sheet header, Arabic search, getItemLayout + initialScrollIndex, per-row tick haptic | components/forms/FormSelect.tsx | tsc clean, bug-361 | ~14k |
+| 16:44 | Session end: 3 writes across 1 files (BottomSheet.tsx) | 1 reads | ~897 tok |
+| 17:40 | RTL text fix: RN swaps left/right textAlign under forceRTL, so `textAlign: 'right'` rendered visually LEFT. Added lib/theme.ts textStart/textEnd + components/ui/Text.tsx wrapper, swept 69 files off RN Text, removed 15 wrong `textAlign: 'right'` from Text styles (kept 4 TextInput ones) | components/ui/Text.tsx, lib/theme.ts, 69 files | tsc clean, 47 tests pass | ~40k |
+| 16:53 | Session end: 3 writes across 1 files (BottomSheet.tsx) | 1 reads | ~897 tok |

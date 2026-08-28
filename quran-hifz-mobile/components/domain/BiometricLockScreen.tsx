@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { IconFaceId, IconFingerprint } from '@tabler/icons-react-native';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { theme } from '@/lib/theme';
+import { success, error as errorHaptic } from '@/lib/haptics';
 
 /** Shown after a stored session resumes silently, when the user has opted into
  * biometric re-auth (Account Settings). Requires Face ID/Touch ID before any
@@ -35,9 +38,15 @@ export default function BiometricLockScreen() {
         cancelLabel: 'إلغاء',
         disableDeviceFallback: false,
       });
-      if (result.success) unlock();
-      else setError('لم يتم التحقق من الهوية — حاول مرة أخرى');
+      if (result.success) {
+        success();
+        unlock();
+      } else {
+        errorHaptic();
+        setError('لم يتم التحقق من الهوية — حاول مرة أخرى');
+      }
     } catch {
+      errorHaptic();
       setError('تعذّر التحقق — حاول مرة أخرى');
     } finally {
       setChecking(false);

@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import {
-  View, Text, Image, Pressable, StyleSheet, ScrollView, Modal, ActivityIndicator,
-  TextInput, KeyboardAvoidingView, Platform,
+  View, Image, StyleSheet, ScrollView, Modal, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Redirect, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -18,6 +19,7 @@ import { ApiError } from '@/lib/api';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
+import { success, error } from '@/lib/haptics';
 
 type FormData = { email: string; password: string };
 
@@ -50,6 +52,7 @@ export default function LoginScreen() {
     clearSessionExpired();
     try {
       await login(data.email, data.password);
+      success();
       const role = usePortalStore.getState().authUser?.role;
       if (role === 'parent') {
         setShowChildSelector(true);
@@ -57,6 +60,7 @@ export default function LoginScreen() {
         router.replace(PORTAL_ROUTES[role] as any);
       }
     } catch (err) {
+      error();
       setServerError(err instanceof ApiError ? err.message : 'حدث خطأ غير متوقع، حاول مرة أخرى');
     }
   }
@@ -149,6 +153,7 @@ export default function LoginScreen() {
         >
           <View style={styles.topbar}>
             <Pressable
+              haptic="select"
               onPress={toggleTheme}
               hitSlop={8}
               style={styles.themeBtn}
@@ -216,6 +221,7 @@ export default function LoginScreen() {
                       placeholderTextColor={theme.textMuted}
                     />
                     <Pressable
+                      haptic="select"
                       onPress={() => setShowPassword((v) => !v)}
                       hitSlop={8}
                       accessibilityLabel={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}

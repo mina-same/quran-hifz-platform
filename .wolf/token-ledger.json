@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-06-27T12:42:49.696Z",
   "lifetime": {
-    "total_tokens_estimated": 11525472,
-    "total_reads": 5051,
-    "total_writes": 6340,
-    "total_sessions": 102,
-    "anatomy_hits": 4299,
+    "total_tokens_estimated": 11529060,
+    "total_reads": 5055,
+    "total_writes": 6352,
+    "total_sessions": 104,
+    "anatomy_hits": 4303,
     "anatomy_misses": 608,
     "repeated_reads_blocked": 3867,
-    "estimated_savings_vs_bare_cli": 21741058
+    "estimated_savings_vs_bare_cli": 21741858
   },
   "sessions": [
     {
@@ -65468,6 +65468,158 @@
         "writes_count": 0,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-08-28-1626",
+      "started": "2026-08-28T13:26:52.675Z",
+      "ended": "2026-08-28T13:36:40.551Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 572,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 100,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 185,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 40,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 572,
+        "output_tokens_estimated": 325,
+        "reads_count": 1,
+        "writes_count": 3,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-08-28-1626",
+      "started": "2026-08-28T13:26:52.675Z",
+      "ended": "2026-08-28T13:43:33.091Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 572,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 100,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 185,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 40,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 572,
+        "output_tokens_estimated": 325,
+        "reads_count": 1,
+        "writes_count": 3,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-08-28-1626",
+      "started": "2026-08-28T13:26:52.675Z",
+      "ended": "2026-08-28T13:44:24.227Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 572,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 100,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 185,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 40,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 572,
+        "output_tokens_estimated": 325,
+        "reads_count": 1,
+        "writes_count": 3,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-08-28-1626",
+      "started": "2026-08-28T13:26:52.675Z",
+      "ended": "2026-08-28T13:53:47.921Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 572,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 100,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 185,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/ui/BottomSheet.tsx",
+          "tokens_estimated": 40,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 572,
+        "output_tokens_estimated": 325,
+        "reads_count": 1,
+        "writes_count": 3,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
       }
     }
   ],

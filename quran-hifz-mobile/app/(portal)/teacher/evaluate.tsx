@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, View, Text, Pressable, StyleSheet, RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
+import { ScrollView, View, StyleSheet, RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconCircleCheck, IconLock } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';
@@ -16,6 +18,7 @@ import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from '@/lib/
 import { MAX_SCORES, TOTAL_MAX } from '@/lib/evaluationRubric';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { success, error } from '@/lib/haptics';
 
 type ScoreCategory = 'hifz' | 'tajweed' | 'talawah';
 const CATEGORY_LABELS: Record<ScoreCategory, string> = { hifz: 'حفظ', tajweed: 'تجويد', talawah: 'تلاوة' };
@@ -102,9 +105,11 @@ export default function TeacherEvaluate() {
       },
       {
         onSuccess: () => {
+          success();
           setSaved(true);
           setTimeout(() => setSaved(false), 4000);
         },
+        onError: () => error(),
       },
     );
   }
@@ -228,6 +233,7 @@ export default function TeacherEvaluate() {
 
                 <View style={styles.toggleRow}>
                   <Pressable
+                    haptic="select"
                     disabled={alreadySubmitted}
                     onPress={() => setAttendance(st._id, 'حاضر')}
                     style={[styles.toggleBtn, !isAbsent && { backgroundColor: theme.green + '20', borderColor: theme.green }]}
@@ -235,6 +241,7 @@ export default function TeacherEvaluate() {
                     <Text style={[styles.toggleText, !isAbsent && { color: theme.green, fontFamily: theme.fontCairoBold }]}>حاضر</Text>
                   </Pressable>
                   <Pressable
+                    haptic="select"
                     disabled={alreadySubmitted}
                     onPress={() => setAttendance(st._id, 'غائب')}
                     style={[styles.toggleBtn, isAbsent && { backgroundColor: theme.red + '20', borderColor: theme.red }]}
@@ -253,6 +260,7 @@ export default function TeacherEvaluate() {
                             const active = e[cat] === n;
                             return (
                               <Pressable
+                                haptic="select"
                                 key={n}
                                 disabled={alreadySubmitted}
                                 onPress={() => setScore(st._id, cat, n)}
