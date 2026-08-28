@@ -5487,6 +5487,41 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-28T12:26:28.135915"
+    },
+    {
+      "id": "bug-336",
+      "timestamp": "2026-08-28T16:40:00Z",
+      "error_message": "لو الطالب متحمس وسمّع أكتر من المقرر، الزيادة كانت تُهمَل تماماً وباقي الخطة يفضل كما هو",
+      "file": "quran-hifz-server/src/lib/studentPlanReflow.ts",
+      "root_cause": "reflowStudentPlan computed shortfallAyahs = end - completed and bailed out with status 'done' whenever it was <= 0, so a surplus never reached the redistribution pool. The controller also hard-rejected any completedThrough point outside the day's own ward (400), so the case could not even be recorded.",
+      "fix": "Redistribution rewritten as an absolute span (cursor → the pool's pinned finish anchor) divided over the remaining days, so a negative or positive difference is handled by the same formula: a shortfall makes the following days heavier, a surplus lighter, with the plan's finish line pinned either way. Controller bounds widened to [day start .. plan finish] in the plan's direction; new noWard flag for days left with no content.",
+      "tags": [
+        "quran-plan",
+        "reflow",
+        "surplus",
+        "over-achievement",
+        "student-plan-progress"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T16:40:00Z"
+    },
+    {
+      "id": "bug-337",
+      "timestamp": "2026-08-28T16:40:00Z",
+      "error_message": "تكرار «إعادة حساب التوزيع» يُثقل الأيام الأولى تدريجياً (انحراف في التوزيع)",
+      "file": "quran-hifz-server/src/lib/studentPlanReflow.ts",
+      "root_cause": "reflowStudentPlan derived the division total as shortfallAyahs + poolOriginalAyahs, both read from the *current* (already-reflowed) ranges. After the first reflow the absent day's ayahs are already inside the pool, so every replay counted them again, inflating dailyAyahs and squeezing the pinned last day.",
+      "fix": "Total is now the absolute remaining span (cursor → pinned finish anchor), independent of how many times it runs. Verified: two consecutive reflowAll() calls after an absence produce byte-identical ranges.",
+      "tags": [
+        "quran-plan",
+        "reflow",
+        "idempotency",
+        "reflowAll"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T16:40:00Z"
     }
   ]
 }

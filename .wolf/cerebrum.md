@@ -59,6 +59,12 @@
 
 - [2026-07-29] **A partial day now shrinks its own assigned slice, not just future days.** `reflowStudentPlan()` in `studentPlanReflow.ts` always redistributed a shortfall across the *pool* (future pending occurrences) correctly, but left the *triggered* occurrence's own `surahStart/ayahStart/surahEnd/ayahEnd` untouched — so a day marked "partial" kept showing its full original assignment forever, even though the shortfall had already been pushed onto later days. Fixed: after the `shortfallAyahs <= 0` early-return, the undone-side boundary (`surahEnd/ayahEnd` for forward, `surahStart/ayahStart` for reverse) is now set to `completedThroughSurah/Ayah`, with `pageStart/pageEnd/juz` recomputed. `base*` fields (the original assignment) are untouched, so `IndividualPlanPanel.tsx`'s existing "الأصلي" (struck-through) vs "الحالي" (live) columns — which were already built for this — now actually show the shrink. Requested by the user in Arabic: "لو الورد الفعلي كان أقل من المقرر، يبقى المقرر بتاع النهارده يتحط فيه الفعلي والباقي يتوزع على باقي الأيام". See bug-320, and [[bug-316]] for the base direction invariant this respects (shrinks the correct side depending on forward/reverse).
 
+- Per-student plan redistribution (`studentPlanReflow.ts`) is measured in whole **ayahs** over an absolute span: from where the student actually stopped (`cursor`) to the pool's **pinned finish anchor** (the last pool entry's `base*` endpoint). Never derive the division total from the pool's current ranges — they already contain earlier reflows, so it double-counts on replay.
+- The same formula covers all three outcomes in both schedule directions: absence / shortfall (following days get heavier) and over-achievement (following days get lighter). Direction is `isForwardDoc(doc)` — per student, never the shared plan.
+- `noWard: true` on a student occurrence = the student ran so far ahead that the plan's content ran out before its days did. Kept `pending` with its span collapsed onto the finish point, so a later absence can reclaim it; UI must key off `noWard`, not the span.
+- The teacher's "وصل إلى" picker is bounded by [start of today's ward .. end of the student's whole plan], not by today's ward — that's what makes recording an over-achievement possible at all (`clampReached`/`reachedBounds` + `planFinishPoint`).
+- `TeacherAttendance.tsx` and `TeacherTrackDetail.tsx` carry near-identical attendance/completion blocks (indentation differs by 2 spaces). Any change to one needs the same change in the other, plus `app/(portal)/teacher/attendance.tsx` on mobile.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
@@ -160,3 +166,5 @@ are colour modifiers with no layout of their own — padding/radius/font/flex al
 `.topbar-btn`, which despite its name is the base class for every button in the app,
 including form buttons. Writing `className="btn btn-ghost"` yields an unstyled button.
 Always: `className="topbar-btn btn-primary"`.
+
+- **2026-08-28 — when actual recitation exceeds the assigned ward:** the remaining days are *lightened* and the plan's end date stays pinned, rather than keeping the daily load and finishing early. Chosen by the user for symmetry with the existing shortfall rule (which pins the finish line and increases the daily load). Consequence: content can run out before the days do, hence the `noWard` flag rather than inventing work or silently shortening the plan.
