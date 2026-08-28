@@ -11,7 +11,7 @@ import { User } from '../models/User.model';
 
 const ADMIN = {
   name:     'مدير النظام',
-  email:    'admin@Tahfeez.com',
+  email:    'admin@tahfeez.com',
   password: 'admin@123',
 };
 

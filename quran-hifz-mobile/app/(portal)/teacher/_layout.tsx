@@ -1,11 +1,21 @@
+import { useState } from 'react';
 import { Tabs } from 'expo-router';
 import {
-  IconLayoutDashboard, IconSchool, IconUsers, IconCalendarCheck, IconMicrophone,
+  IconLayoutDashboard, IconSchool, IconUsers, IconCalendarCheck, IconMicrophone, IconDots,
 } from '@tabler/icons-react-native';
 import { theme } from '@/lib/theme';
+import MoreSheet from '@/components/layout/MoreSheet';
+
+// Nav items that have no tab of their own — the "المزيد" sheet lists exactly these.
+const MORE_IDS = [
+  'evaluate', 'recordlesson', 'grouphomework', 'plans', 'reports', 'special_tracks', 'settings',
+];
 
 export default function TeacherTabLayout() {
+  const [moreOpen, setMoreOpen] = useState(false);
+
   return (
+    <>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -20,7 +30,18 @@ export default function TeacherTabLayout() {
       <Tabs.Screen name="students"   options={{ title: 'طلابي',         tabBarIcon: ({ color, size }) => <IconUsers            size={size} color={color} /> }} />
       <Tabs.Screen name="attendance" options={{ title: 'الحضور',        tabBarIcon: ({ color, size }) => <IconCalendarCheck    size={size} color={color} />, tabBarBadge: '!' }} />
       <Tabs.Screen name="homework"   options={{ title: 'الواجبات',      tabBarIcon: ({ color, size }) => <IconMicrophone       size={size} color={color} />, tabBarBadge: '3' }} />
-      {/* Accessible via drawer only */}
+      {/* Opens the sheet instead of navigating to the (empty) more route. */}
+      <Tabs.Screen
+        name="more"
+        options={{ title: 'المزيد', tabBarIcon: ({ color, size }) => <IconDots size={size} color={color} /> }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            setMoreOpen(true);
+          },
+        }}
+      />
+      {/* Reachable from the "المزيد" sheet only. */}
       <Tabs.Screen name="plans"         options={{ href: null, title: 'الخطط' }} />
       <Tabs.Screen name="plan-form"     options={{ href: null, title: 'خطة حفظ' }} />
       <Tabs.Screen name="plan-detail"   options={{ href: null, title: 'تفاصيل الخطة' }} />
@@ -32,5 +53,13 @@ export default function TeacherTabLayout() {
       <Tabs.Screen name="track-detail"  options={{ href: null, title: 'تفاصيل المسار' }} />
       <Tabs.Screen name="settings" options={{ href: null, title: 'الملف الشخصي' }} />
     </Tabs>
+
+    <MoreSheet
+      visible={moreOpen}
+      onClose={() => setMoreOpen(false)}
+      portal="teacher"
+      hiddenIds={MORE_IDS}
+    />
+    </>
   );
 }

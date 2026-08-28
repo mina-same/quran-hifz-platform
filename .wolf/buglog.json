@@ -5830,18 +5830,39 @@
       "error_message": "buttons render wrong on device: label invisible in light mode and chewed/square left corners on the التالي and دخول buttons (all buttons)",
       "file": "quran-hifz-mobile/components/ui/Button.tsx",
       "root_cause": "android_ripple on the Pressable — Android swaps the view background for a RippleDrawable masked to the view's square bounds, which can wipe the backgroundColor (white label on no fill = invisible) and leave artifacts at the rounded corners. Not reproducible on web/iOS, which is why the Expo-web screenshots looked correct.",
-      "fix": "removed android_ripple from Button (and AudioRecorder), added overflow:'hidden' to the button so press feedback stays inside the radius, and limited the elevated shadow to iOS so Android elevation can't fight the borderRadius. Pressed feedback is now opacity on both platforms.",
+      "fix": "removed android_ripple from Button (and AudioRecorder), added overflow:'hidden' to the button so press feedback stays inside the radius, and limited the elevated shadow to iOS so Android elevation can't fight the borderRadius. Pressed feedback is now opacity on both platforms. | STILL BROKEN after that — second fix: Button no longer passes `style={({pressed}) => [...]}` to Pressable at all. NativeWind's JSX interop (babel jsxImportSource: 'nativewind') is active on every element and drops function styles on native, so the whole style array (background included) never reached the view; web was fine because NativeWind uses real CSS there. The coloured box is now a plain <View> with a plain style array inside the Pressable, pressed state tracked with onPressIn/onPressOut.",
       "tags": [
         "android",
         "pressable",
         "android_ripple",
         "button",
         "borderRadius",
-        "light-mode"
+        "light-mode",
+        "nativewind",
+        "css-interop",
+        "function-style"
       ],
       "related_bugs": [],
-      "occurrences": 2,
-      "last_seen": "2026-08-28T14:32:12.929761"
+      "occurrences": 3,
+      "last_seen": "2026-08-28T14:47:17.519571"
+    },
+    {
+      "id": "bug-353",
+      "timestamp": "2026-08-28T14:56:01.517981",
+      "error_message": "\"المزيد\" (More) tab on the teacher navbar does nothing — opens a blank screen",
+      "file": "quran-hifz-mobile/app/(portal)/teacher/_layout.tsx",
+      "root_cause": "teacher/more.tsx is a placeholder that returns null, and the layout never registered a <Tabs.Screen name=\"more\">. expo-router auto-added the route as a plain tab, so tapping it navigated to the empty screen. components/layout/MoreSheet.tsx existed but was imported nowhere in the app.",
+      "fix": "registered the more tab with an IconDots icon + listeners.tabPress that calls e.preventDefault() and opens <MoreSheet portal=\"teacher\" hiddenIds={MORE_IDS}> instead of navigating. MORE_IDS lists the teacher nav items with no tab of their own.",
+      "tags": [
+        "expo-router",
+        "tabs",
+        "more-sheet",
+        "teacher",
+        "navigation"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T14:56:01.517981"
     }
   ]
 }

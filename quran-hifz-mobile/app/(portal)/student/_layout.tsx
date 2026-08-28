@@ -1,11 +1,19 @@
+import { useState } from 'react';
 import { Tabs } from 'expo-router';
 import {
-  IconHome, IconBook, IconMicrophone, IconMessage, IconCalendarCheck,
+  IconHome, IconBook, IconMicrophone, IconMessage, IconCalendarCheck, IconDots,
 } from '@tabler/icons-react-native';
 import { theme } from '@/lib/theme';
+import MoreSheet from '@/components/layout/MoreSheet';
+
+// Nav items with no tab of their own — the "المزيد" sheet lists exactly these.
+const MORE_IDS = ['schedule', 'special_tracks', 'points', 'store', 'settings'];
 
 export default function StudentTabLayout() {
+  const [moreOpen, setMoreOpen] = useState(false);
+
   return (
+    <>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -20,12 +28,31 @@ export default function StudentTabLayout() {
       <Tabs.Screen name="homework"   options={{ title: 'الواجب',  tabBarIcon: ({ color, size }) => <IconMicrophone    size={size} color={color} />, tabBarBadge: '!' }} />
       <Tabs.Screen name="attendance" options={{ title: 'الحضور',  tabBarIcon: ({ color, size }) => <IconCalendarCheck size={size} color={color} /> }} />
       <Tabs.Screen name="messages"   options={{ title: 'الرسائل', tabBarIcon: ({ color, size }) => <IconMessage       size={size} color={color} /> }} />
-      {/* Accessible via drawer only */}
+      {/* Opens the sheet instead of navigating to the (empty) more route. */}
+      <Tabs.Screen
+        name="more"
+        options={{ title: 'المزيد', tabBarIcon: ({ color, size }) => <IconDots size={size} color={color} /> }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            setMoreOpen(true);
+          },
+        }}
+      />
+      {/* Reachable from the "المزيد" sheet only. */}
       <Tabs.Screen name="schedule" options={{ href: null, title: 'المواعيد' }} />
       <Tabs.Screen name="points"   options={{ href: null, title: 'نقاطي' }} />
       <Tabs.Screen name="store"    options={{ href: null, title: 'المكافآت' }} />
       <Tabs.Screen name="special_tracks" options={{ href: null, title: 'المسارات الاستثنائية' }} />
       <Tabs.Screen name="settings" options={{ href: null, title: 'الملف الشخصي' }} />
     </Tabs>
+
+    <MoreSheet
+      visible={moreOpen}
+      onClose={() => setMoreOpen(false)}
+      portal="student"
+      hiddenIds={MORE_IDS}
+    />
+    </>
   );
 }

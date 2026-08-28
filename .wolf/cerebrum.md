@@ -9,6 +9,7 @@
 <!-- How the user likes things done. Code style, tools, patterns, communication. -->
 
 ## Key Learnings
+- NativeWind is active on EVERY element here (babel `jsxImportSource: 'nativewind'`), and on native its interop drops `style={({ pressed }) => [...]}` function styles — the view renders with no background at all. Always pass a plain style array; track pressed with onPressIn/onPressOut. Web builds do NOT reproduce this (NativeWind emits real CSS there). Still-suspect files with the same pattern: components/layout/NavItem.tsx, components/layout/MoreSheet.tsx, components/domain/MasjidAccordion.tsx, app/(portal)/student/messages.tsx, app/index.tsx (child cards).
 - Don't use `android_ripple` on a rounded Pressable in this app: on Android it replaces the background with a square-masked RippleDrawable, which can hide the fill (white label on no fill = invisible button) and break the rounded corners. Use pressed opacity + `overflow:'hidden'` instead; keep shadows iOS-only.
 - Expo web (`npx expo start --web`) + Playwright is a working way to screenshot this app, but it will NOT reproduce Android-only rendering bugs.
 - Mobile app already has NativeWind v4 + tailwind.config.js + global.css wired, but the UI is written with StyleSheet + `useAppTheme()`; react-native-reusables (shadcn for RN) would be a real migration (cva/clsx/tailwind-merge/rn-primitives + CSS-var theme + ~16 Button call sites), not a drop-in.

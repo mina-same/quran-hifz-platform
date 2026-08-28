@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { IconSun, IconMoon } from '@tabler/icons-react-native';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import Button from '@/components/ui/Button';
@@ -12,6 +13,7 @@ export default function OnboardingScreen() {
   const theme = useAppTheme();
   const router = useRouter();
   const completeOnboarding = usePortalStore((s) => s.completeOnboarding);
+  const toggleTheme = usePortalStore((s) => s.toggleTheme);
   const [index, setIndex] = useState(0);
 
   const SLIDES = [
@@ -52,6 +54,14 @@ export default function OnboardingScreen() {
 
   const styles = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
+    // `flex-end` renders at the visual left under forced RTL — matches the login screen.
+    topbar: { alignItems: 'flex-end', paddingTop: 8 },
+    themeBtn: {
+      width: 44, height: 44, borderRadius: 22,
+      alignItems: 'center', justifyContent: 'center',
+      backgroundColor: theme.card,
+      ...theme.shadow.md,
+    },
     content: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
     illustration: { width: 240, height: 240, marginBottom: 22 },
     title: {
@@ -71,6 +81,19 @@ export default function OnboardingScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+
+      <View style={styles.topbar}>
+        <Pressable
+          onPress={toggleTheme}
+          hitSlop={8}
+          style={styles.themeBtn}
+          accessibilityLabel={theme.mode === 'dark' ? 'التبديل للوضع الفاتح' : 'التبديل للوضع الداكن'}
+        >
+          {theme.mode === 'dark'
+            ? <IconSun size={22} color={theme.gold} />
+            : <IconMoon size={22} color={theme.green} />}
+        </Pressable>
+      </View>
       <GestureDetector gesture={swipe}>
         <View style={styles.content}>
           <Image source={slide.image} style={styles.illustration} resizeMode="contain" />

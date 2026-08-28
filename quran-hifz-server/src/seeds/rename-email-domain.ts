@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import { ENV } from '../config/env';
 import { User } from '../models/User.model';
 
-const NEW_DOMAIN = 'Tahfeez.com';
+const NEW_DOMAIN = 'tahfeez.com';
 
 async function run(): Promise<void> {
   await mongoose.connect(ENV.MONGO_URI);

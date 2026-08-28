@@ -50,6 +50,7 @@ export default function RootLayout() {
   const isHydrating = usePortalStore((s) => s.isHydrating);
   const authUser = usePortalStore((s) => s.authUser);
   const isLocked = usePortalStore((s) => s.isLocked);
+  const themeMode = usePortalStore((s) => s.themeMode);
   const hydrate = usePortalStore((s) => s.hydrate);
 
   useEffect(() => {
@@ -70,7 +71,7 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <BottomSheetModalProvider>
-          <StatusBar style="light" />
+          <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} />
           {authUser && isLocked ? (
             <BiometricLockScreen />
           ) : (

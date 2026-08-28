@@ -13,7 +13,7 @@ import mongoose from 'mongoose';
 import { ENV } from '../config/env';
 import { User } from '../models/User.model';
 
-const EMAIL_DOMAIN = 'Tahfeez.com';
+const EMAIL_DOMAIN = 'tahfeez.com';
 
 // Words that form a compound first name together with the following word.
 const COMPOUND_HEADS = new Set(['عبد', 'أبو', 'ابو', 'ام', 'أم']);

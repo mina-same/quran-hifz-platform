@@ -1,4 +1,5 @@
-import { Pressable, Text, StyleSheet, ViewStyle, ActivityIndicator, Platform } from 'react-native';
+import { useState } from 'react';
+import { Pressable, View, Text, StyleSheet, ViewStyle, ActivityIndicator, Platform } from 'react-native';
 import { theme } from '@/lib/theme';
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';
@@ -36,52 +37,66 @@ export default function Button({
 }: Props) {
   const v = VARIANTS[variant];
   const s = SIZES[size];
+  const [pressed, setPressed] = useState(false);
+
+  // The coloured box is a plain View with a plain style array: NativeWind's JSX
+  // interop (jsxImportSource: 'nativewind') drops `style={({ pressed }) => …}`
+  // functions on native, which left the button with no background at all.
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
-      style={({ pressed }) => [
-        styles.btn,
-        {
-          backgroundColor: v.bg,
-          height: s.height,
-          paddingHorizontal: s.paddingHorizontal,
-          borderRadius: s.radius,
-          gap: s.gap,
-        },
-        v.border && { borderWidth: 1, borderColor: v.border },
-        v.elevated && Platform.OS === 'ios' && theme.shadow.sm,
-        fullWidth && styles.fullWidth,
-        pressed && styles.pressed,
-        disabled && styles.disabled,
-        style,
-      ]}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      style={fullWidth ? styles.fullWidth : styles.selfStart}
     >
-      {loading ? (
-        <ActivityIndicator color={v.text} size="small" />
-      ) : (
-        <>
-          {icon}
-          <Text style={[styles.label, { color: v.text, fontSize: s.fontSize, lineHeight: s.fontSize + 6 }]}>
-            {label}
-          </Text>
-        </>
-      )}
+      <View
+        style={[
+          styles.box,
+          {
+            backgroundColor: v.bg,
+            height: s.height,
+            paddingHorizontal: s.paddingHorizontal,
+            borderRadius: s.radius,
+            gap: s.gap,
+          },
+          v.border ? { borderWidth: 1, borderColor: v.border } : null,
+          v.elevated && Platform.OS === 'ios' ? theme.shadow.sm : null,
+          fullWidth ? styles.fullWidth : styles.selfStart,
+          pressed ? styles.pressed : null,
+          disabled ? styles.disabled : null,
+          style,
+        ]}
+      >
+        {loading ? (
+          <ActivityIndicator color={v.text} size="small" />
+        ) : (
+          <>
+            {icon}
+            <Text style={[styles.label, { color: v.text, fontSize: s.fontSize, lineHeight: s.fontSize + 6 }]}>
+              {label}
+            </Text>
+          </>
+        )}
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  btn: {
+  box: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'flex-start',
     // Keeps every child (and any press feedback) inside the rounded corners.
     overflow: 'hidden',
   },
+  selfStart: {
+    alignSelf: 'flex-start',
+  },
   fullWidth: {
     alignSelf: 'stretch',
+    width: '100%',
   },
   pressed: {
     opacity: 0.85,

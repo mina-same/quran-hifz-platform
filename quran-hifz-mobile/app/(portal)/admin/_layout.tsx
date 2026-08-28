@@ -1,11 +1,19 @@
+import { useState } from 'react';
 import { Tabs } from 'expo-router';
 import {
-  IconLayoutDashboard, IconUsers, IconSchool, IconTarget, IconChartBar,
+  IconLayoutDashboard, IconUsers, IconSchool, IconTarget, IconChartBar, IconDots,
 } from '@tabler/icons-react-native';
 import { theme } from '@/lib/theme';
+import MoreSheet from '@/components/layout/MoreSheet';
+
+// Nav items with no tab of their own — the "المزيد" sheet lists exactly these.
+const MORE_IDS = ['register', 'teachers', 'parents', 'masajid', 'special_tracks'];
 
 export default function AdminTabLayout() {
+  const [moreOpen, setMoreOpen] = useState(false);
+
   return (
+    <>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -20,7 +28,18 @@ export default function AdminTabLayout() {
       <Tabs.Screen name="halqat"    options={{ title: 'الحلقات',       tabBarIcon: ({ color, size }) => <IconSchool          size={size} color={color} /> }} />
       <Tabs.Screen name="kpis"      options={{ title: 'المؤشرات',      tabBarIcon: ({ color, size }) => <IconTarget          size={size} color={color} /> }} />
       <Tabs.Screen name="reports"   options={{ title: 'التقارير',      tabBarIcon: ({ color, size }) => <IconChartBar        size={size} color={color} /> }} />
-      {/* Accessible via drawer only */}
+      {/* Opens the sheet instead of navigating to the (empty) more route. */}
+      <Tabs.Screen
+        name="more"
+        options={{ title: 'المزيد', tabBarIcon: ({ color, size }) => <IconDots size={size} color={color} /> }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            setMoreOpen(true);
+          },
+        }}
+      />
+      {/* Reachable from the "المزيد" sheet only. */}
       <Tabs.Screen name="register"       options={{ href: null, title: 'تسجيل طالب' }} />
       <Tabs.Screen name="teachers"       options={{ href: null, title: 'المعلمون' }} />
       <Tabs.Screen name="masajid"        options={{ href: null, title: 'المساجد' }} />
@@ -28,5 +47,13 @@ export default function AdminTabLayout() {
       <Tabs.Screen name="track-detail" options={{ href: null, title: 'تفاصيل المسار' }} />
       <Tabs.Screen name="parents" options={{ href: null, title: 'أولياء الأمور' }} />
     </Tabs>
+
+    <MoreSheet
+      visible={moreOpen}
+      onClose={() => setMoreOpen(false)}
+      portal="admin"
+      hiddenIds={MORE_IDS}
+    />
+    </>
   );
 }
