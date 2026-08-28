@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
-import { View, Text, Image, Pressable, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { IconBook2, IconChecklist, IconUsersGroup, IconArrowLeft } from '@tabler/icons-react-native';
+import { StatusBar } from 'expo-status-bar';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import Button from '@/components/ui/Button';
@@ -14,28 +16,34 @@ export default function OnboardingScreen() {
 
   const SLIDES = [
     {
-      icon: IconBook2,
-      tint: theme.green,
-      title: 'تابع رحلة حفظك',
-      desc: 'اعرف خطة حفظك، تقدّمك اليومي، وما تبقّى لك بضغطة واحدة.',
+      image: require('@/assets/onboarding/1.png'),
+      title: 'حفظ القرآن الكريم\nنور لحياتك',
+      desc: 'نساعدك على حفظ كتاب الله وتدبره خطوة بخطوة بإذن الله.',
     },
     {
-      icon: IconChecklist,
-      tint: theme.blue,
-      title: 'حضور وواجبات في مكان واحد',
-      desc: 'سجّل حضورك، راجع واجباتك الصوتية، وتابع تقييم معلمك أولاً بأول.',
+      image: require('@/assets/onboarding/2.png'),
+      title: 'متابعة يومية\nوتشجيع مستمر',
+      desc: 'خطط يومية مرنة، وإحصائيات تساعدك على الاستمرار وتحقيق أهدافك.',
     },
     {
-      icon: IconUsersGroup,
-      tint: theme.gold,
-      title: 'حلقتك ومعلمك دائماً معك',
-      desc: 'تواصل مع حلقتك ومعلمك، وتابع أخبار الجمعية أينما كنت.',
+      image: require('@/assets/onboarding/3.png'),
+      title: 'اجعل القرآن\nجزءاً من يومك',
+      desc: 'منصة تجمع لك الأدوات والمجتمع لتعيش رحلة حفظ مميزة.',
     },
   ];
 
   const isLast = index === SLIDES.length - 1;
   const slide = SLIDES[index];
-  const Icon = slide.icon;
+
+  // Swipe left for the next slide, right for the previous one. runOnJS keeps the
+  // callback off the UI thread so it can call setIndex directly.
+  const swipe = Gesture.Pan()
+    .runOnJS(true)
+    .activeOffsetX([-20, 20])
+    .onEnd((e) => {
+      if (e.translationX < -40) setIndex((i) => Math.min(i + 1, SLIDES.length - 1));
+      else if (e.translationX > 40) setIndex((i) => Math.max(i - 1, 0));
+    });
 
   async function finish() {
     await completeOnboarding();
@@ -44,50 +52,32 @@ export default function OnboardingScreen() {
 
   const styles = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg, paddingHorizontal: 24 },
-    top: { height: 44, justifyContent: 'center', alignItems: 'flex-start' },
-    skip: { color: theme.textMuted, fontFamily: theme.fontCairoBold, fontSize: 13 },
-    content: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
-    logo: { width: 56, height: 56, marginBottom: 4, opacity: 0.9 },
-    iconWrap: {
-      width: 88, height: 88, borderRadius: 26,
-      alignItems: 'center', justifyContent: 'center',
-      marginBottom: 6,
-    },
+    content: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
+    illustration: { width: 240, height: 240, marginBottom: 22 },
     title: {
-      fontSize: 20, fontFamily: theme.fontAmiriBold, color: theme.text,
-      textAlign: 'center', lineHeight: 30,
+      fontSize: 24, fontFamily: theme.fontCairoBold, color: theme.green,
+      textAlign: 'center', lineHeight: 38,
     },
     desc: {
       fontSize: 14, fontFamily: theme.fontCairo, color: theme.textMuted,
-      textAlign: 'center', lineHeight: 22, paddingHorizontal: 12,
+      textAlign: 'center', lineHeight: 26, paddingHorizontal: 8, marginTop: 6,
     },
-    bottom: { paddingBottom: 24, gap: 22, alignItems: 'center', width: '100%' },
-    dots: { flexDirection: 'row', gap: 8 },
-    dot: {
-      width: 8, height: 8, borderRadius: 4,
-      backgroundColor: theme.border,
-    },
-    dotActive: { backgroundColor: theme.green, width: 22 },
+    bottom: { paddingBottom: 28, gap: 26, alignItems: 'center', width: '100%' },
+    dots: { flexDirection: 'row-reverse', gap: 9 },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: theme.border },
+    dotActive: { backgroundColor: theme.green },
   }), [theme]);
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.top}>
-        {!isLast && (
-          <Pressable onPress={finish} hitSlop={10}>
-            <Text style={styles.skip}>تخطي</Text>
-          </Pressable>
-        )}
-      </View>
-
-      <View style={styles.content}>
-        <Image source={require('@/assets/logo.png')} style={styles.logo} resizeMode="contain" />
-        <View style={[styles.iconWrap, { backgroundColor: `${slide.tint}14` }]}>
-          <Icon size={38} color={slide.tint} />
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+      <GestureDetector gesture={swipe}>
+        <View style={styles.content}>
+          <Image source={slide.image} style={styles.illustration} resizeMode="contain" />
+          <Text style={styles.title}>{slide.title}</Text>
+          <Text style={styles.desc}>{slide.desc}</Text>
         </View>
-        <Text style={styles.title}>{slide.title}</Text>
-        <Text style={styles.desc}>{slide.desc}</Text>
-      </View>
+      </GestureDetector>
 
       <View style={styles.bottom}>
         <View style={styles.dots}>
@@ -100,7 +90,7 @@ export default function OnboardingScreen() {
           label={isLast ? 'ابدأ الآن' : 'التالي'}
           onPress={() => (isLast ? finish() : setIndex((i) => i + 1))}
           fullWidth
-          icon={<IconArrowLeft size={17} color={theme.white} />}
+          size="lg"
         />
       </View>
     </SafeAreaView>

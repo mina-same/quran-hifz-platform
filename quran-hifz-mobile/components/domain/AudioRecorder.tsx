@@ -85,7 +85,6 @@ export default function AudioRecorder() {
       <View style={styles.btns}>
         <Pressable
           onPress={handleToggle}
-          android_ripple={{ color: 'rgba(255,255,255,0.3)' }}
           style={[styles.btn, state.isRecording ? styles.btnStop : styles.btnStart]}
         >
           {state.isRecording

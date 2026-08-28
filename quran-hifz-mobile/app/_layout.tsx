@@ -80,6 +80,7 @@ export default function RootLayout() {
             </Stack.Protected>
             <Stack.Protected guard={!authUser}>
               <Stack.Screen name="index" />
+              <Stack.Screen name="onboarding" />
             </Stack.Protected>
           </Stack>
           )}

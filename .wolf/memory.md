@@ -2592,3 +2592,32 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 12:36 | Diagnosed "Project is incompatible with this version of Expo Go": project serves sdkVersion 56.0.0, App Store Expo Go now ships the SDK 57 client only — no Expo Go exists for SDK 56 | (diagnosis only, no code change) | root cause confirmed via api.expo.dev/v2/versions/latest + local manifest | ~9k |
+| 12:51 | iOS dev-client build failed: disk had 632MB free of 228GB. Cleared Xcode DerivedData (5.7G) + npm cache (1.3G) -> 8.6GB free; retrying build behind a disk watchdog | (tooling, no source change) | 8GB reclaimed; 8.6GB still likely short of the ~25GB an RN-from-source build needs | ~12k |
+| 12:55 | My guarded iOS build collided with a build the USER had started in their own terminal (ttys002) -> xcodebuild error 65 "build database is locked". Stood down without killing their process | (tooling) | my build failed; user build left running, unguarded, 5.2GB free | ~6k |
+| 13:18 | Repo renamed by user to ~/Downloads/mina-work (fixes expo-constants path-split); verified commits 8ee4734+6c8ad38 intact, zero stale path refs in ios/. I broke a live build by deleting ModuleCache.noindex mid-flight | .wolf logs | blocker A fixed (RN pods now compiling); disk still 6.6GB vs ~25GB needed | ~10k |
+
+## Session: 2026-08-28 13:18
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:21 | Diagnosed user-pasted "2 error(s)" xcodebuild 65 from .xcactivitylog — same as bug-343 (Session.modulevalidation); verified ModuleCache.noindex rebuilt, no build running, 6.8G free | .wolf/buglog.json (read only) | known transient, re-run advised; flagged disk risk | ~6k |
+| 13:25 | Fixed expo-modules-jsi stale .pcm old-path error (bug-344): rm -rf its private node_modules .DerivedData | node_modules/expo-modules-jsi/apple/.DerivedData | deleted 285M, disk 6.8G->8.2G, ready to rebuild | ~8k |
+| 13:38 | App icon regenerated from logo.png (bug-345); .env.local localhost->LAN IP for device builds (bug-346) | assets/icon.png, ios AppIcon.appiconset, .env.local | icon fixed+verified; white-screen NOT yet root-caused | ~20k |
+| 13:50 | Root-caused white screen (bug-347): native splash storyboard has missing SplashScreen image + white systemBackground, held forever by preventAutoHideAsync since hydrate can hang on timeout-less fetch | ios SplashScreen.storyboard, app/_layout.tsx, lib/api.ts | confirmed via assetutil on built Assets.car; needs Metro restart + splash regen | ~26k |
+| 14:05 | ROOT CAUSE: empty RCTThirdPartyComponentsProvider.mm (Fabric codegen registered 0 third-party components) -> SafeAreaProvider never mounted -> endless splash; fixed by rm -rf ios/build/generated + pod install; all diagnostics reverted | ios/build/generated, app/*.tsx, node_modules/expo-router | registry verified populated; needs native rebuild | ~32k |
+
+## Session: 2026-08-28 14:07
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:14 | Redesigned mobile login to match light mockup; RTL right-aligned email/password fields | quran-hifz-mobile/app/index.tsx | tsc clean; forgot-password + magic-link from mockup omitted (no backend) | ~12k |
+| 14:18 | Rebuilt onboarding to match mockup (3 custom SVG illustrations, new copy, dots, CTA) + shadcn-style Button sizes/states | quran-hifz-mobile/app/onboarding.tsx, components/illustrations/*, components/ui/Button.tsx | tsc clean; skip button dropped per mockup; QuranStudyIllustration deleted (unused) | ~20k |
+| 14:19 | Replaced login gear icon with sun/moon theme toggle | quran-hifz-mobile/app/index.tsx | tsc clean | ~3k |
+
+## Session: 2026-08-28 14:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:25 | fix deprecated RN SafeAreaView warning → react-native-safe-area-context | quran-hifz-mobile/app/index.tsx, app/onboarding.tsx | tsc clean, no RN SafeAreaView imports left | ~6k |
+| 14:29 | Onboarding wired to app open (store flag + Redirect), slides now use assets/onboarding/{1,2,3}.png, keyboard-avoidance + status bar on login | quran-hifz-mobile/app/{index,onboarding,_layout}.tsx, lib/store/portalStore.ts | tsc clean; verified full flow on expo web screenshots; SVG illustrations deleted | ~25k |
+| 14:32 | Removed android_ripple from Button/AudioRecorder, clipped corners, iOS-only shadow | quran-hifz-mobile/components/ui/Button.tsx, components/domain/AudioRecorder.tsx | tsc clean; Android-only fix, not verifiable on web | ~6k |

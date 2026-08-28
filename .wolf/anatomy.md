@@ -275,7 +275,7 @@
 
 - `_devtest.tsx` — DevTest (~780 tok)
 - `_layout.tsx` — queryClient (~806 tok)
-- `index.tsx` — getHalqaName — renders form, modal (~2490 tok)
+- `index.tsx` — Mobile login screen: light-bg design (logo + org title + "منصة حفظ القرآن"), white card with RTL right-aligned email/password inputs (leading icon, eye toggle), sun/moon theme toggle top-left, parent child-selector modal (~2600 tok)
 
 ## quran-hifz-mobile/app/(portal)/
 
@@ -363,7 +363,6 @@
 
 ## quran-hifz-mobile/components/illustrations/
 
-- `QuranStudyIllustration.tsx` — Base line/fill tone for the figure (should read well against the screen's background). (~919 tok)
 
 ## quran-hifz-mobile/components/layout/
 
@@ -378,7 +377,7 @@
 - `AyahBar.tsx` — AyahBar (~234 tok)
 - `Badge.tsx` — VARIANT_STYLES (~305 tok)
 - `BottomSheet.tsx` — Snap points as percentages of screen height, e.g. ['40%', '80%']. Defaults to a single auto-sizing s (~572 tok)
-- `Button.tsx` — VARIANTS (~564 tok)
+- `Button.tsx` — shadcn-style button: VARIANTS (primary/secondary/danger/ghost/outline) + SIZES (sm 36 / default 44 / lg 52) with fixed heights, radius, pressed + disabled states (~700 tok)
 - `Card.tsx` — Card (~201 tok)
 - `CardHeader.tsx` — CardHeader (~277 tok)
 - `DataTable.tsx` — DataTable (~724 tok)

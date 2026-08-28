@@ -67,6 +67,8 @@ interface PortalStore {
   themeMode: ThemeMode;
   /** Whether the user opted into Face ID/Touch ID re-auth (Account Settings). Persisted. */
   biometricEnabled: boolean;
+  /** False until the onboarding slides have been seen once. Persisted. */
+  hasOnboarded: boolean;
   /** True right after a token-based (re)hydrate when biometricEnabled is on — gates the
    * app behind a lock screen until unlock() succeeds, even though authUser is already set. */
   isLocked: boolean;
@@ -94,6 +96,7 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
   selectedChildId: null,
   themeMode: 'light',
   biometricEnabled: false,
+  hasOnboarded: false,
   isLocked: false,
   portal: null,
   user: null,
@@ -101,16 +104,18 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
   topbar: { icon: 'home', title: 'لوحة التحكم', actionsKey: '' },
 
   hydrate: async () => {
-    const [token, storedMode, storedBiometric] = await Promise.all([
+    const [token, storedMode, storedBiometric, storedOnboarded] = await Promise.all([
       getToken().catch(() => null),
       AsyncStorage.getItem(THEME_MODE_KEY).catch(() => null),
       AsyncStorage.getItem(BIOMETRIC_ENABLED_KEY).catch(() => null),
+      AsyncStorage.getItem(ONBOARDED_KEY).catch(() => null),
     ]);
     const themeMode: ThemeMode = storedMode === 'dark' ? 'dark' : 'light';
     const biometricEnabled = storedBiometric === '1';
+    const hasOnboarded = storedOnboarded === '1';
 
     if (!token) {
-      set({ isHydrating: false, themeMode, biometricEnabled });
+      set({ isHydrating: false, themeMode, biometricEnabled, hasOnboarded });
       return;
     }
     try {
@@ -124,13 +129,13 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
       // A stored session resuming silently is exactly what biometric lock guards against —
       // gate behind isLocked so the lock screen must clear before any portal screen renders.
       set({
-        authUser, isHydrating: false, themeMode, biometricEnabled,
+        authUser, isHydrating: false, themeMode, biometricEnabled, hasOnboarded,
         isLocked: biometricEnabled,
         ...enterPortal(authUser.role, authUser),
       });
     } catch {
       await clearToken();
-      set({ authUser: null, isHydrating: false, themeMode, biometricEnabled });
+      set({ authUser: null, isHydrating: false, themeMode, biometricEnabled, hasOnboarded });
     }
   },
 
@@ -164,6 +169,7 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
 
   completeOnboarding: async () => {
     await AsyncStorage.setItem(ONBOARDED_KEY, '1').catch(() => {});
+    set({ hasOnboarded: true });
   },
 
   setBiometricEnabled: async (enabled) => {

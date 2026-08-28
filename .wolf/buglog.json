@@ -5563,6 +5563,285 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-28T09:36:20Z"
+    },
+    {
+      "id": "bug-340",
+      "timestamp": "2026-08-28T09:51:23Z",
+      "error_message": "xcodebuild: \"error: failed to save attachment: .../XCBuildData/....xcbuilddata/attachments/... Error: No space left on device (28)\" repeated hundreds of times; `npx expo run:ios` exited 1. Claude Code's own Bash tool also started failing with ENOSPC when writing tool-output files.",
+      "file": "quran-hifz-mobile/ios (build environment, not source)",
+      "root_cause": "Machine had 632 MiB free of 228 GiB. `ios.buildReactNativeFromSource: true` (required for this Expo 56 / RN 0.85.3 combo, see bug-330) compiles all of React Native, whose DerivedData typically reaches 10-20 GB plus ~1.5 GB of Pods source. Not a code or config fault.",
+      "fix": "Reclaimed 8 GB: `rm -rf ~/Library/Developer/Xcode/DerivedData/*` (5.7 G, all pure build caches) + `npm cache clean --force` (1.3 G) -> 8.6 GiB free. Retried behind a watchdog wrapper (scratchpad/build-guarded.sh) that polls `df -m` every 20s and kills the build if free space drops under 1536 MB, so a full disk can no longer wedge the machine or break the Bash tool mid-session.",
+      "lesson": "BEFORE starting any `expo run:ios` on this project, check `df -h /System/Volumes/Data` and require >=25 GiB free. Other reclaimable space on this machine when needed: ~/Library/Developer/CoreSimulator/Devices (14 G, simulators recreate on demand), ~/Library/Android (13 G), and an 8.8 G node_modules in ~/Downloads/work/social-media/xontel-omnichannel-mobile. Do NOT touch ~/Downloads/{mina work,work} source trees.",
+      "tags": [
+        "mobile",
+        "ios",
+        "build",
+        "enospc",
+        "disk-space",
+        "expo",
+        "tooling"
+      ],
+      "related_bugs": [
+        "bug-330",
+        "bug-339"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T09:51:23Z"
+    },
+    {
+      "id": "bug-341",
+      "timestamp": "2026-08-28T09:55:20Z",
+      "error_message": "xcodebuild error 65: \"unable to attach DB: error: accessing build database '.../XCBuildData/build.db': database is locked Possibly there are two concurrent builds running in the same filesystem location.\" -> CommandError: Failed to build iOS project.",
+      "file": "quran-hifz-mobile/ios (build environment, not source)",
+      "root_cause": "I started `npx expo run:ios` while the user already had their own `npx expo run:ios --device` running in their terminal (pid 18323, state S+, ancestor /bin/zsh on ttys002). Two xcodebuild instances cannot share one DerivedData build.db. My own agent-side failure to check for an existing build first, not a project defect.",
+      "fix": "Stood down: did NOT kill the user's build, reported the collision and handed the decision back. Correct procedure is to check `ps` for xcodebuild/SWBBuildService/expo-run processes AND resolve the PPID chain (S+ with a tty-attached zsh ancestor = user-owned) before launching any build.",
+      "tags": [
+        "mobile",
+        "ios",
+        "build",
+        "xcodebuild",
+        "concurrency",
+        "agent-procedure",
+        "tooling"
+      ],
+      "related_bugs": [
+        "bug-330",
+        "bug-339",
+        "bug-340"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T09:55:20Z"
+    },
+    {
+      "id": "bug-342",
+      "timestamp": "2026-08-28T10:18:00Z",
+      "error_message": "Script '[CP-User] Generate app.config for prebuilt Constants.manifest' failed / Pods/EXConstants / No such file or directory: /Users/xontel/Downloads/mina -> xcodebuild error 65",
+      "file": "quran-hifz-mobile/ios (build environment, not source)",
+      "root_cause": "The repo lived at `~/Downloads/mina work/` (space in the path). expo-constants' build phase is `bash -l -c \"$PODS_TARGET_SRCROOT/../scripts/get-app-config-ios.sh\"`; bash -c word-splits its argument as a command line, so it tried to exec `/Users/xontel/Downloads/mina`. Upstream expo-constants quoting bug, triggered by any space in the project path.",
+      "fix": "User renamed ~/Downloads/'mina work' -> ~/Downloads/mina-work. Verified afterwards: repo intact on main, commits 8ee4734 (holiday UI parity) and 6c8ad38 (expo-dev-client) present, and `grep -rl 'Downloads/mina work' ios/` returned 0 files since CocoaPods uses relative paths. Build then progressed all the way into compiling React-graphics / React-featureflags.",
+      "tags": [
+        "mobile",
+        "ios",
+        "build",
+        "expo-constants",
+        "path-with-spaces",
+        "cocoapods"
+      ],
+      "related_bugs": [
+        "bug-339",
+        "bug-340",
+        "bug-341"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T10:18:00Z"
+    },
+    {
+      "id": "bug-343",
+      "timestamp": "2026-08-28T10:18:00Z",
+      "error_message": "error: no such file or directory: '/Users/xontel/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation' (in target 'React-graphics' / 'React-featureflags' from project 'Pods') -> xcodebuild error 65",
+      "file": "quran-hifz-mobile/ios (build environment, not source)",
+      "root_cause": "I ran `rm -rf ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex` to reclaim 851 MB while the user had a build actively running; the build was holding Session.modulevalidation inside that directory.",
+      "fix": "Transient — Xcode recreates ModuleCache.noindex on the next build, so simply re-running fixes it. Procedure fix: always check for running xcodebuild/SWBBuildService before touching DerivedData.",
+      "tags": [
+        "mobile",
+        "ios",
+        "build",
+        "derived-data",
+        "agent-procedure",
+        "cache"
+      ],
+      "related_bugs": [
+        "bug-339",
+        "bug-340",
+        "bug-341"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T10:18:00Z"
+    },
+    {
+      "id": "bug-344",
+      "timestamp": "2026-08-28T10:25:00Z",
+      "error_message": "error: precompiled file 'node_modules/expo-modules-jsi/apple/.DerivedData/ModuleCache.noindex/.../SwiftShims-*.pcm' was compiled with module cache path '/Users/xontel/Downloads/mina work/...' but the path is currently '/Users/xontel/Downloads/mina-work/...' (x2, in [CP-User] Build ExpoModulesJSI xcframework) -> xcodebuild error 65",
+      "file": "node_modules/expo-modules-jsi/apple/.DerivedData (build cache, not source)",
+      "root_cause": "Second-order fallout of bug-342's directory rename ('mina work' -> 'mina-work'). expo-modules-jsi does NOT build into the app's shared DerivedData; its podspec script phase uses a PRIVATE cache at node_modules/expo-modules-jsi/apple/.DerivedData. Clearing ~/Library/Developer/Xcode/DerivedData does not touch it, so stale .pcm files still recorded the pre-rename absolute path and clang refused them.",
+      "fix": "rm -rf node_modules/expo-modules-jsi/apple/.DerivedData (285 MB, pure cache; also reclaimed disk 6.8G -> 8.2G free). Regenerated on next build. Note: apple/Products/ExpoModulesJSI.xcframework dSYM relocation YAMLs also still reference the old path but are symbolication-only and harmless - left untouched.",
+      "tags": [
+        "ios",
+        "xcodebuild",
+        "error-65",
+        "expo-modules-jsi",
+        "module-cache",
+        "pcm",
+        "path-rename",
+        "stale-cache",
+        "node_modules"
+      ],
+      "related_bugs": [
+        "bug-342",
+        "bug-343"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T10:25:00Z"
+    },
+    {
+      "id": "bug-345",
+      "timestamp": "2026-08-28T10:35:00Z",
+      "error_message": "User: \"first thing the logo of the app i not why it is not that .../assets/logo.png\" — home-screen app icon was not the client logo",
+      "file": "quran-hifz-mobile/assets/icon.png, ios/mnshthfyzalqraan/Images.xcassets/AppIcon.appiconset/App-Icon-1024x1024@1x.png, app.json",
+      "root_cause": "assets/icon.png was never replaced after `create-expo-app` — it was still the stock Expo template placeholder (blue chevron 'A' on pale blue with design guide lines). app.json's `icon` and the expo-notifications plugin both point at it. Only the expo-splash-screen plugin used the real assets/logo.png, so the logo appeared on the splash but never as the app icon.",
+      "fix": "Generated a proper icon from assets/logo.png with PIL: threshold-cropped the alpha, LANCZOS-upscaled to 80% of the canvas (~10% safe margin), composited on opaque white 1024x1024 RGB (iOS icons must have NO alpha). Wrote to BOTH assets/icon.png (source of truth for future prebuilds) AND ios/.../AppIcon.appiconset/App-Icon-1024x1024@1x.png directly — writing only app.json/assets would need `expo prebuild --clean`, which wipes ios/ and forces a full pod install + RN-from-source rebuild.",
+      "tags": [
+        "ios",
+        "app-icon",
+        "expo",
+        "placeholder-asset",
+        "branding",
+        "assets",
+        "prebuild"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T10:35:00Z"
+    },
+    {
+      "id": "bug-346",
+      "timestamp": "2026-08-28T10:38:00Z",
+      "error_message": "EXPO_PUBLIC_API_URL=http://localhost:5001/api while running `expo run:ios --device` on a physical iPhone — every API call targets the phone itself, not the Mac",
+      "file": "quran-hifz-mobile/.env.local",
+      "root_cause": "'localhost' inside a physical-device build resolves on the device. The API server runs on the Mac (verified listening on *:5001). Works on the simulator (shares the host loopback), silently broken on hardware — which is why it survived unnoticed.",
+      "fix": "Set EXPO_PUBLIC_API_URL=http://192.168.100.35:5001/api (Mac LAN IP via `ipconfig getifaddr en0`); verified 401 from the device-reachable URL = server responding. ATS already permits it: ios Info.plist has NSAllowsArbitraryLoads=false BUT NSAllowsLocalNetworking=true, which allows cleartext HTTP to LAN IPs. EXPO_PUBLIC_* is inlined by Metro at bundle time, so a Metro restart applies it — no native rebuild. Old value kept at .env.local.bak; .env.local is gitignored.",
+      "tags": [
+        "expo",
+        "env",
+        "physical-device",
+        "networking",
+        "localhost",
+        "ats",
+        "EXPO_PUBLIC"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T10:38:00Z"
+    },
+    {
+      "id": "bug-347",
+      "timestamp": "2026-08-28T10:50:00Z",
+      "error_message": "User: \"when it is opened i cant see anything just white page\" / \"i must see login page or something\" — app launches to a permanently blank white screen on a physical iPhone dev build",
+      "file": "quran-hifz-mobile/ios/mnshthfyzalqraan/SplashScreen.storyboard, ios/mnshthfyzalqraan/Images.xcassets, app/_layout.tsx, lib/api.ts",
+      "root_cause": [
+        "FINAL ROOT CAUSE (verified): ios/build/generated/ios/ReactCodegen/RCTThirdPartyComponentsProvider.mm was generated EMPTY — `thirdPartyComponents = @{ };` with zero entries. React Native's Fabric codegen ran during a previous `pod install` but discovered no libraries, so NO third-party native component was registered in the build. Consequences, all from this one fault: (a) RNCSafeAreaProvider unregistered -> expo-router wraps the whole app in <SafeAreaProvider> with initialMetrics=undefined on native, which renders null until native reports insets; insets never arrived, so the entire React tree below it never mounted -> endless splash with NO error and NO log, because rendering null is not an error; (b) RNSScreenStack / RNSScreenContentWrapper unregistered -> 'Unimplemented component' red overlays once the safe-area gate was bypassed. Strongly suspected trigger: pods were installed while the repo path still contained a space (Downloads/'mina work', see bug-342), the same quoting fault that broke expo-constants — codegen's node_modules scan silently found nothing and emitted an empty registry."
+      ],
+      "fix": "rm -rf ios/build/generated && cd ios && pod install. Verified the regenerated RCTThirdPartyComponentsProvider.mm now registers 50+ components including RNCSafeAreaProvider, RNCSafeAreaView, RNSScreenStack, RNSScreenContentWrapper, RNGestureHandlerButton, RNDateTimePicker and all RNSVG*. Requires a native rebuild (npx expo run:ios --device) — a JS reload cannot fix it. All diagnostics reverted: app/_layout.tsx, app/index.tsx, app/onboarding.tsx, app/(portal)/_layout.tsx restored via git checkout; node_modules/expo-router/build/ExpoRoot.js restored from .orig. DIAGNOSTIC METHOD THAT WORKED (reuse this): console.log at module scope vs. first line of the component vs. after each hook, to bisect 'module evaluates but component never renders' — that gap is the signature of a null-rendering provider above you, not of an exception.",
+      "tags": [
+        "ios",
+        "white-screen",
+        "blank-screen",
+        "fabric",
+        "new-architecture",
+        "codegen",
+        "RCTThirdPartyComponentsProvider",
+        "react-native-screens",
+        "react-native-safe-area-context",
+        "unimplemented-component",
+        "pod-install",
+        "path-with-space",
+        "expo-router",
+        "silent-null-render"
+      ],
+      "related_bugs": [
+        "bug-346",
+        "bug-342"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T10:50:00Z"
+    },
+    {
+      "id": "bug-348",
+      "timestamp": "2026-08-28T14:25:03.252221",
+      "error_message": "WARN SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead.",
+      "file": "quran-hifz-mobile/app/index.tsx, quran-hifz-mobile/app/onboarding.tsx",
+      "root_cause": "These two screens still imported SafeAreaView from 'react-native', which RN has deprecated. Every other screen in the app already imports it from react-native-safe-area-context.",
+      "fix": "Swapped the import to react-native-safe-area-context and added edges={['top','bottom']} to match the convention used across the other ~40 screens. expo-router's ExpoRoot already mounts SafeAreaProvider, so no provider was needed.",
+      "tags": [
+        "react-native",
+        "safe-area",
+        "deprecation",
+        "expo",
+        "mobile"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T14:25:03.252221"
+    },
+    {
+      "id": "bug-349",
+      "timestamp": "2026-08-28T14:29:52.586112",
+      "error_message": "onboarding screen never showed — app opened straight to login",
+      "file": "quran-hifz-mobile/lib/store/portalStore.ts, app/index.tsx, app/_layout.tsx",
+      "root_cause": "app/onboarding.tsx was dead code: ONBOARDED_KEY was written by completeOnboarding() but never read, no store flag existed, and no route ever navigated to /onboarding",
+      "fix": "added hasOnboarded to the store (read from AsyncStorage in hydrate, set true in completeOnboarding), <Redirect href=\"/onboarding\"> from app/index.tsx when false, and registered the onboarding screen in the signed-out Stack.Protected group",
+      "tags": [
+        "onboarding",
+        "expo-router",
+        "zustand",
+        "asyncstorage",
+        "dead-code"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T14:29:52.586112"
+    },
+    {
+      "id": "bug-350",
+      "timestamp": "2026-08-28T14:29:52.586112",
+      "error_message": "keyboard covers the password input on the login screen",
+      "file": "quran-hifz-mobile/app/index.tsx",
+      "root_cause": "the login ScrollView had no keyboard handling — content stayed centred under the keyboard",
+      "fix": "wrapped the ScrollView in KeyboardAvoidingView (padding on iOS, height on Android) and added keyboardShouldPersistTaps=\"handled\" + keyboardDismissMode=\"on-drag\"",
+      "tags": [
+        "keyboard",
+        "login",
+        "react-native",
+        "ios"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T14:29:52.586112"
+    },
+    {
+      "id": "bug-351",
+      "timestamp": "2026-08-28T14:29:52.586112",
+      "error_message": "white status-bar text invisible on the new light login/onboarding screens",
+      "file": "quran-hifz-mobile/app/index.tsx, app/onboarding.tsx",
+      "root_cause": "root _layout.tsx sets <StatusBar style=\"light\" /> for the dark portal chrome; the redesigned light screens inherited it",
+      "fix": "each light screen renders its own <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />",
+      "tags": [
+        "status-bar",
+        "light-mode",
+        "expo-status-bar"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T14:29:52.586112"
+    },
+    {
+      "id": "bug-352",
+      "timestamp": "2026-08-28T14:32:12.929761",
+      "error_message": "buttons render wrong on device: label invisible in light mode and chewed/square left corners on the التالي and دخول buttons (all buttons)",
+      "file": "quran-hifz-mobile/components/ui/Button.tsx",
+      "root_cause": "android_ripple on the Pressable — Android swaps the view background for a RippleDrawable masked to the view's square bounds, which can wipe the backgroundColor (white label on no fill = invisible) and leave artifacts at the rounded corners. Not reproducible on web/iOS, which is why the Expo-web screenshots looked correct.",
+      "fix": "removed android_ripple from Button (and AudioRecorder), added overflow:'hidden' to the button so press feedback stays inside the radius, and limited the elevated shadow to iOS so Android elevation can't fight the borderRadius. Pressed feedback is now opacity on both platforms.",
+      "tags": [
+        "android",
+        "pressable",
+        "android_ripple",
+        "button",
+        "borderRadius",
+        "light-mode"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-28T14:32:12.929761"
     }
   ]
 }
