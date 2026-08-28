@@ -330,7 +330,7 @@
 - `homework.tsx` — getName — renders form (~1264 tok)
 - `myhalqa.tsx` — TeacherHalqa (~1077 tok)
 - `plan-detail.tsx` — STATUS_VARIANT (~2476 tok)
-- `plan-form.tsx` — PLAN_TYPES — renders form (~4185 tok)
+- `plan-form.tsx` — PLAN_TYPES — renders form; holiday section mirrors web TeacherPlanForm (~4800 tok)
 - `plans.tsx` — STATUS_VARIANT (~1529 tok)
 - `recordlesson.tsx` — LESSON_TYPES (~3004 tok)
 - `reports.tsx` — TeacherReports (~642 tok)

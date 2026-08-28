@@ -64,6 +64,7 @@
 - `noWard: true` on a student occurrence = the student ran so far ahead that the plan's content ran out before its days did. Kept `pending` with its span collapsed onto the finish point, so a later absence can reclaim it; UI must key off `noWard`, not the span.
 - The teacher's "وصل إلى" picker is bounded by [start of today's ward .. end of the student's whole plan], not by today's ward — that's what makes recording an over-achievement possible at all (`clampReached`/`reachedBounds` + `planFinishPoint`).
 - `TeacherAttendance.tsx` and `TeacherTrackDetail.tsx` carry near-identical attendance/completion blocks (indentation differs by 2 spaces). Any change to one needs the same change in the other, plus `app/(portal)/teacher/attendance.tsx` on mobile.
+- Web/mobile screen pairings for the Quran-plan feature set: `TeacherPlanForm.tsx` ↔ `app/(portal)/teacher/plan-form.tsx`, `TeacherAttendance.tsx` ↔ `app/(portal)/teacher/attendance.tsx`, `IndividualPlanPanel.tsx` ↔ `components/domain/IndividualPlanPanel.tsx`. `TeacherTrackDetail.tsx` has **no** mobile counterpart for its attendance/completion block — mobile's `components/domain/TrackDetail.tsx` is a read-only drill-down by design (2026-07-29 scope cut), so web changes there land on mobile only via `attendance.tsx`.
 
 ## Do-Not-Repeat
 

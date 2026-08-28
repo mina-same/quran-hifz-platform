@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, View, Text, StyleSheet, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { IconArrowRight } from '@tabler/icons-react-native';
+import { IconArrowRight, IconCalendarOff, IconX } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Button from '@/components/ui/Button';
@@ -25,6 +25,12 @@ const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة', 'ترتيل', 'تلا�
 function todayISO(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local
+    midnight so the day never shifts (see the date-arithmetic rule in cerebrum). */
+function fmtDate(iso: string): string {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 type FormFields = {
@@ -251,22 +257,49 @@ export default function TeacherPlanForm() {
           {/* Holidays — active days the plan pauses on (Eid, exams, travel). A
               holiday consumes no occurrence, so its portion moves to the next
               working day rather than being lost. */}
-          <View style={{ height: 14 }} />
-          <FormGroup label="أيام العطلات (استثناءات)">
-            <FormDatePicker value="" onChange={(v) => addHoliday(v)} />
+          <View style={{ height: 18 }} />
+          <View style={s.holidayHead}>
+            <IconCalendarOff size={15} color={theme.gold} />
+            <Text style={s.holidayTitle}>أيام العطلات</Text>
             {form.holidays.length > 0 && (
-              <View style={[s.chipRow, { marginTop: 10 }]}>
-                {form.holidays.map((h) => (
-                  <Pressable key={h} style={s.chip} onPress={() => sf('holidays', form.holidays.filter((d) => d !== h))}>
-                    <Text style={s.chipText}>{h}  ✕</Text>
-                  </Pressable>
-                ))}
+              <View style={s.holidayCount}>
+                <Text style={s.holidayCountText}>{form.holidays.length}</Text>
               </View>
             )}
-            <Text style={s.holidayHint}>
-              لا يُحتسب يوم العطلة ضمن أيام الخطة حتى لو وافق يومًا نشطًا — ينتقل نصيبه إلى يوم العمل التالي
-            </Text>
-          </FormGroup>
+          </View>
+          <FormDatePicker
+            value=""
+            onChange={(v) => addHoliday(v)}
+            minimumDate={form.startDate ? new Date(`${form.startDate}T00:00:00`) : undefined}
+            maximumDate={form.endType === 'date' && form.endDate ? new Date(`${form.endDate}T00:00:00`) : undefined}
+          />
+          {form.holidays.length > 0 && (
+            <View style={[s.chipRow, { marginTop: 12 }]}>
+              {form.holidays.map((h) => {
+                // WEEK_DAYS runs Sat..Fri while getDay() runs Sun..Sat, hence the +1 shift.
+                const weekday = WEEK_DAYS[(new Date(`${h}T00:00:00`).getDay() + 1) % 7];
+                const active = form.days.includes(weekday);
+                return (
+                  <Pressable
+                    key={h}
+                    style={[s.holidayChip, active && s.holidayChipActive]}
+                    onPress={() => sf('holidays', form.holidays.filter((d) => d !== h))}
+                    accessibilityLabel={`حذف عطلة ${h}`}
+                  >
+                    <IconCalendarOff size={13} color={active ? theme.brown : theme.textMuted} />
+                    <Text style={[s.holidayChipText, active && s.holidayChipTextActive]}>{fmtDate(h)}</Text>
+                    <View style={s.holidayChipX}>
+                      <IconX size={11} color={active ? theme.brown : theme.textMuted} />
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
+          <Text style={s.holidayHint}>
+            لا يُحتسب يوم العطلة ضمن أيام الخطة حتى لو وافق يومًا نشطًا — ينتقل نصيبه إلى يوم العمل التالي.{'\n'}
+            العطلة التي لا توافق يومًا من أيام الخطة تظهر بلون باهت لأنه لا أثر لها.
+          </Text>
         </Card>
 
         <Card>
@@ -350,7 +383,23 @@ const s = StyleSheet.create({
   chipText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
   chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
   lockedText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted, textAlign: 'right' },
-  holidayHint: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 8, textAlign: 'right' },
+  holidayHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+  holidayTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+  holidayCount: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 1, backgroundColor: theme.goldPale },
+  holidayCountText: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.brown },
+  holidayChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    borderRadius: 999, paddingStart: 12, paddingEnd: 5, paddingVertical: 5,
+    borderWidth: 1, borderColor: theme.border, backgroundColor: theme.cream,
+  },
+  holidayChipActive: { backgroundColor: theme.goldPale, borderColor: 'rgba(201, 149, 42, 0.35)' },
+  holidayChipText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.textMuted },
+  holidayChipTextActive: { color: theme.brown },
+  holidayChipX: {
+    width: 20, height: 20, borderRadius: 999, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.06)',
+  },
+  holidayHint: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 10, lineHeight: 18, textAlign: 'right' },
   reverseHint: { fontSize: 11, color: theme.gold, fontFamily: theme.fontCairo, marginTop: 10, textAlign: 'right' },
   rowGroup: { flexDirection: 'row', gap: 8 },
   toggleBtn: { flex: 1, borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },

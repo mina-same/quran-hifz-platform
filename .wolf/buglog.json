@@ -5522,6 +5522,25 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-28T16:40:00Z"
+    },
+    {
+      "id": "bug-338",
+      "timestamp": "2026-08-28T09:32:51Z",
+      "error_message": "User: \"now for mobile add those changes i made to web to be on mobile\" — the redesigned holiday UI shipped to web only",
+      "file": "quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx",
+      "root_cause": "Commit 073409c touched TeacherPlanForm.tsx (holiday section redesign) without the paired mobile plan-form edit; the same commit's attendance/IndividualPlanPanel changes WERE mirrored, so the gap was easy to miss.",
+      "fix": "Ported the web holiday section: IconCalendarOff header + count badge, FormDatePicker bounded by the plan's start/end dates, weekday-aware chips (goldPale/brown when the date falls on an active plan day, cream/muted when it has no effect), ar-SA formatted dates with an inline X, and the two-line hint. TrackDetail needs nothing — no attendance block on mobile.",
+      "tags": [
+        "mobile",
+        "web-parity",
+        "quran-plan",
+        "holidays",
+        "plan-form",
+        "ui"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T09:32:51Z"
     }
   ]
 }

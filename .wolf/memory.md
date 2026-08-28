@@ -2585,3 +2585,9 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 12:32 | Mobile parity for web holiday UI: header+count badge, start/end-bounded date picker, weekday-aware chips (active vs no-effect), formatted dates, expanded hint | quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx | tsc clean, 47/47 jest pass | ~14k |
+
+## Session: 2026-08-28 12:34
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
