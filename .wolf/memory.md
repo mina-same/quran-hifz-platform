@@ -2591,3 +2591,4 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 12:36 | Diagnosed "Project is incompatible with this version of Expo Go": project serves sdkVersion 56.0.0, App Store Expo Go now ships the SDK 57 client only — no Expo Go exists for SDK 56 | (diagnosis only, no code change) | root cause confirmed via api.expo.dev/v2/versions/latest + local manifest | ~9k |

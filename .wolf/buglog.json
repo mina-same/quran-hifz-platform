@@ -5541,6 +5541,28 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-28T09:32:51Z"
+    },
+    {
+      "id": "bug-339",
+      "timestamp": "2026-08-28T09:36:20Z",
+      "error_message": "Expo Go: \"Project is incompatible with this version of Expo Go. The project you requested requires a newer version of Expo Go.\" — repeated on every connection attempt, user confirmed Expo Go was up to date",
+      "file": "quran-hifz-mobile/package.json (expo ~56.0.12)",
+      "root_cause": "Expo Go publishes exactly ONE SDK client at a time. api.expo.dev/v2/versions/latest confirms the current iOS client is the SDK 57 one (iosClientVersion 57.0.9); SDK 56's client was 56.0.4 and is no longer downloadable from the App Store. The local dev server serves sdkVersion 56.0.0 (verified via curl -H 'expo-platform: ios' http://localhost:8081). So updating Expo Go can never fix this — the latest Expo Go DROPPED SDK 56. The error wording ('requires a newer version') is misleading; it fires on any SDK mismatch.",
+      "fix": "Not fixable via Expo Go. Either (a) use a development build — ios/ is already prebuilt and ios/Podfile.properties.json carries the required ios.buildReactNativeFromSource flag, run `npm run ios`; note there is no Podfile.lock yet so the first build runs pod install and compiles RN from source (slow), expo-dev-client is NOT installed, and there is no android/ dir; or (b) bump the project to SDK 57 via `npx expo install expo@^57.0.0 --fix` so the store Expo Go matches again.",
+      "tags": [
+        "mobile",
+        "expo",
+        "expo-go",
+        "sdk-version",
+        "tooling",
+        "dev-build"
+      ],
+      "related_bugs": [
+        "bug-330",
+        "bug-331"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T09:36:20Z"
     }
   ]
 }
