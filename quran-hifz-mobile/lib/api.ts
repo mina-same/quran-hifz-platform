@@ -1,6 +1,14 @@
-import { getToken } from './auth-storage';
+import { getToken, clearToken } from './auth-storage';
 
 const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:5000/api';
+
+/** Called once when any request comes back 401 — the store registers a handler
+ * that clears the session so the app drops back to the login screen instead of
+ * rendering portal screens whose every query is failing. */
+let onUnauthorized: (() => void) | null = null;
+export function setUnauthorizedHandler(handler: () => void) {
+  onUnauthorized = handler;
+}
 
 export class ApiError extends Error {
   constructor(
@@ -23,6 +31,13 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
 
   if (!res.ok) {
+    // A rejected token (expired, or signed with a since-rotated secret) must end
+    // the session — otherwise authUser stays set and every screen renders empty.
+    // Login itself answers 401 for a wrong password, which is not a dead session.
+    if (res.status === 401 && !path.startsWith('/auth/login')) {
+      await clearToken().catch(() => {});
+      onUnauthorized?.();
+    }
     let message = `HTTP ${res.status}`;
     try {
       const body = await res.json();

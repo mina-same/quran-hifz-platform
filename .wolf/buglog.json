@@ -5863,6 +5863,65 @@
       "related_bugs": [],
       "occurrences": 2,
       "last_seen": "2026-08-28T15:01:49.424176"
+    },
+    {
+      "id": "bug-354",
+      "timestamp": "2026-08-28T15:11:30.026005",
+      "error_message": "after a reload the mobile app keeps no valid token but still renders portal screens with empty data instead of logging out (NOTE: the 401 work was real hardening but NOT the cause of this report — see the next entry)",
+      "file": "quran-hifz-mobile/lib/api.ts, lib/store/portalStore.ts, app/(portal)/_layout.tsx, app/index.tsx",
+      "root_cause": "apiFetch threw ApiError(401) like any other status — nothing cleared the token or reset authUser, so a rejected/expired token left the user 'signed in' with every query failing (screens render as no-data). A restored deep route inside (portal) could also mount before/without auth.",
+      "fix": "api.ts clears the token and calls a registered onUnauthorized handler on any 401 except /auth/login; portalStore registers it and drops the session (authUser/portal/user/navGroups reset) setting sessionExpired; (portal)/_layout.tsx redirects to '/' when hydration is done and there is no authUser; the login screen shows 'انتهت صلاحية جلستك — سجّل الدخول من جديد'.",
+      "tags": [
+        "auth",
+        "401",
+        "token",
+        "session",
+        "expo-router",
+        "zustand"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T15:11:30.026005"
+    },
+    {
+      "id": "bug-355",
+      "timestamp": "2026-08-28T15:13:29.772028",
+      "error_message": "server log: repeated GET /api/students/6a5fd33d2d4a1b4d6b20da40 404 while /api/auth/me returns 200 — mobile showed student screens with no data after a reload",
+      "file": "quran-hifz-mobile/app/(portal)/_layout.tsx",
+      "root_cause": "The id is a TEACHER profileId (ibrahim@tahfeez.com) — verified against the DB, where zero User.profileId values are dangling. Resuming a stored session only fills the store (hydrate() never navigates), so the router fell back to the (portal) group's FIRST registered screen — 'student' — for every role. A teacher therefore rendered the student portal, whose hooks call /students/<teacher profileId> and 404 four times a load. Pre-existing: the old Drawer listed 'student' first too.",
+      "fix": "(portal)/_layout.tsx now compares usePathname() against authUser.role and redirects to PORTAL_ROUTES[role] whenever they disagree — fixes the resume fallback and blocks deep links into another role's portal.",
+      "tags": [
+        "auth",
+        "routing",
+        "expo-router",
+        "portal",
+        "404",
+        "teacher",
+        "hydrate"
+      ],
+      "related_bugs": [
+        "bug-354"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T15:13:29.772028"
+    },
+    {
+      "id": "bug-356",
+      "timestamp": "2026-08-28T15:15:37.751127",
+      "error_message": "ERROR  Text strings must be rendered within a <Text> component. (thrown from the new teacher attendance screen; stack also blamed admin/parents.tsx)",
+      "file": "quran-hifz-mobile/components/ui/Alert.tsx",
+      "root_cause": "Alert only wrapped its children in <Text> when `typeof children === 'string'`. Any message with an interpolation (`<Alert>... {name} ...</Alert>`) arrives as an ARRAY of strings, so it fell through to rendering raw strings directly inside a View.",
+      "fix": "Alert now uses Children.toArray(children) and wraps in <Text> when every child is a string/number, so interpolated messages work; element children still render as-is.",
+      "tags": [
+        "react-native",
+        "text",
+        "alert",
+        "shared-component",
+        "interpolation"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-28T15:15:37.751127"
     }
   ]
 }

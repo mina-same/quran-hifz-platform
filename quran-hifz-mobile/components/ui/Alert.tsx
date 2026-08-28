@@ -1,3 +1,4 @@
+import { Children } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { theme } from '@/lib/theme';
 
@@ -18,11 +19,16 @@ interface Props {
 
 export default function Alert({ variant = 'info', icon, children }: Props) {
   const c = COLORS[variant];
+  // Interpolated message text (`<Alert>عن غياب: {names} — ...</Alert>`) arrives as an
+  // array of strings, not a single string — without wrapping those too, React Native
+  // throws "Text strings must be rendered within a <Text> component".
+  const parts = Children.toArray(children);
+  const isTextOnly = parts.length > 0 && parts.every((p) => typeof p === 'string' || typeof p === 'number');
   return (
     <View style={[styles.box, { backgroundColor: c.bg, borderColor: c.border }]}>
       {icon && <View style={styles.icon}>{icon}</View>}
       <View style={styles.content}>
-        {typeof children === 'string' ? (
+        {isTextOnly ? (
           <Text style={[styles.text, { color: c.text }]}>{children}</Text>
         ) : (
           children

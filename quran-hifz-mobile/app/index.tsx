@@ -9,7 +9,7 @@ import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Controller, useForm } from 'react-hook-form';
 import {
-  IconLock, IconMail, IconEye, IconEyeOff, IconSun, IconMoon,
+  IconLock, IconMail, IconEye, IconEyeOff, IconSun, IconMoon, IconClock,
 } from '@tabler/icons-react-native';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { PORTAL_ROUTES } from '@/lib/constants/portals';
@@ -31,6 +31,8 @@ export default function LoginScreen() {
   const login = usePortalStore((s) => s.login);
   const toggleTheme = usePortalStore((s) => s.toggleTheme);
   const hasOnboarded = usePortalStore((s) => s.hasOnboarded);
+  const sessionExpired = usePortalStore((s) => s.sessionExpired);
+  const clearSessionExpired = usePortalStore((s) => s.clearSessionExpired);
   const [serverError, setServerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showChildSelector, setShowChildSelector] = useState(false);
@@ -45,6 +47,7 @@ export default function LoginScreen() {
 
   async function onSubmit(data: FormData) {
     setServerError('');
+    clearSessionExpired();
     try {
       await login(data.email, data.password);
       const role = usePortalStore.getState().authUser?.role;
@@ -227,6 +230,11 @@ export default function LoginScreen() {
               {errors.password && <Text style={styles.fieldError}>{errors.password.message}</Text>}
             </View>
 
+            {sessionExpired && !serverError && (
+              <Alert variant="warning" icon={<IconClock size={16} color="#92400E" />}>
+                انتهت صلاحية جلستك — سجّل الدخول من جديد.
+              </Alert>
+            )}
             {!!serverError && (
               <Alert variant="error" icon={<IconLock size={16} color="#991B1B" />}>
                 {serverError}

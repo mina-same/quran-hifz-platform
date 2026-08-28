@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { PortalType, PortalUser, NavGroup } from '@/lib/types/portal';
 import type { ThemeMode } from '@/lib/theme';
 import { PORTALS } from '@/lib/constants/portals';
-import { get as apiGet, post as apiPost } from '@/lib/api';
+import { get as apiGet, post as apiPost, setUnauthorizedHandler } from '@/lib/api';
 import { getToken, setToken, clearToken } from '@/lib/auth-storage';
 
 const THEME_MODE_KEY = 'qh_theme_mode';
@@ -69,6 +69,9 @@ interface PortalStore {
   biometricEnabled: boolean;
   /** False until the onboarding slides have been seen once. Persisted. */
   hasOnboarded: boolean;
+  /** Set when a request came back 401 and the session was dropped — the login
+   * screen shows a "session ended" notice instead of silently reappearing. */
+  sessionExpired: boolean;
   /** True right after a token-based (re)hydrate when biometricEnabled is on — gates the
    * app behind a lock screen until unlock() succeeds, even though authUser is already set. */
   isLocked: boolean;
@@ -88,6 +91,9 @@ interface PortalStore {
   updateUserName: (name: string) => void;
   setBiometricEnabled: (enabled: boolean) => Promise<void>;
   unlock: () => void;
+  /** Drops the session after a 401. Token is already cleared by the API layer. */
+  handleUnauthorized: () => void;
+  clearSessionExpired: () => void;
 }
 
 export const usePortalStore = create<PortalStore>()((set, get) => ({
@@ -97,6 +103,7 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
   themeMode: 'light',
   biometricEnabled: false,
   hasOnboarded: false,
+  sessionExpired: false,
   isLocked: false,
   portal: null,
   user: null,
@@ -140,6 +147,7 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
   },
 
   login: async (email, password) => {
+    set({ sessionExpired: false });
     const res = await apiPost<LoginResponse>('/auth/login', { email, password });
     const authUser: AuthUser = {
       id: res.user.id,
@@ -179,6 +187,16 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
 
   unlock: () => set({ isLocked: false }),
 
+  handleUnauthorized: () => {
+    if (!get().authUser) return; // already signed out — nothing to drop
+    set({
+      authUser: null, portal: null, user: null, navGroups: [],
+      selectedChildId: null, isLocked: false, sessionExpired: true,
+    });
+  },
+
+  clearSessionExpired: () => set({ sessionExpired: false }),
+
   // Keeps the drawer/more-sheet display name in sync right after an
   // account-settings name edit, without a full re-login or /auth/me refetch.
   updateUserName: (name) => {
@@ -189,3 +207,6 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
     });
   },
 }));
+
+// The API layer signals a dead token; the store owns what that means.
+setUnauthorizedHandler(() => usePortalStore.getState().handleUnauthorized());
