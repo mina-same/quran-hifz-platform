@@ -833,3 +833,4 @@
 - `index.tsx` — Landing page route with per-page Arabic SEO head overrides (~200 tok)
 - `README.md` — Project documentation (~207 tok)
 - `sitemap[.]xml.ts` — API route: serves /sitemap.xml dynamically from request origin (~159 tok)
+- `MoreTabButton.tsx` — Factory for the "المزيد" tab-bar button; opens the MoreSheet on press instead of navigating. (~180 tok)

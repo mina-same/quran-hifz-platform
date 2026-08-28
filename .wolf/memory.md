@@ -2634,3 +2634,14 @@
 | 15:11 | Global 401 handling: dead token now clears session and returns to login with a notice | quran-hifz-mobile/lib/api.ts, lib/store/portalStore.ts, app/(portal)/_layout.tsx, app/index.tsx | tsc clean; unverified on device | ~10k |
 | 15:13 | Root-caused the "student screens with no data" report: role→portal routing on resume, not the token | quran-hifz-mobile/app/(portal)/_layout.tsx | tsc clean; verified id 6a5fd33d… is a teacher profileId via read-only DB audit | ~12k |
 | 15:15 | Fixed "Text strings must be rendered within a <Text>" — Alert did not wrap interpolated (array) children | quran-hifz-mobile/components/ui/Alert.tsx | tsc clean | ~5k |
+
+## Session: 2026-08-28 15:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-28 15:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:56 | Fixed "المزيد" tab: BottomSheetView content collapse + custom tabBarButton | components/ui/BottomSheet.tsx, components/layout/MoreSheet.tsx, components/layout/MoreTabButton.tsx, app/(portal)/*/_layout.tsx | tsc clean, bug-357 logged | ~45k |

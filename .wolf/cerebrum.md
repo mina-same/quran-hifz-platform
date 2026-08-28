@@ -186,3 +186,9 @@ including form buttons. Writing `className="btn btn-ghost"` yields an unstyled b
 Always: `className="topbar-btn btn-primary"`.
 
 - **2026-08-28 — when actual recitation exceeds the assigned ward:** the remaining days are *lightened* and the plan's end date stays pinned, rather than keeping the daily load and finishing early. Chosen by the user for symmetry with the existing shortfall rule (which pins the finish line and increases the daily load). Consequence: content can run out before the days do, hence the `noWard` flag rather than inventing work or silently shortening the plan.
+
+### @gorhom/bottom-sheet v5 — BottomSheetView collapses flex children (2026-08-28)
+`BottomSheetView` merges its style as `[callerStyle, {position:'absolute',top:0,left:0,right:0}]`,
+so it hugs content height and any `flex: 1` child renders at height 0 — the sheet opens but looks empty.
+With fixed `snapPoints`, pass `bottom: 0` (the one edge the library never overwrites) to make it fill.
+Never do this when `enableDynamicSizing` is on — the sheet height is derived from this view's measured height.

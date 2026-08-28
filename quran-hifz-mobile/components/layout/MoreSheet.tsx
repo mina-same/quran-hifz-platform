@@ -125,6 +125,9 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
       color: theme.text,
     },
     list: {
+      // Takes the space between the header and the footer so the footer stays
+      // pinned and the tiles scroll instead of overflowing the sheet.
+      flex: 1,
       paddingTop: 4,
     },
     group: {

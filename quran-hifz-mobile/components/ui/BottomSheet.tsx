@@ -48,7 +48,9 @@ export default function BottomSheet({ visible, onClose, children, snapPoints }: 
       backgroundStyle={styles.background}
       handleIndicatorStyle={styles.handle}
     >
-      <BottomSheetView style={styles.content}>{children}</BottomSheetView>
+      <BottomSheetView style={snapPoints ? styles.contentFill : styles.content}>
+        {children}
+      </BottomSheetView>
     </BottomSheetModal>
   );
 }
@@ -64,6 +66,19 @@ const styles = StyleSheet.create({
     width: 40,
   },
   content: {
+    paddingBottom: 24,
+  },
+  /**
+   * BottomSheetView is `position: absolute` with only top/left/right pinned, so it
+   * hugs its content height and any child laid out with `flex: 1` (a scroll list, a
+   * footer pinned to the bottom) collapses to zero height and the sheet renders
+   * blank. Pinning `bottom: 0` — the one edge the library leaves alone — makes it
+   * fill the sheet, which already has an explicit height whenever snapPoints are
+   * given. Only safe for fixed snap points: with enableDynamicSizing the sheet
+   * height is derived FROM this view's measured height, so filling would loop.
+   */
+  contentFill: {
+    bottom: 0,
     paddingBottom: 24,
   },
 });

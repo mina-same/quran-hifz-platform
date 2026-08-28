@@ -5922,6 +5922,30 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-28T15:15:37.751127"
+    },
+    {
+      "id": "bug-357",
+      "timestamp": "2026-08-28T15:55:58.682379",
+      "error_message": "User: \"still more in the navbar not working, no bottom sheet is opened in the teacher navbar in mobile\" — the \"المزيد\" tab still does nothing after bug-353",
+      "file": "quran-hifz-mobile/components/ui/BottomSheet.tsx, components/layout/MoreSheet.tsx, components/layout/MoreTabButton.tsx, app/(portal)/{teacher,student,admin,parent}/_layout.tsx",
+      "root_cause": "Two defects. (1) @gorhom/bottom-sheet v5's BottomSheetView applies its own style AFTER the caller's: {position:'absolute', top:0, left:0, right:0} with no bottom/height, so it hugs content height. MoreSheet's root child is flex:1, which collapses to 0 inside it — the sheet presented but rendered completely empty. Same defect silently broke FormSelect's BottomSheetFlatList. (2) The bug-353 fix opened the sheet from a Tabs.Screen listeners.tabPress + e.preventDefault(), which depends on react-navigation's tabPress plumbing surviving expo-router's withLayoutContext screen re-creation on every render.",
+      "fix": "(1) BottomSheet.tsx now passes a `contentFill` style ({bottom: 0}) to BottomSheetView whenever snapPoints are given — `bottom` is the one edge the library does not overwrite, so the view fills the sheet's already-explicit height. Kept the content-hugging style for the enableDynamicSizing path, where filling would feed back into the height calculation. (2) MoreSheet's tile list got flex:1 so the footer stays pinned and tiles scroll. (3) Replaced listeners.tabPress with a custom tabBarButton (components/layout/MoreTabButton.tsx, memoised per layout) that calls setMoreOpen(true) directly — the press never enters the navigate path. Applied to all four portals. npx tsc --noEmit clean.",
+      "tags": [
+        "mobile",
+        "bottom-sheet",
+        "gorhom",
+        "expo-router",
+        "tabs",
+        "navbar",
+        "more-sheet",
+        "layout",
+        "flex"
+      ],
+      "related_bugs": [
+        "bug-353"
+      ],
+      "occurrences": 2,
+      "last_seen": "2026-08-28T15:55:58.682379"
     }
   ]
 }

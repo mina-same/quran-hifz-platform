@@ -1,16 +1,20 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Tabs } from 'expo-router';
 import {
   IconHome, IconBook, IconMicrophone, IconMessage, IconCalendarCheck, IconDots,
 } from '@tabler/icons-react-native';
 import { theme } from '@/lib/theme';
 import MoreSheet from '@/components/layout/MoreSheet';
+import { createMoreTabButton } from '@/components/layout/MoreTabButton';
 
 // Nav items with no tab of their own — the "المزيد" sheet lists exactly these.
 const MORE_IDS = ['schedule', 'special_tracks', 'points', 'store', 'settings'];
 
 export default function StudentTabLayout() {
   const [moreOpen, setMoreOpen] = useState(false);
+  // Memoised so the tab button keeps its identity across renders — an inline
+  // component would be a new type every render and remount the tab.
+  const MoreTabButton = useMemo(() => createMoreTabButton(() => setMoreOpen(true)), []);
 
   return (
     <>
@@ -31,13 +35,7 @@ export default function StudentTabLayout() {
       {/* Opens the sheet instead of navigating to the (empty) more route. */}
       <Tabs.Screen
         name="more"
-        options={{ title: 'المزيد', tabBarIcon: ({ color, size }) => <IconDots size={size} color={color} /> }}
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault();
-            setMoreOpen(true);
-          },
-        }}
+        options={{ title: 'المزيد', tabBarIcon: ({ color, size }) => <IconDots size={size} color={color} />, tabBarButton: MoreTabButton }}
       />
       {/* Reachable from the "المزيد" sheet only. */}
       <Tabs.Screen name="schedule" options={{ href: null, title: 'المواعيد' }} />
