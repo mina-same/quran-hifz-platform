@@ -2737,3 +2737,7 @@
 | 12:36 | Session end: 1 writes across 1 files (DaySlider.tsx) | 0 reads | ~149 tok |
 | 05:20 | Student + parent screens compared 1:1 with web and aligned: parent recordings type/points/teacherNote (bug-371 closed), attendance evaluation per day + تأخر, homework description/dueDay/child name, timeline rebuilt on real hifz data, ChildSelector mounted, dashboard goal framing; student attendance تأخيرات, hifz yearly-goal card + surah numbers + آخر حفظ, dashboard juz/schedule/top-student alert + stacked cards, homework one-take notice, tracks linked-plan block + join link | 10 screens + lib/queries/parent.ts, students.ts | tsc clean, jest 47/47 | ~90k |
 | 12:39 | Session end: 1 writes across 1 files (DaySlider.tsx) | 0 reads | ~149 tok |
+| 12:48 | Session end: 1 writes across 1 files (DaySlider.tsx) | 0 reads | ~149 tok |
+| 12:51 | Session end: 1 writes across 1 files (DaySlider.tsx) | 0 reads | ~149 tok |
+| 13:03 | fixed admin "تعديل الخطة" infinite render loop: shared TrackDetail pushed a teacher-only route from the admin navigator; added admin/plan-form route + role-aware planFormPath; admin plan create now derives teacher from the halqa | quran-hifz-mobile: app/(portal)/admin/plan-form.tsx (new), admin/_layout.tsx, components/domain/TrackDetail.tsx, teacher/plan-form.tsx | tsc clean, jest 47/47, full expo export bundles clean; bug-384/385 logged | ~30k |
+| 13:03 | Session end: 1 writes across 1 files (DaySlider.tsx) | 0 reads | ~149 tok |

@@ -136,6 +136,13 @@ export default function TrackDetail({ trackId, role }: Props) {
     : undefined;
   const evaluatingTeacherId = role === 'teacher' ? profileId : trackTeacherId;
 
+  // The plan form must be pushed from *this portal's* navigator. Sending an
+  // admin to the teacher route asks the admin Tabs navigator for a screen it
+  // does not own, which loops the root guard instead of failing cleanly.
+  const planFormPath = role === 'admin'
+    ? '/(portal)/admin/plan-form'
+    : '/(portal)/teacher/plan-form';
+
   const [tab, setTab] = useState<TabKey>('students');
   const [showLinkPanel, setShowLinkPanel] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
@@ -337,7 +344,7 @@ export default function TrackDetail({ trackId, role }: Props) {
                     label="تعديل الخطة"
                     variant="secondary"
                     style={{ flex: 1 }}
-                    onPress={() => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'edit', id: linkedPlan._id } } as any)}
+                    onPress={() => router.push({ pathname: planFormPath, params: { mode: 'edit', id: linkedPlan._id } } as any)}
                   />
                 )}
                 {canManagePlan && (
@@ -386,7 +393,7 @@ export default function TrackDetail({ trackId, role }: Props) {
               <Button
                 label="إنشاء خطة جديدة بدلاً من ذلك"
                 variant="ghost"
-                onPress={() => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'create' } } as any)}
+                onPress={() => router.push({ pathname: planFormPath, params: { mode: 'create' } } as any)}
                 style={{ marginTop: 8 }}
                 fullWidth
               />

@@ -6478,6 +6478,44 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-29T12:38:56.813914"
+    },
+    {
+      "id": "bug-384",
+      "timestamp": "2026-08-29T13:02:56.384945",
+      "error_message": "Maximum update depth exceeded (RootLayout app/_layout.tsx:84 <Stack.Protected>) when an admin taps تعديل الخطة in the track detail plan tab",
+      "file": "quran-hifz-mobile/components/domain/TrackDetail.tsx",
+      "root_cause": "TrackDetail is shared by both portals but hard-coded its pushes to '/(portal)/teacher/plan-form'. The admin Tabs navigator (app/(portal)/admin/_layout.tsx) does not own that route, so expo-router could not resolve it and the root <Stack.Protected> guard re-rendered without converging instead of failing cleanly. Surfaced only after canManagePlan was opened to admin, which made the button reachable",
+      "fix": "Added app/(portal)/admin/plan-form.tsx re-exporting the teacher form, registered it as an href:null Tabs.Screen in the admin layout, and made TrackDetail pick planFormPath from `role`",
+      "tags": [
+        "mobile",
+        "expo-router",
+        "navigation",
+        "admin",
+        "infinite-loop",
+        "cross-portal"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T13:02:56.384945"
+    },
+    {
+      "id": "bug-385",
+      "timestamp": "2026-08-29T13:02:56.384945",
+      "error_message": "Admin creating a Quran plan would fail server validation (teacher: z.string().min(1) required)",
+      "file": "quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx",
+      "root_cause": "On create the form sent `body.teacher = profileId`, which is undefined for admin users (they are seeded without a profileId)",
+      "fix": "Fall back to the selected halqa's own teacher id, with an inline Arabic error when neither is available",
+      "tags": [
+        "mobile",
+        "admin",
+        "quran-plan",
+        "validation"
+      ],
+      "related_bugs": [
+        "bug-384"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T13:02:56.384945"
     }
   ]
 }

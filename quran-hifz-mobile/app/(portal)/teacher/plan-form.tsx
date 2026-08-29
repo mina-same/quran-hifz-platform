@@ -191,7 +191,18 @@ export default function TeacherPlanForm() {
       body.targetType = 'halqa';
       body.halqa = form.halqa;
     }
-    if (!isEdit) body.teacher = profileId;
+    if (!isEdit) {
+      // `teacher` is required by the server on create. An admin reaching this
+      // form from the track drill-down has no profileId of their own, so fall
+      // back to the teacher who owns the halqa the plan targets.
+      const halqaTeacher = halqat.find((h) => h._id === form.halqa)?.teacher;
+      body.teacher = profileId
+        ?? (typeof halqaTeacher === 'object' ? halqaTeacher?._id : halqaTeacher);
+      if (!body.teacher) {
+        setFormError('تعذّر تحديد المعلم لهذه الخطة — اختر حلقة لها معلم مُسنَد.');
+        return;
+      }
+    }
 
     try {
       setFormError('');

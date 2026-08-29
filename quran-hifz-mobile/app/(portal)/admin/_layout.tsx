@@ -57,6 +57,9 @@ export default function AdminTabLayout() {
       <Tabs.Screen name="halqa-form"   options={{ href: null, title: 'بيانات الحلقة' }} />
       <Tabs.Screen name="teacher-form" options={{ href: null, title: 'بيانات المعلم' }} />
       <Tabs.Screen name="student-form" options={{ href: null, title: 'بيانات الطالب' }} />
+      {/* Pushed from the track drill-down's plan tab (تعديل الخطة / إنشاء خطة جديدة).
+          Must live in this navigator — see the note in admin/plan-form.tsx. */}
+      <Tabs.Screen name="plan-form"    options={{ href: null, title: 'خطة الحفظ' }} />
     </Tabs>
 
     <MoreSheet
