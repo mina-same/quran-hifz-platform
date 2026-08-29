@@ -6516,6 +6516,43 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-29T13:02:56.384945"
+    },
+    {
+      "id": "bug-386",
+      "timestamp": "2026-08-29T13:09:22.091113",
+      "error_message": "Admin sees 'لإضافة أو إزالة معلم/طالب من هذا المسار، تواصل مع الإدارة' on the track detail — the admin IS الإدارة",
+      "file": "quran-hifz-mobile/components/domain/TrackDetail.tsx, quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
+      "root_cause": "Both clients share one track-detail page between the teacher and admin portals, but the two info notes are teacher-only copy that was rendered unconditionally",
+      "fix": "Mobile gates on the existing `role === 'teacher'` prop; web reads `portal` off usePortal() and gates on `portal === 'teacher'`",
+      "tags": [
+        "mobile",
+        "web",
+        "admin",
+        "copy",
+        "role-aware",
+        "special-tracks"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T13:09:22.091113"
+    },
+    {
+      "id": "bug-387",
+      "timestamp": "2026-08-29T13:09:22.091113",
+      "error_message": "Pull-to-refresh spinner nearly invisible in dark mode",
+      "file": "quran-hifz-mobile/lib/theme.ts (+38 RefreshControl call sites)",
+      "root_cause": "Every RefreshControl passed colors/tintColor as theme.green (#1B5E20). The spinner is drawn straight on the page background with no surface behind it, and in dark mode bg is #101511 — so a near-black spinner on near-black ground",
+      "fix": "Added a `spinner` surface token (#1B5E20 light, #F2F2F0 dark) and swapped all 38 call sites to theme.spinner",
+      "tags": [
+        "mobile",
+        "dark-mode",
+        "theme",
+        "refresh-control",
+        "contrast"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T13:09:22.091113"
     }
   ]
 }

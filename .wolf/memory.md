@@ -2741,3 +2741,5 @@
 | 12:51 | Session end: 1 writes across 1 files (DaySlider.tsx) | 0 reads | ~149 tok |
 | 13:03 | fixed admin "تعديل الخطة" infinite render loop: shared TrackDetail pushed a teacher-only route from the admin navigator; added admin/plan-form route + role-aware planFormPath; admin plan create now derives teacher from the halqa | quran-hifz-mobile: app/(portal)/admin/plan-form.tsx (new), admin/_layout.tsx, components/domain/TrackDetail.tsx, teacher/plan-form.tsx | tsc clean, jest 47/47, full expo export bundles clean; bug-384/385 logged | ~30k |
 | 13:03 | Session end: 1 writes across 1 files (DaySlider.tsx) | 0 reads | ~149 tok |
+| 13:09 | admin-facing copy fix (تواصل مع الإدارة hidden for admin on web+mobile) + new theme.spinner token so pull-to-refresh is visible in dark mode (38 call sites) | quran-hifz-mobile/lib/theme.ts, components/domain/TrackDetail.tsx, 34 screens; quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | mobile tsc clean + jest 47/47 + expo export clean; web tsc clean for touched file | ~25k |
+| 13:09 | Session end: 1 writes across 1 files (DaySlider.tsx) | 0 reads | ~149 tok |
