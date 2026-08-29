@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-  IconCircleCheck, IconChevronDown, IconChevronUp, IconChevronLeft, IconChevronRight,
+  IconCircleCheck, IconChevronDown, IconChevronUp,
   IconLock, IconClock, IconCalendarOff, IconBook2, IconDeviceFloppy, IconEdit,
   IconCheck, IconX, IconTrophy, IconCalendarCheck, IconHistory, IconMedal,
 } from '@tabler/icons-react-native';
@@ -17,6 +17,7 @@ import Leaderboard, { type LeaderboardRow } from '@/components/ui/Leaderboard';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import ContextCard, { halqaToContext, trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
+import DaySlider, { useDaySchedule } from '@/components/domain/DaySlider';
 import { useHalqat } from '@/lib/queries/halqat';
 import { useSpecialTracks } from '@/lib/queries/specialTracks';
 import { useStudents } from '@/lib/queries/students';
@@ -31,7 +32,7 @@ import {
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { success, warning, error } from '@/lib/haptics';
-import { AR_LOCALE } from '@/lib/date';
+import { AR_LOCALE, fmtDayLabel, toDateOnly } from '@/lib/date';
 
 // ── helpers (mirrored from the web page) ───────────────────────────────────
 function surahName(n: number): string {
@@ -40,46 +41,6 @@ function surahName(n: number): string {
 function avatarInitials(name: string): string {
   return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0] ?? '').join('');
 }
-// Indexed by Date.getDay(): 0 = الأحد … 6 = السبت.
-const ARABIC_WEEKDAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-function weekdayOf(iso: string): string {
-  return ARABIC_WEEKDAYS[new Date(iso + 'T00:00:00').getDay()];
-}
-/** Pure UTC arithmetic — building the date at local midnight and reading it
- * back via toISOString() is not a round trip in any UTC+ timezone, which froze
- * the whole slider on one repeated date on the web. */
-function addDays(iso: string, n: number): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().split('T')[0];
-}
-/** The server stores schedule dates as full ISO timestamps; normalise to a bare
- * YYYY-MM-DD so date maths and Set keys stay consistent. */
-function toDateOnly(s: string): string {
-  return String(s).slice(0, 10);
-}
-function fmtDate(iso: string): string {
-  return new Date(iso + 'T00:00:00').toLocaleDateString(AR_LOCALE, {
-    weekday: 'long', day: 'numeric', month: 'long',
-  });
-}
-type DayChip = { iso: string; weekday: string; dayNum: number; isToday: boolean };
-function buildDayChips(minIso: string, maxIso: string, today: string): DayChip[] {
-  const out: DayChip[] = [];
-  let cur = minIso;
-  let guard = 0;
-  while (cur <= maxIso && guard < 1095) {
-    out.push({
-      iso: cur,
-      weekday: weekdayOf(cur),
-      dayNum: new Date(cur + 'T00:00:00').getDate(),
-      isToday: cur === today,
-    });
-    cur = addDays(cur, 1);
-    guard++;
-  }
-  return out;
-}
-
 type ScoreCategory = 'hifz' | 'tajweed' | 'talawah';
 const CATEGORY_LABELS: Record<ScoreCategory, string> = { hifz: 'حفظ', tajweed: 'تجويد', talawah: 'تلاوة' };
 type StudentEval = { attendanceStatus: 'حاضر' | 'غائب'; hifz: number; tajweed: number; talawah: number };
@@ -91,9 +52,6 @@ function totalOf(e: StudentEval): number {
   if (e.attendanceStatus === 'غائب') return 0;
   return MAX_SCORES.attendance + e.hifz + e.tajweed + e.talawah;
 }
-
-const CHIP_W = 56;
-const CHIP_GAP = 8;
 
 export default function TeacherAttendance() {
   const theme = useAppTheme();
@@ -117,11 +75,6 @@ export default function TeacherAttendance() {
   const bulkEvaluate = useBulkEvaluate();
   const recordOccurrence = useRecordStudentOccurrence();
 
-  // Local calendar date — toISOString() lags a day behind local wall-clock time
-  // for the first `offset` hours of each day in any UTC+ timezone.
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
   const { data: plans = [], isLoading: loadingPlans, refetch: refetchPlans, isRefetching: refetchingPlans } =
     useQuranPlans(contextFilter);
   const linkedPlan = plans.find((p) => p.targetType === (selected?.kind === 'specialTrack' ? 'specialTrack' : 'halqa')) ?? plans[0];
@@ -129,34 +82,15 @@ export default function TeacherAttendance() {
 
   // ── Day slider ─────────────────────────────────────────────────────────
   const [selectedDate, setSelectedDate] = useState('');
-  const { scheduledSet, scheduledSorted, assignmentByDate, dayChips, effectiveDate } = useMemo(() => {
-    const set = new Set<string>();
-    const byDate = new Map<string, ScheduleEntry>();
-    for (const p of plans) {
-      for (const e of p.schedule ?? []) {
-        if (!e.date) continue;
-        const d = toDateOnly(e.date);
-        set.add(d);
-        if (!byDate.has(d)) byDate.set(d, e);
-      }
-    }
-    const sorted = Array.from(set).sort();
-    const chips = sorted.length ? buildDayChips(sorted[0], sorted[sorted.length - 1], today) : [];
-    // Default to the latest scheduled day ≤ today, else the first upcoming one,
-    // so the roster always opens on a day that has a real assignment.
-    let dflt = sorted.length ? sorted[0] : today;
-    if (sorted.length) {
-      const pastOrToday = sorted.filter((d) => d <= today);
-      dflt = pastOrToday.length ? pastOrToday[pastOrToday.length - 1] : sorted[0];
-    }
-    return {
-      scheduledSet: set,
-      scheduledSorted: sorted,
-      assignmentByDate: byDate,
-      dayChips: chips,
-      effectiveDate: selectedDate && set.has(selectedDate) ? selectedDate : dflt,
-    };
-  }, [plans, selectedDate, today]);
+  // Unlike the track drill-down, this screen shows a *context* (halqa or
+  // track) that can carry several plans at once, so every plan's schedule
+  // feeds the same strip of days.
+  const scheduleEntries = useMemo(
+    () => plans.flatMap((p) => p.schedule ?? []),
+    [plans],
+  );
+  const daySchedule = useDaySchedule(scheduleEntries, selectedDate);
+  const { scheduledSorted, assignmentByDate, effectiveDate, today, isFutureDay } = daySchedule;
 
   function planCoversStudent(studentId: string): boolean {
     if (!linkedPlan) return false;
@@ -203,14 +137,6 @@ export default function TeacherAttendance() {
       });
     }
   }, [bulkEvaluate.isSuccess]);
-
-  // Keep the active day chip in view — the slider can span months.
-  const sliderRef = useRef<ScrollView>(null);
-  useEffect(() => {
-    const i = dayChips.findIndex((d) => d.iso === effectiveDate);
-    if (i < 0) return;
-    sliderRef.current?.scrollTo({ x: Math.max(0, i * (CHIP_W + CHIP_GAP) - CHIP_W * 2), animated: true });
-  }, [effectiveDate, dayChips]);
 
   // Already-saved evaluations for the selected day.
   const { data: savedToday = [], refetch: refetchSaved, isRefetching: refetchingSaved } = useEvaluations(
@@ -311,7 +237,6 @@ export default function TeacherAttendance() {
     return perStudent ?? assignmentByDate.get(effectiveDate);
   }
 
-  const isFutureDay = effectiveDate > today;
 
   function saveStudent(studentId: string, studentName: string) {
     if (isFutureDay || !selected || !profileId) return;
@@ -393,25 +318,6 @@ export default function TeacherAttendance() {
     muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
     backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
 
-    slider: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    sliderArrow: {
-      width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center',
-      backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
-    },
-    sliderArrowOff: { opacity: 0.35 },
-    chipRow: { flexDirection: 'row', gap: CHIP_GAP, paddingHorizontal: 2 },
-    dayChip: {
-      width: CHIP_W, paddingVertical: 7, borderRadius: theme.radiusSm,
-      alignItems: 'center', gap: 1,
-      backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
-    },
-    dayChipActive: { backgroundColor: theme.greenAccent, borderColor: theme.green },
-    dayChipToday: { borderColor: theme.gold },
-    dayChipOff: { opacity: 0.4, borderStyle: 'dashed' },
-    dayChipWd: { fontSize: 9, fontFamily: theme.fontCairo, color: theme.textMuted },
-    dayChipNum: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text },
-    dayChipTextActive: { color: theme.white },
-    todayDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: theme.gold },
 
     row: { paddingVertical: 12 },
     rowBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
@@ -505,7 +411,6 @@ export default function TeacherAttendance() {
   }
 
   // ── View 2: day slider + per-student attendance/evaluation roster ────────
-  const activeIdx = scheduledSorted.indexOf(effectiveDate);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -532,62 +437,13 @@ export default function TeacherAttendance() {
         {/* Day slider — only when this context has scheduled days */}
         {loadingPlans ? (
           <SkeletonRows count={1} rowHeight={44} />
-        ) : scheduledSorted.length > 0 ? (
-          <View style={styles.slider}>
-            <Pressable
-              haptic="select"
-              onPress={() => { if (activeIdx > 0) setSelectedDate(scheduledSorted[activeIdx - 1]); }}
-              style={[styles.sliderArrow, activeIdx <= 0 && styles.sliderArrowOff]}
-              disabled={activeIdx <= 0}
-            >
-              <IconChevronRight size={18} color={theme.text} />
-            </Pressable>
-            <ScrollView
-              ref={sliderRef}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.chipRow}
-              style={{ flex: 1 }}
-            >
-              {dayChips.map((d) => {
-                const enabled = scheduledSet.has(d.iso);
-                const isSel = d.iso === effectiveDate;
-                return (
-                  <Pressable
-                    haptic="select"
-                    key={d.iso}
-                    onPress={() => {
-                      if (!enabled) {
-                        setDayNotice(`${fmtDate(d.iso)} — هذا اليوم غير مشمول بخطة الحفظ الحالية`);
-                        return;
-                      }
-                      setDayNotice(null);
-                      setSelectedDate(d.iso);
-                    }}
-                    style={[
-                      styles.dayChip,
-                      d.isToday && styles.dayChipToday,
-                      !enabled && styles.dayChipOff,
-                      isSel && styles.dayChipActive,
-                    ]}
-                  >
-                    <Text style={[styles.dayChipWd, isSel && styles.dayChipTextActive]}>{d.weekday}</Text>
-                    <Text style={[styles.dayChipNum, isSel && styles.dayChipTextActive]}>{d.dayNum}</Text>
-                    {d.isToday && <View style={styles.todayDot} />}
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-            <Pressable
-              haptic="select"
-              onPress={() => { if (activeIdx >= 0 && activeIdx < scheduledSorted.length - 1) setSelectedDate(scheduledSorted[activeIdx + 1]); }}
-              style={[styles.sliderArrow, activeIdx >= scheduledSorted.length - 1 && styles.sliderArrowOff]}
-              disabled={activeIdx >= scheduledSorted.length - 1}
-            >
-              <IconChevronLeft size={18} color={theme.text} />
-            </Pressable>
-          </View>
-        ) : null}
+        ) : (
+          <DaySlider
+            schedule={daySchedule}
+            onSelect={(iso) => { setDayNotice(null); setSelectedDate(iso); }}
+            onBlocked={(iso) => setDayNotice(`${fmtDayLabel(iso)} — هذا اليوم غير مشمول بخطة الحفظ الحالية`)}
+          />
+        )}
 
         {!!dayNotice && (
           <Alert variant="warning" icon={<IconCalendarOff size={16} color="#92400E" />}>{dayNotice}</Alert>
@@ -607,7 +463,7 @@ export default function TeacherAttendance() {
         )}
 
         <Card>
-          <CardHeader title={`${selected.title} — ${fmtDate(effectiveDate)}`} />
+          <CardHeader title={`${selected.title} — ${fmtDayLabel(effectiveDate)}`} />
 
           {loadingStudents && <SkeletonRows count={4} />}
           {!loadingStudents && students.length === 0 && <Text style={styles.muted}>لا يوجد طلاب</Text>}

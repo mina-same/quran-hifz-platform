@@ -117,7 +117,7 @@ export default function StudentSpecialTracks() {
         {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
 
         {!isLoading && tracks.length === 0 && (
-          <Text style={s.muted}>لم تُسجَّل في أي مسار استثنائي بعد</Text>
+          <Text style={s.muted}>لم تُسجَّل في أي مسار بعد</Text>
         )}
 
         {active.length > 0 && (

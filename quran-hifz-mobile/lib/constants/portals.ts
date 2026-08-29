@@ -51,8 +51,8 @@ export const PORTALS: Record<string, PortalConfig> = {
           {
             id: "special_tracks",
             icon: "calendar-event",
-            label: "مساراتي الاستثنائية",
-            desc: "عرض مساراتك الاستثنائية",
+            label: "مساراتي",
+            desc: "المسارات المسجَّل بها",
           },
         ],
       },
@@ -178,13 +178,13 @@ export const PORTALS: Record<string, PortalConfig> = {
         ],
       },
       {
-        group: "المسارات الاستثنائية",
+        group: "المسارات",
         items: [
           {
             id: "special_tracks",
             icon: "calendar-event",
-            label: "مساراتي الاستثنائية",
-            desc: "عرض مساراتك الاستثنائية",
+            label: "مساراتي",
+            desc: "المسارات المسجَّل بها",
           },
         ],
       },
@@ -280,8 +280,8 @@ export const PORTALS: Record<string, PortalConfig> = {
           {
             id: "special_tracks",
             icon: "calendar-event",
-            label: "المسارات الاستثنائية",
-            desc: "متابعة المسارات الاستثنائية",
+            label: "المسارات",
+            desc: "إدارة المسارات وحلقاتها",
             dot: true,
           },
         ],

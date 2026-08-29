@@ -1,11 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
-import { get } from '@/lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { get, post, put, del } from '@/lib/api';
 
 export type Halqa = {
   _id: string;
   name: string;
   teacher: { _id: string; name: string } | string;
   masjid: { _id: string; name: string } | string;
+  /** The halqa's programme — populated on read, sent as an id on write. */
+  specialTrack?: { _id: string; title: string } | string | null;
   days: string;
   time: string;
   capacity: number;
@@ -43,5 +45,30 @@ export function useHalqa(id: string | undefined) {
     queryKey: ['halqat', id],
     queryFn: () => get<SingleResponse>(`/halqat/${id}`).then((r) => r.data),
     enabled: !!id,
+  });
+}
+
+export function useCreateHalqa() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Record<string, unknown>) => post<SingleResponse>('/halqat', body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['halqat'] }),
+  });
+}
+
+export function useUpdateHalqa() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) =>
+      put<SingleResponse>(`/halqat/${id}`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['halqat'] }),
+  });
+}
+
+export function useDeleteHalqa() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => del(`/halqat/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['halqat'] }),
   });
 }

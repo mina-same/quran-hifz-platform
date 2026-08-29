@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
+import { useRouter } from 'expo-router';
 import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
 import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AyahBar from '@/components/ui/AyahBar';
 import StatsRow from '@/components/ui/StatsRow';
@@ -36,6 +38,7 @@ function trackLabel(s: Student): string | null {
 
 export default function AdminDashboard() {
   const theme = useAppTheme();
+  const router = useRouter();
   const stats = useStats();
   const halqatQuery = useHalqat();
   const kpisQuery = useKpis();
@@ -58,6 +61,11 @@ export default function AdminDashboard() {
     safe: { flex: 1, backgroundColor: theme.bg },
     page: { padding: theme.pagePadding, gap: 14 },
     row: { paddingVertical: 14, gap: 8 },
+    addBtn: { backgroundColor: theme.greenAccent, borderRadius: 8, padding: 12, alignItems: 'center' },
+    addBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 14 },
+    masarRow: { gap: 4, marginBottom: 10 },
+    masarName: { flex: 1, fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    masarCount: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.green },
     rowBorder: { borderTopWidth: 1, borderTopColor: theme.border },
     rowHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
     bold: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, flex: 1 },
@@ -75,6 +83,19 @@ export default function AdminDashboard() {
     { label: 'المساجد',          value: stats.data.totalMasajid,  color: theme.red },
   ] : [];
 
+  // توزيع المسارات — grouped client-side from the students list, as on the web.
+  const masarRows = (() => {
+    const counts: Record<string, number> = {};
+    for (const st of students) {
+      const key = trackLabel(st) ?? '—';
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+    const total = students.length || 1;
+    return Object.entries(counts)
+      .map(([name, count]) => ({ name, count, pct: Math.round((count / total) * 100) }))
+      .sort((a, b) => b.count - a.count);
+  })();
+
   const topKpis = kpis.slice(0, 4);
   const recentStudents = students.slice(0, 5);
 
@@ -87,6 +108,26 @@ export default function AdminDashboard() {
       >
         <AyahBar />
         {isLoading ? <SkeletonRows count={1} rowHeight={70} /> : <StatsRow stats={STATS} />}
+
+        <Pressable style={styles.addBtn} onPress={() => router.push('/(portal)/admin/register' as any)}>
+          <Text style={styles.addBtnText}>+ طالب جديد</Text>
+        </Pressable>
+
+        {/* Programme distribution */}
+        <Card>
+          <CardHeader title="توزيع المسارات" />
+          {isLoading && <SkeletonRows count={3} />}
+          {!isLoading && masarRows.length === 0 && <Text style={styles.muted}>لا توجد بيانات</Text>}
+          {!isLoading && masarRows.map((r) => (
+            <View key={r.name} style={styles.masarRow}>
+              <View style={styles.rowHead}>
+                <Text style={styles.masarName} numberOfLines={1}>{r.name}</Text>
+                <Text style={styles.masarCount}>{r.count}</Text>
+              </View>
+              <ProgressBar value={r.pct} showPercent={false} />
+            </View>
+          ))}
+        </Card>
 
         {/* Halqat overview (first 2) */}
         {!isLoading && halqat.slice(0, 2).map((h) => (

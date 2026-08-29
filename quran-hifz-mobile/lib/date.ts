@@ -44,3 +44,69 @@ function toDate(value: string | number | Date | null | undefined): Date | null {
       : new Date(value);
   return Number.isNaN(d.getTime()) ? null : d;
 }
+
+/* ─── day-slider helpers ──────────────────────────────────────────────────
+ * Shared by every screen that scrolls a plan's scheduled days (teacher
+ * attendance, track detail). These deliberately work on bare `YYYY-MM-DD`
+ * strings rather than `Date` objects: the slider compares and sorts dates as
+ * Set keys, and string comparison is the only representation where that is
+ * both cheap and timezone-proof.
+ */
+
+/** Today as a **local** calendar date. `toISOString()` cannot be used here —
+ * it lags a day behind local wall-clock time for the first `offset` hours of
+ * each day in any UTC+ timezone. */
+export function todayIso(ref: Date = new Date()): string {
+  const m = String(ref.getMonth() + 1).padStart(2, '0');
+  const d = String(ref.getDate()).padStart(2, '0');
+  return `${ref.getFullYear()}-${m}-${d}`;
+}
+
+/** The server stores schedule dates as full ISO timestamps; normalise to a
+ * bare YYYY-MM-DD so date maths and Set keys stay consistent. */
+export function toDateOnly(s: string): string {
+  return String(s).slice(0, 10);
+}
+
+/** Pure UTC arithmetic — building the date at local midnight and reading it
+ * back via toISOString() is not a round trip in any UTC+ timezone, which froze
+ * the whole slider on one repeated date on the web. */
+export function addDays(iso: string, n: number): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().split('T')[0];
+}
+
+// Indexed by Date.getDay(): 0 = الأحد … 6 = السبت.
+const ARABIC_WEEKDAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+export function weekdayOf(iso: string): string {
+  return ARABIC_WEEKDAYS[new Date(iso + 'T00:00:00').getDay()];
+}
+
+/** "الأحد ٢٩ أغسطس" — the long label used in day-slider notices. */
+export function fmtDayLabel(iso: string): string {
+  return new Date(iso + 'T00:00:00').toLocaleDateString(AR_LOCALE, {
+    weekday: 'long', day: 'numeric', month: 'long',
+  });
+}
+
+export type DayChip = { iso: string; weekday: string; dayNum: number; isToday: boolean };
+
+/** Every calendar day from `minIso` to `maxIso` inclusive — including days the
+ * plan does not cover, so the slider reads as a continuous calendar rather
+ * than a jumpy list of scheduled dates. Capped at 3 years as a runaway guard. */
+export function buildDayChips(minIso: string, maxIso: string, today: string): DayChip[] {
+  const out: DayChip[] = [];
+  let cur = minIso;
+  let guard = 0;
+  while (cur <= maxIso && guard < 1095) {
+    out.push({
+      iso: cur,
+      weekday: weekdayOf(cur),
+      dayNum: new Date(cur + 'T00:00:00').getDate(),
+      isToday: cur === today,
+    });
+    cur = addDays(cur, 1);
+    guard++;
+  }
+  return out;
+}

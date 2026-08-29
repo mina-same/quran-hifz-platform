@@ -20,12 +20,14 @@ function nameOf(v: { name: string } | string | undefined): string {
 
 interface Props {
   masjid: Masjid;
+  /** Admin edit/delete buttons — rendered in the header, beside the count badge. */
+  actions?: React.ReactNode;
   /** This masjid's own halqat — the real /masajid endpoint doesn't nest them,
    * so the caller resolves them from a separate useHalqat() list. */
   halqat: Halqa[];
 }
 
-export default function MasjidAccordion({ masjid, halqat }: Props) {
+export default function MasjidAccordion({ masjid, halqat, actions }: Props) {
   const theme = useAppTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [open, setOpen] = useState(false);
@@ -39,18 +41,25 @@ export default function MasjidAccordion({ masjid, halqat }: Props) {
     <View style={styles.card}>
       {/* Plain style — NativeWind's interop drops the ({ pressed }) => … form. */}
       <Pressable onPress={toggle} style={styles.trigger}>
-        <View style={styles.triggerLeft}>
-          <IconBuildingArch size={16} color={theme.gold} />
-          <Text style={styles.name}>{masjid.name}</Text>
-          <Text style={styles.location}>— {masjid.location}</Text>
+        <IconBuildingArch size={16} color={theme.gold} style={styles.triggerIcon} />
+        {/* Name and location stack and wrap: a masjid name like "جامع الأمير متعب
+            بن عبد العزيز" needs two lines, and on one row it used to run under
+            the badge and the action buttons. */}
+        <View style={styles.titles}>
+          <Text style={styles.name} numberOfLines={2}>{masjid.name}</Text>
+          <Text style={styles.location} numberOfLines={1}>{masjid.location}</Text>
         </View>
-        <View style={styles.triggerRight}>
-          <Badge label={`${halqat.length} حلقات`} variant="green" />
-          {open
-            ? <IconChevronUp size={16} color={theme.textMuted} />
-            : <IconChevronDown size={16} color={theme.textMuted} />}
-        </View>
+        {open
+          ? <IconChevronUp size={16} color={theme.textMuted} />
+          : <IconChevronDown size={16} color={theme.textMuted} />}
       </Pressable>
+
+      {/* Count + admin actions on their own row, so nothing competes with the
+          title for width and the buttons keep a full-size touch target. */}
+      <View style={styles.metaRow}>
+        <Badge label={`${halqat.length} حلقات`} variant="green" />
+        {!!actions && <View style={styles.actions}>{actions}</View>}
+      </View>
 
       {open && (
         <View style={styles.content}>
@@ -86,31 +95,44 @@ function createStyles(theme: AppTheme) {
     },
     trigger: {
       flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      gap: 8,
       paddingHorizontal: 14,
-      paddingVertical: 13,
+      paddingTop: 13,
+      paddingBottom: 10,
     },
-    triggerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
+    triggerIcon: {
+      marginTop: 2,
+    },
+    // flexShrink as well as flex: without it a long unbroken title pushes past
+    // the row instead of wrapping inside it.
+    titles: {
       flex: 1,
+      flexShrink: 1,
+      gap: 2,
     },
     name: {
-      fontSize: 13,
+      fontSize: 14,
       fontFamily: theme.fontCairoBold,
       color: theme.green,
+      lineHeight: 21,
     },
     location: {
       fontSize: 11,
       fontFamily: theme.fontCairo,
       color: theme.textMuted,
     },
-    triggerRight: {
+    metaRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
+      justifyContent: 'space-between',
+      gap: 8,
+      paddingHorizontal: 14,
+      paddingBottom: 12,
+    },
+    actions: {
+      flexDirection: 'row',
+      gap: 8,
     },
     content: {
       borderTopWidth: 1,

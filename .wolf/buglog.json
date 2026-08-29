@@ -6248,6 +6248,160 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-29T09:13:41.576228"
+    },
+    {
+      "id": "bug-372",
+      "timestamp": "2026-08-29T12:03:09.799200",
+      "error_message": "admin 'تسجيل طالب جديد' on mobile saved nothing — the form was a mock",
+      "file": "quran-hifz-mobile/app/(portal)/admin/register.tsx",
+      "root_cause": "handleSubmit only flipped a local `submitted` flag and showed a success banner; no mutation was called. Fields were invented (national id, birth date, relation) and the halqa picker read a hardcoded lib/data/halqat.ts mock instead of the API.",
+      "fix": "Rewired to useCreateStudent with the web's field set + validation (name/age/guardianPhone/reading level/level/masjid/halqa/optional credentials), path derived via the ported pickMasar, and the returned credentials shown in the shared CredentialsDialog. Deleted the unused lib/data/halqat.ts mock.",
+      "tags": [
+        "mobile",
+        "admin",
+        "register",
+        "mock-data",
+        "no-op-form",
+        "parity"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T12:03:09.799200"
+    },
+    {
+      "id": "bug-373",
+      "timestamp": "2026-08-29T12:06:25.855303",
+      "error_message": "reports scope tabs unreadable — every label truncated to 3 letters (\"كل الـ… أبو بك… حفص…\")",
+      "file": "quran-hifz-mobile/components/ui/ScopeTabs.tsx",
+      "root_cause": "The component was a segmented control with `tab: { flex: 1 }`, so N options split ONE screen width. With 9 scopes (all + 6 halqat + 2 tracks) each tab got ~35pt and numberOfLines={1} ellipsized every name after 3 characters.",
+      "fix": "Segmented layout is now kept only for <=3 options; beyond that the component renders a horizontally scrolling chip row with content-sized pills (maxWidth 200), a per-kind icon (all/halqa/track) and a filled green active chip.",
+      "tags": [
+        "mobile",
+        "reports",
+        "scope-tabs",
+        "layout",
+        "truncation",
+        "segmented-control"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T12:06:25.855303"
+    },
+    {
+      "id": "bug-374",
+      "timestamp": "2026-08-29T12:10:34.309390",
+      "error_message": "Mobile track detail showed every student in a track to any teacher, and fetched the entire student list to do it",
+      "file": "quran-hifz-mobile/components/domain/TrackDetail.tsx",
+      "root_cause": "Roster was built from a bare useStudents() (all students) filtered client-side by halqa.specialTrack, instead of the web's teacher-scoped useHalqat({teacher}) -> useStudents({halqa: ids}) chain",
+      "fix": "Scope halqat by teacher for role='teacher' (all halqat for admin), narrow to the ones on this track, and fetch only those halqat's students via useStudents({halqa: ids.join(',')}, {enabled})",
+      "tags": [
+        "mobile",
+        "track-detail",
+        "authorization",
+        "over-fetch",
+        "web-parity"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T12:10:34.309390"
+    },
+    {
+      "id": "bug-375",
+      "timestamp": "2026-08-29T12:10:34.309390",
+      "error_message": "Mobile track detail could latch onto the wrong Quran plan for a track",
+      "file": "quran-hifz-mobile/components/domain/TrackDetail.tsx",
+      "root_cause": "Took linkedPlans[0] blindly. A plan can keep a stale `specialTrack` ref after its targetType is switched to 'students', so the filtered list can contain several plans for one track",
+      "fix": "Prefer the plan actually targeting the track: linkedPlans.find(p => p.targetType === 'specialTrack') ?? linkedPlans[0] — same rule the web page uses",
+      "tags": [
+        "mobile",
+        "track-detail",
+        "quran-plan",
+        "stale-ref",
+        "web-parity"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T12:10:34.309390"
+    },
+    {
+      "id": "bug-376",
+      "timestamp": "2026-08-29T12:13:26.157817",
+      "error_message": "Admin opening a track detail downloaded every Quran plan in the system",
+      "file": "quran-hifz-mobile/components/domain/TrackDetail.tsx",
+      "root_cause": "useQuranPlans({teacher: profileId}) ran for both roles. Admin users are seeded with no profileId, so the `teacher` param was dropped and GET /quran-plans returned everything — for a link panel that is teacher-only and never rendered for admin",
+      "fix": "Added an `opts.enabled` escape hatch to useQuranPlans (matching useStudents' convention) and gated the call behind canManagePlan",
+      "tags": [
+        "mobile",
+        "track-detail",
+        "admin",
+        "over-fetch",
+        "react-query"
+      ],
+      "related_bugs": [
+        "bug-374",
+        "bug-375"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T12:13:26.157817"
+    },
+    {
+      "id": "bug-377",
+      "timestamp": "2026-08-29T12:13:26.157817",
+      "error_message": "Admin track card's 'مقرَّر اليوم' could disagree with the same track's detail screen",
+      "file": "quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
+      "root_cause": "Card took linkedPlans[0]; a plan retains its specialTrack ref after targetType switches to 'students', so the filter can return several plans. Same root cause as bug-375, different screen. The web copy (quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx:707) still has it",
+      "fix": "Prefer linkedPlans.find(p => p.targetType === 'specialTrack') ?? linkedPlans[0]",
+      "tags": [
+        "mobile",
+        "admin",
+        "special-tracks",
+        "quran-plan",
+        "stale-ref"
+      ],
+      "related_bugs": [
+        "bug-375"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T12:13:26.157817"
+    },
+    {
+      "id": "bug-378",
+      "timestamp": "2026-08-29T12:13:39.842317",
+      "error_message": "a FormSelect opened from inside an add/edit form appeared BEHIND the form — the picker was unreachable",
+      "file": "quran-hifz-mobile/components/ui/FormModal.tsx (deleted), admin masajid/halqat/teachers/students screens",
+      "root_cause": "FormModal was built on React Native's <Modal>, which is a separate NATIVE WINDOW stacked above the React root. FormSelect's picker is a @gorhom/bottom-sheet BottomSheetModal that renders into the single BottomSheetModalProvider mounted in app/_layout.tsx — i.e. inside the root, therefore underneath the RN Modal window.",
+      "fix": "Deleted FormModal and moved every admin add/edit form to its own route (masjid-form, halqa-form, teacher-form, student-form) built on a new shared components/ui/FormPage.tsx (back header + scrolling body + sticky save/cancel footer). A route has no native window of its own, so the picker sheet lands on top; long forms also get the full screen and normal keyboard avoidance. ConfirmDialog/CredentialsDialog stay RN Modals — they contain no pickers.",
+      "tags": [
+        "mobile",
+        "bottom-sheet",
+        "z-index",
+        "rn-modal",
+        "gorhom",
+        "forms",
+        "admin"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T12:13:39.842317"
+    },
+    {
+      "id": "bug-379",
+      "timestamp": "2026-08-29T12:15:05.900159",
+      "error_message": "masjid accordion header overlapped: the location text ran underneath the '3 حلقات' badge and the edit/delete buttons",
+      "file": "quran-hifz-mobile/components/domain/MasjidAccordion.tsx",
+      "root_cause": "Header was one row: [icon + name + location] (flex:1) beside [badge + actions + chevron]. The name and location were plain <Text> with no numberOfLines and no flexShrink, so a long masjid name ('جامع الأمير متعب بن عبد العزيز') overflowed its container and painted over the right-hand group.",
+      "fix": "Split into two rows: a tappable row with the icon, a stacked name (2 lines) + location (1 line) column that flexes and shrinks, and the chevron; then a meta row carrying the halqa count badge and the admin actions.",
+      "tags": [
+        "mobile",
+        "layout",
+        "overlap",
+        "rtl",
+        "masajid",
+        "accordion"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T12:15:05.900159"
     }
   ]
 }

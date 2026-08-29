@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
+import { IconDownload } from '@tabler/icons-react-native';
 import Svg, { Polyline } from 'react-native-svg';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
@@ -10,11 +12,13 @@ import Alert from '@/components/ui/Alert';
 import ProgressBar from '@/components/ui/ProgressBar';
 import Donut from '@/components/ui/Donut';
 import Leaderboard, { type LeaderboardRow } from '@/components/ui/Leaderboard';
-import ScopeTabs from '@/components/ui/ScopeTabs';
+import ScopeTabs, { type ScopeOption } from '@/components/ui/ScopeTabs';
 import Tile, { tileGridStyle } from '@/components/ui/Tile';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { useStudents, type StudentFilters } from '@/lib/queries/students';
+import StudentReportPanel from '@/components/domain/StudentReportPanel';
+import { shareCsv } from '@/lib/csv';
 import { useEvaluations, type EvaluationRecord, type EvaluationScores } from '@/lib/queries/evaluations';
 import type { Halqa } from '@/lib/queries/halqat';
 import type { SpecialTrack } from '@/lib/queries/specialTracks';
@@ -127,6 +131,14 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
         heroMeta: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted, marginTop: 8 },
         trendLabelsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
         halqaRow: { gap: 4 },
+        exportList: { gap: 8 },
+        exportBtn: {
+          flexDirection: 'row', alignItems: 'center', gap: 8,
+          borderWidth: 1, borderColor: theme.border, borderRadius: 8,
+          paddingVertical: 10, paddingHorizontal: 12,
+        },
+        exportBtnDisabled: { opacity: 0.5 },
+        exportText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.green },
       }),
     [theme],
   );
@@ -139,10 +151,10 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
     return baseFilter;
   }, [scope, baseFilter]);
 
-  const scopeOptions = useMemo(() => {
-    const opts = [{ value: '', label: scopeAllLabel }];
-    halqat.forEach((h) => opts.push({ value: `halqa:${h._id}`, label: h.name }));
-    tracks.forEach((t) => opts.push({ value: `track:${t._id}`, label: t.title }));
+  const scopeOptions: ScopeOption[] = useMemo(() => {
+    const opts: ScopeOption[] = [{ value: '', label: scopeAllLabel, kind: 'all' }];
+    halqat.forEach((h) => opts.push({ value: `halqa:${h._id}`, label: h.name, kind: 'halqa' }));
+    tracks.forEach((t) => opts.push({ value: `track:${t._id}`, label: t.title, kind: 'track' }));
     return opts;
   }, [halqat, tracks, scopeAllLabel]);
 
@@ -295,6 +307,58 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
       ? 'لا يوجد طلاب مسجلون بعد — أضف طلابًا لعرض التقارير'
       : 'لا يوجد طلاب في حلقاتك بعد';
 
+  /* ── exports: the phone has no download, so each report goes out through the
+   *  OS share sheet (Mail / Files / Drive) with the same columns as the web. ── */
+  const exportItems = [
+    {
+      label: 'تقرير التقييمات',
+      disabled: evaluations.length === 0,
+      run: () => shareCsv(
+        'تقرير التقييمات',
+        ['الطالب', 'التاريخ', 'حضور', 'حفظ', 'تجويد', 'تلاوة', 'المجموع'],
+        evaluations.map((e) => [
+          studentNameOf(e), e.date.slice(0, 10),
+          e.scores.attendance, e.scores.hifz, e.scores.tajweed, e.scores.talawah, e.total,
+        ]),
+      ),
+    },
+    {
+      label: 'مقارنة الحلقات (تقييم)',
+      disabled: halqaEvalStats.length === 0,
+      run: () => shareCsv(
+        'تقرير الحلقات - تقييم',
+        ['الحلقة', 'متوسط الحضور', 'متوسط الحفظ', 'متوسط التجويد', 'متوسط التلاوة', 'المتوسط الكلي', 'عدد الجلسات'],
+        halqaEvalStats.map((h) => [
+          h.name, `${h.avgAttendance}%`, `${h.avgHifz}%`, `${h.avgTajweed}%`, `${h.avgTalawah}%`, h.avgTotal, h.count,
+        ]),
+      ),
+    },
+    {
+      label: 'تقرير ذوي المتابعة',
+      disabled: m.atRisk.length === 0,
+      run: () => shareCsv(
+        'تقرير الطلاب ذوي المتابعة',
+        ['الطالب', 'الحلقة', 'نسبة الحضور', 'نسبة الإنجاز'],
+        m.atRisk.map((st) => [
+          st.name,
+          typeof st.halqa === 'object' && st.halqa ? st.halqa.name : '—',
+          `${st.attendancePct}%`,
+          `${st.progressPct}%`,
+        ]),
+      ),
+    },
+  ];
+
+  const selectedHalqaForTitle = halqat.find((h) => `halqa:${h._id}` === scope);
+  const selectedTrackForTitle = tracks.find((t) => `track:${t._id}` === scope);
+  const aggregateTitle = selectedHalqaForTitle
+    ? `مقارنة طلاب ${selectedHalqaForTitle.name}`
+    : selectedTrackForTitle
+      ? `مقارنة طلاب ${selectedTrackForTitle.title}`
+      : showAdmin
+        ? 'متوسط الدرجات لكل طلاب المدرسة'
+        : 'متوسط الدرجات لطلابك';
+
   return (
     <>
       <StatsRow
@@ -305,6 +369,25 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
           { label: 'ذوو المتابعة', value: m.atRisk.length, color: m.atRisk.length > 0 ? theme.red : theme.green },
         ]}
       />
+
+      {students.length > 0 && (
+        <Card>
+          <CardHeader title="تصدير التقارير" />
+          <View style={styles.exportList}>
+            {exportItems.map((it) => (
+              <Pressable
+                key={it.label}
+                style={[styles.exportBtn, it.disabled && styles.exportBtnDisabled]}
+                disabled={it.disabled}
+                onPress={it.run}
+              >
+                <IconDownload size={15} color={it.disabled ? theme.textMuted : theme.green} />
+                <Text style={[styles.exportText, it.disabled && { color: theme.textMuted }]}>{it.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </Card>
+      )}
 
       {scopeOptions.length > 1 && <ScopeTabs options={scopeOptions} value={scope} onChange={setScope} />}
 
@@ -440,6 +523,15 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
             ))}
           </View>
         </Card>
+      )}
+
+      {/* Detailed per-student report — mirrors the web's StudentReportPanel */}
+      {students.length > 0 && (
+        <StudentReportPanel
+          students={students.map((st) => ({ _id: st._id, name: st.name }))}
+          aggregateFilter={scopedFilter}
+          aggregateTitle={aggregateTitle}
+        />
       )}
 
       {/* Admin-only: org-wide teacher workload */}

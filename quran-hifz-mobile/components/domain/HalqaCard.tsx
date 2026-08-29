@@ -19,10 +19,17 @@ function nameOf(v: { name: string } | string | undefined): string {
   return '—';
 }
 
+/** Every halqa now belongs to a مسار; it is populated on read, an id on write. */
+function trackTitle(v: { title: string } | string | null | undefined): string | null {
+  if (v && typeof v === 'object' && 'title' in v) return v.title;
+  return null;
+}
+
 export default function HalqaCard({ halqa, actions }: Props) {
   const theme = useAppTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const studentCount = halqa.studentCount ?? 0;
+  const track = trackTitle(halqa.specialTrack);
   const capacityPct = halqa.capacity > 0 ? Math.round((studentCount / halqa.capacity) * 100) : 0;
 
   return (
@@ -36,11 +43,13 @@ export default function HalqaCard({ halqa, actions }: Props) {
       {/* Details */}
       <View style={styles.body}>
         {[
+          ...(track ? [{ label: 'المسار', value: track }] : []),
           { label: 'المعلم',       value: nameOf(halqa.teacher) },
           { label: 'المسجد',       value: nameOf(halqa.masjid) },
           { label: 'الأوقات',      value: halqa.time },
           { label: 'الأيام',       value: halqa.days },
           { label: 'نسبة الحضور',  value: `${halqa.attendancePct}٪` },
+          { label: 'نسبة الإنجاز', value: `${halqa.completionPct}٪` },
         ].map(({ label, value }) => (
           <View key={label} style={styles.row}>
             <Text style={styles.rowLabel}>{label}</Text>

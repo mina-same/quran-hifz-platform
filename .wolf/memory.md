@@ -2714,3 +2714,20 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-08-29 12:02
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 03:40 | Admin portal brought to web parity: CRUD for halqat/masajid/teachers (+ mutations added to the query layer), students edit/delete/search/path-filter/parent-link, real API-backed register with masar auto-pick + credentials, KPI + reports CSV share, dashboard masar distribution, mobile StudentReportPanel; renamed المسارات الاستثنائية → المسارات everywhere | quran-hifz-mobile: 8 admin screens, 4 new ui components, lib/csv.ts, lib/constants/masarMap.ts, 4 query modules | tsc clean, jest 47/47 | ~120k |
+| 12:03 | gap analysis: web #trackdetail (TeacherTrackDetail 1926L) vs mobile TrackDetail (343L) | quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx, quran-hifz-mobile/components/domain/TrackDetail.tsx | 10 concrete gaps identified, awaiting direction | ~35k |
+| 03:55 | Fixed unreadable reports scope tabs: segmented only up to 3 options, horizontal scrolling chips beyond that (icons per scope kind, filled active pill) | quran-hifz-mobile/components/ui/ScopeTabs.tsx, components/domain/ReportsScreen.tsx | tsc clean | ~10k |
+| 12:06 | Edited quran-hifz-mobile/components/domain/DaySlider.tsx | 11→11 lines | ~149 |
+| 12:10 | ported web #trackdetail gaps to mobile: ScopeTabs tabs, shared DaySlider (extracted from attendance.tsx), teacher-scoped roster, targetType-aware plan pick, teacher avatar chips, tappable meet link | quran-hifz-mobile: components/domain/TrackDetail.tsx (rewritten), components/domain/DaySlider.tsx (new), app/(portal)/teacher/attendance.tsx, lib/date.ts | tsc clean, jest 47/47; bug-374/375 logged | ~55k |
+| 12:11 | Session end: 1 writes across 1 files (DaySlider.tsx) | 0 reads | ~149 tok |
+| 12:13 | admin-side follow-up: gated myPlans fetch behind teacher role (useQuranPlans gains opts.enabled), fixed stale-plan pick on the admin track card; confirmed plan CRUD is authorize(teacher)-only server-side so hiding it from admin is correct | quran-hifz-mobile/lib/queries/quranPlan.ts, components/domain/TrackDetail.tsx, app/(portal)/admin/special_tracks.tsx | tsc clean, jest 47/47; bug-376/377 logged | ~25k |
+| 04:20 | Moved admin add/edit forms out of RN Modal into their own routes on a new FormPage container, fixing FormSelect pickers rendering behind the form; deleted FormModal | quran-hifz-mobile: components/ui/FormPage.tsx + 4 new *-form routes, 4 list screens, admin/_layout | tsc clean, jest 47/47 | ~40k |
+| 12:13 | Session end: 1 writes across 1 files (DaySlider.tsx) | 0 reads | ~149 tok |
+| 12:14 | Session end: 1 writes across 1 files (DaySlider.tsx) | 0 reads | ~149 tok |
+| 04:35 | Fixed overlapping masjid accordion header — title/location column that wraps, badge + actions moved to their own row | quran-hifz-mobile/components/domain/MasjidAccordion.tsx | tsc clean | ~8k |
+| 12:15 | Session end: 1 writes across 1 files (DaySlider.tsx) | 0 reads | ~149 tok |

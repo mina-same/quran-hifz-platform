@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { get } from '@/lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { get, post, put, del } from '@/lib/api';
 
 export type Teacher = {
   _id: string;
@@ -10,10 +10,14 @@ export type Teacher = {
   status: 'active' | 'inactive';
   halqatCount?: number;
   studentCount?: number;
+  /** null when the teacher has no login account yet. */
+  email?: string | null;
 };
 
 type ListResponse = { success: boolean; count: number; data: Teacher[] };
 type SingleResponse = { success: boolean; data: Teacher };
+/** POST /teachers echoes the generated login back ONCE — it is never readable again. */
+type CreateResponse = { success: boolean; data: Teacher; credentials?: { email: string; password: string } };
 
 export function useTeachers() {
   return useQuery({
@@ -27,5 +31,30 @@ export function useTeacher(id: string | undefined) {
     queryKey: ['teachers', id],
     queryFn: () => get<SingleResponse>(`/teachers/${id}`).then((r) => r.data),
     enabled: !!id,
+  });
+}
+
+export function useCreateTeacher() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Record<string, unknown>) => post<CreateResponse>('/teachers', body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['teachers'] }),
+  });
+}
+
+export function useUpdateTeacher() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) =>
+      put<SingleResponse>(`/teachers/${id}`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['teachers'] }),
+  });
+}
+
+export function useDeleteTeacher() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => del(`/teachers/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['teachers'] }),
   });
 }

@@ -389,7 +389,7 @@ export default function AdminSpecialTracks() {
         keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.green]} tintColor={theme.green} />}
       >
-        {saved && <Text style={s.successBanner}>تم حفظ المسار الاستثنائي ✓</Text>}
+        {saved && <Text style={s.successBanner}>تم حفظ المسار ✓</Text>}
 
         <Pressable style={s.addBtn} onPress={openAdd}>
           <Text style={s.addBtnText}>+ مسار جديد</Text>
@@ -397,7 +397,7 @@ export default function AdminSpecialTracks() {
 
         {showForm && (
           <Card>
-            <CardHeader title={editId ? 'تعديل المسار' : 'إضافة مسار استثنائي'} />
+            <CardHeader title={editId ? 'تعديل المسار' : 'إضافة مسار جديد'} />
             {!!formError && <Text style={s.errorText}>{formError}</Text>}
 
             <Text style={s.label}>اسم المسار</Text>
@@ -590,7 +590,11 @@ function TrackCard({
 }) {
   const [planOpen, setPlanOpen] = useState(false);
   const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: t._id });
-  const linkedPlan = linkedPlans[0];
+  // A plan keeps its `specialTrack` ref after its targetType is switched to
+  // "students", so this filter can return several plans for one track. Prefer
+  // the one actually targeting the whole track, or this card's "مقرَّر اليوم"
+  // disagrees with the track-detail screen for the same track.
+  const linkedPlan = linkedPlans.find((p) => p.targetType === 'specialTrack') ?? linkedPlans[0];
 
   const enrolled = t.enrolledStudents.length;
   const pct = Math.min(100, Math.round((enrolled / t.maxStudents) * 100));

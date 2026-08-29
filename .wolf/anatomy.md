@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-28T13:36:17.073Z
-> Files: 523 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-29T09:06:47.848Z
+> Files: 531 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -345,13 +345,14 @@
 - `AudioRecorder.tsx` — AudioRecorder — uses useState, useEffect (~1336 tok)
 - `BiometricLockScreen.tsx` — Shown after a stored session resumes silently, when the user has opted into (~1123 tok)
 - `ContextCard.tsx` — Normalized TeachingContext (halqa|specialTrack) card + halqaToContext/trackToContext mappers (~950 tok)
+- `DaySlider.tsx` — Horizontal calendar strip for picking a plan's scheduled day, plus the `useDaySchedule(entries, selectedDate)` hook that derives scheduledSet/Sorted, assignmentByDate, dayChips, effectiveDate and isFutureDay. Shared by teacher attendance and TrackDetail. (~1948 tok)
 - `HalqaCard.tsx` — nameOf (~816 tok)
 - `IndividualPlanPanel.tsx` — The shared halqa/track plan this student's overlay hangs off — used as the (~1783 tok)
 - `MasjidAccordion.tsx` — This masjid's own halqat — the real /masajid endpoint doesn't nest them, (~1180 tok)
 - `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~5750 tok)
 - `ScheduleSheet.tsx` — Day-by-day plan breakdown as a bottom sheet of compact cards (replaced the 6-column ScheduleTable). Exports scheduleItems()/fmtShortDate()/fmtPages() + the ScheduleItem shape. (~1700 tok)
 - `SurahAyahPicker.tsx` — When given, restricts BOTH pickers to only the surahs/ayat that fall inside (~828 tok)
-- `TrackDetail.tsx` — Admin reuses this same drill-down (role parity, per backend routes that (~4445 tok)
+- `TrackDetail.tsx` — Special-track drill-down shared by the teacher and admin routes. Three ScopeTabs (المعلمون/الطلاب/الخطة), a day slider over the linked plan's schedule, per-student assignment + IndividualPlanPanel, and teacher-only plan link/edit. Roster is scoped through the track's halaqat. (~4445 tok)
 
 ## quran-hifz-mobile/components/forms/
 
@@ -378,18 +379,22 @@
 - `Button.tsx` — shadcn-style button: VARIANTS (primary/secondary/danger/ghost/outline) + SIZES (sm 36 / default 44 / lg 52) with fixed heights, radius, pressed + disabled states (~700 tok)
 - `Card.tsx` — Card (~201 tok)
 - `CardHeader.tsx` — CardHeader (~277 tok)
+- `ConfirmDialog.tsx` — shared destructive-confirm modal (every admin delete goes through it). (~600 tok)
+- `CredentialsDialog.tsx` — one-time display of a newly created account's email/password. (~600 tok)
 - `DataTable.tsx` — DataTable — generic column table. UNUSED on mobile since the schedule tables moved to ScheduleSheet; too wide for a phone, prefer a sheet of cards. (~724 tok)
-- `SheetTriggerRow.tsx` — "Tap to open a sheet" settings-style row (icon + label + trailing summary + chevron, 56pt). Used wherever a wide table used to expand inline. Plain array style only — a function style is dropped by NativeWind and the row stacks vertically. (~620 tok)
 - `Donut.tsx` — Multi-segment ring chart with a centered label — the mobile-native equivalent of the web's recharts- (~1034 tok)
+- `FormPage.tsx` — full-screen add/edit container (back header, scrolling body, sticky save/cancel). Forms are ROUTES, not modals, so their FormSelect pickers aren't covered. Exports useFormPageStyles(). (~950 tok)
 - `HonorBoard.tsx` — Exactly the top 3, already sorted best-first. Degrades gracefully with fewer than 3. (~541 tok)
+- `IconButton.tsx` — small bordered row-action button, tone 'default' | 'danger'. (~350 tok)
 - `Leaderboard.tsx` — Ranked list with an avatar + inline meter per row — variant 'leader' (top achievers) or 'watch' (nee (~670 tok)
 - `Pressable.tsx` — Drop-in haptic replacement for RN's <Pressable>: fires lib/haptics on onPressIn (haptic="tap"|"select"|"medium"|"none"), medium on long-press, silent when disabled (~330 tok)
-- `Text.tsx` — Drop-in replacement for RN's <Text> that applies textStart (RN swaps left/right text alignment under forced RTL, so a bare <Text> or `textAlign: 'right'` renders visually LEFT). Import Text from here, never from 'react-native' (~300 tok)
 - `ProgressBar.tsx` — ProgressBar (~380 tok)
 - `ScopeTabs.tsx` — Segmented control used to scope report/dashboard widgets (all / per-halqa / per-track, etc). (~418 tok)
+- `SheetTriggerRow.tsx` — "Tap to open a sheet" settings-style row (icon + label + trailing summary + chevron, 56pt). Used wherever a wide table used to expand inline. Plain array style only — a function style is dropped by NativeWind and the row stacks vertically. (~620 tok)
 - `Skeleton.tsx` — A stacked group of skeleton rows — for card-list screens waiting on their first fetch. (~400 tok)
 - `StatBox.tsx` — StatBox (~376 tok)
 - `StatsRow.tsx` — StatsRow (~150 tok)
+- `Text.tsx` — Drop-in replacement for RN's <Text> that applies textStart (RN swaps left/right text alignment under forced RTL, so a bare <Text> or `textAlign: 'right'` renders visually LEFT). Import Text from here, never from 'react-native' (~300 tok)
 - `Tile.tsx` — 1 = half-width tile, 2 = full-width tile — mirrors the web BentoTile's span prop. (~477 tok)
 
 ## quran-hifz-mobile/ios/
@@ -673,8 +678,8 @@
 
 - `api.ts` — Exports ApiError, get, post, put + 2 more (~443 tok)
 - `auth-storage.ts` — Exports StoredUser, getToken, setToken, clearToken + 3 more (~308 tok)
-- `date.ts` — AR_LOCALE ('ar-EG', Gregorian — NEVER 'ar-SA', which is Hijri) + fmtDate/fmtDateLong/fmtDateShort. Every date in the mobile app formats through this. (~450 tok)
 - `csv.ts` — Exports downloadCsv (~214 tok)
+- `date.ts` — AR_LOCALE ('ar-EG', Gregorian — NEVER 'ar-SA', which is Hijri) + fmtDate/fmtDateLong/fmtDateShort. Every date in the mobile app formats through this. (~450 tok)
 - `error-capture.ts` — Captures the original Error out-of-band so server.ts can recover the stack (~259 tok)
 - `error-page.ts` — Exports renderErrorPage (~392 tok)
 - `format.ts` — Exports toAr, pct (~67 tok)

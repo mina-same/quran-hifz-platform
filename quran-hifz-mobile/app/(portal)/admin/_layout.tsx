@@ -48,9 +48,15 @@ export default function AdminTabLayout() {
       <Tabs.Screen name="register"       options={{ href: null, title: 'تسجيل طالب' }} />
       <Tabs.Screen name="teachers"       options={{ href: null, title: 'المعلمون' }} />
       <Tabs.Screen name="masajid"        options={{ href: null, title: 'المساجد' }} />
-      <Tabs.Screen name="special_tracks" options={{ href: null, title: 'المسارات الاستثنائية' }} />
+      <Tabs.Screen name="special_tracks" options={{ href: null, title: 'المسارات' }} />
       <Tabs.Screen name="track-detail" options={{ href: null, title: 'تفاصيل المسار' }} />
       <Tabs.Screen name="parents" options={{ href: null, title: 'أولياء الأمور' }} />
+      {/* Add/edit forms are full pages, not modals: their <FormSelect> pickers are
+          bottom sheets from the app-root host, which an RN Modal would cover. */}
+      <Tabs.Screen name="masjid-form"  options={{ href: null, title: 'بيانات المسجد' }} />
+      <Tabs.Screen name="halqa-form"   options={{ href: null, title: 'بيانات الحلقة' }} />
+      <Tabs.Screen name="teacher-form" options={{ href: null, title: 'بيانات المعلم' }} />
+      <Tabs.Screen name="student-form" options={{ href: null, title: 'بيانات الطالب' }} />
     </Tabs>
 
     <MoreSheet

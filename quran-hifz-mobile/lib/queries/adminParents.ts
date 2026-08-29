@@ -54,3 +54,27 @@ export function useUpdateParent() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-parents'] }),
   });
 }
+
+export function useStudentParent(studentId: string | null) {
+  return useQuery({
+    queryKey: ['student-parent', studentId],
+    queryFn: () =>
+      get<{ success: boolean; data: { _id: string; name: string; email: string } | null }>(
+        `/admin/students/${studentId}/parent`,
+      ).then((r) => r.data),
+    enabled: !!studentId,
+  });
+}
+
+export function useSetStudentParent() {
+  const qc = useQueryClient();
+  return useMutation({
+    // parentId: null unlinks the student from whichever parent holds them.
+    mutationFn: ({ studentId, parentId }: { studentId: string; parentId: string | null }) =>
+      put(`/admin/students/${studentId}/parent`, { parentId }),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['student-parent', vars.studentId] });
+      qc.invalidateQueries({ queryKey: ['admin-parents'] });
+    },
+  });
+}

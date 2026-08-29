@@ -52,7 +52,10 @@ export type QuranPlan = {
 type ListResponse = { success: boolean; count: number; data: QuranPlan[] };
 type SingleResponse = { success: boolean; data: QuranPlan };
 
-export function useQuranPlans(filters?: { teacher?: string; halqa?: string; student?: string; specialTrack?: string }) {
+export function useQuranPlans(
+  filters?: { teacher?: string; halqa?: string; student?: string; specialTrack?: string },
+  opts?: { enabled?: boolean },
+) {
   const params = new URLSearchParams();
   if (filters?.teacher) params.set('teacher', filters.teacher);
   if (filters?.halqa) params.set('halqa', filters.halqa);
@@ -62,6 +65,7 @@ export function useQuranPlans(filters?: { teacher?: string; halqa?: string; stud
   return useQuery({
     queryKey: ['quran-plans', filters?.teacher ?? '', filters?.halqa ?? '', filters?.student ?? '', filters?.specialTrack ?? ''],
     queryFn: () => get<ListResponse>(`/quran-plans${qs}`).then((r) => r.data),
+    enabled: opts?.enabled,
   });
 }
 
