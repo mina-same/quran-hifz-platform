@@ -52,7 +52,7 @@ export default function AdminRegister() {
     formCol: { gap: 14 },
     pathResult: {
       marginTop: 14,
-      backgroundColor: '#F0FDF4',
+      backgroundColor: theme.tone.green.bg,
       borderRadius: theme.radiusSm,
       padding: 14,
       gap: 10,

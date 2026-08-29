@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
@@ -6,13 +6,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { IconFaceId, IconFingerprint } from '@tabler/icons-react-native';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
 import { success, error as errorHaptic } from '@/lib/haptics';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 /** Shown after a stored session resumes silently, when the user has opted into
  * biometric re-auth (Account Settings). Requires Face ID/Touch ID before any
  * portal screen renders — "logout" falls back to the normal password login. */
 export default function BiometricLockScreen() {
+  const theme = useAppTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const unlock = usePortalStore((s) => s.unlock);
   const logout = usePortalStore((s) => s.logout);
   const [error, setError] = useState('');
@@ -82,18 +87,20 @@ export default function BiometricLockScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.green },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 6 },
-  logo: { width: 72, height: 72, marginBottom: 16 },
-  title: { fontSize: 17, fontFamily: theme.fontCairoBold, color: theme.white },
-  sub: { fontSize: 13, fontFamily: theme.fontCairo, color: 'rgba(255,255,255,0.7)', marginBottom: 24, textAlign: 'center' },
-  unlockBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: 'rgba(255,255,255,0.12)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)',
-    borderRadius: theme.radiusFull, paddingHorizontal: 24, paddingVertical: 12,
-  },
-  unlockText: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.white },
-  error: { fontSize: 12, fontFamily: theme.fontCairo, color: '#FCA5A5', marginTop: 14, textAlign: 'center' },
-  logoutLink: { fontSize: 12, fontFamily: theme.fontCairo, color: 'rgba(255,255,255,0.6)', textDecorationLine: 'underline' },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.green },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 6 },
+    logo: { width: 72, height: 72, marginBottom: 16 },
+    title: { fontSize: 17, fontFamily: theme.fontCairoBold, color: theme.white },
+    sub: { fontSize: 13, fontFamily: theme.fontCairo, color: 'rgba(255,255,255,0.7)', marginBottom: 24, textAlign: 'center' },
+    unlockBtn: {
+      flexDirection: 'row', alignItems: 'center', gap: 8,
+      backgroundColor: 'rgba(255,255,255,0.12)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)',
+      borderRadius: theme.radiusFull, paddingHorizontal: 24, paddingVertical: 12,
+    },
+    unlockText: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.white },
+    error: { fontSize: 12, fontFamily: theme.fontCairo, color: '#FCA5A5', marginTop: 14, textAlign: 'center' },
+    logoutLink: { fontSize: 12, fontFamily: theme.fontCairo, color: 'rgba(255,255,255,0.6)', textDecorationLine: 'underline' },
+  });
+}

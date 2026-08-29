@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, View, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
@@ -5,9 +6,13 @@ import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconArrowRight } from '@tabler/icons-react-native';
 import TrackDetail from '@/components/domain/TrackDetail';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 export default function TeacherTrackDetailRoute() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id?: string }>();
 
@@ -27,14 +32,17 @@ export default function TeacherTrackDetailRoute() {
   );
 }
 
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12, backgroundColor: theme.card,
-    borderBottomWidth: 1, borderBottomColor: theme.border,
-  },
-  headerTitle: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text },
-  page: { padding: theme.pagePadding },
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
-});
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    // No background and no divider: the header sits directly on the page surface
+    // rather than reading as a separate white bar over it.
+    header: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingHorizontal: 16, paddingVertical: 12,
+    },
+    headerTitle: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text },
+    page: { padding: theme.pagePadding },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+  });
+}

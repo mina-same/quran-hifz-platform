@@ -291,7 +291,7 @@
 - `parents.tsx` — EMPTY_ADD — renders form (~4595 tok)
 - `register.tsx` — PATHS — renders form (~1824 tok)
 - `reports.tsx` — AdminReports (~562 tok)
-- `special_tracks.tsx` — getTeacherId — renders form (~5282 tok)
+- `special_tracks.tsx` — admin tracks at web parity: status-grouped sections, TrackCard (status strip, chips, info grid, teacher avatars, capacity bar, collapsible linked Quran plan via useQuranPlans, join link), form with masjid/days custom pickers, inline students panel (capacity + search + avatars), delete confirm modal. (~9800 tok)
 - `students.tsx` — المسار: real track lives one hop away via halqa.specialTrack, not the unused legacy `path` enum. (~1577 tok)
 - `teachers.tsx` — ratingVariant (~954 tok)
 - `track-detail.tsx` — AdminTrackDetailRoute (~474 tok)
@@ -355,10 +355,10 @@
 
 ## quran-hifz-mobile/components/forms/
 
-- `FormDatePicker.tsx` — ISO date string, e.g. "2026-07-29". Empty string means unset. iOS sheet is dynamically sized (no snapPoints) with a header + إلغاء/تم footer. (~1300 tok)
+- `FormDatePicker.tsx` — ISO date string, e.g. "2026-07-29". Empty string means unset. iOS sheet is dynamically sized (no snapPoints); إلغاء/تم is a PINNED BottomSheetFooter, not content. Gregorian via AR_LOCALE. (~1450 tok)
 - `FormGroup.tsx` — FormGroup (~249 tok)
 - `FormInput.tsx` — FormInput (~236 tok)
-- `FormSelect.tsx` — FormSelect — single-snap-point sheet (multi-snap locks the list), Arabic-normalised search above 12 options, getItemLayout + initialScrollIndex, per-row scroll tick haptic. (~1900 tok)
+- `FormSelect.tsx` — FormSelect — single-snap-point `rawContent` sheet (multi-snap locks the list), Arabic-normalised search above 12 options, getItemLayout + initialScrollIndex, per-row scroll tick haptic. Rows are centre-aligned between two equal slots; selected row is bold/green. (~2000 tok)
 - `FormTextarea.tsx` — FormTextarea (~266 tok)
 
 ## quran-hifz-mobile/components/illustrations/
@@ -367,19 +367,19 @@
 ## quran-hifz-mobile/components/layout/
 
 - `iconMap.ts` — Exports ICON_MAP (~359 tok)
-- `MoreSheet.tsx` — MoreSheet (~1884 tok)
+- `MoreSheet.tsx` — MoreSheet — 85% sheet, `rawContent` (no BottomSheetView wrapper, or the scroll list gets re-tagged as a static VIEW) + user footer pinned via BottomSheetFooter/footerComponent. (~2000 tok)
 
 ## quran-hifz-mobile/components/ui/
 
 - `Alert.tsx` — COLORS (~403 tok)
 - `AyahBar.tsx` — AyahBar (~234 tok)
-- `Badge.tsx` — VARIANT_STYLES (~305 tok)
-- `BottomSheet.tsx` — Snap points as percentages of screen height, e.g. ['40%', '80%']. Defaults to a single auto-sizing s (~1285 tok)
+- `Badge.tsx` — tone-driven chip; single-line + flexShrink by default so long labels ellipsize instead of overflowing the row. Optional numberOfLines/style props. (~330 tok)
+- `BottomSheet.tsx` — Snap points as percentages of screen height, e.g. ['40%', '80%']. Defaults to a single auto-sizing snap point. Props: visible/onClose/snapPoints/`rawContent` (skip BottomSheetView — required for scrollable content)/`footerComponent`. (~1450 tok)
 - `Button.tsx` — shadcn-style button: VARIANTS (primary/secondary/danger/ghost/outline) + SIZES (sm 36 / default 44 / lg 52) with fixed heights, radius, pressed + disabled states (~700 tok)
 - `Card.tsx` — Card (~201 tok)
 - `CardHeader.tsx` — CardHeader (~277 tok)
 - `DataTable.tsx` — DataTable — generic column table. UNUSED on mobile since the schedule tables moved to ScheduleSheet; too wide for a phone, prefer a sheet of cards. (~724 tok)
-- `SheetTriggerRow.tsx` — "Tap to open a sheet" settings-style row (icon + label + trailing summary + chevron, 56pt). Used wherever a wide table used to expand inline. (~600 tok)
+- `SheetTriggerRow.tsx` — "Tap to open a sheet" settings-style row (icon + label + trailing summary + chevron, 56pt). Used wherever a wide table used to expand inline. Plain array style only — a function style is dropped by NativeWind and the row stacks vertically. (~620 tok)
 - `Donut.tsx` — Multi-segment ring chart with a centered label — the mobile-native equivalent of the web's recharts- (~1034 tok)
 - `HonorBoard.tsx` — Exactly the top 3, already sorted best-first. Degrades gracefully with fewer than 3. (~541 tok)
 - `Leaderboard.tsx` — Ranked list with an avatar + inline meter per row — variant 'leader' (top achievers) or 'watch' (nee (~670 tok)
@@ -404,7 +404,7 @@
 - `haptics.ts` — App-wide haptic taxonomy over expo-haptics: tap/select/medium/success/warning/error + setHapticsEnabled. Native only, Android uses performAndroidHapticsAsync, every call fire-and-forget (~560 tok)
 - `quranRange.test.ts` — / <reference types="jest" /> (~3014 tok)
 - `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~3700 tok)
-- `theme.ts` — Exports ThemeMode, buildTheme, theme, Theme (~652 tok)
+- `theme.ts` — Exports ThemeMode, buildTheme(mode), Theme, textStart/textEnd. Mode-independent `base` (brand/status ink, shape, spacing, fonts, shadow) merged with light/darkSurfaces (bg, card, cardAlt, inputBg, overlay, text*, border, greenAccent, the pastel tints, and the `tone` bg/border/text map). Deliberately exports NO frozen `theme` object — read colours via useAppTheme() (~1050 tok)
 
 ## quran-hifz-mobile/lib/constants/
 
@@ -673,6 +673,7 @@
 
 - `api.ts` — Exports ApiError, get, post, put + 2 more (~443 tok)
 - `auth-storage.ts` — Exports StoredUser, getToken, setToken, clearToken + 3 more (~308 tok)
+- `date.ts` — AR_LOCALE ('ar-EG', Gregorian — NEVER 'ar-SA', which is Hijri) + fmtDate/fmtDateLong/fmtDateShort. Every date in the mobile app formats through this. (~450 tok)
 - `csv.ts` — Exports downloadCsv (~214 tok)
 - `error-capture.ts` — Captures the original Error out-of-band so server.ts can recover the stack (~259 tok)
 - `error-page.ts` — Exports renderErrorPage (~392 tok)

@@ -9,6 +9,7 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useParentChildren, useChildHomework } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { AR_LOCALE } from '@/lib/date';
 
 export default function ParentHomeworkView() {
   const theme = useAppTheme();
@@ -47,7 +48,7 @@ export default function ParentHomeworkView() {
           {group.map((hw, i) => (
             <View key={hw._id} style={[s.item, i > 0 && s.border]}>
               <Text style={s.title}>{hw.title}</Text>
-              <Badge label={`الموعد: ${new Date(hw.dueDate).toLocaleDateString('ar-SA')}`} variant="gold" />
+              <Badge label={`الموعد: ${new Date(hw.dueDate).toLocaleDateString(AR_LOCALE)}`} variant="gold" />
             </View>
           ))}
         </Card>
@@ -60,7 +61,7 @@ export default function ParentHomeworkView() {
               <Text style={s.title}>{hw.type} — {hw.segment}</Text>
               {!!hw.notes && <Text style={s.desc}>{hw.notes}</Text>}
               <View style={s.badgeRow}>
-                <Badge label={`الموعد: ${new Date(hw.dueDate).toLocaleDateString('ar-SA')}`} variant="gold" />
+                <Badge label={`الموعد: ${new Date(hw.dueDate).toLocaleDateString(AR_LOCALE)}`} variant="gold" />
                 <Badge
                   label={hw.status}
                   variant={hw.status === 'مراجع' ? 'green' : hw.status === 'متأخر' ? 'red' : 'gray'}

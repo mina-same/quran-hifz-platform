@@ -3,7 +3,9 @@ import { Tabs } from 'expo-router';
 import {
   IconHome, IconTimeline, IconMicrophone, IconListCheck, IconCalendarCheck, IconMessage, IconDots,
 } from '@tabler/icons-react-native';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 import { tap } from '@/lib/haptics';
 import MoreSheet from '@/components/layout/MoreSheet';
 import { createMoreTabButton } from '@/components/layout/MoreTabButton';
@@ -12,6 +14,7 @@ import { createMoreTabButton } from '@/components/layout/MoreTabButton';
 const MORE_IDS = ['homework_view'];
 
 export default function ParentTabLayout() {
+  const theme = useAppTheme();
   const [moreOpen, setMoreOpen] = useState(false);
   // Memoised so the tab button keeps its identity across renders — an inline
   // component would be a new type every render and remount the tab.
@@ -25,9 +28,9 @@ export default function ParentTabLayout() {
       screenListeners={{ tabPress: () => tap() }}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.green,
+        tabBarActiveTintColor: theme.greenAccent,
         tabBarInactiveTintColor: theme.textMuted,
-        tabBarStyle: { backgroundColor: theme.white, borderTopColor: theme.border },
+        tabBarStyle: { backgroundColor: theme.card, borderTopColor: theme.border },
         tabBarLabelStyle: { fontFamily: theme.fontCairo, fontSize: 11 },
       }}
     >

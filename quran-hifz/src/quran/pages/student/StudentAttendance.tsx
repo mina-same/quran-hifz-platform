@@ -6,7 +6,7 @@ import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { SkeletonTable } from "../../components/common/Skeleton";
 import { useAttendance } from "../../api/attendance";
 import { useStudent } from "../../api/students";
-import { toAr, pct } from "../../../lib/format";
+import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 
 const STATUS_TONE: Record<string, BadgeTone> = {
   حاضر: "green",
@@ -52,7 +52,7 @@ export function StudentAttendance() {
                 <tbody>
                   {records.map((r) => (
                     <tr key={r._id}>
-                      <td>{new Date(r.date).toLocaleDateString("ar-SA")}</td>
+                      <td>{new Date(r.date).toLocaleDateString(AR_LOCALE)}</td>
                       <td>{r.day}</td>
                       <td>{r.time || "—"}</td>
                       <td>
@@ -75,7 +75,7 @@ export function StudentAttendance() {
               {records.map((r) => (
                 <div key={r._id} className="rc-card">
                   <div className="rc-card-head">
-                    <span className="rc-card-title">{new Date(r.date).toLocaleDateString("ar-SA")}</span>
+                    <span className="rc-card-title">{new Date(r.date).toLocaleDateString(AR_LOCALE)}</span>
                     <Badge tone={STATUS_TONE[r.status] ?? "gray"}>{r.status}</Badge>
                   </div>
                   <div className="rc-row">

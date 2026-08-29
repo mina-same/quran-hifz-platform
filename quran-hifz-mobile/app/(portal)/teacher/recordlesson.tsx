@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ScrollView, View, TextInput, StyleSheet, RefreshControl, KeyboardAvoidingView, Platform,
 } from 'react-native';
@@ -22,12 +22,17 @@ import { useSpecialTracks } from '@/lib/queries/specialTracks';
 import { useStudents, type Student } from '@/lib/queries/students';
 import { useCreateRecording } from '@/lib/queries/lessonRecordings';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
 import { success, error } from '@/lib/haptics';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 const LESSON_TYPES = ['حفظ جديد', 'مراجعة قريبة', 'مراجعة بعيدة', 'تحسين تلاوة', 'اختبار'];
 
 function StudentRecorderCard({ student, context, onSent }: { student: Student; context: TeachingContext; onSent: () => void }) {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const state = useAudioRecorderState(recorder);
   const createRecording = useCreateRecording();
@@ -127,6 +132,8 @@ function StudentRecorderCard({ student, context, onSent }: { student: Student; c
 }
 
 export default function TeacherRecordLesson() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const profileId = usePortalStore((s) => s.authUser?.profileId);
   const [selected, setSelected] = useState<TeachingContext | null>(null);
   const [, forceRerender] = useState(0);
@@ -204,27 +211,29 @@ export default function TeacherRecordLesson() {
   );
 }
 
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: theme.pagePadding, gap: 14 },
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
-  backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
-  studentHead: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
-  avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: theme.greenPale, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: 18, fontFamily: theme.fontCairoBold, color: theme.green },
-  studentName: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
-  lastHifz: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
-  label: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 6, marginTop: 10 },
-  input: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo, fontSize: 13, color: theme.text, backgroundColor: theme.white },
-  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
-  chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
-  chipText: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
-  chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
-  recArea: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },
-  recBtn: { backgroundColor: theme.green, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  recBtnStop: { backgroundColor: theme.red },
-  recBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 13 },
-  timer: { fontSize: 16, fontFamily: theme.fontCairoBold, color: theme.green },
-  sendBtn: { backgroundColor: theme.gold, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center', marginTop: 12 },
-});
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+    backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
+    studentHead: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
+    avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: theme.greenPale, alignItems: 'center', justifyContent: 'center' },
+    avatarText: { fontSize: 18, fontFamily: theme.fontCairoBold, color: theme.green },
+    studentName: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
+    lastHifz: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
+    label: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 6, marginTop: 10 },
+    input: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo, fontSize: 13, color: theme.text, backgroundColor: theme.inputBg },
+    chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
+    chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
+    chipText: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
+    chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
+    recArea: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },
+    recBtn: { backgroundColor: theme.greenAccent, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 8 },
+    recBtnStop: { backgroundColor: theme.red },
+    recBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 13 },
+    timer: { fontSize: 16, fontFamily: theme.fontCairoBold, color: theme.green },
+    sendBtn: { backgroundColor: theme.gold, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center', marginTop: 12 },
+  });
+}

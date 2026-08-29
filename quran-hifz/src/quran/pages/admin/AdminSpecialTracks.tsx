@@ -16,6 +16,7 @@ import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { FormSection } from "../../components/common/FormSection";
+import { AR_LOCALE } from "@/lib/format";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -27,7 +28,7 @@ function getEnrolledName(v: EnrolledStudent | string){ return typeof v === "obje
 function getTeacherId(v: TrackTeacher | string)      { return typeof v === "object" ? v._id  : v; }
 function getTeacherName(v: TrackTeacher | string)    { return typeof v === "object" ? v.name : v; }
 function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString("ar-SA", { year: "numeric", month: "short", day: "numeric" });
+  return new Date(d).toLocaleDateString(AR_LOCALE, { year: "numeric", month: "short", day: "numeric" });
 }
 function avatarInitials(name: string) {
   return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0] ?? "").join("");

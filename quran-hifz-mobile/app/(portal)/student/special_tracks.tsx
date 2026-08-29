@@ -7,12 +7,13 @@ import Badge from '@/components/ui/Badge';
 import { useSpecialTracks, type SpecialTrack, type TrackTeacher } from '@/lib/queries/specialTracks';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { AR_LOCALE } from '@/lib/date';
 
 function getTeacherName(v: TrackTeacher | string) {
   return typeof v === 'object' ? v.name : v;
 }
 function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+  return new Date(d).toLocaleDateString(AR_LOCALE, { year: 'numeric', month: 'long', day: 'numeric' });
 }
 function daysLeft(endDate: string): number {
   return Math.max(0, Math.ceil((new Date(endDate).getTime() - Date.now()) / 86400000));

@@ -8,6 +8,7 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useParentChildren, useChildRecordings } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { AR_LOCALE } from '@/lib/date';
 
 export default function ParentRecordings() {
   const theme = useAppTheme();
@@ -45,7 +46,7 @@ export default function ParentRecordings() {
           {recordings.map((r, i) => (
             <View key={r._id} style={[s.item, i > 0 && s.border]}>
               <View style={s.itemHead}>
-                <Text style={s.date}>{new Date(r.recordedAt).toLocaleDateString('ar-SA')}</Text>
+                <Text style={s.date}>{new Date(r.recordedAt).toLocaleDateString(AR_LOCALE)}</Text>
               </View>
               {!!r.segment && <Text style={s.segment}>{r.segment}</Text>}
               {!!r.notes && <Text style={s.note}>{r.notes}</Text>}

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, View, StyleSheet, ViewStyle, ActivityIndicator, Platform } from 'react-native';
 import Text from '@/components/ui/Text';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { tap, medium } from '@/lib/haptics';
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';
@@ -25,13 +25,21 @@ interface Props {
   haptic?: 'tap' | 'medium' | 'none';
 }
 
-const VARIANTS: Record<Variant, { bg: string; text: string; border?: string; elevated?: boolean }> = {
-  primary:   { bg: theme.green,    text: theme.white, elevated: true },
-  secondary: { bg: theme.goldPale, text: theme.brown, border: 'rgba(201,149,42,0.3)' },
-  danger:    { bg: '#EF4444',      text: theme.white, elevated: true },
-  ghost:     { bg: 'transparent',  text: theme.green, border: theme.border },
-  outline:   { bg: theme.white,    text: theme.green, border: theme.border },
-};
+/**
+ * Built per-theme rather than at module scope. The old frozen map baked the light
+ * palette in: `outline` sat on a hard `theme.white`, and `secondary`'s dark-brown
+ * label on a pale gold fill — both unreadable once the page went dark.
+ */
+function buildVariants(theme: ReturnType<typeof useAppTheme>): Record<Variant, { bg: string; text: string; border?: string; elevated?: boolean }> {
+  const dark = theme.mode === 'dark';
+  return {
+    primary:   { bg: theme.greenAccent, text: theme.white, elevated: true },
+    secondary: { bg: theme.tone.gold.bg, text: theme.tone.gold.text, border: dark ? theme.tone.gold.border : 'rgba(201,149,42,0.3)' },
+    danger:    { bg: theme.red,          text: theme.white, elevated: true },
+    ghost:     { bg: 'transparent',      text: theme.greenAccent, border: theme.border },
+    outline:   { bg: theme.card,         text: theme.greenAccent, border: theme.border },
+  };
+}
 
 // shadcn-style sizing: fixed control heights so labels always sit centred.
 const SIZES: Record<Size, { height: number; paddingHorizontal: number; fontSize: number; radius: number; gap: number }> = {
@@ -43,9 +51,38 @@ const SIZES: Record<Size, { height: number; paddingHorizontal: number; fontSize:
 export default function Button({
   label, onPress, variant = 'primary', size = 'default', disabled, loading, icon, style, fullWidth, haptic,
 }: Props) {
-  const v = VARIANTS[variant];
+  const theme = useAppTheme();
+  const v = useMemo(() => buildVariants(theme)[variant], [theme, variant]);
   const s = SIZES[size];
   const [pressed, setPressed] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    box: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      // Keeps every child (and any press feedback) inside the rounded corners.
+      overflow: 'hidden',
+    },
+    selfStart: {
+      alignSelf: 'flex-start',
+    },
+    fullWidth: {
+      alignSelf: 'stretch',
+      width: '100%',
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+    disabled: {
+      opacity: 0.5,
+    },
+    label: {
+      fontFamily: theme.fontCairoBold,
+      textAlign: 'center',
+      includeFontPadding: false,
+    },
+  }), [theme]);
   const kind = haptic ?? (variant === 'danger' ? 'medium' : 'tap');
 
   // The coloured box is a plain View with a plain style array: NativeWind's JSX
@@ -96,31 +133,3 @@ export default function Button({
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  box: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    // Keeps every child (and any press feedback) inside the rounded corners.
-    overflow: 'hidden',
-  },
-  selfStart: {
-    alignSelf: 'flex-start',
-  },
-  fullWidth: {
-    alignSelf: 'stretch',
-    width: '100%',
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  label: {
-    fontFamily: theme.fontCairoBold,
-    textAlign: 'center',
-    includeFontPadding: false,
-  },
-});

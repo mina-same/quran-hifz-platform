@@ -123,7 +123,6 @@ export default function LoginScreen() {
       backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)',
       borderRadius: 16, paddingVertical: 20, paddingHorizontal: 20, alignItems: 'center', gap: 6, width: '100%',
     },
-    cardPressed: { backgroundColor: 'rgba(255,255,255,0.14)', borderColor: theme.gold },
     modalTitle: {
       fontSize: 17, fontFamily: theme.fontAmiriBold, color: theme.white,
       textAlign: 'center', marginTop: 24, marginBottom: 4,
@@ -275,7 +274,7 @@ export default function LoginScreen() {
                 <Pressable
                   key={child._id}
                   onPress={() => handleSelectChild(child)}
-                  style={({ pressed }) => [styles.childCard, pressed && styles.cardPressed]}
+                  style={styles.childCard}
                 >
                   <Text style={styles.cardTitle}>{child.name}</Text>
                   <Text style={styles.cardDesc}>{child.path}</Text>

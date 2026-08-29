@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ScrollView, View, TextInput, StyleSheet, RefreshControl, KeyboardAvoidingView, Platform,
 } from 'react-native';
@@ -14,11 +14,15 @@ import { useHalqat } from '@/lib/queries/halqat';
 import { useSpecialTracks } from '@/lib/queries/specialTracks';
 import { useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework } from '@/lib/queries/groupHomework';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 const DAYS = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
 
 export default function TeacherGroupHomework() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const profileId = usePortalStore((s) => s.authUser?.profileId);
   const [selected, setSelected] = useState<TeachingContext | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -157,31 +161,33 @@ export default function TeacherGroupHomework() {
   );
 }
 
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: 16, gap: 14 },
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
-  backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
-  successBanner: { backgroundColor: theme.greenPale, color: theme.green, fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
-  errorBanner: { backgroundColor: theme.redPale, color: theme.red, fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
-  addBtn: { backgroundColor: theme.green, borderRadius: 8, padding: 12, alignItems: 'center' },
-  addBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 14 },
-  label: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 6, marginTop: 10 , textAlign: 'left'},
-  input: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo, fontSize: 13, color: theme.text, backgroundColor: theme.white },
-  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
-  chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
-  chipText: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
-  chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
-  row: { flexDirection: 'row', gap: 12, marginTop: 12 },
-  saveBtn: { backgroundColor: theme.green, borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10, flex: 1, alignItems: 'center' },
-  saveBtnText: { color: theme.white, fontFamily: theme.fontCairoBold },
-  cancelBtn: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10, flex: 1, alignItems: 'center' },
-  cancelText: { color: theme.textMuted, fontFamily: theme.fontCairo },
-  hwItem: { paddingVertical: 12 },
-  border: { borderTopWidth: 1, borderTopColor: theme.border },
-  hwTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 4 },
-  hwDesc: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, marginBottom: 6 },
-  hwFoot: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  delText: { fontSize: 12, color: theme.red, fontFamily: theme.fontCairo },
-});
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: 16, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
+    backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
+    successBanner: { backgroundColor: theme.greenPale, color: theme.green, fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
+    errorBanner: { backgroundColor: theme.redPale, color: theme.red, fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
+    addBtn: { backgroundColor: theme.greenAccent, borderRadius: 8, padding: 12, alignItems: 'center' },
+    addBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 14 },
+    label: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 6, marginTop: 10 , textAlign: 'left'},
+    input: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo, fontSize: 13, color: theme.text, backgroundColor: theme.inputBg },
+    chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
+    chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
+    chipText: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
+    chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
+    row: { flexDirection: 'row', gap: 12, marginTop: 12 },
+    saveBtn: { backgroundColor: theme.greenAccent, borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10, flex: 1, alignItems: 'center' },
+    saveBtnText: { color: theme.white, fontFamily: theme.fontCairoBold },
+    cancelBtn: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10, flex: 1, alignItems: 'center' },
+    cancelText: { color: theme.textMuted, fontFamily: theme.fontCairo },
+    hwItem: { paddingVertical: 12 },
+    border: { borderTopWidth: 1, borderTopColor: theme.border },
+    hwTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 4 },
+    hwDesc: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, marginBottom: 6 },
+    hwFoot: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    delText: { fontSize: 12, color: theme.red, fontFamily: theme.fontCairo },
+  });
+}

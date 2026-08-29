@@ -11,7 +11,7 @@ import { useHalqat } from "../../api/halqat";
 import { useStudents } from "../../api/students";
 import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudentPlanProgressList } from "../../api/student-plan-progress";
-import { toAr } from "../../../lib/format";
+import { toAr, AR_LOCALE } from "../../../lib/format";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { DaysOfWeekPicker } from "../../components/common/DaysOfWeekPicker";
@@ -20,7 +20,7 @@ import { IndividualPlanPanel } from "../../components/common/IndividualPlanPanel
 import { countRangeAyahs, pageRangeOfAyahRange, computeScheduleBreakdown, surahName, WEEK_DAYS } from "../../lib/quranRange";
 
 function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString("ar-SA", { year: "numeric", month: "short", day: "numeric" });
+  return new Date(d).toLocaleDateString(AR_LOCALE, { year: "numeric", month: "short", day: "numeric" });
 }
 
 const PLAN_TYPES: { value: PlanType; label: string; icon: string; fg: string; bg: string }[] = [

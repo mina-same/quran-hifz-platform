@@ -25,7 +25,7 @@ import { useEvaluations } from "../../api/evaluations";
 import { MAX_SCORES } from "../../lib/evaluationRubric";
 import { toFlatIndex, fromFlatIndex, juzFlatRange } from "../../lib/quranRange";
 import { SURAHS } from "../../data/surahs";
-import { toAr, pct } from "../../../lib/format";
+import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -133,7 +133,7 @@ export function StudentReportPanel({
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         .map((e) => ({
           date: toAr(
-            new Date(e.date).toLocaleDateString("ar-SA", { month: "numeric", day: "numeric" }),
+            new Date(e.date).toLocaleDateString(AR_LOCALE, { month: "numeric", day: "numeric" }),
           ),
           total: e.total,
         })),

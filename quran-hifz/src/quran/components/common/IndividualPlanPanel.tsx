@@ -11,7 +11,7 @@ import {
 import type { RangePoint, QuranPlan } from "../../api/quran-plans";
 import { fractionalPage, isReversedRange, isReversedSchedule } from "../../lib/quranRange";
 import { SURAHS } from "../../data/surahs";
-import { toAr } from "../../../lib/format";
+import { toAr, AR_LOCALE } from "../../../lib/format";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -20,7 +20,7 @@ function toDateOnly(s: string): string {
   return String(s).slice(0, 10);
 }
 function fmtDayLabel(iso: string): string {
-  return toAr(new Date(iso + "T00:00:00").toLocaleDateString("ar-SA", { weekday: "long", day: "numeric", month: "long" }));
+  return toAr(new Date(iso + "T00:00:00").toLocaleDateString(AR_LOCALE, { weekday: "long", day: "numeric", month: "long" }));
 }
 
 /** Formats a schedule day's page position: a clean page boundary shows as a

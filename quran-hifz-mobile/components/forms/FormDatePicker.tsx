@@ -1,7 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Platform, View, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import { BottomSheetFooter, type BottomSheetFooterProps } from '@gorhom/bottom-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AR_LOCALE } from '@/lib/date';
 import { IconCalendarEvent, IconX } from '@tabler/icons-react-native';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import BottomSheet from '@/components/ui/BottomSheet';
@@ -31,7 +34,7 @@ function fromIso(iso?: string): Date {
 }
 
 function fmtLong(d: Date) {
-  return d.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  return d.toLocaleDateString(AR_LOCALE, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 /** Native date picker — Android opens the system dialog directly, iOS shows an inline picker in a bottom sheet. */
@@ -40,6 +43,7 @@ export default function FormDatePicker({
 }: Props) {
   const theme = useAppTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const insets = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(() => fromIso(value));
 
@@ -60,20 +64,42 @@ export default function FormDatePicker({
     }
   }
 
+  // Pinned by the library (absolute, zIndex 9999) rather than laid out after the
+  // calendar: the inline iOS picker reports a different intrinsic height per
+  // month and per calendar system, and any of those that overshot the sheet's
+  // measured height used to push "تم" below the visible edge.
+  const renderFooter = useCallback(
+    (props: BottomSheetFooterProps) => (
+      <BottomSheetFooter {...props} bottomInset={insets.bottom}>
+        <View style={styles.footer}>
+          <View style={styles.footerBtn}>
+            <Button label="إلغاء" variant="ghost" fullWidth onPress={() => setOpen(false)} />
+          </View>
+          <View style={styles.footerBtn}>
+            <Button label="تم" fullWidth onPress={() => { onChange(toIso(draft)); setOpen(false); }} />
+          </View>
+        </View>
+      </BottomSheetFooter>
+    ),
+    [insets.bottom, styles, draft, onChange],
+  );
+
   return (
     <>
       <Pressable style={[styles.trigger, error && styles.triggerError]} onPress={openPicker}>
         <Text style={[styles.text, !value && styles.placeholder]}>
-          {value ? new Date(fromIso(value)).toLocaleDateString('ar-SA') : placeholder}
+          {value ? fromIso(value).toLocaleDateString(AR_LOCALE) : placeholder}
         </Text>
         <IconCalendarEvent size={16} color={theme.textMuted} />
       </Pressable>
 
       {Platform.OS === 'ios' && (
-        // No snapPoints: the sheet sizes itself to the calendar + footer, so the
-        // confirm button can never be pushed past the bottom edge the way a fixed
-        // 45% snap point pushed it off-screen.
-        <BottomSheet visible={open} onClose={() => setOpen(false)}>
+        // No snapPoints: the sheet sizes itself to the calendar. The إلغاء/تم row
+        // is a pinned footerComponent rather than content, so it stays on screen
+        // whatever height the inline calendar reports — the two earlier attempts
+        // (a fixed 45% snap point, then a laid-out footer) both put it below the
+        // fold.
+        <BottomSheet visible={open} onClose={() => setOpen(false)} footerComponent={renderFooter}>
           <View style={styles.sheet}>
             <View style={styles.header}>
               <View style={styles.headerText}>
@@ -91,7 +117,7 @@ export default function FormDatePicker({
                 value={draft}
                 mode="date"
                 display="inline"
-                locale="ar"
+                locale={AR_LOCALE}
                 themeVariant={theme.mode}
                 accentColor={theme.green}
                 minimumDate={minimumDate}
@@ -99,15 +125,6 @@ export default function FormDatePicker({
                 onChange={(_, date) => date && setDraft(date)}
                 style={styles.picker}
               />
-            </View>
-
-            <View style={styles.footer}>
-              <View style={styles.footerBtn}>
-                <Button label="إلغاء" variant="ghost" fullWidth onPress={() => setOpen(false)} />
-              </View>
-              <View style={styles.footerBtn}>
-                <Button label="تم" fullWidth onPress={() => { onChange(toIso(draft)); setOpen(false); }} />
-              </View>
             </View>
           </View>
         </BottomSheet>
@@ -128,7 +145,9 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
       paddingHorizontal: 12,
       paddingVertical: 12,
       minHeight: 44,
-      backgroundColor: theme.card,
+      // Matches FormInput's fill so a select and a text field read as the
+      // same control; `card` would sit a shade lighter than its neighbour in dark mode.
+      backgroundColor: theme.inputBg,
     },
     triggerError: { borderColor: theme.red },
     text: { fontSize: theme.fontSize.md, fontFamily: theme.fontCairo, color: theme.text },
@@ -162,7 +181,15 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
     // which otherwise makes the sheet resize as the user pages through months.
     pickerWrap: { height: 340, justifyContent: 'center' },
     picker: { alignSelf: 'stretch' },
-    footer: { flexDirection: 'row', gap: theme.space.md, marginTop: theme.space.sm },
+    // Overlays the calendar now that it is pinned, so it paints its own surface.
+    footer: {
+      flexDirection: 'row',
+      gap: theme.space.md,
+      paddingHorizontal: 20,
+      paddingTop: theme.space.sm,
+      paddingBottom: theme.space.sm,
+      backgroundColor: theme.card,
+    },
     footerBtn: { flex: 1 },
   });
 }

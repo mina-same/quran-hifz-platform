@@ -31,7 +31,11 @@ export default function SheetTriggerRow({ label, value, icon, onPress, disabled,
       haptic="select"
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.row, pressed && styles.rowPressed, disabled && styles.rowDisabled, style]}
+      // Plain array, never `style={({ pressed }) => …}`: NativeWind's JSX interop
+      // (jsxImportSource: 'nativewind') drops function styles on native, which
+      // left this row with no flexDirection — icon, label, value and chevron each
+      // stacked on their own line. Press feedback is the press-in haptic.
+      style={[styles.row, disabled && styles.rowDisabled, style]}
     >
       {!!icon && <View style={styles.iconWrap}>{icon}</View>}
       <Text style={styles.label} numberOfLines={1}>{label}</Text>
@@ -54,7 +58,6 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
       borderColor: theme.border,
       borderRadius: 14,
     },
-    rowPressed: { backgroundColor: theme.border },
     rowDisabled: { opacity: 0.5 },
     iconWrap: {
       width: 32,

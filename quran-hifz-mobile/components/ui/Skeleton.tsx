@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Animated, View, StyleSheet, ViewStyle } from 'react-native';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 interface Props {
   width?: number | `${number}%`;
@@ -9,7 +9,8 @@ interface Props {
   style?: ViewStyle;
 }
 
-export default function Skeleton({ width = '100%', height = 14, radius = theme.radiusSm, style }: Props) {
+export default function Skeleton({ width = '100%', height = 14, radius, style }: Props) {
+  const theme = useAppTheme();
   const opacity = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
@@ -23,15 +24,20 @@ export default function Skeleton({ width = '100%', height = 14, radius = theme.r
     return () => loop.stop();
   }, [opacity]);
 
+  const styles = useMemo(() => StyleSheet.create({
+    base: { backgroundColor: theme.border },
+  }), [theme]);
+
   return (
     <Animated.View
-      style={[styles.base, { width, height, borderRadius: radius, opacity }, style]}
+      style={[styles.base, { width, height, borderRadius: radius ?? theme.radiusSm, opacity }, style]}
     />
   );
 }
 
 /** A stacked group of skeleton rows — for card-list screens waiting on their first fetch. */
 export function SkeletonRows({ count = 4, rowHeight = 56, gap = 10 }: { count?: number; rowHeight?: number; gap?: number }) {
+  const theme = useAppTheme();
   return (
     <View style={{ gap }}>
       {Array.from({ length: count }).map((_, i) => (
@@ -40,9 +46,3 @@ export function SkeletonRows({ count = 4, rowHeight = 56, gap = 10 }: { count?: 
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    backgroundColor: theme.border,
-  },
-});

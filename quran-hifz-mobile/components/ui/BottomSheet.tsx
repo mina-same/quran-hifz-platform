@@ -5,9 +5,10 @@ import {
   BottomSheetBackdrop,
   BottomSheetView,
   type BottomSheetBackdropProps,
+  type BottomSheetFooterProps,
 } from '@gorhom/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 interface Props {
   visible: boolean;
@@ -15,6 +16,19 @@ interface Props {
   children: React.ReactNode;
   /** Snap points as percentages of screen height, e.g. ['40%', '80%']. Defaults to a single auto-sizing snap point. */
   snapPoints?: (string | number)[];
+  /**
+   * Render `children` straight into the sheet, with no BottomSheetView wrapper.
+   * REQUIRED whenever the content is (or contains) a BottomSheet* scrollable:
+   * BottomSheetView's focus effect re-tags the sheet's scrollable as
+   * SCROLLABLE_TYPE.VIEW, and because parent effects run after child ones it
+   * always wins over the scrollable's own registration — the list then scrolls
+   * the sheet instead of itself. The sheet's content container already has an
+   * explicit height for fixed snap points, so a `flex: 1` scrollable laid out
+   * directly under it fills correctly without the wrapper.
+   */
+  rawContent?: boolean;
+  /** Pinned footer, rendered by the library on top of the content (use BottomSheetFooter). */
+  footerComponent?: React.FC<BottomSheetFooterProps>;
 }
 
 /**
@@ -23,10 +37,42 @@ interface Props {
  * Controlled the same way a plain <Modal visible onClose /> would be, so call
  * sites don't need to manage imperative refs.
  */
-export default function BottomSheet({ visible, onClose, children, snapPoints }: Props) {
+export default function BottomSheet({
+  visible,
+  onClose,
+  children,
+  snapPoints,
+  rawContent = false,
+  footerComponent,
+}: Props) {
+  const theme = useAppTheme();
   const ref = useRef<BottomSheetModal>(null);
   const points = useMemo(() => snapPoints ?? ['50%'], [snapPoints]);
   const insets = useSafeAreaInsets();
+
+  const styles = useMemo(() => StyleSheet.create({
+    background: {
+      backgroundColor: theme.card,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+    },
+    handle: {
+      backgroundColor: theme.border,
+      width: 40,
+    },
+    /**
+     * BottomSheetView is `position: absolute` with only top/left/right pinned, so it
+     * hugs its content height and any child laid out with `flex: 1` (a scroll list, a
+     * footer pinned to the bottom) collapses to zero height and the sheet renders
+     * blank. Pinning `bottom: 0` — the one edge the library leaves alone — makes it
+     * fill the sheet, which already has an explicit height whenever snapPoints are
+     * given. Only safe for fixed snap points: with enableDynamicSizing the sheet
+     * height is derived FROM this view's measured height, so filling would loop.
+     */
+    contentFill: {
+      bottom: 0,
+    },
+  }), [theme]);
 
   // The sheet is drawn over the home indicator, so a footer button laid out at
   // the very bottom of the content ends up half-swallowed by it. Every sheet
@@ -64,11 +110,13 @@ export default function BottomSheet({ visible, onClose, children, snapPoints }: 
     onClose();
   }, [onClose]);
 
+  // A 0.4 scrim barely separates a dark sheet from the dark page behind it.
+  const backdropOpacity = theme.mode === 'dark' ? 0.6 : 0.4;
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} opacity={0.4} pressBehavior="close" />
+      <BottomSheetBackdrop {...props} appearsOnIndex={0} disappearsOnIndex={-1} opacity={backdropOpacity} pressBehavior="close" />
     ),
-    [],
+    [backdropOpacity],
   );
 
   return (
@@ -78,36 +126,26 @@ export default function BottomSheet({ visible, onClose, children, snapPoints }: 
       enableDynamicSizing={!snapPoints}
       onDismiss={handleDismiss}
       backdropComponent={renderBackdrop}
+      footerComponent={footerComponent}
+      // The sheet's own surface. These MUST come from the themed sheet above —
+      // a module-scope StyleSheet froze them to the light palette, which is why
+      // every sheet in the app stayed white after switching to dark mode.
       backgroundStyle={styles.background}
       handleIndicatorStyle={styles.handle}
     >
-      <BottomSheetView style={[snapPoints ? styles.contentFill : null, bottomPad]}>
-        {children}
-      </BottomSheetView>
+      {rawContent ? (
+        children
+      ) : (
+        <BottomSheetView
+          // Adds the footer's measured height to the content's bottom padding, so
+          // the pinned footer never sits on top of the content — and, under
+          // enableDynamicSizing, so the sheet measures tall enough to fit it.
+          enableFooterMarginAdjustment={!!footerComponent}
+          style={[snapPoints ? styles.contentFill : null, bottomPad]}
+        >
+          {children}
+        </BottomSheetView>
+      )}
     </BottomSheetModal>
   );
 }
-
-const styles = StyleSheet.create({
-  background: {
-    backgroundColor: theme.card,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  handle: {
-    backgroundColor: theme.border,
-    width: 40,
-  },
-  /**
-   * BottomSheetView is `position: absolute` with only top/left/right pinned, so it
-   * hugs its content height and any child laid out with `flex: 1` (a scroll list, a
-   * footer pinned to the bottom) collapses to zero height and the sheet renders
-   * blank. Pinning `bottom: 0` — the one edge the library leaves alone — makes it
-   * fill the sheet, which already has an explicit height whenever snapPoints are
-   * given. Only safe for fixed snap points: with enableDynamicSizing the sheet
-   * height is derived FROM this view's measured height, so filling would loop.
-   */
-  contentFill: {
-    bottom: 0,
-  },
-});

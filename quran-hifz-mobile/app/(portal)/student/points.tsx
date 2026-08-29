@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, View, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -5,17 +6,12 @@ import StatsRow from '@/components/ui/StatsRow';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import ProgressBar from '@/components/ui/ProgressBar';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 const MY_PTS = 740;
 const NEXT   = 1000;
-
-const STATS = [
-  { label: 'نقطة مكتسبة',         value: '٧٤٠',                 color: theme.green },
-  { label: 'للمستوى التالي',       value: '٢٦٠',                 color: theme.gold },
-  { label: 'مرتبتك في الحلقة',    value: '١',                   color: '#3B82F6' },
-  { label: 'مستواك',               value: 'نجم ⭐',             color: theme.green },
-];
 
 const LEADERS = [
   { rank: '🥇', name: 'عبدالله الحميداني', pts: 740, me: true },
@@ -31,6 +27,16 @@ const HISTORY = [
 ];
 
 export default function StudentPoints() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
+  // Built inside the component: these accents come from the theme, so a
+  // module-scope array would freeze them to whichever mode loaded first.
+  const STATS = useMemo(() => [
+    { label: 'نقطة مكتسبة',         value: '٧٤٠',                 color: theme.green },
+    { label: 'للمستوى التالي',       value: '٢٦٠',                 color: theme.gold },
+    { label: 'مرتبتك في الحلقة',    value: '١',                   color: theme.blue },
+    { label: 'مستواك',               value: 'نجم ⭐',             color: theme.green },
+  ], [theme]);
   const pct = Math.round((MY_PTS / NEXT) * 100);
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
@@ -66,17 +72,19 @@ export default function StudentPoints() {
   );
 }
 
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.cream },
-  page: { padding: 16, gap: 14 },
-  pct: { fontSize: 28, fontFamily: theme.fontCairoBold, color: theme.green, textAlign: 'center', marginVertical: 8 },
-  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, gap: 10 },
-  border: { borderTopWidth: 1, borderTopColor: theme.border },
-  myRow: { backgroundColor: theme.greenPale, borderRadius: 8, paddingHorizontal: 8 },
-  rankIcon: { fontSize: 18, minWidth: 30 },
-  name: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text },
-  meName: { fontFamily: theme.fontCairoBold },
-  pts: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.gold },
-  day: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, minWidth: 40 },
-  earned: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.green },
-});
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.cream },
+    page: { padding: 16, gap: 14 },
+    pct: { fontSize: 28, fontFamily: theme.fontCairoBold, color: theme.green, textAlign: 'center', marginVertical: 8 },
+    row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, gap: 10 },
+    border: { borderTopWidth: 1, borderTopColor: theme.border },
+    myRow: { backgroundColor: theme.greenPale, borderRadius: 8, paddingHorizontal: 8 },
+    rankIcon: { fontSize: 18, minWidth: 30 },
+    name: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text },
+    meName: { fontFamily: theme.fontCairoBold },
+    pts: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.gold },
+    day: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, minWidth: 40 },
+    earned: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.green },
+  });
+}

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,7 +9,11 @@ import Badge from '@/components/ui/Badge';
 import AudioRecorder from '@/components/domain/AudioRecorder';
 import { useHomework } from '@/lib/queries/homework';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+import { AR_LOCALE } from '@/lib/date';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 function getTitle(v: { title: string } | string | undefined): string {
   if (!v) return '';
@@ -16,6 +21,8 @@ function getTitle(v: { title: string } | string | undefined): string {
 }
 
 export default function StudentHomework() {
+  const theme = useAppTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const profileId = usePortalStore((s) => s.authUser?.profileId);
   const { data: homework = [], isLoading, isRefetching, refetch } = useHomework({ student: profileId, status: 'معلق' });
   const today = homework[0];
@@ -52,7 +59,7 @@ export default function StudentHomework() {
               </View>
               <View style={styles.gridItem}>
                 <Text style={styles.gridLabel}>الموعد النهائي</Text>
-                <Text style={styles.gridValue}>{today.dueDate ? new Date(today.dueDate).toLocaleDateString('ar-SA') : '—'}</Text>
+                <Text style={styles.gridValue}>{today.dueDate ? new Date(today.dueDate).toLocaleDateString(AR_LOCALE) : '—'}</Text>
               </View>
             </View>
           )}
@@ -68,13 +75,15 @@ export default function StudentHomework() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: theme.pagePadding, gap: 14 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
-  gridItem: { width: '46%', gap: 4 },
-  gridLabel: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
-  segment: { fontSize: 18, fontFamily: theme.fontCairoBold, color: theme.green },
-  gridValue: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 12 },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
+    gridItem: { width: '46%', gap: 4 },
+    gridLabel: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    segment: { fontSize: 18, fontFamily: theme.fontCairoBold, color: theme.green },
+    gridValue: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 12 },
+  });
+}

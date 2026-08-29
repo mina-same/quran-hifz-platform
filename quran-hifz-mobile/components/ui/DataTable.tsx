@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 export interface Column {
   key: string;
@@ -15,6 +16,53 @@ interface Props {
 }
 
 export default function DataTable({ columns, rows, emptyMessage = 'لا توجد بيانات' }: Props) {
+  const theme = useAppTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    table: { minWidth: '100%' },
+    headerRow: {
+      flexDirection: 'row',
+      // Was a hard-coded '#F0FDF4' mint that stayed bright in dark mode.
+      backgroundColor: theme.tone.green.bg,
+      borderBottomWidth: 2,
+      borderBottomColor: theme.tone.green.border,
+    },
+    row: {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border,
+    },
+    rowAlt: {
+      backgroundColor: theme.cardAlt,
+    },
+    cell: {
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      justifyContent: 'center',
+      minWidth: 80,
+    },
+    headerCell: {},
+    headerText: {
+      fontSize: 12,
+      fontFamily: theme.fontCairoBold,
+      color: theme.tone.green.text,
+    },
+    cellText: {
+      fontSize: 13,
+      fontFamily: theme.fontCairo,
+      color: theme.text,
+    },
+    empty: {
+      paddingVertical: 40,
+      alignItems: 'center',
+    },
+    emptyText: {
+      fontSize: 14,
+      color: theme.textMuted,
+      fontFamily: theme.fontCairo,
+    },
+  }), [theme]);
+
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
       <View style={styles.table}>
@@ -51,47 +99,3 @@ export default function DataTable({ columns, rows, emptyMessage = 'لا توجد
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  table: { minWidth: '100%' },
-  headerRow: {
-    flexDirection: 'row',
-    backgroundColor: '#F0FDF4',
-    borderBottomWidth: 2,
-    borderBottomColor: '#86EFAC',
-  },
-  row: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: theme.border,
-  },
-  rowAlt: {
-    backgroundColor: '#FAFAFA',
-  },
-  cell: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    justifyContent: 'center',
-    minWidth: 80,
-  },
-  headerCell: {},
-  headerText: {
-    fontSize: 12,
-    fontFamily: theme.fontCairoBold,
-    color: theme.green,
-  },
-  cellText: {
-    fontSize: 13,
-    fontFamily: theme.fontCairo,
-    color: theme.text,
-  },
-  empty: {
-    paddingVertical: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 14,
-    color: theme.textMuted,
-    fontFamily: theme.fontCairo,
-  },
-});

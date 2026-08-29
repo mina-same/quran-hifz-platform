@@ -8,6 +8,7 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useParentChildren, useChildMessages } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { AR_LOCALE } from '@/lib/date';
 
 export default function ParentMessages() {
   const theme = useAppTheme();
@@ -54,7 +55,7 @@ export default function ParentMessages() {
                 <View style={{ flex: 1 }}>
                   <View style={s.head}>
                     <Text style={s.from}>{from}</Text>
-                    <Text style={s.time}>{new Date(m.createdAt).toLocaleDateString('ar-SA')}</Text>
+                    <Text style={s.time}>{new Date(m.createdAt).toLocaleDateString(AR_LOCALE)}</Text>
                   </View>
                   <Text style={s.text}>{m.body}</Text>
                 </View>

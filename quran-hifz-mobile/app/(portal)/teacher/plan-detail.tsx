@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
 import Text from '@/components/ui/Text';
@@ -15,7 +15,11 @@ import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
 import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet';
 import { useQuranPlan, useDeleteQuranPlan, type QuranPlan } from '@/lib/queries/quranPlan';
 import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+import { AR_LOCALE } from '@/lib/date';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 const STATUS_VARIANT: Record<QuranPlan['status'], 'green' | 'gold' | 'gray'> = {
   'نشطة': 'green',
@@ -30,6 +34,8 @@ function targetLabel(plan: QuranPlan): string {
 }
 
 export default function TeacherPlanDetail() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { data: plan, isLoading, isRefetching, refetch } = useQuranPlan(id);
@@ -101,7 +107,7 @@ export default function TeacherPlanDetail() {
                     <Text style={s.infoLabel}>{plan.endType === 'date' ? 'ينتهي في' : 'عدد الأيام النشطة'}</Text>
                     <Text style={s.infoValue}>
                       {plan.endType === 'date'
-                        ? (plan.endDate ? new Date(plan.endDate).toLocaleDateString('ar-SA') : '—')
+                        ? (plan.endDate ? new Date(plan.endDate).toLocaleDateString(AR_LOCALE) : '—')
                         : (plan.activeDaysCount ?? '—')}
                     </Text>
                   </View>
@@ -176,24 +182,27 @@ export default function TeacherPlanDetail() {
   );
 }
 
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12, backgroundColor: theme.card,
-    borderBottomWidth: 1, borderBottomColor: theme.border,
-  },
-  headerTitle: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text, flex: 1, textAlign: 'center' },
-  page: { padding: theme.pagePadding, gap: 14 },
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
-  headRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
-  infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  infoItem: { width: '46%' },
-  infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
-  infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
-  assignmentBox: { borderRadius: 10, padding: 12 },
-  assignmentText: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.greenDark },
-  actionsRow: { flexDirection: 'row', gap: 10 },
-  confirmText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text, textAlign: 'center', marginBottom: 12 },
-});
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    // No background and no divider: the header sits directly on the page surface
+    // rather than reading as a separate white bar over it.
+    header: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingHorizontal: 16, paddingVertical: 12,
+    },
+    headerTitle: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text, flex: 1, textAlign: 'center' },
+    page: { padding: theme.pagePadding, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+    headRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+    typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+    infoItem: { width: '46%' },
+    infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
+    infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
+    assignmentBox: { borderRadius: 10, padding: 12 },
+    assignmentText: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.greenDark },
+    actionsRow: { flexDirection: 'row', gap: 10 },
+    confirmText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.text, textAlign: 'center', marginBottom: 12 },
+  });
+}

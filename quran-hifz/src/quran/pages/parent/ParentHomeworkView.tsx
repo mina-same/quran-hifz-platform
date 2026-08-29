@@ -5,6 +5,7 @@ import { Alert } from "../../components/common/Alert";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonList } from "../../components/common/Skeleton";
+import { AR_LOCALE } from "@/lib/format";
 
 export function ParentHomeworkView() {
   const { activeChild } = useParentContext();
@@ -74,7 +75,7 @@ export function ParentHomeworkView() {
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 3 }}>{hw.segment}</div>
                 <div style={{ fontSize: 12, color: "var(--text2)", marginBottom: 5 }}>{hw.notes ?? hw.type}</div>
-                <Badge tone="gold" style={{ fontSize: 10 }}>الموعد: {new Date(hw.dueDate).toLocaleDateString("ar-SA")}</Badge>
+                <Badge tone="gold" style={{ fontSize: 10 }}>الموعد: {new Date(hw.dueDate).toLocaleDateString(AR_LOCALE)}</Badge>
               </div>
             </div>
           ))

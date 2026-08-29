@@ -3,6 +3,7 @@ import { useParentContext } from "../../context/ParentContext";
 import { useChildHifz } from "../../api/parent";
 import { Card } from "../../components/common/Card";
 import { SkeletonList } from "../../components/common/Skeleton";
+import { AR_LOCALE } from "@/lib/format";
 
 const STATUS_COLOR: Record<string, string> = {
   "مكتمل": "var(--green)",
@@ -57,7 +58,7 @@ export function ParentTimeline() {
                   {ev.completionDate && (
                     <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 2 }}>
                       <i className="ti ti-calendar" style={{ fontSize: 11 }} />{" "}
-                      {new Date(ev.completionDate).toLocaleDateString("ar-SA")}
+                      {new Date(ev.completionDate).toLocaleDateString(AR_LOCALE)}
                     </div>
                   )}
                 </div>

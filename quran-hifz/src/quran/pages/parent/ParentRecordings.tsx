@@ -5,6 +5,7 @@ import { Alert } from "../../components/common/Alert";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonTable } from "../../components/common/Skeleton";
+import { AR_LOCALE } from "@/lib/format";
 
 export function ParentRecordings() {
   const { activeChild } = useParentContext();
@@ -36,7 +37,7 @@ export function ParentRecordings() {
                   {(recordings ?? []).map((r, i) => (
                     <tr key={i}>
                       <td style={{ fontSize: 12, color: "var(--text2)" }}>
-                        {new Date(r.recordedAt).toLocaleDateString("ar-SA")}
+                        {new Date(r.recordedAt).toLocaleDateString(AR_LOCALE)}
                       </td>
                       <td><Badge tone="blue">{r.type}</Badge></td>
                       <td style={{ fontSize: 12 }}>{r.segment}</td>
@@ -52,7 +53,7 @@ export function ParentRecordings() {
               {(recordings ?? []).map((r, i) => (
                 <div key={i} className="rc-card">
                   <div className="rc-card-head">
-                    <span className="rc-card-title">{new Date(r.recordedAt).toLocaleDateString("ar-SA")}</span>
+                    <span className="rc-card-title">{new Date(r.recordedAt).toLocaleDateString(AR_LOCALE)}</span>
                     <Badge tone="blue">{r.type}</Badge>
                   </div>
                   <div className="rc-row">

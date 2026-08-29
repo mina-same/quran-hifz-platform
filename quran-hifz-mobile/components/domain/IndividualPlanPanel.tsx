@@ -13,7 +13,9 @@ import {
 } from '@/lib/queries/quranPlan';
 import { IconCalendarEvent } from '@tabler/icons-react-native';
 import { isReversedRange, isReversedSchedule, orientSlice, surahName, type RangePoint } from '@/lib/quranRange';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 const STATUS_LABEL: Record<StudentOccurrenceStatus, string> = {
   pending: 'قيد الانتظار', done: 'مكتمل', partial: 'جزئي', absent: 'غائب',
@@ -39,6 +41,8 @@ interface Props {
  * student's own occurrences first, falling back to the base plan's direction —
  * a custom-range overlay can run opposite to the plan it hangs off. */
 export default function IndividualPlanPanel({ planId, studentId, studentName, basePlan }: Props) {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const { data: progress, isLoading } = useStudentPlanProgress(planId, studentId);
   const initProgress = useInitStudentPlanProgress();
   const reflow = useReflowStudentPlan();
@@ -142,10 +146,12 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
   );
 }
 
-const s = StyleSheet.create({
-  box: { gap: 10, marginTop: 10 },
-  boxTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
-  label: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
-  muted: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 10 },
-  headRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-});
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    box: { gap: 10, marginTop: 10 },
+    boxTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    label: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    muted: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 10 },
+    headRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  });
+}

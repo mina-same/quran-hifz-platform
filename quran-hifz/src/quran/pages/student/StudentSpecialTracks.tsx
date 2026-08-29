@@ -8,6 +8,7 @@ import { useSpecialTracks, type SpecialTrack, type TrackTeacher } from "../../ap
 import { useQuranPlans } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
+import { AR_LOCALE } from "@/lib/format";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -39,7 +40,7 @@ function teacherName(t: TrackTeacher | string): string {
   return typeof t === "object" ? t.name : t;
 }
 function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" });
+  return new Date(d).toLocaleDateString(AR_LOCALE, { year: "numeric", month: "long", day: "numeric" });
 }
 function daysLeft(endDate: string): number {
   return Math.max(0, Math.ceil((new Date(endDate).getTime() - Date.now()) / 86400000));

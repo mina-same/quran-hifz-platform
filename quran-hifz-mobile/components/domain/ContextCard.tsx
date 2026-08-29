@@ -1,8 +1,11 @@
+import { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import Badge from '@/components/ui/Badge';
 import ProgressBar from '@/components/ui/ProgressBar';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 /**
  * Normalized shape for anything a teacher/student/admin can act on:
@@ -82,6 +85,8 @@ interface Props {
 }
 
 export default function ContextCard({ context, actions }: Props) {
+  const theme = useAppTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const hasCapacity = typeof context.studentCount === 'number' && typeof context.capacity === 'number' && context.capacity > 0;
   const capacityPct = hasCapacity ? Math.round((context.studentCount! / context.capacity!) * 100) : 0;
 
@@ -131,60 +136,62 @@ export default function ContextCard({ context, actions }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: theme.white,
-    borderRadius: theme.radius,
-    borderWidth: 1,
-    borderColor: theme.border,
-    overflow: 'hidden',
-  },
-  header: {
-    backgroundColor: theme.green,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerTrack: {
-    backgroundColor: theme.brown,
-  },
-  headerName: {
-    fontSize: 13,
-    fontFamily: theme.fontCairoBold,
-    color: theme.white,
-    flex: 1,
-  },
-  body: {
-    padding: 14,
-    gap: 7,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  rowLabel: {
-    fontSize: 12,
-    fontFamily: theme.fontCairo,
-    color: theme.textMuted,
-  },
-  rowValue: {
-    fontSize: 12,
-    fontFamily: theme.fontCairoBold,
-    color: theme.text,
-  },
-  capacityLabel: {
-    fontSize: 11,
-    fontFamily: theme.fontCairo,
-    color: theme.textMuted,
-    marginTop: 4,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 10,
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: theme.card,
+      borderRadius: theme.radius,
+      borderWidth: 1,
+      borderColor: theme.border,
+      overflow: 'hidden',
+    },
+    header: {
+      backgroundColor: theme.greenAccent,
+      paddingHorizontal: 14,
+      paddingVertical: 11,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: 8,
+    },
+    headerTrack: {
+      backgroundColor: theme.brown,
+    },
+    headerName: {
+      fontSize: 13,
+      fontFamily: theme.fontCairoBold,
+      color: theme.white,
+      flex: 1,
+    },
+    body: {
+      padding: 14,
+      gap: 7,
+    },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    rowLabel: {
+      fontSize: 12,
+      fontFamily: theme.fontCairo,
+      color: theme.textMuted,
+    },
+    rowValue: {
+      fontSize: 12,
+      fontFamily: theme.fontCairoBold,
+      color: theme.text,
+    },
+    capacityLabel: {
+      fontSize: 11,
+      fontFamily: theme.fontCairo,
+      color: theme.textMuted,
+      marginTop: 4,
+    },
+    actions: {
+      flexDirection: 'row',
+      gap: 8,
+      marginTop: 10,
+    },
+  });
+}

@@ -10,6 +10,7 @@ import FormSelect from '@/components/forms/FormSelect';
 import { useHomework, useGradeHomework } from '@/lib/queries/homework';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { AR_LOCALE } from '@/lib/date';
 
 function getName(v: { name: string } | string | undefined): string {
   if (!v) return '—';
@@ -74,7 +75,7 @@ export default function TeacherHomework() {
                   <Text style={styles.infoItem}>·</Text>
                   <Text style={styles.infoItem}>{h.specialTrack ? `مسار: ${getTitle(h.specialTrack)}` : getName(h.halqa)}</Text>
                   <Text style={styles.infoItem}>·</Text>
-                  <Text style={styles.infoItem}>{h.dueDate ? new Date(h.dueDate).toLocaleDateString('ar-SA') : '—'}</Text>
+                  <Text style={styles.infoItem}>{h.dueDate ? new Date(h.dueDate).toLocaleDateString(AR_LOCALE) : '—'}</Text>
                 </View>
 
                 <FormSelect

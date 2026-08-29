@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, View, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
@@ -6,8 +6,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconBook, IconStar, IconAward, IconGift } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
 import { success, error } from '@/lib/haptics';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 const MY_PTS = 740;
 const ITEMS = [
@@ -18,6 +21,8 @@ const ITEMS = [
 ];
 
 export default function StudentStore() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const [redeemed, setRedeemed] = useState<number | null>(null);
 
   function handleRedeem(id: number, pts: number) {
@@ -64,17 +69,19 @@ export default function StudentStore() {
   );
 }
 
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.cream },
-  page: { padding: 16, gap: 14 },
-  balance: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: theme.white, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: theme.border },
-  balLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
-  balNum: { fontSize: 24, fontFamily: theme.fontCairoBold, color: theme.green },
-  successBanner: { backgroundColor: '#f0fdf4', color: '#15803d', fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
-  itemRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  itemName: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
-  itemPts: { fontSize: 13, fontFamily: theme.fontCairo, marginTop: 2 },
-  btn: { backgroundColor: theme.green, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8 },
-  btnDisabled: { backgroundColor: theme.border },
-  btnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 12 },
-});
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.cream },
+    page: { padding: 16, gap: 14 },
+    balance: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: theme.card, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: theme.border },
+    balLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
+    balNum: { fontSize: 24, fontFamily: theme.fontCairoBold, color: theme.green },
+    successBanner: { backgroundColor: theme.tone.green.bg, color: theme.tone.green.text, fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
+    itemRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    itemName: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
+    itemPts: { fontSize: 13, fontFamily: theme.fontCairo, marginTop: 2 },
+    btn: { backgroundColor: theme.greenAccent, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8 },
+    btnDisabled: { backgroundColor: theme.border },
+    btnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 12 },
+  });
+}

@@ -1,41 +1,46 @@
-import { View, StyleSheet } from 'react-native';
+import { useMemo } from 'react';
+import { View, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import Text from '@/components/ui/Text';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 export type BadgeVariant = 'green' | 'gold' | 'red' | 'blue' | 'gray';
-type Variant = BadgeVariant;
-
-const VARIANT_STYLES: Record<Variant, { bg: string; text: string }> = {
-  green: { bg: '#DCFCE7', text: '#166534' },
-  gold:  { bg: theme.goldPale, text: theme.brown },
-  red:   { bg: '#FEE2E2', text: '#991B1B' },
-  blue:  { bg: '#DBEAFE', text: '#1E40AF' },
-  gray:  { bg: '#F3F4F6', text: '#374151' },
-};
 
 interface Props {
   label: string;
-  variant?: Variant;
+  variant?: BadgeVariant;
+  /**
+   * A chip is one line by default: a long label (a full special-track title, a
+   * masjid name) ellipsizes instead of running off the edge of a phone screen.
+   */
+  numberOfLines?: number;
+  style?: StyleProp<ViewStyle>;
 }
 
-export default function Badge({ label, variant = 'gray' }: Props) {
-  const v = VARIANT_STYLES[variant];
+export default function Badge({ label, variant = 'gray', numberOfLines = 1, style }: Props) {
+  const theme = useAppTheme();
+  // theme.tone carries a bg/border/text triple per variant in BOTH modes, so the
+  // badge no longer hard-codes light pastels that stayed bright in dark mode.
+  const v = theme.tone[variant];
+
+  const styles = useMemo(() => StyleSheet.create({
+    badge: {
+      borderRadius: theme.radiusFull,
+      paddingHorizontal: 10,
+      paddingVertical: 3,
+      alignSelf: 'flex-start',
+      // Shrink before overflowing: only bites when the row runs out of width.
+      flexShrink: 1,
+      maxWidth: '100%',
+    },
+    text: {
+      fontSize: 11,
+      fontFamily: theme.fontCairoBold,
+    },
+  }), [theme]);
+
   return (
-    <View style={[styles.badge, { backgroundColor: v.bg }]}>
-      <Text style={[styles.text, { color: v.text }]}>{label}</Text>
+    <View style={[styles.badge, { backgroundColor: v.bg }, style]}>
+      <Text style={[styles.text, { color: v.text }]} numberOfLines={numberOfLines}>{label}</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  badge: {
-    borderRadius: theme.radiusFull,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    alignSelf: 'flex-start',
-  },
-  text: {
-    fontSize: 11,
-    fontFamily: theme.fontCairoBold,
-  },
-});

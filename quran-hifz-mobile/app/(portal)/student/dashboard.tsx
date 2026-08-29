@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,7 +13,11 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useStudent } from '@/lib/queries/students';
 import { useHomework } from '@/lib/queries/homework';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+import { AR_LOCALE } from '@/lib/date';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 function getName(v: unknown): string {
   if (v && typeof v === 'object' && 'name' in v) return (v as { name: string }).name;
@@ -20,6 +25,8 @@ function getName(v: unknown): string {
 }
 
 export default function StudentDashboard() {
+  const theme = useAppTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const authUser = usePortalStore((s) => s.authUser);
   const studentId = authUser?.profileId;
 
@@ -128,7 +135,7 @@ export default function StudentDashboard() {
               <View key={row._id} style={[styles.hwRow, i < recentHomework.length - 1 && styles.hwBorder]}>
                 <View>
                   <Text style={styles.hwSegment}>{row.segment}</Text>
-                  <Text style={styles.hwDate}>{new Date(row.dueDate).toLocaleDateString('ar-SA')}</Text>
+                  <Text style={styles.hwDate}>{new Date(row.dueDate).toLocaleDateString(AR_LOCALE)}</Text>
                 </View>
                 <View style={styles.hwBadges}>
                   {row.rating && <Badge label={row.rating} variant="gold" />}
@@ -143,29 +150,31 @@ export default function StudentDashboard() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe:  { flex: 1, backgroundColor: theme.bg },
-  page:  { padding: theme.pagePadding, gap: 14 },
-  twoCol:{ flexDirection: 'row', gap: 12 },
-  half:  { flex: 1 },
-  planCenter: { alignItems: 'center', paddingVertical: 8 },
-  planLabel: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted, marginBottom: 4 },
-  planPct: { fontSize: 30, fontFamily: theme.fontCairoBold, color: theme.green },
-  planBarWrap: { width: '100%', marginTop: 10, marginBottom: 8 },
-  planNote: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
-  planBadge: { marginTop: 10 },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 5,
-  },
-  infoKey: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
-  infoVal: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
-  hwRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 },
-  hwBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
-  hwSegment: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
-  hwDate: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted, marginTop: 2 },
-  hwBadges: { flexDirection: 'row', gap: 6 },
-  emptyText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted, textAlign: 'center', paddingVertical: 20 },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    safe:  { flex: 1, backgroundColor: theme.bg },
+    page:  { padding: theme.pagePadding, gap: 14 },
+    twoCol:{ flexDirection: 'row', gap: 12 },
+    half:  { flex: 1 },
+    planCenter: { alignItems: 'center', paddingVertical: 8 },
+    planLabel: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted, marginBottom: 4 },
+    planPct: { fontSize: 30, fontFamily: theme.fontCairoBold, color: theme.green },
+    planBarWrap: { width: '100%', marginTop: 10, marginBottom: 8 },
+    planNote: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    planBadge: { marginTop: 10 },
+    infoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 5,
+    },
+    infoKey: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    infoVal: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
+    hwRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 },
+    hwBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
+    hwSegment: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    hwDate: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted, marginTop: 2 },
+    hwBadges: { flexDirection: 'row', gap: 6 },
+    emptyText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted, textAlign: 'center', paddingVertical: 20 },
+  });
+}

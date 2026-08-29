@@ -27,6 +27,13 @@ function trackLabel(s: Student): string | null {
   return null;
 }
 
+type Tone = 'green' | 'gold' | 'red';
+function attendanceTone(pct: number): Tone {
+  if (pct >= 90) return 'green';
+  if (pct >= 75) return 'gold';
+  return 'red';
+}
+
 export default function AdminStudents() {
   const theme = useAppTheme();
   const { data: students = [], isLoading, isError, isRefetching, refetch } = useStudents();
@@ -34,14 +41,44 @@ export default function AdminStudents() {
   const styles = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },
     page: { padding: theme.pagePadding, gap: 14 },
-    row: { paddingVertical: 14, gap: 8 },
+
+    row: { paddingVertical: 14, gap: 10 },
     rowBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
-    rowHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-    name: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
-    muted: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
-    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-    infoItem: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+
+    // Name takes the width it needs; the attendance pill never gets pushed off-screen.
+    rowHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    name: { flex: 1, fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text },
+
+    attPill: { borderRadius: theme.radiusFull, paddingHorizontal: 10, paddingVertical: 4 },
+    attPillText: { fontSize: 11, fontFamily: theme.fontCairoBold },
+
+    // A full-width chip: a long track title ellipsizes on one line instead of
+    // squeezing the student's name out of the header row.
+    trackBadge: { alignSelf: 'stretch' },
+
+    // Meta reads as wrapping chips — dot-separated text ran into a ragged block
+    // on a 390pt screen.
+    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    chip: {
+      backgroundColor: theme.tone.gray.bg,
+      borderRadius: theme.radiusSm,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      flexShrink: 1,
+      maxWidth: '100%',
+    },
+    chipText: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.tone.gray.text },
+
+    guardian: { gap: 2 },
+    guardianName: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    // textMuted, not textFaint: `textFaint` is white-on-dark ink and vanishes on a light card.
+    guardianContact: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted, opacity: 0.85 },
+
     progressWrap: { gap: 4 },
+    progressHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    progressLabel: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    progressPct: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
+
     empty: { textAlign: 'center', color: theme.textMuted, fontFamily: theme.fontCairo, fontSize: 13, paddingVertical: 24 },
   }), [theme]);
 
@@ -75,36 +112,44 @@ export default function AdminStudents() {
               const track = trackLabel(s);
               const guardianName = s.parentName || s.guardian || null;
               const guardianContact = s.parentEmail || s.guardianPhone || null;
+              const att = theme.tone[attendanceTone(s.attendancePct)];
               return (
                 <View key={s._id} style={[styles.row, i < students.length - 1 && styles.rowBorder]}>
                   <View style={styles.rowHead}>
                     <Text style={styles.name} numberOfLines={1}>{s.name}</Text>
-                    {track ? <Badge label={track} variant="gold" /> : <Text style={styles.muted}>—</Text>}
+                    <View style={[styles.attPill, { backgroundColor: att.bg }]}>
+                      <Text style={[styles.attPillText, { color: att.text }]}>حضور {s.attendancePct}٪</Text>
+                    </View>
                   </View>
 
-                  <View style={styles.infoGrid}>
-                    <Text style={styles.infoItem}>الحلقة: {getName(s.halqa)}</Text>
-                    <Text style={styles.infoItem}>·</Text>
-                    <Text style={styles.infoItem}>المسجد: {getName(s.masjid)}</Text>
+                  {track && <Badge label={track} variant="gold" style={styles.trackBadge} />}
+
+                  <View style={styles.chips}>
+                    <View style={styles.chip}>
+                      <Text style={styles.chipText} numberOfLines={1}>الحلقة: {getName(s.halqa)}</Text>
+                    </View>
+                    <View style={styles.chip}>
+                      <Text style={styles.chipText} numberOfLines={1}>المسجد: {getName(s.masjid)}</Text>
+                    </View>
                     {typeof s.level === 'number' && (
-                      <>
-                        <Text style={styles.infoItem}>·</Text>
-                        <Text style={styles.infoItem}>المستوى: {s.level}</Text>
-                      </>
+                      <View style={styles.chip}>
+                        <Text style={styles.chipText} numberOfLines={1}>المستوى: {s.level}</Text>
+                      </View>
                     )}
                   </View>
 
-                  <View style={styles.rowHead}>
-                    <Text style={[styles.muted, { color: s.attendancePct >= 90 ? theme.green : theme.red, fontFamily: theme.fontCairoBold }]}>
-                      الحضور {s.attendancePct}٪
-                    </Text>
-                    <Text style={styles.muted}>
-                      ولي الأمر: {guardianName ?? '—'}{guardianContact ? ` (${guardianContact})` : ''}
-                    </Text>
+                  <View style={styles.guardian}>
+                    <Text style={styles.guardianName} numberOfLines={1}>ولي الأمر: {guardianName ?? '—'}</Text>
+                    {guardianContact && (
+                      <Text style={styles.guardianContact} numberOfLines={1}>{guardianContact}</Text>
+                    )}
                   </View>
 
                   <View style={styles.progressWrap}>
-                    <Text style={styles.muted}>التقدم {s.progressPct}٪</Text>
+                    <View style={styles.progressHead}>
+                      <Text style={styles.progressLabel}>التقدم</Text>
+                      <Text style={styles.progressPct}>{s.progressPct}٪</Text>
+                    </View>
                     <ProgressBar value={s.progressPct} showPercent={false} />
                   </View>
                 </View>

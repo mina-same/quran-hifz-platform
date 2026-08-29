@@ -21,8 +21,12 @@ import { useHalqat } from '@/lib/queries/halqat';
 import { useQuranPlan, useCreateQuranPlan, useUpdateQuranPlan, type PlanType } from '@/lib/queries/quranPlan';
 import { computeScheduleBreakdown, isReversedRange, WEEK_DAYS, type RangePoint } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
 import { success, error } from '@/lib/haptics';
+import { AR_LOCALE } from '@/lib/date';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة', 'ترتيل', 'تلاوة'];
 
@@ -34,7 +38,7 @@ function todayISO(): string {
 /** Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local
     midnight so the day never shifts (see the date-arithmetic rule in cerebrum). */
 function fmtDate(iso: string): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' });
+  return new Date(`${iso}T00:00:00`).toLocaleDateString(AR_LOCALE, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 type FormFields = {
@@ -60,6 +64,8 @@ const EMPTY: FormFields = {
 };
 
 export default function TeacherPlanForm() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
   const params = useLocalSearchParams<{ mode?: string; id?: string; halqaId?: string }>();
   const isEdit = params.mode === 'edit' && !!params.id;
@@ -387,42 +393,45 @@ export default function TeacherPlanForm() {
   );
 }
 
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12, backgroundColor: theme.card,
-    borderBottomWidth: 1, borderBottomColor: theme.border,
-  },
-  headerTitle: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text },
-  page: { padding: theme.pagePadding, gap: 14 },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
-  chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
-  chipText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
-  chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
-  lockedText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
-  holidayHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  holidayTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
-  holidayCount: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 1, backgroundColor: theme.goldPale },
-  holidayCountText: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.brown },
-  holidayChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    borderRadius: 999, paddingStart: 12, paddingEnd: 5, paddingVertical: 5,
-    borderWidth: 1, borderColor: theme.border, backgroundColor: theme.cream,
-  },
-  holidayChipActive: { backgroundColor: theme.goldPale, borderColor: 'rgba(201, 149, 42, 0.35)' },
-  holidayChipText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.textMuted },
-  holidayChipTextActive: { color: theme.brown },
-  holidayChipX: {
-    width: 20, height: 20, borderRadius: 999, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.06)',
-  },
-  holidayHint: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 10, lineHeight: 18 },
-  reverseHint: { fontSize: 11, color: theme.gold, fontFamily: theme.fontCairo, marginTop: 10 },
-  rowGroup: { flexDirection: 'row', gap: 8 },
-  toggleBtn: { flex: 1, borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },
-  toggleBtnActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
-  toggleBtnText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
-  toggleBtnTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
-});
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    // No background and no divider: the header sits directly on the page surface
+    // rather than reading as a separate white bar over it.
+    header: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingHorizontal: 16, paddingVertical: 12,
+    },
+    headerTitle: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text },
+    page: { padding: theme.pagePadding, gap: 14 },
+    chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+    chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
+    chipText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
+    lockedText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
+    holidayHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+    holidayTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    holidayCount: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 1, backgroundColor: theme.goldPale },
+    holidayCountText: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.brown },
+    holidayChip: {
+      flexDirection: 'row', alignItems: 'center', gap: 8,
+      borderRadius: 999, paddingStart: 12, paddingEnd: 5, paddingVertical: 5,
+      borderWidth: 1, borderColor: theme.border, backgroundColor: theme.cream,
+    },
+    holidayChipActive: { backgroundColor: theme.goldPale, borderColor: 'rgba(201, 149, 42, 0.35)' },
+    holidayChipText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.textMuted },
+    holidayChipTextActive: { color: theme.brown },
+    holidayChipX: {
+      width: 20, height: 20, borderRadius: 999, alignItems: 'center', justifyContent: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.06)',
+    },
+    holidayHint: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 10, lineHeight: 18 },
+    reverseHint: { fontSize: 11, color: theme.gold, fontFamily: theme.fontCairo, marginTop: 10 },
+    rowGroup: { flexDirection: 'row', gap: 8 },
+    toggleBtn: { flex: 1, borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },
+    toggleBtnActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
+    toggleBtnText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
+    toggleBtnTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
+  });
+}

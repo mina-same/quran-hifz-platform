@@ -236,7 +236,7 @@ export default function TeacherEvaluate() {
                     haptic="select"
                     disabled={alreadySubmitted}
                     onPress={() => setAttendance(st._id, 'حاضر')}
-                    style={[styles.toggleBtn, !isAbsent && { backgroundColor: theme.green + '20', borderColor: theme.green }]}
+                    style={[styles.toggleBtn, !isAbsent && { backgroundColor: theme.greenPale, borderColor: theme.greenAccent }]}
                   >
                     <Text style={[styles.toggleText, !isAbsent && { color: theme.green, fontFamily: theme.fontCairoBold }]}>حاضر</Text>
                   </Pressable>
@@ -264,7 +264,7 @@ export default function TeacherEvaluate() {
                                 key={n}
                                 disabled={alreadySubmitted}
                                 onPress={() => setScore(st._id, cat, n)}
-                                style={[styles.chip, active && { backgroundColor: theme.green, borderColor: theme.green }]}
+                                style={[styles.chip, active && { backgroundColor: theme.greenAccent, borderColor: theme.green }]}
                               >
                                 <Text style={[styles.chipText, active && { color: theme.white }]}>{n}</Text>
                               </Pressable>

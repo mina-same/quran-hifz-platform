@@ -11,6 +11,7 @@ import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCard } from "../../components/common/Skeleton";
+import { AR_LOCALE } from "@/lib/format";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -22,7 +23,7 @@ function getName(v: { name: string } | string) {
   return typeof v === "object" ? v.name : v;
 }
 function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString("ar-SA", { year: "numeric", month: "short", day: "numeric" });
+  return new Date(d).toLocaleDateString(AR_LOCALE, { year: "numeric", month: "short", day: "numeric" });
 }
 
 const PLAN_TYPE_CFG: Record<string, { icon: string; fg: string; bg: string }> = {

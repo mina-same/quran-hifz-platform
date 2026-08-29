@@ -10,6 +10,7 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useAttendance } from '@/lib/queries/attendance';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { AR_LOCALE } from '@/lib/date';
 
 export default function StudentAttendance() {
   const theme = useAppTheme();
@@ -64,7 +65,7 @@ export default function StudentAttendance() {
             {!isLoading && records.map((r, i) => (
               <View key={r._id} style={[styles.row, i < records.length - 1 && styles.rowBorder]}>
                 <View style={styles.rowHead}>
-                  <Text style={styles.name}>{new Date(r.date).toLocaleDateString('ar-SA')}</Text>
+                  <Text style={styles.name}>{new Date(r.date).toLocaleDateString(AR_LOCALE)}</Text>
                   {statusBadge(r.status)}
                 </View>
                 <View style={styles.infoGrid}>

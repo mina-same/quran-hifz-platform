@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
 import Text from '@/components/ui/Text';
@@ -11,7 +12,9 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useQuranPlans, type QuranPlan } from '@/lib/queries/quranPlan';
 import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 const STATUS_VARIANT: Record<QuranPlan['status'], 'green' | 'gold' | 'gray'> = {
   'نشطة': 'green',
@@ -30,6 +33,8 @@ function targetLabel(plan: QuranPlan): string {
 }
 
 function PlanCard({ plan, onPress }: { plan: QuranPlan; onPress: () => void }) {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const reversed = isReversedRange(plan.rangeStart, plan.rangeEnd);
   const assignment = plan.todayAssignment ? orientSlice(plan.todayAssignment, reversed) : null;
   const progressPct = plan.progress?.percent ?? 0;
@@ -66,6 +71,8 @@ function PlanCard({ plan, onPress }: { plan: QuranPlan; onPress: () => void }) {
 }
 
 export default function TeacherPlans() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
   const profileId = usePortalStore((st) => st.authUser?.profileId);
   const { data: plans = [], isLoading, isRefetching, refetch } = useQuranPlans({ teacher: profileId });
@@ -106,18 +113,20 @@ export default function TeacherPlans() {
   );
 }
 
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: theme.pagePadding, gap: 14 },
-  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  pageTitle: { fontSize: 16, fontFamily: theme.fontCairoBold, color: theme.text },
-  addBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.green, borderRadius: theme.radiusSm, paddingHorizontal: 14, paddingVertical: 10 },
-  addBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 13 },
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
-  headRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8, justifyContent: 'space-between' },
-  typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
-  title: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text },
-  subInfo: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 2 },
-  assignmentBox: { backgroundColor: theme.greenPale, borderRadius: 10, padding: 10, marginTop: 10 },
-  assignmentText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.greenDark },
-});
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    pageTitle: { fontSize: 16, fontFamily: theme.fontCairoBold, color: theme.text },
+    addBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.greenAccent, borderRadius: theme.radiusSm, paddingHorizontal: 14, paddingVertical: 10 },
+    addBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 13 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+    headRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8, justifyContent: 'space-between' },
+    typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+    title: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text },
+    subInfo: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 2 },
+    assignmentBox: { backgroundColor: theme.greenPale, borderRadius: 10, padding: 10, marginTop: 10 },
+    assignmentText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.greenDark },
+  });
+}

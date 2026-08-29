@@ -28,15 +28,28 @@ import {
 } from "../../api/quran-plans";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
 import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
-import { useRecordStudentOccurrence, useStudentPlanProgressList } from "../../api/student-plan-progress";
-import { IndividualPlanPanel, planCoversStudent } from "../../components/common/IndividualPlanPanel";
+import {
+  useRecordStudentOccurrence,
+  useStudentPlanProgressList,
+} from "../../api/student-plan-progress";
+import {
+  IndividualPlanPanel,
+  planCoversStudent,
+} from "../../components/common/IndividualPlanPanel";
 import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
 import {
-  fractionalPage, toFlatIndex, fromFlatIndex, isReversedRange, orientSlice,
-  isReversedSchedule, dayFinishPoint, dayDeltaAyahs, planFinishPoint,
+  fractionalPage,
+  toFlatIndex,
+  fromFlatIndex,
+  isReversedRange,
+  orientSlice,
+  isReversedSchedule,
+  dayFinishPoint,
+  dayDeltaAyahs,
+  planFinishPoint,
 } from "../../lib/quranRange";
-import { toAr } from "../../../lib/format";
+import { toAr, AR_LOCALE } from "../../../lib/format";
 
 /** Formats a schedule day's page position: a clean page boundary shows as a
  * plain integer, a partial (mid-page) position shows one decimal, e.g. `٢.٧`
@@ -61,7 +74,17 @@ const compactInputStyle = { fontSize: 12, padding: "6px 8px" };
  * picked, since the value bounced straight back on the next render. The raw
  * schedule row edit (rangeStart/rangeEnd, further below) has no such bound
  * and keeps offering the full list. */
-function CompactSurahAyah({ value, onChange, disabled, bounds }: { value: RangePoint; onChange: (v: RangePoint) => void; disabled?: boolean; bounds?: { lo: RangePoint; hi: RangePoint } }) {
+function CompactSurahAyah({
+  value,
+  onChange,
+  disabled,
+  bounds,
+}: {
+  value: RangePoint;
+  onChange: (v: RangePoint) => void;
+  disabled?: boolean;
+  bounds?: { lo: RangePoint; hi: RangePoint };
+}) {
   const surah = SURAHS.find((s) => s.number === value.surahNumber) ?? SURAHS[0];
   const loFlat = bounds ? toFlatIndex(bounds.lo) : undefined;
   const hiFlat = bounds ? toFlatIndex(bounds.hi) : undefined;
@@ -73,12 +96,17 @@ function CompactSurahAyah({ value, onChange, disabled, bounds }: { value: RangeP
       return f >= loFlat && f <= hiFlat;
     });
   }
-  const surahs = loFlat == null || hiFlat == null ? SURAHS : SURAHS.filter((s) => ayahsOf(s).length > 0);
+  const surahs =
+    loFlat == null || hiFlat == null ? SURAHS : SURAHS.filter((s) => ayahsOf(s).length > 0);
   const ayahs = ayahsOf(surah);
   function setSurah(surahNumber: number) {
     const s = SURAHS.find((x) => x.number === surahNumber) ?? SURAHS[0];
     const opts = ayahsOf(s);
-    const ayah = opts.length ? (opts.includes(value.ayah) ? value.ayah : opts[0]) : Math.min(value.ayah, s.ayahCount);
+    const ayah = opts.length
+      ? opts.includes(value.ayah)
+        ? value.ayah
+        : opts[0]
+      : Math.min(value.ayah, s.ayahCount);
     onChange({ surahNumber, ayah });
   }
   function setAyah(ayah: number) {
@@ -86,11 +114,31 @@ function CompactSurahAyah({ value, onChange, disabled, bounds }: { value: RangeP
   }
   return (
     <div style={{ display: "flex", gap: 5 }}>
-      <select className="form-input" style={{ ...compactInputStyle, flex: "1 1 auto", minWidth: 90 }} value={value.surahNumber} disabled={disabled} onChange={(e) => setSurah(Number(e.target.value))}>
-        {surahs.map((s) => <option key={s.number} value={s.number}>{s.number}. {s.name}</option>)}
+      <select
+        className="form-input"
+        style={{ ...compactInputStyle, flex: "1 1 auto", minWidth: 90 }}
+        value={value.surahNumber}
+        disabled={disabled}
+        onChange={(e) => setSurah(Number(e.target.value))}
+      >
+        {surahs.map((s) => (
+          <option key={s.number} value={s.number}>
+            {s.number}. {s.name}
+          </option>
+        ))}
       </select>
-      <select className="form-input" style={{ ...compactInputStyle, width: 62, flexShrink: 0 }} value={value.ayah} disabled={disabled} onChange={(e) => setAyah(Number(e.target.value))}>
-        {ayahs.map((n) => <option key={n} value={n}>{n}</option>)}
+      <select
+        className="form-input"
+        style={{ ...compactInputStyle, width: 62, flexShrink: 0 }}
+        value={value.ayah}
+        disabled={disabled}
+        onChange={(e) => setAyah(Number(e.target.value))}
+      >
+        {ayahs.map((n) => (
+          <option key={n} value={n}>
+            {n}
+          </option>
+        ))}
       </select>
     </div>
   );
@@ -109,10 +157,19 @@ function getTeacherName(v: TrackTeacher | string) {
   return typeof v === "object" ? v.name : v;
 }
 function fmtTrackDate(d: string) {
-  return new Date(d).toLocaleDateString("ar-SA", { year: "numeric", month: "short", day: "numeric" });
+  return new Date(d).toLocaleDateString(AR_LOCALE, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 function avatarInitials(name: string) {
-  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0] ?? "").join("");
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0] ?? "")
+    .join("");
 }
 const AV = [
   { bg: "var(--green-pale)", fg: "var(--green)" },
@@ -121,9 +178,9 @@ const AV = [
   { bg: "#fde8f0", fg: "#9d174d" },
 ];
 const STATUS_CFG = {
-  active:   { label: "نشط",   tone: "green" as const, color: "var(--green)" },
-  upcoming: { label: "قادم",  tone: "gold"  as const, color: "#d97706" },
-  ended:    { label: "منتهي", tone: "gray"  as const, color: "var(--text3)" },
+  active: { label: "نشط", tone: "green" as const, color: "var(--green)" },
+  upcoming: { label: "قادم", tone: "gold" as const, color: "#d97706" },
+  ended: { label: "منتهي", tone: "gray" as const, color: "var(--text3)" },
 };
 
 /* ─── day-slider helpers, mirrored from TeacherAttendance.tsx ─── */
@@ -139,7 +196,13 @@ function toDateOnly(s: string): string {
   return String(s).slice(0, 10);
 }
 function fmtDayLabel(iso: string): string {
-  return toAr(new Date(iso + "T00:00:00").toLocaleDateString("ar-SA", { weekday: "long", day: "numeric", month: "long" }));
+  return toAr(
+    new Date(iso + "T00:00:00").toLocaleDateString(AR_LOCALE, {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    }),
+  );
 }
 type DayChip = { iso: string; weekday: string; dayNum: number; isToday: boolean };
 function buildDayChips(minIso: string, maxIso: string, today: string): DayChip[] {
@@ -156,8 +219,17 @@ function buildDayChips(minIso: string, maxIso: string, today: string): DayChip[]
 }
 
 type ScoreCategory = "hifz" | "tajweed" | "talawah";
-const CATEGORY_LABELS: Record<ScoreCategory, string> = { hifz: "حفظ", tajweed: "تجويد", talawah: "تلاوة" };
-type StudentEval = { attendanceStatus: "حاضر" | "غائب"; hifz: number; tajweed: number; talawah: number };
+const CATEGORY_LABELS: Record<ScoreCategory, string> = {
+  hifz: "حفظ",
+  tajweed: "تجويد",
+  talawah: "تلاوة",
+};
+type StudentEval = {
+  attendanceStatus: "حاضر" | "غائب";
+  hifz: number;
+  tajweed: number;
+  talawah: number;
+};
 function blankEval(): StudentEval {
   return { attendanceStatus: "حاضر", hifz: 0, tajweed: 0, talawah: 0 };
 }
@@ -175,7 +247,10 @@ const TABS: { value: TabKey; label: string; icon: string }[] = [
 
 /* ─── inline panel (no popup): pick an already-existing plan (of this teacher's) to link to a track ─── */
 function LinkPlanPanel({
-  track, teacherId, onLinked, onCreateNew,
+  track,
+  teacherId,
+  onLinked,
+  onCreateNew,
 }: {
   track: SpecialTrack;
   teacherId?: string;
@@ -186,17 +261,30 @@ function LinkPlanPanel({
   const updatePlan = useUpdateQuranPlan();
 
   const linkable = myPlans.filter(
-    (p) => p.specialTrack !== track._id && (typeof p.specialTrack !== "object" || p.specialTrack?._id !== track._id),
+    (p) =>
+      p.specialTrack !== track._id &&
+      (typeof p.specialTrack !== "object" || p.specialTrack?._id !== track._id),
   );
 
   function link(plan: QuranPlan) {
-    updatePlan.mutate({ id: plan._id, targetType: "specialTrack", specialTrack: track._id }, { onSuccess: onLinked });
+    updatePlan.mutate(
+      { id: plan._id, targetType: "specialTrack", specialTrack: track._id },
+      { onSuccess: onLinked },
+    );
   }
 
   return (
-    <div style={{ border: "1px solid var(--border)", borderRadius: 12, padding: "14px 16px", marginTop: 12 }}>
+    <div
+      style={{
+        border: "1px solid var(--border)",
+        borderRadius: 12,
+        padding: "14px 16px",
+        marginTop: 12,
+      }}
+    >
       <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>
-        <i className="ti ti-link" style={{ marginLeft: 4 }} />ربط خطة موجودة بـ"{track.title}"
+        <i className="ti ti-link" style={{ marginLeft: 4 }} />
+        ربط خطة موجودة بـ"{track.title}"
       </div>
 
       {isLoading && <p style={{ fontSize: 12, color: "var(--text3)" }}>جارٍ التحميل...</p>}
@@ -208,14 +296,39 @@ function LinkPlanPanel({
       )}
 
       {!isLoading && linkable.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14, maxHeight: 320, overflowY: "auto" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            marginBottom: 14,
+            maxHeight: 320,
+            overflowY: "auto",
+          }}
+        >
           {linkable.map((p) => (
-            <div key={p._id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, border: "1px solid var(--border)", borderRadius: 10, padding: "10px 12px" }}>
+            <div
+              key={p._id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+                border: "1px solid var(--border)",
+                borderRadius: 10,
+                padding: "10px 12px",
+              }}
+            >
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{p.name}</div>
                 <div style={{ fontSize: 11, color: "var(--text3)" }}>{p.type}</div>
               </div>
-              <button className="topbar-btn btn-primary" style={{ fontSize: 11, padding: "5px 12px" }} disabled={updatePlan.isPending} onClick={() => link(p)}>
+              <button
+                className="topbar-btn btn-primary"
+                style={{ fontSize: 11, padding: "5px 12px" }}
+                disabled={updatePlan.isPending}
+                onClick={() => link(p)}
+              >
                 {updatePlan.isPending ? "جارٍ الربط..." : "ربط"}
               </button>
             </div>
@@ -223,7 +336,11 @@ function LinkPlanPanel({
         </div>
       )}
 
-      <button className="topbar-btn btn-ghost" style={{ width: "100%", justifyContent: "center", fontSize: 12 }} onClick={onCreateNew}>
+      <button
+        className="topbar-btn btn-ghost"
+        style={{ width: "100%", justifyContent: "center", fontSize: 12 }}
+        onClick={onCreateNew}
+      >
         <i className="ti ti-plus" /> إنشاء خطة جديدة بدلاً من ذلك
       </button>
     </div>
@@ -257,7 +374,10 @@ export function TeacherTrackDetail() {
     { halqa: myHalqaIdsInTrack.join(",") },
     { enabled: myHalqaIdsInTrack.length > 0 },
   );
-  const roster: (EnrolledStudent | string)[] = rosterStudents.map((s) => ({ _id: s._id, name: s.name }));
+  const roster: (EnrolledStudent | string)[] = rosterStudents.map((s) => ({
+    _id: s._id,
+    name: s.name,
+  }));
 
   const [tab, setTab] = useState<TabKey>("students");
   // Only one of the plan tab's expandable sections (link-another-plan /
@@ -326,9 +446,13 @@ export function TeacherTrackDetail() {
   function isDayEditDirty(): boolean {
     if (!editingDay) return false;
     return (
-      dayRangeStart.surahNumber !== editingDay.surahStart || dayRangeStart.ayah !== editingDay.ayahStart ||
-      dayRangeEnd.surahNumber !== editingDay.surahEnd || dayRangeEnd.ayah !== editingDay.ayahEnd ||
-      dayPageStart !== editingDay.pageStart || dayPageEnd !== editingDay.pageEnd || dayJuz !== editingDay.juz
+      dayRangeStart.surahNumber !== editingDay.surahStart ||
+      dayRangeStart.ayah !== editingDay.ayahStart ||
+      dayRangeEnd.surahNumber !== editingDay.surahEnd ||
+      dayRangeEnd.ayah !== editingDay.ayahEnd ||
+      dayPageStart !== editingDay.pageStart ||
+      dayPageEnd !== editingDay.pageEnd ||
+      dayJuz !== editingDay.juz
     );
   }
   /** Asks for confirmation before discarding an in-progress, unsaved day edit.
@@ -336,7 +460,9 @@ export function TeacherTrackDetail() {
    * confirmed discarding it). */
   function guardDiscardDayEdit(): boolean {
     if (!isDayEditDirty()) return true;
-    return window.confirm("لديك تعديل غير محفوظ على توزيع أحد الأيام — سيتم فقده إذا واصلت. هل تريد تجاهل التعديل والمتابعة؟");
+    return window.confirm(
+      "لديك تعديل غير محفوظ على توزيع أحد الأيام — سيتم فقده إذا واصلت. هل تريد تجاهل التعديل والمتابعة؟",
+    );
   }
 
   // First time anyone opens the schedule table, freeze it into the DB
@@ -374,17 +500,28 @@ export function TeacherTrackDetail() {
     if (!linkedPlan || !editingDay) return;
     const startsBeforeEnd =
       dayRangeStart.surahNumber < dayRangeEnd.surahNumber ||
-      (dayRangeStart.surahNumber === dayRangeEnd.surahNumber && dayRangeStart.ayah <= dayRangeEnd.ayah);
-    if (!startsBeforeEnd) { setDayError("نقطة البداية يجب أن تسبق نقطة النهاية"); return; }
-    if (dayPageStart > dayPageEnd) { setDayError("صفحة البداية يجب أن تسبق صفحة النهاية"); return; }
+      (dayRangeStart.surahNumber === dayRangeEnd.surahNumber &&
+        dayRangeStart.ayah <= dayRangeEnd.ayah);
+    if (!startsBeforeEnd) {
+      setDayError("نقطة البداية يجب أن تسبق نقطة النهاية");
+      return;
+    }
+    if (dayPageStart > dayPageEnd) {
+      setDayError("صفحة البداية يجب أن تسبق صفحة النهاية");
+      return;
+    }
     setDayError("");
     try {
       await updateScheduleEntry.mutateAsync({
         id: linkedPlan._id,
         occurrenceIndex: editingDay.occurrenceIndex,
-        surahStart: dayRangeStart.surahNumber, ayahStart: dayRangeStart.ayah,
-        surahEnd: dayRangeEnd.surahNumber, ayahEnd: dayRangeEnd.ayah,
-        pageStart: dayPageStart, pageEnd: dayPageEnd, juz: dayJuz,
+        surahStart: dayRangeStart.surahNumber,
+        ayahStart: dayRangeStart.ayah,
+        surahEnd: dayRangeEnd.surahNumber,
+        ayahEnd: dayRangeEnd.ayah,
+        pageStart: dayPageStart,
+        pageEnd: dayPageEnd,
+        juz: dayJuz,
       });
       setEditingDay(null);
     } catch (e) {
@@ -397,25 +534,32 @@ export function TeacherTrackDetail() {
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
-  const { scheduledSet, scheduledSorted, assignmentByDate, dayChips, effectiveDate } = useMemo(() => {
-    const set = new Set<string>();
-    const byDate = new Map<string, ScheduleEntry>();
-    for (const e of linkedPlan?.schedule ?? []) {
-      if (!e.date) continue;
-      const d = toDateOnly(e.date);
-      set.add(d);
-      if (!byDate.has(d)) byDate.set(d, e);
-    }
-    const sorted = Array.from(set).sort();
-    const chips = sorted.length ? buildDayChips(sorted[0], sorted[sorted.length - 1], today) : [];
-    let dflt = sorted.length ? sorted[0] : today;
-    if (sorted.length) {
-      const pastOrToday = sorted.filter((d) => d <= today);
-      dflt = pastOrToday.length ? pastOrToday[pastOrToday.length - 1] : sorted[0];
-    }
-    const effective = selectedDate && set.has(selectedDate) ? selectedDate : dflt;
-    return { scheduledSet: set, scheduledSorted: sorted, assignmentByDate: byDate, dayChips: chips, effectiveDate: effective };
-  }, [linkedPlan, selectedDate, today]);
+  const { scheduledSet, scheduledSorted, assignmentByDate, dayChips, effectiveDate } =
+    useMemo(() => {
+      const set = new Set<string>();
+      const byDate = new Map<string, ScheduleEntry>();
+      for (const e of linkedPlan?.schedule ?? []) {
+        if (!e.date) continue;
+        const d = toDateOnly(e.date);
+        set.add(d);
+        if (!byDate.has(d)) byDate.set(d, e);
+      }
+      const sorted = Array.from(set).sort();
+      const chips = sorted.length ? buildDayChips(sorted[0], sorted[sorted.length - 1], today) : [];
+      let dflt = sorted.length ? sorted[0] : today;
+      if (sorted.length) {
+        const pastOrToday = sorted.filter((d) => d <= today);
+        dflt = pastOrToday.length ? pastOrToday[pastOrToday.length - 1] : sorted[0];
+      }
+      const effective = selectedDate && set.has(selectedDate) ? selectedDate : dflt;
+      return {
+        scheduledSet: set,
+        scheduledSorted: sorted,
+        assignmentByDate: byDate,
+        dayChips: chips,
+        effectiveDate: effective,
+      };
+    }, [linkedPlan, selectedDate, today]);
 
   // No active plan (no scheduled days) → attendance/evaluation can't be saved
   // until a plan is added, so the save controls are disabled.
@@ -426,7 +570,10 @@ export function TeacherTrackDetail() {
   // messages are ignored by modern browsers), but it does stop the leave.
   useEffect(() => {
     function onBeforeUnload(e: BeforeUnloadEvent) {
-      if (isDayEditDirty()) { e.preventDefault(); e.returnValue = ""; }
+      if (isDayEditDirty()) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
     }
     window.addEventListener("beforeunload", onBeforeUnload);
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
@@ -449,11 +596,18 @@ export function TeacherTrackDetail() {
     el?.scrollIntoView({ inline: "center", block: "nearest" });
   }, [effectiveDate, dayChips]);
 
-  const { data: savedForDay = [] } = useEvaluations(track ? { specialTrack: track._id, from: effectiveDate, to: effectiveDate } : undefined);
+  const { data: savedForDay = [] } = useEvaluations(
+    track ? { specialTrack: track._id, from: effectiveDate, to: effectiveDate } : undefined,
+  );
   const savedById: Record<string, StudentEval> = {};
   for (const r of savedForDay) {
     const id = typeof r.student === "string" ? r.student : r.student._id;
-    savedById[id] = { attendanceStatus: r.attendanceStatus, hifz: r.scores.hifz, tajweed: r.scores.tajweed, talawah: r.scores.talawah };
+    savedById[id] = {
+      attendanceStatus: r.attendanceStatus,
+      hifz: r.scores.hifz,
+      tajweed: r.scores.tajweed,
+      talawah: r.scores.talawah,
+    };
   }
   const bulkEvaluate = useBulkEvaluate();
 
@@ -474,12 +628,19 @@ export function TeacherTrackDetail() {
 
   const isFutureDay = effectiveDate > today;
 
-  const evalFor = (studentId: string): StudentEval => overrides[studentId] ?? savedById[studentId] ?? blankEval();
+  const evalFor = (studentId: string): StudentEval =>
+    overrides[studentId] ?? savedById[studentId] ?? blankEval();
   function setAttendance(studentId: string, status: "حاضر" | "غائب") {
-    setOverrides((prev) => ({ ...prev, [studentId]: { ...evalFor(studentId), attendanceStatus: status } }));
+    setOverrides((prev) => ({
+      ...prev,
+      [studentId]: { ...evalFor(studentId), attendanceStatus: status },
+    }));
   }
   function setScore(studentId: string, category: ScoreCategory, value: number) {
-    setOverrides((prev) => ({ ...prev, [studentId]: { ...evalFor(studentId), [category]: value } }));
+    setOverrides((prev) => ({
+      ...prev,
+      [studentId]: { ...evalFor(studentId), [category]: value },
+    }));
   }
   function toggleStudent(studentId: string) {
     setExpandedStudentId((cur) => (cur === studentId ? null : studentId));
@@ -494,7 +655,9 @@ export function TeacherTrackDetail() {
     return isReversedSchedule(progressByStudentId[studentId]?.effectiveSchedule) ?? rangeReversed;
   }
   function completedPointFor(studentId: string, forAssignment: ScheduleEntry): RangePoint {
-    return completionOverrides[studentId] ?? dayFinishPoint(forAssignment, reversedForStudent(studentId));
+    return (
+      completionOverrides[studentId] ?? dayFinishPoint(forAssignment, reversedForStudent(studentId))
+    );
   }
   function setCompletedPoint(studentId: string, point: RangePoint) {
     setCompletionOverrides((prev) => ({ ...prev, [studentId]: point }));
@@ -505,13 +668,18 @@ export function TeacherTrackDetail() {
    * recite past today's ward into the following days, but never past the plan
    * itself. Both bounds are read in the plan's own direction, then applied
    * low→high the way slices are always stored. */
-  function clampReached(point: RangePoint, assignment: ScheduleEntry, studentId: string): RangePoint {
+  function clampReached(
+    point: RangePoint,
+    assignment: ScheduleEntry,
+    studentId: string,
+  ): RangePoint {
     const reversed = reversedForStudent(studentId);
     const dayStart = reversed
       ? { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd }
       : { surahNumber: assignment.surahStart, ayah: assignment.ayahStart };
-    const finish = planFinishPoint(progressByStudentId[studentId]?.effectiveSchedule ?? [], reversed)
-      ?? dayFinishPoint(assignment, reversed);
+    const finish =
+      planFinishPoint(progressByStudentId[studentId]?.effectiveSchedule ?? [], reversed) ??
+      dayFinishPoint(assignment, reversed);
     const loFlat = Math.min(toFlatIndex(dayStart), toFlatIndex(finish));
     const hiFlat = Math.max(toFlatIndex(dayStart), toFlatIndex(finish));
     return fromFlatIndex(Math.max(loFlat, Math.min(hiFlat, toFlatIndex(point))));
@@ -528,75 +696,96 @@ export function TeacherTrackDetail() {
   function saveStudent(studentId: string, studentName: string) {
     if (!track || isFutureDay) return;
     const e = evalFor(studentId);
-    const records: BulkEvaluateRecord[] = [{
-      student: studentId,
-      attendanceStatus: e.attendanceStatus,
-      hifz: e.hifz,
-      tajweed: e.tajweed,
-      talawah: e.talawah,
-    }];
+    const records: BulkEvaluateRecord[] = [
+      {
+        student: studentId,
+        attendanceStatus: e.attendanceStatus,
+        hifz: e.hifz,
+        tajweed: e.tajweed,
+        talawah: e.talawah,
+      },
+    ];
     setLastSavedId(studentId);
     const toastId = toast.loading("جاري حفظ الحضور والتقييم...");
-    bulkEvaluate.mutate({ teacher: teacherId!, specialTrack: track._id, date: effectiveDate, records }, {
-      onSuccess: () => {
-        // Feed the day's outcome into the student's individual plan overlay so
-        // an absence or a partial completion gets redistributed across their
-        // remaining days — only meaningful when there's an assigned portion.
-        const studentAssignment = linkedPlan && planCoversStudent(linkedPlan, studentId) ? assignmentForStudent(studentId) : undefined;
-        if (!linkedPlan || !studentAssignment) {
-          toast.success("تم الحفظ بنجاح", { id: toastId });
-          return;
-        }
-        const completedPoint = completedPointFor(studentId, studentAssignment);
-        // Signed in the plan's own direction — for a reverse plan the undone part
-        // is the low side of the day's slice, not the high one. Negative = fell
-        // short of the day's ward, positive = recited past it.
-        const delta = dayDeltaAyahs(studentAssignment, reversedForStudent(studentId), completedPoint);
-        const status = e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
+    bulkEvaluate.mutate(
+      { teacher: teacherId!, specialTrack: track._id, date: effectiveDate, records },
+      {
+        onSuccess: () => {
+          // Feed the day's outcome into the student's individual plan overlay so
+          // an absence or a partial completion gets redistributed across their
+          // remaining days — only meaningful when there's an assigned portion.
+          const studentAssignment =
+            linkedPlan && planCoversStudent(linkedPlan, studentId)
+              ? assignmentForStudent(studentId)
+              : undefined;
+          if (!linkedPlan || !studentAssignment) {
+            toast.success("تم الحفظ بنجاح", { id: toastId });
+            return;
+          }
+          const completedPoint = completedPointFor(studentId, studentAssignment);
+          // Signed in the plan's own direction — for a reverse plan the undone part
+          // is the low side of the day's slice, not the high one. Negative = fell
+          // short of the day's ward, positive = recited past it.
+          const delta = dayDeltaAyahs(
+            studentAssignment,
+            reversedForStudent(studentId),
+            completedPoint,
+          );
+          const status = e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
 
-        if (status === "done" && delta === 0) {
-          toast.success("تم حفظ الحضور والتقييم بنجاح", { id: toastId });
-          recordOccurrence.mutate({ planId: linkedPlan._id, studentId, occurrenceIndex: studentAssignment.occurrenceIndex, status });
-          return;
-        }
+          if (status === "done" && delta === 0) {
+            toast.success("تم حفظ الحضور والتقييم بنجاح", { id: toastId });
+            recordOccurrence.mutate({
+              planId: linkedPlan._id,
+              studentId,
+              occurrenceIndex: studentAssignment.occurrenceIndex,
+              status,
+            });
+            return;
+          }
 
-        toast.loading(
-          status === "absent"
-            ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
+          toast.loading(
+            status === "absent"
+              ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
               : delta > 0
                 ? `جاري تعديل باقي أيام خطة ${studentName} بعد التسميع الإضافي...`
                 : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`,
-          { id: toastId },
-        );
-        recordOccurrence.mutate(
-          {
-            planId: linkedPlan._id, studentId, occurrenceIndex: studentAssignment.occurrenceIndex,
-            status,
-            // Sent for an over-achievement too (status "done"), so the server can
-            // take the surplus off the student's remaining days.
-            completedThroughSurah: status === "absent" ? undefined : completedPoint.surahNumber,
-            completedThroughAyah: status === "absent" ? undefined : completedPoint.ayah,
-          },
-          {
-            onSuccess: (res) => {
-              toast.success(
-                status === "absent"
-                  ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
+            { id: toastId },
+          );
+          recordOccurrence.mutate(
+            {
+              planId: linkedPlan._id,
+              studentId,
+              occurrenceIndex: studentAssignment.occurrenceIndex,
+              status,
+              // Sent for an over-achievement too (status "done"), so the server can
+              // take the surplus off the student's remaining days.
+              completedThroughSurah: status === "absent" ? undefined : completedPoint.surahNumber,
+              completedThroughAyah: status === "absent" ? undefined : completedPoint.ayah,
+            },
+            {
+              onSuccess: (res) => {
+                toast.success(
+                  status === "absent"
+                    ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
                     : delta > 0
                       ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
                       : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`,
-                { id: toastId },
-              );
-              if (res.data.overflowPages > 0) {
-                toast.warning(`لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`);
-              }
+                  { id: toastId },
+                );
+                if (res.data.overflowPages > 0) {
+                  toast.warning(
+                    `لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`,
+                  );
+                }
+              },
+              onError: (err) => toast.error((err as Error).message, { id: toastId }),
             },
-            onError: (err) => toast.error((err as Error).message, { id: toastId }),
-          },
-        );
+          );
+        },
+        onError: (err) => toast.error((err as Error).message, { id: toastId }),
       },
-      onError: (err) => toast.error((err as Error).message, { id: toastId }),
-    });
+    );
   }
 
   function togglePlanPanel(studentId: string) {
@@ -618,7 +807,10 @@ export function TeacherTrackDetail() {
   }
   function editLinkedPlan() {
     if (!linkedPlan) return;
-    sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "edit", plan: linkedPlan }));
+    sessionStorage.setItem(
+      PLAN_FORM_HANDOFF_KEY,
+      JSON.stringify({ mode: "edit", plan: linkedPlan }),
+    );
     showPage("planform");
   }
   // Plans are halqa-based: open the plan form pre-selected on this student's
@@ -634,11 +826,21 @@ export function TeacherTrackDetail() {
     "ti-calendar-event",
     track?.title ?? "تفاصيل المسار",
     <div style={{ display: "flex", gap: 8 }}>
-      <button className="topbar-btn btn-ghost" onClick={() => { if (guardDiscardDayEdit()) showPage("specialtracks"); }}>
+      <button
+        className="topbar-btn btn-ghost"
+        onClick={() => {
+          if (guardDiscardDayEdit()) showPage("specialtracks");
+        }}
+      >
         <i className="ti ti-arrow-right" /> المسارات
       </button>
       {track && (
-        <button className="topbar-btn btn-primary" onClick={() => { if (guardDiscardDayEdit()) takeAttendance(); }}>
+        <button
+          className="topbar-btn btn-primary"
+          onClick={() => {
+            if (guardDiscardDayEdit()) takeAttendance();
+          }}
+        >
           <i className="ti ti-calendar-check" /> تسجيل الحضور
         </button>
       )}
@@ -646,7 +848,11 @@ export function TeacherTrackDetail() {
   );
 
   if (!trackId) {
-    return <Alert tone="warning">لم يتم تحديد مسار. عد إلى صفحة المسارات واختر مساراً لعرض تفاصيله.</Alert>;
+    return (
+      <Alert tone="warning">
+        لم يتم تحديد مسار. عد إلى صفحة المسارات واختر مساراً لعرض تفاصيله.
+      </Alert>
+    );
   }
   if (loadingTracks) return <SkeletonCard lines={4} />;
   if (!track) return <Alert tone="danger">هذا المسار غير موجود أو لم تعد مُسنَداً إليه.</Alert>;
@@ -659,23 +865,57 @@ export function TeacherTrackDetail() {
   // the shared plan schedule (assignmentByDate) for anyone with no individual
   // overlay yet, matching the API's own graceful-degradation behavior.
   function assignmentForStudent(studentId: string): ScheduleEntry | undefined {
-    const perStudent = progressByStudentId[studentId]?.effectiveSchedule.find((o) => toDateOnly(o.date) === effectiveDate);
+    const perStudent = progressByStudentId[studentId]?.effectiveSchedule.find(
+      (o) => toDateOnly(o.date) === effectiveDate,
+    );
     return perStudent ?? assignmentByDate.get(effectiveDate);
   }
 
   return (
     <>
-      <Card icon="ti-calendar-event" title={track.title} headerExtra={<Badge tone={cfg.tone}>{cfg.label}</Badge>}>
+      <Card
+        icon="ti-calendar-event"
+        title={track.title}
+        headerExtra={<Badge tone={cfg.tone}>{cfg.label}</Badge>}
+      >
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-          <span style={{ fontSize: 11, background: "var(--cream)", color: "var(--text2)", borderRadius: 6, padding: "2px 8px" }}>{track.type}</span>
+          <span
+            style={{
+              fontSize: 11,
+              background: "var(--cream)",
+              color: "var(--text2)",
+              borderRadius: 6,
+              padding: "2px 8px",
+            }}
+          >
+            {track.type}
+          </span>
           {track.isOnline && (
-            <span style={{ fontSize: 11, background: "#eff6ff", color: "#1d4ed8", borderRadius: 6, padding: "2px 8px" }}>
-              <i className="ti ti-wifi" style={{ marginLeft: 3 }} />أونلاين
+            <span
+              style={{
+                fontSize: 11,
+                background: "#eff6ff",
+                color: "#1d4ed8",
+                borderRadius: 6,
+                padding: "2px 8px",
+              }}
+            >
+              <i className="ti ti-wifi" style={{ marginLeft: 3 }} />
+              أونلاين
             </span>
           )}
         </div>
 
-        <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 14px", fontSize: 12, marginBottom: track.isOnline && track.meetLink ? 14 : 0 }}>
+        <div
+          className="grid-collapse"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "8px 14px",
+            fontSize: 12,
+            marginBottom: track.isOnline && track.meetLink ? 14 : 0,
+          }}
+        >
           {[
             { icon: "ti-clock", label: "الوقت", val: track.timeSlot },
             { icon: "ti-calendar-repeat", label: "الأيام", val: track.daysPerWeek },
@@ -683,44 +923,113 @@ export function TeacherTrackDetail() {
             { icon: "ti-calendar-off", label: "النهاية", val: fmtTrackDate(track.endDate) },
           ].map(({ icon, label, val }) => (
             <div key={label} style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
-              <i className={`ti ${icon}`} style={{ color: "var(--green)", marginTop: 1, flexShrink: 0 }} />
+              <i
+                className={`ti ${icon}`}
+                style={{ color: "var(--green)", marginTop: 1, flexShrink: 0 }}
+              />
               <div>
                 <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>{label}</div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text)", marginTop: 1 }}>{val}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text)", marginTop: 1 }}>
+                  {val}
+                </div>
               </div>
             </div>
           ))}
           <div style={{ display: "flex", alignItems: "flex-start", gap: 6, gridColumn: "1 / -1" }}>
-            <i className={`ti ${track.isOnline ? "ti-video" : "ti-map-pin"}`} style={{ color: "var(--green)", marginTop: 1, flexShrink: 0 }} />
+            <i
+              className={`ti ${track.isOnline ? "ti-video" : "ti-map-pin"}`}
+              style={{ color: "var(--green)", marginTop: 1, flexShrink: 0 }}
+            />
             <div>
               <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>المكان</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text)", marginTop: 1 }}>{track.isOnline ? "أونلاين" : track.location}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text)", marginTop: 1 }}>
+                {track.isOnline ? "أونلاين" : track.location}
+              </div>
             </div>
           </div>
         </div>
 
         {track.isOnline && track.meetLink && (
-          <a href={track.meetLink} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "#1d4ed8", background: "#eff6ff", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(29,78,216,0.2)", textDecoration: "none", fontWeight: 600 }}>
+          <a
+            href={track.meetLink}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 12,
+              color: "#1d4ed8",
+              background: "#eff6ff",
+              padding: "6px 12px",
+              borderRadius: 8,
+              border: "1px solid rgba(29,78,216,0.2)",
+              textDecoration: "none",
+              fontWeight: 600,
+            }}
+          >
             <i className="ti ti-video" /> انضم للجلسة
           </a>
         )}
       </Card>
 
       <div style={{ margin: "14px 0" }}>
-        <ScopeTabs options={TABS} value={tab} onChange={(v) => { if (guardDiscardDayEdit()) setTab(v as TabKey); }} />
+        <ScopeTabs
+          options={TABS}
+          value={tab}
+          onChange={(v) => {
+            if (guardDiscardDayEdit()) setTab(v as TabKey);
+          }}
+        />
       </div>
 
       {tab === "teachers" && (
-        <Card icon="ti-users-group" title="المعلمون" headerExtra={<span style={{ fontSize: 12, color: "var(--text2)" }}>{track.teachers.length} معلم</span>}>
+        <Card
+          icon="ti-users-group"
+          title="المعلمون"
+          headerExtra={
+            <span style={{ fontSize: 12, color: "var(--text2)" }}>
+              {track.teachers.length} معلم
+            </span>
+          }
+        >
           {track.teachers.length === 0 ? (
-            <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>لا يوجد معلمون مُسنَدون لهذا المسار</div>
+            <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+              لا يوجد معلمون مُسنَدون لهذا المسار
+            </div>
           ) : (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {track.teachers.map((tc, i) => {
                 const c = AV[i % AV.length];
                 return (
-                  <div key={getTeacherName(tc) + i} style={{ display: "flex", alignItems: "center", gap: 8, background: c.bg, color: c.fg, borderRadius: 99, padding: "6px 14px 6px 6px", fontSize: 13, fontWeight: 700 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: c.fg, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800 }}>
+                  <div
+                    key={getTeacherName(tc) + i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      background: c.bg,
+                      color: c.fg,
+                      borderRadius: 99,
+                      padding: "6px 14px 6px 6px",
+                      fontSize: 13,
+                      fontWeight: 700,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: "50%",
+                        background: c.fg,
+                        color: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 11,
+                        fontWeight: 800,
+                      }}
+                    >
                       {avatarInitials(getTeacherName(tc))}
                     </div>
                     {getTeacherName(tc)}
@@ -738,9 +1047,32 @@ export function TeacherTrackDetail() {
 
       {tab === "students" && (
         <>
-          <Card icon="ti-user-check" title="عدد الطلاب" headerExtra={<span style={{ fontSize: 12, fontWeight: 700, color: barClr }}>{enrolled} / {track.maxStudents}</span>}>
-            <div style={{ height: 6, background: "var(--border)", borderRadius: 99, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${pct}%`, background: barClr, borderRadius: 99, transition: "width .4s" }} />
+          <Card
+            icon="ti-user-check"
+            title="عدد الطلاب"
+            headerExtra={
+              <span style={{ fontSize: 12, fontWeight: 700, color: barClr }}>
+                {enrolled} / {track.maxStudents}
+              </span>
+            }
+          >
+            <div
+              style={{
+                height: 6,
+                background: "var(--border)",
+                borderRadius: 99,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  width: `${pct}%`,
+                  background: barClr,
+                  borderRadius: 99,
+                  transition: "width .4s",
+                }}
+              />
             </div>
             <p style={{ margin: "12px 0 0", fontSize: 11, color: "var(--text3)" }}>
               <i className="ti ti-info-circle" style={{ marginLeft: 4 }} />
@@ -776,7 +1108,9 @@ export function TeacherTrackDetail() {
                       className={`day-chip ${isSel ? "active" : ""} ${d.isToday ? "is-today" : ""} ${!enabled ? "not-planned" : ""}`}
                       onClick={() => {
                         if (!enabled) {
-                          setDayNotice(`${fmtDayLabel(d.iso)} — هذا اليوم غير مشمول بخطة الحفظ الحالية`);
+                          setDayNotice(
+                            `${fmtDayLabel(d.iso)} — هذا اليوم غير مشمول بخطة الحفظ الحالية`,
+                          );
                           return;
                         }
                         setDayNotice(null);
@@ -796,7 +1130,8 @@ export function TeacherTrackDetail() {
                 className="day-slider-arrow"
                 onClick={() => {
                   const i = scheduledSorted.indexOf(effectiveDate);
-                  if (i >= 0 && i < scheduledSorted.length - 1) setSelectedDate(scheduledSorted[i + 1]);
+                  if (i >= 0 && i < scheduledSorted.length - 1)
+                    setSelectedDate(scheduledSorted[i + 1]);
                 }}
                 disabled={scheduledSorted.indexOf(effectiveDate) >= scheduledSorted.length - 1}
                 aria-label="اليوم التالي"
@@ -806,12 +1141,16 @@ export function TeacherTrackDetail() {
             </div>
           )}
 
-          {dayNotice && <Alert tone="warning" icon="ti-calendar-off">{dayNotice}</Alert>}
+          {dayNotice && (
+            <Alert tone="warning" icon="ti-calendar-off">
+              {dayNotice}
+            </Alert>
+          )}
 
           {scheduledSorted.length === 0 && (
             <Alert tone="warning">
-              لا يوجد خطة حفظ نشطة لهذا المسار — لا يمكن تسجيل الحضور والتقييم قبل إضافة خطة.
-              أضف خطة من تبويب "الخطة" أولاً لتفعيل التسجيل والتقويم.
+              لا يوجد خطة حفظ نشطة لهذا المسار — لا يمكن تسجيل الحضور والتقييم قبل إضافة خطة. أضف
+              خطة من تبويب "الخطة" أولاً لتفعيل التسجيل والتقويم.
             </Alert>
           )}
 
@@ -821,9 +1160,19 @@ export function TeacherTrackDetail() {
             </Alert>
           )}
 
-          <Card icon="ti-users" title="طلاب المسار" headerExtra={<span style={{ fontSize: 12, color: "var(--text2)" }}>{fmtDayLabel(effectiveDate)}</span>}>
+          <Card
+            icon="ti-users"
+            title="طلاب المسار"
+            headerExtra={
+              <span style={{ fontSize: 12, color: "var(--text2)" }}>
+                {fmtDayLabel(effectiveDate)}
+              </span>
+            }
+          >
             {enrolled === 0 ? (
-              <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>لا يوجد طلاب مسجّلون بعد</div>
+              <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                لا يوجد طلاب مسجّلون بعد
+              </div>
             ) : (
               <div className="att-list">
                 {roster.map((s) => {
@@ -838,8 +1187,15 @@ export function TeacherTrackDetail() {
                   const hasIndividualPlan = !!linkedPlan && planCoversStudent(linkedPlan, id);
                   const assignment = hasIndividualPlan ? assignmentForStudent(id) : undefined;
                   return (
-                    <div key={id} className={`att-row ${isAbsent && isExpanded ? "is-absent" : ""}`}>
-                      <div className="att-row-top" style={{ cursor: "pointer" }} onClick={() => toggleStudent(id)}>
+                    <div
+                      key={id}
+                      className={`att-row ${isAbsent && isExpanded ? "is-absent" : ""}`}
+                    >
+                      <div
+                        className="att-row-top"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => toggleStudent(id)}
+                      >
                         <div className="att-avatar">{avatarInitials(name)}</div>
                         <div className="att-info">
                           <div className="att-name">{name}</div>
@@ -853,7 +1209,10 @@ export function TeacherTrackDetail() {
                           type="button"
                           className="topbar-btn btn-ghost"
                           style={{ padding: "6px 10px" }}
-                          onClick={(ev) => { ev.stopPropagation(); toggleStudent(id); }}
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            toggleStudent(id);
+                          }}
                           aria-label={isExpanded ? "طي" : "توسيع"}
                         >
                           <i className={`ti ${isExpanded ? "ti-chevron-up" : "ti-chevron-down"}`} />
@@ -862,41 +1221,54 @@ export function TeacherTrackDetail() {
 
                       {isExpanded && (
                         <div style={{ padding: "10px 2px 4px" }}>
-                          {assignment ? (() => {
-                            const reversed = reversedForStudent(id);
-                            const a = orientSlice(assignment, reversed);
-                            return (
-                            <div className="assignment-banner" style={{ marginBottom: 10 }}>
-                              <div className="assignment-icon">
-                                <i className="ti ti-book-2" />
-                              </div>
-                              <div className="assignment-body">
-                                <div className="assignment-label">
-                                  <i className="ti ti-clipboard-text" /> الورد المقرر
-                                  {reversed && <span style={{ fontWeight: 400, color: "var(--text3)" }}> · بالعكس</span>}
+                          {assignment ? (
+                            (() => {
+                              const reversed = reversedForStudent(id);
+                              const a = orientSlice(assignment, reversed);
+                              return (
+                                <div className="assignment-banner" style={{ marginBottom: 10 }}>
+                                  <div className="assignment-icon">
+                                    <i className="ti ti-book-2" />
+                                  </div>
+                                  <div className="assignment-body">
+                                    <div className="assignment-label">
+                                      <i className="ti ti-clipboard-text" /> الورد المقرر
+                                      {reversed && (
+                                        <span style={{ fontWeight: 400, color: "var(--text3)" }}>
+                                          {" "}
+                                          · بالعكس
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="assignment-range">
+                                      <span>
+                                        {surahName(a.surahStart)} : {toAr(a.ayahStart)}
+                                      </span>
+                                      <i className="ti ti-arrow-left assignment-arrow" />
+                                      <span>
+                                        {surahName(a.surahEnd)} : {toAr(a.ayahEnd)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="assignment-meta">
+                                    <span className="assignment-pill">
+                                      <i className="ti ti-file-text" />
+                                      {a.pageEnd !== a.pageStart
+                                        ? `من صفحة ${toAr(a.pageStart)} إلى صفحة ${toAr(a.pageEnd)}`
+                                        : `صفحة ${toAr(a.pageStart)}`}
+                                    </span>
+                                    <span className="assignment-pill">
+                                      <i className="ti ti-bookmark" />
+                                      الجزء {toAr(assignment.juz)}
+                                    </span>
+                                  </div>
                                 </div>
-                                <div className="assignment-range">
-                                  <span>{surahName(a.surahStart)} : {toAr(a.ayahStart)}</span>
-                                  <i className="ti ti-arrow-left assignment-arrow" />
-                                  <span>{surahName(a.surahEnd)} : {toAr(a.ayahEnd)}</span>
-                                </div>
-                              </div>
-                              <div className="assignment-meta">
-                                <span className="assignment-pill">
-                                  <i className="ti ti-file-text" />
-                                  {a.pageEnd !== a.pageStart
-                                    ? `من صفحة ${toAr(a.pageStart)} إلى صفحة ${toAr(a.pageEnd)}`
-                                    : `صفحة ${toAr(a.pageStart)}`}
-                                </span>
-                                <span className="assignment-pill">
-                                  <i className="ti ti-bookmark" />
-                                  الجزء {toAr(assignment.juz)}
-                                </span>
-                              </div>
+                              );
+                            })()
+                          ) : (
+                            <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10 }}>
+                              لا يوجد جزء مخصص لهذا اليوم
                             </div>
-                            );
-                          })() : (
-                            <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10 }}>لا يوجد جزء مخصص لهذا اليوم</div>
                           )}
 
                           {hasSaved && !isUnlocked && !isFutureDay && (
@@ -905,83 +1277,166 @@ export function TeacherTrackDetail() {
                             </Alert>
                           )}
 
-                          <div className="att-toggle" style={{ display: "inline-flex", marginBottom: 10 }}>
-                            <button type="button" disabled={controlsLocked} className={!isAbsent ? "active present" : ""} onClick={() => setAttendance(id, "حاضر")}>
+                          <div
+                            className="att-toggle"
+                            style={{ display: "inline-flex", marginBottom: 10 }}
+                          >
+                            <button
+                              type="button"
+                              disabled={controlsLocked}
+                              className={!isAbsent ? "active present" : ""}
+                              onClick={() => setAttendance(id, "حاضر")}
+                            >
                               <i className="ti ti-check" /> حاضر
                             </button>
-                            <button type="button" disabled={controlsLocked} className={isAbsent ? "active absent" : ""} onClick={() => setAttendance(id, "غائب")}>
+                            <button
+                              type="button"
+                              disabled={controlsLocked}
+                              className={isAbsent ? "active absent" : ""}
+                              onClick={() => setAttendance(id, "غائب")}
+                            >
                               <i className="ti ti-x" /> غائب
                             </button>
                           </div>
 
-                          {!isAbsent && assignment && (() => {
-                            // "وصل إلى" and the leftover are both measured in the plan's
-                            // own direction: a reverse day is worked from its high end
-                            // down, so it's complete once the student reaches its low end.
-                            const reversedHere = reversedForStudent(id);
-                            const actualPoint = completedPointFor(id, assignment);
-                            const delta = dayDeltaAyahs(assignment, reversedHere, actualPoint);
-                            const isFull = delta === 0;
-                            return (
-                              <div style={{ border: "1px dashed var(--border)", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
-                                <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text2)", display: "block", marginBottom: 6 }}>
-                                  <i className="ti ti-bookmark" style={{ marginLeft: 4, color: "var(--green)" }} /> الورد الفعلي — السورة والآية التي وصل إليها الطالب
-                                </label>
-                                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                                  <CompactSurahAyah
-                                    value={actualPoint} disabled={controlsLocked}
-                                    bounds={reachedBounds(assignment, id)}
-                                    onChange={(v) => setCompletedPoint(id, clampReached(v, assignment, id))}
-                                  />
-                                  <span style={{ fontSize: 11, color: "var(--text3)" }}>
-                                    {reversedHere
-                                      ? <>من {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)} إلى {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)}</>
-                                      : <>من {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)} إلى {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}</>
-                                    }
-                                  </span>
-                                  {!isFull && !controlsLocked && (
-                                    <button
-                                      type="button"
-                                      className="topbar-btn btn-ghost"
-                                      style={{ fontSize: 11, padding: "4px 10px" }}
-                                      onClick={() => setCompletedPoint(id, dayFinishPoint(assignment, reversedHere))}
-                                    >
-                                      الورد كامل
-                                    </button>
-                                  )}
+                          {!isAbsent &&
+                            assignment &&
+                            (() => {
+                              // "وصل إلى" and the leftover are both measured in the plan's
+                              // own direction: a reverse day is worked from its high end
+                              // down, so it's complete once the student reaches its low end.
+                              const reversedHere = reversedForStudent(id);
+                              const actualPoint = completedPointFor(id, assignment);
+                              const delta = dayDeltaAyahs(assignment, reversedHere, actualPoint);
+                              const isFull = delta === 0;
+                              return (
+                                <div
+                                  style={{
+                                    border: "1px dashed var(--border)",
+                                    borderRadius: 10,
+                                    padding: "10px 12px",
+                                    marginBottom: 10,
+                                  }}
+                                >
+                                  <label
+                                    style={{
+                                      fontSize: 11,
+                                      fontWeight: 700,
+                                      color: "var(--text2)",
+                                      display: "block",
+                                      marginBottom: 6,
+                                    }}
+                                  >
+                                    <i
+                                      className="ti ti-bookmark"
+                                      style={{ marginLeft: 4, color: "var(--green)" }}
+                                    />{" "}
+                                    الورد الفعلي — السورة والآية التي وصل إليها الطالب
+                                  </label>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 8,
+                                      flexWrap: "wrap",
+                                    }}
+                                  >
+                                    <CompactSurahAyah
+                                      value={actualPoint}
+                                      disabled={controlsLocked}
+                                      bounds={reachedBounds(assignment, id)}
+                                      onChange={(v) =>
+                                        setCompletedPoint(id, clampReached(v, assignment, id))
+                                      }
+                                    />
+                                    <span style={{ fontSize: 11, color: "var(--text3)" }}>
+                                      {reversedHere ? (
+                                        <>
+                                          من {surahName(assignment.surahEnd)} :{" "}
+                                          {toAr(assignment.ayahEnd)} إلى{" "}
+                                          {surahName(assignment.surahStart)} :{" "}
+                                          {toAr(assignment.ayahStart)}
+                                        </>
+                                      ) : (
+                                        <>
+                                          من {surahName(assignment.surahStart)} :{" "}
+                                          {toAr(assignment.ayahStart)} إلى{" "}
+                                          {surahName(assignment.surahEnd)} :{" "}
+                                          {toAr(assignment.ayahEnd)}
+                                        </>
+                                      )}
+                                    </span>
+                                    {!isFull && !controlsLocked && (
+                                      <button
+                                        type="button"
+                                        className="topbar-btn btn-ghost"
+                                        style={{ fontSize: 11, padding: "4px 10px" }}
+                                        onClick={() =>
+                                          setCompletedPoint(
+                                            id,
+                                            dayFinishPoint(assignment, reversedHere),
+                                          )
+                                        }
+                                      >
+                                        الورد كامل
+                                      </button>
+                                    )}
+                                  </div>
+                                  <div
+                                    style={{
+                                      fontSize: 11,
+                                      marginTop: 6,
+                                      color: isFull || delta > 0 ? "var(--green)" : "#b45309",
+                                    }}
+                                  >
+                                    {isFull ? (
+                                      <>
+                                        <i className="ti ti-check" style={{ marginLeft: 3 }} />
+                                        سيُسجَّل كمكتمل
+                                      </>
+                                    ) : delta > 0 ? (
+                                      <>
+                                        <i className="ti ti-arrow-down" style={{ marginLeft: 3 }} />
+                                        سمّع {toAr(delta)} آية إضافية — سيتم خصمها من باقي أيام خطته
+                                      </>
+                                    ) : (
+                                      <>
+                                        <i
+                                          className="ti ti-arrow-forward-up"
+                                          style={{ marginLeft: 3 }}
+                                        />
+                                        سيتم تعويض {toAr(-delta)} آية في باقي أيام خطته
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
-                                <div style={{ fontSize: 11, marginTop: 6, color: isFull || delta > 0 ? "var(--green)" : "#b45309" }}>
-                                  {isFull
-                                    ? <><i className="ti ti-check" style={{ marginLeft: 3 }} />سيُسجَّل كمكتمل</>
-                                    : delta > 0
-                                      ? <><i className="ti ti-arrow-down" style={{ marginLeft: 3 }} />سمّع {toAr(delta)} آية إضافية — سيتم خصمها من باقي أيام خطته</>
-                                      : <><i className="ti ti-arrow-forward-up" style={{ marginLeft: 3 }} />سيتم تعويض {toAr(-delta)} آية في باقي أيام خطته</>
-                                  }
-                                </div>
-                              </div>
-                            );
-                          })()}
+                              );
+                            })()}
 
                           <div className="eval-scores">
                             {(["hifz", "tajweed", "talawah"] as ScoreCategory[]).map((cat) => (
                               <div key={cat} className="eval-cat">
                                 <span className="eval-cat-label">{CATEGORY_LABELS[cat]}</span>
                                 <div className="eval-chip-group">
-                                  {Array.from({ length: MAX_SCORES[cat] + 1 }, (_, n) => n).map((n) => (
-                                    <button
-                                      key={n}
-                                      type="button"
-                                      className={`eval-chip ${!isAbsent && e[cat] === n ? "active" : ""}`}
-                                      disabled={isAbsent || controlsLocked}
-                                      onClick={() => setScore(id, cat, n)}
-                                    >
-                                      {toAr(n)}
-                                    </button>
-                                  ))}
+                                  {Array.from({ length: MAX_SCORES[cat] + 1 }, (_, n) => n).map(
+                                    (n) => (
+                                      <button
+                                        key={n}
+                                        type="button"
+                                        className={`eval-chip ${!isAbsent && e[cat] === n ? "active" : ""}`}
+                                        disabled={isAbsent || controlsLocked}
+                                        onClick={() => setScore(id, cat, n)}
+                                      >
+                                        {toAr(n)}
+                                      </button>
+                                    ),
+                                  )}
                                 </div>
                               </div>
                             ))}
-                            <span className={`eval-total ${totalOf(e) === 0 ? "zero" : ""}`}>{toAr(totalOf(e))}/{toAr(TOTAL_MAX)}</span>
+                            <span className={`eval-total ${totalOf(e) === 0 ? "zero" : ""}`}>
+                              {toAr(totalOf(e))}/{toAr(TOTAL_MAX)}
+                            </span>
                           </div>
 
                           {hasIndividualPlan && (
@@ -989,49 +1444,100 @@ export function TeacherTrackDetail() {
                               type="button"
                               className="topbar-btn btn-ghost"
                               style={{ fontSize: 11, padding: "5px 10px", marginBottom: 4 }}
-                              onClick={(ev) => { ev.stopPropagation(); togglePlanPanel(id); }}
+                              onClick={(ev) => {
+                                ev.stopPropagation();
+                                togglePlanPanel(id);
+                              }}
                             >
-                              {planPanelStudentId === id
-                                ? <><i className="ti ti-chevron-up" /> إخفاء الخطة الفردية</>
-                                : progressByStudentId[id]?.progressIsPersisted
-                                  ? <><i className="ti ti-list-details" /> عرض الخطة الفردية</>
-                                  : <><i className="ti ti-plus" /> أنشئ خطة فردية</>
-                              }
+                              {planPanelStudentId === id ? (
+                                <>
+                                  <i className="ti ti-chevron-up" /> إخفاء الخطة الفردية
+                                </>
+                              ) : progressByStudentId[id]?.progressIsPersisted ? (
+                                <>
+                                  <i className="ti ti-list-details" /> عرض الخطة الفردية
+                                </>
+                              ) : (
+                                <>
+                                  <i className="ti ti-plus" /> أنشئ خطة فردية
+                                </>
+                              )}
                             </button>
                           )}
 
                           {hasIndividualPlan && linkedPlan && planPanelStudentId === id && (
-                            <IndividualPlanPanel planId={linkedPlan._id} studentId={id} studentName={name} basePlan={linkedPlan} />
+                            <IndividualPlanPanel
+                              planId={linkedPlan._id}
+                              studentId={id}
+                              studentName={name}
+                              basePlan={linkedPlan}
+                            />
                           )}
 
                           {!hasIndividualPlan && (
                             <button
                               type="button"
                               className="topbar-btn btn-ghost"
-                              style={{ fontSize: 11, padding: "5px 10px", marginBottom: 4, color: "var(--green)", borderColor: "rgba(26,92,42,0.25)" }}
-                              onClick={(ev) => { ev.stopPropagation(); createPlanForStudent(id); }}
+                              style={{
+                                fontSize: 11,
+                                padding: "5px 10px",
+                                marginBottom: 4,
+                                color: "var(--green)",
+                                borderColor: "rgba(26,92,42,0.25)",
+                              }}
+                              onClick={(ev) => {
+                                ev.stopPropagation();
+                                createPlanForStudent(id);
+                              }}
                             >
                               <i className="ti ti-plus" /> أضف خطة للحلقة
                             </button>
                           )}
 
-                          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+                          <div
+                            style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}
+                          >
                             {isFutureDay ? (
-                              <button className="topbar-btn btn-ghost" style={{ padding: "8px 18px" }} disabled>
+                              <button
+                                className="topbar-btn btn-ghost"
+                                style={{ padding: "8px 18px" }}
+                                disabled
+                              >
                                 <i className="ti ti-clock" /> اليوم لم يحن بعد
                               </button>
                             ) : hasSaved && !isUnlocked ? (
-                              <button className="topbar-btn btn-ghost" style={{ padding: "8px 18px" }} onClick={() => unlockStudent(id)}>
+                              <button
+                                className="topbar-btn btn-ghost"
+                                style={{ padding: "8px 18px" }}
+                                onClick={() => unlockStudent(id)}
+                              >
                                 <i className="ti ti-edit" /> تعديل
                               </button>
                             ) : (
-                              <button className="topbar-btn btn-primary" style={{ padding: "8px 18px" }} onClick={() => saveStudent(id, name)} disabled={bulkEvaluate.isPending || noActivePlan} title={noActivePlan ? "أضف خطة أولاً لتفعيل الحفظ" : undefined}>
-                                {bulkEvaluate.isPending && lastSavedId === id
-                                  ? <><i className="ti ti-loader-2" style={{ animation: "spin 1s linear infinite" }} /> جارٍ الحفظ...</>
-                                  : isUnlocked
-                                    ? <><i className="ti ti-device-floppy" /> حفظ التعديلات</>
-                                    : <><i className="ti ti-device-floppy" /> حفظ لهذا الطالب</>
-                                }
+                              <button
+                                className="topbar-btn btn-primary"
+                                style={{ padding: "8px 18px" }}
+                                onClick={() => saveStudent(id, name)}
+                                disabled={bulkEvaluate.isPending || noActivePlan}
+                                title={noActivePlan ? "أضف خطة أولاً لتفعيل الحفظ" : undefined}
+                              >
+                                {bulkEvaluate.isPending && lastSavedId === id ? (
+                                  <>
+                                    <i
+                                      className="ti ti-loader-2"
+                                      style={{ animation: "spin 1s linear infinite" }}
+                                    />{" "}
+                                    جارٍ الحفظ...
+                                  </>
+                                ) : isUnlocked ? (
+                                  <>
+                                    <i className="ti ti-device-floppy" /> حفظ التعديلات
+                                  </>
+                                ) : (
+                                  <>
+                                    <i className="ti ti-device-floppy" /> حفظ لهذا الطالب
+                                  </>
+                                )}
                               </button>
                             )}
                           </div>
@@ -1047,36 +1553,69 @@ export function TeacherTrackDetail() {
       )}
 
       {tab === "plan" && (
-        <Card icon="ti-target" title="الخطة القرآنية" headerExtra={linkedPlan?.progress ? <Badge tone="green">{linkedPlan.progress.percent}%</Badge> : undefined}>
+        <Card
+          icon="ti-target"
+          title="الخطة القرآنية"
+          headerExtra={
+            linkedPlan?.progress ? (
+              <Badge tone="green">{linkedPlan.progress.percent}%</Badge>
+            ) : undefined
+          }
+        >
           {linkedPlan ? (
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>{linkedPlan.name}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>
+                {linkedPlan.name}
+              </div>
               {linkedPlan.progress && (
                 <div style={{ margin: "6px 0 12px" }}>
                   <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${linkedPlan.progress.percent}%` }} />
+                    <div
+                      className="progress-fill"
+                      style={{ width: `${linkedPlan.progress.percent}%` }}
+                    />
                   </div>
                   <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 4 }}>
-                    {linkedPlan.juzProgress ? `${linkedPlan.juzProgress.completed} / ${linkedPlan.juzProgress.total} جزء` : ""}
-                    {" · "}{linkedPlan.progress.completed} / {linkedPlan.progress.total} يوم
+                    {linkedPlan.juzProgress
+                      ? `${linkedPlan.juzProgress.completed} / ${linkedPlan.juzProgress.total} جزء`
+                      : ""}
+                    {" · "}
+                    {linkedPlan.progress.completed} / {linkedPlan.progress.total} يوم
                   </div>
                 </div>
               )}
-              <div style={{ borderRadius: 10, padding: "10px 12px", background: linkedPlan.todayAssignment ? "var(--green-pale)" : "var(--cream)", marginBottom: 14 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: linkedPlan.todayAssignment ? "var(--green)" : "var(--text3)", marginBottom: linkedPlan.todayAssignment ? 4 : 0 }}>
-                  <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />الجزء المطلوب اليوم
+              <div
+                style={{
+                  borderRadius: 10,
+                  padding: "10px 12px",
+                  background: linkedPlan.todayAssignment ? "var(--green-pale)" : "var(--cream)",
+                  marginBottom: 14,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: linkedPlan.todayAssignment ? "var(--green)" : "var(--text3)",
+                    marginBottom: linkedPlan.todayAssignment ? 4 : 0,
+                  }}
+                >
+                  <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />
+                  الجزء المطلوب اليوم
                 </div>
-                {linkedPlan.todayAssignment ? (() => {
-                  const a = orientSlice(linkedPlan.todayAssignment, rangeReversed);
-                  return (
-                  <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
-                    {surahName(a.surahStart)} : {a.ayahStart}
-                    {" — "}
-                    {surahName(a.surahEnd)} : {a.ayahEnd} (صفحة {a.pageStart}
-                    {a.pageEnd !== a.pageStart ? ` - ${a.pageEnd}` : ""})
-                  </div>
-                  );
-                })() : (
+                {linkedPlan.todayAssignment ? (
+                  (() => {
+                    const a = orientSlice(linkedPlan.todayAssignment, rangeReversed);
+                    return (
+                      <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
+                        {surahName(a.surahStart)} : {a.ayahStart}
+                        {" — "}
+                        {surahName(a.surahEnd)} : {a.ayahEnd} (صفحة {a.pageStart}
+                        {a.pageEnd !== a.pageStart ? ` - ${a.pageEnd}` : ""})
+                      </div>
+                    );
+                  })()
+                ) : (
                   <div style={{ fontSize: 11, color: "var(--text3)" }}>لا يوجد جزء مخصص لليوم</div>
                 )}
               </div>
@@ -1085,25 +1624,55 @@ export function TeacherTrackDetail() {
                   <i className="ti ti-pencil" /> تعديل الخطة
                 </button>
                 <button className="topbar-btn btn-ghost" onClick={() => togglePlanSection("link")}>
-                  <i className={`ti ${openPlanSection === "link" ? "ti-x" : "ti-refresh"}`} /> {openPlanSection === "link" ? "إلغاء" : "ربط خطة أخرى"}
+                  <i className={`ti ${openPlanSection === "link" ? "ti-x" : "ti-refresh"}`} />{" "}
+                  {openPlanSection === "link" ? "إلغاء" : "ربط خطة أخرى"}
                 </button>
                 {linkedPlan.schedule.length > 0 && (
                   <button className="topbar-btn btn-ghost" onClick={handleScheduleToggle}>
-                    <i className={`ti ${openPlanSection === "schedule" ? "ti-chevron-up" : "ti-calendar-stats"}`} /> {openPlanSection === "schedule" ? "إخفاء توزيع الأيام" : "عرض توزيع الأيام والصفحات"}
+                    <i
+                      className={`ti ${openPlanSection === "schedule" ? "ti-chevron-up" : "ti-calendar-stats"}`}
+                    />{" "}
+                    {openPlanSection === "schedule"
+                      ? "إخفاء توزيع الأيام"
+                      : "عرض توزيع الأيام والصفحات"}
                   </button>
                 )}
               </div>
 
               {openPlanSection === "schedule" && (
                 <div style={{ marginTop: 14 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      flexWrap: "wrap",
+                      gap: 8,
+                      marginBottom: 8,
+                    }}
+                  >
                     <span style={{ fontSize: 11, color: "var(--text3)" }}>
                       {generateSchedule.isPending ? (
-                        <><i className="ti ti-loader-2" style={{ animation: "spin 1s linear infinite", marginLeft: 4 }} />جارٍ حفظ التوزيع...</>
+                        <>
+                          <i
+                            className="ti ti-loader-2"
+                            style={{ animation: "spin 1s linear infinite", marginLeft: 4 }}
+                          />
+                          جارٍ حفظ التوزيع...
+                        </>
                       ) : linkedPlan.scheduleIsPersisted ? (
-                        <><i className="ti ti-database-check" style={{ marginLeft: 4, color: "var(--green)" }} />توزيع محفوظ في قاعدة البيانات</>
+                        <>
+                          <i
+                            className="ti ti-database-check"
+                            style={{ marginLeft: 4, color: "var(--green)" }}
+                          />
+                          توزيع محفوظ في قاعدة البيانات
+                        </>
                       ) : (
-                        <><i className="ti ti-refresh" style={{ marginLeft: 4 }} />توزيع محسوب مؤقتًا (غير محفوظ)</>
+                        <>
+                          <i className="ti ti-refresh" style={{ marginLeft: 4 }} />
+                          توزيع محسوب مؤقتًا (غير محفوظ)
+                        </>
                       )}
                     </span>
                     <button
@@ -1112,121 +1681,229 @@ export function TeacherTrackDetail() {
                       onClick={handleRegenerateSchedule}
                       disabled={generateSchedule.isPending}
                     >
-                      <i className="ti ti-device-floppy" /> {linkedPlan.scheduleIsPersisted ? "إعادة الحفظ من الإعدادات الحالية" : "حفظ التوزيع في قاعدة البيانات"}
+                      <i className="ti ti-device-floppy" />{" "}
+                      {linkedPlan.scheduleIsPersisted
+                        ? "إعادة الحفظ من الإعدادات الحالية"
+                        : "حفظ التوزيع في قاعدة البيانات"}
                     </button>
                   </div>
-                <div className="tbl-wrap" style={{ maxHeight: "50vh" }}>
-                  <table className="tbl">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>التاريخ</th>
-                        <th>الجزء</th>
-                        <th>من</th>
-                        <th>إلى</th>
-                        <th>الصفحات</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {linkedPlan.schedule.map((s) => {
-                        const isEditingRow = editingDay?.occurrenceIndex === s.occurrenceIndex;
-                        if (!isEditingRow) {
+                  <div className="tbl-wrap" style={{ maxHeight: "50vh" }}>
+                    <table className="tbl">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>التاريخ</th>
+                          <th>الجزء</th>
+                          <th>من</th>
+                          <th>إلى</th>
+                          <th>الصفحات</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {linkedPlan.schedule.map((s) => {
+                          const isEditingRow = editingDay?.occurrenceIndex === s.occurrenceIndex;
+                          if (!isEditingRow) {
+                            return (
+                              <tr key={s.occurrenceIndex}>
+                                <td>{toAr(s.occurrenceIndex)}</td>
+                                <td>{fmtDayLabel(toDateOnly(s.date))}</td>
+                                <td>
+                                  <Badge tone="green">جزء {toAr(s.juz)}</Badge>
+                                </td>
+                                <td>
+                                  {surahName(rangeReversed ? s.surahEnd : s.surahStart)} :{" "}
+                                  {toAr(rangeReversed ? s.ayahEnd : s.ayahStart)}
+                                </td>
+                                <td>
+                                  {surahName(rangeReversed ? s.surahStart : s.surahEnd)} :{" "}
+                                  {toAr(rangeReversed ? s.ayahStart : s.ayahEnd)}
+                                </td>
+                                <td>
+                                  {rangeReversed ? (
+                                    <>
+                                      {pageLabel(
+                                        { surahNumber: s.surahEnd, ayah: s.ayahEnd },
+                                        "end",
+                                      )}
+                                      {" - "}
+                                      {pageLabel(
+                                        { surahNumber: s.surahStart, ayah: s.ayahStart },
+                                        "start",
+                                      )}
+                                    </>
+                                  ) : (
+                                    <>
+                                      {pageLabel(
+                                        { surahNumber: s.surahStart, ayah: s.ayahStart },
+                                        "start",
+                                      )}
+                                      {" - "}
+                                      {pageLabel(
+                                        { surahNumber: s.surahEnd, ayah: s.ayahEnd },
+                                        "end",
+                                      )}
+                                    </>
+                                  )}
+                                </td>
+                                <td>
+                                  {linkedPlan.scheduleIsPersisted && (
+                                    <button
+                                      className="topbar-btn btn-ghost"
+                                      style={{ padding: "4px 9px", fontSize: 11 }}
+                                      onClick={() => startEditDay(s)}
+                                    >
+                                      <i className="ti ti-pencil" />
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          }
                           return (
-                            <tr key={s.occurrenceIndex}>
+                            <tr key={s.occurrenceIndex} style={{ background: "var(--green-pale)" }}>
                               <td>{toAr(s.occurrenceIndex)}</td>
                               <td>{fmtDayLabel(toDateOnly(s.date))}</td>
-                              <td><Badge tone="green">جزء {toAr(s.juz)}</Badge></td>
-                              <td>{surahName(rangeReversed ? s.surahEnd : s.surahStart)} : {toAr(rangeReversed ? s.ayahEnd : s.ayahStart)}</td>
-                              <td>{surahName(rangeReversed ? s.surahStart : s.surahEnd)} : {toAr(rangeReversed ? s.ayahStart : s.ayahEnd)}</td>
                               <td>
-                                {rangeReversed
-                                  ? <>{pageLabel({ surahNumber: s.surahEnd, ayah: s.ayahEnd }, "end")}{" - "}{pageLabel({ surahNumber: s.surahStart, ayah: s.ayahStart }, "start")}</>
-                                  : <>{pageLabel({ surahNumber: s.surahStart, ayah: s.ayahStart }, "start")}{" - "}{pageLabel({ surahNumber: s.surahEnd, ayah: s.ayahEnd }, "end")}</>
-                                }
+                                <input
+                                  type="number"
+                                  min={1}
+                                  max={30}
+                                  className="form-input"
+                                  style={{ ...compactInputStyle, width: 52 }}
+                                  value={dayJuz}
+                                  onChange={(e) =>
+                                    setDayJuz(
+                                      Math.max(1, Math.min(30, Number(e.target.value) || 1)),
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td style={{ minWidth: 170 }}>
+                                <CompactSurahAyah
+                                  value={dayRangeStart}
+                                  onChange={setDayRangeStart}
+                                />
+                              </td>
+                              <td style={{ minWidth: 170 }}>
+                                <CompactSurahAyah value={dayRangeEnd} onChange={setDayRangeEnd} />
                               </td>
                               <td>
-                                {linkedPlan.scheduleIsPersisted && (
-                                  <button className="topbar-btn btn-ghost" style={{ padding: "4px 9px", fontSize: 11 }} onClick={() => startEditDay(s)}>
-                                    <i className="ti ti-pencil" />
+                                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    max={604}
+                                    className="form-input"
+                                    style={{ ...compactInputStyle, width: 56 }}
+                                    value={dayPageStart}
+                                    onChange={(e) =>
+                                      setDayPageStart(
+                                        Math.max(1, Math.min(604, Number(e.target.value) || 1)),
+                                      )
+                                    }
+                                  />
+                                  <span style={{ color: "var(--text3)" }}>-</span>
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    max={604}
+                                    className="form-input"
+                                    style={{ ...compactInputStyle, width: 56 }}
+                                    value={dayPageEnd}
+                                    onChange={(e) =>
+                                      setDayPageEnd(
+                                        Math.max(1, Math.min(604, Number(e.target.value) || 1)),
+                                      )
+                                    }
+                                  />
+                                </div>
+                              </td>
+                              <td>
+                                <div style={{ display: "flex", gap: 6 }}>
+                                  <button
+                                    className="topbar-btn btn-primary"
+                                    style={{ padding: "6px 10px", fontSize: 11 }}
+                                    onClick={saveEditDay}
+                                    disabled={updateScheduleEntry.isPending}
+                                    title="حفظ"
+                                  >
+                                    {updateScheduleEntry.isPending ? (
+                                      <i
+                                        className="ti ti-loader-2"
+                                        style={{ animation: "spin 1s linear infinite" }}
+                                      />
+                                    ) : (
+                                      <i className="ti ti-check" />
+                                    )}
                                   </button>
-                                )}
+                                  <button
+                                    className="topbar-btn btn-ghost"
+                                    style={{ padding: "6px 10px", fontSize: 11 }}
+                                    onClick={() => {
+                                      if (guardDiscardDayEdit()) setEditingDay(null);
+                                    }}
+                                    title="إلغاء"
+                                  >
+                                    <i className="ti ti-x" />
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           );
-                        }
-                        return (
-                          <tr key={s.occurrenceIndex} style={{ background: "var(--green-pale)" }}>
-                            <td>{toAr(s.occurrenceIndex)}</td>
-                            <td>{fmtDayLabel(toDateOnly(s.date))}</td>
-                            <td>
-                              <input
-                                type="number" min={1} max={30} className="form-input"
-                                style={{ ...compactInputStyle, width: 52 }}
-                                value={dayJuz}
-                                onChange={(e) => setDayJuz(Math.max(1, Math.min(30, Number(e.target.value) || 1)))}
-                              />
-                            </td>
-                            <td style={{ minWidth: 170 }}>
-                              <CompactSurahAyah value={dayRangeStart} onChange={setDayRangeStart} />
-                            </td>
-                            <td style={{ minWidth: 170 }}>
-                              <CompactSurahAyah value={dayRangeEnd} onChange={setDayRangeEnd} />
-                            </td>
-                            <td>
-                              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                                <input
-                                  type="number" min={1} max={604} className="form-input"
-                                  style={{ ...compactInputStyle, width: 56 }}
-                                  value={dayPageStart}
-                                  onChange={(e) => setDayPageStart(Math.max(1, Math.min(604, Number(e.target.value) || 1)))}
-                                />
-                                <span style={{ color: "var(--text3)" }}>-</span>
-                                <input
-                                  type="number" min={1} max={604} className="form-input"
-                                  style={{ ...compactInputStyle, width: 56 }}
-                                  value={dayPageEnd}
-                                  onChange={(e) => setDayPageEnd(Math.max(1, Math.min(604, Number(e.target.value) || 1)))}
-                                />
-                              </div>
-                            </td>
-                            <td>
-                              <div style={{ display: "flex", gap: 6 }}>
-                                <button className="topbar-btn btn-primary" style={{ padding: "6px 10px", fontSize: 11 }} onClick={saveEditDay} disabled={updateScheduleEntry.isPending} title="حفظ">
-                                  {updateScheduleEntry.isPending
-                                    ? <i className="ti ti-loader-2" style={{ animation: "spin 1s linear infinite" }} />
-                                    : <i className="ti ti-check" />
-                                  }
-                                </button>
-                                <button className="topbar-btn btn-ghost" style={{ padding: "6px 10px", fontSize: 11 }} onClick={() => { if (guardDiscardDayEdit()) setEditingDay(null); }} title="إلغاء">
-                                  <i className="ti ti-x" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                {editingDay && dayError && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#ef4444", fontSize: 13, marginTop: 10, padding: "10px 14px", background: "#fef2f2", borderRadius: 10, border: "1px solid rgba(239,68,68,0.2)" }}>
-                    <i className="ti ti-alert-circle" style={{ flexShrink: 0 }} /> {dayError}
+                        })}
+                      </tbody>
+                    </table>
                   </div>
-                )}
+
+                  {editingDay && dayError && (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        color: "#ef4444",
+                        fontSize: 13,
+                        marginTop: 10,
+                        padding: "10px 14px",
+                        background: "#fef2f2",
+                        borderRadius: 10,
+                        border: "1px solid rgba(239,68,68,0.2)",
+                      }}
+                    >
+                      <i className="ti ti-alert-circle" style={{ flexShrink: 0 }} /> {dayError}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           ) : (
             <div style={{ textAlign: "center", padding: "28px 0" }}>
-              <div style={{ width: 56, height: 56, borderRadius: 14, background: "var(--cream)", color: "var(--text3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, margin: "0 auto 14px" }}>
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 14,
+                  background: "var(--cream)",
+                  color: "var(--text3)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 24,
+                  margin: "0 auto 14px",
+                }}
+              >
                 <i className="ti ti-target-off" />
               </div>
-              <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "var(--text)" }}>لا توجد خطة حفظ مرتبطة بهذا المسار بعد</p>
-              <p style={{ margin: "0 0 16px", fontSize: 12, color: "var(--text3)" }}>اربط خطة موجودة أو أنشئ خطة جديدة لتفعيل التقويم والتقييم</p>
+              <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "var(--text)" }}>
+                لا توجد خطة حفظ مرتبطة بهذا المسار بعد
+              </p>
+              <p style={{ margin: "0 0 16px", fontSize: 12, color: "var(--text3)" }}>
+                اربط خطة موجودة أو أنشئ خطة جديدة لتفعيل التقويم والتقييم
+              </p>
               <button className="topbar-btn btn-primary" onClick={() => togglePlanSection("link")}>
-                <i className={`ti ${openPlanSection === "link" ? "ti-x" : "ti-plus"}`} /> {openPlanSection === "link" ? "إلغاء" : "ربط خطة"}
+                <i className={`ti ${openPlanSection === "link" ? "ti-x" : "ti-plus"}`} />{" "}
+                {openPlanSection === "link" ? "إلغاء" : "ربط خطة"}
               </button>
             </div>
           )}
@@ -1236,7 +1913,10 @@ export function TeacherTrackDetail() {
               track={track}
               teacherId={teacherId}
               onLinked={() => setOpenPlanSection(null)}
-              onCreateNew={() => { setOpenPlanSection(null); createNewPlan(); }}
+              onCreateNew={() => {
+                setOpenPlanSection(null);
+                createNewPlan();
+              }}
             />
           )}
         </Card>

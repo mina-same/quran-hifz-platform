@@ -77,7 +77,7 @@ export default function OnboardingScreen() {
     bottom: { paddingBottom: 28, gap: 26, alignItems: 'center', width: '100%' },
     dots: { flexDirection: 'row-reverse', gap: 9 },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: theme.border },
-    dotActive: { backgroundColor: theme.green },
+    dotActive: { backgroundColor: theme.greenAccent },
   }), [theme]);
 
   return (

@@ -11,6 +11,7 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useParentChildren, useChildHifz, useChildMessages } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { AR_LOCALE } from '@/lib/date';
 
 export default function ParentDashboard() {
   const theme = useAppTheme();
@@ -106,7 +107,7 @@ export default function ParentDashboard() {
           {!messagesLoading && messages.length === 0 && <Text style={s.muted}>لا توجد إشعارات حديثة</Text>}
           {messages.slice(0, 4).map((n, i) => (
             <View key={n._id} style={[s.notifRow, i > 0 && s.borderTop]}>
-              <Text style={s.day}>{new Date(n.createdAt).toLocaleDateString('ar-SA')}</Text>
+              <Text style={s.day}>{new Date(n.createdAt).toLocaleDateString(AR_LOCALE)}</Text>
               <Text style={s.notifText}>{n.body}</Text>
             </View>
           ))}

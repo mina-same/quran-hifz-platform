@@ -3,6 +3,7 @@ import { useParentContext } from "../../context/ParentContext";
 import { useChildMessages } from "../../api/parent";
 import { Card } from "../../components/common/Card";
 import { SkeletonList } from "../../components/common/Skeleton";
+import { AR_LOCALE } from "@/lib/format";
 
 export function ParentMessages() {
   const { activeChild } = useParentContext();
@@ -45,7 +46,7 @@ export function ParentMessages() {
                 {m.senderName ?? m.sender}
               </span>
               <span style={{ fontSize: 11, color: "var(--text3)" }}>
-                {new Date(m.createdAt).toLocaleDateString("ar-SA")}
+                {new Date(m.createdAt).toLocaleDateString(AR_LOCALE)}
               </span>
             </div>
             <div style={{ fontSize: 12, color: "var(--text2)" }}>{m.body}</div>

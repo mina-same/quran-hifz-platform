@@ -6,6 +6,7 @@ import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { SkeletonTable } from "../../components/common/Skeleton";
 import { useHomework } from "../../api/homework";
 import { useGradeHomework } from "../../api/homework";
+import { AR_LOCALE } from "@/lib/format";
 
 function getName(v: unknown): string {
   if (v && typeof v === "object" && "name" in v) return (v as { name: string }).name;
@@ -57,7 +58,7 @@ export function TeacherHomework() {
                       </td>
                       <td style={{ fontSize: 12 }}>{hw.segment}</td>
                       <td style={{ fontSize: 12, color: "var(--text2)" }}>
-                        {hw.dueDate ? new Date(hw.dueDate).toLocaleDateString("ar-SA") : "—"}
+                        {hw.dueDate ? new Date(hw.dueDate).toLocaleDateString(AR_LOCALE) : "—"}
                       </td>
                       <td>
                         <Badge tone={STATUS_TONE[hw.status] ?? "gray"}>{hw.status}</Badge>
@@ -109,7 +110,7 @@ export function TeacherHomework() {
                   </div>
                   <div className="rc-row">
                     <span className="rc-row-label">تاريخ الاستحقاق</span>
-                    <span>{hw.dueDate ? new Date(hw.dueDate).toLocaleDateString("ar-SA") : "—"}</span>
+                    <span>{hw.dueDate ? new Date(hw.dueDate).toLocaleDateString(AR_LOCALE) : "—"}</span>
                   </div>
                   <div className="rc-actions">
                     <select

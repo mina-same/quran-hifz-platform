@@ -2,6 +2,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { SkeletonList } from "../../components/common/Skeleton";
 import { useMessages, useMarkRead } from "../../api/messages";
+import { AR_LOCALE } from "@/lib/format";
 
 export function StudentMessages() {
   const { data: messages = [], isLoading } = useMessages();
@@ -58,7 +59,7 @@ export function StudentMessages() {
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
               <span style={{ fontWeight: 700, fontSize: 13 }}>{msg.senderName}</span>
               <span style={{ fontSize: 11, color: "var(--text3)" }}>
-                {new Date(msg.createdAt).toLocaleDateString("ar-SA")}
+                {new Date(msg.createdAt).toLocaleDateString(AR_LOCALE)}
               </span>
             </div>
             <div style={{ fontSize: 12, color: "var(--text2)" }}>{msg.body}</div>

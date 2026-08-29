@@ -8,6 +8,7 @@ import Pressable from '@/components/ui/Pressable';
 import Badge, { type BadgeVariant } from '@/components/ui/Badge';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { orientSlice, surahName, type ScheduleEntry } from '@/lib/quranRange';
+import { AR_LOCALE } from '@/lib/date';
 
 /** One day of a plan, flattened into the few strings a phone-width card can show. */
 export interface ScheduleItem {
@@ -33,7 +34,7 @@ function isSameLocalDay(iso: string, ref: Date) {
 /** Compact weekday + day + month — "الأحد ٥ رمضان" — instead of the full numeric
  * date the wide table used, which no longer has a column to itself. */
 export function fmtShortDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('ar-SA', { weekday: 'short', day: 'numeric', month: 'short' });
+  return new Date(iso).toLocaleDateString(AR_LOCALE, { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
 export function fmtPages(pageStart: number, pageEnd: number): string {
@@ -190,8 +191,8 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
       borderRadius: 14,
     },
     cardToday: {
-      borderColor: theme.green,
-      backgroundColor: `${theme.green}0F`,
+      borderColor: theme.greenAccent,
+      backgroundColor: `${theme.greenAccent}1F`,
     },
     idx: {
       width: 30,
@@ -203,7 +204,7 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    idxToday: { backgroundColor: theme.green, borderColor: theme.green },
+    idxToday: { backgroundColor: theme.greenAccent, borderColor: theme.greenAccent },
     idxText: {
       fontSize: theme.fontSize.sm,
       fontFamily: theme.fontCairoBold,

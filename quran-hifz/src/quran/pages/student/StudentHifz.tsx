@@ -7,7 +7,7 @@ import { HalqaRow } from "../../components/common/HalqaRow";
 import { SkeletonTable } from "../../components/common/Skeleton";
 import { useHifz } from "../../api/hifz";
 import { useStudent } from "../../api/students";
-import { toAr, pct } from "../../../lib/format";
+import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 
 function tone(status: string): BadgeTone {
   if (status === "مكتمل") return "green";
@@ -72,7 +72,7 @@ export function StudentHifz() {
                     </td>
                     <td style={{ fontSize: 12, color: "var(--text2)" }}>
                       {e.completionDate
-                        ? new Date(e.completionDate).toLocaleDateString("ar-SA")
+                        ? new Date(e.completionDate).toLocaleDateString(AR_LOCALE)
                         : "—"}
                     </td>
                   </tr>

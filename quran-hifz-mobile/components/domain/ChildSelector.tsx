@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
+import { useMemo, useEffect } from 'react';
 import { View, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
 import { useParentChildren } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 /**
  * Post-login child picker for the parent portal — rendered once at the top
@@ -16,6 +18,8 @@ import { theme } from '@/lib/theme';
  * - Zero children / loading / error: lightweight inline states.
  */
 export default function ChildSelector() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const { data: children, isLoading, isError } = useParentChildren();
   const selectedChildId = usePortalStore((s) => s.selectedChildId);
   const setSelectedChild = usePortalStore((s) => s.setSelectedChild);
@@ -74,29 +78,31 @@ export default function ChildSelector() {
   );
 }
 
-const s = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 8, paddingBottom: 2 },
-  center: { paddingVertical: 10, alignItems: 'center' },
-  pill: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: theme.radiusFull,
-    borderWidth: 1,
-    borderColor: theme.border,
-    backgroundColor: theme.white,
-  },
-  pillActive: {
-    backgroundColor: theme.green,
-    borderColor: theme.green,
-  },
-  pillText: {
-    fontSize: 12,
-    fontFamily: theme.fontCairoBold,
-    color: theme.text,
-  },
-  pillTextActive: {
-    color: theme.white,
-  },
-  errorText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.red },
-  emptyText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
-});
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    row: { flexDirection: 'row', gap: 8, paddingBottom: 2 },
+    center: { paddingVertical: 10, alignItems: 'center' },
+    pill: {
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: theme.radiusFull,
+      borderWidth: 1,
+      borderColor: theme.border,
+      backgroundColor: theme.card,
+    },
+    pillActive: {
+      backgroundColor: theme.greenAccent,
+      borderColor: theme.green,
+    },
+    pillText: {
+      fontSize: 12,
+      fontFamily: theme.fontCairoBold,
+      color: theme.text,
+    },
+    pillTextActive: {
+      color: theme.white,
+    },
+    errorText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.red },
+    emptyText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+  });
+}

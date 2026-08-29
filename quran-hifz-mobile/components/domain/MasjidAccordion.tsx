@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { View, StyleSheet, LayoutAnimation } from 'react-native';
 import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
@@ -8,7 +8,9 @@ import {
 import type { Masjid } from '@/lib/queries/masajid';
 import type { Halqa } from '@/lib/queries/halqat';
 import Badge from '@/components/ui/Badge';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 function nameOf(v: { name: string } | string | undefined): string {
   if (v && typeof v === 'object') return v.name;
@@ -24,6 +26,8 @@ interface Props {
 }
 
 export default function MasjidAccordion({ masjid, halqat }: Props) {
+  const theme = useAppTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [open, setOpen] = useState(false);
 
   const toggle = () => {
@@ -33,7 +37,8 @@ export default function MasjidAccordion({ masjid, halqat }: Props) {
 
   return (
     <View style={styles.card}>
-      <Pressable onPress={toggle} style={({ pressed }) => [styles.trigger, pressed && styles.triggerPressed]}>
+      {/* Plain style — NativeWind's interop drops the ({ pressed }) => … form. */}
+      <Pressable onPress={toggle} style={styles.trigger}>
         <View style={styles.triggerLeft}>
           <IconBuildingArch size={16} color={theme.gold} />
           <Text style={styles.name}>{masjid.name}</Text>
@@ -69,80 +74,81 @@ export default function MasjidAccordion({ masjid, halqat }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: theme.white,
-    borderRadius: theme.radius,
-    borderWidth: 1,
-    borderColor: theme.border,
-    marginBottom: 8,
-    overflow: 'hidden',
-  },
-  trigger: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-  },
-  triggerPressed: { backgroundColor: '#F0FDF4' },
-  triggerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    flex: 1,
-  },
-  name: {
-    fontSize: 13,
-    fontFamily: theme.fontCairoBold,
-    color: theme.green,
-  },
-  location: {
-    fontSize: 11,
-    fontFamily: theme.fontCairo,
-    color: theme.textMuted,
-  },
-  triggerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  content: {
-    borderTopWidth: 1,
-    borderTopColor: theme.border,
-    padding: 12,
-    gap: 8,
-  },
-  halqaRow: {
-    backgroundColor: '#F9FAF5',
-    borderRadius: theme.radiusSm,
-    padding: 10,
-    gap: 4,
-  },
-  halqaName: {
-    fontSize: 13,
-    fontFamily: theme.fontCairoBold,
-    color: theme.green,
-  },
-  halqaMeta: {
-    fontSize: 11,
-    fontFamily: theme.fontCairo,
-    color: theme.textMuted,
-  },
-  halqaBottom: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 4,
-  },
-  countRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  countText: {
-    fontSize: 11,
-    fontFamily: theme.fontCairo,
-    color: theme.textMuted,
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: theme.card,
+      borderRadius: theme.radius,
+      borderWidth: 1,
+      borderColor: theme.border,
+      marginBottom: 8,
+      overflow: 'hidden',
+    },
+    trigger: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 14,
+      paddingVertical: 13,
+    },
+    triggerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      flex: 1,
+    },
+    name: {
+      fontSize: 13,
+      fontFamily: theme.fontCairoBold,
+      color: theme.green,
+    },
+    location: {
+      fontSize: 11,
+      fontFamily: theme.fontCairo,
+      color: theme.textMuted,
+    },
+    triggerRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    content: {
+      borderTopWidth: 1,
+      borderTopColor: theme.border,
+      padding: 12,
+      gap: 8,
+    },
+    halqaRow: {
+      backgroundColor: theme.cardAlt,
+      borderRadius: theme.radiusSm,
+      padding: 10,
+      gap: 4,
+    },
+    halqaName: {
+      fontSize: 13,
+      fontFamily: theme.fontCairoBold,
+      color: theme.green,
+    },
+    halqaMeta: {
+      fontSize: 11,
+      fontFamily: theme.fontCairo,
+      color: theme.textMuted,
+    },
+    halqaBottom: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: 4,
+    },
+    countRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    countText: {
+      fontSize: 11,
+      fontFamily: theme.fontCairo,
+      color: theme.textMuted,
+    },
+  });
+}

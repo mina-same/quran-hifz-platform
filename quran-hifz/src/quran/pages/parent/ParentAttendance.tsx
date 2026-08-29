@@ -6,7 +6,7 @@ import { StatsRow } from "../../components/common/StatsRow";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonTable } from "../../components/common/Skeleton";
-import { toAr, pct } from "../../../lib/format";
+import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 
 const STATUS_TONE: Record<string, "green" | "gold" | "red"> = {
   حاضر: "green",
@@ -63,7 +63,7 @@ export function ParentAttendance() {
                     const evalForDay = evalByDate.get(new Date(r.date).toDateString());
                     return (
                       <tr key={i}>
-                        <td>{new Date(r.date).toLocaleDateString("ar-SA")}</td>
+                        <td>{new Date(r.date).toLocaleDateString(AR_LOCALE)}</td>
                         <td>{r.day}</td>
                         <td>{r.time}</td>
                         <td>
@@ -89,7 +89,7 @@ export function ParentAttendance() {
                   <div key={i} className="rc-card">
                     <div className="rc-card-head">
                       <span className="rc-card-title">
-                        {new Date(r.date).toLocaleDateString("ar-SA")}
+                        {new Date(r.date).toLocaleDateString(AR_LOCALE)}
                       </span>
                       <Badge tone={STATUS_TONE[r.status] ?? "green"}>{r.status}</Badge>
                     </div>

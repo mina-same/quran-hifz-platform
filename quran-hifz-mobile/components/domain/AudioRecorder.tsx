@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { View, StyleSheet, LayoutAnimation } from 'react-native';
 import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
@@ -13,10 +13,15 @@ import {
   IconMicrophone, IconPlayerStop, IconSend, IconCircleCheck,
 } from '@tabler/icons-react-native';
 import Alert from '@/components/ui/Alert';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
 import { success } from '@/lib/haptics';
 
+type AppTheme = ReturnType<typeof useAppTheme>;
+
 export default function AudioRecorder() {
+  const theme = useAppTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [done, setDone] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(false);
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
@@ -111,64 +116,66 @@ export default function AudioRecorder() {
   );
 }
 
-const styles = StyleSheet.create({
-  box: {
-    backgroundColor: theme.redPale,
-    borderWidth: 2,
-    borderColor: theme.redBorder,
-    borderRadius: theme.radius,
-    padding: 24,
-    alignItems: 'center',
-  },
-  micIcon: { marginBottom: 12 },
-  timer: {
-    fontSize: 32,
-    fontFamily: theme.fontCairoBold,
-    color: theme.green,
-    marginBottom: 16,
-    fontVariant: ['tabular-nums'],
-  },
-  btns: {
-    flexDirection: 'row',
-    gap: 10,
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-  },
-  btn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 11,
-    borderRadius: theme.radiusSm,
-  },
-  btnStart: { backgroundColor: theme.green },
-  btnStop:  { backgroundColor: theme.red },
-  btnSend: {
-    backgroundColor: theme.goldPale,
-    borderWidth: 1,
-    borderColor: 'rgba(201,149,42,0.3)',
-  },
-  btnText: {
-    fontSize: 14,
-    fontFamily: theme.fontCairoBold,
-    color: theme.white,
-  },
-  btnTextSend: {
-    fontSize: 14,
-    fontFamily: theme.fontCairoBold,
-    color: theme.brown,
-  },
-  doneTitle: {
-    fontSize: 14,
-    fontFamily: theme.fontCairoBold,
-    color: '#166534',
-  },
-  doneSub: {
-    fontSize: 12,
-    fontFamily: theme.fontCairo,
-    color: '#166534',
-    marginTop: 4,
-    lineHeight: 20,
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    box: {
+      backgroundColor: theme.redPale,
+      borderWidth: 2,
+      borderColor: theme.redBorder,
+      borderRadius: theme.radius,
+      padding: 24,
+      alignItems: 'center',
+    },
+    micIcon: { marginBottom: 12 },
+    timer: {
+      fontSize: 32,
+      fontFamily: theme.fontCairoBold,
+      color: theme.green,
+      marginBottom: 16,
+      fontVariant: ['tabular-nums'],
+    },
+    btns: {
+      flexDirection: 'row',
+      gap: 10,
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+    },
+    btn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingHorizontal: 20,
+      paddingVertical: 11,
+      borderRadius: theme.radiusSm,
+    },
+    btnStart: { backgroundColor: theme.greenAccent },
+    btnStop:  { backgroundColor: theme.red },
+    btnSend: {
+      backgroundColor: theme.goldPale,
+      borderWidth: 1,
+      borderColor: 'rgba(201,149,42,0.3)',
+    },
+    btnText: {
+      fontSize: 14,
+      fontFamily: theme.fontCairoBold,
+      color: theme.white,
+    },
+    btnTextSend: {
+      fontSize: 14,
+      fontFamily: theme.fontCairoBold,
+      color: theme.brown,
+    },
+    doneTitle: {
+      fontSize: 14,
+      fontFamily: theme.fontCairoBold,
+      color: '#166534',
+    },
+    doneSub: {
+      fontSize: 12,
+      fontFamily: theme.fontCairo,
+      color: '#166534',
+      marginTop: 4,
+      lineHeight: 20,
+    },
+  });
+}

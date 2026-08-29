@@ -1,7 +1,12 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import {
+  BottomSheetScrollView,
+  BottomSheetFooter,
+  type BottomSheetFooterProps,
+} from '@gorhom/bottom-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { IconX, IconLogout, IconSun, IconMoon, IconChevronLeft } from '@tabler/icons-react-native';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -53,6 +58,7 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
   const router = useRouter();
   const theme = useAppTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const insets = useSafeAreaInsets();
   const { user, logout, themeMode, toggleTheme } = usePortalStore();
 
   // Icon washes sit on the row surface, so dark mode needs a stronger alpha than
@@ -74,8 +80,41 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
     router.replace('/');
   };
 
+  // Pinned by the library on top of the scroll content (absolute + zIndex), so it
+  // survives regardless of how the content lays out — the previous version was a
+  // flex sibling inside BottomSheetView and got pushed off the bottom edge.
+  const renderFooter = useCallback(
+    (props: BottomSheetFooterProps) => (
+      <BottomSheetFooter {...props} bottomInset={insets.bottom}>
+        <View style={styles.footer}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{user?.initials}</Text>
+          </View>
+          <View style={styles.userInfo}>
+            <Text style={styles.userName} numberOfLines={1}>{user?.name}</Text>
+            <Text style={styles.userRole} numberOfLines={1}>{user?.role}</Text>
+          </View>
+          <Pressable haptic="select" onPress={toggleTheme} hitSlop={8} style={styles.footerBtn}>
+            {themeMode === 'dark' ? (
+              <IconSun size={17} color={theme.textMuted} />
+            ) : (
+              <IconMoon size={17} color={theme.textMuted} />
+            )}
+          </Pressable>
+        </View>
+      </BottomSheetFooter>
+    ),
+    [insets.bottom, styles, user, themeMode, toggleTheme, theme.textMuted],
+  );
+
   return (
-    <BottomSheet visible={visible} onClose={onClose} snapPoints={['80%']}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      snapPoints={['85%']}
+      rawContent
+      footerComponent={renderFooter}
+    >
       <View style={styles.sheetInner}>
         <View style={styles.header}>
           <Text style={styles.title}>المزيد</Text>
@@ -89,6 +128,7 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
           style={styles.list}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          enableFooterMarginAdjustment
         >
           {groups.map((g) => (
             <View key={g.group} style={styles.group}>
@@ -139,23 +179,6 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
             </Pressable>
           </View>
         </BottomSheetScrollView>
-
-        <View style={styles.footer}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{user?.initials}</Text>
-          </View>
-          <View style={styles.userInfo}>
-            <Text style={styles.userName} numberOfLines={1}>{user?.name}</Text>
-            <Text style={styles.userRole} numberOfLines={1}>{user?.role}</Text>
-          </View>
-          <Pressable haptic="select" onPress={toggleTheme} hitSlop={8} style={styles.footerBtn}>
-            {themeMode === 'dark' ? (
-              <IconSun size={17} color={theme.textMuted} />
-            ) : (
-              <IconMoon size={17} color={theme.textMuted} />
-            )}
-          </Pressable>
-        </View>
       </View>
     </BottomSheet>
   );
@@ -200,7 +223,10 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
     },
     listContent: {
       paddingHorizontal: 22,
-      paddingBottom: theme.space.lg,
+      // Breathing room under the last row, on top of the footer height that
+      // `enableFooterMarginAdjustment` adds — otherwise the logout card ends
+      // flush against the pinned footer at full scroll.
+      paddingBottom: theme.space.xl,
     },
     group: {
       marginTop: theme.space.lg,
@@ -266,12 +292,16 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
       borderRadius: theme.radiusFull,
       backgroundColor: theme.gold,
     },
+    // Pinned over the scroll content, so it has to paint its own opaque
+    // background rather than letting rows slide visibly underneath it.
     footer: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: theme.space.md,
       paddingHorizontal: 22,
       paddingTop: theme.space.md,
+      paddingBottom: theme.space.md,
+      backgroundColor: theme.card,
       borderTopWidth: 1,
       borderTopColor: theme.border,
     },

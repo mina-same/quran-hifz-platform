@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
 import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,19 +14,25 @@ import {
   type TrackTeacher,
 } from '@/lib/queries/specialTracks';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+import { AR_LOCALE } from '@/lib/date';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 function getTeacherName(v: TrackTeacher | string) {
   return typeof v === 'object' ? v.name : v;
 }
 function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' });
+  return new Date(d).toLocaleDateString(AR_LOCALE, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 const STATUS_LABEL: Record<SpecialTrack['status'], string> = { active: 'نشط', upcoming: 'قادم', ended: 'منتهي' };
 const STATUS_VARIANT: Record<SpecialTrack['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
 
 function TrackCard({ track, onOpenDetail }: { track: SpecialTrack; onOpenDetail: () => void }) {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const enrolled = track.enrolledStudents.length;
   const pct = track.maxStudents > 0 ? Math.min(100, Math.round((enrolled / track.maxStudents) * 100)) : 0;
 
@@ -86,6 +93,8 @@ function TrackCard({ track, onOpenDetail }: { track: SpecialTrack; onOpenDetail:
 }
 
 export default function TeacherSpecialTracks() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
   const { data: tracks = [], isLoading, refetch, isRefetching } = useSpecialTracks(undefined, profileId);
@@ -134,22 +143,24 @@ export default function TeacherSpecialTracks() {
   );
 }
 
-const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.bg },
-  page: { padding: theme.pagePadding, gap: 14 },
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
-  sectionTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 6 },
-  headRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
-  typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
-  onlineTag: { fontSize: 11, backgroundColor: theme.bluePale, color: theme.blue, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
-  title: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 12 },
-  infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 6 },
-  infoItem: { width: '46%' },
-  infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
-  infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
-  capacityBox: { backgroundColor: theme.bg, borderRadius: 10, padding: 10, marginBottom: 10 },
-  capacityRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  capacityLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
-  capacityValue: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.text },
-  meetLink: { fontSize: 11, color: theme.blue, fontFamily: theme.fontCairo, marginBottom: 10 },
-});
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
+    sectionTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 6 },
+    headRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
+    typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+    onlineTag: { fontSize: 11, backgroundColor: theme.bluePale, color: theme.blue, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+    title: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 12 },
+    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 6 },
+    infoItem: { width: '46%' },
+    infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
+    infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
+    capacityBox: { backgroundColor: theme.bg, borderRadius: 10, padding: 10, marginBottom: 10 },
+    capacityRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+    capacityLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
+    capacityValue: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.text },
+    meetLink: { fontSize: 11, color: theme.blue, fontFamily: theme.fontCairo, marginBottom: 10 },
+  });
+}

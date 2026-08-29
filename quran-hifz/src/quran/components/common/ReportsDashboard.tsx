@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, LabelList } from "recharts";
-import { toAr, pct } from "../../../lib/format";
+import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 import { downloadCsv } from "../../../lib/csv";
 import { useStudents, type Student, type StudentFilters } from "../../api/students";
 import { useEvaluations, type EvaluationRecord } from "../../api/evaluations";
@@ -181,7 +181,7 @@ export function ReportsDashboard({
     return Array.from(byDate.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, v]) => ({
-        date: toAr(new Date(date).toLocaleDateString("ar-SA", { month: "numeric", day: "numeric" })),
+        date: toAr(new Date(date).toLocaleDateString(AR_LOCALE, { month: "numeric", day: "numeric" })),
         avg: round1(v.sum / v.count),
       }));
   }, [evaluations]);

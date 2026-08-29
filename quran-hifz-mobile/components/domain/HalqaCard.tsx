@@ -1,9 +1,12 @@
+import { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import type { Halqa } from '@/lib/queries/halqat';
 import ProgressBar from '@/components/ui/ProgressBar';
 import Badge from '@/components/ui/Badge';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 interface Props {
   halqa: Halqa;
@@ -17,6 +20,8 @@ function nameOf(v: { name: string } | string | undefined): string {
 }
 
 export default function HalqaCard({ halqa, actions }: Props) {
+  const theme = useAppTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const studentCount = halqa.studentCount ?? 0;
   const capacityPct = halqa.capacity > 0 ? Math.round((studentCount / halqa.capacity) * 100) : 0;
 
@@ -54,55 +59,57 @@ export default function HalqaCard({ halqa, actions }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: theme.white,
-    borderRadius: theme.radius,
-    borderWidth: 1,
-    borderColor: theme.border,
-    overflow: 'hidden',
-  },
-  header: {
-    backgroundColor: theme.green,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerName: {
-    fontSize: 13,
-    fontFamily: theme.fontCairoBold,
-    color: theme.white,
-  },
-  body: {
-    padding: 14,
-    gap: 7,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  rowLabel: {
-    fontSize: 12,
-    fontFamily: theme.fontCairo,
-    color: theme.textMuted,
-  },
-  rowValue: {
-    fontSize: 12,
-    fontFamily: theme.fontCairoBold,
-    color: theme.text,
-  },
-  capacityLabel: {
-    fontSize: 11,
-    fontFamily: theme.fontCairo,
-    color: theme.textMuted,
-    marginTop: 4,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 10,
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: theme.card,
+      borderRadius: theme.radius,
+      borderWidth: 1,
+      borderColor: theme.border,
+      overflow: 'hidden',
+    },
+    header: {
+      backgroundColor: theme.greenAccent,
+      paddingHorizontal: 14,
+      paddingVertical: 11,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    headerName: {
+      fontSize: 13,
+      fontFamily: theme.fontCairoBold,
+      color: theme.white,
+    },
+    body: {
+      padding: 14,
+      gap: 7,
+    },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    rowLabel: {
+      fontSize: 12,
+      fontFamily: theme.fontCairo,
+      color: theme.textMuted,
+    },
+    rowValue: {
+      fontSize: 12,
+      fontFamily: theme.fontCairoBold,
+      color: theme.text,
+    },
+    capacityLabel: {
+      fontSize: 11,
+      fontFamily: theme.fontCairo,
+      color: theme.textMuted,
+      marginTop: 4,
+    },
+    actions: {
+      flexDirection: 'row',
+      gap: 8,
+      marginTop: 10,
+    },
+  });
+}

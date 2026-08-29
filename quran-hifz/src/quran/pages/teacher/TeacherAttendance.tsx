@@ -25,7 +25,7 @@ import { useRecordStudentOccurrence, useStudentPlanProgressList } from "../../ap
 import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
 import { toFlatIndex, fromFlatIndex, isReversedSchedule, dayFinishPoint, dayDeltaAyahs, planFinishPoint } from "../../lib/quranRange";
-import { toAr, pct } from "../../../lib/format";
+import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -110,7 +110,7 @@ function toDateOnly(s: string): string {
 }
 function fmtDate(iso: string): string {
   return toAr(
-    new Date(iso + "T00:00:00").toLocaleDateString("ar-SA", {
+    new Date(iso + "T00:00:00").toLocaleDateString(AR_LOCALE, {
       weekday: "long",
       day: "numeric",
       month: "long",
@@ -902,7 +902,7 @@ export function TeacherAttendance() {
               <tbody>
                 {history.map((r) => (
                   <tr key={r._id}>
-                    <td>{toAr(new Date(r.date).toLocaleDateString("ar-SA"))}</td>
+                    <td>{toAr(new Date(r.date).toLocaleDateString(AR_LOCALE))}</td>
                     <td>{typeof r.student === "string" ? r.student : r.student.name}</td>
                     <td>
                       <Badge tone={r.attendanceStatus === "حاضر" ? "green" : "red"}>

@@ -2672,3 +2672,45 @@
 | 16:44 | Session end: 3 writes across 1 files (BottomSheet.tsx) | 1 reads | ~897 tok |
 | 17:40 | RTL text fix: RN swaps left/right textAlign under forceRTL, so `textAlign: 'right'` rendered visually LEFT. Added lib/theme.ts textStart/textEnd + components/ui/Text.tsx wrapper, swept 69 files off RN Text, removed 15 wrong `textAlign: 'right'` from Text styles (kept 4 TextInput ones) | components/ui/Text.tsx, lib/theme.ts, 69 files | tsc clean, 47 tests pass | ~40k |
 | 16:53 | Session end: 3 writes across 1 files (BottomSheet.tsx) | 1 reads | ~897 tok |
+
+## Session: 2026-08-28 01:39
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 01:45 | Fixed MoreSheet scroll (BottomSheetView re-tagging the scrollable as VIEW) + missing pinned user footer; added rawContent/footerComponent to the shared BottomSheet | components/ui/BottomSheet.tsx, components/layout/MoreSheet.tsx | tsc clean, bug-363 logged | ~35k |
+| 01:53 | Centred + bolded FormSelect option rows, pinned the date sheet's إلغاء/تم footer, swept every ar-SA date locale onto a Gregorian AR_LOCALE in BOTH apps | components/forms/FormSelect.tsx, components/forms/FormDatePicker.tsx, lib/date.ts (new), src/lib/format.ts, 37 call sites | mobile tsc clean, web tsc only pre-existing errors; bug-364/365 logged, bug-363 root cause corrected | ~60k |
+
+## Session: 2026-08-28 01:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 01:56 | Removed the white bar bg+divider from the 4 hand-rolled screen headers; swept every remaining function-form Pressable style (NativeWind drops them, which is why SheetTriggerRow stacked vertically) | app/(portal)/{admin,teacher}/track-detail.tsx, teacher/plan-form.tsx, teacher/plan-detail.tsx, ui/SheetTriggerRow.tsx, domain/MasjidAccordion.tsx, app/index.tsx, student/messages.tsx | tsc clean, bug-366/367 logged, bug-360 root cause corrected | ~25k |
+
+## Session: 2026-08-28 02:02
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 02:20 | Reflowed admin students list for phone widths (attendance pill, full-width track chip, wrapping meta chips, stacked guardian lines) + made Badge shrink/ellipsize | quran-hifz-mobile/app/(portal)/admin/students.tsx, components/ui/Badge.tsx | tsc clean | ~12k |
+
+## Session: 2026-08-29 dark-mode surfaces
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| — | Fixed "cards and bottom sheets stay white in dark mode": deleted the frozen `theme = buildTheme('light')` export so tsc flags all 45 offenders, moved every mode-dependent colour out of `base` into light/darkSurfaces, added cardAlt/inputBg/overlay/greenAccent + a shared `tone` palette, converted all 45 files to useAppTheme + memoised styles, swept hardcoded whites, the 4 tab bars, and 20 `backgroundColor: theme.green` fills | quran-hifz-mobile/lib/theme.ts + 45 screens/components | tsc clean, jest 47/47, `expo export --platform ios` bundles; bug-369 logged | ~60k |
+| 02:40 | Rebuilt admin special tracks to web parity: status sections + counts, rich TrackCard (status strip, type/online chips, info grid, teacher avatars, capacity bar, collapsible linked Quran plan, join link), masjid/days custom pickers, students panel with capacity + search + avatars, delete confirm dialog | quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx | tsc clean | ~35k |
+| 03:05 | Systematic web↔mobile parity audit across all 40 page pairs (Arabic-string diff + hook/mutation greps) | scratchpad/parity.py, all pages | found: no CRUD on mobile admin halqat/masajid/teachers/students, no reports export/student report, no copy-plan, read-only TrackDetail, parent recordings field mismatch (bug logged) | ~45k |
+
+## Session: 2026-08-29 11:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-29 11:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-29 11:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

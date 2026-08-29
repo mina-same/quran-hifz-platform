@@ -21,13 +21,17 @@ import {
 } from '@/lib/queries/quranPlan';
 import { isReversedRange, isReversedSchedule, orientSlice, surahName } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { theme } from '@/lib/theme';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
 import { IconCalendarEvent } from '@tabler/icons-react-native';
+import { AR_LOCALE } from '@/lib/date';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
 
 function getEnrolledId(v: EnrolledStudent | string) { return typeof v === 'object' ? v._id : v; }
 function getEnrolledName(v: EnrolledStudent | string) { return typeof v === 'object' ? v.name : v; }
 function getTeacherName(v: TrackTeacher | string) { return typeof v === 'object' ? v.name : v; }
-function fmtDate(d: string) { return new Date(d).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' }); }
+function fmtDate(d: string) { return new Date(d).toLocaleDateString(AR_LOCALE, { year: 'numeric', month: 'short', day: 'numeric' }); }
 
 function isSameLocalDay(iso: string, ref: Date) {
   const d = new Date(iso);
@@ -54,6 +58,8 @@ interface Props {
 }
 
 export default function TrackDetail({ trackId, role }: Props) {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
   const canManagePlan = role === 'teacher';
@@ -304,32 +310,34 @@ export default function TrackDetail({ trackId, role }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 12 },
-  headRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
-  typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
-  onlineTag: { fontSize: 11, backgroundColor: theme.bluePale, color: theme.blue, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
-  title: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 4 },
-  subInfo: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, marginBottom: 8 },
-  infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 6, marginTop: 8 },
-  infoItem: { width: '46%' },
-  infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
-  infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
-  capacityBox: { backgroundColor: theme.bg, borderRadius: 10, padding: 10 },
-  capacityRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  capacityLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
-  capacityValue: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.text },
-  meetLink: { fontSize: 11, color: theme.blue, fontFamily: theme.fontCairo, marginBottom: 10 },
-  assignmentBox: { borderRadius: 10, padding: 10, marginTop: 10 },
-  assignmentText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.greenDark },
-  actionsRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
-  linkPanel: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: theme.border, gap: 8 },
-  linkPanelTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
-  linkRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: theme.border },
-  linkRowText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.text, flex: 1 },
-  studentBlock: { borderTopWidth: 1, borderTopColor: theme.border },
-  studentRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
-  studentName: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
-  expandIcon: { fontSize: 12, color: theme.textMuted },
-  expandedBox: { paddingBottom: 14, gap: 6 },
-});
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 12 },
+    headRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
+    typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+    onlineTag: { fontSize: 11, backgroundColor: theme.bluePale, color: theme.blue, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+    title: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 4 },
+    subInfo: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, marginBottom: 8 },
+    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 6, marginTop: 8 },
+    infoItem: { width: '46%' },
+    infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
+    infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
+    capacityBox: { backgroundColor: theme.bg, borderRadius: 10, padding: 10 },
+    capacityRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+    capacityLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
+    capacityValue: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.text },
+    meetLink: { fontSize: 11, color: theme.blue, fontFamily: theme.fontCairo, marginBottom: 10 },
+    assignmentBox: { borderRadius: 10, padding: 10, marginTop: 10 },
+    assignmentText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.greenDark },
+    actionsRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
+    linkPanel: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: theme.border, gap: 8 },
+    linkPanelTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    linkRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: theme.border },
+    linkRowText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.text, flex: 1 },
+    studentBlock: { borderTopWidth: 1, borderTopColor: theme.border },
+    studentRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
+    studentName: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    expandIcon: { fontSize: 12, color: theme.textMuted },
+    expandedBox: { paddingBottom: 14, gap: 6 },
+  });
+}

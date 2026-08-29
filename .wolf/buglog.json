@@ -6056,6 +6056,198 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-28T16:53:13.961994"
+    },
+    {
+      "id": "bug-363",
+      "timestamp": "2026-08-29T01:45:35.010183",
+      "error_message": "User: \"the more sheet has problem with scroll and the bottom part witch have name and avatar and dark mood not showing\" + \"need some space buttom\"",
+      "file": "quran-hifz-mobile/components/layout/MoreSheet.tsx, quran-hifz-mobile/components/ui/BottomSheet.tsx",
+      "root_cause": "Footer: the avatar/name/theme-toggle bar was a plain flex sibling laid out at the bottom of the wrapper's BottomSheetView, so once the content overflowed it was laid out past the sheet's bottom edge and never rendered. Scroll: MoreSheet nested a BottomSheetScrollView inside BottomSheetView, whose focus effect sets animatedScrollableState.type = SCROLLABLE_TYPE.VIEW; React fires child effects before parent ones, so the parent always overwrote the scrollable's own registration. CORRECTION to the first write-up of this entry: that mis-registration does NOT stop the list from scrolling — useGestureEventsHandlersDefault only reads the type for over-drag resistance (a VIEW over-drags the whole sheet instead of letting the list rubber-band) and for the keyboard-dismiss branch. So the nesting made drags inside the list move the sheet, which is the 'problem with scroll' the user felt, but it is not a hard scroll break.",
+      "fix": "BottomSheet.tsx gained a `rawContent` prop that renders children straight into BottomSheetModal with no BottomSheetView wrapper (documented on the prop), plus a `footerComponent` passthrough. MoreSheet now sets rawContent, moved the user footer into a <BottomSheetFooter bottomInset={insets.bottom}> rendered via footerComponent (absolute + zIndex 9999, so it cannot be pushed off), gave the footer its own opaque theme.card background + paddingBottom since it now overlays the list, set enableFooterMarginAdjustment on the scroll view so content clears it, raised the snap point to 85% and bumped listContent paddingBottom to space.xl. npx tsc --noEmit clean.",
+      "tags": [
+        "mobile",
+        "bottom-sheet",
+        "gorhom",
+        "scroll",
+        "more-sheet",
+        "footer",
+        "layout",
+        "scrollable-type"
+      ],
+      "related_bugs": [
+        "bug-357",
+        "bug-358",
+        "bug-360",
+        "bug-361"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T01:52:55.196403"
+    },
+    {
+      "id": "bug-364",
+      "timestamp": "2026-08-29T01:52:55.196403",
+      "error_message": "User: \"والتاريخ محتاج يظهر بالميلادي مش الهجري في كل الاماكن\" — dates rendered as Hijri (e.g. ٢٥ رمضان ١٤٤٧) everywhere, in both the mobile app and the web app",
+      "file": "quran-hifz-mobile/lib/date.ts (new) + 18 call sites, quran-hifz/src/lib/format.ts + 19 call sites, quran-hifz-mobile/components/forms/FormDatePicker.tsx",
+      "root_cause": "Every date went through toLocaleDateString('ar-SA'). Per CLDR the DEFAULT CALENDAR for the ar-SA locale is islamic-umalqura, so ICU renders a Hijri date from a Gregorian Date object with no error and no warning. The iOS inline DateTimePicker had the same problem from locale=\"ar\", which resolves its NSCalendar from the device region.",
+      "fix": "Added a single AR_LOCALE = 'ar-EG' constant per app (mobile lib/date.ts, which also exports fmtDate/fmtDateLong/fmtDateShort helpers that pin bare YYYY-MM-DD strings to LOCAL midnight; web src/lib/format.ts alongside toAr/pct) and swept every 'ar-SA' literal in both apps onto it, including the DateTimePicker's locale prop. ar-EG is Arabic with the Gregorian calendar and Arabic-Indic digits, which is what the UI already assumed. Mobile tsc clean; web tsc shows only the two pre-existing errors (Badge style prop in ParentHomeworkView, sitemap route).",
+      "tags": [
+        "dates",
+        "hijri",
+        "gregorian",
+        "locale",
+        "icu",
+        "ar-SA",
+        "arabic",
+        "mobile",
+        "web",
+        "cross-cutting"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T01:52:55.196403"
+    },
+    {
+      "id": "bug-365",
+      "timestamp": "2026-08-29T01:52:55.196403",
+      "error_message": "User: \"the sheet of the pick سوره and number look very bad (the one you use picker into need to be choosen need to be bold and all the text in middel)\" and \"the sheet of the date must scroll buttom to see the button\"",
+      "file": "quran-hifz-mobile/components/forms/FormSelect.tsx, quran-hifz-mobile/components/forms/FormDatePicker.tsx",
+      "root_cause": "FormSelect's option rows still used the `style={({ pressed }) => [...]}` callback form that bug-360 had already identified as dropping the style on this project's ui Pressable, and the label was a flex:1 start-aligned Text sharing a space-between row with the check icon, so nothing lined up. FormDatePicker laid the إلغاء/تم row out after the calendar, so any month whose inline picker overshot the sheet's measured height pushed the confirm button below the fold.",
+      "fix": "FormSelect: plain array style, label centred between two equal 22pt slots (the check fills one, so the label stays on the row's centre line without absolute positioning, whose left/right Yoga swaps under forceRTL), selected row bold + green + a stronger tint, header title centred with a spacer mirroring the close button, and rawContent + an insets-aware list paddingBottom. FormDatePicker: إلغاء/تم moved into a pinned BottomSheetFooter via footerComponent, with enableFooterMarginAdjustment on BottomSheetView so dynamic sizing still measures tall enough for it.",
+      "tags": [
+        "mobile",
+        "bottom-sheet",
+        "formselect",
+        "datepicker",
+        "rtl",
+        "layout",
+        "pressable",
+        "style-callback"
+      ],
+      "related_bugs": [
+        "bug-357",
+        "bug-360",
+        "bug-361",
+        "bug-363"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T01:52:55.196403"
+    },
+    {
+      "id": "bug-366",
+      "timestamp": "2026-08-29T01:56:36.088792",
+      "error_message": "User (screenshot of teacher/track-detail): the توزيع الأيام والصفحات row renders as a vertical stack — calendar chip, title, \"3 يوم\" and chevron each on their own line. \"those need to be beside each other not under each other\"",
+      "file": "quran-hifz-mobile/components/ui/SheetTriggerRow.tsx, components/domain/MasjidAccordion.tsx, app/index.tsx, app/(portal)/student/messages.tsx",
+      "root_cause": "`style={({ pressed }) => [...]}` again. CONFIRMS AND CORRECTS bug-360, which blamed components/ui/Pressable: the real cause is NativeWind. The app sets jsxImportSource: 'nativewind', and its JSX interop drops function-valued `style` on native, so the component renders with NO style — SheetTriggerRow lost its flexDirection:'row' and collapsed to the default column. components/ui/Button.tsx already documented this exact cause (its coloured box is a plain View for the same reason) but the note never made it into cerebrum, so the form kept getting written.",
+      "fix": "Swept every remaining function-style Pressable in the app onto plain array styles (SheetTriggerRow, MasjidAccordion, app/index.tsx child cards, student/messages rows) and deleted the now-unreachable rowPressed/triggerPressed/cardPressed/msgPressed styles — the press-in haptic is the feedback. Recorded the NativeWind root cause in cerebrum Do-Not-Repeat. tsc clean.",
+      "tags": [
+        "mobile",
+        "nativewind",
+        "pressable",
+        "style-callback",
+        "layout",
+        "flexdirection",
+        "jsx-interop"
+      ],
+      "related_bugs": [
+        "bug-360",
+        "bug-365"
+      ],
+      "occurrences": 3,
+      "last_seen": "2026-08-29T01:56:36.088792"
+    },
+    {
+      "id": "bug-367",
+      "timestamp": "2026-08-29T01:56:36.088792",
+      "error_message": "User: \"remove the bg from تفاصيل المسار and all those who had bg in the top like that\" — the hand-rolled screen headers rendered as a white bar sitting on the page surface",
+      "file": "quran-hifz-mobile/app/(portal)/{admin,teacher}/track-detail.tsx, app/(portal)/teacher/plan-form.tsx, app/(portal)/teacher/plan-detail.tsx",
+      "root_cause": "Design change, not a defect: the four stack screens that draw their own back-arrow header all shared an identical header style with backgroundColor: theme.card + a 1px bottom border, which read as a separate bar over theme.bg.",
+      "fix": "Dropped backgroundColor and borderBottom from all four; the header now sits directly on the page surface. These are the only hand-rolled headers in the app — every navigator has headerShown: false. NOTE (not fixed, out of scope): all four import the STATIC `theme` rather than useAppTheme(), so they do not respond to the dark-mode toggle.",
+      "tags": [
+        "mobile",
+        "ui",
+        "header",
+        "design",
+        "dark-mode-debt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T01:56:36.088792"
+    },
+    {
+      "id": "bug-368",
+      "timestamp": "2026-08-29T02:06:12.771790",
+      "error_message": "admin students list not mobile friendly: long gold track badge runs off the screen edge, guardian name+email collides with the attendance figure",
+      "file": "quran-hifz-mobile/app/(portal)/admin/students.tsx, quran-hifz-mobile/components/ui/Badge.tsx",
+      "root_cause": "Badge had no flexShrink/maxWidth and its text was unbounded, so a long special-track title overflowed its flex row; the students row packed name+badge and attendance+guardian into two space-between rows with no line budget at phone widths.",
+      "fix": "Badge defaults to numberOfLines=1 with flexShrink:1 + maxWidth:'100%' and accepts numberOfLines/style. Students row restructured: name + attendance tone pill, full-width track chip on its own line, wrapping halqa/masjid/level chips, guardian name and contact on separate ellipsized lines, progress label/percent above the bar.",
+      "tags": [
+        "mobile",
+        "rtl",
+        "layout",
+        "overflow",
+        "badge",
+        "admin-students"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T02:06:12.771790"
+    },
+    {
+      "id": "bug-369",
+      "timestamp": "2026-08-29T02:08:29.273264",
+      "error_message": "alot of things and cards and buttom sheets are white when dark mode",
+      "file": "quran-hifz-mobile/lib/theme.ts (+45 consumers)",
+      "root_cause": "lib/theme.ts exported `const theme = buildTheme('light')` - a LIGHT theme frozen at import time. 45 files imported it and read colours inside a module-scope StyleSheet.create({...}), which runs ONCE on first import, so the light surfaces were baked into the compiled style IDs and no mode toggle could repaint them. Only the 34 files already on useAppTheme() reacted. Compounding it, the pastel tints (greenPale/goldPale/cream) and the Badge/Alert/DataTable palettes lived in the mode-INDEPENDENT `base` object or as inline hex, so even a reactive component still painted light pastels in dark mode.",
+      "fix": "Deleted the static `theme` export entirely so tsc flags every offender (45 errors), moved every mode-dependent colour out of `base` into light/darkSurfaces, added mode-aware tokens (cardAlt, inputBg, overlay, greenAccent, and a shared `tone` bg/border/text map for green/gold/red/blue/gray), then converted all 45 files to `const theme = useAppTheme()` + `useMemo(() => createStyles(theme), [theme])`. Also swept hardcoded '#fff'/'#F0FDF4' surfaces, the four tab bars (backgroundColor theme.white -> theme.card), and every `backgroundColor: theme.green` fill -> theme.greenAccent (the brand green is near-black and vanishes on a dark surface).",
+      "tags": [
+        "dark-mode",
+        "theming",
+        "react-native",
+        "stylesheet",
+        "module-scope",
+        "frozen-theme",
+        "useAppTheme"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T02:08:29.273264"
+    },
+    {
+      "id": "bug-370",
+      "timestamp": "2026-08-29T02:12:43.201992",
+      "error_message": "admin special tracks on mobile deleted a track immediately on tapping حذف, with no confirmation",
+      "file": "quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
+      "root_cause": "The list row wired the delete Pressable straight to deleteTrack.mutate(t._id); the web page's confirm dialog was never ported.",
+      "fix": "Added a deleteId state + transparent RN Modal confirm dialog ('حذف المسار — سيُحذف المسار نهائياً ولا يمكن التراجع') matching the web page; the row press only opens it.",
+      "tags": [
+        "mobile",
+        "destructive-action",
+        "confirm-dialog",
+        "special-tracks",
+        "web-parity"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T02:12:43.201992"
+    },
+    {
+      "id": "bug-371",
+      "timestamp": "2026-08-29T09:13:41.576228",
+      "error_message": "parent recordings on mobile never shows the teacher's note, lesson type, or points",
+      "file": "quran-hifz-mobile/lib/queries/parent.ts, quran-hifz-mobile/app/(portal)/parent/recordings.tsx",
+      "root_cause": "mobile ChildRecording declares `notes?` and the screen renders `r.notes`, but the server (LessonRecording.model.ts, parent.controller.getChildRecordings) returns `teacherNote`, plus `type` and `points` which the mobile type omits entirely. The wrong field name is type-clean because the type itself is wrong.",
+      "fix": "NOT YET FIXED — found during the web/mobile parity audit. Align ChildRecording with the web type (type, segment, points, teacherNote, recordedAt, teacher) and render type badge + points + teacherNote.",
+      "tags": [
+        "mobile",
+        "parent",
+        "lesson-recordings",
+        "type-mismatch",
+        "parity",
+        "open"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T09:13:41.576228"
     }
   ]
 }

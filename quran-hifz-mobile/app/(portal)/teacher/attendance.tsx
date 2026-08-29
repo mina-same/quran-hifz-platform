@@ -31,6 +31,7 @@ import {
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { success, warning, error } from '@/lib/haptics';
+import { AR_LOCALE } from '@/lib/date';
 
 // ── helpers (mirrored from the web page) ───────────────────────────────────
 function surahName(n: number): string {
@@ -57,7 +58,7 @@ function toDateOnly(s: string): string {
   return String(s).slice(0, 10);
 }
 function fmtDate(iso: string): string {
-  return new Date(iso + 'T00:00:00').toLocaleDateString('ar-EG', {
+  return new Date(iso + 'T00:00:00').toLocaleDateString(AR_LOCALE, {
     weekday: 'long', day: 'numeric', month: 'long',
   });
 }
@@ -404,7 +405,7 @@ export default function TeacherAttendance() {
       alignItems: 'center', gap: 1,
       backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
     },
-    dayChipActive: { backgroundColor: theme.green, borderColor: theme.green },
+    dayChipActive: { backgroundColor: theme.greenAccent, borderColor: theme.green },
     dayChipToday: { borderColor: theme.gold },
     dayChipOff: { opacity: 0.4, borderStyle: 'dashed' },
     dayChipWd: { fontSize: 9, fontFamily: theme.fontCairo, color: theme.textMuted },
@@ -694,7 +695,7 @@ export default function TeacherAttendance() {
                         onPress={() => setAttendance(st._id, 'حاضر')}
                         style={[
                           styles.toggle,
-                          !isAbsent && { backgroundColor: theme.green + '20', borderColor: theme.green },
+                          !isAbsent && { backgroundColor: theme.greenPale, borderColor: theme.greenAccent },
                           locked && styles.disabled,
                         ]}
                       >
@@ -773,7 +774,7 @@ export default function TeacherAttendance() {
                                 onPress={() => setScore(st._id, cat, n)}
                                 style={[
                                   styles.scoreChip,
-                                  active && { backgroundColor: theme.green, borderColor: theme.green },
+                                  active && { backgroundColor: theme.greenAccent, borderColor: theme.green },
                                   (isAbsent || locked) && styles.disabled,
                                 ]}
                               >

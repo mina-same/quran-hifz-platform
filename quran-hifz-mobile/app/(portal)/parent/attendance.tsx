@@ -10,6 +10,7 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useParentChildren, useChildAttendance } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { AR_LOCALE } from '@/lib/date';
 
 export default function ParentAttendance() {
   const theme = useAppTheme();
@@ -60,7 +61,7 @@ export default function ParentAttendance() {
           {records.map((r, i) => (
             <View key={r._id} style={[s.row, i > 0 && s.border]}>
               <View style={s.left}>
-                <Text style={s.date}>{new Date(r.date).toLocaleDateString('ar-SA')} — {r.day}</Text>
+                <Text style={s.date}>{new Date(r.date).toLocaleDateString(AR_LOCALE)} — {r.day}</Text>
                 <Text style={s.note}>{r.time}</Text>
               </View>
               <Badge label={r.status} variant={statusVariant(r.status)} />
