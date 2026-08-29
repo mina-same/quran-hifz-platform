@@ -42,15 +42,22 @@ export type ChildHomework = {
 export type ChildGroupHomework = {
   _id: string;
   title: string;
+  description: string;
+  /** Human day label ("الثلاثاء") the teacher set — shown instead of a raw date. */
+  dueDay: string;
   dueDate: string;
 };
 
+/** Mirrors LessonRecording on the server — the note field is `teacherNote`,
+ *  NOT `notes`, and the lesson type and points come with it. */
 export type ChildRecording = {
   _id: string;
   teacher: { _id: string; name: string } | string;
   recordedAt: string;
-  segment?: string;
-  notes?: string;
+  type: string;
+  segment: string;
+  points: number;
+  teacherNote?: string;
 };
 
 export type ChildMessage = {

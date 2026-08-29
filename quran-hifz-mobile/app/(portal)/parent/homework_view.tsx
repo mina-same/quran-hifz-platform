@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
 import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Alert from '@/components/ui/Alert';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
@@ -16,6 +17,8 @@ export default function ParentHomeworkView() {
   const selectedChildId = usePortalStore((s) => s.selectedChildId);
   const { data: children = [] } = useParentChildren();
   const childId = selectedChildId ?? children[0]?._id;
+
+  const childName = children.find((c) => c._id === childId)?.name;
 
   const { data, isLoading, isRefetching, refetch } = useChildHomework(childId);
   const group = data?.group ?? [];
@@ -41,6 +44,8 @@ export default function ParentHomeworkView() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.green} colors={[theme.green]} />
         }
       >
+        <Alert variant="info">واجبات ابنك الجماعية والفردية المُكلَّف بها من المعلم.</Alert>
+
         <Card>
           <CardHeader title="الواجبات الجماعية" />
           {isLoading && <SkeletonRows count={2} rowHeight={44} />}
@@ -48,14 +53,20 @@ export default function ParentHomeworkView() {
           {group.map((hw, i) => (
             <View key={hw._id} style={[s.item, i > 0 && s.border]}>
               <Text style={s.title}>{hw.title}</Text>
-              <Badge label={`الموعد: ${new Date(hw.dueDate).toLocaleDateString(AR_LOCALE)}`} variant="gold" />
+              {!!hw.description && <Text style={s.desc}>{hw.description}</Text>}
+              {/* dueDay is the label the teacher actually set ("الثلاثاء"); the
+                  date is the fallback for older records that lack it. */}
+              <Badge
+                label={`الموعد: ${hw.dueDay || new Date(hw.dueDate).toLocaleDateString(AR_LOCALE)}`}
+                variant="gold"
+              />
             </View>
           ))}
         </Card>
         <Card>
-          <CardHeader title="الواجبات الفردية" />
+          <CardHeader title={childName ? `واجبات خاصة بـ ${childName}` : 'الواجبات الفردية'} />
           {isLoading && <SkeletonRows count={2} rowHeight={44} />}
-          {!isLoading && individual.length === 0 && <Text style={s.muted}>لا توجد واجبات فردية</Text>}
+          {!isLoading && individual.length === 0 && <Text style={s.muted}>لا توجد واجبات فردية حالياً — ممتاز!</Text>}
           {individual.map((hw, i) => (
             <View key={hw._id} style={[s.item, i > 0 && s.border]}>
               <Text style={s.title}>{hw.type} — {hw.segment}</Text>

@@ -428,7 +428,6 @@ function createS(theme: AppTheme) {
     linkPanelTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
     linkRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: theme.border },
     linkRowText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.text, flex: 1 },
-    studentName: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
     joinBtn: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
       backgroundColor: theme.bluePale, borderWidth: 1, borderColor: theme.blue,

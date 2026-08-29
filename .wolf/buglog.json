@@ -6236,7 +6236,7 @@
       "error_message": "parent recordings on mobile never shows the teacher's note, lesson type, or points",
       "file": "quran-hifz-mobile/lib/queries/parent.ts, quran-hifz-mobile/app/(portal)/parent/recordings.tsx",
       "root_cause": "mobile ChildRecording declares `notes?` and the screen renders `r.notes`, but the server (LessonRecording.model.ts, parent.controller.getChildRecordings) returns `teacherNote`, plus `type` and `points` which the mobile type omits entirely. The wrong field name is type-clean because the type itself is wrong.",
-      "fix": "NOT YET FIXED — found during the web/mobile parity audit. Align ChildRecording with the web type (type, segment, points, teacherNote, recordedAt, teacher) and render type badge + points + teacherNote.",
+      "fix": "FIXED 2026-08-29: Align ChildRecording with the web type (type, segment, points, teacherNote, recordedAt, teacher) and render type badge + points + teacherNote.",
       "tags": [
         "mobile",
         "parent",
@@ -6402,6 +6402,82 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-29T12:15:05.900159"
+    },
+    {
+      "id": "bug-380",
+      "timestamp": "2026-08-29T12:24:42.340212",
+      "error_message": "in the المزيد sheet the last rows (تسجيل الخروج) were hidden under the pinned user/theme footer card",
+      "file": "quran-hifz-mobile/components/layout/MoreSheet.tsx, quran-hifz-mobile/components/forms/FormDatePicker.tsx",
+      "root_cause": "The footer was lifted off the bottom edge with <BottomSheetFooter bottomInset={insets.bottom}>. gorhom applies bottomInset as a translateY and records ONLY the footer container's measured height as footerHeight; `enableFooterMarginAdjustment` pads the scroll content by that height alone, so the footer visually occupied footerHeight + insets.bottom and the content was under-padded by exactly the safe-area inset.",
+      "fix": "Dropped bottomInset and moved the safe-area gap inside the footer as paddingBottom (theme.space.md + insets.bottom), so the measured height includes it and the content padding matches what the footer actually covers. Same change applied to FormDatePicker's footer.",
+      "tags": [
+        "mobile",
+        "bottom-sheet",
+        "gorhom",
+        "safe-area",
+        "footer",
+        "layout",
+        "more-sheet"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T12:24:42.340212"
+    },
+    {
+      "id": "bug-381",
+      "timestamp": "2026-08-29T12:35:24.831900",
+      "error_message": "Teacher students page showed only the first halqa's students",
+      "file": "quran-hifz-mobile/app/(portal)/teacher/students.tsx",
+      "root_cause": "useStudents({ halqa: halqat[0]?._id }) — a teacher running more than one halqa lost every student outside halqa #1. The web page joins all halqa ids",
+      "fix": "Fetch with { halqa: halqaIds.join(',') } gated on halqaIds.length, and add the web's كل الطلاب / per-halqa / per-track filter",
+      "tags": [
+        "mobile",
+        "teacher",
+        "students",
+        "data-scoping",
+        "web-parity"
+      ],
+      "related_bugs": [
+        "bug-374"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T12:35:24.831900"
+    },
+    {
+      "error_message": "parent 'مسيرة الحفظ' timeline showed six hardcoded fake milestones instead of the child's real surah records",
+      "file": "quran-hifz-mobile/app/(portal)/parent/timeline.tsx",
+      "root_cause": "The screen shipped with a module-scope TL array of mock events (محرم ١٤٤٦ … ذو الحجة ١٤٤٦) and never called useChildHifz — every parent saw identical invented data.",
+      "fix": "Rebuilt on useChildHifz: one node per surah with its real status (مكتمل/جارٍ/لم يبدأ), notes and completion date, drawn as a rail-and-dot timeline.",
+      "tags": [
+        "mobile",
+        "parent",
+        "mock-data",
+        "timeline",
+        "parity"
+      ],
+      "id": "bug-382",
+      "timestamp": "2026-08-29T12:38:56.813914",
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T12:38:56.813914"
+    },
+    {
+      "error_message": "a parent with more than one child could not switch child after login on mobile",
+      "file": "quran-hifz-mobile/app/(portal)/parent/dashboard.tsx",
+      "root_cause": "components/domain/ChildSelector.tsx exists and its own doc says it belongs at the top of the parent dashboard, but it was never mounted there — the child was only chosen once in the post-login modal in app/index.tsx, so switching meant logging out.",
+      "fix": "Rendered <ChildSelector /> at the top of the parent dashboard; it hides itself for single-child parents, matching the web's 'تغيير الابن' topbar button.",
+      "tags": [
+        "mobile",
+        "parent",
+        "navigation",
+        "child-selector",
+        "parity"
+      ],
+      "id": "bug-383",
+      "timestamp": "2026-08-29T12:38:56.813914",
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-29T12:38:56.813914"
     }
   ]
 }

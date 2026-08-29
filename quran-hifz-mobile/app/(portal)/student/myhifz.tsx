@@ -47,6 +47,16 @@ export default function StudentHifz() {
         safe: { flex: 1, backgroundColor: theme.bg },
         page: { padding: theme.pagePadding, gap: 14 },
         summaryRow: { flexDirection: "row", gap: 12, marginBottom: 14 },
+        goalBlock: { alignItems: "center", gap: 6, paddingVertical: 4 },
+        goalNumber: { fontSize: 44, fontFamily: theme.fontCairoBold, color: theme.green, lineHeight: 54 },
+        goalCaption: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
+        goalBar: { alignSelf: "stretch", marginVertical: 8 },
+        lastRow: {
+          flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+          gap: 10, marginBottom: 12,
+        },
+        lastValue: { flex: 1, fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, textAlign: "left" },
+        surahNum: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
         summaryItem: { flex: 1, gap: 4 },
         summaryLabel: {
           fontSize: 12,
@@ -115,6 +125,7 @@ export default function StudentHifz() {
   const remaining = student
     ? Math.max(student.totalPages - student.progressPages, 0)
     : 0;
+  const totalPages = student?.totalPages || 604;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
@@ -136,6 +147,20 @@ export default function StudentHifz() {
 
         {/* Summary card */}
         <Card>
+          <CardHeader title="هدفي السنوي" />
+          {student && (
+            <View style={styles.goalBlock}>
+              <Text style={styles.goalNumber}>{student.progressPages}</Text>
+              <Text style={styles.goalCaption}>صفحة من أصل {totalPages}</Text>
+              <View style={styles.goalBar}>
+                <ProgressBar value={student.progressPct} showPercent={false} />
+              </View>
+              <Badge label={`${Math.round(student.progressPct)}٪ منجز`} variant="green" />
+            </View>
+          )}
+        </Card>
+
+        <Card>
           <CardHeader title="ملخص خطة الحفظ" />
           {student && (
             <View style={styles.summaryRow}>
@@ -153,6 +178,12 @@ export default function StudentHifz() {
               </View>
             </View>
           )}
+          {!!student?.lastMemorization && (
+            <View style={styles.lastRow}>
+              <Text style={styles.summaryLabel}>آخر حفظ</Text>
+              <Text style={styles.lastValue} numberOfLines={1}>{student.lastMemorization}</Text>
+            </View>
+          )}
           <View style={styles.pctRow}>
             <Text style={styles.pctLabel}>السور المكتملة</Text>
             <Text style={styles.pctVal}>
@@ -166,7 +197,7 @@ export default function StudentHifz() {
         {/* Card-list */}
         <Card noPadding>
           <CardHeader
-            title="تفاصيل السور"
+            title="تفاصيل الحفظ"
             style={{ padding: 16, paddingBottom: 8 }}
           />
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
@@ -185,6 +216,7 @@ export default function StudentHifz() {
                   ]}
                 >
                   <View style={styles.rowHead}>
+                    <Text style={styles.surahNum}>{entry.surahNumber}</Text>
                     <Text style={styles.name} numberOfLines={1}>
                       {entry.surah}
                     </Text>

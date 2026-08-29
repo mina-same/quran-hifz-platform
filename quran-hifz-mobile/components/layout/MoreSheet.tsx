@@ -84,9 +84,13 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
   // survives regardless of how the content lays out — the previous version was a
   // flex sibling inside BottomSheetView and got pushed off the bottom edge.
   const renderFooter = useCallback(
+    // The safe-area gap is PADDING INSIDE the footer, not `bottomInset`: the
+    // library measures only the footer container's own height and feeds that to
+    // `enableFooterMarginAdjustment`, so an inset applied as a translate leaves
+    // the last rows sitting under the footer card.
     (props: BottomSheetFooterProps) => (
-      <BottomSheetFooter {...props} bottomInset={insets.bottom}>
-        <View style={styles.footer}>
+      <BottomSheetFooter {...props}>
+        <View style={[styles.footer, { paddingBottom: theme.space.md + insets.bottom }]}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{user?.initials}</Text>
           </View>
@@ -104,7 +108,7 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
         </View>
       </BottomSheetFooter>
     ),
-    [insets.bottom, styles, user, themeMode, toggleTheme, theme.textMuted],
+    [insets.bottom, styles, user, themeMode, toggleTheme, theme.textMuted, theme.space.md],
   );
 
   return (

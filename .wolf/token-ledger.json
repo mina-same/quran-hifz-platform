@@ -2,9 +2,9 @@
   "version": 1,
   "created_at": "2026-06-27T12:42:49.696Z",
   "lifetime": {
-    "total_tokens_estimated": 11529656,
+    "total_tokens_estimated": 11530103,
     "total_reads": 5055,
-    "total_writes": 6356,
+    "total_writes": 6359,
     "total_sessions": 110,
     "anatomy_hits": 4303,
     "anatomy_misses": 608,
@@ -65689,6 +65689,69 @@
       "id": "session-2026-08-29-1202",
       "started": "2026-08-29T09:02:00.705Z",
       "ended": "2026-08-29T09:15:22.437Z",
+      "reads": [],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/DaySlider.tsx",
+          "tokens_estimated": 149,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 149,
+        "reads_count": 0,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-08-29-1202",
+      "started": "2026-08-29T09:02:00.705Z",
+      "ended": "2026-08-29T09:24:58.782Z",
+      "reads": [],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/DaySlider.tsx",
+          "tokens_estimated": 149,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 149,
+        "reads_count": 0,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-08-29-1202",
+      "started": "2026-08-29T09:02:00.705Z",
+      "ended": "2026-08-29T09:36:02.917Z",
+      "reads": [],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/DaySlider.tsx",
+          "tokens_estimated": 149,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 149,
+        "reads_count": 0,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-08-29-1202",
+      "started": "2026-08-29T09:02:00.705Z",
+      "ended": "2026-08-29T09:39:28.037Z",
       "reads": [],
       "writes": [
         {

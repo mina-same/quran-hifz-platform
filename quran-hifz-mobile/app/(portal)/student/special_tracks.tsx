@@ -1,16 +1,24 @@
-import { useMemo } from 'react';
-import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
+import { useMemo, useState } from 'react';
+import { ScrollView, View, RefreshControl, StyleSheet, Linking } from 'react-native';
+import { IconChevronDown, IconChevronUp, IconTarget, IconVideo } from '@tabler/icons-react-native';
 import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { useSpecialTracks, type SpecialTrack, type TrackTeacher } from '@/lib/queries/specialTracks';
+import { useQuranPlans } from '@/lib/queries/quranPlan';
+import { SURAHS } from '@/lib/data/surahs';
+import { isReversedRange, orientSlice } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { AR_LOCALE } from '@/lib/date';
 
 function getTeacherName(v: TrackTeacher | string) {
   return typeof v === 'object' ? v.name : v;
+}
+function surahName(n: number) {
+  return SURAHS.find((su) => su.number === n)?.name ?? '';
 }
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString(AR_LOCALE, { year: 'numeric', month: 'long', day: 'numeric' });
@@ -25,6 +33,17 @@ const STATUS_VARIANT: Record<SpecialTrack['status'], 'green' | 'gold' | 'red'> =
 function TrackCard({ track }: { track: SpecialTrack }) {
   const theme = useAppTheme();
   const remaining = daysLeft(track.endDate);
+  const [planOpen, setPlanOpen] = useState(false);
+  // The track's own Quran plan — where "مقرَّر اليوم" comes from.
+  const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: track._id });
+  const linkedPlan = linkedPlans[0];
+
+  const todayText = (() => {
+    if (!linkedPlan?.todayAssignment) return 'لا يوجد جزء مخصص لليوم';
+    const a = orientSlice(linkedPlan.todayAssignment, isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd));
+    const pages = a.pageEnd !== a.pageStart ? `${a.pageStart} - ${a.pageEnd}` : `${a.pageStart}`;
+    return `مقرَّر اليوم: ${surahName(a.surahStart)} : ${a.ayahStart} — ${surahName(a.surahEnd)} : ${a.ayahEnd} (صفحة ${pages})`;
+  })();
 
   const s = useMemo(() => StyleSheet.create({
     headRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
@@ -38,7 +57,22 @@ function TrackCard({ track }: { track: SpecialTrack }) {
     dateBox: { backgroundColor: theme.bg, borderRadius: 10, padding: 10, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
     dateText: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
     dateRemaining: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.textMuted },
-    meetLink: { fontSize: 11, color: theme.blue, fontFamily: theme.fontCairo, marginBottom: 8 },
+    joinBtn: {
+      flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start',
+      backgroundColor: theme.tone.blue.bg, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 7, marginBottom: 8,
+    },
+    joinText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.tone.blue.text },
+    planBox: { backgroundColor: theme.cardAlt, borderRadius: 10, padding: 12, marginBottom: 8 },
+    planHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    planLabel: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 },
+    planName: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.textMuted, flexShrink: 1 },
+    planPct: { backgroundColor: theme.greenAccent, borderRadius: theme.radiusFull, paddingHorizontal: 8, paddingVertical: 1 },
+    planPctText: { fontSize: 10, fontFamily: theme.fontCairoBold, color: theme.white },
+    planDetail: { marginTop: 8, gap: 4 },
+    planTrack: { height: 6, backgroundColor: theme.border, borderRadius: 999, overflow: 'hidden' },
+    planFill: { height: '100%', borderRadius: 999, backgroundColor: theme.mode === 'dark' ? theme.greenLight : theme.green },
+    planMeta: { fontSize: 10, fontFamily: theme.fontCairo, color: theme.textMuted },
+    planToday: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.text },
     notes: { fontSize: 12, color: theme.brown, backgroundColor: theme.goldPale, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo },
   }), [theme]);
 
@@ -80,8 +114,49 @@ function TrackCard({ track }: { track: SpecialTrack }) {
         )}
       </View>
 
-      {track.isOnline && track.meetLink && track.status === 'active' && (
-        <Text style={s.meetLink}>رابط الجلسة: {track.meetLink}</Text>
+      {!!linkedPlan && (
+        <View style={[s.planBox, !!linkedPlan.todayAssignment && { backgroundColor: theme.greenPale }]}>
+          <Pressable haptic="select" style={s.planHead} onPress={() => setPlanOpen((o) => !o)}>
+            <View style={s.planLabel}>
+              <IconTarget size={14} color={linkedPlan.todayAssignment ? theme.green : theme.textMuted} />
+              <Text style={[s.planName, !!linkedPlan.todayAssignment && { color: theme.green }]} numberOfLines={1}>
+                {linkedPlan.name}
+              </Text>
+              {!!linkedPlan.progress && (
+                <View style={s.planPct}>
+                  <Text style={s.planPctText}>{linkedPlan.progress.percent}%</Text>
+                </View>
+              )}
+            </View>
+            {planOpen
+              ? <IconChevronUp size={14} color={theme.textMuted} />
+              : <IconChevronDown size={14} color={theme.textMuted} />}
+          </Pressable>
+
+          {planOpen && (
+            <View style={s.planDetail}>
+              {!!linkedPlan.progress && (
+                <>
+                  <View style={s.planTrack}>
+                    <View style={[s.planFill, { width: `${linkedPlan.progress.percent}%` }]} />
+                  </View>
+                  <Text style={s.planMeta}>
+                    {linkedPlan.juzProgress ? `${linkedPlan.juzProgress.completed} / ${linkedPlan.juzProgress.total} جزء · ` : ''}
+                    {linkedPlan.progress.completed} / {linkedPlan.progress.total} يوم
+                  </Text>
+                </>
+              )}
+              <Text style={s.planToday}>{todayText}</Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      {track.isOnline && !!track.meetLink && track.status === 'active' && (
+        <Pressable style={s.joinBtn} onPress={() => Linking.openURL(track.meetLink!)}>
+          <IconVideo size={14} color={theme.tone.blue.text} />
+          <Text style={s.joinText}>انضم للجلسة الآن</Text>
+        </Pressable>
       )}
 
       {track.notes && <Text style={s.notes}>{track.notes}</Text>}
@@ -99,6 +174,7 @@ export default function StudentSpecialTracks() {
     page: { padding: theme.pagePadding, gap: 14 },
     muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
     sectionTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 6 },
+    mutedSmall: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', marginTop: -14 },
   }), [theme]);
 
   const active = tracks.filter((t) => t.status === 'active');
@@ -117,7 +193,10 @@ export default function StudentSpecialTracks() {
         {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
 
         {!isLoading && tracks.length === 0 && (
-          <Text style={s.muted}>لم تُسجَّل في أي مسار بعد</Text>
+          <>
+            <Text style={s.muted}>لم تُسجَّل في أي مسار بعد</Text>
+            <Text style={s.mutedSmall}>تواصل مع معلمك أو الإدارة للانضمام إلى أحد البرامج</Text>
+          </>
         )}
 
         {active.length > 0 && (

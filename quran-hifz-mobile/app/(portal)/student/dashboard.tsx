@@ -62,10 +62,16 @@ export default function StudentDashboard() {
 
   const submittedCount = homework.filter((h) => h.status === 'مراجع').length;
 
+  const juz = Math.round((student.progressPct / 100) * 30);
+  // Same badge the web shows: strong attendance AND real progress.
+  const isTopStudent = student.attendancePct >= 90 && student.progressPct >= 60;
+  const halqaObj = typeof student.halqa === 'object' ? student.halqa : null;
+  const halqaSchedule = halqaObj?.days && halqaObj?.time ? `${halqaObj.days} | ${halqaObj.time}` : null;
+
   const STATS = [
-    { label: 'صفحات محفوظة', value: student.progressPages, color: theme.green },
-    { label: 'نسبة الحضور', value: `${student.attendancePct}٪`, color: theme.gold },
-    { label: 'واجبات مراجعة', value: submittedCount, color: theme.blue },
+    { label: 'جزءاً محفوظاً', value: juz, color: theme.green },
+    { label: 'نسبة حضوري', value: `${student.attendancePct}٪`, color: theme.gold },
+    { label: 'واجبات أرسلتها', value: submittedCount, color: theme.blue },
     { label: 'نسبة الإنجاز', value: `${student.progressPct}٪`, color: theme.red },
   ];
 
@@ -86,9 +92,9 @@ export default function StudentDashboard() {
 
         <StatsRow stats={STATS} />
 
-        <View style={styles.twoCol}>
+        <View style={styles.stack}>
           {/* Current plan */}
-          <Card style={styles.half}>
+          <Card>
             <CardHeader title="خطتي الحالية" />
             <View style={styles.planCenter}>
               <Text style={styles.planLabel}>التقدم نحو الهدف السنوي</Text>
@@ -99,6 +105,7 @@ export default function StudentDashboard() {
               <Text style={styles.planNote}>
                 {student.progressPages} صفحة من {student.totalPages} صفحة
               </Text>
+              <Text style={styles.planNote}>{juz} جزء من ٣٠ جزء المستهدف</Text>
               <View style={styles.planBadge}>
                 <Badge label={student.path} variant="green" />
               </View>
@@ -112,7 +119,7 @@ export default function StudentDashboard() {
           </Card>
 
           {/* Halqa info */}
-          <Card style={styles.half}>
+          <Card>
             <CardHeader title="معلومات حلقتي" />
             <View style={styles.infoRow}>
               <Text style={styles.infoKey}>الحلقة</Text>
@@ -122,6 +129,17 @@ export default function StudentDashboard() {
               <Text style={styles.infoKey}>المسجد</Text>
               <Text style={styles.infoVal}>{getName(student.masjid)}</Text>
             </View>
+            {!!halqaSchedule && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>المواعيد</Text>
+                <Text style={styles.infoVal}>{halqaSchedule}</Text>
+              </View>
+            )}
+            {isTopStudent && (
+              <View style={styles.topAlert}>
+                <Alert variant="success">أنت من أفضل طلاب الحلقة هذا الأسبوع!</Alert>
+              </View>
+            )}
           </Card>
         </View>
 
@@ -154,8 +172,8 @@ function createStyles(theme: AppTheme) {
   return StyleSheet.create({
     safe:  { flex: 1, backgroundColor: theme.bg },
     page:  { padding: theme.pagePadding, gap: 14 },
-    twoCol:{ flexDirection: 'row', gap: 12 },
-    half:  { flex: 1 },
+    stack: { gap: 14 },
+    topAlert: { marginTop: 10 },
     planCenter: { alignItems: 'center', paddingVertical: 8 },
     planLabel: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted, marginBottom: 4 },
     planPct: { fontSize: 30, fontFamily: theme.fontCairoBold, color: theme.green },

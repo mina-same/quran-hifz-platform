@@ -6,6 +6,7 @@ import AyahBar from '@/components/ui/AyahBar';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
+import Alert from '@/components/ui/Alert';
 import AudioRecorder from '@/components/domain/AudioRecorder';
 import { useHomework } from '@/lib/queries/homework';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -66,6 +67,9 @@ export default function StudentHomework() {
         </Card>
 
         {/* Recorder */}
+        <Alert variant="warning">
+          التسجيل مرة واحدة فقط — يُرسل تلقائياً لأستاذك وولي أمرك فور الإرسال، ولا يمكن إعادته إلا بإذن الأستاذ.
+        </Alert>
         <Card>
           <CardHeader title="تسجيل التلاوة" />
           <AudioRecorder />

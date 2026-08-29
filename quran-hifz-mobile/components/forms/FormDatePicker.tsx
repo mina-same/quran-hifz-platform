@@ -69,9 +69,11 @@ export default function FormDatePicker({
   // month and per calendar system, and any of those that overshot the sheet's
   // measured height used to push "تم" below the visible edge.
   const renderFooter = useCallback(
+    // Safe-area space lives inside the footer's padding, not in `bottomInset` —
+    // see the note in MoreSheet: only the container's measured height counts.
     (props: BottomSheetFooterProps) => (
-      <BottomSheetFooter {...props} bottomInset={insets.bottom}>
-        <View style={styles.footer}>
+      <BottomSheetFooter {...props}>
+        <View style={[styles.footer, { paddingBottom: theme.space.sm + insets.bottom }]}>
           <View style={styles.footerBtn}>
             <Button label="إلغاء" variant="ghost" fullWidth onPress={() => setOpen(false)} />
           </View>
@@ -81,7 +83,7 @@ export default function FormDatePicker({
         </View>
       </BottomSheetFooter>
     ),
-    [insets.bottom, styles, draft, onChange],
+    [insets.bottom, styles, draft, onChange, theme.space.sm],
   );
 
   return (

@@ -8,6 +8,7 @@ import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useAttendance } from '@/lib/queries/attendance';
+import { useStudent } from '@/lib/queries/students';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { AR_LOCALE } from '@/lib/date';
@@ -16,6 +17,7 @@ export default function StudentAttendance() {
   const theme = useAppTheme();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
   const { data: records = [], isLoading, isRefetching, refetch } = useAttendance({ student: profileId });
+  const { data: student } = useStudent(profileId);
 
   const styles = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },
@@ -31,13 +33,16 @@ export default function StudentAttendance() {
 
   const present = records.filter((r) => r.status === 'حاضر').length;
   const absent = records.filter((r) => r.status === 'غائب').length;
-  const pct = records.length > 0 ? Math.round((present / records.length) * 100) : 0;
+  const late = records.filter((r) => r.status === 'متأخر').length;
+  // Prefer the server's own figure (it spans the whole enrolment, not just the
+  // records fetched here) and fall back to the local ratio.
+  const pct = student?.attendancePct ?? (records.length > 0 ? Math.round((present / records.length) * 100) : 0);
 
   const STATS = [
-    { label: 'إجمالي الجلسات', value: records.length, color: theme.green },
-    { label: 'حضور', value: present, color: theme.gold },
-    { label: 'غياب', value: absent, color: theme.red },
-    { label: 'نسبة الحضور', value: `${pct}٪`, color: theme.blue },
+    { label: 'نسبة حضوري', value: `${pct}٪`, color: theme.green },
+    { label: 'جلسة حضرتها', value: present, color: theme.gold },
+    { label: 'غيابات', value: absent, color: theme.red },
+    { label: 'تأخيرات', value: late, color: theme.blue },
   ];
 
   const statusBadge = (s: string) => {
@@ -57,7 +62,7 @@ export default function StudentAttendance() {
       >
         <StatsRow stats={STATS} />
         <Card noPadding>
-          <CardHeader title="سجل الحضور" style={{ padding: 16, paddingBottom: 8 }} />
+          <CardHeader title="سجل حضوري" style={{ padding: 16, paddingBottom: 8 }} />
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
             {isLoading && <SkeletonRows count={5} />}
             {!isLoading && records.length === 0 && <Text style={styles.empty}>لا توجد سجلات حضور بعد</Text>}

@@ -6,7 +6,10 @@ export type Student = {
   name: string;
   path: string;
   level?: number;
-  halqa: { _id: string; name: string; specialTrack?: { _id: string; title: string } | string } | string;
+  /** Populated with `name teacher time days capacity` by the server. */
+  halqa:
+    | { _id: string; name: string; time?: string; days?: string; specialTrack?: { _id: string; title: string } | string }
+    | string;
   masjid: { _id: string; name: string } | string;
   attendancePct: number;
   progressPct: number;

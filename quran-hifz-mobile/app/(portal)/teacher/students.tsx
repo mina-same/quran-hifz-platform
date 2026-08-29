@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,8 +9,10 @@ import Alert from '@/components/ui/Alert';
 import ProgressBar from '@/components/ui/ProgressBar';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import { usePortalStore } from '@/lib/store/portalStore';
+import ScopeTabs from '@/components/ui/ScopeTabs';
 import { useHalqat } from '@/lib/queries/halqat';
 import { useStudents } from '@/lib/queries/students';
+import { useSpecialTracks } from '@/lib/queries/specialTracks';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 const hwVariant = (s: string) =>
@@ -27,22 +29,70 @@ function getName(v: { _id: string; name: string } | string | undefined): string 
 export default function TeacherStudents() {
   const theme = useAppTheme();
   const authUser = usePortalStore((s) => s.authUser);
-  // Teachers may run several halqat — mirrors the web TeacherStudents page,
-  // which scopes the list to the teacher's first halqa.
+  // "all" | "halqa:<id>" | "track:<id>", same filter vocabulary as the web page.
+  const [filter, setFilter] = useState('all');
+
   const { data: halqat = [], refetch: refetchHalqat, isRefetching: refetchingHalqat } = useHalqat({ teacher: authUser?.profileId });
-  const firstHalqaId = halqat[0]?._id;
+  // A teacher can run several halqat — fetch across all of them, not just the
+  // first, or every student outside halqa #1 silently disappears.
+  const halqaIds = useMemo(() => halqat.map((h) => h._id), [halqat]);
   const {
     data: students = [],
     isLoading,
     isError,
     refetch: refetchStudents,
     isRefetching: refetchingStudents,
-  } = useStudents({ halqa: firstHalqaId });
+  } = useStudents({ halqa: halqaIds.join(',') }, { enabled: halqaIds.length > 0 });
 
-  const isRefreshing = refetchingHalqat || refetchingStudents;
+  const {
+    data: myTracks = [], refetch: refetchTracks, isRefetching: refetchingTracks,
+  } = useSpecialTracks(undefined, authUser?.profileId);
+
+  // studentId -> the titles of this teacher's tracks they're enrolled in,
+  // counting both direct enrollment and the track their halqa hangs off.
+  const studentTracks = useMemo(() => {
+    const map = new Map<string, string[]>();
+    const push = (id: string, title: string) => {
+      const cur = map.get(id) ?? [];
+      if (!cur.includes(title)) map.set(id, [...cur, title]);
+    };
+    for (const t of myTracks) {
+      for (const es of t.enrolledStudents) push(typeof es === 'object' ? es._id : es, t.title);
+    }
+    for (const h of halqat) {
+      const ref = h.specialTrack;
+      if (!ref || typeof ref !== 'object') continue;
+      for (const st of students) {
+        const sh = st.halqa;
+        if ((typeof sh === 'object' ? sh?._id : sh) === h._id) push(st._id, ref.title);
+      }
+    }
+    return map;
+  }, [myTracks, halqat, students]);
+
+  const filterOptions = useMemo(() => [
+    { value: 'all', label: 'كل الطلاب' },
+    ...halqat.map((h) => ({ value: `halqa:${h._id}`, label: h.name })),
+    ...myTracks.map((t) => ({ value: `track:${t._id}`, label: t.title })),
+  ], [halqat, myTracks]);
+
+  const shown = useMemo(() => {
+    if (filter.startsWith('halqa:')) {
+      const id = filter.slice(6);
+      return students.filter((st) => (typeof st.halqa === 'object' ? st.halqa?._id : st.halqa) === id);
+    }
+    if (filter.startsWith('track:')) {
+      const title = myTracks.find((t) => t._id === filter.slice(6))?.title;
+      return title ? students.filter((st) => (studentTracks.get(st._id) ?? []).includes(title)) : [];
+    }
+    return students;
+  }, [students, filter, myTracks, studentTracks]);
+
+  const isRefreshing = refetchingHalqat || refetchingStudents || refetchingTracks;
   const onRefresh = () => {
     refetchHalqat();
     refetchStudents();
+    refetchTracks();
   };
 
   const styles = useMemo(() => StyleSheet.create({
@@ -54,6 +104,8 @@ export default function TeacherStudents() {
     name: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
     muted: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
     infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    trackRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    filterLabel: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.textMuted },
     infoItem: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
     progressWrap: { gap: 4 },
     empty: { textAlign: 'center', color: theme.textMuted, fontFamily: theme.fontCairo, fontSize: 13, paddingVertical: 24 },
@@ -68,16 +120,24 @@ export default function TeacherStudents() {
       >
         {isError && <Alert variant="error">تعذر تحميل الطلاب</Alert>}
 
+        {filterOptions.length > 1 && (
+          <View style={{ gap: 6 }}>
+            <Text style={styles.filterLabel}>تصفية الطلاب</Text>
+            <ScopeTabs options={filterOptions} value={filter} onChange={setFilter} />
+          </View>
+        )}
+
         <Card noPadding>
-          <CardHeader title={`الطلاب (${students.length})`} style={{ padding: 16, paddingBottom: 8 }} />
+          <CardHeader title={`الطلاب (${shown.length})`} style={{ padding: 16, paddingBottom: 8 }} />
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
             {isLoading && <SkeletonRows count={5} />}
-            {!isLoading && students.length === 0 && <Text style={styles.empty}>لا يوجد طلاب</Text>}
+            {!isLoading && shown.length === 0 && <Text style={styles.empty}>لا يوجد طلاب</Text>}
 
-            {!isLoading && students.map((s, i) => {
+            {!isLoading && shown.map((s, i) => {
               const guardianName = s.parentName || s.guardian || '—';
+              const tracks = studentTracks.get(s._id) ?? [];
               return (
-                <View key={s._id} style={[styles.row, i < students.length - 1 && styles.rowBorder]}>
+                <View key={s._id} style={[styles.row, i < shown.length - 1 && styles.rowBorder]}>
                   <View style={styles.rowHead}>
                     <Text style={styles.name} numberOfLines={1}>{s.name}</Text>
                     <Badge label={hwLabel(s.homeworkStatus)} variant={hwVariant(s.homeworkStatus) as any} />
@@ -88,6 +148,12 @@ export default function TeacherStudents() {
                     <Text style={styles.infoItem}>·</Text>
                     <Text style={styles.infoItem}>آخر حفظ: {s.lastMemorization || '—'}</Text>
                   </View>
+
+                  {tracks.length > 0 && (
+                    <View style={styles.trackRow}>
+                      {tracks.map((t) => <Badge key={t} label={t} variant="green" />)}
+                    </View>
+                  )}
 
                   <View style={styles.rowHead}>
                     <Text style={[styles.muted, { color: s.attendancePct >= 90 ? theme.green : theme.red, fontFamily: theme.fontCairoBold }]}>

@@ -69,9 +69,13 @@ export default function TeacherPlanForm() {
   const router = useRouter();
   const params = useLocalSearchParams<{ mode?: string; id?: string; halqaId?: string }>();
   const isEdit = params.mode === 'edit' && !!params.id;
+  // Duplicate prefills from an existing plan but saves as a new one, matching
+  // the web's "نسخ الخطة" handoff.
+  const isDuplicate = params.mode === 'duplicate' && !!params.id;
+  const prefillFrom = isEdit || isDuplicate ? params.id : undefined;
   const profileId = usePortalStore((s) => s.authUser?.profileId);
 
-  const { data: existingPlan } = useQuranPlan(isEdit ? params.id : undefined);
+  const { data: existingPlan } = useQuranPlan(prefillFrom);
   const { data: halqat = [] } = useHalqat({ teacher: profileId });
 
   const createPlan = useCreateQuranPlan();
@@ -91,9 +95,9 @@ export default function TeacherPlanForm() {
   const [lockedTarget, setLockedTarget] = useState<{ targetType: string; label: string } | null>(null);
 
   useEffect(() => {
-    if (isEdit && existingPlan && !prefilled) {
+    if (prefillFrom && existingPlan && !prefilled) {
       setForm({
-        name: existingPlan.name,
+        name: isDuplicate ? `${existingPlan.name} (نسخة)` : existingPlan.name,
         type: existingPlan.type,
         description: existingPlan.description ?? '',
         halqa: existingPlan.targetType === 'halqa'
@@ -116,7 +120,7 @@ export default function TeacherPlanForm() {
       }
       setPrefilled(true);
     }
-  }, [isEdit, existingPlan, prefilled]);
+  }, [prefillFrom, isDuplicate, existingPlan, prefilled]);
 
   function sf<K extends keyof FormFields>(k: K, v: FormFields[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -209,7 +213,7 @@ export default function TeacherPlanForm() {
         <Pressable onPress={() => router.back()} hitSlop={10}>
           <IconArrowRight size={22} color={theme.text} />
         </Pressable>
-        <Text style={s.headerTitle}>{isEdit ? 'تعديل الخطة' : 'خطة حفظ جديدة'}</Text>
+        <Text style={s.headerTitle}>{isEdit ? 'تعديل الخطة' : isDuplicate ? 'نسخ الخطة' : 'خطة حفظ جديدة'}</Text>
         <View style={{ width: 22 }} />
       </View>
 
@@ -382,7 +386,7 @@ export default function TeacherPlanForm() {
         />
 
         <Button
-          label={isPending ? 'جارٍ الحفظ...' : isEdit ? 'حفظ التعديلات' : 'إنشاء الخطة'}
+          label={isPending ? 'جارٍ الحفظ...' : isEdit ? 'حفظ التعديلات' : isDuplicate ? 'إنشاء النسخة' : 'إنشاء الخطة'}
           onPress={handleSubmit}
           disabled={isPending}
           fullWidth

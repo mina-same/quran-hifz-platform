@@ -4,9 +4,7 @@ import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-  IconCircleCheck, IconChevronDown, IconChevronUp,
-  IconLock, IconClock, IconCalendarOff, IconBook2, IconDeviceFloppy, IconEdit,
-  IconCheck, IconX, IconTrophy, IconCalendarCheck, IconHistory, IconMedal,
+  IconClock, IconCalendarOff, IconTrophy, IconCalendarCheck, IconHistory, IconMedal,
 } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
@@ -16,42 +14,17 @@ import Button from '@/components/ui/Button';
 import Leaderboard, { type LeaderboardRow } from '@/components/ui/Leaderboard';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import ContextCard, { halqaToContext, trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
-import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import DaySlider, { useDaySchedule } from '@/components/domain/DaySlider';
+import EvaluationRoster from '@/components/domain/EvaluationRoster';
 import { useHalqat } from '@/lib/queries/halqat';
 import { useSpecialTracks } from '@/lib/queries/specialTracks';
 import { useStudents } from '@/lib/queries/students';
-import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from '@/lib/queries/evaluations';
-import { useQuranPlans, useStudentPlanProgressList, useRecordStudentOccurrence } from '@/lib/queries/quranPlan';
+import { useEvaluations } from '@/lib/queries/evaluations';
+import { useQuranPlans } from '@/lib/queries/quranPlan';
 import { MAX_SCORES, TOTAL_MAX } from '@/lib/evaluationRubric';
-import { SURAHS } from '@/lib/data/surahs';
-import {
-  dayFinishPoint, dayDeltaAyahs, planFinishPoint, toFlatIndex, fromFlatIndex,
-  isReversedSchedule, isReversedRange, type RangePoint, type ScheduleEntry,
-} from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
-import { success, warning, error } from '@/lib/haptics';
-import { AR_LOCALE, fmtDayLabel, toDateOnly } from '@/lib/date';
-
-// ── helpers (mirrored from the web page) ───────────────────────────────────
-function surahName(n: number): string {
-  return SURAHS.find((s) => s.number === n)?.name ?? '';
-}
-function avatarInitials(name: string): string {
-  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0] ?? '').join('');
-}
-type ScoreCategory = 'hifz' | 'tajweed' | 'talawah';
-const CATEGORY_LABELS: Record<ScoreCategory, string> = { hifz: 'حفظ', tajweed: 'تجويد', talawah: 'تلاوة' };
-type StudentEval = { attendanceStatus: 'حاضر' | 'غائب'; hifz: number; tajweed: number; talawah: number };
-/** Scores start at 0 so the teacher consciously awards points. */
-function blankEval(): StudentEval {
-  return { attendanceStatus: 'حاضر', hifz: 0, tajweed: 0, talawah: 0 };
-}
-function totalOf(e: StudentEval): number {
-  if (e.attendanceStatus === 'غائب') return 0;
-  return MAX_SCORES.attendance + e.hifz + e.tajweed + e.talawah;
-}
+import { fmtDayLabel, toDateOnly } from '@/lib/date';
 
 export default function TeacherAttendance() {
   const theme = useAppTheme();
@@ -72,16 +45,14 @@ export default function TeacherAttendance() {
   const {
     data: students = [], isLoading: loadingStudents, refetch: refetchStudents, isRefetching: refetchingStudents,
   } = useStudents(contextFilter);
-  const bulkEvaluate = useBulkEvaluate();
-  const recordOccurrence = useRecordStudentOccurrence();
 
   const { data: plans = [], isLoading: loadingPlans, refetch: refetchPlans, isRefetching: refetchingPlans } =
     useQuranPlans(contextFilter);
   const linkedPlan = plans.find((p) => p.targetType === (selected?.kind === 'specialTrack' ? 'specialTrack' : 'halqa')) ?? plans[0];
-  const rangeReversed = !!linkedPlan && isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd);
 
   // ── Day slider ─────────────────────────────────────────────────────────
   const [selectedDate, setSelectedDate] = useState('');
+  const [dayNotice, setDayNotice] = useState<string | null>(null);
   // Unlike the track drill-down, this screen shows a *context* (halqa or
   // track) that can carry several plans at once, so every plan's schedule
   // feeds the same strip of days.
@@ -91,65 +62,6 @@ export default function TeacherAttendance() {
   );
   const daySchedule = useDaySchedule(scheduleEntries, selectedDate);
   const { scheduledSorted, assignmentByDate, effectiveDate, today, isFutureDay } = daySchedule;
-
-  function planCoversStudent(studentId: string): boolean {
-    if (!linkedPlan) return false;
-    if (linkedPlan.targetType === 'students') {
-      return (linkedPlan.students ?? []).some((s) => (typeof s === 'string' ? s : s._id) === studentId);
-    }
-    return true; // a halqa/track plan covers every student fetched under that context
-  }
-  const coveredStudentIds = useMemo(
-    () => (linkedPlan ? students.map((s) => s._id).filter(planCoversStudent) : []),
-    [students, linkedPlan],
-  );
-  const progressByStudentId = useStudentPlanProgressList(linkedPlan?._id, coveredStudentIds);
-
-  const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
-  const [overrides, setOverrides] = useState<Record<string, StudentEval>>({});
-  const [completionOverrides, setCompletionOverrides] = useState<Record<string, RangePoint>>({});
-  const [dayNotice, setDayNotice] = useState<string | null>(null);
-  const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
-  const [lastSavedId, setLastSavedId] = useState<string | null>(null);
-  const [savedNotice, setSavedNotice] = useState<string | null>(null);
-  // Absent students whose parent could not be notified — the save still went
-  // through, so this is a warning rather than an error.
-  const [unnotified, setUnnotified] = useState<{ id: string; name: string }[]>([]);
-
-  // Monday's edits must not leak into Tuesday's roster for the same students.
-  useEffect(() => {
-    setOverrides({});
-    setCompletionOverrides({});
-    setDayNotice(null);
-    setUnlockedIds(new Set());
-    setExpandedStudentId(null);
-  }, [effectiveDate]);
-
-  // Re-lock a student's row once their save lands — re-opening it needs an
-  // explicit "تعديل" tap.
-  useEffect(() => {
-    if (bulkEvaluate.isSuccess && lastSavedId) {
-      setUnlockedIds((prev) => {
-        if (!prev.has(lastSavedId)) return prev;
-        const next = new Set(prev);
-        next.delete(lastSavedId);
-        return next;
-      });
-    }
-  }, [bulkEvaluate.isSuccess]);
-
-  // Already-saved evaluations for the selected day.
-  const { data: savedToday = [], refetch: refetchSaved, isRefetching: refetchingSaved } = useEvaluations(
-    contextFilter ? { ...contextFilter, from: effectiveDate, to: effectiveDate } : undefined,
-  );
-  const savedById: Record<string, StudentEval> = {};
-  for (const r of savedToday) {
-    const id = typeof r.student === 'string' ? r.student : r.student._id;
-    savedById[id] = {
-      attendanceStatus: r.attendanceStatus,
-      hifz: r.scores.hifz, tajweed: r.scores.tajweed, talawah: r.scores.talawah,
-    };
-  }
 
   // Full session history for this context, for the log + leaderboards below.
   const { data: history = [] } = useEvaluations(contextFilter);
@@ -190,127 +102,10 @@ export default function TeacherAttendance() {
     return { topScoreRows: byScore, topAttendanceRows: byAttendance };
   }, [history]);
 
-  const evalFor = (studentId: string): StudentEval =>
-    overrides[studentId] ?? savedById[studentId] ?? blankEval();
-
-  function setAttendance(studentId: string, status: 'حاضر' | 'غائب') {
-    setOverrides((prev) => ({ ...prev, [studentId]: { ...evalFor(studentId), attendanceStatus: status } }));
-  }
-  function setScore(studentId: string, category: ScoreCategory, value: number) {
-    setOverrides((prev) => ({ ...prev, [studentId]: { ...evalFor(studentId), [category]: value } }));
-  }
-
-  /** A student's own overlay can run the opposite direction to the shared plan
-   * (a custom-range individual plan), so infer direction from their own
-   * schedule first and only fall back to the base plan's direction. */
-  function reversedForStudent(studentId: string): boolean {
-    return isReversedSchedule(progressByStudentId[studentId]?.effectiveSchedule) ?? rangeReversed;
-  }
-  function completedPointFor(studentId: string, assignment: ScheduleEntry): RangePoint {
-    return completionOverrides[studentId] ?? dayFinishPoint(assignment, reversedForStudent(studentId));
-  }
-  /** Clamps a teacher-picked completion point to what the student could
-   * plausibly have reached: no earlier than the start of the day's own ward,
-   * and no further than the end of their whole plan. */
-  function clampReached(point: RangePoint, assignment: ScheduleEntry, studentId: string): RangePoint {
-    const reversed = reversedForStudent(studentId);
-    const dayStart = reversed
-      ? { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd }
-      : { surahNumber: assignment.surahStart, ayah: assignment.ayahStart };
-    const finish = planFinishPoint(progressByStudentId[studentId]?.effectiveSchedule ?? [], reversed)
-      ?? dayFinishPoint(assignment, reversed);
-    const loFlat = Math.min(toFlatIndex(dayStart), toFlatIndex(finish));
-    const hiFlat = Math.max(toFlatIndex(dayStart), toFlatIndex(finish));
-    return fromFlatIndex(Math.max(loFlat, Math.min(hiFlat, toFlatIndex(point))));
-  }
-  function reachedBounds(assignment: ScheduleEntry, studentId: string) {
-    return {
-      lo: clampReached({ surahNumber: 1, ayah: 1 }, assignment, studentId),
-      hi: clampReached({ surahNumber: 114, ayah: 6 }, assignment, studentId),
-    };
-  }
-  /** Each student's own portion for the selected day — falls back to the shared
-   * plan's schedule for anyone without an individual overlay yet. */
-  function assignmentForStudent(studentId: string): ScheduleEntry | undefined {
-    const perStudent = progressByStudentId[studentId]?.effectiveSchedule
-      .find((o) => toDateOnly(o.date) === effectiveDate);
-    return perStudent ?? assignmentByDate.get(effectiveDate);
-  }
-
-
-  function saveStudent(studentId: string, studentName: string) {
-    if (isFutureDay || !selected || !profileId) return;
-    const e = evalFor(studentId);
-    const records: BulkEvaluateRecord[] = [{
-      student: studentId,
-      attendanceStatus: e.attendanceStatus,
-      hifz: e.hifz, tajweed: e.tajweed, talawah: e.talawah,
-    }];
-    setLastSavedId(studentId);
-    setSavedNotice(null);
-    setUnnotified([]);
-    bulkEvaluate.mutate(
-      {
-        teacher: profileId,
-        ...(selected.kind === 'halqa' ? { halqa: selected.id } : { specialTrack: selected.id }),
-        date: effectiveDate,
-        records,
-      },
-      {
-        onSuccess: (res) => {
-          success();
-          setUnnotified(res.unnotified);
-          // Feed the day's outcome into the student's individual plan overlay so
-          // an absence or a shortfall is redistributed over their remaining days.
-          const assignment = linkedPlan && planCoversStudent(studentId) ? assignmentForStudent(studentId) : undefined;
-          if (!linkedPlan || !assignment) {
-            setSavedNotice(`تم حفظ حضور وتقييم ${studentName}`);
-            return;
-          }
-          const completedPoint = completedPointFor(studentId, assignment);
-          // Signed in the plan's own direction: negative = fell short of the
-          // day's ward, positive = recited past it.
-          const delta = dayDeltaAyahs(assignment, reversedForStudent(studentId), completedPoint);
-          const status = e.attendanceStatus === 'غائب' ? 'absent' : delta < 0 ? 'partial' : 'done';
-          if (status === 'done' && delta === 0) {
-            recordOccurrence.mutate({ planId: linkedPlan._id, studentId, occurrenceIndex: assignment.occurrenceIndex, status });
-            setSavedNotice(`تم حفظ حضور وتقييم ${studentName}`);
-            return;
-          }
-          recordOccurrence.mutate(
-            {
-              planId: linkedPlan._id, studentId, occurrenceIndex: assignment.occurrenceIndex, status,
-              // Sent for an over-achievement too, so the server can take the
-              // surplus off the student's remaining days.
-              completedThroughSurah: status === 'absent' ? undefined : completedPoint.surahNumber,
-              completedThroughAyah: status === 'absent' ? undefined : completedPoint.ayah,
-            },
-            {
-              onSuccess: (res) => {
-                setSavedNotice(
-                  status === 'absent'
-                    ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
-                    : delta > 0
-                      ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
-                      : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`,
-                );
-                if (res.data.overflowPages > 0) {
-                  warning();
-                  setSavedNotice(`لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`);
-                }
-              },
-            },
-          );
-        },
-        onError: () => error(),
-      },
-    );
-  }
-
   const isRefreshingSelection = refetchingHalqat || refetchingTracks;
   const onRefreshSelection = () => { refetchHalqat(); refetchTracks(); };
-  const isRefreshingDetail = refetchingStudents || refetchingSaved || refetchingPlans;
-  const onRefreshDetail = () => { refetchStudents(); refetchSaved(); refetchPlans(); };
+  const isRefreshingDetail = refetchingStudents || refetchingPlans;
+  const onRefreshDetail = () => { refetchStudents(); refetchPlans(); };
 
   const styles = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },
@@ -419,20 +214,10 @@ export default function TeacherAttendance() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefreshingDetail} onRefresh={onRefreshDetail} colors={[theme.green]} tintColor={theme.green} />}
       >
-        <Pressable onPress={() => { setSelected(null); setOverrides({}); setSelectedDate(''); }}>
+        <Pressable onPress={() => { setSelected(null); setSelectedDate(''); }}>
           <Text style={styles.backLink}>‹ رجوع لاختيار الحلقة/المسار</Text>
         </Pressable>
 
-        {!!savedNotice && (
-          <Alert variant="success" icon={<IconCircleCheck size={18} color="#166534" />}>{savedNotice}</Alert>
-        )}
-        {unnotified.length > 0 && (
-          <Alert variant="warning">
-            تعذر إرسال إشعار عن غياب: {unnotified.map((u) => u.name).join('، ')} — لا يوجد ولي أمر مرتبط بالحساب.
-          </Alert>
-        )}
-        {bulkEvaluate.isError && <Alert variant="error">{(bulkEvaluate.error as Error).message}</Alert>}
-        {recordOccurrence.isError && <Alert variant="error">{(recordOccurrence.error as Error).message}</Alert>}
 
         {/* Day slider — only when this context has scheduled days */}
         {loadingPlans ? (
@@ -466,208 +251,15 @@ export default function TeacherAttendance() {
           <CardHeader title={`${selected.title} — ${fmtDayLabel(effectiveDate)}`} />
 
           {loadingStudents && <SkeletonRows count={4} />}
-          {!loadingStudents && students.length === 0 && <Text style={styles.muted}>لا يوجد طلاب</Text>}
-
-          {students.map((st, i) => {
-            const e = evalFor(st._id);
-            const isAbsent = e.attendanceStatus === 'غائب';
-            const total = totalOf(e);
-            const isExpanded = expandedStudentId === st._id;
-            const hasSaved = !!savedById[st._id];
-            const isUnlocked = unlockedIds.has(st._id);
-            const locked = isFutureDay || (hasSaved && !isUnlocked);
-            const assignment = planCoversStudent(st._id) ? assignmentForStudent(st._id) : undefined;
-            const savingThis = bulkEvaluate.isPending && lastSavedId === st._id;
-
-            return (
-              <View key={st._id} style={[styles.row, i < students.length - 1 && styles.rowBorder]}>
-                <Pressable
-                  style={styles.rowTop}
-                  onPress={() => setExpandedStudentId((prev) => (prev === st._id ? null : st._id))}
-                >
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>{avatarInitials(st.name)}</Text>
-                  </View>
-                  <View style={styles.rowInfo}>
-                    <Text style={styles.name}>{st.name}</Text>
-                    <Text style={styles.sub}>
-                      {hasSaved
-                        ? `${e.attendanceStatus} — ${total}/${TOTAL_MAX}${isUnlocked ? ' (وضع التعديل)' : ''}`
-                        : 'لم يُسجَّل لهذا اليوم بعد'}
-                    </Text>
-                  </View>
-                  {isExpanded
-                    ? <IconChevronUp size={18} color={theme.textMuted} />
-                    : <IconChevronDown size={18} color={theme.textMuted} />}
-                </Pressable>
-
-                {isExpanded && (
-                  <View style={styles.body}>
-                    {assignment ? (() => {
-                      // Swap the displayed endpoints for a reverse plan so the
-                      // banner reads in the plan's own direction (back→front).
-                      const reversed = reversedForStudent(st._id);
-                      const from = reversed
-                        ? { surah: assignment.surahEnd, ayah: assignment.ayahEnd, page: assignment.pageEnd }
-                        : { surah: assignment.surahStart, ayah: assignment.ayahStart, page: assignment.pageStart };
-                      const to = reversed
-                        ? { surah: assignment.surahStart, ayah: assignment.ayahStart, page: assignment.pageStart }
-                        : { surah: assignment.surahEnd, ayah: assignment.ayahEnd, page: assignment.pageEnd };
-                      return (
-                        <View style={styles.banner}>
-                          <IconBook2 size={20} color={theme.green} />
-                          <View style={{ flex: 1 }}>
-                            <Text style={styles.bannerLabel}>
-                              الورد المقرر{reversed ? ' · بالعكس' : ''}
-                            </Text>
-                            <Text style={styles.bannerRange}>
-                              {surahName(from.surah)} : {from.ayah} ← {surahName(to.surah)} : {to.ayah}
-                            </Text>
-                            <View style={styles.pillRow}>
-                              <Text style={styles.pill}>
-                                {from.page !== to.page
-                                  ? `من صفحة ${from.page} إلى صفحة ${to.page}`
-                                  : `صفحة ${from.page}`}
-                              </Text>
-                              <Text style={styles.pill}>الجزء {assignment.juz}</Text>
-                            </View>
-                          </View>
-                        </View>
-                      );
-                    })() : (
-                      <Text style={styles.sub}>لا يوجد جزء مخصص لهذا اليوم</Text>
-                    )}
-
-                    {hasSaved && !isUnlocked && !isFutureDay && (
-                      <Alert variant="success" icon={<IconLock size={16} color="#166534" />}>
-                        تم تسجيل حضور وتقييم {st.name} لهذا اليوم. اضغط "تعديل" لتصحيح البيانات.
-                      </Alert>
-                    )}
-
-                    <View style={styles.toggleRow}>
-                      <Pressable
-                        haptic="select"
-                        disabled={locked}
-                        onPress={() => setAttendance(st._id, 'حاضر')}
-                        style={[
-                          styles.toggle,
-                          !isAbsent && { backgroundColor: theme.greenPale, borderColor: theme.greenAccent },
-                          locked && styles.disabled,
-                        ]}
-                      >
-                        <IconCheck size={14} color={!isAbsent ? theme.green : theme.textMuted} />
-                        <Text style={[styles.toggleText, !isAbsent && { color: theme.green, fontFamily: theme.fontCairoBold }]}>حاضر</Text>
-                      </Pressable>
-                      <Pressable
-                        haptic="select"
-                        disabled={locked}
-                        onPress={() => setAttendance(st._id, 'غائب')}
-                        style={[
-                          styles.toggle,
-                          isAbsent && { backgroundColor: theme.red + '20', borderColor: theme.red },
-                          locked && styles.disabled,
-                        ]}
-                      >
-                        <IconX size={14} color={isAbsent ? theme.red : theme.textMuted} />
-                        <Text style={[styles.toggleText, isAbsent && { color: theme.red, fontFamily: theme.fontCairoBold }]}>غائب</Text>
-                      </Pressable>
-                    </View>
-
-                    {!isAbsent && assignment && (() => {
-                      // "وصل إلى" and the leftover are both measured in the plan's
-                      // own direction: a reverse day is worked from its high end
-                      // down, so it's complete once the student reaches its low end.
-                      const reversedHere = reversedForStudent(st._id);
-                      const actualPoint = completedPointFor(st._id, assignment);
-                      const delta = dayDeltaAyahs(assignment, reversedHere, actualPoint);
-                      const isFull = delta === 0;
-                      return (
-                        <View style={styles.completionBox}>
-                          <Text style={styles.completionLabel}>
-                            الورد الفعلي — السورة والآية التي وصل إليها الطالب
-                          </Text>
-                          <SurahAyahPicker
-                            value={actualPoint}
-                            onChange={(v) => setCompletionOverrides((p) => ({ ...p, [st._id]: clampReached(v, assignment, st._id) }))}
-                            bounds={reachedBounds(assignment, st._id)}
-                            disabled={locked}
-                          />
-                          <Text style={styles.wardRange}>
-                            {reversedHere
-                              ? `من ${surahName(assignment.surahEnd)} : ${assignment.ayahEnd} إلى ${surahName(assignment.surahStart)} : ${assignment.ayahStart}`
-                              : `من ${surahName(assignment.surahStart)} : ${assignment.ayahStart} إلى ${surahName(assignment.surahEnd)} : ${assignment.ayahEnd}`}
-                          </Text>
-                          {!isFull && !locked && (
-                            <Button
-                              label="الورد كامل"
-                              variant="ghost"
-                              size="sm"
-                              onPress={() => setCompletionOverrides((p) => ({ ...p, [st._id]: dayFinishPoint(assignment, reversedHere) }))}
-                            />
-                          )}
-                          <Text style={[styles.completionHint, { color: delta >= 0 ? theme.green : theme.gold }]}>
-                            {isFull
-                              ? 'سيُسجَّل كمكتمل'
-                              : delta > 0
-                                ? `سمّع ${delta} آية إضافية — سيتم خصمها من باقي أيام خطته`
-                                : `سيتم تعويض ${-delta} آية في باقي أيام خطته`}
-                          </Text>
-                        </View>
-                      );
-                    })()}
-
-                    {(['hifz', 'tajweed', 'talawah'] as ScoreCategory[]).map((cat) => (
-                      <View key={cat}>
-                        <Text style={styles.catLabel}>{CATEGORY_LABELS[cat]} (0-{MAX_SCORES[cat]})</Text>
-                        <View style={styles.scoreChipRow}>
-                          {Array.from({ length: MAX_SCORES[cat] + 1 }, (_, n) => n).map((n) => {
-                            const active = !isAbsent && e[cat] === n;
-                            return (
-                              <Pressable
-                                haptic="select"
-                                key={n}
-                                disabled={isAbsent || locked}
-                                onPress={() => setScore(st._id, cat, n)}
-                                style={[
-                                  styles.scoreChip,
-                                  active && { backgroundColor: theme.greenAccent, borderColor: theme.green },
-                                  (isAbsent || locked) && styles.disabled,
-                                ]}
-                              >
-                                <Text style={[styles.scoreChipText, active && { color: theme.white }]}>{n}</Text>
-                              </Pressable>
-                            );
-                          })}
-                        </View>
-                      </View>
-                    ))}
-                    <Text style={styles.totalLine}>المجموع {total}/{TOTAL_MAX}</Text>
-
-                    {isFutureDay ? (
-                      <Button label="اليوم لم يحن بعد" variant="ghost" disabled fullWidth />
-                    ) : hasSaved && !isUnlocked ? (
-                      <Button
-                        label="تعديل"
-                        variant="ghost"
-                        fullWidth
-                        icon={<IconEdit size={16} color={theme.green} />}
-                        onPress={() => setUnlockedIds((prev) => new Set(prev).add(st._id))}
-                      />
-                    ) : (
-                      <Button
-                        label={savingThis ? 'جارٍ الحفظ...' : isUnlocked ? 'حفظ التعديلات' : 'حفظ لهذا الطالب'}
-                        fullWidth
-                        loading={savingThis}
-                        disabled={bulkEvaluate.isPending}
-                        icon={<IconDeviceFloppy size={16} color={theme.white} />}
-                        onPress={() => saveStudent(st._id, st.name)}
-                      />
-                    )}
-                  </View>
-                )}
-              </View>
-            );
-          })}
+          {!loadingStudents && (
+            <EvaluationRoster
+              students={students}
+              context={{ kind: selected.kind, id: selected.id }}
+              teacherId={profileId}
+              linkedPlan={linkedPlan}
+              daySchedule={daySchedule}
+            />
+          )}
         </Card>
 
         {history.length > 0 && (

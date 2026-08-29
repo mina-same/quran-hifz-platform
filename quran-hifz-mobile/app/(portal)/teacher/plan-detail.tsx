@@ -114,7 +114,16 @@ export default function TeacherPlanDetail() {
                 </View>
 
                 <View style={{ marginTop: 12 }}>
-                  <ProgressBar value={progressPct} label={progressLabel} />
+                  <View style={s.progressHead}>
+                    <Text style={s.progressLabel}>تقدّم الخطة</Text>
+                    <Text style={s.progressValue}>{progressLabel ?? `${progressPct}%`}</Text>
+                  </View>
+                  <ProgressBar value={progressPct} showPercent={false} />
+                  {!!plan.progress && (
+                    <Text style={s.progressSub}>
+                      {plan.progress.completed} / {plan.progress.total} يوم ({plan.progress.percent}%)
+                    </Text>
+                  )}
                 </View>
               </Card>
 
@@ -156,6 +165,12 @@ export default function TeacherPlanDetail() {
                     variant="secondary"
                     style={{ flex: 1 }}
                     onPress={() => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'edit', id: plan._id } } as any)}
+                  />
+                  <Button
+                    label="نسخ"
+                    variant="ghost"
+                    style={{ flex: 1 }}
+                    onPress={() => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'duplicate', id: plan._id } } as any)}
                   />
                   <Button label="حذف" variant="danger" style={{ flex: 1 }} onPress={() => setConfirmDelete(true)} />
                 </View>
@@ -200,6 +215,10 @@ function createS(theme: AppTheme) {
     infoItem: { width: '46%' },
     infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
     infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
+    progressHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 },
+    progressLabel: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.textMuted },
+    progressValue: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.green },
+    progressSub: { fontSize: 10, fontFamily: theme.fontCairo, color: theme.textMuted, marginTop: 3 },
     assignmentBox: { borderRadius: 10, padding: 12 },
     assignmentText: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.greenDark },
     actionsRow: { flexDirection: 'row', gap: 10 },

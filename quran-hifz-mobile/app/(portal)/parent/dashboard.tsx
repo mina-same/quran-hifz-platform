@@ -7,7 +7,9 @@ import StatsRow from '@/components/ui/StatsRow';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import ProgressBar from '@/components/ui/ProgressBar';
+import Badge from '@/components/ui/Badge';
 import { SkeletonRows } from '@/components/ui/Skeleton';
+import ChildSelector from '@/components/domain/ChildSelector';
 import { useParentChildren, useChildHifz, useChildMessages } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -55,11 +57,15 @@ export default function ParentDashboard() {
     { label: 'المستوى', value: level, color: theme.green },
   ];
 
+  const childName = child?.name;
+
   const s = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.cream },
     page: { padding: 16, gap: 14 },
     muted: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 8 },
-    pctNum: { fontSize: 32, fontFamily: theme.fontCairoBold, color: theme.green, textAlign: 'center', marginVertical: 8 },
+    goalLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center' },
+    pctNum: { fontSize: 36, fontFamily: theme.fontCairoBold, color: theme.green, textAlign: 'center', marginTop: 2, marginBottom: 8 },
+    juzBadgeWrap: { alignItems: 'center', marginTop: 10, marginBottom: 4 },
     row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderTopWidth: 1, borderTopColor: theme.border },
     key: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
     val: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
@@ -79,19 +85,26 @@ export default function ParentDashboard() {
         }
       >
         <AyahBar />
+        {/* The switcher the web puts in its topbar ("تغيير الابن"). It hides
+            itself for a single-child parent and auto-selects that child. */}
+        <ChildSelector />
         {isLoading ? (
           <SkeletonRows count={4} rowHeight={64} />
         ) : (
           <StatsRow stats={STATS} />
         )}
         <Card>
-          <CardHeader title="خطة الحفظ الفردية" />
+          <CardHeader title="خطة الحفظ الفردية" subtitle={childName ? `متابعة ${childName}` : undefined} />
           {isLoading ? (
             <SkeletonRows count={3} rowHeight={28} />
           ) : (
             <>
+              <Text style={s.goalLabel}>التقدم نحو هدف السنة: ٣٠ جزءاً</Text>
               <Text style={s.pctNum}>{Math.round(progressPct)}٪</Text>
-              <ProgressBar value={progressPct} />
+              <ProgressBar value={progressPct} showPercent={false} />
+              <View style={s.juzBadgeWrap}>
+                <Badge label={`${totalJuz} جزء من ٣٠`} variant="green" />
+              </View>
               {[['الحلقة', halqaName], ['الجلسة القادمة', 'الثلاثاء بعد الفجر']].map(([k, v]) => (
                 <View key={k} style={s.row}>
                   <Text style={s.key}>{k}</Text>
