@@ -167,7 +167,7 @@ export default function TeacherEvaluate() {
         <ScrollView
           contentContainerStyle={styles.page}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.green]} tintColor={theme.green} />}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
         >
           {isLoading && <SkeletonRows count={4} rowHeight={72} />}
           {!isLoading && halqat.length === 0 && tracks.length === 0 && (
@@ -195,7 +195,7 @@ export default function TeacherEvaluate() {
           contentContainerStyle={styles.page}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.green]} tintColor={theme.green} />}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
         >
         {saved && (
           <Alert variant="success" icon={<IconCircleCheck size={18} color={theme.green} />}>

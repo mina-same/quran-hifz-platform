@@ -190,7 +190,7 @@ export default function AdminParents() {
       <ScrollView
         contentContainerStyle={styles.page}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.green]} tintColor={theme.green} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         {isError && <Alert variant="error">تعذر تحميل بيانات أولياء الأمور</Alert>}
 

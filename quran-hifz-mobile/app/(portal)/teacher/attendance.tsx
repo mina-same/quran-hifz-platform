@@ -184,7 +184,7 @@ export default function TeacherAttendance() {
         <ScrollView
           contentContainerStyle={styles.page}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={isRefreshingSelection} onRefresh={onRefreshSelection} colors={[theme.green]} tintColor={theme.green} />}
+          refreshControl={<RefreshControl refreshing={isRefreshingSelection} onRefresh={onRefreshSelection} colors={[theme.spinner]} tintColor={theme.spinner} />}
         >
           {loading && <SkeletonRows count={3} rowHeight={92} />}
           {!loading && halqat.length === 0 && tracks.length === 0 && (
@@ -212,7 +212,7 @@ export default function TeacherAttendance() {
       <ScrollView
         contentContainerStyle={styles.page}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={isRefreshingDetail} onRefresh={onRefreshDetail} colors={[theme.green]} tintColor={theme.green} />}
+        refreshControl={<RefreshControl refreshing={isRefreshingDetail} onRefresh={onRefreshDetail} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         <Pressable onPress={() => { setSelected(null); setSelectedDate(''); }}>
           <Text style={styles.backLink}>‹ رجوع لاختيار الحلقة/المسار</Text>

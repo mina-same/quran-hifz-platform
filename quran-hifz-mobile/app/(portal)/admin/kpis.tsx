@@ -63,7 +63,7 @@ export default function AdminKpis() {
       <ScrollView
         contentContainerStyle={styles.page}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.green]} tintColor={theme.green} />}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         {!isLoading && <StatsRow stats={STATS} />}
 

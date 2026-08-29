@@ -112,7 +112,7 @@ export default function TeacherSpecialTracks() {
       <ScrollView
         contentContainerStyle={s.page}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.green]} tintColor={theme.green} />}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         {isLoading && <SkeletonRows count={3} rowHeight={220} gap={14} />}
 

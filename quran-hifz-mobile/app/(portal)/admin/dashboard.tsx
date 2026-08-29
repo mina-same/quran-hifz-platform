@@ -104,7 +104,7 @@ export default function AdminDashboard() {
       <ScrollView
         contentContainerStyle={styles.page}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={[theme.green]} tintColor={theme.green} />}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         <AyahBar />
         {isLoading ? <SkeletonRows count={1} rowHeight={70} /> : <StatsRow stats={STATS} />}

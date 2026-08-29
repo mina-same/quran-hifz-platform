@@ -99,7 +99,7 @@ export default function AdminStudents() {
         contentContainerStyle={s.page}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.green]} tintColor={theme.green} />}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         {isError && <Alert variant="error">تعذر تحميل بيانات الطلاب</Alert>}
 

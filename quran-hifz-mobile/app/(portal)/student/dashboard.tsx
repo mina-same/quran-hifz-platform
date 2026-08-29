@@ -85,7 +85,7 @@ export default function StudentDashboard() {
         contentContainerStyle={styles.page}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={[theme.green]} tintColor={theme.green} />
+          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />
         }
       >
         <AyahBar />

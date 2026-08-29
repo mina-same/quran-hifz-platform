@@ -52,7 +52,7 @@ export default function AdminMasajid() {
       <ScrollView
         contentContainerStyle={s.page}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={[theme.green]} tintColor={theme.green} />}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         <Pressable style={s.addBtn} onPress={() => router.push('/(portal)/admin/masjid-form' as any)}>
           <Text style={s.addBtnText}>+ مسجد جديد</Text>

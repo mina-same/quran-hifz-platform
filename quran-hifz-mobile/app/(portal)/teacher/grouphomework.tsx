@@ -71,7 +71,7 @@ export default function TeacherGroupHomework() {
         <ScrollView
           contentContainerStyle={s.page}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.green]} tintColor={theme.green} />}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
         >
           {isLoading && <SkeletonRows count={4} rowHeight={72} />}
           {!isLoading && halqat.length === 0 && tracks.length === 0 && (
@@ -99,7 +99,7 @@ export default function TeacherGroupHomework() {
         contentContainerStyle={s.page}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.green]} tintColor={theme.green} />}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         <Pressable onPress={() => setSelected(null)}>
           <Text style={s.backLink}>‹ رجوع لاختيار الحلقة/المسار</Text>

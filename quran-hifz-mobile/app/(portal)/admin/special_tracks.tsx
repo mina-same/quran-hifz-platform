@@ -387,7 +387,7 @@ export default function AdminSpecialTracks() {
         contentContainerStyle={s.page}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.green]} tintColor={theme.green} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         {saved && <Text style={s.successBanner}>تم حفظ المسار ✓</Text>}
 

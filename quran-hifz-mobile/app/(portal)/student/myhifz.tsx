@@ -136,8 +136,8 @@ export default function StudentHifz() {
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={onRefresh}
-            colors={[theme.green]}
-            tintColor={theme.green}
+            colors={[theme.spinner]}
+            tintColor={theme.spinner}
           />
         }
       >

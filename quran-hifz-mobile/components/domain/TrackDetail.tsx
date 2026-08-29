@@ -251,9 +251,13 @@ export default function TrackDetail({ trackId, role }: Props) {
               })}
             </View>
           )}
-          <Text style={[s.muted, { marginTop: 12, textAlign: 'right' }]}>
-            لإضافة أو إزالة معلم من هذا المسار، تواصل مع الإدارة.
-          </Text>
+          {/* Only a teacher is being told to ask someone else — the admin *is*
+              الإدارة, and manages the track's teachers from the tracks list. */}
+          {role === 'teacher' && (
+            <Text style={[s.muted, { marginTop: 12, textAlign: 'right' }]}>
+              لإضافة أو إزالة معلم من هذا المسار، تواصل مع الإدارة.
+            </Text>
+          )}
         </Card>
       )}
 
@@ -306,9 +310,11 @@ export default function TrackDetail({ trackId, role }: Props) {
             </View>
           </Card>
 
-          <Text style={[s.muted, { textAlign: 'right' }]}>
-            لإضافة أو إزالة طالب من هذا المسار، تواصل مع الإدارة.
-          </Text>
+          {role === 'teacher' && (
+            <Text style={[s.muted, { textAlign: 'right' }]}>
+              لإضافة أو إزالة طالب من هذا المسار، تواصل مع الإدارة.
+            </Text>
+          )}
         </>
       )}
 

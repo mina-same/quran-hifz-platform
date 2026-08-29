@@ -60,7 +60,7 @@ export default function ParentAttendance() {
         contentContainerStyle={s.page}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.green} colors={[theme.green]} />
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.spinner} colors={[theme.spinner]} />
         }
       >
         <StatsRow stats={STATS} />

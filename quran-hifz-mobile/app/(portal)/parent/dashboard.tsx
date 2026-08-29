@@ -81,7 +81,7 @@ export default function ParentDashboard() {
         contentContainerStyle={s.page}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} tintColor={theme.green} colors={[theme.green]} />
+          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} tintColor={theme.spinner} colors={[theme.spinner]} />
         }
       >
         <AyahBar />

@@ -37,7 +37,7 @@ export default function AdminHalqat() {
       <ScrollView
         contentContainerStyle={s.page}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.green]} tintColor={theme.green} />}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         <Pressable style={s.addBtn} onPress={() => router.push('/(portal)/admin/halqa-form' as any)}>
           <Text style={s.addBtnText}>+ حلقة جديدة</Text>

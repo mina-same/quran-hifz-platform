@@ -37,7 +37,7 @@ export default function ParentTimeline() {
         contentContainerStyle={s.page}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.green} colors={[theme.green]} />
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.spinner} colors={[theme.spinner]} />
         }
       >
         <Card>

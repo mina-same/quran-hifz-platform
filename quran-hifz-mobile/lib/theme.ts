@@ -91,6 +91,14 @@ const lightSurfaces = {
    */
   greenAccent:  '#1B5E20',
 
+  /**
+   * Pull-to-refresh spinner ink. It is drawn directly on the page background
+   * with no surface behind it, so it cannot reuse `green` (#1B5E20) in dark
+   * mode — that is nearly black on the near-black `bg` and the spinner reads
+   * as invisible. Light mode keeps the brand green; dark lifts to near-white.
+   */
+  spinner:      '#1B5E20',
+
   // Tints — soft washes used as backgrounds behind coloured content.
   cream:      '#F5F1E6',
   greenPale:  '#E8F5E9',
@@ -124,6 +132,9 @@ const darkSurfaces = {
   dividerOnGreen: 'rgba(255,255,255,0.08)',
 
   greenAccent:  '#2E7D32',
+
+  /** See the note on `spinner` in lightSurfaces. */
+  spinner:      '#F2F2F0',
 
   cream:      '#1F241C',
   greenPale:  '#16291A',

@@ -348,7 +348,10 @@ function LinkPlanPanel({
 }
 
 export function TeacherTrackDetail() {
-  const { user, showPage } = usePortal();
+  const { user, showPage, portal } = usePortal();
+  // Admin reuses this whole page (see pageRegistry.ts), so anything that
+  // tells the reader to go ask الإدارة is teacher-only copy.
+  const isTeacherPortal = portal === "teacher";
   const teacherId = user?.profileId as string | undefined;
   const [trackId] = useState(() => sessionStorage.getItem(TRACK_DETAIL_ID_KEY));
 
@@ -1038,10 +1041,12 @@ export function TeacherTrackDetail() {
               })}
             </div>
           )}
-          <p style={{ margin: "14px 0 0", fontSize: 11, color: "var(--text3)" }}>
-            <i className="ti ti-info-circle" style={{ marginLeft: 4 }} />
-            لإضافة أو إزالة معلم من هذا المسار، تواصل مع الإدارة.
-          </p>
+          {isTeacherPortal && (
+            <p style={{ margin: "14px 0 0", fontSize: 11, color: "var(--text3)" }}>
+              <i className="ti ti-info-circle" style={{ marginLeft: 4 }} />
+              لإضافة أو إزالة معلم من هذا المسار، تواصل مع الإدارة.
+            </p>
+          )}
         </Card>
       )}
 
@@ -1074,10 +1079,12 @@ export function TeacherTrackDetail() {
                 }}
               />
             </div>
-            <p style={{ margin: "12px 0 0", fontSize: 11, color: "var(--text3)" }}>
-              <i className="ti ti-info-circle" style={{ marginLeft: 4 }} />
-              لإضافة أو إزالة طالب من هذا المسار، تواصل مع الإدارة.
-            </p>
+            {isTeacherPortal && (
+              <p style={{ margin: "12px 0 0", fontSize: 11, color: "var(--text3)" }}>
+                <i className="ti ti-info-circle" style={{ marginLeft: 4 }} />
+                لإضافة أو إزالة طالب من هذا المسار، تواصل مع الإدارة.
+              </p>
+            )}
           </Card>
 
           {scheduledSorted.length > 0 && (
