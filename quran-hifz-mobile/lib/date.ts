@@ -110,3 +110,25 @@ export function buildDayChips(minIso: string, maxIso: string, today: string): Da
   }
   return out;
 }
+
+/** Every calendar day from `from` to `to` inclusive, as bare YYYY-MM-DD.
+ *
+ * Used to turn a holiday *range* (Eid week, exams, travel) into the flat list
+ * of dates the plan scheduler actually consumes — `holidays` is stored as one
+ * date per day, so a range is purely an input convenience and needs no schema
+ * change. Reversed input is tolerated (the caller may pick "to" first), and
+ * the span is capped at one year as a runaway guard. */
+export function expandDateRange(from: string, to?: string): string[] {
+  if (!from) return [];
+  if (!to || to === from) return [from];
+  const [lo, hi] = from <= to ? [from, to] : [to, from];
+  const out: string[] = [];
+  let cur = lo;
+  let guard = 0;
+  while (cur <= hi && guard < 366) {
+    out.push(cur);
+    cur = addDays(cur, 1);
+    guard++;
+  }
+  return out;
+}

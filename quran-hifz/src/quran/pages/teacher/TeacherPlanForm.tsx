@@ -131,12 +131,40 @@ export function TeacherPlanForm() {
     return EMPTY;
   });
   const [formError, setFormError] = useState("");
-  const [holidayDraft, setHolidayDraft] = useState("");
+  // Holidays are only meaningful inside the plan's own window, so both
+  // inputs are bounded by it (the end bound only exists for a date-ended plan).
+  const holidayBoundMin = form.startDate || undefined;
+  const holidayBoundMax = form.endType === "date" && form.endDate ? form.endDate : undefined;
+  const [holidayFrom, setHolidayFrom] = useState("");
+  const [holidayTo, setHolidayTo] = useState("");
 
-  /** Adds a holiday date, keeping the list deduped and chronological. */
-  function addHoliday(date: string) {
-    if (!date || form.holidays.includes(date)) return;
-    sf("holidays", [...form.holidays, date].sort());
+  /** Every calendar day from `from` to `to` inclusive, as bare YYYY-MM-DD.
+   * Reversed input is tolerated and the span is capped at a year. */
+  function expandDateRange(from: string, to?: string): string[] {
+    if (!from) return [];
+    if (!to || to === from) return [from];
+    const [lo, hi] = from <= to ? [from, to] : [to, from];
+    const out: string[] = [];
+    let cur = lo;
+    let guard = 0;
+    while (cur <= hi && guard < 366) {
+      out.push(cur);
+      const [y, m, d] = cur.split("-").map(Number);
+      cur = new Date(Date.UTC(y, m - 1, d + 1)).toISOString().split("T")[0];
+      guard++;
+    }
+    return out;
+  }
+
+  /** Adds a holiday date — or a whole span of them — keeping the list deduped
+   * and chronological. `holidays` stays one entry per day, so a range is only
+   * an input convenience: leaving "إلى" empty adds the single "من" day. */
+  function addHolidays(from: string, to?: string) {
+    const added = expandDateRange(from, to);
+    if (added.length === 0) return;
+    const merged = Array.from(new Set([...form.holidays, ...added])).sort();
+    if (merged.length === form.holidays.length) return;
+    sf("holidays", merged);
   }
 
   function sf<K extends keyof FormFields>(k: K, v: FormFields[K]) {
@@ -444,31 +472,49 @@ export function TeacherPlanForm() {
             )}
           </div>
 
-          <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
-            <input
-              className="form-input"
-              type="date"
-              dir="ltr"
-              value={holidayDraft}
-              min={form.startDate || undefined}
-              max={form.endType === "date" && form.endDate ? form.endDate : undefined}
-              onChange={(e) => setHolidayDraft(e.target.value)}
-              style={{ flex: 1 }}
-            />
-            <button
-              type="button"
-              className="topbar-btn btn-primary"
-              disabled={!holidayDraft || form.holidays.includes(holidayDraft)}
-              onClick={() => { addHoliday(holidayDraft); setHolidayDraft(""); }}
-              style={{
-                padding: "0 18px", whiteSpace: "nowrap",
-                opacity: !holidayDraft || form.holidays.includes(holidayDraft) ? 0.45 : 1,
-                cursor: !holidayDraft || form.holidays.includes(holidayDraft) ? "not-allowed" : "pointer",
-              }}
-            >
-              <i className="ti ti-plus" /> إضافة
-            </button>
+          <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            <label style={{ display: "block", fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>
+              من
+              <input
+                className="form-input"
+                type="date"
+                dir="ltr"
+                value={holidayFrom}
+                min={holidayBoundMin}
+                max={holidayBoundMax}
+                onChange={(e) => setHolidayFrom(e.target.value)}
+                style={{ width: "100%", marginTop: 4 }}
+              />
+            </label>
+            <label style={{ display: "block", fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>
+              إلى (اختياري)
+              <input
+                className="form-input"
+                type="date"
+                dir="ltr"
+                value={holidayTo}
+                /* Never lets the end fall before the start it is paired with. */
+                min={holidayFrom || holidayBoundMin}
+                max={holidayBoundMax}
+                onChange={(e) => setHolidayTo(e.target.value)}
+                style={{ width: "100%", marginTop: 4 }}
+              />
+            </label>
           </div>
+          <button
+            type="button"
+            className="topbar-btn btn-primary"
+            disabled={!holidayFrom}
+            onClick={() => { addHolidays(holidayFrom, holidayTo); setHolidayFrom(""); setHolidayTo(""); }}
+            style={{
+              marginTop: 10, width: "100%", justifyContent: "center", whiteSpace: "nowrap",
+              opacity: !holidayFrom ? 0.45 : 1,
+              cursor: !holidayFrom ? "not-allowed" : "pointer",
+            }}
+          >
+            <i className="ti ti-plus" />{" "}
+            {holidayTo && holidayTo !== holidayFrom ? "إضافة الفترة" : "إضافة يوم"}
+          </button>
 
           {form.holidays.length > 0 && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
@@ -512,6 +558,8 @@ export function TeacherPlanForm() {
           )}
 
           <p style={{ margin: "10px 0 0", fontSize: 11, color: "var(--text3)", lineHeight: 1.7 }}>
+            اختر "من" وحدها ليوم واحد، أو "من" و"إلى" لإضافة فترة كاملة (إجازة عيد، اختبارات، سفر).
+            <br />
             لا يُحتسب يوم العطلة ضمن أيام الخطة حتى لو وافق يومًا نشطًا — ينتقل نصيبه إلى يوم العمل التالي.
             <br />
             العطلة التي لا توافق يومًا من أيام الخطة تظهر بلون باهت لأنه لا أثر لها.

@@ -24,7 +24,7 @@ import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 import { success, error } from '@/lib/haptics';
-import { AR_LOCALE } from '@/lib/date';
+import { AR_LOCALE, expandDateRange } from '@/lib/date';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
@@ -126,11 +126,26 @@ export default function TeacherPlanForm() {
     setForm((f) => ({ ...f, [k]: v }));
   }
 
-  /** Adds a holiday date, keeping the list deduped and chronological. */
-  function addHoliday(date: string) {
-    if (!date) return;
-    setForm((f) => (f.holidays.includes(date) ? f : { ...f, holidays: [...f.holidays, date].sort() }));
+  /** Adds a holiday date — or a whole span of them — keeping the list deduped
+   * and chronological. `holidays` stays one entry per day, so a range is only
+   * an input convenience: leaving "إلى" empty adds the single "من" day. */
+  function addHolidays(from: string, to?: string) {
+    const added = expandDateRange(from, to);
+    if (added.length === 0) return;
+    setForm((f) => {
+      const merged = Array.from(new Set([...f.holidays, ...added])).sort();
+      return merged.length === f.holidays.length ? f : { ...f, holidays: merged };
+    });
   }
+
+  // Holidays are only meaningful inside the plan's own window, so both
+  // pickers are bounded by it (the end bound only exists for a date-ended plan).
+  const holidayMin = form.startDate ? new Date(`${form.startDate}T00:00:00`) : undefined;
+  const holidayMax = form.endType === 'date' && form.endDate
+    ? new Date(`${form.endDate}T00:00:00`)
+    : undefined;
+  const [holidayFrom, setHolidayFrom] = useState('');
+  const [holidayTo, setHolidayTo] = useState('');
 
   function toggleDay(day: string) {
     setForm((f) => ({
@@ -295,11 +310,42 @@ export default function TeacherPlanForm() {
               </View>
             )}
           </View>
-          <FormDatePicker
-            value=""
-            onChange={(v) => addHoliday(v)}
-            minimumDate={form.startDate ? new Date(`${form.startDate}T00:00:00`) : undefined}
-            maximumDate={form.endType === 'date' && form.endDate ? new Date(`${form.endDate}T00:00:00`) : undefined}
+          <View style={s.holidayRangeRow}>
+            <View style={s.flex1}>
+              <FormGroup label="من">
+                <FormDatePicker
+                  value={holidayFrom}
+                  onChange={setHolidayFrom}
+                  title="بداية العطلة"
+                  minimumDate={holidayMin}
+                  maximumDate={holidayMax}
+                />
+              </FormGroup>
+            </View>
+            <View style={s.flex1}>
+              <FormGroup label="إلى (اختياري)">
+                <FormDatePicker
+                  value={holidayTo}
+                  onChange={setHolidayTo}
+                  title="نهاية العطلة"
+                  // Never lets the end fall before the start it is paired with.
+                  minimumDate={holidayFrom ? new Date(`${holidayFrom}T00:00:00`) : holidayMin}
+                  maximumDate={holidayMax}
+                />
+              </FormGroup>
+            </View>
+          </View>
+          <Button
+            label={holidayTo && holidayTo !== holidayFrom ? 'إضافة الفترة' : 'إضافة يوم'}
+            variant="secondary"
+            fullWidth
+            disabled={!holidayFrom}
+            style={{ marginTop: 10 }}
+            onPress={() => {
+              addHolidays(holidayFrom, holidayTo);
+              setHolidayFrom('');
+              setHolidayTo('');
+            }}
           />
           {form.holidays.length > 0 && (
             <View style={[s.chipRow, { marginTop: 12 }]}>
@@ -325,6 +371,7 @@ export default function TeacherPlanForm() {
             </View>
           )}
           <Text style={s.holidayHint}>
+            اختر "من" وحدها ليوم واحد، أو "من" و"إلى" لإضافة فترة كاملة (إجازة عيد، اختبارات، سفر).{'\n'}
             لا يُحتسب يوم العطلة ضمن أيام الخطة حتى لو وافق يومًا نشطًا — ينتقل نصيبه إلى يوم العمل التالي.{'\n'}
             العطلة التي لا توافق يومًا من أيام الخطة تظهر بلون باهت لأنه لا أثر لها.
           </Text>
@@ -420,6 +467,8 @@ function createS(theme: AppTheme) {
     headerTitle: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text },
     page: { padding: theme.pagePadding, gap: 14 },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    holidayRangeRow: { flexDirection: 'row', gap: 10 },
+    flex1: { flex: 1 },
     chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
     chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
     chipText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
