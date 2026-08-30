@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-30T20:02:04.403Z
-> Files: 532 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-30T20:20:42.441Z
+> Files: 533 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -80,6 +80,10 @@
 - `drive.mjs` — DIR: loginAs, goToReports (~812 tok)
 - `inspect.mjs` — Declares BASE (~324 tok)
 - `mobile.mjs` — Declares DIR (~354 tok)
+
+## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/6e619271-832f-43e1-9de0-2e5ca53449b3/scratchpad/
+
+- `multi-segment-plans.html` — Multi-Type Quran Plans (~6896 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/9cdca122-7784-410a-bdd8-e96747e16c60/scratchpad/pw/
 

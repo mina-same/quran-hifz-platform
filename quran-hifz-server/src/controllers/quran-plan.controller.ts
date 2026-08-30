@@ -6,7 +6,10 @@ import { SURAHS } from '../data/surahs';
 import {
   WEEK_DAYS, computeTodayAssignment, computePlanProgress, computeJuzProgress, computeScheduleBreakdown,
   pageRangeOfAyahRange, toFlatIndex, pageOfFlatIndex, juzOfFlatIndex,
+  PLAN_TYPES, validateSegmentDays, segmentOccurrenceCounts, unionDays,
+  type PlanSegmentInput, type PlanType, type MultiPlanInput,
 } from '../lib/quranRange';
+import type { IPlanSegment, IQuranPlan } from '../models/QuranPlan.model';
 
 const SURAH_BY_NUMBER = new Map(SURAHS.map((s) => [s.number, s]));
 
@@ -21,9 +24,15 @@ const rangePointSchema = z.object({
   ayah:        z.number().int().min(1),
 });
 
+const planSegmentSchema = z.object({
+  type:       z.enum(['حفظ', 'مراجعة', 'ترتيل', 'تلاوة']),
+  days:       z.array(z.enum(WEEK_DAYS)).min(1),
+  rangeStart: rangePointSchema,
+  rangeEnd:   rangePointSchema,
+});
+
 const quranPlanSchema = z.object({
   name:        z.string().min(1),
-  type:        z.enum(['حفظ', 'مراجعة', 'ترتيل', 'تلاوة']),
   description: z.string().optional(),
   teacher:     z.string().min(1),
 
@@ -32,12 +41,12 @@ const quranPlanSchema = z.object({
   students:     z.array(z.string().min(1)).optional(),
   specialTrack: z.string().min(1).optional(),
 
-  days:      z.array(z.enum(WEEK_DAYS)).min(1),
+  /** One track per type. Max four (one per type), and their days must not
+   * overlap — both enforced by validateSegmentDays in the refine below. */
+  segments: z.array(planSegmentSchema).min(1).max(PLAN_TYPES.length),
+
   startDate: z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح').optional(),
   holidays:  z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'تاريخ عطلة غير صالح')).optional(),
-
-  rangeStart: rangePointSchema,
-  rangeEnd:   rangePointSchema,
 
   pointsEnabled: z.boolean().default(false),
   pointRules:    z.array(pointRuleSchema).default([]),
@@ -67,47 +76,153 @@ const quranPlanCreateSchema = quranPlanSchema.superRefine((data, ctx) => {
     ctx.addIssue({ code: 'custom', message: 'يجب تحديد تاريخ الانتهاء', path: ['endDate'] });
   }
 
+  // One type per plan, and no weekday claimed by two types — the partition
+  // that keeps a day's ward, evaluation and reflow single-valued.
+  const segmentError = validateSegmentDays(data.segments);
+  if (segmentError) {
+    ctx.addIssue({ code: 'custom', message: segmentError, path: ['segments'] });
+  }
+
   // rangeStart is deliberately allowed to sit after rangeEnd in mushaf order —
   // a reverse-direction plan (e.g. starting at An-Nas and working backward
   // toward Al-Fatiha), handled by sliceForOccurrence/computeScheduleBreakdown.
 
-  for (const [key, point] of [['rangeStart', data.rangeStart], ['rangeEnd', data.rangeEnd]] as const) {
-    const surah = SURAH_BY_NUMBER.get(point.surahNumber);
-    if (surah && point.ayah > surah.ayahCount) {
-      ctx.addIssue({ code: 'custom', message: `سورة ${surah.name} تحتوي على ${surah.ayahCount} آية فقط`, path: [key, 'ayah'] });
+  data.segments.forEach((seg, i) => {
+    for (const [key, point] of [['rangeStart', seg.rangeStart], ['rangeEnd', seg.rangeEnd]] as const) {
+      const surah = SURAH_BY_NUMBER.get(point.surahNumber);
+      if (surah && point.ayah > surah.ayahCount) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `سورة ${surah.name} تحتوي على ${surah.ayahCount} آية فقط`,
+          path: ['segments', i, key, 'ayah'],
+        });
+      }
     }
-  }
+  });
 });
 
-function withTodayAssignment(plan: InstanceType<typeof QuranPlan>) {
+/**
+ * A plan's segments, migrating a legacy single-track document on the fly.
+ *
+ * Documents written before segments existed carry `type`/`days`/`rangeStart`/
+ * `rangeEnd`/`schedule` at the top level. They are never rewritten in place —
+ * every read path funnels through here, so the rest of the codebase only ever
+ * sees the segment shape and no downtime migration is needed.
+ */
+function normalizePlanSegments(plan: IQuranPlan): IPlanSegment[] {
+  if (plan.segments && plan.segments.length > 0) return plan.segments;
+  if (!plan.type || !plan.days || !plan.rangeStart || !plan.rangeEnd) return [];
+  return [{
+    type:       plan.type,
+    days:       plan.days,
+    rangeStart: plan.rangeStart,
+    rangeEnd:   plan.rangeEnd,
+    schedule:   plan.schedule ?? [],
+  }];
+}
+
+/**
+ * Shapes a plan for the wire: each segment carries its own live-or-frozen
+ * schedule and progress, and the plan carries rollups across all of them.
+ *
+ * The rollups (`todayAssignment`, `progress`, `schedule`, `days`, `type`) are
+ * deliberately kept at the top level even though the data is now per-segment:
+ * roughly twenty read-only screens across the two clients render those fields
+ * as a label or a bar, and keeping them meaningful means those screens need no
+ * change. Screens that actually schedule read `segments` instead.
+ */
+function withPlanComputed(plan: InstanceType<typeof QuranPlan>) {
   const obj = plan.toObject();
-  const scheduleInput = {
-    days:            plan.days,
+  const segments = normalizePlanSegments(plan);
+
+  const window: Omit<MultiPlanInput, 'segments'> = {
     startDate:       plan.startDate,
     holidays:        plan.holidays,
     endType:         plan.endType,
     activeDaysCount: plan.activeDaysCount,
     endDate:         plan.endDate,
-    rangeStart:      plan.rangeStart,
-    rangeEnd:        plan.rangeEnd,
   };
-  const progress = computePlanProgress(scheduleInput);
-  // Once a teacher freezes the schedule (generateSchedule), the persisted
-  // array wins over live recomputation — that's the whole point: it survives
-  // later config edits and can carry hand-adjusted days without being wiped
-  // on every fetch. Plans that never had it generated fall back to the
-  // always-fresh live computation, same as before this field existed.
-  const persisted = plan.schedule && plan.schedule.length > 0;
+  const segmentInputs: PlanSegmentInput[] = segments.map((s) => ({
+    type: s.type, days: s.days, rangeStart: s.rangeStart, rangeEnd: s.rangeEnd,
+  }));
+  const counts = segmentOccurrenceCounts({ ...window, segments: segmentInputs });
+
+  const shaped = segments.map((seg) => {
+    // Pin the occurrence count from the SHARED window so this segment's walk
+    // stops where the plan says it should, not where its own days run out.
+    const scheduleInput = {
+      days: seg.days, startDate: plan.startDate, holidays: plan.holidays,
+      endType: 'activeDays' as const,
+      activeDaysCount: counts.get(seg.type) ?? 0,
+      rangeStart: seg.rangeStart, rangeEnd: seg.rangeEnd,
+    };
+    const progress = computePlanProgress(scheduleInput);
+    // A frozen schedule wins over live recomputation — that's the point of
+    // freezing: it survives later config edits and carries hand-edited days.
+    const persisted = seg.schedule && seg.schedule.length > 0;
+    const schedule = persisted
+      ? seg.schedule.map((s) => ({ ...s, date: new Date(s.date).toISOString(), type: seg.type }))
+      : computeScheduleBreakdown(scheduleInput).map((s) => ({ ...s, type: seg.type }));
+
+    return {
+      type:       seg.type,
+      days:       seg.days,
+      rangeStart: seg.rangeStart,
+      rangeEnd:   seg.rangeEnd,
+      todayAssignment: (() => {
+        const slice = computeTodayAssignment(scheduleInput);
+        return slice ? { ...slice, type: seg.type } : null;
+      })(),
+      progress,
+      juzProgress: computeJuzProgress(scheduleInput, progress),
+      pageRange:   pageRangeOfAyahRange(seg.rangeStart, seg.rangeEnd),
+      schedule,
+      scheduleIsPersisted: persisted,
+    };
+  });
+
+  // Days are partitioned, so at most one segment can be due today.
+  const todayAssignment = shaped.find((s) => s.todayAssignment)?.todayAssignment ?? null;
+
+  const totals = shaped.reduce(
+    (acc, s) => {
+      if (s.progress) { acc.completed += s.progress.completed; acc.total += s.progress.total; }
+      if (s.juzProgress) { acc.juzCompleted += s.juzProgress.completed; acc.juzTotal += s.juzProgress.total; }
+      return acc;
+    },
+    { completed: 0, total: 0, juzCompleted: 0, juzTotal: 0 },
+  );
+
+  const pageStarts = shaped.map((s) => s.pageRange.pageStart);
+  const pageEnds   = shaped.map((s) => s.pageRange.pageEnd);
+
   return {
     ...obj,
-    todayAssignment: computeTodayAssignment(scheduleInput),
-    progress,
-    juzProgress:     computeJuzProgress(scheduleInput, progress),
-    pageRange:       pageRangeOfAyahRange(plan.rangeStart, plan.rangeEnd),
-    schedule:        persisted
-      ? obj.schedule.map((s: { date: Date }) => ({ ...s, date: new Date(s.date).toISOString() }))
-      : computeScheduleBreakdown(scheduleInput),
-    scheduleIsPersisted: persisted,
+    segments: shaped,
+
+    // ── rollups, so display-only screens keep working ──
+    types: shaped.map((s) => s.type),
+    /** The single most representative type — the one due today when there is
+     * one, else the first segment. Legacy `plan.type` consumers read this. */
+    type: todayAssignment?.type ?? shaped[0]?.type ?? plan.type,
+    days: unionDays(segmentInputs),
+    todayAssignment,
+    progress: totals.total > 0
+      ? { completed: totals.completed, total: totals.total, percent: Math.round((totals.completed / totals.total) * 100) }
+      : null,
+    juzProgress: totals.juzTotal > 0
+      ? { completed: totals.juzCompleted, total: totals.juzTotal }
+      : null,
+    pageRange: pageStarts.length > 0
+      ? {
+          pageStart: Math.min(...pageStarts),
+          pageEnd:   Math.max(...pageEnds),
+          pageCount: Math.max(...pageEnds) - Math.min(...pageStarts) + 1,
+        }
+      : null,
+    /** Every segment's days merged and sorted — each entry carries its `type`. */
+    schedule: shaped.flatMap((s) => s.schedule).sort((a, b) => String(a.date).localeCompare(String(b.date))),
+    scheduleIsPersisted: shaped.length > 0 && shaped.every((s) => s.scheduleIsPersisted),
   };
 }
 
@@ -127,7 +242,7 @@ export async function getPlans(req: Request, res: Response, next: NextFunction):
       .populate('specialTrack', 'title')
       .sort({ createdAt: -1 });
 
-    res.json({ success: true, count: plans.length, data: plans.map(withTodayAssignment) });
+    res.json({ success: true, count: plans.length, data: plans.map(withPlanComputed) });
   } catch (err) {
     next(err);
   }
@@ -141,7 +256,7 @@ export async function getPlan(req: Request, res: Response, next: NextFunction): 
       .populate('students', 'name')
       .populate('specialTrack', 'title');
     if (!plan) throw new AppError('الخطة غير موجودة', 404);
-    res.json({ success: true, data: withTodayAssignment(plan) });
+    res.json({ success: true, data: withPlanComputed(plan) });
   } catch (err) {
     next(err);
   }
@@ -155,7 +270,7 @@ export async function createPlan(req: Request, res: Response, next: NextFunction
       startDate: data.startDate ? new Date(data.startDate) : new Date(),
       endDate:   data.endDate ? new Date(data.endDate) : undefined,
     });
-    res.status(201).json({ success: true, data: withTodayAssignment(plan) });
+    res.status(201).json({ success: true, data: withPlanComputed(plan) });
   } catch (err) {
     next(err);
   }
@@ -174,7 +289,7 @@ export async function updatePlan(req: Request, res: Response, next: NextFunction
       .populate('students', 'name')
       .populate('specialTrack', 'title');
     if (!plan) throw new AppError('الخطة غير موجودة', 404);
-    res.json({ success: true, data: withTodayAssignment(plan) });
+    res.json({ success: true, data: withPlanComputed(plan) });
   } catch (err) {
     next(err);
   }
@@ -192,12 +307,31 @@ export async function generateSchedule(req: Request, res: Response, next: NextFu
     const plan = await QuranPlan.findById(req.params.id);
     if (!plan) throw new AppError('الخطة غير موجودة', 404);
 
-    const scheduleInput = {
-      days: plan.days, startDate: plan.startDate, holidays: plan.holidays,
+    // Freeze every segment. A legacy document is normalized into segments
+    // first, so this is also what migrates it in place on first generate.
+    const segments = normalizePlanSegments(plan);
+    if (segments.length === 0) throw new AppError('لا توجد أنواع مُعرَّفة لهذه الخطة', 400);
+
+    const segmentInputs: PlanSegmentInput[] = segments.map((s) => ({
+      type: s.type, days: s.days, rangeStart: s.rangeStart, rangeEnd: s.rangeEnd,
+    }));
+    const counts = segmentOccurrenceCounts({
+      startDate: plan.startDate, holidays: plan.holidays,
       endType: plan.endType, activeDaysCount: plan.activeDaysCount, endDate: plan.endDate,
-      rangeStart: plan.rangeStart, rangeEnd: plan.rangeEnd,
-    };
-    plan.schedule = computeScheduleBreakdown(scheduleInput).map((s) => ({ ...s, date: new Date(s.date) }));
+      segments: segmentInputs,
+    });
+
+    plan.segments = segments.map((seg) => ({
+      ...seg,
+      schedule: computeScheduleBreakdown({
+        days: seg.days, startDate: plan.startDate, holidays: plan.holidays,
+        endType: 'activeDays', activeDaysCount: counts.get(seg.type) ?? 0,
+        rangeStart: seg.rangeStart, rangeEnd: seg.rangeEnd,
+      }).map((s) => ({ ...s, date: new Date(s.date) })),
+    }));
+    // The legacy top-level copy would otherwise shadow the segments on a later
+    // read via normalizePlanSegments' fallback — clear it once migrated.
+    plan.schedule = undefined;
     await plan.save();
 
     const populated = await QuranPlan.findById(plan._id)
@@ -205,7 +339,7 @@ export async function generateSchedule(req: Request, res: Response, next: NextFu
       .populate('halqa', 'name')
       .populate('students', 'name')
       .populate('specialTrack', 'title');
-    res.json({ success: true, data: withTodayAssignment(populated!) });
+    res.json({ success: true, data: withPlanComputed(populated!) });
   } catch (err) {
     next(err);
   }
@@ -223,6 +357,10 @@ const scheduleEntryUpdateSchema = z.object({
   pageStart: z.number().int().min(1).max(604).optional(),
   pageEnd:   z.number().int().min(1).max(604).optional(),
   juz:       z.number().int().min(1).max(30).optional(),
+  /** Which segment the day belongs to. `occurrenceIndex` is 1-based within a
+   * segment, so it no longer identifies a day on its own. Optional only so a
+   * single-segment plan can keep working with older clients. */
+  type:      z.enum(['حفظ', 'مراجعة', 'ترتيل', 'تلاوة']).optional(),
 });
 
 /** Hand-edits one day's assigned range within an already-persisted schedule
@@ -253,7 +391,22 @@ export async function updateScheduleEntry(req: Request, res: Response, next: Nex
     const plan = await QuranPlan.findById(req.params.id);
     if (!plan) throw new AppError('الخطة غير موجودة', 404);
 
-    const entry = plan.schedule.find((s) => s.occurrenceIndex === occurrenceIndex);
+    if (!plan.segments || plan.segments.length === 0) {
+      throw new AppError('يجب حفظ توزيع الأيام أولاً', 404);
+    }
+    // With one segment the type is unambiguous; with several it is required,
+    // because occurrenceIndex restarts at 1 inside each of them.
+    const segment = data.type
+      ? plan.segments.find((s) => s.type === data.type)
+      : plan.segments.length === 1 ? plan.segments[0] : undefined;
+    if (!segment) {
+      throw new AppError(
+        data.type ? `لا يوجد "${data.type}" في هذه الخطة` : 'يجب تحديد نوع اليوم المراد تعديله',
+        400,
+      );
+    }
+
+    const entry = segment.schedule.find((s) => s.occurrenceIndex === occurrenceIndex);
     if (!entry) throw new AppError('لم يتم العثور على هذا اليوم — يجب حفظ توزيع الأيام أولاً', 404);
 
     if (data.pageStart != null && data.pageEnd != null && data.pageStart > data.pageEnd) {
@@ -278,7 +431,7 @@ export async function updateScheduleEntry(req: Request, res: Response, next: Nex
       .populate('halqa', 'name')
       .populate('students', 'name')
       .populate('specialTrack', 'title');
-    res.json({ success: true, data: withTodayAssignment(populated!) });
+    res.json({ success: true, data: withPlanComputed(populated!) });
   } catch (err) {
     next(err);
   }

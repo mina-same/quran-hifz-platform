@@ -65,6 +65,10 @@ export async function getStudentProgress(req: Request, res: Response, next: Next
 }
 
 const recordOccurrenceSchema = z.object({
+  /** Which segment the day belongs to. `occurrenceIndex` is 1-based within a
+   * segment, so it no longer identifies a day on its own. Optional for
+   * single-segment plans / older clients — resolved below. */
+  type: z.enum(['حفظ', 'مراجعة', 'ترتيل', 'تلاوة']).optional(),
   occurrenceIndex: z.number().int().min(1),
   status: z.enum(['done', 'partial', 'absent']),
   completedThroughSurah: z.number().int().min(1).max(114).optional(),
@@ -90,11 +94,19 @@ export async function recordOccurrence(req: Request, res: Response, next: NextFu
     const plan = await loadPlanAndValidateStudent(planId, studentId);
     const doc = await getOrInitProgress(planId, studentId, plan);
 
-    const entry = doc.occurrences.find((o) => o.occurrenceIndex === data.occurrenceIndex);
+    // Backfill: overlays written before segments existed carry no type.
+    const presentTypes = Array.from(new Set(doc.occurrences.map((o) => o.type)));
+    const type = data.type
+      ?? (presentTypes.length === 1 ? presentTypes[0] : undefined);
+    if (!type) throw new AppError('يجب تحديد نوع اليوم المراد تسجيله', 400);
+
+    const entry = doc.occurrences.find(
+      (o) => o.type === type && o.occurrenceIndex === data.occurrenceIndex,
+    );
     if (!entry) throw new AppError('لم يتم العثور على هذا اليوم في خطة الطالب', 404);
 
     if (data.status === 'absent') {
-      reflowStudentPlan(doc, data.occurrenceIndex, { kind: 'absent' });
+      reflowStudentPlan(doc, type, data.occurrenceIndex, { kind: 'absent' });
     } else if (data.completedThroughSurah != null && data.completedThroughAyah != null) {
       const surah = SURAH_BY_NUMBER.get(data.completedThroughSurah);
       if (surah && data.completedThroughAyah > surah.ayahCount) {
@@ -105,20 +117,20 @@ export async function recordOccurrence(req: Request, res: Response, next: NextFu
       // own ward, since a keen student may recite past it and eat into the
       // following days (reflow settles the surplus against them). Both bounds
       // are read in the student's own direction.
-      const forward = isForwardDoc(doc);
+      const forward = isForwardDoc(doc, type);
       const step = forward ? 1 : -1;
       const completedFlat = toFlatIndex({ surahNumber: data.completedThroughSurah, ayah: data.completedThroughAyah });
       const dayStartFlat = toFlatIndex(forward
         ? { surahNumber: entry.surahStart, ayah: entry.ayahStart }
         : { surahNumber: entry.surahEnd, ayah: entry.ayahEnd });
-      const planFinishFlat = toFlatIndex(docFinishPoint(doc, forward));
+      const planFinishFlat = toFlatIndex(docFinishPoint(doc, type, forward));
       if ((completedFlat - dayStartFlat) * step < 0) {
         throw new AppError('النقطة التي وصل إليها الطالب لا يمكن أن تكون قبل بداية ورد اليوم — سجّل غياباً إن لم يسمّع شيئاً', 400);
       }
       if ((planFinishFlat - completedFlat) * step < 0) {
         throw new AppError('النقطة التي وصل إليها الطالب تتجاوز نهاية خطته', 400);
       }
-      reflowStudentPlan(doc, data.occurrenceIndex, {
+      reflowStudentPlan(doc, type, data.occurrenceIndex, {
         kind: 'reached', completedThroughSurah: data.completedThroughSurah, completedThroughAyah: data.completedThroughAyah,
       });
     } else {
@@ -127,7 +139,7 @@ export async function recordOccurrence(req: Request, res: Response, next: NextFu
       // student's own direction — the slice's low end for a reverse-direction
       // schedule (worked from the end of the mushaf backward), even though the
       // slice itself is always stored low→high.
-      const forward = isForwardDoc(doc);
+      const forward = isForwardDoc(doc, type);
       entry.completedThroughSurah = forward ? entry.surahEnd : entry.surahStart;
       entry.completedThroughAyah = forward ? entry.ayahEnd : entry.ayahStart;
     }
@@ -212,6 +224,9 @@ const rangePointSchema = z.object({
 // mushaf order (a reverse-direction individual plan), same relaxation as the
 // shared plan's own create validation.
 const initStudentProgressSchema = z.object({
+  /** Which type the custom range applies to — required when the plan has more
+   * than one, since each type covers its own stretch of the mushaf. */
+  type: z.enum(['حفظ', 'مراجعة', 'ترتيل', 'تلاوة']).optional(),
   rangeStart: rangePointSchema.optional(),
   rangeEnd: rangePointSchema.optional(),
 }).superRefine((data, ctx) => {
@@ -235,11 +250,12 @@ const initStudentProgressSchema = z.object({
  * With no body: idempotent — `getOrInitProgress` returns the existing doc if
  * one already exists, else clones the base plan's own schedule.
  *
- * With `{ rangeStart, rangeEnd }`: the teacher is deliberately giving this
- * student their own memorization range (possibly a different direction than
- * the base plan) — always (re)computes and overwrites the doc's occurrences
- * from that range, discarding any prior progress/overrides, same "re-freeze
- * discards the earlier version" semantics as the plan-level generateSchedule. */
+ * With `{ type, rangeStart, rangeEnd }`: the teacher is deliberately giving
+ * this student their own memorization range for ONE type (possibly a different
+ * direction than the base plan) — always (re)computes and overwrites the doc's
+ * occurrences from that range, discarding any prior progress/overrides, same
+ * "re-freeze discards the earlier version" semantics as generateSchedule. The
+ * plan's other types are rebuilt from the shared plan unchanged. */
 export async function initStudentProgress(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id: planId, studentId } = req.params;
@@ -248,7 +264,17 @@ export async function initStudentProgress(req: Request, res: Response, next: Nex
 
     let doc;
     if (data.rangeStart && data.rangeEnd) {
-      const occurrences = initStudentOccurrences(plan, { rangeStart: data.rangeStart, rangeEnd: data.rangeEnd });
+      // A custom range belongs to one type — each type covers its own stretch
+      // of the mushaf, so there is no plan-wide range to override.
+      const segmentTypes = (plan.segments && plan.segments.length > 0)
+        ? plan.segments.map((s) => s.type)
+        : plan.type ? [plan.type] : [];
+      const rangeType = data.type ?? (segmentTypes.length === 1 ? segmentTypes[0] : undefined);
+      if (!rangeType) throw new AppError('يجب تحديد النوع الذي ينطبق عليه النطاق المخصص', 400);
+
+      const occurrences = initStudentOccurrences(plan, {
+        type: rangeType, rangeStart: data.rangeStart, rangeEnd: data.rangeEnd,
+      });
       doc = await StudentPlanProgress.findOneAndUpdate(
         { plan: planId, student: studentId },
         { plan: planId, student: studentId, occurrences, overflowPages: 0, $unset: { lastReflowedAt: 1 } },

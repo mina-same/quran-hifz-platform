@@ -10,7 +10,7 @@ import { ENV } from '../config/env';
 import { Halqa } from '../models/Halqa.model';
 import { SpecialTrack } from '../models/SpecialTrack.model';
 import { QuranPlan } from '../models/QuranPlan.model';
-import { WEEK_DAYS, computeTodayAssignment, pageRangeOfAyahRange } from '../lib/quranRange';
+import { WEEK_DAYS, computeMultiTodayAssignment, pageRangeOfAyahRange } from '../lib/quranRange';
 
 // A modest, multi-page starting range (Al-Fatiha + most of Al-Baqarah's first
 // juz') so the day's assignment banner has something meaningful to show.
@@ -30,28 +30,44 @@ async function backfill(): Promise<void> {
   const [halqat, tracks, existingPlans] = await Promise.all([
     Halqa.find({}).select('name teacher'),
     SpecialTrack.find({}).select('title teachers'),
-    QuranPlan.find({}).select('halqa specialTrack days startDate endType activeDaysCount endDate rangeStart rangeEnd'),
+    QuranPlan.find({}).select('halqa specialTrack segments days startDate endType activeDaysCount endDate rangeStart rangeEnd type'),
   ]);
 
   const today = new Date();
   let created = 0;
 
+  /** Whether a plan has a ward due today, reading through its segments and
+   * migrating a legacy single-track document on the fly (mirrors
+   * normalizePlanSegments in quran-plan.controller.ts). */
+  const hasWardToday = (p: typeof existingPlans[number]) => {
+    const segments = (p.segments && p.segments.length > 0)
+      ? p.segments.map((s) => ({ type: s.type, days: s.days, rangeStart: s.rangeStart, rangeEnd: s.rangeEnd }))
+      : (p.type && p.days && p.rangeStart && p.rangeEnd)
+        ? [{ type: p.type, days: p.days, rangeStart: p.rangeStart, rangeEnd: p.rangeEnd }]
+        : [];
+    if (segments.length === 0) return false;
+    return computeMultiTodayAssignment({
+      startDate: p.startDate, holidays: p.holidays,
+      endType: p.endType, activeDaysCount: p.activeDaysCount, endDate: p.endDate,
+      segments,
+    }, today) !== null;
+  };
+
   for (const halqa of halqat) {
     const hasToday = existingPlans
       .filter((p) => p.halqa && String(p.halqa) === String(halqa._id))
-      .some((p) => computeTodayAssignment(p, today) !== null);
+      .some(hasWardToday);
     if (hasToday) continue;
 
     await QuranPlan.create({
       name: `خطة حفظ يومية — ${halqa.name}`,
-      type: 'حفظ',
       description: 'خطة تلقائية لضمان وجود مقرر يومي (تمت إضافتها تلقائيًا، لا تحذف البيانات الأخرى).',
       teacher: halqa.teacher,
       targetType: 'halqa',
       halqa: halqa._id,
-      days: [...WEEK_DAYS],
+      // One segment: these auto-plans exist only to guarantee a daily ward.
+      segments: [{ type: 'حفظ', days: [...WEEK_DAYS], ...DEFAULT_RANGE, schedule: [] }],
       startDate: today,
-      ...DEFAULT_RANGE,
       pointsEnabled: false,
       pointRules: [],
       endType: 'activeDays',
@@ -66,19 +82,18 @@ async function backfill(): Promise<void> {
     if (!track.teachers || track.teachers.length === 0) continue;
     const hasToday = existingPlans
       .filter((p) => p.specialTrack && String(p.specialTrack) === String(track._id))
-      .some((p) => computeTodayAssignment(p, today) !== null);
+      .some(hasWardToday);
     if (hasToday) continue;
 
     await QuranPlan.create({
       name: `خطة حفظ يومية — ${track.title}`,
-      type: 'حفظ',
       description: 'خطة تلقائية لضمان وجود مقرر يومي (تمت إضافتها تلقائيًا، لا تحذف البيانات الأخرى).',
       teacher: track.teachers[0],
       targetType: 'specialTrack',
       specialTrack: track._id,
-      days: [...WEEK_DAYS],
+      // One segment: these auto-plans exist only to guarantee a daily ward.
+      segments: [{ type: 'حفظ', days: [...WEEK_DAYS], ...DEFAULT_RANGE, schedule: [] }],
       startDate: today,
-      ...DEFAULT_RANGE,
       pointsEnabled: false,
       pointRules: [],
       endType: 'activeDays',

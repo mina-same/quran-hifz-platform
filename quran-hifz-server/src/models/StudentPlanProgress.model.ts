@@ -1,8 +1,14 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { PLAN_TYPE_VALUES, type PlanType } from './QuranPlan.model';
 
 export type StudentOccurrenceStatus = 'pending' | 'done' | 'partial' | 'absent';
 
 export interface IStudentOccurrence {
+  /** Which of the plan's segments this day belongs to. `occurrenceIndex` is
+   * 1-based WITHIN a segment, so the addressing pair is (type, occurrenceIndex)
+   * — an index alone no longer identifies a day. Reflow redistributes strictly
+   * inside one type: a مراجعة shortfall must never eat حفظ days. */
+  type: PlanType;
   occurrenceIndex: number;
   date: Date;
 
@@ -55,6 +61,9 @@ export interface IStudentPlanProgress extends Document {
 
 const studentOccurrenceSchema = new Schema<IStudentOccurrence>(
   {
+    // Not `required`: documents written before segments existed have no type.
+    // They are backfilled on read with the plan's single segment type.
+    type:            { type: String, enum: PLAN_TYPE_VALUES },
     occurrenceIndex: { type: Number, required: true },
     date:            { type: Date, required: true },
 
