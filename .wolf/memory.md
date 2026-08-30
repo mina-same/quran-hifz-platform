@@ -2763,3 +2763,5 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 22:14 | holidays (أيام العطلات) accept a from/to range on both clients — expandDateRange() expands to the existing flat string[] so no schema or server change; single-day add preserved; +11 unit tests | quran-hifz-mobile/lib/date.ts, lib/date.test.ts (new), app/(portal)/teacher/plan-form.tsx; quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | mobile tsc clean, jest 58/58, expo export clean; web tsc clean | ~30k |
+| 22:30 | iOS build error 65 diagnosed: disk 100% full (`LLVM ERROR: No space left on device`), not a code bug | quran-hifz-mobile/ios, .wolf/buglog.json | freed ~11GB (DerivedData 7.8G, npm cache, sim unavailable, dev caches); 143MB -> 11GB free; build unblocked | ~12k |

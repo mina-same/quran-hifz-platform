@@ -6553,6 +6553,27 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-29T13:09:22.091113"
+    },
+    {
+      "id": "bug-388",
+      "timestamp": "2026-08-30T22:30:00",
+      "error_message": "expo run:ios failed: 'xcodebuild exited with error code 65', script '[Expo] Configure project' failed. Real cause buried mid-log: 'LLVM ERROR: IO failure on output stream: No space left on device'",
+      "file": "quran-hifz-mobile/ios (build environment, not source)",
+      "root_cause": "Mac boot volume was 100% full (143 MB free of 228 GB). The linker could not write object files. Xcode reports this as a generic error 65 / failed build script, and the only real signal is the LLVM 'No space left on device' line far above the summary. The two trailing warnings (ambiguous script dependencies, SDWebImage iOS@9.0 deployment mismatch) are cosmetic and unrelated.",
+      "fix": "Freed ~11 GB: rm -rf ~/Library/Developer/Xcode/DerivedData/* (7.8 GB), npm cache clean --force, xcrun simctl delete unavailable, and removed ~/Library/Caches/{Google,typescript,node-gyp,electron,electron-builder}. Disk went 143 MB -> 11 GB free and the build unblocked.",
+      "tags": [
+        "ios",
+        "build",
+        "xcodebuild",
+        "error-65",
+        "disk-space",
+        "expo",
+        "environment",
+        "false-lead"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-30T22:30:00"
     }
   ]
 }
