@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-29T09:06:47.848Z
-> Files: 531 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-30T20:02:04.403Z
+> Files: 532 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -773,6 +773,7 @@
 
 - `LandingPage.tsx` — LOGO_SRC (~4826 tok)
 - `LoginPage.tsx` — schema — renders form. No dev-account quick-login buttons (removed for security, 2026-07-05). (~1400 tok)
+- `OnboardingPage.tsx` — First-visit intro slides — the web counterpart of the mobile app's (~1011 tok)
 
 ## quran-hifz/src/quran/pages/admin/
 

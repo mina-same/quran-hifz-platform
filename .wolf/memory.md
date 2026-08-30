@@ -2766,3 +2766,18 @@
 | 22:14 | holidays (أيام العطلات) accept a from/to range on both clients — expandDateRange() expands to the existing flat string[] so no schema or server change; single-day add preserved; +11 unit tests | quran-hifz-mobile/lib/date.ts, lib/date.test.ts (new), app/(portal)/teacher/plan-form.tsx; quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | mobile tsc clean, jest 58/58, expo export clean; web tsc clean | ~30k |
 | 22:30 | iOS build error 65 diagnosed: disk 100% full (`LLVM ERROR: No space left on device`), not a code bug | quran-hifz-mobile/ios, .wolf/buglog.json | freed ~11GB (DerivedData 7.8G, npm cache, sim unavailable, dev caches); 143MB -> 11GB free; build unblocked | ~12k |
 | 22:39 | added __DEV__-only button on the login topbar that pushes /onboarding — hasOnboarded is persisted so the slides were otherwise unreachable without clearing app storage | quran-hifz-mobile/app/index.tsx | tsc clean, jest 58/58, expo export clean | ~12k |
+
+## Session: 2026-08-30 23:01
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 23:02 | Created quran-hifz/src/quran/pages/OnboardingPage.tsx | — | ~1011 |
+| 23:06 | web login page: onboarding slides as a left-hand panel beside the form (RTL flex order — card order:1 = right, intro order:2 = left), cross-fade carousel w/ dots, touch swipe, pause on hover/focus, reduced-motion hold, hidden <900px; slide art downscaled 1200px→640px (4.8MB→1.2MB) | quran-hifz/src/quran/components/LoginIntro.tsx (new), pages/LoginPage.tsx, quran.css, public/quran/onboarding/*.png | tsc clean (excl. 4 pre-existing), vite build clean | ~40k |
+| 23:06 | Session end: 1 writes across 1 files (OnboardingPage.tsx) | 0 reads | ~1011 tok |
+
+## Session: 2026-08-30 23:11
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 23:12 | login onboarding carousel auto-advance set to 5s | quran-hifz/src/quran/components/LoginIntro.tsx | done | ~3k |
+| 23:15 | sped up login carousel: 3s interval, 0.35s fade | LoginIntro.tsx, quran.css | done | ~2k |

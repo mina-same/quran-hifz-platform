@@ -4536,3 +4536,108 @@ textarea.form-input {
   .att-chip { padding: 6px 10px; font-size: 11px; }
   .att-mark-all { padding: 6px 10px; font-size: 11px; }
 }
+
+/* ─── Login intro panel ─────────────────────────────────────────────────────
+   The three onboarding slides sit beside the login form, mirroring the mobile
+   app's onboarding screen. */
+.login-split {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  width: 100%;
+  max-width: 980px;
+}
+/* Under RTL the first flex item lands on the RIGHT, so explicit order is what
+   puts the form right and the intro left, while the DOM keeps the form first
+   (it is the reason the visitor is here, and it should stack first on mobile). */
+.login-split > .login-card { order: 1; flex: 0 0 420px; }
+.login-split > .login-intro { order: 2; }
+
+.login-intro {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+  /* The panel is swipeable on touch — keep the browser's own horizontal
+     gesture (back-navigation) from stealing the drag. */
+  touch-action: pan-y;
+}
+
+/* Fixed-height stage so a slide change never reflows the row beside the form. */
+.login-intro-stage {
+  position: relative;
+  width: 100%;
+  height: 260px;
+}
+.login-intro-img {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.login-intro-img.active { opacity: 1; }
+
+/* Reserved so the shorter slides do not bounce the dots up and down. */
+.login-intro-copy { min-height: 132px; }
+.login-intro-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  font-family: "Cairo", sans-serif;
+  color: var(--green);
+  line-height: 1.6;
+  /* The copy carries its own line break, same as the mobile slides. */
+  white-space: pre-line;
+}
+.dark .login-intro-title { color: #4ade80; }
+.login-intro-desc {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-family: "Cairo", sans-serif;
+  color: var(--text2);
+  line-height: 1.9;
+}
+
+.login-intro-dots {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 9px;
+}
+.login-intro-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: var(--border);
+  cursor: pointer;
+  transition: background 0.2s, width 0.2s;
+}
+.login-intro-dot.active {
+  width: 22px;
+  background: var(--green);
+}
+.dark .login-intro-dot.active { background: #4ade80; }
+
+@media (prefers-reduced-motion: reduce) {
+  .login-intro-img { transition: none; }
+  .login-intro-dot { transition: none; }
+}
+
+/* Below the split, the form stands alone: a decorative carousel is not worth a
+   screen's worth of scrolling on a phone. */
+@media (max-width: 900px) {
+  .login-split { gap: 0; max-width: 420px; }
+  .login-split > .login-card { flex: 1 1 auto; }
+  .login-split > .login-intro { display: none; }
+}

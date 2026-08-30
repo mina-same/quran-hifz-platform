@@ -2,10 +2,10 @@
   "version": 1,
   "created_at": "2026-06-27T12:42:49.696Z",
   "lifetime": {
-    "total_tokens_estimated": 11530699,
+    "total_tokens_estimated": 11531710,
     "total_reads": 5055,
-    "total_writes": 6363,
-    "total_sessions": 113,
+    "total_writes": 6364,
+    "total_sessions": 115,
     "anatomy_hits": 4303,
     "anatomy_misses": 608,
     "repeated_reads_blocked": 3867,
@@ -65847,6 +65847,27 @@
       "totals": {
         "input_tokens_estimated": 0,
         "output_tokens_estimated": 149,
+        "reads_count": 0,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-08-30-2301",
+      "started": "2026-08-30T20:01:16.230Z",
+      "ended": "2026-08-30T20:06:33.462Z",
+      "reads": [],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/OnboardingPage.tsx",
+          "tokens_estimated": 1011,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 1011,
         "reads_count": 0,
         "writes_count": 1,
         "repeated_reads_blocked": 0,

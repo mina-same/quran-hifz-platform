@@ -5,6 +5,7 @@ import { z } from "zod";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { ApiError } from "../../lib/api";
+import { LoginIntro } from "../components/LoginIntro";
 
 const schema = z.object({
   email:    z.string().email("بريد إلكتروني غير صحيح"),
@@ -48,9 +49,14 @@ export function LoginPage({ onBack }: { onBack?: () => void }) {
         </button>
       </div>
 
-      {/* Centered card */}
+      {/* Intro panel + login card, side by side. Under RTL the FIRST flex item
+          lands on the right, so the card carries order:1 and the intro order:2
+          to put the intro on the left — see .login-split in quran.css. On a
+          narrow screen they stack with the card first, since signing in is the
+          reason the visitor is here. */}
       <div className="login-center">
-        <div className="login-card">
+        <div className="login-split">
+          <div className="login-card">
           {/* Logo + org name */}
           <div className="login-card-header">
             <div className="login-logo-wrap">
@@ -127,7 +133,10 @@ export function LoginPage({ onBack }: { onBack?: () => void }) {
                 <>دخول <i className="ti ti-arrow-left" /></>
               )}
             </button>
-          </form>
+            </form>
+          </div>
+
+          <LoginIntro />
         </div>
       </div>
     </div>
