@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { PortalType, PortalUser, NavGroup } from '@/lib/types/portal';
 import type { ThemeMode } from '@/lib/theme';
 import { PORTALS } from '@/lib/constants/portals';
-import { get as apiGet, post as apiPost, setUnauthorizedHandler } from '@/lib/api';
+import { get as apiGet, post as apiPost, setUnauthorizedHandler, NetworkError } from '@/lib/api';
 import { getToken, setToken, clearToken } from '@/lib/auth-storage';
 import { setHapticsEnabled as applyHapticsEnabled } from '@/lib/haptics';
 
@@ -150,8 +150,12 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
         isLocked: biometricEnabled,
         ...enterPortal(authUser.role, authUser),
       });
-    } catch {
-      await clearToken();
+    } catch (err) {
+      // Only drop the stored token when the server actually rejected it. A
+      // NetworkError means we never reached the server (offline, stale LAN IP),
+      // and throwing away a still-valid session for that would force a re-login
+      // every time the API is briefly unreachable.
+      if (!(err instanceof NetworkError)) await clearToken();
       set({ authUser: null, isHydrating: false, themeMode, biometricEnabled, hapticsEnabled, hasOnboarded });
     }
   },

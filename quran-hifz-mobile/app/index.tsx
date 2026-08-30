@@ -10,7 +10,7 @@ import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Controller, useForm } from 'react-hook-form';
 import {
-  IconLock, IconMail, IconEye, IconEyeOff, IconSun, IconMoon, IconClock,
+  IconLock, IconMail, IconEye, IconEyeOff, IconSun, IconMoon, IconClock, IconPresentation,
 } from '@tabler/icons-react-native';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { PORTAL_ROUTES } from '@/lib/constants/portals';
@@ -76,7 +76,7 @@ export default function LoginScreen() {
     flex: { flex: 1 },
     scroll: { flexGrow: 1, justifyContent: 'center', paddingVertical: 24, paddingHorizontal: 20 },
     // `flex-end` renders at the visual left under forced RTL — matches the design.
-    topbar: { alignItems: 'flex-end', marginBottom: 8 },
+    topbar: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: 10, marginBottom: 8 },
     themeBtn: {
       width: 44, height: 44, borderRadius: 22,
       alignItems: 'center', justifyContent: 'center',
@@ -151,6 +151,22 @@ export default function LoginScreen() {
           keyboardDismissMode="on-drag"
         >
           <View style={styles.topbar}>
+            {/* Dev-only shortcut back into the onboarding slides. `hasOnboarded`
+                is persisted, so once the slides have been seen the app always
+                lands straight on this screen and there is otherwise no way to
+                see them again short of clearing app storage. `__DEV__` is false
+                in any release build, so this never reaches users. */}
+            {__DEV__ && (
+              <Pressable
+                haptic="select"
+                onPress={() => router.push('/onboarding')}
+                hitSlop={8}
+                style={styles.themeBtn}
+                accessibilityLabel="عرض شاشات التعريف (وضع التطوير)"
+              >
+                <IconPresentation size={22} color={theme.textMuted} />
+              </Pressable>
+            )}
             <Pressable
               haptic="select"
               onPress={toggleTheme}

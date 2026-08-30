@@ -10,6 +10,21 @@ export function setUnauthorizedHandler(handler: () => void) {
   onUnauthorized = handler;
 }
 
+/** No response within this window is treated as unreachable. Without it a fetch
+ * to a routable-but-dead host (a stale LAN IP after the Mac's DHCP lease moves)
+ * hangs on the OS connect timeout, which is long enough to look infinite — and
+ * hydrate() awaits /auth/me before hiding the splash, so the app never starts. */
+const REQUEST_TIMEOUT_MS = 12000;
+
+/** The request never reached the server (offline, wrong host, timeout). Distinct
+ * from ApiError, which means the server answered and rejected us. */
+export class NetworkError extends Error {
+  constructor(message = 'تعذّر الاتصال بالخادم') {
+    super(message);
+    this.name = 'NetworkError';
+  }
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -28,7 +43,20 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
   };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE}${path}`, { ...options, headers });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${path}`, { ...options, headers, signal: controller.signal });
+  } catch (err) {
+    // fetch rejects for both a real transport failure and our own abort; neither
+    // one is a server verdict, so both surface as NetworkError.
+    throw new NetworkError(
+      (err as Error)?.name === 'AbortError' ? 'انتهت مهلة الاتصال بالخادم' : undefined,
+    );
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (!res.ok) {
     // A rejected token (expired, or signed with a since-rotated secret) must end
