@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-30T20:20:42.441Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-30T20:26:36.000Z
 > Files: 533 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
@@ -565,7 +565,7 @@
 - `masjid.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~161 tok)
 - `message.routes.ts` — API routes: GET, POST, PATCH (3 endpoints) (~105 tok)
 - `parent.routes.ts` — API routes: GET (6 endpoints) (~239 tok)
-- `quran-plan.routes.ts` — API routes: GET, POST, PUT, DELETE (12 endpoints) (~484 tok)
+- `quran-plan.routes.ts` — API routes: GET, POST, PUT, DELETE (12 endpoints) (~632 tok)
 - `special-track.routes.ts` — API routes: GET, POST, PUT, DELETE (6 endpoints) (~210 tok)
 - `stats.routes.ts` — API routes: GET (1 endpoints) (~79 tok)
 - `student.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~173 tok)
