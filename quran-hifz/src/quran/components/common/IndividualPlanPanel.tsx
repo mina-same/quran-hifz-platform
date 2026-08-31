@@ -8,7 +8,7 @@ import {
   useUpdateStudentScheduleEntry, useReflowStudentPlan,
   type StudentOccurrence,
 } from "../../api/student-plan-progress";
-import type { RangePoint, QuranPlan } from "../../api/quran-plans";
+import { planSegment, type RangePoint, type QuranPlan, type PlanType } from "../../api/quran-plans";
 import { fractionalPage, isReversedRange, isReversedSchedule } from "../../lib/quranRange";
 import { SURAHS } from "../../data/surahs";
 import { toAr, AR_LOCALE } from "../../../lib/format";
@@ -78,20 +78,33 @@ export function planCoversStudent(plan: QuranPlan, studentId: string): boolean {
  * the teacher create one with a custom (possibly reverse-direction) range, or
  * view/edit/reflow an existing one. */
 export function IndividualPlanPanel({
-  planId, studentId, studentName, basePlan,
+  planId, studentId, studentName, basePlan, type,
 }: {
   planId: string;
   studentId: string;
   studentName: string;
   basePlan: QuranPlan;
+  /** Which of the plan's types this panel is for. A custom range belongs to
+   * one type — each covers its own stretch of the mushaf — so with a
+   * multi-type plan the caller must say which. Falls back to the only segment
+   * when the plan has just one. */
+  type?: PlanType;
 }) {
   const { data: progress, isLoading } = useStudentPlanProgress(planId, studentId);
   const initProgress = useInitStudentPlanProgress();
   const updateEntry = useUpdateStudentScheduleEntry();
   const reflow = useReflowStudentPlan();
 
-  const [customStart, setCustomStart] = useState<RangePoint>(basePlan.rangeStart);
-  const [customEnd, setCustomEnd] = useState<RangePoint>(basePlan.rangeEnd);
+  // The segment this panel covers, and the range it seeds the pickers with.
+  const segment = planSegment(basePlan, type);
+  const segType = segment?.type ?? type;
+
+  const [customStart, setCustomStart] = useState<RangePoint>(
+    segment?.rangeStart ?? { surahNumber: 1, ayah: 1 },
+  );
+  const [customEnd, setCustomEnd] = useState<RangePoint>(
+    segment?.rangeEnd ?? { surahNumber: 114, ayah: 6 },
+  );
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [rangeStart, setRangeStart] = useState<RangePoint>({ surahNumber: 1, ayah: 1 });
@@ -106,7 +119,12 @@ export function IndividualPlanPanel({
   // Reverse schedule → display "من—إلى" in its own direction. This student's
   // overlay can run the opposite way to the base plan (a custom range they were
   // given), so read the direction off their own occurrences first.
-  const reversed = isReversedSchedule(progress.effectiveSchedule) ?? isReversedRange(basePlan.rangeStart, basePlan.rangeEnd);
+  // Only this type's days — a multi-type plan's overlay holds every type's
+  // occurrences in one array, and mixing them would read as one jumbled
+  // schedule and infer the wrong direction.
+  const ownSchedule = progress.effectiveSchedule.filter((o) => !segType || o.type === segType);
+  const reversed = isReversedSchedule(ownSchedule)
+    ?? (segment ? isReversedRange(segment.rangeStart, segment.rangeEnd) : false);
 
   function startEdit(entry: StudentOccurrence) {
     setEditingIndex(entry.occurrenceIndex);

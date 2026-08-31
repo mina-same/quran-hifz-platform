@@ -19,7 +19,7 @@ import { useHalqat } from "../../api/halqat";
 import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudents } from "../../api/students";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
-import { useQuranPlans, type ScheduleEntry, type RangePoint } from "../../api/quran-plans";
+import { useQuranPlans, type ScheduleEntry, type RangePoint, segmentReversed, type PlanType } from "../../api/quran-plans";
 import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
 import { useRecordStudentOccurrence, useStudentPlanProgressList } from "../../api/student-plan-progress";
 import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
@@ -215,18 +215,13 @@ export function TeacherAttendance() {
 
   // A reverse-direction plan (rangeStart sits after rangeEnd in mushaf order):
   // the day's assignment is still recited/stored low→high internally, but the
-  // "من/إلى" display is swapped so the teacher reads it in the plan's own
-  // direction (from the plan's start point back toward its end).
-  const rangeReversed = !!linkedPlan &&
-    toFlatIndex(linkedPlan.rangeStart) > toFlatIndex(linkedPlan.rangeEnd);
-
   // Day slider state — "" means "not yet chosen", falls back to defaultDate.
   const [selectedDate, setSelectedDate] = useState("");
 
   const { scheduledSet, scheduledSorted, assignmentByDate, dayChips, effectiveDate } =
     useMemo(() => {
       const set = new Set<string>();
-      const byDate = new Map<string, ScheduleEntry>();
+      const byDate = new Map<string, ScheduleEntry & { type?: PlanType }>();
       for (const p of plans) {
         for (const e of p.schedule ?? []) {
           if (!e.date) continue;
@@ -254,6 +249,12 @@ export function TeacherAttendance() {
         effectiveDate: effective,
       };
     }, [plans, selectedDate, today]);
+
+  // Days are partitioned across types, so the selected date resolves to
+  // exactly one — that segment decides the ward, the direction the teacher
+  // reads "من/إلى" in, and which segment a shortfall reflows into.
+  const dayType = assignmentByDate.get(effectiveDate)?.type;
+  const rangeReversed = segmentReversed(linkedPlan, dayType);
 
   // Each covered student can have their own effective schedule (absence/
   // shortfall reflow, manual per-student overrides) once they have an
@@ -493,7 +494,7 @@ export function TeacherAttendance() {
 
           if (status === "done" && delta === 0) {
             toast.success("تم حفظ الحضور والتقييم بنجاح", { id: toastId });
-            recordOccurrence.mutate({ planId: linkedPlan._id, studentId, occurrenceIndex: studentAssignment.occurrenceIndex, status });
+            recordOccurrence.mutate({ planId: linkedPlan._id, studentId, type: dayType, occurrenceIndex: studentAssignment.occurrenceIndex, status });
             return;
           }
 
@@ -507,7 +508,7 @@ export function TeacherAttendance() {
           );
           recordOccurrence.mutate(
             {
-              planId: linkedPlan._id, studentId, occurrenceIndex: studentAssignment.occurrenceIndex,
+              planId: linkedPlan._id, studentId, type: dayType, occurrenceIndex: studentAssignment.occurrenceIndex,
               status,
               // Sent for an over-achievement too (status "done"), so the server can
               // take the surplus off the student's remaining days.

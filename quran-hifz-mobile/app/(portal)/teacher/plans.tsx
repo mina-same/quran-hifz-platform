@@ -16,7 +16,7 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import IconButton from '@/components/ui/IconButton';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Alert from '@/components/ui/Alert';
-import { useQuranPlans, useDeleteQuranPlan, type QuranPlan } from '@/lib/queries/quranPlan';
+import { useQuranPlans, useDeleteQuranPlan, segmentReversed, type QuranPlan } from '@/lib/queries/quranPlan';
 import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
 import { fmtDate } from '@/lib/date';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -70,8 +70,10 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
 }) {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
-  const reversed = isReversedRange(plan.rangeStart, plan.rangeEnd);
-  const assignment = plan.todayAssignment ? orientSlice(plan.todayAssignment, reversed) : null;
+  // Direction is per segment — today's ward is oriented by the type due today.
+  const assignment = plan.todayAssignment
+    ? orientSlice(plan.todayAssignment, segmentReversed(plan, plan.todayAssignment.type))
+    : null;
   const progressLabel = plan.juzProgress
     ? `${plan.juzProgress.completed} / ${plan.juzProgress.total} جزء`
     : `${plan.progress?.percent ?? 0}%`;
@@ -82,9 +84,6 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
       ? <IconCalendarEvent size={15} color={theme.textMuted} />
       : <IconUsers size={15} color={theme.textMuted} />;
 
-  const pagesValue = plan.pageRange.pageCount === 1
-    ? `صفحة ${plan.pageRange.pageStart}`
-    : `${plan.pageRange.pageCount} (${plan.pageRange.pageStart}-${plan.pageRange.pageEnd})`;
 
   return (
     <Pressable onPress={onPress}>
@@ -92,7 +91,11 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
         <View style={s.headRow}>
           <View style={s.headBadges}>
             <Badge label={plan.status} variant={STATUS_VARIANT[plan.status]} />
-            <Text style={s.typeTag}>{plan.type}</Text>
+            {/* One chip per type — a plan can carry several, each on its own
+                days and its own stretch of the mushaf. */}
+            {plan.segments.map((seg) => (
+              <Text key={seg.type} style={s.typeTag}>{seg.type}</Text>
+            ))}
           </View>
           <View style={s.rowActions}>
             <IconButton onPress={onEdit} accessibilityLabel="تعديل الخطة">
@@ -112,14 +115,7 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
 
         <View style={s.infoGrid}>
           <InfoRow icon={targetIcon} label="الهدف" value={targetLabel(plan)} />
-          <InfoRow
-            icon={<IconCalendarWeek size={15} color={theme.textMuted} />}
-            label="الأيام"
-            value={plan.days.join('، ')}
-          />
-          <InfoRow icon={<IconBook size={15} color={theme.textMuted} />} label="من" value={pointLabel(plan.rangeStart)} />
-          <InfoRow icon={<IconBook2 size={15} color={theme.textMuted} />} label="إلى" value={pointLabel(plan.rangeEnd)} />
-          <InfoRow icon={<IconFiles size={15} color={theme.textMuted} />} label="عدد الصفحات" value={pagesValue} full />
+
           {plan.endType === 'date' && plan.endDate ? (
             <InfoRow icon={<IconCalendarDue size={15} color={theme.textMuted} />} label="ينتهي في" value={fmtDate(plan.endDate)} full />
           ) : (
@@ -151,12 +147,14 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
         <View style={[s.assignmentBox, !assignment && { backgroundColor: theme.cream }]}>
           <View style={s.progressLabelRow}>
             <IconCalendarStar size={14} color={assignment ? theme.green : theme.textMuted} />
-            <Text style={[s.assignmentLabel, !assignment && { color: theme.textMuted }]}>الجزء المطلوب اليوم</Text>
+            <Text style={[s.assignmentLabel, !assignment && { color: theme.textMuted }]}>
+              الجزء المطلوب اليوم{plan.todayAssignment ? ` · ${plan.todayAssignment.type}` : ''}
+            </Text>
           </View>
           {assignment ? (
             <Text style={s.assignmentText}>
               {surahName(assignment.surahStart)}:{assignment.ayahStart} — {surahName(assignment.surahEnd)}:{assignment.ayahEnd}
-              {reversed ? ' · بالعكس' : ''}
+              {plan.todayAssignment && segmentReversed(plan, plan.todayAssignment.type) ? ' · بالعكس' : ''}
             </Text>
           ) : (
             <Text style={s.muted}>لا يوجد جزء مخصص لليوم</Text>
@@ -260,6 +258,8 @@ function createS(theme: AppTheme) {
     assignmentLabel: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.green },
     emptyBox: { alignItems: 'center', gap: 4, paddingVertical: 24 },
     mutedSm: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center' },
+    segBlock: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: theme.border },
+    segTitle: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.green, marginBottom: 6 },
     typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
     title: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text },
     subInfo: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 2 },

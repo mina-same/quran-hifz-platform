@@ -1,6 +1,6 @@
 import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import { get, post, put, del } from '@/lib/api';
-import type { RangePoint, ScheduleEntry } from '@/lib/quranRange';
+import { isReversedRange, type RangePoint, type ScheduleEntry } from '@/lib/quranRange';
 
 export type PlanType = 'حفظ' | 'مراجعة' | 'ترتيل' | 'تلاوة';
 export type PointRule = { label: string; amount: number; kind: 'خصم' | 'زيادة' };
@@ -13,11 +13,35 @@ export type PlanProgress = { completed: number; total: number; percent: number }
 export type JuzProgress = { completed: number; total: number };
 export type PageRange = { pageStart: number; pageEnd: number; pageCount: number };
 
+/** One type's track inside a plan: its own weekdays, its own stretch of the
+ * mushaf, and its own schedule. `occurrenceIndex` inside `schedule` is 1-based
+ * WITHIN this segment, so a day is addressed by (type, occurrenceIndex). */
+export type PlanSegment = {
+  type: PlanType;
+  days: string[];
+  rangeStart: RangePoint;
+  rangeEnd: RangePoint;
+  todayAssignment: (TodayAssignment & { type: PlanType }) | null;
+  progress: PlanProgress | null;
+  juzProgress: JuzProgress | null;
+  pageRange: PageRange;
+  schedule: (ScheduleEntry & { type: PlanType })[];
+  scheduleIsPersisted: boolean;
+};
+
 export type QuranPlan = {
   _id: string;
   name: string;
-  type: PlanType;
   description?: string;
+
+  /** One track per type — the real scheduling data. Always present: the server
+   * migrates a legacy single-type plan into a one-element array on read. */
+  segments: PlanSegment[];
+  /** Every type in the plan, in segment order. */
+  types: PlanType[];
+  /** Rollup — the type due today, else the first segment's. Kept so screens
+   * that only render a badge need no change. */
+  type: PlanType;
   teacher: PlanTeacher | string;
 
   targetType: 'halqa' | 'students' | 'specialTrack';
@@ -25,13 +49,11 @@ export type QuranPlan = {
   students?: (PlanStudent | string)[];
   specialTrack?: PlanSpecialTrack | string;
 
+  /** Rollup — every segment's days merged. Scheduling reads `segments`. */
   days: string[];
   /** Calendar days (YYYY-MM-DD) the plan pauses on — see quranRange. */
   holidays: string[];
   startDate: string;
-
-  rangeStart: RangePoint;
-  rangeEnd: RangePoint;
 
   pointsEnabled: boolean;
   pointRules: PointRule[];
@@ -41,13 +63,34 @@ export type QuranPlan = {
   endDate?: string;
 
   status: 'نشطة' | 'متوقفة' | 'منتهية';
-  todayAssignment: TodayAssignment | null;
+
+  /* ── rollups across every segment ──────────────────────────────────────
+   * Days are partitioned, so at most one type is due on any date and
+   * `todayAssignment` is single-valued. `schedule` is every segment's days
+   * merged and date-sorted, each entry carrying its own `type`. */
+  todayAssignment: (TodayAssignment & { type: PlanType }) | null;
   progress: PlanProgress | null;
   juzProgress: JuzProgress | null;
-  pageRange: PageRange;
-  schedule: ScheduleEntry[];
+  pageRange: PageRange | null;
+  schedule: (ScheduleEntry & { type: PlanType })[];
   scheduleIsPersisted: boolean;
 };
+
+/** The segment carrying a given type — or the plan's only segment when the
+ * type is omitted and there is just one. Returns undefined when ambiguous. */
+export function planSegment(plan: QuranPlan | undefined, type?: PlanType): PlanSegment | undefined {
+  if (!plan) return undefined;
+  if (type) return plan.segments?.find((s) => s.type === type);
+  return plan.segments?.length === 1 ? plan.segments[0] : undefined;
+}
+
+/** Whether a segment's range runs backward through the mushaf (from the end
+ * toward Al-Fatiha). Direction is per segment: مراجعة may run forward while
+ * حفظ runs backward, so this must never be read off the plan as a whole. */
+export function segmentReversed(plan: QuranPlan | undefined, type?: PlanType): boolean {
+  const seg = planSegment(plan, type);
+  return seg ? isReversedRange(seg.rangeStart, seg.rangeEnd) : false;
+}
 
 type ListResponse = { success: boolean; count: number; data: QuranPlan[] };
 type SingleResponse = { success: boolean; data: QuranPlan };
@@ -129,6 +172,9 @@ export function useDeleteQuranPlan() {
 export type StudentOccurrenceStatus = 'pending' | 'done' | 'partial' | 'absent';
 
 export type StudentOccurrence = ScheduleEntry & {
+  /** Which segment this day belongs to — `occurrenceIndex` restarts at 1 in
+   * each, so a day is addressed by (type, occurrenceIndex). */
+  type: PlanType;
   baseSurahStart: number; baseAyahStart: number;
   baseSurahEnd: number; baseAyahEnd: number;
   basePageStart: number; basePageEnd: number; baseJuz: number;
@@ -183,6 +229,9 @@ export function useRecordStudentOccurrence() {
   return useMutation({
     mutationFn: ({ planId, studentId, ...body }: {
       planId: string; studentId: string;
+      /** Required when the plan has more than one type — occurrenceIndex alone
+       * no longer identifies a day. */
+      type?: PlanType;
       occurrenceIndex: number; status: 'done' | 'partial' | 'absent';
       completedThroughSurah?: number; completedThroughAyah?: number;
     }) => post<ProgressSingleResponse>(`/quran-plans/${planId}/students/${studentId}/progress/record`, body),
@@ -195,6 +244,7 @@ export function useUpdateStudentScheduleEntry() {
   return useMutation({
     mutationFn: ({ planId, studentId, occurrenceIndex, ...body }: {
       planId: string; studentId: string; occurrenceIndex: number;
+      type?: PlanType;
       surahStart: number; ayahStart: number; surahEnd: number; ayahEnd: number;
       pageStart?: number; pageEnd?: number; juz?: number;
     }) => put<ProgressSingleResponse>(`/quran-plans/${planId}/students/${studentId}/schedule/${occurrenceIndex}`, body),
@@ -208,12 +258,16 @@ export function useUpdateStudentScheduleEntry() {
 export function useInitStudentPlanProgress() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ planId, studentId, rangeStart, rangeEnd }: {
-      planId: string; studentId: string; rangeStart?: RangePoint; rangeEnd?: RangePoint;
+    mutationFn: ({ planId, studentId, type, rangeStart, rangeEnd }: {
+      planId: string; studentId: string;
+      /** Which type the custom range applies to — required when the plan has
+       * more than one, since each covers its own stretch of the mushaf. */
+      type?: PlanType;
+      rangeStart?: RangePoint; rangeEnd?: RangePoint;
     }) =>
       post<ProgressSingleResponse>(
         `/quran-plans/${planId}/students/${studentId}/progress/init`,
-        rangeStart && rangeEnd ? { rangeStart, rangeEnd } : {},
+        rangeStart && rangeEnd ? { type, rangeStart, rangeEnd } : {},
       ),
     onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: progressKey(vars.planId, vars.studentId) }),
   });

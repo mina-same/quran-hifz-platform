@@ -33,9 +33,9 @@ import {
 import { useTeachers } from '@/lib/queries/teachers';
 import { useStudents } from '@/lib/queries/students';
 import { useMasajid } from '@/lib/queries/masajid';
-import { useQuranPlans } from '@/lib/queries/quranPlan';
+import { useQuranPlans, segmentReversed } from '@/lib/queries/quranPlan';
 import { SURAHS } from '@/lib/data/surahs';
-import { isReversedRange, orientSlice } from '@/lib/quranRange';
+import { orientSlice } from '@/lib/quranRange';
 import { fmtDateShort } from '@/lib/date';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -606,7 +606,8 @@ function TrackCard({
 
   const todayText = (() => {
     if (!linkedPlan?.todayAssignment) return 'لا يوجد جزء مخصص لليوم';
-    const a = orientSlice(linkedPlan.todayAssignment, isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd));
+    // Direction is per segment — read it from the type that is actually due.
+    const a = orientSlice(linkedPlan.todayAssignment, segmentReversed(linkedPlan, linkedPlan.todayAssignment.type));
     const pages = a.pageEnd !== a.pageStart ? `${a.pageStart} - ${a.pageEnd}` : `${a.pageStart}`;
     return `مقرَّر اليوم: ${surahName(a.surahStart)} : ${a.ayahStart} — ${surahName(a.surahEnd)} : ${a.ayahEnd} (صفحة ${pages})`;
   })();

@@ -3,7 +3,7 @@ import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { useSpecialTracks, TRACK_DETAIL_ID_KEY, type SpecialTrack } from "../../api/special-tracks";
-import { useQuranPlans } from "../../api/quran-plans";
+import { useQuranPlans, segmentReversed } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
@@ -114,7 +114,7 @@ function TrackCard({ track, onOpen }: { track: SpecialTrack; onOpen: (t: Special
             </div>
             <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
               {(() => {
-                const a = orientSlice(linkedPlan.todayAssignment, isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd));
+                const a = orientSlice(linkedPlan.todayAssignment, segmentReversed(linkedPlan, linkedPlan.todayAssignment.type));
                 return <>{surahName(a.surahStart)} : {a.ayahStart}{" — "}{surahName(a.surahEnd)} : {a.ayahEnd}</>;
               })()}
             </div>

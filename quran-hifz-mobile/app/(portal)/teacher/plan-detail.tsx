@@ -13,7 +13,7 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
 import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet';
-import { useQuranPlan, useDeleteQuranPlan, type QuranPlan } from '@/lib/queries/quranPlan';
+import { useQuranPlan, useDeleteQuranPlan, type QuranPlan, segmentReversed } from '@/lib/queries/quranPlan';
 import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -69,7 +69,8 @@ export default function TeacherPlanDetail() {
         {!isLoading && !plan && <Text style={s.muted}>تعذّر العثور على الخطة</Text>}
 
         {plan && (() => {
-          const reversed = isReversedRange(plan.rangeStart, plan.rangeEnd);
+          // Direction is per segment — orient today's ward by the type due.
+          const reversed = segmentReversed(plan, plan.todayAssignment?.type);
           const assignment = plan.todayAssignment ? orientSlice(plan.todayAssignment, reversed) : null;
           const progressPct = plan.progress?.percent ?? 0;
           const progressLabel = plan.juzProgress ? `${plan.juzProgress.completed} / ${plan.juzProgress.total} جزء` : undefined;
@@ -79,29 +80,15 @@ export default function TeacherPlanDetail() {
               <Card>
                 <View style={s.headRow}>
                   <Badge label={plan.status} variant={STATUS_VARIANT[plan.status]} />
-                  <Text style={s.typeTag}>{plan.type}</Text>
+                  {plan.segments.map((seg) => (
+                    <Text key={seg.type} style={s.typeTag}>{seg.type}</Text>
+                  ))}
                 </View>
 
                 <View style={s.infoGrid}>
                   <View style={s.infoItem}>
                     <Text style={s.infoLabel}>الهدف</Text>
                     <Text style={s.infoValue}>{targetLabel(plan)}</Text>
-                  </View>
-                  <View style={s.infoItem}>
-                    <Text style={s.infoLabel}>الأيام</Text>
-                    <Text style={s.infoValue}>{plan.days.join('، ')}</Text>
-                  </View>
-                  <View style={s.infoItem}>
-                    <Text style={s.infoLabel}>من</Text>
-                    <Text style={s.infoValue}>{surahName(plan.rangeStart.surahNumber)}:{plan.rangeStart.ayah}</Text>
-                  </View>
-                  <View style={s.infoItem}>
-                    <Text style={s.infoLabel}>إلى</Text>
-                    <Text style={s.infoValue}>{surahName(plan.rangeEnd.surahNumber)}:{plan.rangeEnd.ayah}</Text>
-                  </View>
-                  <View style={s.infoItem}>
-                    <Text style={s.infoLabel}>عدد الصفحات</Text>
-                    <Text style={s.infoValue}>{plan.pageRange.pageCount}</Text>
                   </View>
                   <View style={s.infoItem}>
                     <Text style={s.infoLabel}>{plan.endType === 'date' ? 'ينتهي في' : 'عدد الأيام النشطة'}</Text>
@@ -125,6 +112,33 @@ export default function TeacherPlanDetail() {
                     </Text>
                   )}
                 </View>
+
+                {/* One block per type: its own days, its own range, its own
+                    page count — independent divisions of different content
+                    over the plan's one shared window. */}
+                {plan.segments.map((seg) => (
+                  <View key={seg.type} style={s.segBlock}>
+                    <Text style={s.segTitle}>{seg.type}</Text>
+                    <View style={s.infoGrid}>
+                      <View style={s.infoItem}>
+                        <Text style={s.infoLabel}>الأيام</Text>
+                        <Text style={s.infoValue}>{seg.days.join('، ')}</Text>
+                      </View>
+                      <View style={s.infoItem}>
+                        <Text style={s.infoLabel}>عدد الصفحات</Text>
+                        <Text style={s.infoValue}>{seg.pageRange.pageCount}</Text>
+                      </View>
+                      <View style={s.infoItem}>
+                        <Text style={s.infoLabel}>من</Text>
+                        <Text style={s.infoValue}>{surahName(seg.rangeStart.surahNumber)}:{seg.rangeStart.ayah}</Text>
+                      </View>
+                      <View style={s.infoItem}>
+                        <Text style={s.infoLabel}>إلى</Text>
+                        <Text style={s.infoValue}>{surahName(seg.rangeEnd.surahNumber)}:{seg.rangeEnd.ayah}</Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
               </Card>
 
               <Card>
@@ -155,7 +169,7 @@ export default function TeacherPlanDetail() {
                 visible={showSchedule}
                 onClose={() => setShowSchedule(false)}
                 title="تقسيم الأجزاء على الأيام"
-                items={scheduleItems(plan.schedule, reversed)}
+                items={scheduleItems(plan.schedule, (e) => segmentReversed(plan, e.type))}
               />
 
               {!confirmDelete ? (
@@ -210,6 +224,8 @@ function createS(theme: AppTheme) {
     page: { padding: theme.pagePadding, gap: 14 },
     muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
     headRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+    segBlock: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: theme.border },
+    segTitle: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.green, marginBottom: 8 },
     typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
     infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
     infoItem: { width: '46%' },

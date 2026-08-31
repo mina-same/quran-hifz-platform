@@ -22,7 +22,7 @@ import {
 import { useHalqat } from '@/lib/queries/halqat';
 import { useStudents } from '@/lib/queries/students';
 import {
-  useQuranPlans, useUpdateQuranPlan, type QuranPlan,
+  useQuranPlans, useUpdateQuranPlan, segmentReversed, type QuranPlan,
 } from '@/lib/queries/quranPlan';
 import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -167,10 +167,11 @@ export default function TrackDetail({ trackId, role }: Props) {
     return Array.from(map.values());
   }, [track, halqaStudents]);
 
-  const planReversed = linkedPlan ? isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd) : false;
+  // Direction is per segment — read it from the type actually due today.
+  const planReversed = segmentReversed(linkedPlan, linkedPlan?.todayAssignment?.type);
 
   const scheduleRows = useMemo(
-    () => (linkedPlan ? scheduleItems(linkedPlan.schedule, planReversed) : []),
+    () => (linkedPlan ? scheduleItems(linkedPlan.schedule, (e) => segmentReversed(linkedPlan, e.type)) : []),
     [linkedPlan, planReversed],
   );
 
@@ -301,9 +302,15 @@ export default function TrackDetail({ trackId, role }: Props) {
                 linkedPlan={linkedPlan}
                 daySchedule={daySchedule}
                 emptyLabel="لا يوجد طلاب مسجّلون بعد"
-                renderExtra={(student) => (
+                renderExtra={(student, dayType) => (
                   linkedPlan
-                    ? <IndividualPlanPanel planId={linkedPlan._id} studentId={student._id} studentName={student.name} basePlan={linkedPlan} />
+                    ? <IndividualPlanPanel
+                        planId={linkedPlan._id}
+                        studentId={student._id}
+                        studentName={student.name}
+                        basePlan={linkedPlan}
+                        type={dayType}
+                      />
                     : <Text style={s.muted}>اربط خطة حفظ بالمسار أولاً لعرض التوزيع الفردي</Text>
                 )}
               />

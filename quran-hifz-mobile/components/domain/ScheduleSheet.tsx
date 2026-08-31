@@ -7,14 +7,17 @@ import BottomSheet from '@/components/ui/BottomSheet';
 import Pressable from '@/components/ui/Pressable';
 import Badge, { type BadgeVariant } from '@/components/ui/Badge';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
-import { orientSlice, surahName, type ScheduleEntry } from '@/lib/quranRange';
+import { orientSlice, surahName, type PlanType } from '@/lib/quranRange';
+import type { DayEntry } from '@/components/domain/DaySlider';
 import { AR_LOCALE } from '@/lib/date';
 
 /** One day of a plan, flattened into the few strings a phone-width card can show. */
 export interface ScheduleItem {
   key: string;
-  /** 1-based occurrence number, shown in the leading circle. */
+  /** 1-based occurrence number WITHIN its type, shown in the leading circle. */
   index: number;
+  /** The segment this day belongs to — shown when a plan carries several. */
+  type?: PlanType;
   date: string;
   juz?: number;
   /** "البقرة:١ — البقرة:٢٥", already oriented for the plan's direction. */
@@ -41,14 +44,25 @@ export function fmtPages(pageStart: number, pageEnd: number): string {
   return pageStart === pageEnd ? `ص ${pageStart}` : `ص ${pageStart}–${pageEnd}`;
 }
 
-/** Maps a plan/track schedule (the common case) onto the card shape. */
-export function scheduleItems(entries: ScheduleEntry[], reversed: boolean): ScheduleItem[] {
+/** Maps a plan/track schedule (the common case) onto the card shape.
+ *
+ * `reversed` may be a per-entry predicate: a multi-type plan mixes segments
+ * in one list, and direction is a property of the segment — مراجعة can run
+ * forward while حفظ runs backward, so one flag for the whole list would orient
+ * half the rows wrongly. */
+export function scheduleItems(
+  entries: DayEntry[],
+  reversed: boolean | ((entry: DayEntry) => boolean),
+): ScheduleItem[] {
   const today = new Date();
+  const isReversed = typeof reversed === 'function' ? reversed : () => reversed;
   return entries.map((e) => {
-    const o = orientSlice(e, reversed);
+    const o = orientSlice(e, isReversed(e));
     return {
-      key: `${e.occurrenceIndex}-${e.date}`,
+      // occurrenceIndex restarts per segment, so the type is part of identity.
+      key: `${e.type ?? ''}-${e.occurrenceIndex}-${e.date}`,
       index: e.occurrenceIndex,
+      type: e.type,
       date: fmtShortDate(e.date),
       juz: e.juz,
       range: `${surahName(o.surahStart)}:${o.ayahStart} — ${surahName(o.surahEnd)}:${o.ayahEnd}`,
@@ -107,6 +121,7 @@ export default function ScheduleSheet({ visible, onClose, title, items, emptyMes
                 <View style={styles.topRow}>
                   <Text style={styles.date} numberOfLines={1}>{item.date}</Text>
                   <View style={styles.tags}>
+                    {!!item.type && <Badge label={item.type} variant="gold" />}
                     {item.juz != null && <Badge label={`ج ${item.juz}`} variant="green" />}
                     <Text style={styles.pages}>{item.pages}</Text>
                   </View>

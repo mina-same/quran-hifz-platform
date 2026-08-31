@@ -5,7 +5,7 @@ import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { useSpecialTracks, type SpecialTrack, type TrackTeacher } from "../../api/special-tracks";
-import { useQuranPlans } from "../../api/quran-plans";
+import { useQuranPlans, segmentReversed } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { AR_LOCALE } from "@/lib/format";
@@ -210,7 +210,7 @@ function TrackCard({ track }: { track: SpecialTrack }) {
                 )}
                 <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
                   {linkedPlan.todayAssignment ? (() => {
-                    const a = orientSlice(linkedPlan.todayAssignment, isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd));
+                    const a = orientSlice(linkedPlan.todayAssignment, segmentReversed(linkedPlan, linkedPlan.todayAssignment.type));
                     return (
                     <>
                       مقرَّر اليوم: {surahName(a.surahStart)} : {a.ayahStart}

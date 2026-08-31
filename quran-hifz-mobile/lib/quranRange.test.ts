@@ -401,3 +401,158 @@ describe('holidays', () => {
       .toEqual(dates(computeScheduleBreakdown({ ...plan, holidays: ['2026-01-01'] })));
   });
 });
+
+/* ─── Multi-segment plans ─────────────────────────────────────────────────── */
+
+import {
+  validateSegmentDays, segmentOccurrenceCounts, computeMultiScheduleBreakdown,
+  segmentForDate, unionDays, type PlanSegmentInput,
+} from './quranRange';
+
+const HIFZ: PlanSegmentInput = {
+  type: 'حفظ',
+  days: ['السبت', 'الاثنين', 'الأربعاء'],
+  rangeStart: { surahNumber: 78, ayah: 1 },
+  rangeEnd:   { surahNumber: 114, ayah: 6 },
+};
+const MURAJAA: PlanSegmentInput = {
+  type: 'مراجعة',
+  days: ['الخميس'],
+  rangeStart: { surahNumber: 1, ayah: 1 },
+  rangeEnd:   { surahNumber: 9, ayah: 129 },
+};
+// 2026-08-01 is a Saturday.
+const START = new Date(2026, 7, 1);
+
+describe('validateSegmentDays', () => {
+  it('accepts a clean partition', () => {
+    expect(validateSegmentDays([HIFZ, MURAJAA])).toBeNull();
+  });
+
+  it('rejects an empty set', () => {
+    expect(validateSegmentDays([])).toMatch(/نوع واحد على الأقل/);
+  });
+
+  it('rejects a segment with no days', () => {
+    expect(validateSegmentDays([{ ...HIFZ, days: [] }])).toMatch(/اختر أيام/);
+  });
+
+  it('rejects a duplicated type', () => {
+    expect(validateSegmentDays([HIFZ, { ...HIFZ, days: ['الخميس'] }])).toMatch(/مكرر/);
+  });
+
+  // The invariant the whole design rests on: one day, one type.
+  it('rejects two types claiming the same weekday', () => {
+    const clash: PlanSegmentInput = { ...MURAJAA, days: ['الخميس', 'السبت'] };
+    const msg = validateSegmentDays([HIFZ, clash]);
+    expect(msg).toMatch(/السبت/);
+    expect(msg).toMatch(/لنوع واحد فقط/);
+  });
+});
+
+describe('segmentOccurrenceCounts', () => {
+  it('counts each segment across a date-bounded window', () => {
+    // Four full weeks → 3 حفظ days/week, 1 مراجعة day/week.
+    const counts = segmentOccurrenceCounts({
+      startDate: START, endType: 'date', endDate: new Date(2026, 7, 28),
+      segments: [HIFZ, MURAJAA],
+    });
+    expect(counts.get('حفظ')).toBe(12);
+    expect(counts.get('مراجعة')).toBe(4);
+  });
+
+  it('splits a shared activeDays budget between the types', () => {
+    // 8 total active days, taken in calendar order across both types.
+    const counts = segmentOccurrenceCounts({
+      startDate: START, endType: 'activeDays', activeDaysCount: 8,
+      segments: [HIFZ, MURAJAA],
+    });
+    expect((counts.get('حفظ') ?? 0) + (counts.get('مراجعة') ?? 0)).toBe(8);
+    expect(counts.get('حفظ')).toBe(6);
+    expect(counts.get('مراجعة')).toBe(2);
+  });
+
+  it('skips holidays when splitting the budget', () => {
+    const counts = segmentOccurrenceCounts({
+      startDate: START, endType: 'date', endDate: new Date(2026, 7, 28),
+      holidays: ['2026-08-01', '2026-08-06'], // one حفظ day, one مراجعة day
+      segments: [HIFZ, MURAJAA],
+    });
+    expect(counts.get('حفظ')).toBe(11);
+    expect(counts.get('مراجعة')).toBe(3);
+  });
+});
+
+describe('computeMultiScheduleBreakdown', () => {
+  const plan = {
+    startDate: START, endType: 'date' as const, endDate: new Date(2026, 7, 28),
+    segments: [HIFZ, MURAJAA],
+  };
+
+  it('tags every entry with its own type', () => {
+    const rows = computeMultiScheduleBreakdown(plan);
+    expect(rows.every((r) => r.type === 'حفظ' || r.type === 'مراجعة')).toBe(true);
+    expect(rows.filter((r) => r.type === 'حفظ')).toHaveLength(12);
+    expect(rows.filter((r) => r.type === 'مراجعة')).toHaveLength(4);
+  });
+
+  it('returns the merged set sorted by date', () => {
+    const dates = computeMultiScheduleBreakdown(plan).map((r) => r.date);
+    expect([...dates].sort()).toEqual(dates);
+  });
+
+  // occurrenceIndex restarts per segment — that is why a day is addressed by
+  // (type, occurrenceIndex) and never by the index alone.
+  it('numbers occurrences from 1 within each segment', () => {
+    const rows = computeMultiScheduleBreakdown(plan);
+    const hifz = rows.filter((r) => r.type === 'حفظ').map((r) => r.occurrenceIndex);
+    const muraja = rows.filter((r) => r.type === 'مراجعة').map((r) => r.occurrenceIndex);
+    expect(hifz).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    expect(muraja).toEqual([1, 2, 3, 4]);
+  });
+
+  it('keeps each type inside its own range', () => {
+    const rows = computeMultiScheduleBreakdown(plan);
+    // حفظ covers juz 30 (An-Naba onward); مراجعة covers Al-Fatiha→At-Tawbah.
+    expect(rows.filter((r) => r.type === 'حفظ').every((r) => r.surahStart >= 78)).toBe(true);
+    expect(rows.filter((r) => r.type === 'مراجعة').every((r) => r.surahEnd <= 9)).toBe(true);
+  });
+
+  it('never puts two types on the same date', () => {
+    const byDate = new Map<string, string>();
+    for (const r of computeMultiScheduleBreakdown(plan)) {
+      const day = String(r.date).slice(0, 10);
+      expect(byDate.get(day) ?? r.type).toBe(r.type);
+      byDate.set(day, r.type);
+    }
+  });
+});
+
+describe('segmentForDate', () => {
+  const plan = {
+    startDate: START, endType: 'date' as const, endDate: new Date(2026, 7, 28),
+    holidays: ['2026-08-03'],
+    segments: [HIFZ, MURAJAA],
+  };
+
+  it('resolves a date to the one type that owns it', () => {
+    expect(segmentForDate(plan, new Date(2026, 7, 1))?.type).toBe('حفظ');     // Saturday
+    expect(segmentForDate(plan, new Date(2026, 7, 6))?.type).toBe('مراجعة');  // Thursday
+  });
+
+  it('returns null on an off day', () => {
+    expect(segmentForDate(plan, new Date(2026, 7, 7))).toBeNull(); // Friday
+  });
+
+  it('returns null on a holiday even when the weekday matches', () => {
+    expect(segmentForDate(plan, new Date(2026, 7, 3))).toBeNull(); // Monday, holiday
+  });
+});
+
+describe('unionDays', () => {
+  it('merges every segment\'s days without duplicates', () => {
+    expect(unionDays([HIFZ, MURAJAA]).sort()).toEqual(
+      ['الأربعاء', 'الاثنين', 'الخميس', 'السبت'].sort(),
+    );
+  });
+});

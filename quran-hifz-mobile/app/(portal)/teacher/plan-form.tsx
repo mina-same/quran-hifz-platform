@@ -18,8 +18,11 @@ import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
 import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet';
 import { useHalqat } from '@/lib/queries/halqat';
-import { useQuranPlan, useCreateQuranPlan, useUpdateQuranPlan, type PlanType } from '@/lib/queries/quranPlan';
-import { computeScheduleBreakdown, isReversedRange, WEEK_DAYS, type RangePoint } from '@/lib/quranRange';
+import { useQuranPlan, useCreateQuranPlan, useUpdateQuranPlan } from '@/lib/queries/quranPlan';
+import {
+  computeMultiScheduleBreakdown, isReversedRange, validateSegmentDays, WEEK_DAYS,
+  type PlanType, type RangePoint,
+} from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -41,25 +44,40 @@ function fmtDate(iso: string): string {
   return new Date(`${iso}T00:00:00`).toLocaleDateString(AR_LOCALE, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-type FormFields = {
-  name: string;
+/** One type's track in the form: its own days and its own range. The plan's
+ * window (start, end, holidays) is shared by every segment. */
+type FormSegment = {
   type: PlanType;
-  description: string;
-  halqa: string;
   days: string[];
-  holidays: string[];
-  startDate: string;
   rangeStart: RangePoint;
   rangeEnd: RangePoint;
+};
+
+type FormFields = {
+  name: string;
+  description: string;
+  halqa: string;
+  /** One per selected type, max four. Their days must not overlap. */
+  segments: FormSegment[];
+  holidays: string[];
+  startDate: string;
   endType: 'activeDays' | 'date';
   activeDaysCount: string;
   endDate: string;
 };
 
+function emptySegment(type: PlanType): FormSegment {
+  return {
+    type, days: [],
+    rangeStart: { surahNumber: 1, ayah: 1 },
+    rangeEnd: { surahNumber: 1, ayah: 1 },
+  };
+}
+
 const EMPTY: FormFields = {
-  name: '', type: 'حفظ', description: '', halqa: '',
-  days: [], holidays: [], startDate: todayISO(),
-  rangeStart: { surahNumber: 1, ayah: 1 }, rangeEnd: { surahNumber: 1, ayah: 1 },
+  name: '', description: '', halqa: '',
+  segments: [emptySegment('حفظ')],
+  holidays: [], startDate: todayISO(),
   endType: 'activeDays', activeDaysCount: '', endDate: '',
 };
 
@@ -98,16 +116,18 @@ export default function TeacherPlanForm() {
     if (prefillFrom && existingPlan && !prefilled) {
       setForm({
         name: isDuplicate ? `${existingPlan.name} (نسخة)` : existingPlan.name,
-        type: existingPlan.type,
         description: existingPlan.description ?? '',
         halqa: existingPlan.targetType === 'halqa'
           ? (typeof existingPlan.halqa === 'object' ? existingPlan.halqa?._id ?? '' : existingPlan.halqa ?? '')
           : '',
-        days: existingPlan.days,
+        // The server always returns segments, migrating a legacy single-type
+        // plan into a one-element array, so there is no old shape to handle.
+        segments: existingPlan.segments.map((seg) => ({
+          type: seg.type, days: seg.days,
+          rangeStart: seg.rangeStart, rangeEnd: seg.rangeEnd,
+        })),
         holidays: existingPlan.holidays ?? [],
         startDate: existingPlan.startDate ? existingPlan.startDate.split('T')[0] : todayISO(),
-        rangeStart: existingPlan.rangeStart,
-        rangeEnd: existingPlan.rangeEnd,
         endType: existingPlan.endType,
         activeDaysCount: existingPlan.activeDaysCount ? String(existingPlan.activeDaysCount) : '',
         endDate: existingPlan.endDate ? existingPlan.endDate.split('T')[0] : '',
@@ -147,42 +167,72 @@ export default function TeacherPlanForm() {
   const [holidayFrom, setHolidayFrom] = useState('');
   const [holidayTo, setHolidayTo] = useState('');
 
-  function toggleDay(day: string) {
+  /** Adds or removes a whole type. Removing one frees its days for the others. */
+  function toggleType(type: PlanType) {
     setForm((f) => ({
       ...f,
-      days: f.days.includes(day) ? f.days.filter((d) => d !== day) : [...f.days, day],
+      segments: f.segments.some((sg) => sg.type === type)
+        ? f.segments.filter((sg) => sg.type !== type)
+        : [...f.segments, emptySegment(type)],
     }));
   }
 
-  const rangeIsReversed = useMemo(() => isReversedRange(form.rangeStart, form.rangeEnd), [form.rangeStart, form.rangeEnd]);
+  function updateSegment(type: PlanType, patch: Partial<FormSegment>) {
+    setForm((f) => ({
+      ...f,
+      segments: f.segments.map((sg) => (sg.type === type ? { ...sg, ...patch } : sg)),
+    }));
+  }
 
+  /** Toggling a day for one type; a day already owned by another type is not
+   * offered, so this can only ever add a free day. */
+  function toggleSegmentDay(type: PlanType, day: string) {
+    setForm((f) => ({
+      ...f,
+      segments: f.segments.map((sg) => sg.type !== type ? sg : {
+        ...sg,
+        days: sg.days.includes(day) ? sg.days.filter((d) => d !== day) : [...sg.days, day],
+      }),
+    }));
+  }
+
+  /** Which type owns each weekday — a day belongs to at most one. */
+  const dayOwner = useMemo(() => {
+    const owner = new Map<string, PlanType>();
+    for (const sg of form.segments) for (const d of sg.days) owner.set(d, sg.type);
+    return owner;
+  }, [form.segments]);
+
+  /** Live breakdown across every segment — the same computation the server
+   * runs, so the preview matches what will be saved. */
   const schedulePreview = useMemo(() => {
-    if (form.days.length === 0) return [];
+    if (form.segments.every((sg) => sg.days.length === 0)) return [];
     if (form.endType === 'activeDays' && !form.activeDaysCount) return [];
     if (form.endType === 'date' && !form.endDate) return [];
     if (!form.startDate) return [];
     try {
-      return computeScheduleBreakdown({
-        days: form.days,
+      return computeMultiScheduleBreakdown({
         holidays: form.holidays,
         startDate: new Date(`${form.startDate}T00:00:00`),
         endType: form.endType,
         activeDaysCount: form.endType === 'activeDays' ? Number(form.activeDaysCount) : undefined,
         endDate: form.endType === 'date' ? new Date(`${form.endDate}T00:00:00`) : undefined,
-        rangeStart: form.rangeStart,
-        rangeEnd: form.rangeEnd,
+        segments: form.segments.filter((sg) => sg.days.length > 0),
       });
     } catch {
       return [];
     }
-  }, [form.days, form.holidays, form.startDate, form.endType, form.activeDaysCount, form.endDate, form.rangeStart, form.rangeEnd]);
+  }, [form.segments, form.holidays, form.startDate, form.endType, form.activeDaysCount, form.endDate]);
 
   const requestedOccurrences = form.endType === 'activeDays' ? Number(form.activeDaysCount || 0) : schedulePreview.length;
   const previewShortfall = requestedOccurrences > 0 && schedulePreview.length < requestedOccurrences;
 
   async function handleSubmit() {
     if (!form.name.trim()) return setFormError('اسم الخطة مطلوب');
-    if (form.days.length === 0) return setFormError('يرجى اختيار يوم واحد على الأقل');
+    // Same rule the server enforces: at least one type, every type with days,
+    // and no weekday claimed twice.
+    const segmentError = validateSegmentDays(form.segments);
+    if (segmentError) return setFormError(segmentError);
     if (!lockedTarget && !form.halqa) return setFormError('يرجى اختيار حلقة');
     if (!form.startDate) return setFormError('يرجى تحديد تاريخ البداية');
     if (form.endType === 'activeDays' && !form.activeDaysCount) return setFormError('يرجى تحديد عدد الأيام النشطة');
@@ -191,13 +241,10 @@ export default function TeacherPlanForm() {
 
     const body: Record<string, unknown> = {
       name: form.name.trim(),
-      type: form.type,
       description: form.description.trim() || undefined,
-      days: form.days,
+      segments: form.segments,
       holidays: form.holidays,
       startDate: form.startDate,
-      rangeStart: form.rangeStart,
-      rangeEnd: form.rangeEnd,
       endType: form.endType,
       activeDaysCount: form.endType === 'activeDays' ? Number(form.activeDaysCount) : undefined,
       endDate: form.endType === 'date' ? form.endDate : undefined,
@@ -255,14 +302,20 @@ export default function TeacherPlanForm() {
           </FormGroup>
 
           <View style={{ height: 12 }} />
-          <FormGroup label="نوع الخطة" required>
+          {/* A plan can carry several types at once. Each gets its own card
+              below with its own days and range; the plan's duration is shared. */}
+          <FormGroup label="أنواع الخطة" required>
             <View style={s.chipRow}>
-              {PLAN_TYPES.map((t) => (
-                <Pressable haptic="select" key={t} style={[s.chip, form.type === t && s.chipActive]} onPress={() => sf('type', t)}>
-                  <Text style={[s.chipText, form.type === t && s.chipTextActive]}>{t}</Text>
-                </Pressable>
-              ))}
+              {PLAN_TYPES.map((t) => {
+                const on = form.segments.some((sg) => sg.type === t);
+                return (
+                  <Pressable haptic="select" key={t} style={[s.chip, on && s.chipActive]} onPress={() => toggleType(t)}>
+                    <Text style={[s.chipText, on && s.chipTextActive]}>{t}</Text>
+                  </Pressable>
+                );
+              })}
             </View>
+            <Text style={s.typeHint}>اختر نوعاً أو أكثر — لكل نوع أيامه ونطاقه، والمدة واحدة للجميع.</Text>
           </FormGroup>
 
           <View style={{ height: 12 }} />
@@ -287,16 +340,62 @@ export default function TeacherPlanForm() {
           )}
         </Card>
 
-        <Card>
-          <CardHeader title="الأيام" />
-          <View style={s.chipRow}>
-            {WEEK_DAYS.map((d) => (
-              <Pressable haptic="select" key={d} style={[s.chip, form.days.includes(d) && s.chipActive]} onPress={() => toggleDay(d)}>
-                <Text style={[s.chipText, form.days.includes(d) && s.chipTextActive]}>{d}</Text>
-              </Pressable>
-            ))}
-          </View>
+        {/* One card per selected type: its own days and its own range. A day
+            already taken by another type is disabled and says who owns it —
+            the partition is what keeps each day's ward single-valued. */}
+        {form.segments.map((seg) => {
+          const segReversed = isReversedRange(seg.rangeStart, seg.rangeEnd);
+          return (
+            <Card key={seg.type}>
+              <CardHeader title={seg.type} />
+              <FormGroup label="الأيام" required>
+                <View style={s.chipRow}>
+                  {WEEK_DAYS.map((d) => {
+                    const owner = dayOwner.get(d);
+                    const mine = owner === seg.type;
+                    const taken = !!owner && !mine;
+                    return (
+                      <Pressable
+                        haptic="select"
+                        key={d}
+                        disabled={taken}
+                        style={[s.chip, mine && s.chipActive, taken && s.chipDisabled]}
+                        onPress={() => toggleSegmentDay(seg.type, d)}
+                        accessibilityLabel={taken ? `${d} — مُسنَد لـ${owner}` : d}
+                      >
+                        <Text style={[s.chipText, mine && s.chipTextActive, taken && s.chipTextDisabled]}>{d}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                {form.segments.length > 1 && (
+                  <Text style={s.typeHint}>الأيام الباهتة مُسنَدة لنوع آخر — اليوم الواحد لنوع واحد فقط.</Text>
+                )}
+              </FormGroup>
 
+              <View style={{ height: 12 }} />
+              <FormGroup label="من">
+                <SurahAyahPicker
+                  value={seg.rangeStart}
+                  onChange={(v) => updateSegment(seg.type, { rangeStart: v })}
+                />
+              </FormGroup>
+              <View style={{ height: 12 }} />
+              <FormGroup label="إلى">
+                <SurahAyahPicker
+                  value={seg.rangeEnd}
+                  onChange={(v) => updateSegment(seg.type, { rangeEnd: v })}
+                />
+              </FormGroup>
+              {segReversed && (
+                <Text style={s.reverseHint}>⟲ هذا النطاق بالعكس (من نهاية المصحف نحو البداية) — سيُعرض كل يوم بترتيبه الصحيح.</Text>
+              )}
+            </Card>
+          );
+        })}
+
+        <Card>
+          <CardHeader title="أيام العطلات" />
           {/* Holidays — active days the plan pauses on (Eid, exams, travel). A
               holiday consumes no occurrence, so its portion moves to the next
               working day rather than being lost. */}
@@ -352,7 +451,9 @@ export default function TeacherPlanForm() {
               {form.holidays.map((h) => {
                 // WEEK_DAYS runs Sat..Fri while getDay() runs Sun..Sat, hence the +1 shift.
                 const weekday = WEEK_DAYS[(new Date(`${h}T00:00:00`).getDay() + 1) % 7];
-                const active = form.days.includes(weekday);
+                // A holiday only has an effect if some type actually runs
+                // that weekday — with several types, that means any of them.
+                const active = dayOwner.has(weekday);
                 return (
                   <Pressable
                     key={h}
@@ -375,20 +476,6 @@ export default function TeacherPlanForm() {
             لا يُحتسب يوم العطلة ضمن أيام الخطة حتى لو وافق يومًا نشطًا — ينتقل نصيبه إلى يوم العمل التالي.{'\n'}
             العطلة التي لا توافق يومًا من أيام الخطة تظهر بلون باهت لأنه لا أثر لها.
           </Text>
-        </Card>
-
-        <Card>
-          <CardHeader title="نطاق الحفظ" />
-          <FormGroup label="من">
-            <SurahAyahPicker value={form.rangeStart} onChange={(v) => sf('rangeStart', v)} />
-          </FormGroup>
-          <View style={{ height: 12 }} />
-          <FormGroup label="إلى">
-            <SurahAyahPicker value={form.rangeEnd} onChange={(v) => sf('rangeEnd', v)} />
-          </FormGroup>
-          {rangeIsReversed && (
-            <Text style={s.reverseHint}>⟲ هذا النطاق بالعكس (من نهاية المصحف نحو البداية) — سيُعرض كل يوم بترتيبه الصحيح.</Text>
-          )}
         </Card>
 
         <Card>
@@ -440,7 +527,11 @@ export default function TeacherPlanForm() {
           visible={showSchedule}
           onClose={() => setShowSchedule(false)}
           title="التقسيمة اليومية (معاينة)"
-          items={scheduleItems(schedulePreview, rangeIsReversed)}
+          // Direction is a property of the segment, so resolve it per row.
+          items={scheduleItems(schedulePreview, (e) => {
+            const seg = form.segments.find((sg) => sg.type === e.type);
+            return seg ? isReversedRange(seg.rangeStart, seg.rangeEnd) : false;
+          })}
         />
 
         <Button
@@ -470,6 +561,9 @@ function createS(theme: AppTheme) {
     holidayRangeRow: { flexDirection: 'row', gap: 10 },
     flex1: { flex: 1 },
     chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+    chipDisabled: { opacity: 0.35, borderStyle: 'dashed' },
+    chipTextDisabled: { color: theme.textMuted },
+    typeHint: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 8, lineHeight: 18 },
     chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
     chipText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
     chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },

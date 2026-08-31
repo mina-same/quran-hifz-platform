@@ -11,11 +11,13 @@ import {
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import type { DaySchedule } from '@/components/domain/DaySlider';
 import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from '@/lib/queries/evaluations';
-import { useStudentPlanProgressList, useRecordStudentOccurrence, type QuranPlan } from '@/lib/queries/quranPlan';
+import {
+  useStudentPlanProgressList, useRecordStudentOccurrence, segmentReversed, type QuranPlan,
+} from '@/lib/queries/quranPlan';
 import { MAX_SCORES, TOTAL_MAX } from '@/lib/evaluationRubric';
 import {
   dayFinishPoint, dayDeltaAyahs, planFinishPoint, toFlatIndex, fromFlatIndex,
-  isReversedSchedule, isReversedRange, surahName, type RangePoint, type ScheduleEntry,
+  isReversedSchedule, surahName, type PlanType, type RangePoint, type ScheduleEntry,
 } from '@/lib/quranRange';
 import { toDateOnly } from '@/lib/date';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -60,7 +62,7 @@ interface Props {
   emptyLabel?: string;
   /** Extra content for an expanded student row, above the save button — the
    * track drill-down uses it to hang the individual-plan panel off each row. */
-  renderExtra?: (student: { _id: string; name: string }) => React.ReactNode;
+  renderExtra?: (student: { _id: string; name: string }, dayType?: PlanType) => React.ReactNode;
 }
 
 /**
@@ -82,7 +84,11 @@ export default function EvaluationRoster({
   const bulkEvaluate = useBulkEvaluate();
   const recordOccurrence = useRecordStudentOccurrence();
 
-  const rangeReversed = !!linkedPlan && isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd);
+  // Days are partitioned across types, so the selected date resolves to
+  // exactly one — that type decides the ward, the direction, and which
+  // segment a recorded shortfall reflows into.
+  const dayType = assignmentByDate.get(effectiveDate)?.type;
+  const rangeReversed = segmentReversed(linkedPlan, dayType);
 
   function planCoversStudent(studentId: string): boolean {
     if (!linkedPlan) return false;
@@ -217,13 +223,13 @@ export default function EvaluationRoster({
           const delta = dayDeltaAyahs(assignment, reversedForStudent(studentId), completedPoint);
           const status = e.attendanceStatus === 'غائب' ? 'absent' : delta < 0 ? 'partial' : 'done';
           if (status === 'done' && delta === 0) {
-            recordOccurrence.mutate({ planId: linkedPlan._id, studentId, occurrenceIndex: assignment.occurrenceIndex, status });
+            recordOccurrence.mutate({ planId: linkedPlan._id, studentId, type: dayType, occurrenceIndex: assignment.occurrenceIndex, status });
             setSavedNotice(`تم حفظ حضور وتقييم ${studentName}`);
             return;
           }
           recordOccurrence.mutate(
             {
-              planId: linkedPlan._id, studentId, occurrenceIndex: assignment.occurrenceIndex, status,
+              planId: linkedPlan._id, studentId, type: dayType, occurrenceIndex: assignment.occurrenceIndex, status,
               // Sent for an over-achievement too, so the server can take the
               // surplus off the student's remaining days.
               completedThroughSurah: status === 'absent' ? undefined : completedPoint.surahNumber,
@@ -323,7 +329,7 @@ export default function EvaluationRoster({
                       <IconBook2 size={20} color={theme.green} />
                       <View style={{ flex: 1 }}>
                         <Text style={styles.bannerLabel}>
-                          الورد المقرر{reversed ? ' · بالعكس' : ''}
+                          الورد المقرر{dayType ? ` · ${dayType}` : ''}{reversed ? ' · بالعكس' : ''}
                         </Text>
                         <Text style={styles.bannerRange}>
                           {surahName(from.surah)} : {from.ayah} ← {surahName(to.surah)} : {to.ayah}
@@ -448,7 +454,7 @@ export default function EvaluationRoster({
                 ))}
                 <Text style={styles.totalLine}>المجموع {total}/{TOTAL_MAX}</Text>
 
-                {renderExtra?.(st)}
+                {renderExtra?.(st, dayType)}
 
                 {isFutureDay ? (
                   <Button label="اليوم لم يحن بعد" variant="ghost" disabled fullWidth />

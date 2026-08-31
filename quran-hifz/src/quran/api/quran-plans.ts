@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { isReversedRange } from "../lib/quranRange";
 import { get, post, put, del } from "../../lib/api";
 
 /** sessionStorage key used to hand off "open the plan form" from wherever a
@@ -31,11 +32,35 @@ export type JuzProgress = { completed: number; total: number };
 export type PageRange = { pageStart: number; pageEnd: number; pageCount: number };
 export type ScheduleEntry = TodayAssignment & { occurrenceIndex: number; date: string; juz: number };
 
+/** One type's track inside a plan: its own weekdays, its own stretch of the
+ * mushaf, and its own schedule. `occurrenceIndex` inside `schedule` is 1-based
+ * WITHIN this segment, so a day is addressed by (type, occurrenceIndex). */
+export type PlanSegment = {
+  type: PlanType;
+  days: string[];
+  rangeStart: RangePoint;
+  rangeEnd: RangePoint;
+  todayAssignment: (TodayAssignment & { type: PlanType }) | null;
+  progress: PlanProgress | null;
+  juzProgress: JuzProgress | null;
+  pageRange: PageRange;
+  schedule: (ScheduleEntry & { type: PlanType })[];
+  scheduleIsPersisted: boolean;
+};
+
 export type QuranPlan = {
   _id: string;
   name: string;
-  type: PlanType;
   description?: string;
+
+  /** One track per type — the real scheduling data. Always present: the server
+   * migrates a legacy single-type plan into a one-element array on read. */
+  segments: PlanSegment[];
+  /** Every type in the plan, in segment order. */
+  types: PlanType[];
+  /** Rollup — the type due today, else the first segment's. Kept so screens
+   * that only render a badge need no change. */
+  type: PlanType;
   teacher: PlanTeacher | string;
 
   targetType: "halqa" | "students" | "specialTrack";
@@ -43,13 +68,11 @@ export type QuranPlan = {
   students?: (PlanStudent | string)[];
   specialTrack?: PlanSpecialTrack | string;
 
+  /** Rollup — every segment's days merged. Scheduling reads `segments`. */
   days: string[];
   /** Calendar days (YYYY-MM-DD) the plan pauses on — see quranRange. */
   holidays: string[];
   startDate: string;
-
-  rangeStart: RangePoint;
-  rangeEnd: RangePoint;
 
   pointsEnabled: boolean;
   pointRules: PointRule[];
@@ -59,15 +82,36 @@ export type QuranPlan = {
   endDate?: string;
 
   status: "نشطة" | "متوقفة" | "منتهية";
-  todayAssignment: TodayAssignment | null;
+
+  /* ── rollups across every segment ──────────────────────────────────────
+   * Days are partitioned, so at most one type is due on any date and
+   * `todayAssignment` is single-valued. `schedule` is every segment's days
+   * merged and date-sorted, each entry carrying its own `type`. */
+  todayAssignment: (TodayAssignment & { type: PlanType }) | null;
   progress: PlanProgress | null;
   juzProgress: JuzProgress | null;
-  pageRange: PageRange;
-  schedule: ScheduleEntry[];
-  /** Whether `schedule` came from the persisted `schedule` field (frozen via
-   * `useGenerateSchedule`) rather than being recomputed live on this fetch. */
+  pageRange: PageRange | null;
+  schedule: (ScheduleEntry & { type: PlanType })[];
+  /** Whether every segment's schedule came from the persisted field (frozen
+   * via `useGenerateSchedule`) rather than being recomputed live. */
   scheduleIsPersisted: boolean;
 };
+
+/** The segment carrying a given type — or the plan's only segment when the
+ * type is omitted and there is just one. Returns undefined when ambiguous. */
+export function planSegment(plan: QuranPlan | undefined, type?: PlanType): PlanSegment | undefined {
+  if (!plan) return undefined;
+  if (type) return plan.segments?.find((s) => s.type === type);
+  return plan.segments?.length === 1 ? plan.segments[0] : undefined;
+}
+
+/** Whether a segment's range runs backward through the mushaf. Direction is
+ * per segment: مراجعة may run forward while حفظ runs backward, so this must
+ * never be read off the plan as a whole. */
+export function segmentReversed(plan: QuranPlan | undefined, type?: PlanType): boolean {
+  const seg = planSegment(plan, type);
+  return seg ? isReversedRange(seg.rangeStart, seg.rangeEnd) : false;
+}
 
 type ListResponse   = { success: boolean; count: number; data: QuranPlan[] };
 type SingleResponse = { success: boolean; data: QuranPlan };

@@ -370,3 +370,159 @@ export function computeScheduleBreakdown(plan: PlanScheduleInput): ScheduleEntry
   }
   return entries;
 }
+
+/* ─── Multi-segment plans ───────────────────────────────────────────────────
+ *
+ * A plan carries one segment per type (حفظ / مراجعة / ترتيل / تلاوة). All
+ * segments share the plan's window — start date, end, holidays — and differ
+ * only in which weekdays they own and which stretch of the mushaf they cover.
+ *
+ * The weekdays are PARTITIONED: a given date belongs to at most one segment,
+ * which is what lets a day's ward, its evaluation and its reflow all stay
+ * single-valued. `validateSegmentDays` below is what enforces that.
+ */
+
+export type PlanType = 'حفظ' | 'مراجعة' | 'ترتيل' | 'تلاوة';
+export const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة', 'ترتيل', 'تلاوة'];
+
+export type PlanSegmentInput = {
+  type: PlanType;
+  days: string[];
+  rangeStart: RangePoint;
+  rangeEnd: RangePoint;
+};
+
+/** The plan-level window every segment shares. */
+export type PlanWindowInput = {
+  startDate: Date;
+  endType: 'activeDays' | 'date';
+  activeDaysCount?: number;
+  endDate?: Date;
+  holidays?: string[];
+};
+
+export type MultiPlanInput = PlanWindowInput & { segments: PlanSegmentInput[] };
+
+/** Every weekday the plan is active on, across all its segments. */
+export function unionDays(segments: PlanSegmentInput[]): string[] {
+  return Array.from(new Set(segments.flatMap((s) => s.days)));
+}
+
+/**
+ * How many occurrences each segment gets inside the shared window.
+ *
+ * For `endType: 'date'` this is just each segment's matching days in range.
+ *
+ * For `activeDays` the count is the plan's TOTAL active days across all types
+ * (confirmed with the user: the duration is one shared duration, and the types
+ * differ only in how the week is split between them). So the walk counts days
+ * matching ANY segment until it has seen `activeDaysCount` of them, tallying
+ * which segment each one belongs to along the way.
+ */
+export function segmentOccurrenceCounts(plan: MultiPlanInput): Map<PlanType, number> {
+  const counts = new Map<PlanType, number>();
+  for (const seg of plan.segments) counts.set(seg.type, 0);
+
+  const holidays = plan.holidays && plan.holidays.length > 0 ? new Set(plan.holidays) : NO_HOLIDAYS;
+
+  if (plan.endType === 'date') {
+    for (const seg of plan.segments) {
+      counts.set(seg.type, countMatchingDays(plan.startDate, plan.endDate!, seg.days, holidays));
+    }
+    return counts;
+  }
+
+  const target = plan.activeDaysCount ?? 0;
+  const cursor = dateOnly(plan.startDate);
+  let seen = 0;
+  let walked = 0;
+  while (seen < target && walked < SCHEDULE_WALK_LIMIT_DAYS) {
+    if (!holidays.has(dateKey(cursor))) {
+      const label = dayLabel(cursor);
+      // Days are partitioned, so at most one segment can claim this date.
+      const seg = plan.segments.find((s) => s.days.includes(label));
+      if (seg) {
+        counts.set(seg.type, (counts.get(seg.type) ?? 0) + 1);
+        seen++;
+      }
+    }
+    cursor.setDate(cursor.getDate() + 1);
+    walked++;
+  }
+  return counts;
+}
+
+/** One segment expressed as the single-track input the existing math takes.
+ * The occurrence count is pinned, so the walk stops exactly where the shared
+ * window says it should. */
+function segmentAsScheduleInput(
+  plan: PlanWindowInput,
+  seg: PlanSegmentInput,
+  occurrenceCount: number,
+): PlanScheduleInput {
+  return {
+    days: seg.days,
+    startDate: plan.startDate,
+    holidays: plan.holidays,
+    endType: 'activeDays',
+    activeDaysCount: occurrenceCount,
+    rangeStart: seg.rangeStart,
+    rangeEnd: seg.rangeEnd,
+  };
+}
+
+export type SegmentScheduleEntry = ScheduleEntry & { type: PlanType };
+
+/**
+ * Day-by-day breakdown for every segment, merged and sorted by date.
+ *
+ * `occurrenceIndex` stays 1-based **within its own segment** — that is what
+ * reflow walks when a student falls short, and it must not be shared across
+ * types. Pair it with `type` to address a day uniquely.
+ */
+export function computeMultiScheduleBreakdown(plan: MultiPlanInput): SegmentScheduleEntry[] {
+  const counts = segmentOccurrenceCounts(plan);
+  const out: SegmentScheduleEntry[] = [];
+  for (const seg of plan.segments) {
+    const count = counts.get(seg.type) ?? 0;
+    if (count <= 0) continue;
+    for (const entry of computeScheduleBreakdown(segmentAsScheduleInput(plan, seg, count))) {
+      out.push({ ...entry, type: seg.type });
+    }
+  }
+  return out.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/** The segment that owns a given date, or null on an off day/holiday. */
+export function segmentForDate(plan: MultiPlanInput, d: Date): PlanSegmentInput | null {
+  const holidays = plan.holidays && plan.holidays.length > 0 ? new Set(plan.holidays) : NO_HOLIDAYS;
+  const day = dateOnly(d);
+  if (holidays.has(dateKey(day))) return null;
+  const label = dayLabel(day);
+  return plan.segments.find((s) => s.days.includes(label)) ?? null;
+}
+
+/**
+ * Rejects a segment set where two types claim the same weekday, or a segment
+ * has no days, or a type appears twice. Returns an Arabic message, or null when
+ * the set is valid. Shared by the API and both clients' forms.
+ */
+export function validateSegmentDays(segments: PlanSegmentInput[]): string | null {
+  if (segments.length === 0) return 'يجب اختيار نوع واحد على الأقل';
+
+  const seenTypes = new Set<PlanType>();
+  const owner = new Map<string, PlanType>();
+  for (const seg of segments) {
+    if (seenTypes.has(seg.type)) return `النوع "${seg.type}" مكرر — كل نوع مرة واحدة فقط`;
+    seenTypes.add(seg.type);
+
+    if (seg.days.length === 0) return `اختر أيام "${seg.type}"`;
+
+    for (const day of seg.days) {
+      const taken = owner.get(day);
+      if (taken) return `يوم ${day} مُسنَد لـ"${taken}" و"${seg.type}" — اليوم الواحد لنوع واحد فقط`;
+      owner.set(day, seg.type);
+    }
+  }
+  return null;
+}

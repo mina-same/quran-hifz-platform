@@ -1,10 +1,13 @@
 import { useQuery, useQueries, useMutation, useQueryClient } from "@tanstack/react-query";
 import { get, post, put } from "../../lib/api";
-import type { ScheduleEntry, RangePoint } from "./quran-plans";
+import type { ScheduleEntry, RangePoint, PlanType } from "./quran-plans";
 
 export type StudentOccurrenceStatus = "pending" | "done" | "partial" | "absent";
 
 export type StudentOccurrence = ScheduleEntry & {
+  /** Which segment this day belongs to — `occurrenceIndex` restarts at 1 in
+   * each, so a day is addressed by (type, occurrenceIndex). */
+  type: PlanType;
   baseSurahStart: number; baseAyahStart: number;
   baseSurahEnd: number; baseAyahEnd: number;
   basePageStart: number; basePageEnd: number; baseJuz: number;
@@ -69,6 +72,9 @@ export function useRecordStudentOccurrence() {
   return useMutation({
     mutationFn: ({ planId, studentId, ...body }: {
       planId: string; studentId: string;
+      /** Required when the plan has more than one type — occurrenceIndex alone
+       * no longer identifies a day. */
+      type?: PlanType;
       occurrenceIndex: number; status: "done" | "partial" | "absent";
       completedThroughSurah?: number; completedThroughAyah?: number;
     }) => post<SingleResponse>(`/quran-plans/${planId}/students/${studentId}/progress/record`, body),
@@ -102,12 +108,13 @@ export function useUpdateStudentScheduleEntry() {
 export function useInitStudentPlanProgress() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ planId, studentId, rangeStart, rangeEnd }: {
-      planId: string; studentId: string; rangeStart?: RangePoint; rangeEnd?: RangePoint;
+    mutationFn: ({ planId, studentId, type, rangeStart, rangeEnd }: {
+      planId: string; studentId: string;
+      type?: PlanType; rangeStart?: RangePoint; rangeEnd?: RangePoint;
     }) =>
       post<SingleResponse>(
         `/quran-plans/${planId}/students/${studentId}/progress/init`,
-        rangeStart && rangeEnd ? { rangeStart, rangeEnd } : {},
+        rangeStart && rangeEnd ? { type, rangeStart, rangeEnd } : {},
       ),
     onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: progressKey(vars.planId, vars.studentId) }),
   });

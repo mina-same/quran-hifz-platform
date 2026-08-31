@@ -4,6 +4,7 @@ import { useTopbar } from "../../context/useTopbar";
 import {
   useQuranPlan, useDeleteQuranPlan,
   PLAN_DETAIL_ID_KEY, PLAN_FORM_HANDOFF_KEY,
+  segmentReversed,
   type RangePoint,
 } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
@@ -79,8 +80,8 @@ export function TeacherPlanDetail() {
   }
 
   const typeCfg = PLAN_TYPE_CFG[plan.type] ?? PLAN_TYPE_CFG["حفظ"];
-  // Reverse-direction plan → display "من/إلى" in the plan's own direction.
-  const reversed = isReversedRange(plan.rangeStart, plan.rangeEnd);
+  // Direction is per segment — orient today's ward by the type actually due.
+  const reversed = segmentReversed(plan, plan.todayAssignment?.type);
   const targetLabel =
     plan.targetType === "halqa" ? getName(plan.halqa!) :
     plan.targetType === "specialTrack" ? (plan.specialTrack ? (typeof plan.specialTrack === "object" ? plan.specialTrack.title : plan.specialTrack) : "—") :
@@ -133,19 +134,39 @@ export function TeacherPlanDetail() {
 
         <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "14px 20px", marginTop: 20, paddingTop: 18, borderTop: "1px solid var(--border)" }}>
           <InfoRow icon={targetIcon} label="الهدف" val={targetLabel} />
-          <InfoRow icon="ti-calendar-week" label="الأيام" val={plan.days.join("، ")} />
-          <InfoRow icon="ti-book" label="من" val={pointLabel(plan.rangeStart)} />
-          <InfoRow icon="ti-book-2" label="إلى" val={pointLabel(plan.rangeEnd)} />
-          <InfoRow
-            icon="ti-files"
-            label="عدد الصفحات"
-            val={plan.pageRange.pageCount === 1 ? `صفحة ${plan.pageRange.pageStart}` : `${plan.pageRange.pageCount} (${plan.pageRange.pageStart}-${plan.pageRange.pageEnd})`}
-          />
           {plan.endType === "date" && plan.endDate
             ? <InfoRow icon="ti-calendar-due" label="ينتهي في" val={fmtDate(plan.endDate)} />
             : <InfoRow icon="ti-calendar-due" label="عدد الأيام النشطة" val={String(plan.activeDaysCount ?? "—")} />
           }
         </div>
+
+        {/* One block per type: its own days, its own range, its own page count
+            — independent divisions of different content over one shared window. */}
+        {plan.segments.map((seg) => (
+          <div
+            key={seg.type}
+            style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--border)" }}
+          >
+            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--green)", marginBottom: 10 }}>
+              {seg.type}
+            </div>
+            <div
+              className="grid-collapse"
+              style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "14px 20px" }}
+            >
+              <InfoRow icon="ti-calendar-week" label="الأيام" val={seg.days.join("، ")} />
+              <InfoRow icon="ti-book" label="من" val={pointLabel(seg.rangeStart)} />
+              <InfoRow icon="ti-book-2" label="إلى" val={pointLabel(seg.rangeEnd)} />
+              <InfoRow
+                icon="ti-files"
+                label="عدد الصفحات"
+                val={seg.pageRange.pageCount === 1
+                  ? `صفحة ${seg.pageRange.pageStart}`
+                  : `${seg.pageRange.pageCount} (${seg.pageRange.pageStart}-${seg.pageRange.pageEnd})`}
+              />
+            </div>
+          </div>
+        ))}
 
         {plan.progress && (
           <div style={{ marginTop: 18 }}>

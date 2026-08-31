@@ -10,7 +10,7 @@ import {
 import { useTeachers } from "../../api/teachers";
 import { useMasajid } from "../../api/masajid";
 import { useStudents } from "../../api/students";
-import { useQuranPlans } from "../../api/quran-plans";
+import { useQuranPlans, segmentReversed } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { Badge } from "../../components/common/Badge";
@@ -866,7 +866,7 @@ function TrackCard({
 
               <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2 }}>
                 {linkedPlan.todayAssignment ? (() => {
-                  const a = orientSlice(linkedPlan.todayAssignment, isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd));
+                  const a = orientSlice(linkedPlan.todayAssignment, segmentReversed(linkedPlan, linkedPlan.todayAssignment.type));
                   return (
                   <>
                     مقرَّر اليوم: {surahName(a.surahStart)} : {a.ayahStart}

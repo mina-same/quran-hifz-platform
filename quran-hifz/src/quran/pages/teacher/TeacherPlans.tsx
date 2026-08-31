@@ -6,6 +6,7 @@ import {
   PLAN_FORM_HANDOFF_KEY, PLAN_DETAIL_ID_KEY,
   type QuranPlan, type PlanType, type RangePoint,
   type PlanHalqa,
+  segmentReversed,
 } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
@@ -242,20 +243,33 @@ function PlanCard({
             val={targetLabel}
             onClick={plan.targetType === "specialTrack" ? onViewTrack : undefined}
           />
-          <InfoRow icon="ti-calendar-week" label="الأيام" val={plan.days.join("، ")} span />
-          <InfoRow icon="ti-book" label="من" val={pointLabel(plan.rangeStart)} />
-          <InfoRow icon="ti-book-2" label="إلى" val={pointLabel(plan.rangeEnd)} />
-          <InfoRow
-            icon="ti-files"
-            label="عدد الصفحات"
-            val={plan.pageRange.pageCount === 1 ? `صفحة ${plan.pageRange.pageStart}` : `${plan.pageRange.pageCount} (${plan.pageRange.pageStart}-${plan.pageRange.pageEnd})`}
-            span
-          />
+
           {plan.endType === "date" && plan.endDate
             ? <InfoRow icon="ti-calendar-due" label="ينتهي في" val={fmtDate(plan.endDate)} span />
             : <InfoRow icon="ti-calendar-due" label="عدد الأيام النشطة" val={String(plan.activeDaysCount ?? "—")} span />
           }
         </div>
+
+        {/* Each type gets its own days, range and page count — independent
+            divisions of different content over one shared window. */}
+        {plan.segments.map((seg) => (
+          <div key={seg.type} style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--border)" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--green)", marginBottom: 8 }}>{seg.type}</div>
+            <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12, color: "var(--text2)" }}>
+              <InfoRow icon="ti-calendar-week" label="الأيام" val={seg.days.join("، ")} span />
+              <InfoRow icon="ti-book" label="من" val={pointLabel(seg.rangeStart)} />
+              <InfoRow icon="ti-book-2" label="إلى" val={pointLabel(seg.rangeEnd)} />
+              <InfoRow
+                icon="ti-files"
+                label="عدد الصفحات"
+                val={seg.pageRange.pageCount === 1
+                  ? `صفحة ${seg.pageRange.pageStart}`
+                  : `${seg.pageRange.pageCount} (${seg.pageRange.pageStart}-${seg.pageRange.pageEnd})`}
+                span
+              />
+            </div>
+          </div>
+        ))}
 
         {plan.progress && (
           <div style={{ marginBottom: 12 }}>
@@ -281,10 +295,12 @@ function PlanCard({
           background: plan.todayAssignment ? "var(--green-pale)" : "var(--cream)",
         }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: plan.todayAssignment ? "var(--green)" : "var(--text3)", marginBottom: plan.todayAssignment ? 4 : 0 }}>
-            <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />الجزء المطلوب اليوم
+            <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />
+            الجزء المطلوب اليوم{plan.todayAssignment ? ` · ${plan.todayAssignment.type}` : ""}
           </div>
           {plan.todayAssignment ? (() => {
-            const a = orientSlice(plan.todayAssignment, isReversedRange(plan.rangeStart, plan.rangeEnd));
+            // Direction is per segment — orient by the type actually due today.
+            const a = orientSlice(plan.todayAssignment, segmentReversed(plan, plan.todayAssignment.type));
             return (
             <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
               {surahName(a.surahStart)} : {a.ayahStart}

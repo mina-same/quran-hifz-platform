@@ -7,9 +7,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { useSpecialTracks, type SpecialTrack, type TrackTeacher } from '@/lib/queries/specialTracks';
-import { useQuranPlans } from '@/lib/queries/quranPlan';
+import { useQuranPlans, segmentReversed } from '@/lib/queries/quranPlan';
 import { SURAHS } from '@/lib/data/surahs';
-import { isReversedRange, orientSlice } from '@/lib/quranRange';
+import { orientSlice } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { AR_LOCALE } from '@/lib/date';
@@ -40,7 +40,8 @@ function TrackCard({ track }: { track: SpecialTrack }) {
 
   const todayText = (() => {
     if (!linkedPlan?.todayAssignment) return 'لا يوجد جزء مخصص لليوم';
-    const a = orientSlice(linkedPlan.todayAssignment, isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd));
+    // Direction is per segment — read it from the type that is actually due.
+    const a = orientSlice(linkedPlan.todayAssignment, segmentReversed(linkedPlan, linkedPlan.todayAssignment.type));
     const pages = a.pageEnd !== a.pageStart ? `${a.pageStart} - ${a.pageEnd}` : `${a.pageStart}`;
     return `مقرَّر اليوم: ${surahName(a.surahStart)} : ${a.ayahStart} — ${surahName(a.surahEnd)} : ${a.ayahEnd} (صفحة ${pages})`;
   })();

@@ -4,10 +4,14 @@ import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react-native';
 import { buildDayChips, todayIso, toDateOnly, type DayChip } from '@/lib/date';
-import type { ScheduleEntry } from '@/lib/quranRange';
+import type { PlanType, ScheduleEntry } from '@/lib/quranRange';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
+
+/** A schedule day, carrying the segment it belongs to when the plan has more
+ * than one type. Optional so a legacy single-type plan still fits. */
+export type DayEntry = ScheduleEntry & { type?: PlanType };
 
 const CHIP_W = 56;
 const CHIP_GAP = 8;
@@ -18,7 +22,7 @@ export interface DaySchedule {
   /** The same days, ascending — the order the arrows step through. */
   scheduledSorted: string[];
   /** First schedule entry per covered day. */
-  assignmentByDate: Map<string, ScheduleEntry>;
+  assignmentByDate: Map<string, DayEntry>;
   /** Every calendar day in range, covered or not. */
   dayChips: DayChip[];
   /** The day actually being shown: the selection when it is covered, else the
@@ -33,11 +37,11 @@ export interface DaySchedule {
 /** Derives everything the slider and the roster below it need from a plan's
  * schedule. `selectedDate` is the raw user selection; it is ignored when it
  * does not name a covered day, so a stale selection can never blank the page. */
-export function useDaySchedule(entries: ScheduleEntry[], selectedDate: string): DaySchedule {
+export function useDaySchedule(entries: DayEntry[], selectedDate: string): DaySchedule {
   const today = todayIso();
   return useMemo(() => {
     const set = new Set<string>();
-    const byDate = new Map<string, ScheduleEntry>();
+    const byDate = new Map<string, DayEntry>();
     for (const e of entries) {
       if (!e.date) continue;
       const d = toDateOnly(e.date);

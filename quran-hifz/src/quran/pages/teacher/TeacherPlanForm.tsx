@@ -17,7 +17,7 @@ import { Badge } from "../../components/common/Badge";
 import { DaysOfWeekPicker } from "../../components/common/DaysOfWeekPicker";
 import { SurahPointFields } from "../../components/common/SurahRangePicker";
 import { IndividualPlanPanel } from "../../components/common/IndividualPlanPanel";
-import { countRangeAyahs, pageRangeOfAyahRange, computeScheduleBreakdown, surahName, WEEK_DAYS } from "../../lib/quranRange";
+import { countRangeAyahs, pageRangeOfAyahRange, computeMultiScheduleBreakdown, surahName, WEEK_DAYS, validateSegmentDays} from "../../lib/quranRange";
 
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString(AR_LOCALE, { year: "numeric", month: "short", day: "numeric" });
@@ -37,19 +37,34 @@ const TARGET_TYPES: { value: "halqa" | "students" | "specialTrack"; label: strin
   { value: "halqa",        label: "حلقة كاملة",    icon: "ti-school" },
 ];
 
+/** One type's track in the form: its own days and its own range. The plan's
+ * window (start, end, holidays) is shared by every segment. */
+type FormSegment = {
+  type: PlanType;
+  days: string[];
+  rangeStart: RangePoint;
+  rangeEnd: RangePoint;
+};
+
+function emptySegment(type: PlanType): FormSegment {
+  return {
+    type, days: [],
+    rangeStart: { surahNumber: 1, ayah: 1 },
+    rangeEnd: { surahNumber: 1, ayah: 1 },
+  };
+}
+
 type FormFields = {
   name: string;
-  type: PlanType;
   description: string;
+  /** One per selected type, max four. Their days must not overlap. */
+  segments: FormSegment[];
   targetType: "halqa" | "students" | "specialTrack";
   halqa: string;
   students: string[];
   specialTrack: string;
-  days: string[];
   holidays: string[];
   startDate: string;
-  rangeStart: RangePoint;
-  rangeEnd: RangePoint;
   endType: "activeDays" | "date";
   activeDaysCount: string;
   endDate: string;
@@ -63,13 +78,11 @@ function todayISO(): string {
 }
 
 const EMPTY: FormFields = {
-  name: "", type: "حفظ", description: "",
+  name: "", description: "",
+  segments: [emptySegment("حفظ")],
   targetType: "halqa", halqa: "", students: [], specialTrack: "",
-  days: [],
   holidays: [],
   startDate: todayISO(),
-  rangeStart: { surahNumber: 1, ayah: 1 },
-  rangeEnd:   { surahNumber: 1, ayah: 1 },
   endType: "activeDays",
   activeDaysCount: "10",
   endDate: "",
@@ -81,16 +94,18 @@ function getId(v: { _id: string } | string) {
 
 function fieldsFromPlan(plan: QuranPlan, nameSuffix = ""): FormFields {
   return {
-    name: `${plan.name}${nameSuffix}`, type: plan.type, description: plan.description ?? "",
+    name: `${plan.name}${nameSuffix}`, description: plan.description ?? "",
+    // The server always returns segments, migrating a legacy single-type plan
+    // into a one-element array, so there is no old shape to handle here.
+    segments: plan.segments.map((seg) => ({
+      type: seg.type, days: seg.days, rangeStart: seg.rangeStart, rangeEnd: seg.rangeEnd,
+    })),
     targetType: plan.targetType,
     halqa: plan.halqa ? getId(plan.halqa) : "",
     students: (plan.students ?? []).map(getId),
     specialTrack: plan.specialTrack ? getId(plan.specialTrack) : "",
-    days: plan.days,
     holidays: plan.holidays ?? [],
     startDate: plan.startDate ? plan.startDate.split("T")[0] : todayISO(),
-    rangeStart: plan.rangeStart,
-    rangeEnd: plan.rangeEnd,
     endType: plan.endType,
     activeDaysCount: plan.activeDaysCount ? String(plan.activeDaysCount) : "",
     endDate: plan.endDate ? plan.endDate.split("T")[0] : "",
@@ -172,7 +187,29 @@ export function TeacherPlanForm() {
   }
 
   const title = handoff?.mode === "edit" ? "تعديل الخطة" : handoff?.mode === "duplicate" ? "نسخ الخطة" : "خطة قرآنية جديدة";
-  const typeCfg = PLAN_TYPES.find((t) => t.value === form.type) ?? PLAN_TYPES[0];
+  /** Adds or removes a whole type. Removing one frees its days for the others. */
+  function toggleType(type: PlanType) {
+    setForm((p) => ({
+      ...p,
+      segments: p.segments.some((sg) => sg.type === type)
+        ? p.segments.filter((sg) => sg.type !== type)
+        : [...p.segments, emptySegment(type)],
+    }));
+  }
+
+  function updateSegment(type: PlanType, patch: Partial<FormSegment>) {
+    setForm((p) => ({
+      ...p,
+      segments: p.segments.map((sg) => (sg.type === type ? { ...sg, ...patch } : sg)),
+    }));
+  }
+
+  /** Which type owns each weekday — a day belongs to at most one. */
+  const dayOwner = useMemo(() => {
+    const owner = new Map<string, PlanType>();
+    for (const sg of form.segments) for (const d of sg.days) owner.set(d, sg.type);
+    return owner;
+  }, [form.segments]);
 
   const { data: halqaStudents = [] } = useStudents({ halqa: form.halqa }, { enabled: form.targetType === "halqa" && !!form.halqa });
   const { data: trackStudents = [] } = useStudents({ specialTrack: form.specialTrack }, { enabled: form.targetType === "specialTrack" && !!form.specialTrack });
@@ -186,7 +223,10 @@ export function TeacherPlanForm() {
 
   async function handleSubmit() {
     if (!form.name.trim())      { setFormError("اسم الخطة مطلوب"); return; }
-    if (form.days.length === 0) { setFormError("يرجى اختيار يوم واحد على الأقل"); return; }
+    // Same rule the server enforces: at least one type, every type with days,
+    // and no weekday claimed twice.
+    const segmentError = validateSegmentDays(form.segments);
+    if (segmentError) { setFormError(segmentError); return; }
     if (form.targetType === "halqa" && !form.halqa) { setFormError("يرجى اختيار حلقة"); return; }
     if (form.targetType === "students" && form.students.length === 0) { setFormError("يرجى اختيار طالب واحد على الأقل"); return; }
     if (form.targetType === "specialTrack" && !form.specialTrack) { setFormError("يرجى اختيار المسار"); return; }
@@ -200,16 +240,15 @@ export function TeacherPlanForm() {
     // toward Al-Fatiha) — so no ordering check here.
     setFormError("");
     const body: Record<string, unknown> = {
-      name: form.name.trim(), type: form.type, description: form.description.trim() || undefined,
+      name: form.name.trim(), description: form.description.trim() || undefined,
+      segments: form.segments,
       teacher: teacherId,
       targetType: form.targetType,
       halqa: form.targetType === "halqa" ? form.halqa : undefined,
       students: form.targetType === "students" ? form.students : undefined,
       specialTrack: form.targetType === "specialTrack" ? form.specialTrack : undefined,
-      days: form.days,
       holidays: form.holidays,
       startDate: form.startDate || undefined,
-      rangeStart: form.rangeStart, rangeEnd: form.rangeEnd,
       endType: form.endType,
       activeDaysCount: form.endType === "activeDays" ? Number(form.activeDaysCount) : undefined,
       endDate: form.endType === "date" ? form.endDate : undefined,
@@ -233,33 +272,33 @@ export function TeacherPlanForm() {
   );
 
   const isPending = createPlan.isPending || updatePlan.isPending;
-  const rangeIsReversed =
-    form.rangeStart.surahNumber > form.rangeEnd.surahNumber ||
-    (form.rangeStart.surahNumber === form.rangeEnd.surahNumber && form.rangeStart.ayah > form.rangeEnd.ayah);
 
   // Live day-by-day preview of how the range divides across the plan's days —
   // computed client-side from the current form state (the server produces the
   // identical breakdown once the plan is saved). Empty until enough is filled in.
   const schedulePreview = useMemo(() => {
-    if (form.days.length === 0) return [];
+    if (form.segments.every((sg) => sg.days.length === 0)) return [];
     if (form.endType === "activeDays" && !form.activeDaysCount) return [];
     if (form.endType === "date" && !form.endDate) return [];
     if (!form.startDate) return [];
     try {
-      return computeScheduleBreakdown({
-        days: form.days,
+      return computeMultiScheduleBreakdown({
         holidays: form.holidays,
         startDate: new Date(`${form.startDate}T00:00:00`),
         endType: form.endType,
         activeDaysCount: form.endType === "activeDays" ? Number(form.activeDaysCount) : undefined,
         endDate: form.endType === "date" && form.endDate ? new Date(`${form.endDate}T00:00:00`) : undefined,
-        rangeStart: form.rangeStart,
-        rangeEnd: form.rangeEnd,
+        segments: form.segments.filter((sg) => sg.days.length > 0),
       });
     } catch {
       return [];
     }
-  }, [form.days, form.holidays, form.startDate, form.endType, form.activeDaysCount, form.endDate, form.rangeStart, form.rangeEnd]);
+  }, [form.segments, form.holidays, form.startDate, form.endType, form.activeDaysCount, form.endDate]);
+
+  // The header badge shows the plan's first type; the full set is listed in
+  // the per-type cards below.
+  const headerTypeCfg =
+    PLAN_TYPES.find((t) => t.value === form.segments[0]?.type) ?? PLAN_TYPES[0];
 
   const requestedOccurrences =
     form.endType === "activeDays" ? Number(form.activeDaysCount || 0) : schedulePreview.length;
@@ -273,10 +312,10 @@ export function TeacherPlanForm() {
           <div style={{ display: "flex", alignItems: "center", gap: 14, flex: 1, minWidth: 240 }}>
             <div style={{
               width: 52, height: 52, borderRadius: 14, flexShrink: 0,
-              background: typeCfg.bg, color: typeCfg.fg,
+              background: headerTypeCfg.bg, color: headerTypeCfg.fg,
               display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
             }}>
-              <i className={`ti ${typeCfg.icon}`} />
+              <i className={`ti ${headerTypeCfg.icon}`} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
               <input
@@ -319,15 +358,15 @@ export function TeacherPlanForm() {
         )}
 
         <div style={{ marginTop: 20, paddingTop: 18, borderTop: "1px solid var(--border)" }}>
-          <div style={{ fontSize: 11, color: "var(--text3)", fontWeight: 700, marginBottom: 10 }}>نوع الخطة</div>
+          <div style={{ fontSize: 11, color: "var(--text3)", fontWeight: 700, marginBottom: 10 }}>أنواع الخطة</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {PLAN_TYPES.map((t) => {
-              const active = form.type === t.value;
+              const active = form.segments.some((sg) => sg.type === t.value);
               return (
                 <button
                   key={t.value}
                   type="button"
-                  onClick={() => sf("type", t.value)}
+                  onClick={() => toggleType(t.value)}
                   style={{
                     flex: "1 1 120px", padding: "12px 0", borderRadius: 12, cursor: "pointer",
                     border: `2px solid ${active ? t.fg : "var(--border)"}`,
@@ -344,8 +383,58 @@ export function TeacherPlanForm() {
               );
             })}
           </div>
+          <p style={{ margin: "10px 0 0", fontSize: 11, color: "var(--text3)" }}>
+            اختر نوعاً أو أكثر — لكل نوع أيامه ونطاقه، والمدة واحدة للجميع.
+          </p>
         </div>
       </Card>
+
+      {/* ── One card per selected type: its own days and range. A day already
+             taken by another type is disabled and names its owner — the
+             partition is what keeps each day's ward single-valued. ── */}
+      {form.segments.map((seg) => {
+        const segPages = pageRangeOfAyahRange(seg.rangeStart, seg.rangeEnd);
+        const segReversed =
+          seg.rangeStart.surahNumber > seg.rangeEnd.surahNumber ||
+          (seg.rangeStart.surahNumber === seg.rangeEnd.surahNumber && seg.rangeStart.ayah > seg.rangeEnd.ayah);
+        return (
+          <Card key={seg.type} icon="ti-target" title={seg.type}>
+            <div style={{ fontSize: 11, color: "var(--text3)", fontWeight: 700, marginBottom: 8 }}>الأيام</div>
+            <DaysOfWeekPicker
+              value={seg.days}
+              onChange={(days) => updateSegment(seg.type, { days })}
+              disabledDays={WEEK_DAYS.filter((d) => {
+                const owner = dayOwner.get(d);
+                return !!owner && owner !== seg.type;
+              })}
+            />
+            {form.segments.length > 1 && (
+              <p style={{ margin: "8px 0 0", fontSize: 11, color: "var(--text3)" }}>
+                الأيام المعطّلة مُسنَدة لنوع آخر — اليوم الواحد لنوع واحد فقط.
+              </p>
+            )}
+
+            <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ fontSize: 11, color: "var(--text3)", fontWeight: 700 }}>نطاق {seg.type} (من - إلى)</div>
+              <SurahPointFields label="من" value={seg.rangeStart} onChange={(v) => updateSegment(seg.type, { rangeStart: v })} />
+              <SurahPointFields label="إلى" value={seg.rangeEnd} onChange={(v) => updateSegment(seg.type, { rangeEnd: v })} />
+              <div style={{
+                borderRadius: 10, padding: "10px 12px", background: "var(--cream)",
+                fontSize: 13, color: "var(--text2)",
+              }}>
+                عدد الآيات: {countRangeAyahs(seg.rangeStart, seg.rangeEnd)} — عدد الصفحات: {segPages.pageCount}
+                {" "}(صفحة {segPages.pageStart}{segPages.pageEnd !== segPages.pageStart ? ` إلى ${segPages.pageEnd}` : ""})
+                {segReversed && (
+                  <div style={{ marginTop: 6, color: "#92400e", fontWeight: 600 }}>
+                    <i className="ti ti-arrow-back-up" style={{ marginLeft: 4 }} />
+                    نطاق بالعكس — من نهاية المصحف نحو البداية.
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        );
+      })}
 
       {/* ── Target card ── */}
       <Card icon="ti-users" title="الهدف">
@@ -451,10 +540,8 @@ export function TeacherPlanForm() {
         </Card>
       )}
 
-      {/* ── Days card ── */}
-      <Card icon="ti-calendar-week" title="أيام الخطة">
-        <DaysOfWeekPicker value={form.days} onChange={(days) => sf("days", days)} />
-
+      {/* ── Holidays card. Days now live per type, above. ── */}
+      <Card icon="ti-calendar-off" title="أيام العطلات">
         {/* Holidays — active days the plan pauses on (Eid, exams, travel).
             A holiday consumes no occurrence, so its portion shifts to the
             next working day and the plan's content is never lost. */}
@@ -521,7 +608,8 @@ export function TeacherPlanForm() {
               {form.holidays.map((h) => {
                 // WEEK_DAYS runs Sat..Fri while getDay() runs Sun..Sat, hence the +1 shift.
                 const weekday = WEEK_DAYS[(new Date(`${h}T00:00:00`).getDay() + 1) % 7];
-                const active = form.days.includes(weekday);
+                // Only matters if some type actually runs that weekday.
+                const active = dayOwner.has(weekday);
                 return (
                   <span
                     key={h}
@@ -567,31 +655,6 @@ export function TeacherPlanForm() {
         </div>
       </Card>
 
-      {/* ── Range card ── */}
-      <Card icon="ti-book" title="نطاق الحفظ (من - إلى)">
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <SurahPointFields label="من" value={form.rangeStart} onChange={(v) => sf("rangeStart", v)} />
-          <SurahPointFields label="إلى" value={form.rangeEnd} onChange={(v) => sf("rangeEnd", v)} />
-          {(() => {
-            const { pageStart, pageEnd, pageCount } = pageRangeOfAyahRange(form.rangeStart, form.rangeEnd);
-            return (
-              <div style={{
-                borderRadius: 10, padding: "10px 12px", background: "var(--cream)",
-                fontSize: 13, color: "var(--text2)",
-              }}>
-                عدد الآيات: {countRangeAyahs(form.rangeStart, form.rangeEnd)} — عدد الصفحات: {pageCount}
-                {" "}(صفحة {pageStart}{pageEnd !== pageStart ? ` إلى ${pageEnd}` : ""})
-                {rangeIsReversed && (
-                  <div style={{ marginTop: 6, color: "#92400e", fontWeight: 600 }}>
-                    <i className="ti ti-arrow-back-up" style={{ marginLeft: 4 }} />
-                    خطة بالعكس — الحفظ يبدأ من نقطة "من" ويتراجع تدريجيًا حتى يصل إلى نقطة "إلى"
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-        </div>
-      </Card>
 
       {/* ── Duration card — start date + end condition ── */}
       <Card icon="ti-calendar-due" title="مدة الخطة">
@@ -660,10 +723,8 @@ export function TeacherPlanForm() {
             }}>
               <i className="ti ti-info-circle" style={{ color: "var(--green)" }} />
               <span>عدد الأيام: <strong>{schedulePreview.length}</strong></span>
-              {rangeIsReversed && (
-                <span style={{ color: "#92400e", fontWeight: 600 }}>
-                  · خطة بالعكس — كل يوم يُقرأ بترتيبه الطبيعي، والترتيب بين الأيام يتراجع في المصحف
-                </span>
+              {form.segments.length > 1 && (
+                <span>· {form.segments.map((sg) => sg.type).join("، ")}</span>
               )}
             </div>
             {previewShortfall && (
@@ -681,6 +742,7 @@ export function TeacherPlanForm() {
                 <thead>
                   <tr>
                     <th>#</th>
+                    <th>النوع</th>
                     <th>التاريخ</th>
                     <th>الجزء</th>
                     <th>من</th>
@@ -689,20 +751,31 @@ export function TeacherPlanForm() {
                   </tr>
                 </thead>
                 <tbody>
+                  {/* occurrenceIndex restarts per segment, so a row's key
+                      pairs it with the type. */}
                   {schedulePreview.map((s) => {
                     // For a reverse plan, show "من" as the point nearer the plan's
                     // start (rangeStart side) and "إلى" nearer its end — i.e. swap
                     // the natural low→high slice endpoints so the columns read in
                     // the plan's own direction, not mushaf order.
-                    const from = rangeIsReversed
+                    // Direction is a property of the segment, so it is resolved
+                    // per row — مراجعة may run forward while حفظ runs backward.
+                    const rowReversed = (() => {
+                      const sg = form.segments.find((x) => x.type === s.type);
+                      if (!sg) return false;
+                      return sg.rangeStart.surahNumber > sg.rangeEnd.surahNumber ||
+                        (sg.rangeStart.surahNumber === sg.rangeEnd.surahNumber && sg.rangeStart.ayah > sg.rangeEnd.ayah);
+                    })();
+                    const from = rowReversed
                       ? { surah: s.surahEnd, ayah: s.ayahEnd, page: s.pageEnd }
                       : { surah: s.surahStart, ayah: s.ayahStart, page: s.pageStart };
-                    const to = rangeIsReversed
+                    const to = rowReversed
                       ? { surah: s.surahStart, ayah: s.ayahStart, page: s.pageStart }
                       : { surah: s.surahEnd, ayah: s.ayahEnd, page: s.pageEnd };
                     return (
-                      <tr key={s.occurrenceIndex}>
+                      <tr key={`${s.type}-${s.occurrenceIndex}`}>
                         <td>{s.occurrenceIndex}</td>
+                        <td><Badge tone="gold">{s.type}</Badge></td>
                         <td>{fmtDate(s.date)}</td>
                         <td><Badge tone="green">جزء {s.juz}</Badge></td>
                         <td>{surahName(from.surah)} : {from.ayah}</td>

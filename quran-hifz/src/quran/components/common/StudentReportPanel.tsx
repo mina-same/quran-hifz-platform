@@ -20,7 +20,7 @@ import { Card } from "./Card";
 import { Badge, type BadgeTone } from "./Badge";
 import { SkeletonCard } from "./Skeleton";
 import { StatsRow } from "./StatsRow";
-import { useQuranPlans } from "../../api/quran-plans";
+import { useQuranPlans, type PlanSegment } from "../../api/quran-plans";
 import { useEvaluations } from "../../api/evaluations";
 import { MAX_SCORES } from "../../lib/evaluationRubric";
 import { toFlatIndex, fromFlatIndex, juzFlatRange } from "../../lib/quranRange";
@@ -45,18 +45,18 @@ const JUZ_TONE: Record<JuzStatus, BadgeTone> = {
  * rangeStart/rangeEnd + progress.percent, so we just check, for every juz' 1-30,
  * whether any plan's ayah range overlaps it (and whether a fully-covering plan
  * is 100% complete). */
-function computeJuzRows(
-  plans: {
-    rangeStart: { surahNumber: number; ayah: number };
-    rangeEnd: { surahNumber: number; ayah: number };
-    progress: { percent: number } | null;
-  }[],
-) {
-  const planRanges = plans.map((p) => ({
-    start: toFlatIndex(p.rangeStart),
-    end: toFlatIndex(p.rangeEnd),
-    percent: p.progress?.percent ?? 0,
-  }));
+function computeJuzRows(plans: { segments?: PlanSegment[] }[]) {
+  // A juz' is covered when ANY segment spans it. Each segment carries its own
+  // range and its own progress — حفظ and مراجعة cover different stretches of
+  // the mushaf and advance at different rates, so they contribute
+  // independently rather than being averaged into one plan-wide range.
+  const planRanges = plans
+    .flatMap((p) => p.segments ?? [])
+    .map((seg) => ({
+      start: toFlatIndex(seg.rangeStart),
+      end: toFlatIndex(seg.rangeEnd),
+      percent: seg.progress?.percent ?? 0,
+    }));
 
   return Array.from({ length: 30 }, (_, i) => {
     const juz = i + 1;

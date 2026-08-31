@@ -2789,3 +2789,14 @@
 | 23:20 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/6e619271-832f-43e1-9de0-2e5ca53449b3/scratchpad/multi-segment-plans.html | — | ~6896 |
 | 23:21 | Session end: 1 writes across 1 files (multi-segment-plans.html) | 0 reads | ~7389 tok |
 | 23:26 | Edited quran-hifz-server/src/routes/quran-plan.routes.ts | expanded (+7 lines) | ~245 |
+| 23:27 | PHASE 2 server: QuranPlan.segments[] (+legacy fields kept, migrated on read via normalizePlanSegments), StudentOccurrence.type, per-segment zod + validateSegmentDays, withPlanComputed emits per-segment AND rollup fields so ~20 display-only client screens need no change, reflow scoped to type in all 5 occurrence walks, generateSchedule/updateScheduleEntry/recordOccurrence/initStudentProgress take type, backfill emits segments, plan routes now authorize(teacher,admin) | quran-hifz-server: 7 files | tsc clean | ~90k |
+| 23:31 | Android release APK build: prebuild + keystore + gradle signing | quran-hifz-mobile/android/*, release.jks | in progress | ~8k |
+| 23:31 | Session end: 2 writes across 2 files (multi-segment-plans.html, quran-plan.routes.ts) | 0 reads | ~7634 tok |
+| 00:05 | Session end: 2 writes across 2 files (multi-segment-plans.html, quran-plan.routes.ts) | 0 reads | ~7634 tok |
+| 00:06 | Session end: 2 writes across 2 files (multi-segment-plans.html, quran-plan.routes.ts) | 0 reads | ~7634 tok |
+| 00:11 | PHASES 3-4 mobile: multi-segment math mirrored + 17 new tests (75 total), QuranPlan.segments type + planSegment/segmentReversed helpers, plan-form rewritten to multi-type (per-type days+range cards, cross-type day locking), plans/plan-detail per-segment blocks, roster labels day type + sends it on record, IndividualPlanPanel scoped to type, scheduleItems takes per-row direction | quran-hifz-mobile: 12 files | tsc clean, jest 75/75, expo export clean | ~110k |
+| 00:16 | Android release APK BUILT: signed, arm64-v8a, prod API baked in | ~/Desktop/quran-hifz-1.0.0.apk (58M) | success | ~25k |
+| 00:17 | Session end: 2 writes across 2 files (multi-segment-plans.html, quran-plan.routes.ts) | 0 reads | ~7634 tok |
+| 01:08 | Session end: 2 writes across 2 files (multi-segment-plans.html, quran-plan.routes.ts) | 0 reads | ~7634 tok |
+| 02:19 | PHASE 5 web: QuranPlan.segments + planSegment/segmentReversed helpers, TeacherPlanForm rewritten multi-type (per-type days+range cards, DaysOfWeekPicker gains disabledDays), TeacherPlans/PlanDetail per-segment blocks, TeacherAttendance day-type aware + sends type on record, IndividualPlanPanel type-scoped, StudentReportPanel juz coverage from segments, 3 track screens use per-segment direction | quran-hifz/src: 12 files | tsc clean (excl 4 pre-existing), vite build clean | ~95k |
+| 02:27 | Session end: 2 writes across 2 files (multi-segment-plans.html, quran-plan.routes.ts) | 0 reads | ~7634 tok |

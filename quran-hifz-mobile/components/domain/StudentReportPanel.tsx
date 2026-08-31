@@ -6,7 +6,7 @@ import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import ProgressBar from '@/components/ui/ProgressBar';
 import FormSelect from '@/components/forms/FormSelect';
-import { useQuranPlans } from '@/lib/queries/quranPlan';
+import { useQuranPlans, type PlanSegment } from '@/lib/queries/quranPlan';
 import { useEvaluations, type EvaluationRecord } from '@/lib/queries/evaluations';
 import { MAX_SCORES } from '@/lib/evaluationRubric';
 import { toFlatIndex, fromFlatIndex, juzFlatRange } from '@/lib/quranRange';
@@ -32,18 +32,18 @@ function studentNameOf(e: EvaluationRecord): string {
 
 /** Per-juz' coverage derived client-side from the student's plans — the same
  * overlap rule the web panel uses, so both clients colour a juz' identically. */
-function computeJuzRows(
-  plans: {
-    rangeStart: { surahNumber: number; ayah: number };
-    rangeEnd: { surahNumber: number; ayah: number };
-    progress: { percent: number } | null;
-  }[],
-) {
-  const ranges = plans.map((p) => ({
-    start: toFlatIndex(p.rangeStart),
-    end: toFlatIndex(p.rangeEnd),
-    percent: p.progress?.percent ?? 0,
-  }));
+/** A juz' is covered when ANY of the student's plan segments spans it. Each
+ * segment carries its own range and its own progress — حفظ and مراجعة cover
+ * different stretches of the mushaf and advance at different rates, so they
+ * contribute independently rather than being averaged into one plan range. */
+function computeJuzRows(plans: { segments?: PlanSegment[] }[]) {
+  const ranges = plans
+    .flatMap((p) => p.segments ?? [])
+    .map((seg) => ({
+      start: toFlatIndex(seg.rangeStart),
+      end: toFlatIndex(seg.rangeEnd),
+      percent: seg.progress?.percent ?? 0,
+    }));
 
   return Array.from({ length: 30 }, (_, i) => {
     const juz = i + 1;

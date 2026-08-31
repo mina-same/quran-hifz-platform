@@ -25,6 +25,7 @@ import {
   type QuranPlan,
   type RangePoint,
   type ScheduleEntry,
+  segmentReversed,
 } from "../../api/quran-plans";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
 import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
@@ -415,7 +416,7 @@ export function TeacherTrackDetail() {
   const linkedPlan = linkedPlans.find((p) => p.targetType === "specialTrack") ?? linkedPlans[0];
   // Reverse-direction plan → display the assigned ward in the plan's own
   // direction ("من" nearer the plan's start). Display-only; storage stays low→high.
-  const rangeReversed = !!linkedPlan && isReversedRange(linkedPlan.rangeStart, linkedPlan.rangeEnd);
+  const rangeReversed = !!linkedPlan && segmentReversed(linkedPlan, linkedPlan?.todayAssignment?.type);
 
   // Each student can now have their own effective schedule (absence/shortfall
   // reflow, manual per-student overrides), so "today's assigned portion" is

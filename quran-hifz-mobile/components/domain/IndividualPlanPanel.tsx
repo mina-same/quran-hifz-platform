@@ -8,9 +8,10 @@ import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
 import ScheduleSheet, { fmtShortDate, fmtPages, type ScheduleItem } from '@/components/domain/ScheduleSheet';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import {
-  useStudentPlanProgress, useInitStudentPlanProgress, useReflowStudentPlan,
+  useStudentPlanProgress, useInitStudentPlanProgress, useReflowStudentPlan, planSegment,
   type QuranPlan, type StudentOccurrenceStatus,
 } from '@/lib/queries/quranPlan';
+import type { PlanType } from '@/lib/quranRange';
 import { IconCalendarEvent } from '@tabler/icons-react-native';
 import { isReversedRange, isReversedSchedule, orientSlice, surahName, type RangePoint } from '@/lib/quranRange';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -32,6 +33,11 @@ interface Props {
    * default custom-range seed and the direction fallback before the student has
    * any occurrences of their own. */
   basePlan: QuranPlan;
+  /** Which of the plan's types this panel is for. A custom range belongs to one
+   * type — each covers its own stretch of the mushaf — so with a multi-type
+   * plan the caller must say which. Falls back to the only segment when the
+   * plan has just one. */
+  type?: PlanType;
 }
 
 /** Per-student "individual plan" overlay: shows the student's own effective
@@ -40,20 +46,37 @@ interface Props {
  * redistribution algorithm. Direction (reversed) is inferred from the
  * student's own occurrences first, falling back to the base plan's direction —
  * a custom-range overlay can run opposite to the plan it hangs off. */
-export default function IndividualPlanPanel({ planId, studentId, studentName, basePlan }: Props) {
+export default function IndividualPlanPanel({ planId, studentId, studentName, basePlan, type }: Props) {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
   const { data: progress, isLoading } = useStudentPlanProgress(planId, studentId);
   const initProgress = useInitStudentPlanProgress();
   const reflow = useReflowStudentPlan();
 
-  const [customStart, setCustomStart] = useState<RangePoint>(basePlan.rangeStart);
-  const [customEnd, setCustomEnd] = useState<RangePoint>(basePlan.rangeEnd);
+  // The segment this panel covers, and the range it seeds the pickers with.
+  const segment = planSegment(basePlan, type);
+  const segType = segment?.type ?? type;
+
+  const [customStart, setCustomStart] = useState<RangePoint>(
+    segment?.rangeStart ?? { surahNumber: 1, ayah: 1 },
+  );
+  const [customEnd, setCustomEnd] = useState<RangePoint>(
+    segment?.rangeEnd ?? { surahNumber: 114, ayah: 6 },
+  );
   const [showSchedule, setShowSchedule] = useState(false);
 
+  // Only this type's days — a multi-type plan's overlay holds every type's
+  // occurrences in one array, and mixing them would read as one jumbled
+  // schedule and infer the wrong direction.
+  const ownSchedule = useMemo(
+    () => (progress?.effectiveSchedule ?? []).filter((o) => !segType || o.type === segType),
+    [progress?.effectiveSchedule, segType],
+  );
+
   const reversed = useMemo(
-    () => isReversedSchedule(progress?.effectiveSchedule) ?? isReversedRange(basePlan.rangeStart, basePlan.rangeEnd),
-    [progress?.effectiveSchedule, basePlan.rangeStart, basePlan.rangeEnd],
+    () => isReversedSchedule(ownSchedule)
+      ?? (segment ? isReversedRange(segment.rangeStart, segment.rangeEnd) : false),
+    [ownSchedule, segment],
   );
 
   if (isLoading) {
@@ -71,7 +94,7 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
         </View>
         <Button
           label={initProgress.isPending ? 'جارٍ الإنشاء...' : 'إنشاء الخطة الفردية'}
-          onPress={() => initProgress.mutate({ planId, studentId, rangeStart: customStart, rangeEnd: customEnd })}
+          onPress={() => initProgress.mutate({ planId, studentId, type: segType, rangeStart: customStart, rangeEnd: customEnd })}
           disabled={initProgress.isPending}
           style={{ marginTop: 10 }}
           fullWidth
