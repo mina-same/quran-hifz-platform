@@ -39,11 +39,16 @@ function TrackCard({ track }: { track: SpecialTrack }) {
   const linkedPlan = linkedPlans[0];
 
   const todayText = (() => {
-    if (!linkedPlan?.todayAssignment) return 'لا يوجد جزء مخصص لليوم';
+    const list = linkedPlan?.todayAssignments ?? [];
+    if (list.length === 0) return 'لا يوجد جزء مخصص لليوم';
+    const multi = list.length > 1;
     // Direction is per segment — read it from the type that is actually due.
-    const a = orientSlice(linkedPlan.todayAssignment, segmentReversed(linkedPlan, linkedPlan.todayAssignment.type));
-    const pages = a.pageEnd !== a.pageStart ? `${a.pageStart} - ${a.pageEnd}` : `${a.pageStart}`;
-    return `مقرَّر اليوم: ${surahName(a.surahStart)} : ${a.ayahStart} — ${surahName(a.surahEnd)} : ${a.ayahEnd} (صفحة ${pages})`;
+    return list.map((entry) => {
+      const a = orientSlice(entry, segmentReversed(linkedPlan!, entry.type));
+      const pages = a.pageEnd !== a.pageStart ? `${a.pageStart} - ${a.pageEnd}` : `${a.pageStart}`;
+      const label = multi ? `مقرَّر اليوم (${entry.type})` : 'مقرَّر اليوم';
+      return `${label}: ${surahName(a.surahStart)} : ${a.ayahStart} — ${surahName(a.surahEnd)} : ${a.ayahEnd} (صفحة ${pages})`;
+    }).join('\n');
   })();
 
   const s = useMemo(() => StyleSheet.create({
@@ -116,11 +121,11 @@ function TrackCard({ track }: { track: SpecialTrack }) {
       </View>
 
       {!!linkedPlan && (
-        <View style={[s.planBox, !!linkedPlan.todayAssignment && { backgroundColor: theme.greenPale }]}>
+        <View style={[s.planBox, linkedPlan.todayAssignments.length > 0 && { backgroundColor: theme.greenPale }]}>
           <Pressable haptic="select" style={s.planHead} onPress={() => setPlanOpen((o) => !o)}>
             <View style={s.planLabel}>
-              <IconTarget size={14} color={linkedPlan.todayAssignment ? theme.green : theme.textMuted} />
-              <Text style={[s.planName, !!linkedPlan.todayAssignment && { color: theme.green }]} numberOfLines={1}>
+              <IconTarget size={14} color={linkedPlan.todayAssignments.length > 0 ? theme.green : theme.textMuted} />
+              <Text style={[s.planName, linkedPlan.todayAssignments.length > 0 && { color: theme.green }]} numberOfLines={1}>
                 {linkedPlan.name}
               </Text>
               {!!linkedPlan.progress && (

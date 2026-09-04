@@ -146,19 +146,20 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
           </View>
         )}
 
-        <View style={[s.assignmentBox, !assignment && { backgroundColor: theme.cream }]}>
+        <View style={[s.assignmentBox, assignments.length === 0 && { backgroundColor: theme.cream }]}>
           <View style={s.progressLabelRow}>
-            <IconCalendarStar size={14} color={assignment ? theme.green : theme.textMuted} />
-            <Text style={[s.assignmentLabel, !assignment && { color: theme.textMuted }]}>
-              الجزء المطلوب اليوم{plan.todayAssignment ? ` · ${plan.todayAssignment.type}` : ''}
+            <IconCalendarStar size={14} color={assignments.length > 0 ? theme.green : theme.textMuted} />
+            <Text style={[s.assignmentLabel, assignments.length === 0 && { color: theme.textMuted }]}>
+              الجزء المطلوب اليوم{assignments.length === 1 ? ` · ${assignments[0].type}` : ''}
             </Text>
           </View>
-          {assignment ? (
-            <Text style={s.assignmentText}>
-              {surahName(assignment.surahStart)}:{assignment.ayahStart} — {surahName(assignment.surahEnd)}:{assignment.ayahEnd}
-              {plan.todayAssignment && segmentReversed(plan, plan.todayAssignment.type) ? ' · بالعكس' : ''}
+          {assignments.length > 0 ? assignments.map((a, idx) => (
+            <Text key={a.type} style={[s.assignmentText, idx > 0 && { marginTop: 2 }]}>
+              {assignments.length > 1 ? `${a.type} · ` : ''}
+              {surahName(a.surahStart)}:{a.ayahStart} — {surahName(a.surahEnd)}:{a.ayahEnd}
+              {a.reversed ? ' · بالعكس' : ''}
             </Text>
-          ) : (
+          )) : (
             <Text style={s.muted}>لا يوجد جزء مخصص لليوم</Text>
           )}
         </View>

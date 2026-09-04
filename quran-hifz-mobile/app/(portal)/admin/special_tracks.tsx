@@ -605,11 +605,16 @@ function TrackCard({
     : t.status === 'upcoming' ? theme.amber : theme.border;
 
   const todayText = (() => {
-    if (!linkedPlan?.todayAssignment) return 'لا يوجد جزء مخصص لليوم';
+    const list = linkedPlan?.todayAssignments ?? [];
+    if (list.length === 0) return 'لا يوجد جزء مخصص لليوم';
+    const multi = list.length > 1;
     // Direction is per segment — read it from the type that is actually due.
-    const a = orientSlice(linkedPlan.todayAssignment, segmentReversed(linkedPlan, linkedPlan.todayAssignment.type));
-    const pages = a.pageEnd !== a.pageStart ? `${a.pageStart} - ${a.pageEnd}` : `${a.pageStart}`;
-    return `مقرَّر اليوم: ${surahName(a.surahStart)} : ${a.ayahStart} — ${surahName(a.surahEnd)} : ${a.ayahEnd} (صفحة ${pages})`;
+    return list.map((entry) => {
+      const a = orientSlice(entry, segmentReversed(linkedPlan!, entry.type));
+      const pages = a.pageEnd !== a.pageStart ? `${a.pageStart} - ${a.pageEnd}` : `${a.pageStart}`;
+      const label = multi ? `مقرَّر اليوم (${entry.type})` : 'مقرَّر اليوم';
+      return `${label}: ${surahName(a.surahStart)} : ${a.ayahStart} — ${surahName(a.surahEnd)} : ${a.ayahEnd} (صفحة ${pages})`;
+    }).join('\n');
   })();
 
   return (
@@ -685,7 +690,7 @@ function TrackCard({
         </View>
 
         {/* linked Quran plan */}
-        <View style={[s.planBox, linkedPlan?.todayAssignment && { backgroundColor: theme.greenPale }]}>
+        <View style={[s.planBox, !!linkedPlan?.todayAssignments.length && { backgroundColor: theme.greenPale }]}>
           <Pressable
             haptic="select"
             disabled={!linkedPlan}
@@ -693,8 +698,8 @@ function TrackCard({
             style={s.planHead}
           >
             <View style={s.iconLabel}>
-              <IconTarget size={14} color={linkedPlan?.todayAssignment ? theme.green : theme.textMuted} />
-              <Text style={[s.planTitle, linkedPlan?.todayAssignment && { color: theme.green }]}>الخطة القرآنية</Text>
+              <IconTarget size={14} color={linkedPlan?.todayAssignments.length ? theme.green : theme.textMuted} />
+              <Text style={[s.planTitle, !!linkedPlan?.todayAssignments.length && { color: theme.green }]}>الخطة القرآنية</Text>
               {linkedPlan?.progress && (
                 <View style={s.planPct}>
                   <Text style={s.planPctText}>{linkedPlan.progress.percent}%</Text>

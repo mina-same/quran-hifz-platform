@@ -167,12 +167,9 @@ export default function TrackDetail({ trackId, role }: Props) {
     return Array.from(map.values());
   }, [track, halqaStudents]);
 
-  // Direction is per segment — read it from the type actually due today.
-  const planReversed = segmentReversed(linkedPlan, linkedPlan?.todayAssignment?.type);
-
   const scheduleRows = useMemo(
     () => (linkedPlan ? scheduleItems(linkedPlan.schedule, (e) => segmentReversed(linkedPlan, e.type)) : []),
-    [linkedPlan, planReversed],
+    [linkedPlan],
   );
 
   const unlinkedPlans = myPlans.filter((p) => !planTargetsTrack(p, trackId));
@@ -338,15 +335,19 @@ export default function TrackDetail({ trackId, role }: Props) {
                   label={linkedPlan.juzProgress ? `${linkedPlan.juzProgress.completed} / ${linkedPlan.juzProgress.total} جزء` : undefined}
                 />
               </View>
-              <View style={[s.assignmentBox, { backgroundColor: linkedPlan.todayAssignment ? theme.greenPale : theme.cream }]}>
-                {linkedPlan.todayAssignment ? (() => {
-                  const a = orientSlice(linkedPlan.todayAssignment, planReversed);
+              <View style={[s.assignmentBox, { backgroundColor: linkedPlan.todayAssignments.length > 0 ? theme.greenPale : theme.cream }]}>
+                {linkedPlan.todayAssignments.length > 0 ? linkedPlan.todayAssignments.map((entry, idx) => {
+                  // Direction is per segment — each type may span a different,
+                  // independently-reversed range.
+                  const reversed = segmentReversed(linkedPlan, entry.type);
+                  const a = orientSlice(entry, reversed);
                   return (
-                    <Text style={s.assignmentText}>
-                      {surahName(a.surahStart)}:{a.ayahStart} — {surahName(a.surahEnd)}:{a.ayahEnd}{planReversed ? ' · بالعكس' : ''}
+                    <Text key={entry.type} style={[s.assignmentText, idx > 0 && { marginTop: 4 }]}>
+                      {linkedPlan.todayAssignments.length > 1 ? `${entry.type} · ` : ''}
+                      {surahName(a.surahStart)}:{a.ayahStart} — {surahName(a.surahEnd)}:{a.ayahEnd}{reversed ? ' · بالعكس' : ''}
                     </Text>
                   );
-                })() : (
+                }) : (
                   <Text style={s.muted}>لا يوجد جزء مخصص لليوم</Text>
                 )}
               </View>

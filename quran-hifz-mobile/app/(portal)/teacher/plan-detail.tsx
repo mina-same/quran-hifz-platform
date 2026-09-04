@@ -70,8 +70,10 @@ export default function TeacherPlanDetail() {
 
         {plan && (() => {
           // Direction is per segment — orient today's ward by the type due.
-          const reversed = segmentReversed(plan, plan.todayAssignment?.type);
-          const assignment = plan.todayAssignment ? orientSlice(plan.todayAssignment, reversed) : null;
+          const assignments = plan.todayAssignments.map((a) => ({
+            ...orientSlice(a, segmentReversed(plan, a.type)),
+            type: a.type,
+          }));
           const progressPct = plan.progress?.percent ?? 0;
           const progressLabel = plan.juzProgress ? `${plan.juzProgress.completed} / ${plan.juzProgress.total} جزء` : undefined;
 
@@ -143,12 +145,13 @@ export default function TeacherPlanDetail() {
 
               <Card>
                 <CardHeader title="الورد المقرر اليوم" />
-                <View style={[s.assignmentBox, { backgroundColor: assignment ? theme.greenPale : theme.cream }]}>
-                  {assignment ? (
-                    <Text style={s.assignmentText}>
-                      {surahName(assignment.surahStart)}:{assignment.ayahStart} — {surahName(assignment.surahEnd)}:{assignment.ayahEnd}
+                <View style={[s.assignmentBox, { backgroundColor: assignments.length > 0 ? theme.greenPale : theme.cream }]}>
+                  {assignments.length > 0 ? assignments.map((a, idx) => (
+                    <Text key={a.type} style={[s.assignmentText, idx > 0 && { marginTop: 4 }]}>
+                      {assignments.length > 1 ? `${a.type} · ` : ''}
+                      {surahName(a.surahStart)}:{a.ayahStart} — {surahName(a.surahEnd)}:{a.ayahEnd}
                     </Text>
-                  ) : (
+                  )) : (
                     <Text style={s.muted}>لا يوجد جزء مخصص لليوم</Text>
                   )}
                 </View>
