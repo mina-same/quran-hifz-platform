@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-04T15:13:35.191Z
-> Files: 544 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-04T15:23:16.790Z
+> Files: 546 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -246,8 +246,9 @@
 
 ## .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md (~2306 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md (~2757 tok)
 - `task-1-report.md` — Task 1: Mobile `quranRange.ts` — Completion Report (~1978 tok)
+- `task-10-report.md` — Task 10 Report: Web `TeacherPlanDetail.tsx` full schedule table — type badge + per-row orientation (~1241 tok)
 - `task-2-report.md` — Task 2 Report: Web `quranRange.ts` Mirror (~1156 tok)
 - `task-3-report.md` — Task 3 Report: Server `quranRange.ts` mirror + `computeMultiTodayAssignment` → plural + fix `backfil (~1105 tok)
 - `task-4-report.md` — Task 4 Report: Server `quran-plan.controller.ts` — `todayAssignments` Array (~1334 tok)
@@ -255,6 +256,7 @@
 - `task-6-report.md` — Task 6 Report: Web plan builder — remove cross-segment day disabling (~1378 tok)
 - `task-7-report.md` — Task 7 Report: Mobile plan builder — remove cross-segment day disabling (~2185 tok)
 - `task-8-report.md` — Task 8 Report: Web read-only "today's ward" banners → loop over `todayAssignments` (~2274 tok)
+- `task-9-report.md` — Task 9 Report: Mobile read-only "today's ward" banners → loop over `todayAssignments` (~1423 tok)
 
 ## docs/superpowers/plans/
 
@@ -315,7 +317,7 @@
 - `parents.tsx` — EMPTY_ADD — renders form (~4595 tok)
 - `register.tsx` — PATHS — renders form (~1824 tok)
 - `reports.tsx` — AdminReports (~562 tok)
-- `special_tracks.tsx` — admin tracks at web parity: status-grouped sections, TrackCard (status strip, chips, info grid, teacher avatars, capacity bar, collapsible linked Quran plan via useQuranPlans, join link), form with masjid/days custom pickers, inline students panel (capacity + search + avatars), delete confirm modal. (~9800 tok)
+- `special_tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~12026 tok)
 - `students.tsx` — المسار: real track lives one hop away via halqa.specialTrack, not the unused legacy `path` enum. (~1577 tok)
 - `teachers.tsx` — ratingVariant (~954 tok)
 - `track-detail.tsx` — AdminTrackDetailRoute (~474 tok)
@@ -341,7 +343,7 @@
 - `points.tsx` — MY_PTS (~989 tok)
 - `schedule.tsx` — DAYS (~1854 tok)
 - `settings.tsx` — StudentSettings (~47 tok)
-- `special_tracks.tsx` — getTeacherName (~1852 tok)
+- `special_tracks.tsx` — getTeacherName (~3229 tok)
 - `store.tsx` — MY_PTS (~1012 tok)
 
 ## quran-hifz-mobile/app/(portal)/teacher/
@@ -353,9 +355,9 @@
 - `grouphomework.tsx` — DAYS (~2777 tok)
 - `homework.tsx` — getName — renders form (~1264 tok)
 - `myhalqa.tsx` — TeacherHalqa (~1077 tok)
-- `plan-detail.tsx` — STATUS_VARIANT (~2476 tok)
+- `plan-detail.tsx` — STATUS_VARIANT (~3418 tok)
 - `plan-form.tsx` — Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local (~10482 tok)
-- `plans.tsx` — One label/value line in the plan card's detail grid. (~3556 tok)
+- `plans.tsx` — One label/value line in the plan card's detail grid. (~3580 tok)
 - `recordlesson.tsx` — LESSON_TYPES (~3004 tok)
 - `reports.tsx` — TeacherReports (~642 tok)
 - `settings.tsx` — TeacherSettings (~47 tok)
@@ -376,7 +378,7 @@
 - `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~5750 tok)
 - `ScheduleSheet.tsx` — Day-by-day plan breakdown as a bottom sheet of compact cards (replaced the 6-column ScheduleTable). Exports scheduleItems()/fmtShortDate()/fmtPages() + the ScheduleItem shape. (~1700 tok)
 - `SurahAyahPicker.tsx` — When given, restricts BOTH pickers to only the surahs/ayat that fall inside (~828 tok)
-- `TrackDetail.tsx` — Special-track drill-down shared by the teacher and admin routes. Three ScopeTabs (المعلمون/الطلاب/الخطة), a day slider over the linked plan's schedule, per-student assignment + IndividualPlanPanel, and teacher-only plan link/edit. Roster is scoped through the track's halaqat. (~4445 tok)
+- `TrackDetail.tsx` — First letter of the first two words — the same initials the web chips show. (~6331 tok)
 
 ## quran-hifz-mobile/components/forms/
 
@@ -846,7 +848,7 @@
 - `TeacherGroupHomework.tsx` — STUDENTS (~2940 tok)
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
-- `TeacherPlanDetail.tsx` — surahName — renders table (~3891 tok)
+- `TeacherPlanDetail.tsx` — surahName — renders table (~3932 tok)
 - `TeacherPlanForm.tsx` — One type's track in the form: its own days and its own range. The plan's (~14465 tok)
 - `TeacherPlans.tsx` — surahName (~4519 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)

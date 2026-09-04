@@ -2920,3 +2920,22 @@
 | 18:11 | Edited .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md | modified minor() | ~265 |
 | 18:12 | Edited .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md | modified bug() | ~296 |
 | 18:13 | Edited quran-hifz-mobile/app/(portal)/teacher/plans.tsx | CSS: type, reversed | ~75 |
+| 18:13 | Edited quran-hifz-mobile/app/(portal)/teacher/plans.tsx | segmentReversed() → map() | ~246 |
+| 18:14 | Edited quran-hifz-mobile/app/(portal)/teacher/plan-detail.tsx | CSS: type | ~70 |
+| 18:14 | Edited quran-hifz-mobile/app/(portal)/teacher/plan-detail.tsx | CSS: marginTop | ~165 |
+| 18:14 | Edited quran-hifz-mobile/app/(portal)/student/special_tracks.tsx | 7→9 lines | ~170 |
+| 18:14 | Edited quran-hifz-mobile/app/(portal)/student/special_tracks.tsx | added nullish coalescing | ~200 |
+| 18:14 | Edited quran-hifz-mobile/app/(portal)/student/special_tracks.tsx | 5→5 lines | ~141 |
+| 18:14 | Edited quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx | added nullish coalescing | ~200 |
+| 18:15 | Edited quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx | 10→10 lines | ~164 |
+| 18:15 | Edited quran-hifz-mobile/components/domain/TrackDetail.tsx | 7→4 lines | ~47 |
+| 18:15 | Edited quran-hifz-mobile/components/domain/TrackDetail.tsx | CSS: marginTop | ~276 |
+| 18:15 | Edited quran-hifz-mobile/app/(portal)/teacher/plans.tsx | 16→17 lines | ~278 |
+| 18:16 | Edited quran-hifz-mobile/app/(portal)/teacher/plan-detail.tsx | 9→10 lines | ~182 |
+| 18:16 | Edited quran-hifz-mobile/components/domain/TrackDetail.tsx | 11→12 lines | ~226 |
+| 18:17 | Created .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-9-report.md | — | ~1518 |
+| 18:18 | Edited .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md | modified user() | ~279 |
+| 18:20 | Edited .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md | modified bug() | ~339 |
+| 18:21 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx | 23→25 lines | ~312 |
+| 18:22 | Created .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-10-report.md | — | ~1324 |
+| 18:23 | Edited .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md | modified minor() | ~128 |
