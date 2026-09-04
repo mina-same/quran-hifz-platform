@@ -21,8 +21,9 @@ export interface DaySchedule {
   scheduledSet: Set<string>;
   /** The same days, ascending — the order the arrows step through. */
   scheduledSorted: string[];
-  /** First schedule entry per covered day. */
-  assignmentByDate: Map<string, DayEntry>;
+  /** Every schedule entry for a covered day — more than one when the plan has
+   * more than one type due the same day. */
+  assignmentByDate: Map<string, DayEntry[]>;
   /** Every calendar day in range, covered or not. */
   dayChips: DayChip[];
   /** The day actually being shown: the selection when it is covered, else the
@@ -41,12 +42,14 @@ export function useDaySchedule(entries: DayEntry[], selectedDate: string): DaySc
   const today = todayIso();
   return useMemo(() => {
     const set = new Set<string>();
-    const byDate = new Map<string, DayEntry>();
+    const byDate = new Map<string, DayEntry[]>();
     for (const e of entries) {
       if (!e.date) continue;
       const d = toDateOnly(e.date);
       set.add(d);
-      if (!byDate.has(d)) byDate.set(d, e);
+      const list = byDate.get(d) ?? [];
+      list.push(e);
+      byDate.set(d, list);
     }
     const sorted = Array.from(set).sort();
     const chips = sorted.length ? buildDayChips(sorted[0], sorted[sorted.length - 1], today) : [];
