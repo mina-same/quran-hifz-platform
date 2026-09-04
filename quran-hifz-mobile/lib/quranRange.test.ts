@@ -406,7 +406,7 @@ describe('holidays', () => {
 
 import {
   validateSegmentDays, segmentOccurrenceCounts, computeMultiScheduleBreakdown,
-  segmentForDate, unionDays, type PlanSegmentInput,
+  segmentsForDate, unionDays, type PlanSegmentInput,
 } from './quranRange';
 
 const HIFZ: PlanSegmentInput = {
@@ -441,12 +441,9 @@ describe('validateSegmentDays', () => {
     expect(validateSegmentDays([HIFZ, { ...HIFZ, days: ['الخميس'] }])).toMatch(/مكرر/);
   });
 
-  // The invariant the whole design rests on: one day, one type.
-  it('rejects two types claiming the same weekday', () => {
-    const clash: PlanSegmentInput = { ...MURAJAA, days: ['الخميس', 'السبت'] };
-    const msg = validateSegmentDays([HIFZ, clash]);
-    expect(msg).toMatch(/السبت/);
-    expect(msg).toMatch(/لنوع واحد فقط/);
+  it('accepts two types sharing a weekday', () => {
+    const shared: PlanSegmentInput = { ...MURAJAA, days: ['الخميس', 'السبت'] };
+    expect(validateSegmentDays([HIFZ, shared])).toBeNull();
   });
 });
 
@@ -480,6 +477,30 @@ describe('segmentOccurrenceCounts', () => {
     });
     expect(counts.get('حفظ')).toBe(11);
     expect(counts.get('مراجعة')).toBe(3);
+  });
+
+  it('funds every matching segment on a shared day while spending only one unit of the shared budget', () => {
+    const overlap: PlanSegmentInput = { ...MURAJAA, days: ['السبت', 'الخميس'] }; // مراجعة also runs on Saturday now
+    const counts = segmentOccurrenceCounts({
+      startDate: START, endType: 'activeDays', activeDaysCount: 5,
+      segments: [HIFZ, overlap], // حفظ: Sat/Mon/Wed
+    });
+    // Distinct qualifying days consumed: Sat 8/1 (both), Mon 8/3 (حفظ), Wed 8/5 (حفظ),
+    // Thu 8/6 (مراجعة), Sat 8/8 (both) = 5 days, but حفظ earns 4 occurrences and
+    // مراجعة earns 3 — they are not required to match.
+    expect(counts.get('حفظ')).toBe(4);
+    expect(counts.get('مراجعة')).toBe(3);
+  });
+
+  it('gives fully-overlapping segments identical counts', () => {
+    const hifzSat: PlanSegmentInput = { ...HIFZ, days: ['السبت'] };
+    const murajaaSat: PlanSegmentInput = { ...MURAJAA, days: ['السبت'] };
+    const counts = segmentOccurrenceCounts({
+      startDate: START, endType: 'activeDays', activeDaysCount: 4,
+      segments: [hifzSat, murajaaSat],
+    });
+    expect(counts.get('حفظ')).toBe(4);
+    expect(counts.get('مراجعة')).toBe(4);
   });
 });
 
@@ -526,26 +547,45 @@ describe('computeMultiScheduleBreakdown', () => {
       byDate.set(day, r.type);
     }
   });
+
+  it('produces a row per segment on a date they both run, on the same calendar dates', () => {
+    const hifzThursday: PlanSegmentInput = { ...HIFZ, days: ['الخميس'] };
+    const murajaaThursday: PlanSegmentInput = { ...MURAJAA, days: ['الخميس'] };
+    const rows = computeMultiScheduleBreakdown({
+      startDate: START, endType: 'date' as const, endDate: new Date(2026, 7, 28),
+      segments: [hifzThursday, murajaaThursday],
+    });
+    const hifzDates = rows.filter((r) => r.type === 'حفظ').map((r) => r.date.slice(0, 10)).sort();
+    const murajaaDates = rows.filter((r) => r.type === 'مراجعة').map((r) => r.date.slice(0, 10)).sort();
+    expect(hifzDates).toHaveLength(4);
+    expect(hifzDates).toEqual(murajaaDates);
+  });
 });
 
-describe('segmentForDate', () => {
+describe('segmentsForDate', () => {
   const plan = {
     startDate: START, endType: 'date' as const, endDate: new Date(2026, 7, 28),
     holidays: ['2026-08-03'],
     segments: [HIFZ, MURAJAA],
   };
 
-  it('resolves a date to the one type that owns it', () => {
-    expect(segmentForDate(plan, new Date(2026, 7, 1))?.type).toBe('حفظ');     // Saturday
-    expect(segmentForDate(plan, new Date(2026, 7, 6))?.type).toBe('مراجعة');  // Thursday
+  it('resolves a date to every segment that owns it', () => {
+    expect(segmentsForDate(plan, new Date(2026, 7, 1)).map((s) => s.type)).toEqual(['حفظ']);     // Saturday
+    expect(segmentsForDate(plan, new Date(2026, 7, 6)).map((s) => s.type)).toEqual(['مراجعة']);  // Thursday
   });
 
-  it('returns null on an off day', () => {
-    expect(segmentForDate(plan, new Date(2026, 7, 7))).toBeNull(); // Friday
+  it('resolves a shared weekday to both segments', () => {
+    const overlap = { ...plan, segments: [HIFZ, { ...MURAJAA, days: ['السبت'] }] };
+    expect(segmentsForDate(overlap, new Date(2026, 7, 1)).map((s) => s.type).sort())
+      .toEqual(['حفظ', 'مراجعة'].sort());
   });
 
-  it('returns null on a holiday even when the weekday matches', () => {
-    expect(segmentForDate(plan, new Date(2026, 7, 3))).toBeNull(); // Monday, holiday
+  it('returns empty on an off day', () => {
+    expect(segmentsForDate(plan, new Date(2026, 7, 7))).toEqual([]); // Friday
+  });
+
+  it('returns empty on a holiday even when the weekday matches', () => {
+    expect(segmentsForDate(plan, new Date(2026, 7, 3))).toEqual([]); // Monday, holiday
   });
 });
 
