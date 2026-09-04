@@ -377,9 +377,9 @@ export function computeScheduleBreakdown(plan: PlanScheduleInput): ScheduleEntry
  * segments share the plan's window — start date, end, holidays — and differ
  * only in which weekdays they own and which stretch of the mushaf they cover.
  *
- * The weekdays are PARTITIONED: a given date belongs to at most one segment,
- * which is what lets a day's ward, its evaluation and its reflow all stay
- * single-valued. `validateSegmentDays` below is what enforces that.
+ * Weekdays may now be SHARED: a single weekday can belong to more than one
+ * segment (e.g. both حفظ and مراجعة on Saturday), so a date can have multiple
+ * segments. Each segment still tracks its own wards/occurrences independently.
  */
 
 export type PlanType = 'حفظ' | 'مراجعة';
@@ -439,10 +439,12 @@ export function segmentOccurrenceCounts(plan: MultiPlanInput): Map<PlanType, num
   while (seen < target && walked < SCHEDULE_WALK_LIMIT_DAYS) {
     if (!holidays.has(dateKey(cursor))) {
       const label = dayLabel(cursor);
-      // Days are partitioned, so at most one segment can claim this date.
-      const seg = plan.segments.find((s) => s.days.includes(label));
-      if (seg) {
-        counts.set(seg.type, (counts.get(seg.type) ?? 0) + 1);
+      // A day can now fund more than one segment (حفظ + مراجعة sharing a
+      // weekday) — every matching segment gets an occurrence, but the day
+      // still consumes only one unit of the shared calendar-day budget.
+      const matching = plan.segments.filter((s) => s.days.includes(label));
+      if (matching.length > 0) {
+        for (const seg of matching) counts.set(seg.type, (counts.get(seg.type) ?? 0) + 1);
         seen++;
       }
     }
@@ -493,36 +495,33 @@ export function computeMultiScheduleBreakdown(plan: MultiPlanInput): SegmentSche
   return out.sort((a, b) => a.date.localeCompare(b.date));
 }
 
-/** The segment that owns a given date, or null on an off day/holiday. */
-export function segmentForDate(plan: MultiPlanInput, d: Date): PlanSegmentInput | null {
+/** Every segment that owns a given date — a date can now belong to more than
+ * one segment (حفظ + مراجعة sharing a weekday), so this returns an array,
+ * not a single winner. Empty on an off day/holiday. */
+export function segmentsForDate(plan: MultiPlanInput, d: Date): PlanSegmentInput[] {
   const holidays = plan.holidays && plan.holidays.length > 0 ? new Set(plan.holidays) : NO_HOLIDAYS;
   const day = dateOnly(d);
-  if (holidays.has(dateKey(day))) return null;
+  if (holidays.has(dateKey(day))) return [];
   const label = dayLabel(day);
-  return plan.segments.find((s) => s.days.includes(label)) ?? null;
+  return plan.segments.filter((s) => s.days.includes(label));
 }
 
 /**
- * Rejects a segment set where two types claim the same weekday, or a segment
- * has no days, or a type appears twice. Returns an Arabic message, or null when
- * the set is valid. Shared by the API and both clients' forms.
+ * Rejects a segment set where a segment has no days, or a type appears
+ * twice. Returns an Arabic message, or null when the set is valid. Shared
+ * by the API and both clients' forms. Two different types MAY claim the
+ * same weekday — that is exactly what lets a plan run حفظ and مراجعة on the
+ * same day; each still tracks its own ward/occurrence independently.
  */
 export function validateSegmentDays(segments: PlanSegmentInput[]): string | null {
   if (segments.length === 0) return 'يجب اختيار نوع واحد على الأقل';
 
   const seenTypes = new Set<PlanType>();
-  const owner = new Map<string, PlanType>();
   for (const seg of segments) {
     if (seenTypes.has(seg.type)) return `النوع "${seg.type}" مكرر — كل نوع مرة واحدة فقط`;
     seenTypes.add(seg.type);
 
     if (seg.days.length === 0) return `اختر أيام "${seg.type}"`;
-
-    for (const day of seg.days) {
-      const taken = owner.get(day);
-      if (taken) return `يوم ${day} مُسنَد لـ"${taken}" و"${seg.type}" — اليوم الواحد لنوع واحد فقط`;
-      owner.set(day, seg.type);
-    }
   }
   return null;
 }
