@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-04T15:23:16.790Z
-> Files: 546 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-04T15:45:44.833Z
+> Files: 547 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -246,9 +246,10 @@
 
 ## .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md (~2757 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md (~3160 tok)
 - `task-1-report.md` — Task 1: Mobile `quranRange.ts` — Completion Report (~1978 tok)
 - `task-10-report.md` — Task 10 Report: Web `TeacherPlanDetail.tsx` full schedule table — type badge + per-row orientation (~1241 tok)
+- `task-11-report.md` — Task 11 Report: Web `TeacherAttendance.tsx` — dual per-type ward recording (~3140 tok)
 - `task-2-report.md` — Task 2 Report: Web `quranRange.ts` Mirror (~1156 tok)
 - `task-3-report.md` — Task 3 Report: Server `quranRange.ts` mirror + `computeMultiTodayAssignment` → plural + fix `backfil (~1105 tok)
 - `task-4-report.md` — Task 4 Report: Server `quran-plan.controller.ts` — `todayAssignments` Array (~1334 tok)
@@ -842,7 +843,7 @@
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~12798 tok)
+- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~14219 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1433 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
 - `TeacherGroupHomework.tsx` — STUDENTS (~2940 tok)
@@ -856,7 +857,7 @@
 - `TeacherSpecialTracks.tsx` — surahName (~2892 tok)
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2471 tok)
-- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~23735 tok)
+- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~24771 tok)
 
 ## quran-hifz/src/quran/router/
 

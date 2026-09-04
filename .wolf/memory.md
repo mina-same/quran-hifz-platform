@@ -2939,3 +2939,27 @@
 | 18:21 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx | 23→25 lines | ~312 |
 | 18:22 | Created .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-10-report.md | — | ~1324 |
 | 18:23 | Edited .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md | modified minor() | ~128 |
+| 18:30 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | CSS: type | ~116 |
+| 18:30 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | added nullish coalescing | ~80 |
+| 18:31 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 5→7 lines | ~150 |
+| 18:31 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | modified reversedForStudent() | ~1019 |
+| 18:31 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | CSS: toastId | ~1153 |
+| 18:32 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | assignmentForStudent() → assignmentsForStudent() | ~54 |
+| 18:32 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | CSS: marginRight | ~929 |
+| 18:33 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | CSS: marginRight | ~1152 |
+| 18:35 | Created .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-11-report.md | — | ~3349 |
+| 18:36 | Edited .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md | modified bug() | ~446 |
+| 18:40 | Edited .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md | modified minor() | ~232 |
+| 18:42 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 7→8 lines | ~51 |
+| 18:42 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 4→6 lines | ~128 |
+| 18:42 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: type | ~103 |
+| 18:43 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | modified reversedForStudent() | ~844 |
+| 18:43 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: toastId, type, type | ~1247 |
+| 18:43 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: Plural, type, perStudent | ~204 |
+| 18:43 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | assignmentForStudent() → assignmentsForStudent() | ~61 |
+| 18:43 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: marginRight | ~1013 |
+| 18:44 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: marginRight | ~945 |
+| 18:44 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 6→7 lines | ~114 |
+| 18:44 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 4→4 lines | ~30 |
+| 18:45 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 8→10 lines | ~167 |
+| 18:45 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 3→7 lines | ~108 |
