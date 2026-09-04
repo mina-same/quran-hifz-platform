@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-04T15:06:04.296Z
-> Files: 543 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-04T15:13:35.191Z
+> Files: 544 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -246,7 +246,7 @@
 
 ## .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md (~1913 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md (~2306 tok)
 - `task-1-report.md` — Task 1: Mobile `quranRange.ts` — Completion Report (~1978 tok)
 - `task-2-report.md` — Task 2 Report: Web `quranRange.ts` Mirror (~1156 tok)
 - `task-3-report.md` — Task 3 Report: Server `quranRange.ts` mirror + `computeMultiTodayAssignment` → plural + fix `backfil (~1105 tok)
@@ -254,6 +254,7 @@
 - `task-5-report.md` — Task 5 Report: API type declarations — add `todayAssignments` field (web + mobile) (~833 tok)
 - `task-6-report.md` — Task 6 Report: Web plan builder — remove cross-segment day disabling (~1378 tok)
 - `task-7-report.md` — Task 7 Report: Mobile plan builder — remove cross-segment day disabling (~2185 tok)
+- `task-8-report.md` — Task 8 Report: Web read-only "today's ward" banners → loop over `todayAssignments` (~2274 tok)
 
 ## docs/superpowers/plans/
 
@@ -354,7 +355,7 @@
 - `myhalqa.tsx` — TeacherHalqa (~1077 tok)
 - `plan-detail.tsx` — STATUS_VARIANT (~2476 tok)
 - `plan-form.tsx` — Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local (~10482 tok)
-- `plans.tsx` — STATUS_VARIANT (~1529 tok)
+- `plans.tsx` — One label/value line in the plan card's detail grid. (~3556 tok)
 - `recordlesson.tsx` — LESSON_TYPES (~3004 tok)
 - `reports.tsx` — TeacherReports (~642 tok)
 - `settings.tsx` — TeacherSettings (~47 tok)

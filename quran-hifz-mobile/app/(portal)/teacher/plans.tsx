@@ -71,9 +71,11 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
   // Direction is per segment — today's ward is oriented by the type due today.
-  const assignment = plan.todayAssignment
-    ? orientSlice(plan.todayAssignment, segmentReversed(plan, plan.todayAssignment.type))
-    : null;
+  const assignments = plan.todayAssignments.map((a) => ({
+    ...orientSlice(a, segmentReversed(plan, a.type)),
+    type: a.type,
+    reversed: segmentReversed(plan, a.type),
+  }));
   const progressLabel = plan.juzProgress
     ? `${plan.juzProgress.completed} / ${plan.juzProgress.total} جزء`
     : `${plan.progress?.percent ?? 0}%`;
