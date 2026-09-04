@@ -19,13 +19,29 @@ const pointRuleSchema = z.object({
   kind:   z.enum(['خصم', 'زيادة']),
 });
 
+/** One line of the plan's daily grading rubric: a label and its degrees. */
+const gradeCriterionSchema = z.object({
+  key:   z.string().min(1),
+  label: z.string().min(1),
+  max:   z.number().int().positive(),
+  auto:  z.boolean().default(false),
+});
+
+/** Rubric keys must be unique — they address the score map a teacher submits. */
+const gradeRubricSchema = z
+  .array(gradeCriterionSchema)
+  .min(1, 'يجب إضافة بند واحد على الأقل لتقسيمة الدرجات')
+  .refine((r) => new Set(r.map((c) => c.key)).size === r.length, {
+    message: 'مفاتيح بنود التقييم يجب أن تكون فريدة',
+  });
+
 const rangePointSchema = z.object({
   surahNumber: z.number().int().min(1).max(114),
   ayah:        z.number().int().min(1),
 });
 
 const planSegmentSchema = z.object({
-  type:       z.enum(['حفظ', 'مراجعة', 'ترتيل', 'تلاوة']),
+  type:       z.enum(['حفظ', 'مراجعة']),
   days:       z.array(z.enum(WEEK_DAYS)).min(1),
   rangeStart: rangePointSchema,
   rangeEnd:   rangePointSchema,
@@ -41,7 +57,7 @@ const quranPlanSchema = z.object({
   students:     z.array(z.string().min(1)).optional(),
   specialTrack: z.string().min(1).optional(),
 
-  /** One track per type. Max four (one per type), and their days must not
+  /** One track per type. Max two (one per type), and their days must not
    * overlap — both enforced by validateSegmentDays in the refine below. */
   segments: z.array(planSegmentSchema).min(1).max(PLAN_TYPES.length),
 
@@ -50,6 +66,8 @@ const quranPlanSchema = z.object({
 
   pointsEnabled: z.boolean().default(false),
   pointRules:    z.array(pointRuleSchema).default([]),
+  /** Omitted → the model's DEFAULT_GRADE_RUBRIC (حضور 3/حفظ 4/تجويد 2/تلاوة 1). */
+  gradeRubric:   gradeRubricSchema.optional(),
 
   endType:         z.enum(['activeDays', 'date']),
   activeDaysCount: z.number().int().min(1).optional(),
@@ -360,7 +378,7 @@ const scheduleEntryUpdateSchema = z.object({
   /** Which segment the day belongs to. `occurrenceIndex` is 1-based within a
    * segment, so it no longer identifies a day on its own. Optional only so a
    * single-segment plan can keep working with older clients. */
-  type:      z.enum(['حفظ', 'مراجعة', 'ترتيل', 'تلاوة']).optional(),
+  type:      z.enum(['حفظ', 'مراجعة']).optional(),
 });
 
 /** Hand-edits one day's assigned range within an already-persisted schedule

@@ -22,7 +22,7 @@ import { SkeletonCard } from "./Skeleton";
 import { StatsRow } from "./StatsRow";
 import { useQuranPlans, type PlanSegment } from "../../api/quran-plans";
 import { useEvaluations } from "../../api/evaluations";
-import { MAX_SCORES } from "../../lib/evaluationRubric";
+import { MAX_SCORES, legacyScoresOf } from "../../lib/evaluationRubric";
 import { toFlatIndex, fromFlatIndex, juzFlatRange } from "../../lib/quranRange";
 import { SURAHS } from "../../data/surahs";
 import { toAr, pct, AR_LOCALE } from "../../../lib/format";
@@ -113,10 +113,10 @@ export function StudentReportPanel({
     if (studentEvals.length === 0) return [];
     const sums = { attendance: 0, hifz: 0, tajweed: 0, talawah: 0 };
     for (const e of studentEvals) {
-      sums.attendance += e.scores.attendance;
-      sums.hifz += e.scores.hifz;
-      sums.tajweed += e.scores.tajweed;
-      sums.talawah += e.scores.talawah;
+      sums.attendance += legacyScoresOf(e).attendance;
+      sums.hifz += legacyScoresOf(e).hifz;
+      sums.tajweed += legacyScoresOf(e).tajweed;
+      sums.talawah += legacyScoresOf(e).talawah;
     }
     const n = studentEvals.length;
     return [
@@ -162,10 +162,10 @@ export function StudentReportPanel({
         count: 0,
         present: 0,
       };
-      entry.sums.attendance += e.scores.attendance;
-      entry.sums.hifz += e.scores.hifz;
-      entry.sums.tajweed += e.scores.tajweed;
-      entry.sums.talawah += e.scores.talawah;
+      entry.sums.attendance += legacyScoresOf(e).attendance;
+      entry.sums.hifz += legacyScoresOf(e).hifz;
+      entry.sums.tajweed += legacyScoresOf(e).tajweed;
+      entry.sums.talawah += legacyScoresOf(e).talawah;
       entry.sums.total += e.total;
       entry.count += 1;
       if (e.attendanceStatus === "حاضر") entry.present += 1;

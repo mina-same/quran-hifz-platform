@@ -68,7 +68,7 @@ const recordOccurrenceSchema = z.object({
   /** Which segment the day belongs to. `occurrenceIndex` is 1-based within a
    * segment, so it no longer identifies a day on its own. Optional for
    * single-segment plans / older clients — resolved below. */
-  type: z.enum(['حفظ', 'مراجعة', 'ترتيل', 'تلاوة']).optional(),
+  type: z.enum(['حفظ', 'مراجعة']).optional(),
   occurrenceIndex: z.number().int().min(1),
   status: z.enum(['done', 'partial', 'absent']),
   completedThroughSurah: z.number().int().min(1).max(114).optional(),
@@ -226,7 +226,7 @@ const rangePointSchema = z.object({
 const initStudentProgressSchema = z.object({
   /** Which type the custom range applies to — required when the plan has more
    * than one, since each type covers its own stretch of the mushaf. */
-  type: z.enum(['حفظ', 'مراجعة', 'ترتيل', 'تلاوة']).optional(),
+  type: z.enum(['حفظ', 'مراجعة']).optional(),
   rangeStart: rangePointSchema.optional(),
   rangeEnd: rangePointSchema.optional(),
 }).superRefine((data, ctx) => {

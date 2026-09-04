@@ -1,4 +1,7 @@
 import { useMemo, useState } from "react";
+import {
+  DEFAULT_GRADE_RUBRIC, totalMaxOf, criterionKey, type GradeCriterion,
+} from "../../lib/evaluationRubric";
 import { toast } from "sonner";
 import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
@@ -26,8 +29,6 @@ function fmtDate(d: string) {
 const PLAN_TYPES: { value: PlanType; label: string; icon: string; fg: string; bg: string }[] = [
   { value: "حفظ",    label: "حفظ",    icon: "ti-book-2",    fg: "var(--green)", bg: "var(--green-pale)" },
   { value: "مراجعة", label: "مراجعة", icon: "ti-refresh",   fg: "#1d4ed8",      bg: "#eff6ff" },
-  { value: "ترتيل",  label: "ترتيل",  icon: "ti-music",     fg: "#7c3aed",      bg: "#f3e8ff" },
-  { value: "تلاوة",  label: "تلاوة",  icon: "ti-microphone",fg: "#c2410c",      bg: "#fff1e6" },
 ];
 
 // Plans are halqa-based only. "طلاب محددون" and "مسار" targets are intentionally
@@ -68,6 +69,8 @@ type FormFields = {
   endType: "activeDays" | "date";
   activeDaysCount: string;
   endDate: string;
+  /** Daily grading split for this plan. Seeded from DEFAULT_GRADE_RUBRIC. */
+  gradeRubric: GradeCriterion[];
 };
 
 /** Today as a local `YYYY-MM-DD` string — built from local calendar fields
@@ -86,6 +89,7 @@ const EMPTY: FormFields = {
   endType: "activeDays",
   activeDaysCount: "10",
   endDate: "",
+  gradeRubric: DEFAULT_GRADE_RUBRIC.map((c) => ({ ...c })),
 };
 
 function getId(v: { _id: string } | string) {
@@ -109,6 +113,9 @@ function fieldsFromPlan(plan: QuranPlan, nameSuffix = ""): FormFields {
     endType: plan.endType,
     activeDaysCount: plan.activeDaysCount ? String(plan.activeDaysCount) : "",
     endDate: plan.endDate ? plan.endDate.split("T")[0] : "",
+    gradeRubric: plan.gradeRubric?.length
+      ? plan.gradeRubric.map((c) => ({ ...c }))
+      : DEFAULT_GRADE_RUBRIC.map((c) => ({ ...c })),
   };
 }
 
@@ -234,6 +241,9 @@ export function TeacherPlanForm() {
     if (form.endType === "activeDays" && !form.activeDaysCount) { setFormError("يرجى تحديد عدد الأيام النشطة"); return; }
     if (form.endType === "date" && !form.endDate) { setFormError("يرجى تحديد تاريخ الانتهاء"); return; }
     if (form.endType === "date" && form.endDate && form.endDate < form.startDate) { setFormError("تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية"); return; }
+    if (form.gradeRubric.length === 0) { setFormError("يرجى إضافة بند واحد على الأقل لتقسيمة الدرجات"); return; }
+    if (form.gradeRubric.some((c) => !c.label.trim())) { setFormError("يرجى تسمية كل بنود تقسيمة الدرجات"); return; }
+    if (form.gradeRubric.some((c) => !Number.isFinite(c.max) || c.max < 1)) { setFormError("درجة كل بند يجب أن تكون رقماً أكبر من صفر"); return; }
 
     // rangeStart may deliberately sit after rangeEnd in mushaf order — a
     // reverse-direction plan (e.g. starting at An-Nas and working backward
@@ -252,6 +262,7 @@ export function TeacherPlanForm() {
       endType: form.endType,
       activeDaysCount: form.endType === "activeDays" ? Number(form.activeDaysCount) : undefined,
       endDate: form.endType === "date" ? form.endDate : undefined,
+      gradeRubric: form.gradeRubric.map((c) => ({ ...c, label: c.label.trim(), max: Number(c.max) })),
     };
 
     try {
@@ -706,6 +717,106 @@ export function TeacherPlanForm() {
             <input className="form-input" type="date" dir="ltr" value={form.endDate} onChange={(e) => sf("endDate", e.target.value)} />
           </div>
         )}
+      </Card>
+
+      {/* ── Daily grading rubric ── */}
+      <Card icon="ti-list-numbers" title="تقسيمة الدرجات اليومية">
+        <p style={{ margin: "8px 0 14px", fontSize: 12, color: "var(--text3)", lineHeight: 1.7 }}>
+          حدّد بنود التقييم اليومي ودرجة كل بند. القيم الافتراضية هي التقسيمة المعتادة
+          (حضور ٣ + حفظ ٤ + تجويد ٢ + تلاوة ١ = ١٠). بند «حضور» يُحتسب كاملاً عند حضور الطالب،
+          وتُصفَّر كل البنود عند الغياب.
+        </p>
+
+        {form.gradeRubric.map((c, i) => (
+          <div
+            key={c.key}
+            style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}
+          >
+            <input
+              className="form-input"
+              style={{ flex: 1 }}
+              value={c.label}
+              placeholder="اسم البند (مثال: تجويد)"
+              onChange={(e) => {
+                const next = [...form.gradeRubric];
+                next[i] = { ...next[i], label: e.target.value };
+                sf("gradeRubric", next);
+              }}
+            />
+            <input
+              className="form-input"
+              type="number"
+              min={1}
+              style={{ width: 96 }}
+              value={c.max}
+              onChange={(e) => {
+                const next = [...form.gradeRubric];
+                next[i] = { ...next[i], max: Number(e.target.value) };
+                sf("gradeRubric", next);
+              }}
+            />
+            <label
+              title="يُحتسب كاملاً عند الحضور دون إدخال من المعلم"
+              style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--text2)", whiteSpace: "nowrap" }}
+            >
+              <input
+                type="checkbox"
+                checked={c.auto}
+                onChange={(e) => {
+                  const next = [...form.gradeRubric];
+                  next[i] = { ...next[i], auto: e.target.checked };
+                  sf("gradeRubric", next);
+                }}
+              />
+              تلقائي
+            </label>
+            <button
+              type="button"
+              title="حذف البند"
+              onClick={() => sf("gradeRubric", form.gradeRubric.filter((_, n) => n !== i))}
+              style={{
+                border: "1px solid var(--border)", background: "transparent", cursor: "pointer",
+                borderRadius: 8, width: 34, height: 34, color: "#b91c1c",
+              }}
+            >
+              <i className="ti ti-trash" />
+            </button>
+          </div>
+        ))}
+
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 12 }}>
+          <button
+            type="button"
+            className="btn-ghost"
+            onClick={() =>
+              sf("gradeRubric", [
+                ...form.gradeRubric,
+                {
+                  key: criterionKey("بند", form.gradeRubric.map((x) => x.key)),
+                  label: "",
+                  max: 1,
+                  auto: false,
+                },
+              ])
+            }
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}
+          >
+            <i className="ti ti-plus" /> إضافة بند
+          </button>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button
+              type="button"
+              onClick={() => sf("gradeRubric", DEFAULT_GRADE_RUBRIC.map((x) => ({ ...x })))}
+              style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: 12, color: "var(--text3)", textDecoration: "underline" }}
+            >
+              استعادة الافتراضي
+            </button>
+            <strong style={{ fontSize: 13, color: "var(--green)" }}>
+              المجموع: {totalMaxOf(form.gradeRubric)} درجة
+            </strong>
+          </div>
+        </div>
       </Card>
 
       {/* ── Live schedule preview ── */}

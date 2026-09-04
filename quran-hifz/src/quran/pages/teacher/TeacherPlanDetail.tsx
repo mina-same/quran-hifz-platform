@@ -30,8 +30,6 @@ function fmtDate(d: string) {
 const PLAN_TYPE_CFG: Record<string, { icon: string; fg: string; bg: string }> = {
   "حفظ":    { icon: "ti-book-2",     fg: "var(--green)", bg: "var(--green-pale)" },
   "مراجعة": { icon: "ti-refresh",    fg: "#1d4ed8",       bg: "#eff6ff" },
-  "ترتيل":  { icon: "ti-music",      fg: "#7c3aed",       bg: "#f3e8ff" },
-  "تلاوة":  { icon: "ti-microphone", fg: "#c2410c",       bg: "#fff1e6" },
 };
 
 export function TeacherPlanDetail() {

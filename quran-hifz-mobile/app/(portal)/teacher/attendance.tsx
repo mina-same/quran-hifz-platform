@@ -21,7 +21,7 @@ import { useSpecialTracks } from '@/lib/queries/specialTracks';
 import { useStudents } from '@/lib/queries/students';
 import { useEvaluations } from '@/lib/queries/evaluations';
 import { useQuranPlans } from '@/lib/queries/quranPlan';
-import { MAX_SCORES, TOTAL_MAX } from '@/lib/evaluationRubric';
+import { MAX_SCORES, TOTAL_MAX, legacyScoresOf } from '@/lib/evaluationRubric';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { fmtDayLabel, toDateOnly } from '@/lib/date';
@@ -275,8 +275,8 @@ export default function TeacherAttendance() {
                   <Text style={styles.histDate}>{toDateOnly(r.date)}</Text>
                 </View>
                 <Text style={styles.histScores}>
-                  حضور {r.scores.attendance}/{MAX_SCORES.attendance} · حفظ {r.scores.hifz}/{MAX_SCORES.hifz} ·
-                  تجويد {r.scores.tajweed}/{MAX_SCORES.tajweed} · تلاوة {r.scores.talawah}/{MAX_SCORES.talawah} ·
+                  حضور {legacyScoresOf(r).attendance}/{MAX_SCORES.attendance} · حفظ {legacyScoresOf(r).hifz}/{MAX_SCORES.hifz} ·
+                  تجويد {legacyScoresOf(r).tajweed}/{MAX_SCORES.tajweed} · تلاوة {legacyScoresOf(r).talawah}/{MAX_SCORES.talawah} ·
                   المجموع {r.total}/{TOTAL_MAX}
                 </Text>
               </View>

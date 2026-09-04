@@ -1,13 +1,37 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
-export type PlanType = 'حفظ' | 'مراجعة' | 'ترتيل' | 'تلاوة';
-export const PLAN_TYPE_VALUES: PlanType[] = ['حفظ', 'مراجعة', 'ترتيل', 'تلاوة'];
+export type PlanType = 'حفظ' | 'مراجعة';
+export const PLAN_TYPE_VALUES: PlanType[] = ['حفظ', 'مراجعة'];
 
 export interface IPointRule {
   label: string;
   amount: number;
   kind: 'خصم' | 'زيادة';
 }
+
+/**
+ * One line of a plan's daily grading rubric: what is graded and out of how
+ * many degrees. Teachers compose these per plan; `DEFAULT_GRADE_RUBRIC` below
+ * reproduces the split that used to be hard-coded platform-wide.
+ *
+ * `auto` marks a criterion the teacher never types — it is awarded in full
+ * when the student is present and zeroed when absent (حضور). Every other
+ * criterion is entered by hand and is also forced to 0 for an absent student.
+ */
+export interface IGradeCriterion {
+  key: string;
+  label: string;
+  max: number;
+  auto: boolean;
+}
+
+/** The historical fixed rubric: حضور 3 + حفظ 4 + تجويد 2 + تلاوة 1 = 10. */
+export const DEFAULT_GRADE_RUBRIC: IGradeCriterion[] = [
+  { key: 'attendance', label: 'حضور',  max: 3, auto: true  },
+  { key: 'hifz',       label: 'حفظ',   max: 4, auto: false },
+  { key: 'tajweed',    label: 'تجويد', max: 2, auto: false },
+  { key: 'talawah',    label: 'تلاوة', max: 1, auto: false },
+];
 
 export interface IRangePoint {
   surahNumber: number;
@@ -83,6 +107,9 @@ export interface IQuranPlan extends Document {
   pointsEnabled: boolean;
   pointRules: IPointRule[];
 
+  /** Daily grading rubric for this plan. Defaults to DEFAULT_GRADE_RUBRIC. */
+  gradeRubric: IGradeCriterion[];
+
   endType: 'activeDays' | 'date';
   activeDaysCount?: number;
   endDate?: Date;
@@ -98,6 +125,16 @@ const pointRuleSchema = new Schema<IPointRule>(
     label:  { type: String, required: true, trim: true },
     amount: { type: Number, required: true, min: 1 },
     kind:   { type: String, enum: ['خصم', 'زيادة'], required: true },
+  },
+  { _id: false },
+);
+
+const gradeCriterionSchema = new Schema<IGradeCriterion>(
+  {
+    key:   { type: String, required: true, trim: true },
+    label: { type: String, required: true, trim: true },
+    max:   { type: Number, required: true, min: 1 },
+    auto:  { type: Boolean, default: false },
   },
   { _id: false },
 );
@@ -182,6 +219,11 @@ const quranPlanSchema = new Schema<IQuranPlan>(
 
     pointsEnabled: { type: Boolean, default: false },
     pointRules:    { type: [pointRuleSchema], default: [] },
+
+    gradeRubric: {
+      type: [gradeCriterionSchema],
+      default: () => DEFAULT_GRADE_RUBRIC.map((c) => ({ ...c })),
+    },
 
     endType:         { type: String, enum: ['activeDays', 'date'], required: true },
     activeDaysCount: { type: Number, min: 1 },

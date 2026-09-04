@@ -1,7 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { get, post } from '@/lib/api';
+import type { GradeCriterion } from '../evaluationRubric';
 
+/** Legacy fixed shape — mirrored by the server only when a plan's rubric
+ *  keeps the four original keys, so existing reports keep working. */
 export type EvaluationScores = { attendance: number; hifz: number; tajweed: number; talawah: number };
+
+/** Rubric snapshot taken at save time — the source of truth for grading. */
+export type EvaluationCriterion = { key: string; label: string; max: number; value: number };
 
 export type EvaluationRecord = {
   _id: string;
@@ -11,7 +17,9 @@ export type EvaluationRecord = {
   specialTrack?: { _id: string; title: string } | string;
   date: string;
   attendanceStatus: 'حاضر' | 'غائب';
-  scores: EvaluationScores;
+  criteria?: EvaluationCriterion[];
+  scores?: EvaluationScores;
+  totalMax?: number;
   total: number;
   note?: string;
 };
@@ -58,16 +66,40 @@ export type BulkEvaluateResponse = {
 export type BulkEvaluateRecord = {
   student: string;
   attendanceStatus: 'حاضر' | 'غائب';
-  hifz: number;
-  tajweed: number;
-  talawah: number;
+  /** Keyed by rubric criterion key; bounds enforced server-side per plan. */
+  scores: Record<string, number>;
   note?: string;
 };
+
+export type RubricResponse = {
+  success: boolean;
+  data: {
+    rubric: GradeCriterion[];
+    planId?: string;
+    ambiguous: boolean;
+    totalMax: number;
+    plans: { _id: string; name: string; gradeRubric: GradeCriterion[] }[];
+  };
+};
+
+/** The rubric the evaluation screen should render for a halqa/track session. */
+export function useRubric(ctx: { halqa?: string; specialTrack?: string; plan?: string } | undefined) {
+  const p = new URLSearchParams();
+  if (ctx?.halqa) p.set('halqa', ctx.halqa);
+  if (ctx?.specialTrack) p.set('specialTrack', ctx.specialTrack);
+  if (ctx?.plan) p.set('plan', ctx.plan);
+  const q = p.toString();
+  return useQuery({
+    queryKey: ['evaluation-rubric', ctx],
+    queryFn: () => get<RubricResponse>(`/evaluations/rubric${q ? `?${q}` : ''}`).then((r) => r.data),
+    enabled: ctx !== undefined,
+  });
+}
 
 export function useBulkEvaluate() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { teacher: string; halqa?: string; specialTrack?: string; date: string; records: BulkEvaluateRecord[] }) =>
+    mutationFn: (body: { teacher: string; halqa?: string; specialTrack?: string; plan?: string; date: string; records: BulkEvaluateRecord[] }) =>
       post<BulkEvaluateResponse>('/evaluations/bulk', body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['evaluations'] });

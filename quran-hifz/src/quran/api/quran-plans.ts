@@ -18,7 +18,10 @@ export type PlanFormHandoff =
   | { mode: "create"; trackId?: string; halqaId?: string }
   | { mode: "edit" | "duplicate"; plan: QuranPlan };
 
-export type PlanType = "حفظ" | "مراجعة" | "ترتيل" | "تلاوة";
+export type PlanType = "حفظ" | "مراجعة";
+
+/** One line of a plan's daily grading rubric — what is graded, out of how many. */
+export type GradeCriterion = { key: string; label: string; max: number; auto: boolean };
 
 export type PointRule = { label: string; amount: number; kind: "خصم" | "زيادة" };
 export type RangePoint = { surahNumber: number; ayah: number };
@@ -76,6 +79,9 @@ export type QuranPlan = {
 
   pointsEnabled: boolean;
   pointRules: PointRule[];
+
+  /** Per-plan daily grading split. Defaults to DEFAULT_GRADE_RUBRIC server-side. */
+  gradeRubric: GradeCriterion[];
 
   endType: "activeDays" | "date";
   activeDaysCount?: number;

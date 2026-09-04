@@ -20,6 +20,9 @@ import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet'
 import { useHalqat } from '@/lib/queries/halqat';
 import { useQuranPlan, useCreateQuranPlan, useUpdateQuranPlan } from '@/lib/queries/quranPlan';
 import {
+  DEFAULT_GRADE_RUBRIC, totalMaxOf, criterionKey, type GradeCriterion,
+} from '@/lib/evaluationRubric';
+import {
   computeMultiScheduleBreakdown, isReversedRange, validateSegmentDays, WEEK_DAYS,
   type PlanType, type RangePoint,
 } from '@/lib/quranRange';
@@ -31,7 +34,7 @@ import { AR_LOCALE, expandDateRange } from '@/lib/date';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
-const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة', 'ترتيل', 'تلاوة'];
+const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة'];
 
 function todayISO(): string {
   const d = new Date();
@@ -64,6 +67,8 @@ type FormFields = {
   endType: 'activeDays' | 'date';
   activeDaysCount: string;
   endDate: string;
+  /** Daily grading split for this plan. Seeded from DEFAULT_GRADE_RUBRIC. */
+  gradeRubric: GradeCriterion[];
 };
 
 function emptySegment(type: PlanType): FormSegment {
@@ -79,6 +84,7 @@ const EMPTY: FormFields = {
   segments: [emptySegment('حفظ')],
   holidays: [], startDate: todayISO(),
   endType: 'activeDays', activeDaysCount: '', endDate: '',
+  gradeRubric: DEFAULT_GRADE_RUBRIC.map((c) => ({ ...c })),
 };
 
 export default function TeacherPlanForm() {
@@ -131,6 +137,9 @@ export default function TeacherPlanForm() {
         endType: existingPlan.endType,
         activeDaysCount: existingPlan.activeDaysCount ? String(existingPlan.activeDaysCount) : '',
         endDate: existingPlan.endDate ? existingPlan.endDate.split('T')[0] : '',
+        gradeRubric: existingPlan.gradeRubric?.length
+          ? existingPlan.gradeRubric.map((c) => ({ ...c }))
+          : DEFAULT_GRADE_RUBRIC.map((c) => ({ ...c })),
       });
       if (existingPlan.targetType !== 'halqa') {
         const label = existingPlan.targetType === 'specialTrack'
@@ -238,6 +247,9 @@ export default function TeacherPlanForm() {
     if (form.endType === 'activeDays' && !form.activeDaysCount) return setFormError('يرجى تحديد عدد الأيام النشطة');
     if (form.endType === 'date' && !form.endDate) return setFormError('يرجى تحديد تاريخ الانتهاء');
     if (form.endType === 'date' && form.endDate < form.startDate) return setFormError('تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية');
+    if (form.gradeRubric.length === 0) return setFormError('يرجى إضافة بند واحد على الأقل لتقسيمة الدرجات');
+    if (form.gradeRubric.some((c) => !c.label.trim())) return setFormError('يرجى تسمية كل بنود تقسيمة الدرجات');
+    if (form.gradeRubric.some((c) => !Number.isFinite(Number(c.max)) || Number(c.max) < 1)) return setFormError('درجة كل بند يجب أن تكون رقماً أكبر من صفر');
 
     const body: Record<string, unknown> = {
       name: form.name.trim(),
@@ -248,6 +260,7 @@ export default function TeacherPlanForm() {
       endType: form.endType,
       activeDaysCount: form.endType === 'activeDays' ? Number(form.activeDaysCount) : undefined,
       endDate: form.endType === 'date' ? form.endDate : undefined,
+      gradeRubric: form.gradeRubric.map((c) => ({ ...c, label: c.label.trim(), max: Number(c.max) })),
     };
     if (!lockedTarget) {
       body.targetType = 'halqa';
@@ -504,6 +517,84 @@ export default function TeacherPlanForm() {
               <FormDatePicker value={form.endDate} onChange={(v) => sf('endDate', v)} minimumDate={form.startDate ? new Date(form.startDate) : undefined} />
             </FormGroup>
           )}
+        </Card>
+
+        <Card>
+          <CardHeader title="تقسيمة الدرجات اليومية" />
+          <Text style={{ fontSize: 12, color: theme.textMuted, lineHeight: 20, marginBottom: 12 }}>
+            حدّد بنود التقييم اليومي ودرجة كل بند. الافتراضي هو التقسيمة المعتادة
+            (حضور ٣ + حفظ ٤ + تجويد ٢ + تلاوة ١ = ١٠). بند «حضور» يُحتسب كاملاً عند الحضور،
+            وتُصفَّر كل البنود عند الغياب.
+          </Text>
+
+          {form.gradeRubric.map((c, i) => (
+            <View key={c.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <View style={{ flex: 1 }}>
+                <FormInput
+                  placeholder="اسم البند"
+                  value={c.label}
+                  onChangeText={(v) => {
+                    const next = [...form.gradeRubric];
+                    next[i] = { ...next[i], label: v };
+                    sf('gradeRubric', next);
+                  }}
+                />
+              </View>
+              <View style={{ width: 70 }}>
+                <FormInput
+                  placeholder="درجة"
+                  keyboardType="number-pad"
+                  value={String(c.max)}
+                  onChangeText={(v) => {
+                    const next = [...form.gradeRubric];
+                    next[i] = { ...next[i], max: Number(v.replace(/[^0-9]/g, '')) || 0 };
+                    sf('gradeRubric', next);
+                  }}
+                />
+              </View>
+              <Pressable
+                haptic="select"
+                onPress={() => {
+                  const next = [...form.gradeRubric];
+                  next[i] = { ...next[i], auto: !next[i].auto };
+                  sf('gradeRubric', next);
+                }}
+                style={[s.toggleBtn, { paddingHorizontal: 10 }, c.auto && s.toggleBtnActive]}
+              >
+                <Text style={[s.toggleBtnText, { fontSize: 11 }, c.auto && s.toggleBtnTextActive]}>تلقائي</Text>
+              </Pressable>
+              <Pressable
+                haptic="select"
+                onPress={() => sf('gradeRubric', form.gradeRubric.filter((_, n) => n !== i))}
+                style={{ paddingHorizontal: 6, paddingVertical: 8 }}
+              >
+                <Text style={{ color: theme.red, fontSize: 18 }}>×</Text>
+              </Pressable>
+            </View>
+          ))}
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+            <Pressable
+              haptic="select"
+              onPress={() =>
+                sf('gradeRubric', [
+                  ...form.gradeRubric,
+                  { key: criterionKey('بند', form.gradeRubric.map((x) => x.key)), label: '', max: 1, auto: false },
+                ])
+              }
+            >
+              <Text style={{ color: theme.green, fontWeight: '700', fontSize: 13 }}>+ إضافة بند</Text>
+            </Pressable>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <Pressable haptic="select" onPress={() => sf('gradeRubric', DEFAULT_GRADE_RUBRIC.map((x) => ({ ...x })))}>
+                <Text style={{ color: theme.textMuted, fontSize: 12, textDecorationLine: 'underline' }}>استعادة الافتراضي</Text>
+              </Pressable>
+              <Text style={{ color: theme.green, fontWeight: '700', fontSize: 13 }}>
+                المجموع: {totalMaxOf(form.gradeRubric)}
+              </Text>
+            </View>
+          </View>
         </Card>
 
         {schedulePreview.length > 0 && (

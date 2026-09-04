@@ -14,25 +14,28 @@ import ContextCard, { halqaToContext, trackToContext, type TeachingContext } fro
 import { useHalqat } from '@/lib/queries/halqat';
 import { useSpecialTracks } from '@/lib/queries/specialTracks';
 import { useStudents } from '@/lib/queries/students';
-import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from '@/lib/queries/evaluations';
-import { MAX_SCORES, TOTAL_MAX } from '@/lib/evaluationRubric';
+import { useEvaluations, useRubric, useBulkEvaluate, type BulkEvaluateRecord } from '@/lib/queries/evaluations';
+import {
+  MAX_SCORES, TOTAL_MAX, manualCriteria, totalMaxOf, DEFAULT_GRADE_RUBRIC,
+  type GradeCriterion,
+} from '@/lib/evaluationRubric';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { success, error } from '@/lib/haptics';
 
-type ScoreCategory = 'hifz' | 'tajweed' | 'talawah';
-const CATEGORY_LABELS: Record<ScoreCategory, string> = { hifz: 'حفظ', tajweed: 'تجويد', talawah: 'تلاوة' };
-
-type StudentEval = { attendanceStatus: 'حاضر' | 'غائب'; hifz: number; tajweed: number; talawah: number; note: string };
+/** Scores are keyed by the active plan's rubric, so categories are not known
+ * at compile time any more. */
+type StudentEval = { attendanceStatus: 'حاضر' | 'غائب'; scores: Record<string, number>; note: string };
 
 /** Scores start at 0 so the teacher consciously awards points rather than
  * every student defaulting to full marks. */
 function blankEval(): StudentEval {
-  return { attendanceStatus: 'حاضر', hifz: 0, tajweed: 0, talawah: 0, note: '' };
+  return { attendanceStatus: 'حاضر', scores: {}, note: '' };
 }
-function totalOf(e: StudentEval): number {
+/** Absent → 0. `auto` criteria (حضور) are awarded in full on presence. */
+function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
   if (e.attendanceStatus === 'غائب') return 0;
-  return MAX_SCORES.attendance + e.hifz + e.tajweed + e.talawah;
+  return rubric.reduce((a, c) => a + (c.auto ? c.max : Math.min(e.scores[c.key] ?? 0, c.max)), 0);
 }
 
 export default function TeacherEvaluate() {
@@ -62,9 +65,7 @@ export default function TeacherEvaluate() {
     const id = typeof r.student === 'string' ? r.student : r.student._id;
     savedById[id] = {
       attendanceStatus: r.attendanceStatus,
-      hifz: r.scores.hifz,
-      tajweed: r.scores.tajweed,
-      talawah: r.scores.talawah,
+      scores: Object.fromEntries((r.criteria ?? []).map((c) => [c.key, c.value])),
       note: r.note ?? '',
     };
   }
@@ -74,12 +75,21 @@ export default function TeacherEvaluate() {
   function setAttendance(studentId: string, status: 'حاضر' | 'غائب') {
     setOverrides((p) => ({ ...p, [studentId]: { ...evalFor(studentId), attendanceStatus: status } }));
   }
-  function setScore(studentId: string, category: ScoreCategory, value: number) {
-    setOverrides((p) => ({ ...p, [studentId]: { ...evalFor(studentId), [category]: value } }));
+  function setScore(studentId: string, key: string, value: number) {
+    setOverrides((p) => {
+      const current = evalFor(studentId);
+      return { ...p, [studentId]: { ...current, scores: { ...current.scores, [key]: value } } };
+    });
   }
   function setNote(studentId: string, note: string) {
     setOverrides((p) => ({ ...p, [studentId]: { ...evalFor(studentId), note } }));
   }
+
+  // Grading split comes from the plan governing this halqa/track; the server
+  // falls back to the historical default when no single plan resolves.
+  const { data: rubricData } = useRubric(contextFilter);
+  const rubric = rubricData?.rubric ?? DEFAULT_GRADE_RUBRIC;
+  const rubricTotalMax = totalMaxOf(rubric);
 
   const bulkEvaluate = useBulkEvaluate();
 
@@ -90,9 +100,7 @@ export default function TeacherEvaluate() {
       return {
         student: s._id,
         attendanceStatus: e.attendanceStatus,
-        hifz: e.hifz,
-        tajweed: e.tajweed,
-        talawah: e.talawah,
+        scores: e.scores,
         note: e.note.trim() || undefined,
       };
     });
@@ -226,7 +234,7 @@ export default function TeacherEvaluate() {
           {students.map((st, i) => {
             const e = evalFor(st._id);
             const isAbsent = e.attendanceStatus === 'غائب';
-            const total = totalOf(e);
+            const total = totalOf(e, rubric);
             return (
               <View key={st._id} style={[styles.studentRow, i < students.length - 1 && styles.rowBorder]}>
                 <Text style={styles.studentName}>{st.name}</Text>
@@ -252,18 +260,18 @@ export default function TeacherEvaluate() {
 
                 {!isAbsent && (
                   <>
-                    {(['hifz', 'tajweed', 'talawah'] as ScoreCategory[]).map((cat) => (
-                      <View key={cat} style={styles.categoryBlock}>
-                        <Text style={styles.categoryLabel}>{CATEGORY_LABELS[cat]} (٠-{MAX_SCORES[cat]})</Text>
+                    {manualCriteria(rubric).map((cat) => (
+                      <View key={cat.key} style={styles.categoryBlock}>
+                        <Text style={styles.categoryLabel}>{cat.label} (٠-{cat.max})</Text>
                         <View style={styles.chipRow}>
-                          {Array.from({ length: MAX_SCORES[cat] + 1 }, (_, n) => n).map((n) => {
-                            const active = e[cat] === n;
+                          {Array.from({ length: cat.max + 1 }, (_, n) => n).map((n) => {
+                            const active = (e.scores[cat.key] ?? 0) === n;
                             return (
                               <Pressable
                                 haptic="select"
                                 key={n}
                                 disabled={alreadySubmitted}
-                                onPress={() => setScore(st._id, cat, n)}
+                                onPress={() => setScore(st._id, cat.key, n)}
                                 style={[styles.chip, active && { backgroundColor: theme.greenAccent, borderColor: theme.green }]}
                               >
                                 <Text style={[styles.chipText, active && { color: theme.white }]}>{n}</Text>
@@ -274,7 +282,7 @@ export default function TeacherEvaluate() {
                       </View>
                     ))}
                     <View style={styles.totalRow}>
-                      <Text style={styles.totalText}>{total}/{TOTAL_MAX}</Text>
+                      <Text style={styles.totalText}>{total}/{rubricTotalMax}</Text>
                     </View>
                   </>
                 )}

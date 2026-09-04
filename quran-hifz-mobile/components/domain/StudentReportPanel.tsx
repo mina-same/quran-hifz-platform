@@ -8,7 +8,7 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import FormSelect from '@/components/forms/FormSelect';
 import { useQuranPlans, type PlanSegment } from '@/lib/queries/quranPlan';
 import { useEvaluations, type EvaluationRecord } from '@/lib/queries/evaluations';
-import { MAX_SCORES } from '@/lib/evaluationRubric';
+import { MAX_SCORES, legacyScoresOf } from '@/lib/evaluationRubric';
 import { toFlatIndex, fromFlatIndex, juzFlatRange } from '@/lib/quranRange';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { AR_LOCALE } from '@/lib/date';
@@ -95,10 +95,10 @@ export default function StudentReportPanel({ students, aggregateFilter, aggregat
     if (studentEvals.length === 0) return [];
     const sums = { attendance: 0, hifz: 0, tajweed: 0, talawah: 0 };
     for (const e of studentEvals) {
-      sums.attendance += e.scores.attendance;
-      sums.hifz += e.scores.hifz;
-      sums.tajweed += e.scores.tajweed;
-      sums.talawah += e.scores.talawah;
+      sums.attendance += legacyScoresOf(e).attendance;
+      sums.hifz += legacyScoresOf(e).hifz;
+      sums.tajweed += legacyScoresOf(e).tajweed;
+      sums.talawah += legacyScoresOf(e).talawah;
     }
     const n = studentEvals.length;
     return [
@@ -135,9 +135,9 @@ export default function StudentReportPanel({ students, aggregateFilter, aggregat
         sums: { hifz: 0, tajweed: 0, talawah: 0, total: 0 },
         count: 0, present: 0,
       };
-      entry.sums.hifz += e.scores.hifz;
-      entry.sums.tajweed += e.scores.tajweed;
-      entry.sums.talawah += e.scores.talawah;
+      entry.sums.hifz += legacyScoresOf(e).hifz;
+      entry.sums.tajweed += legacyScoresOf(e).tajweed;
+      entry.sums.talawah += legacyScoresOf(e).talawah;
       entry.sums.total += e.total;
       entry.count += 1;
       if (e.attendanceStatus === 'حاضر') entry.present += 1;

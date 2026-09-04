@@ -20,9 +20,12 @@ import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudents } from "../../api/students";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
 import { useQuranPlans, type ScheduleEntry, type RangePoint, segmentReversed, type PlanType } from "../../api/quran-plans";
-import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
+import { useEvaluations, useRubric, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
 import { useRecordStudentOccurrence, useStudentPlanProgressList } from "../../api/student-plan-progress";
-import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
+import {
+  MAX_SCORES, TOTAL_MAX, legacyScoresOf, manualCriteria, totalMaxOf,
+  DEFAULT_GRADE_RUBRIC, type GradeCriterion,
+} from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
 import { toFlatIndex, fromFlatIndex, isReversedSchedule, dayFinishPoint, dayDeltaAyahs, planFinishPoint } from "../../lib/quranRange";
 import { toAr, pct, AR_LOCALE } from "../../../lib/format";
@@ -132,29 +135,27 @@ function buildDayChips(minIso: string, maxIso: string, today: string): DayChip[]
   return out;
 }
 
-type ScoreCategory = "hifz" | "tajweed" | "talawah";
-const CATEGORY_LABELS: Record<ScoreCategory, string> = {
-  hifz: "حفظ",
-  tajweed: "تجويد",
-  talawah: "تلاوة",
-};
-
+/** Scores are keyed by the active plan's rubric, so the categories are not
+ *  known at compile time any more. */
 type StudentEval = {
   attendanceStatus: "حاضر" | "غائب";
-  hifz: number;
-  tajweed: number;
-  talawah: number;
+  scores: Record<string, number>;
 };
 
 /** Default eval for a present student — scores start at 0 so the teacher
  *  consciously awards points rather than every student defaulting to full marks. */
 function blankEval(): StudentEval {
-  return { attendanceStatus: "حاضر", hifz: 0, tajweed: 0, talawah: 0 };
+  return { attendanceStatus: "حاضر", scores: {} };
 }
 
-function totalOf(e: StudentEval): number {
+/** Absent → 0 across the board. `auto` criteria (حضور) are awarded in full on
+ *  presence rather than typed, mirroring the server's own calculation. */
+function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
   if (e.attendanceStatus === "غائب") return 0;
-  return MAX_SCORES.attendance + e.hifz + e.tajweed + e.talawah;
+  return rubric.reduce(
+    (a, c) => a + (c.auto ? c.max : Math.min(e.scores[c.key] ?? 0, c.max)),
+    0,
+  );
 }
 
 export function TeacherAttendance() {
@@ -194,6 +195,13 @@ export function TeacherAttendance() {
       ? { halqa: selected.id }
       : { specialTrack: selected.id }
     : undefined;
+
+  // The grading split now comes from the plan governing this halqa/track. If
+  // none resolves (or several do), the server hands back the default split so
+  // the screen always has something coherent to render.
+  const { data: rubricData } = useRubric(contextFilter);
+  const rubric = rubricData?.rubric ?? DEFAULT_GRADE_RUBRIC;
+  const rubricTotalMax = totalMaxOf(rubric);
 
   const { data: students = [], isLoading: loadingStudents } = useStudents(contextFilter);
   const bulkEvaluate = useBulkEvaluate();
@@ -321,9 +329,7 @@ export function TeacherAttendance() {
     const id = typeof r.student === "string" ? r.student : r.student._id;
     savedById[id] = {
       attendanceStatus: r.attendanceStatus,
-      hifz: r.scores.hifz,
-      tajweed: r.scores.tajweed,
-      talawah: r.scores.talawah,
+      scores: Object.fromEntries((r.criteria ?? []).map((c) => [c.key, c.value])),
     };
   }
 
@@ -400,11 +406,14 @@ export function TeacherAttendance() {
       [studentId]: { ...evalFor(studentId), attendanceStatus: status },
     }));
   }
-  function setScore(studentId: string, category: ScoreCategory, value: number) {
-    setOverrides((prev) => ({
-      ...prev,
-      [studentId]: { ...evalFor(studentId), [category]: value },
-    }));
+  function setScore(studentId: string, key: string, value: number) {
+    setOverrides((prev) => {
+      const current = evalFor(studentId);
+      return {
+        ...prev,
+        [studentId]: { ...current, scores: { ...current.scores, [key]: value } },
+      };
+    });
   }
   function unlockStudent(studentId: string) {
     setUnlockedIds((prev) => new Set(prev).add(studentId));
@@ -462,9 +471,7 @@ export function TeacherAttendance() {
     const records: BulkEvaluateRecord[] = [{
       student: studentId,
       attendanceStatus: e.attendanceStatus,
-      hifz: e.hifz,
-      tajweed: e.tajweed,
-      talawah: e.talawah,
+      scores: e.scores,
     }];
     setLastSavedId(studentId);
     const toastId = toast.loading("جاري حفظ الحضور والتقييم...");
@@ -673,7 +680,7 @@ export function TeacherAttendance() {
               {students.map((s) => {
                 const e = evalFor(s._id);
                 const isAbsent = e.attendanceStatus === "غائب";
-                const total = totalOf(e);
+                const total = totalOf(e, rubric);
                 const isExpanded = expandedStudentId === s._id;
                 const hasSaved = !!savedById[s._id];
                 const isUnlocked = unlockedIds.has(s._id);
@@ -813,17 +820,17 @@ export function TeacherAttendance() {
                         })()}
 
                         <div className="eval-scores">
-                          {(["hifz", "tajweed", "talawah"] as ScoreCategory[]).map((cat) => (
-                            <div key={cat} className="eval-cat">
-                              <span className="eval-cat-label">{CATEGORY_LABELS[cat]}</span>
+                          {manualCriteria(rubric).map((cat) => (
+                            <div key={cat.key} className="eval-cat">
+                              <span className="eval-cat-label">{cat.label}</span>
                               <div className="eval-chip-group">
-                                {Array.from({ length: MAX_SCORES[cat] + 1 }, (_, n) => n).map((n) => (
+                                {Array.from({ length: cat.max + 1 }, (_, n) => n).map((n) => (
                                   <button
                                     key={n}
                                     type="button"
-                                    className={`eval-chip ${!isAbsent && e[cat] === n ? "active" : ""}`}
+                                    className={`eval-chip ${!isAbsent && (e.scores[cat.key] ?? 0) === n ? "active" : ""}`}
                                     disabled={isAbsent || controlsLocked}
-                                    onClick={() => setScore(s._id, cat, n)}
+                                    onClick={() => setScore(s._id, cat.key, n)}
                                   >
                                     {toAr(n)}
                                   </button>
@@ -831,7 +838,7 @@ export function TeacherAttendance() {
                               </div>
                             </div>
                           ))}
-                          <span className={`eval-total ${total === 0 ? "zero" : ""}`}>{toAr(total)}/{toAr(TOTAL_MAX)}</span>
+                          <span className={`eval-total ${total === 0 ? "zero" : ""}`}>{toAr(total)}/{toAr(rubricTotalMax)}</span>
                         </div>
 
                         {hasIndividualPlan && (
@@ -911,16 +918,16 @@ export function TeacherAttendance() {
                       </Badge>
                     </td>
                     <td>
-                      {toAr(r.scores.attendance)}/{toAr(MAX_SCORES.attendance)}
+                      {toAr(legacyScoresOf(r).attendance)}/{toAr(MAX_SCORES.attendance)}
                     </td>
                     <td>
-                      {toAr(r.scores.hifz)}/{toAr(MAX_SCORES.hifz)}
+                      {toAr(legacyScoresOf(r).hifz)}/{toAr(MAX_SCORES.hifz)}
                     </td>
                     <td>
-                      {toAr(r.scores.tajweed)}/{toAr(MAX_SCORES.tajweed)}
+                      {toAr(legacyScoresOf(r).tajweed)}/{toAr(MAX_SCORES.tajweed)}
                     </td>
                     <td>
-                      {toAr(r.scores.talawah)}/{toAr(MAX_SCORES.talawah)}
+                      {toAr(legacyScoresOf(r).talawah)}/{toAr(MAX_SCORES.talawah)}
                     </td>
                     <td>
                       <strong>

@@ -373,7 +373,7 @@ export function computeScheduleBreakdown(plan: PlanScheduleInput): ScheduleEntry
 
 /* ─── Multi-segment plans ───────────────────────────────────────────────────
  *
- * A plan carries one segment per type (حفظ / مراجعة / ترتيل / تلاوة). All
+ * A plan carries one segment per type (حفظ / مراجعة). All
  * segments share the plan's window — start date, end, holidays — and differ
  * only in which weekdays they own and which stretch of the mushaf they cover.
  *
@@ -382,8 +382,8 @@ export function computeScheduleBreakdown(plan: PlanScheduleInput): ScheduleEntry
  * single-valued. `validateSegmentDays` below is what enforces that.
  */
 
-export type PlanType = 'حفظ' | 'مراجعة' | 'ترتيل' | 'تلاوة';
-export const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة', 'ترتيل', 'تلاوة'];
+export type PlanType = 'حفظ' | 'مراجعة';
+export const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة'];
 
 export type PlanSegmentInput = {
   type: PlanType;

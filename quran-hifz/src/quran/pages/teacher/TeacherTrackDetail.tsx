@@ -28,7 +28,7 @@ import {
   segmentReversed,
 } from "../../api/quran-plans";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
-import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
+import { useEvaluations, useRubric, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
 import {
   useRecordStudentOccurrence,
   useStudentPlanProgressList,
@@ -37,7 +37,10 @@ import {
   IndividualPlanPanel,
   planCoversStudent,
 } from "../../components/common/IndividualPlanPanel";
-import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
+import {
+  MAX_SCORES, TOTAL_MAX, legacyScoresOf, manualCriteria, totalMaxOf,
+  DEFAULT_GRADE_RUBRIC, type GradeCriterion,
+} from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
 import {
   fractionalPage,
@@ -219,24 +222,22 @@ function buildDayChips(minIso: string, maxIso: string, today: string): DayChip[]
   return out;
 }
 
-type ScoreCategory = "hifz" | "tajweed" | "talawah";
-const CATEGORY_LABELS: Record<ScoreCategory, string> = {
-  hifz: "حفظ",
-  tajweed: "تجويد",
-  talawah: "تلاوة",
-};
+/** Scores are keyed by the active plan's rubric — categories are not known at
+ *  compile time any more. */
 type StudentEval = {
   attendanceStatus: "حاضر" | "غائب";
-  hifz: number;
-  tajweed: number;
-  talawah: number;
+  scores: Record<string, number>;
 };
 function blankEval(): StudentEval {
-  return { attendanceStatus: "حاضر", hifz: 0, tajweed: 0, talawah: 0 };
+  return { attendanceStatus: "حاضر", scores: {} };
 }
-function totalOf(e: StudentEval): number {
+/** Absent → 0. `auto` criteria (حضور) are awarded in full on presence. */
+function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
   if (e.attendanceStatus === "غائب") return 0;
-  return MAX_SCORES.attendance + e.hifz + e.tajweed + e.talawah;
+  return rubric.reduce(
+    (a, c) => a + (c.auto ? c.max : Math.min(e.scores[c.key] ?? 0, c.max)),
+    0,
+  );
 }
 
 type TabKey = "teachers" | "students" | "plan";
@@ -608,11 +609,15 @@ export function TeacherTrackDetail() {
     const id = typeof r.student === "string" ? r.student : r.student._id;
     savedById[id] = {
       attendanceStatus: r.attendanceStatus,
-      hifz: r.scores.hifz,
-      tajweed: r.scores.tajweed,
-      talawah: r.scores.talawah,
+      scores: Object.fromEntries((r.criteria ?? []).map((c) => [c.key, c.value])),
     };
   }
+  // Grading split comes from the plan governing this track; falls back to the
+  // historical default when no single plan resolves.
+  const { data: rubricData } = useRubric(track ? { specialTrack: track._id } : undefined);
+  const rubric = rubricData?.rubric ?? DEFAULT_GRADE_RUBRIC;
+  const rubricTotalMax = totalMaxOf(rubric);
+
   const bulkEvaluate = useBulkEvaluate();
 
   // Once a student's save succeeds, re-lock their row automatically — reopening
@@ -640,11 +645,14 @@ export function TeacherTrackDetail() {
       [studentId]: { ...evalFor(studentId), attendanceStatus: status },
     }));
   }
-  function setScore(studentId: string, category: ScoreCategory, value: number) {
-    setOverrides((prev) => ({
-      ...prev,
-      [studentId]: { ...evalFor(studentId), [category]: value },
-    }));
+  function setScore(studentId: string, key: string, value: number) {
+    setOverrides((prev) => {
+      const current = evalFor(studentId);
+      return {
+        ...prev,
+        [studentId]: { ...current, scores: { ...current.scores, [key]: value } },
+      };
+    });
   }
   function toggleStudent(studentId: string) {
     setExpandedStudentId((cur) => (cur === studentId ? null : studentId));
@@ -704,9 +712,7 @@ export function TeacherTrackDetail() {
       {
         student: studentId,
         attendanceStatus: e.attendanceStatus,
-        hifz: e.hifz,
-        tajweed: e.tajweed,
-        talawah: e.talawah,
+        scores: e.scores,
       },
     ];
     setLastSavedId(studentId);
@@ -1209,7 +1215,7 @@ export function TeacherTrackDetail() {
                           <div className="att-name">{name}</div>
                           <div className="att-sub">
                             {hasSaved
-                              ? `${e.attendanceStatus} — ${toAr(totalOf(e))}/${toAr(TOTAL_MAX)}${isUnlocked ? " (وضع التعديل)" : ""}`
+                              ? `${e.attendanceStatus} — ${toAr(totalOf(e, rubric))}/${toAr(rubricTotalMax)}${isUnlocked ? " (وضع التعديل)" : ""}`
                               : "لم يُسجَّل لهذا اليوم بعد"}
                           </div>
                         </div>
@@ -1422,18 +1428,18 @@ export function TeacherTrackDetail() {
                             })()}
 
                           <div className="eval-scores">
-                            {(["hifz", "tajweed", "talawah"] as ScoreCategory[]).map((cat) => (
-                              <div key={cat} className="eval-cat">
-                                <span className="eval-cat-label">{CATEGORY_LABELS[cat]}</span>
+                            {manualCriteria(rubric).map((cat) => (
+                              <div key={cat.key} className="eval-cat">
+                                <span className="eval-cat-label">{cat.label}</span>
                                 <div className="eval-chip-group">
-                                  {Array.from({ length: MAX_SCORES[cat] + 1 }, (_, n) => n).map(
+                                  {Array.from({ length: cat.max + 1 }, (_, n) => n).map(
                                     (n) => (
                                       <button
                                         key={n}
                                         type="button"
-                                        className={`eval-chip ${!isAbsent && e[cat] === n ? "active" : ""}`}
+                                        className={`eval-chip ${!isAbsent && (e.scores[cat.key] ?? 0) === n ? "active" : ""}`}
                                         disabled={isAbsent || controlsLocked}
-                                        onClick={() => setScore(id, cat, n)}
+                                        onClick={() => setScore(id, cat.key, n)}
                                       >
                                         {toAr(n)}
                                       </button>
@@ -1442,8 +1448,8 @@ export function TeacherTrackDetail() {
                                 </div>
                               </div>
                             ))}
-                            <span className={`eval-total ${totalOf(e) === 0 ? "zero" : ""}`}>
-                              {toAr(totalOf(e))}/{toAr(TOTAL_MAX)}
+                            <span className={`eval-total ${totalOf(e, rubric) === 0 ? "zero" : ""}`}>
+                              {toAr(totalOf(e, rubric))}/{toAr(rubricTotalMax)}
                             </span>
                           </div>
 

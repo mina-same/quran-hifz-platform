@@ -10,11 +10,14 @@ import {
 } from '@tabler/icons-react-native';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import type { DaySchedule } from '@/components/domain/DaySlider';
-import { useEvaluations, useBulkEvaluate, type BulkEvaluateRecord } from '@/lib/queries/evaluations';
+import { useEvaluations, useRubric, useBulkEvaluate, type BulkEvaluateRecord } from '@/lib/queries/evaluations';
 import {
   useStudentPlanProgressList, useRecordStudentOccurrence, segmentReversed, type QuranPlan,
 } from '@/lib/queries/quranPlan';
-import { MAX_SCORES, TOTAL_MAX } from '@/lib/evaluationRubric';
+import {
+  MAX_SCORES, TOTAL_MAX, legacyScoresOf, manualCriteria, totalMaxOf,
+  DEFAULT_GRADE_RUBRIC, type GradeCriterion,
+} from '@/lib/evaluationRubric';
 import {
   dayFinishPoint, dayDeltaAyahs, planFinishPoint, toFlatIndex, fromFlatIndex,
   isReversedSchedule, surahName, type PlanType, type RangePoint, type ScheduleEntry,
@@ -29,16 +32,16 @@ function avatarInitials(name: string): string {
   return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0] ?? '').join('');
 }
 
-export type ScoreCategory = 'hifz' | 'tajweed' | 'talawah';
-const CATEGORY_LABELS: Record<ScoreCategory, string> = { hifz: 'حفظ', tajweed: 'تجويد', talawah: 'تلاوة' };
-export type StudentEval = { attendanceStatus: 'حاضر' | 'غائب'; hifz: number; tajweed: number; talawah: number };
+/** Scores are keyed by the active plan's rubric — not known at compile time. */
+export type StudentEval = { attendanceStatus: 'حاضر' | 'غائب'; scores: Record<string, number> };
 /** Scores start at 0 so the teacher consciously awards points. */
 function blankEval(): StudentEval {
-  return { attendanceStatus: 'حاضر', hifz: 0, tajweed: 0, talawah: 0 };
+  return { attendanceStatus: 'حاضر', scores: {} };
 }
-function totalOf(e: StudentEval): number {
+/** Absent → 0. `auto` criteria (حضور) are awarded in full on presence. */
+function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
   if (e.attendanceStatus === 'غائب') return 0;
-  return MAX_SCORES.attendance + e.hifz + e.tajweed + e.talawah;
+  return rubric.reduce((a, c) => a + (c.auto ? c.max : Math.min(e.scores[c.key] ?? 0, c.max)), 0);
 }
 
 export interface RosterContext {
@@ -136,13 +139,20 @@ export default function EvaluationRoster({
 
   // Already-saved evaluations for the selected day.
   const contextFilter = context.kind === 'halqa' ? { halqa: context.id } : { specialTrack: context.id };
+
+  // Grading split comes from the plan governing this context; the server falls
+  // back to the historical default when no single plan resolves.
+  const { data: rubricData } = useRubric(contextFilter);
+  const rubric = rubricData?.rubric ?? DEFAULT_GRADE_RUBRIC;
+  const rubricTotalMax = totalMaxOf(rubric);
+
   const { data: savedForDay = [] } = useEvaluations({ ...contextFilter, from: effectiveDate, to: effectiveDate });
   const savedById: Record<string, StudentEval> = {};
   for (const r of savedForDay) {
     const id = typeof r.student === 'string' ? r.student : r.student._id;
     savedById[id] = {
       attendanceStatus: r.attendanceStatus,
-      hifz: r.scores.hifz, tajweed: r.scores.tajweed, talawah: r.scores.talawah,
+      scores: Object.fromEntries((r.criteria ?? []).map((c) => [c.key, c.value])),
     };
   }
 
@@ -152,8 +162,11 @@ export default function EvaluationRoster({
   function setAttendance(studentId: string, status: 'حاضر' | 'غائب') {
     setOverrides((prev) => ({ ...prev, [studentId]: { ...evalFor(studentId), attendanceStatus: status } }));
   }
-  function setScore(studentId: string, category: ScoreCategory, value: number) {
-    setOverrides((prev) => ({ ...prev, [studentId]: { ...evalFor(studentId), [category]: value } }));
+  function setScore(studentId: string, key: string, value: number) {
+    setOverrides((prev) => {
+      const current = evalFor(studentId);
+      return { ...prev, [studentId]: { ...current, scores: { ...current.scores, [key]: value } } };
+    });
   }
 
   /** A student's own overlay can run the opposite direction to the shared plan
@@ -199,7 +212,7 @@ export default function EvaluationRoster({
     const records: BulkEvaluateRecord[] = [{
       student: studentId,
       attendanceStatus: e.attendanceStatus,
-      hifz: e.hifz, tajweed: e.tajweed, talawah: e.talawah,
+      scores: e.scores,
     }];
     setLastSavedId(studentId);
     setSavedNotice(null);
@@ -282,7 +295,7 @@ export default function EvaluationRoster({
       {students.map((st, i) => {
         const e = evalFor(st._id);
         const isAbsent = e.attendanceStatus === 'غائب';
-        const total = totalOf(e);
+        const total = totalOf(e, rubric);
         const isExpanded = expandedStudentId === st._id;
         const hasSaved = !!savedById[st._id];
         const isUnlocked = unlockedIds.has(st._id);
@@ -303,7 +316,7 @@ export default function EvaluationRoster({
                 <Text style={styles.name}>{st.name}</Text>
                 <Text style={styles.sub}>
                   {hasSaved
-                    ? `${e.attendanceStatus} — ${total}/${TOTAL_MAX}${isUnlocked ? ' (وضع التعديل)' : ''}`
+                    ? `${e.attendanceStatus} — ${total}/${rubricTotalMax}${isUnlocked ? ' (وضع التعديل)' : ''}`
                     : 'لم يُسجَّل لهذا اليوم بعد'}
                 </Text>
               </View>
@@ -427,18 +440,18 @@ export default function EvaluationRoster({
                   );
                 })()}
 
-                {(['hifz', 'tajweed', 'talawah'] as ScoreCategory[]).map((cat) => (
-                  <View key={cat}>
-                    <Text style={styles.catLabel}>{CATEGORY_LABELS[cat]} (0-{MAX_SCORES[cat]})</Text>
+                {manualCriteria(rubric).map((cat) => (
+                  <View key={cat.key}>
+                    <Text style={styles.catLabel}>{cat.label} (0-{cat.max})</Text>
                     <View style={styles.scoreChipRow}>
-                      {Array.from({ length: MAX_SCORES[cat] + 1 }, (_, n) => n).map((n) => {
-                        const active = !isAbsent && e[cat] === n;
+                      {Array.from({ length: cat.max + 1 }, (_, n) => n).map((n) => {
+                        const active = !isAbsent && (e.scores[cat.key] ?? 0) === n;
                         return (
                           <Pressable
                             haptic="select"
                             key={n}
                             disabled={isAbsent || locked}
-                            onPress={() => setScore(st._id, cat, n)}
+                            onPress={() => setScore(st._id, cat.key, n)}
                             style={[
                               styles.scoreChip,
                               active && { backgroundColor: theme.greenAccent, borderColor: theme.green },
@@ -452,7 +465,7 @@ export default function EvaluationRoster({
                     </View>
                   </View>
                 ))}
-                <Text style={styles.totalLine}>المجموع {total}/{TOTAL_MAX}</Text>
+                <Text style={styles.totalLine}>المجموع {total}/{rubricTotalMax}</Text>
 
                 {renderExtra?.(st, dayType)}
 

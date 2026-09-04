@@ -24,7 +24,7 @@ import type { Halqa } from '@/lib/queries/halqat';
 import type { SpecialTrack } from '@/lib/queries/specialTracks';
 import type { KPI } from '@/lib/queries/kpis';
 import type { Teacher } from '@/lib/queries/teachers';
-import { MAX_SCORES, TOTAL_MAX } from '@/lib/evaluationRubric';
+import { MAX_SCORES, TOTAL_MAX, legacyScoresOf } from '@/lib/evaluationRubric';
 
 /* ── helpers (ported from quran-hifz/src/quran/components/common/ReportsDashboard.tsx) ── */
 
@@ -177,10 +177,10 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
     if (evaluations.length === 0) return null;
     const sums: EvaluationScores & { total: number } = { attendance: 0, hifz: 0, tajweed: 0, talawah: 0, total: 0 };
     for (const e of evaluations) {
-      sums.attendance += e.scores.attendance;
-      sums.hifz += e.scores.hifz;
-      sums.tajweed += e.scores.tajweed;
-      sums.talawah += e.scores.talawah;
+      sums.attendance += legacyScoresOf(e).attendance;
+      sums.hifz += legacyScoresOf(e).hifz;
+      sums.tajweed += legacyScoresOf(e).tajweed;
+      sums.talawah += legacyScoresOf(e).talawah;
       sums.total += e.total;
     }
     const n = evaluations.length;
@@ -237,10 +237,10 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
       if (!id) continue;
       const name = evalHalqaName(e) || halqat.find((h) => h._id === id)?.name || '—';
       const entry = map.get(id) ?? { name, sums: { attendance: 0, hifz: 0, tajweed: 0, talawah: 0, total: 0 }, count: 0 };
-      entry.sums.attendance += e.scores.attendance;
-      entry.sums.hifz += e.scores.hifz;
-      entry.sums.tajweed += e.scores.tajweed;
-      entry.sums.talawah += e.scores.talawah;
+      entry.sums.attendance += legacyScoresOf(e).attendance;
+      entry.sums.hifz += legacyScoresOf(e).hifz;
+      entry.sums.tajweed += legacyScoresOf(e).tajweed;
+      entry.sums.talawah += legacyScoresOf(e).talawah;
       entry.sums.total += e.total;
       entry.count += 1;
       map.set(id, entry);
@@ -318,7 +318,7 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
         ['الطالب', 'التاريخ', 'حضور', 'حفظ', 'تجويد', 'تلاوة', 'المجموع'],
         evaluations.map((e) => [
           studentNameOf(e), e.date.slice(0, 10),
-          e.scores.attendance, e.scores.hifz, e.scores.tajweed, e.scores.talawah, e.total,
+          legacyScoresOf(e).attendance, legacyScoresOf(e).hifz, legacyScoresOf(e).tajweed, legacyScoresOf(e).talawah, e.total,
         ]),
       ),
     },

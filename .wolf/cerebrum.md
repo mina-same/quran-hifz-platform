@@ -12,6 +12,25 @@
 <!-- How the user likes things done. Code style, tools, patterns, communication. -->
 
 ## Key Learnings
+
+### PlanType is exactly two values: حفظ | مراجعة
+Plan/segment day types were reduced from four to two on 2026-08-31 (ترتيل and تلاوة removed).
+`PlanType` is declared in FOUR separate places that must stay in sync — there is no shared package:
+- `quran-hifz-server/src/models/QuranPlan.model.ts` (+ `PLAN_TYPE_VALUES`, used as the mongoose enum)
+- `quran-hifz-server/src/lib/quranRange.ts` (+ `PLAN_TYPES`) — duplicated, not imported from the model
+- `quran-hifz/src/quran/lib/quranRange.ts` and `quran-hifz/src/quran/api/quran-plans.ts`
+- `quran-hifz-mobile/lib/quranRange.ts` and `quran-hifz-mobile/lib/queries/quranPlan.ts`
+Plus zod enums in `quran-plan.controller.ts` (x2) and `student-plan-progress.controller.ts` (x2),
+and per-type icon/color maps in `TeacherPlanForm.tsx`, `TeacherPlans.tsx`, `TeacherPlanDetail.tsx`
+and `app/(portal)/teacher/plan-form.tsx`.
+
+**CRITICAL — تلاوة is two unrelated concepts.** Do NOT confuse them:
+1. The removed *plan type* تلاوة (gone).
+2. The *evaluation rubric* score `talawah` (حضور 3 + حفظ 4 + تجويد 2 + تلاوة 1 = 10) — STILL LIVE
+   in `evaluation.controller.ts`, `evaluationRubric.ts`, ReportsDashboard/ReportsScreen,
+   StudentReportPanel, TeacherAttendance, evaluate/EvaluationRoster. Never delete these.
+Also unrelated: Homework `type` (free-form string, e.g. 'حفظ جديد', 'تحسين تلاوة') has no enum.
+
 - **`xcodebuild` error 65 / "Script '[Expo] Configure project' failed" is a generic wrapper, not the cause.** Always scroll the log for the real line — on 2026-08-30 it was `LLVM ERROR: IO failure on output stream: No space left on device` (disk 100% full). The trailing warnings expo prints (ambiguous script dependencies on '[Expo Dev Launcher] Strip Local Network Keys', `SDWebImage iOS@9.0 deployment version mismatch`) are cosmetic and appear on EVERY build — never chase them. First move on an error-65: `df -h /System/Volumes/Data`, then `rm -rf ~/Library/Developer/Xcode/DerivedData/*`.
 - **Terminology moved on: they are `المسارات`, not `المسارات الاستثنائية`.** The API route/type is still `special-tracks`/`SpecialTrack`, but every user-facing label follows the web: `المسارات` (admin) / `مساراتي` (student, teacher). Also structural: a حلقة now REQUIRES a مسار (`specialTrack` is a required field on the halqa form), so a halqa is a child of a programme, not a parallel concept.
 - **Mobile has no filesystem download.** CSV export goes through `lib/csv.ts` → `shareCsv()` → RN's `Share` sheet with the CSV as the message body. A real .csv attachment needs expo-file-system + expo-sharing, which are NOT installed (adding them means a dev-client rebuild).

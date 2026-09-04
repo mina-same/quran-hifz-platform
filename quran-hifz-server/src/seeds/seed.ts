@@ -213,9 +213,9 @@ async function seed(): Promise<void> {
       endDate: inAMonth,
     },
     {
-      name: 'ورد تلاوة المسار الرمضاني',
-      type: 'تلاوة',
-      description: 'ورد تلاوة يومي لمتابعي مسار رمضان المكثف',
+      name: 'ورد مراجعة المسار الرمضاني',
+      type: 'مراجعة',
+      description: 'ورد مراجعة يومي لمتابعي مسار رمضان المكثف',
       teacher: tNasir._id,
       targetType: 'specialTrack',
       specialTrack: trackRamadan._id,

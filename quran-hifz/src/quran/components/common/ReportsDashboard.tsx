@@ -4,7 +4,7 @@ import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 import { downloadCsv } from "../../../lib/csv";
 import { useStudents, type Student, type StudentFilters } from "../../api/students";
 import { useEvaluations, type EvaluationRecord } from "../../api/evaluations";
-import { MAX_SCORES, TOTAL_MAX } from "../../lib/evaluationRubric";
+import { MAX_SCORES, TOTAL_MAX, legacyScoresOf } from "../../lib/evaluationRubric";
 import type { Kpi } from "../../api/kpis";
 import type { Teacher } from "../../api/teachers";
 import type { Halqa } from "../../api/halqat";
@@ -147,10 +147,10 @@ export function ReportsDashboard({
     if (evaluations.length === 0) return null;
     const sums = { attendance: 0, hifz: 0, tajweed: 0, talawah: 0, total: 0 };
     for (const e of evaluations) {
-      sums.attendance += e.scores.attendance;
-      sums.hifz += e.scores.hifz;
-      sums.tajweed += e.scores.tajweed;
-      sums.talawah += e.scores.talawah;
+      sums.attendance += legacyScoresOf(e).attendance;
+      sums.hifz += legacyScoresOf(e).hifz;
+      sums.tajweed += legacyScoresOf(e).tajweed;
+      sums.talawah += legacyScoresOf(e).talawah;
       sums.total += e.total;
     }
     const n = evaluations.length;
@@ -200,10 +200,10 @@ export function ReportsDashboard({
     const deltaOf = (pick: (e: EvaluationRecord) => number) => avg(second.map(pick)) - avg(first.map(pick));
     return {
       total: round1(deltaOf((e) => e.total)),
-      attendance: round1(deltaOf((e) => e.scores.attendance)),
-      hifz: round1(deltaOf((e) => e.scores.hifz)),
-      tajweed: round1(deltaOf((e) => e.scores.tajweed)),
-      talawah: round1(deltaOf((e) => e.scores.talawah)),
+      attendance: round1(deltaOf((e) => legacyScoresOf(e).attendance)),
+      hifz: round1(deltaOf((e) => legacyScoresOf(e).hifz)),
+      tajweed: round1(deltaOf((e) => legacyScoresOf(e).tajweed)),
+      talawah: round1(deltaOf((e) => legacyScoresOf(e).talawah)),
     };
   }, [evaluations]);
 
@@ -222,10 +222,10 @@ export function ReportsDashboard({
         sums: { attendance: 0, hifz: 0, tajweed: 0, talawah: 0, total: 0 },
         count: 0,
       };
-      entry.sums.attendance += e.scores.attendance;
-      entry.sums.hifz += e.scores.hifz;
-      entry.sums.tajweed += e.scores.tajweed;
-      entry.sums.talawah += e.scores.talawah;
+      entry.sums.attendance += legacyScoresOf(e).attendance;
+      entry.sums.hifz += legacyScoresOf(e).hifz;
+      entry.sums.tajweed += legacyScoresOf(e).tajweed;
+      entry.sums.talawah += legacyScoresOf(e).talawah;
       entry.sums.total += e.total;
       entry.count += 1;
       map.set(id, entry);
@@ -354,10 +354,10 @@ export function ReportsDashboard({
       evaluations.map((e) => [
         studentNameOf(e),
         e.date.slice(0, 10),
-        e.scores.attendance,
-        e.scores.hifz,
-        e.scores.tajweed,
-        e.scores.talawah,
+        legacyScoresOf(e).attendance,
+        legacyScoresOf(e).hifz,
+        legacyScoresOf(e).tajweed,
+        legacyScoresOf(e).talawah,
         e.total,
       ]),
     );

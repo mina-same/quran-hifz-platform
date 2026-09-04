@@ -2,7 +2,10 @@ import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/rea
 import { get, post, put, del } from '@/lib/api';
 import { isReversedRange, type RangePoint, type ScheduleEntry } from '@/lib/quranRange';
 
-export type PlanType = 'حفظ' | 'مراجعة' | 'ترتيل' | 'تلاوة';
+export type PlanType = 'حفظ' | 'مراجعة';
+
+/** One line of a plan's daily grading rubric — what is graded, out of how many. */
+export type GradeCriterion = { key: string; label: string; max: number; auto: boolean };
 export type PointRule = { label: string; amount: number; kind: 'خصم' | 'زيادة' };
 export type PlanTeacher = { _id: string; name: string };
 export type PlanHalqa = { _id: string; name: string };
@@ -57,6 +60,8 @@ export type QuranPlan = {
 
   pointsEnabled: boolean;
   pointRules: PointRule[];
+  /** Per-plan daily grading split; defaults server-side. */
+  gradeRubric: GradeCriterion[];
 
   endType: 'activeDays' | 'date';
   activeDaysCount?: number;
