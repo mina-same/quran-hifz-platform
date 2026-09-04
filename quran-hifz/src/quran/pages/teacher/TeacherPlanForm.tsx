@@ -215,11 +215,13 @@ export function TeacherPlanForm() {
     }));
   }
 
-  /** Which type owns each weekday — a day belongs to at most one. */
-  const dayOwner = useMemo(() => {
-    const owner = new Map<string, PlanType>();
-    for (const sg of form.segments) for (const d of sg.days) owner.set(d, sg.type);
-    return owner;
+  /** Weekdays used by at least one segment, regardless of type. Both types
+   * may now run on the same day, so this no longer tracks ownership — it
+   * only powers the holiday tooltip below (is this weekday active at all). */
+  const activeWeekdays = useMemo(() => {
+    const days = new Set<string>();
+    for (const sg of form.segments) for (const d of sg.days) days.add(d);
+    return days;
   }, [form.segments]);
 
   const { data: halqaStudents = [] } = useStudents({ halqa: form.halqa }, { enabled: form.targetType === "halqa" && !!form.halqa });
@@ -408,9 +410,9 @@ export function TeacherPlanForm() {
         </div>
       </Card>
 
-      {/* ── One card per selected type: its own days and range. A day already
-             taken by another type is disabled and names its owner — the
-             partition is what keeps each day's ward single-valued. ── */}
+      {/* ── One card per selected type: its own days and range. حفظ and مراجعة
+             may now share the same weekday — each segment's days are picked
+             independently, with no cross-segment restriction. ── */}
       {form.segments.map((seg) => {
         const segPages = pageRangeOfAyahRange(seg.rangeStart, seg.rangeEnd);
         const segReversed =
@@ -422,16 +424,7 @@ export function TeacherPlanForm() {
             <DaysOfWeekPicker
               value={seg.days}
               onChange={(days) => updateSegment(seg.type, { days })}
-              disabledDays={WEEK_DAYS.filter((d) => {
-                const owner = dayOwner.get(d);
-                return !!owner && owner !== seg.type;
-              })}
             />
-            {form.segments.length > 1 && (
-              <p style={{ margin: "8px 0 0", fontSize: 11, color: "var(--text3)" }}>
-                الأيام المعطّلة مُسنَدة لنوع آخر — اليوم الواحد لنوع واحد فقط.
-              </p>
-            )}
 
             <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ fontSize: 11, color: "var(--text3)", fontWeight: 700 }}>نطاق {seg.type} (من - إلى)</div>
@@ -628,7 +621,7 @@ export function TeacherPlanForm() {
                 // WEEK_DAYS runs Sat..Fri while getDay() runs Sun..Sat, hence the +1 shift.
                 const weekday = WEEK_DAYS[(new Date(`${h}T00:00:00`).getDay() + 1) % 7];
                 // Only matters if some type actually runs that weekday.
-                const active = dayOwner.has(weekday);
+                const active = activeWeekdays.has(weekday);
                 return (
                   <span
                     key={h}
