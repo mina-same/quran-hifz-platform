@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-04T08:02:54.030Z
-> Files: 534 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-04T08:17:14.574Z
+> Files: 535 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -243,6 +243,10 @@
 ## .claude/skills/ui-ux-pro-max/
 
 - `SKILL.md` — UI/UX Pro Max - Design Intelligence (~11172 tok)
+
+## docs/superpowers/plans/
+
+- `2026-09-04-same-day-multi-segment-plans.md` — Same-day حفظ + مراجعة Plan Segments Implementation Plan (~18220 tok)
 
 ## docs/superpowers/specs/
 

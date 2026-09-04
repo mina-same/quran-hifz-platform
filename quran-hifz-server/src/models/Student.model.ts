@@ -1,7 +1,16 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
+/**
+ * Saudi national ID (رقم الهوية الوطنية): exactly 10 digits from الأحوال المدنية.
+ * The leading digit encodes the holder's class — 1 = citizen (مواطن),
+ * 2 = resident (مقيم) — so anything else is a typo, not a valid ID.
+ */
+export const NATIONAL_ID_RE = /^[12][0-9]{9}$/;
+
 export interface IStudent extends Document {
   name: string;
+  /** Optional: existing students predate the field, and not every record has one. */
+  nationalId?: string;
   path?: string;
   level?: number;
   plan?: string;
@@ -23,6 +32,11 @@ export interface IStudent extends Document {
 const studentSchema = new Schema<IStudent>(
   {
     name:             { type: String, required: true, trim: true },
+    nationalId:       {
+      type: String,
+      trim: true,
+      match: [NATIONAL_ID_RE, 'رقم الهوية يجب أن يكون ١٠ أرقام ويبدأ بـ ١ أو ٢'],
+    },
     path:             { type: String, enum: ['حفظ كامل', 'عشرون جزءاً', 'عشرة أجزاء', 'خمسة أجزاء'] },
     level:            { type: Number, min: 1, max: 10 },
     plan:             { type: String, trim: true },
@@ -41,6 +55,9 @@ const studentSchema = new Schema<IStudent>(
   { timestamps: true },
 );
 
+// Sparse so the many students without an ID don't collide on `null`, unique so
+// the same identity can't be registered twice.
+studentSchema.index({ nationalId: 1 }, { unique: true, sparse: true });
 studentSchema.index({ halqa: 1 });
 studentSchema.index({ masjid: 1 });
 studentSchema.index({ status: 1 });

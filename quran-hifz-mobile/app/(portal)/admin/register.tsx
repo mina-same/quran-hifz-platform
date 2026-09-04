@@ -19,13 +19,13 @@ import { useAppTheme } from '@/lib/hooks/useAppTheme';
 type AppTheme = ReturnType<typeof useAppTheme>;
 
 type Fields = {
-  name: string; age: string; guardianPhone: string;
+  name: string; age: string; guardianPhone: string; nationalId: string;
   level: string; studentLevel: string;
   masjid: string; halqa: string;
   email: string; password: string;
 };
 const EMPTY: Fields = {
-  name: '', age: '', guardianPhone: '', level: '', studentLevel: '',
+  name: '', age: '', guardianPhone: '', nationalId: '', level: '', studentLevel: '',
   masjid: '', halqa: '', email: '', password: '',
 };
 
@@ -37,6 +37,8 @@ function validate(f: Fields): string | null {
   if (Number(f.age) < 4 || Number(f.age) > 80) return 'العمر بين ٤ و٨٠';
   if (!f.guardianPhone.trim()) return 'جوال ولي الأمر مطلوب';
   if (!/^05\d{8}$/.test(f.guardianPhone.trim())) return 'صيغة الجوال: 05XXXXXXXX';
+  // Optional, but must be well-formed when provided.
+  if (f.nationalId.trim() && !/^[12]\d{9}$/.test(f.nationalId.trim())) return 'رقم الهوية ١٠ أرقام ويبدأ بـ ١ أو ٢';
   if (!f.level) return 'يرجى اختيار مستوى القراءة';
   if (f.studentLevel.trim() && (Number(f.studentLevel) < 1 || Number(f.studentLevel) > 10)) return 'المستوى بين ١ و١٠';
   if (!f.masjid) return 'يرجى اختيار المسجد';
@@ -76,6 +78,7 @@ export default function AdminRegister() {
       name: form.name.trim(),
       guardian: '',
       guardianPhone: form.guardianPhone.trim(),
+      nationalId: form.nationalId.trim() || undefined,
       halqa: form.halqa,
       masjid: form.masjid,
       path: masar?.path ?? 'حفظ كامل',
@@ -112,6 +115,16 @@ export default function AdminRegister() {
               </FormGroup>
               <FormGroup label="العمر" required>
                 <FormInput placeholder="بالسنوات" keyboardType="number-pad" value={form.age} onChangeText={(v) => sf('age', v)} />
+              </FormGroup>
+              <FormGroup label="رقم الهوية">
+                <FormInput
+                  placeholder="١٠ أرقام"
+                  keyboardType="number-pad"
+                  maxLength={10}
+                  style={s.ltr}
+                  value={form.nationalId}
+                  onChangeText={(v) => sf('nationalId', v.replace(/[^0-9]/g, ''))}
+                />
               </FormGroup>
               <FormGroup label="جوال ولي الأمر" required>
                 <FormInput

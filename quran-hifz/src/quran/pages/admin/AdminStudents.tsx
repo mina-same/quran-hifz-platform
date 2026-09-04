@@ -40,6 +40,7 @@ type EditFormFields = {
   halqa: string;
   masjid: string;
   guardianPhone: string;
+  nationalId: string;
   status: "active" | "inactive" | "new";
   email: string;
   password: string;
@@ -71,7 +72,7 @@ export function AdminStudents() {
   const [pathFilter, setPathFilter] = useState("");
   const [editItem, setEditItem] = useState<Student | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [form, setForm] = useState<EditFormFields>({ name: "", path: "", level: "", halqa: "", masjid: "", guardianPhone: "", status: "active", email: "", password: "" });
+  const [form, setForm] = useState<EditFormFields>({ name: "", path: "", level: "", halqa: "", masjid: "", guardianPhone: "", nationalId: "", status: "active", email: "", password: "" });
   const [formError, setFormError] = useState("");
   const [selectedParentId, setSelectedParentId] = useState<string>("");
 
@@ -85,6 +86,7 @@ export function AdminStudents() {
       halqa:         getObjId(s.halqa),
       masjid:        getObjId(s.masjid),
       guardianPhone: s.guardianPhone,
+      nationalId:    s.nationalId ?? "",
       status:        s.status,
       email:         s.email ?? "",
       password:      "",
@@ -113,6 +115,8 @@ export function AdminStudents() {
         halqa:         form.halqa || undefined,
         masjid:        form.masjid || undefined,
         guardianPhone: form.guardianPhone.trim(),
+        // Blank clears the field rather than failing the 10-digit check.
+        nationalId:    form.nationalId.trim() || undefined,
         status:        form.status,
         ...(form.level.trim() && { level: Number(form.level) }),
         ...(form.email.trim()  && { email:    form.email.trim() }),
@@ -351,6 +355,24 @@ export function AdminStudents() {
               <div className="form-group" style={{ gridColumn: "1 / -1" }}>
                 <label className="form-label">جوال ولي الأمر</label>
                 <input className="form-input" type="tel" dir="ltr" placeholder="05XXXXXXXX" value={form.guardianPhone} onChange={(e) => setField("guardianPhone", e.target.value)} />
+              </div>
+
+              <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+                <label className="form-label">رقم الهوية</label>
+                <input
+                  className="form-input"
+                  type="text"
+                  inputMode="numeric"
+                  dir="ltr"
+                  maxLength={10}
+                  placeholder="١٠ أرقام"
+                  value={form.nationalId}
+                  // Digits only — strips pasted spaces/dashes before they hit validation.
+                  onChange={(e) => setField("nationalId", e.target.value.replace(/[^0-9]/g, ""))}
+                />
+                <small style={{ fontSize: 11, color: "var(--text3)" }}>
+                  هوية وطنية (تبدأ بـ ١) أو إقامة (تبدأ بـ ٢)
+                </small>
               </div>
 
               <div className="form-group" style={{ gridColumn: "1 / -1" }}>

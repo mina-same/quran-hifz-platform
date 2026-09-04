@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { QuranPlan } from '../models/QuranPlan.model';
+import { QuranPlan, RUBRIC_TOTAL_DEGREES } from '../models/QuranPlan.model';
 import { AppError } from '../middleware/error';
 import { SURAHS } from '../data/surahs';
 import {
@@ -33,6 +33,10 @@ const gradeRubricSchema = z
   .min(1, 'يجب إضافة بند واحد على الأقل لتقسيمة الدرجات')
   .refine((r) => new Set(r.map((c) => c.key)).size === r.length, {
     message: 'مفاتيح بنود التقييم يجب أن تكون فريدة',
+  })
+  // Totals are compared across plans and reports, so the denominator is fixed.
+  .refine((r) => r.reduce((a, c) => a + c.max, 0) === RUBRIC_TOTAL_DEGREES, {
+    message: `مجموع درجات البنود يجب أن يساوي ${RUBRIC_TOTAL_DEGREES} بالضبط`,
   });
 
 const rangePointSchema = z.object({

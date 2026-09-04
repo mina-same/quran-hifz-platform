@@ -40,6 +40,7 @@ export default function AdminStudentForm() {
   const [halqa, setHalqa] = useState('');
   const [masjid, setMasjid] = useState('');
   const [guardianPhone, setGuardianPhone] = useState('');
+  const [nationalId, setNationalId] = useState('');
   const [status, setStatus] = useState<Student['status']>('active');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -55,6 +56,7 @@ export default function AdminStudentForm() {
     setHalqa(getId(existing.halqa));
     setMasjid(getId(existing.masjid));
     setGuardianPhone(existing.guardianPhone ?? '');
+    setNationalId(existing.nationalId ?? '');
     setStatus(existing.status);
     setEmail(existing.email ?? '');
   }, [existing?._id]);
@@ -75,6 +77,7 @@ export default function AdminStudentForm() {
         halqa: halqa || undefined,
         masjid: masjid || undefined,
         guardianPhone: guardianPhone.trim(),
+        nationalId: nationalId.trim() || undefined,
         status,
         ...(level.trim() && { level: Number(level) }),
         ...(email.trim() && { email: email.trim() }),
@@ -141,6 +144,16 @@ export default function AdminStudentForm() {
         style={s.ltr}
         value={guardianPhone}
         onChangeText={setGuardianPhone}
+      />
+
+      <Text style={s.label}>رقم الهوية</Text>
+      <FormInput
+        placeholder="١٠ أرقام"
+        keyboardType="number-pad"
+        maxLength={10}
+        style={s.ltr}
+        value={nationalId}
+        onChangeText={(v) => setNationalId(v.replace(/[^0-9]/g, ''))}
       />
 
       <Text style={s.label}>الحالة</Text>

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  DEFAULT_GRADE_RUBRIC, totalMaxOf, criterionKey, type GradeCriterion,
+  DEFAULT_GRADE_RUBRIC, RUBRIC_TOTAL_DEGREES, totalMaxOf, criterionKey, type GradeCriterion,
 } from "../../lib/evaluationRubric";
 import { toast } from "sonner";
 import { usePortal } from "../../context/PortalContext";
@@ -79,6 +79,10 @@ function todayISO(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
+
+/** Distribution-bar palette — distinguishable in order, and each segment is
+ *  also labelled in the legend so colour is never the only signal. */
+const RUBRIC_BAR_COLORS = ["var(--green)", "#1d4ed8", "#c2410c", "#7c3aed", "#0891b2", "#b45309"];
 
 const EMPTY: FormFields = {
   name: "", description: "",
@@ -244,6 +248,10 @@ export function TeacherPlanForm() {
     if (form.gradeRubric.length === 0) { setFormError("يرجى إضافة بند واحد على الأقل لتقسيمة الدرجات"); return; }
     if (form.gradeRubric.some((c) => !c.label.trim())) { setFormError("يرجى تسمية كل بنود تقسيمة الدرجات"); return; }
     if (form.gradeRubric.some((c) => !Number.isFinite(c.max) || c.max < 1)) { setFormError("درجة كل بند يجب أن تكون رقماً أكبر من صفر"); return; }
+    if (totalMaxOf(form.gradeRubric) !== RUBRIC_TOTAL_DEGREES) {
+      setFormError(`مجموع درجات البنود يجب أن يساوي ${RUBRIC_TOTAL_DEGREES} بالضبط (الحالي ${totalMaxOf(form.gradeRubric)})`);
+      return;
+    }
 
     // rangeStart may deliberately sit after rangeEnd in mushaf order — a
     // reverse-direction plan (e.g. starting at An-Nas and working backward
@@ -721,101 +729,219 @@ export function TeacherPlanForm() {
 
       {/* ── Daily grading rubric ── */}
       <Card icon="ti-list-numbers" title="تقسيمة الدرجات اليومية">
-        <p style={{ margin: "8px 0 14px", fontSize: 12, color: "var(--text3)", lineHeight: 1.7 }}>
-          حدّد بنود التقييم اليومي ودرجة كل بند. القيم الافتراضية هي التقسيمة المعتادة
-          (حضور ٣ + حفظ ٤ + تجويد ٢ + تلاوة ١ = ١٠). بند «حضور» يُحتسب كاملاً عند حضور الطالب،
-          وتُصفَّر كل البنود عند الغياب.
+        <p style={{ margin: "8px 0 16px", fontSize: 12.5, color: "var(--text2)", lineHeight: 1.8 }}>
+          حدّد بنود التقييم اليومي ودرجة كل بند. الافتراضي هو التقسيمة المعتادة
+          {" "}(حضور ٣ + حفظ ٤ + تجويد ٢ + تلاوة ١). المجموع يجب أن يساوي ١٠ دائماً، وتُصفَّر كل البنود عند غياب الطالب.
         </p>
 
-        {form.gradeRubric.map((c, i) => (
-          <div
-            key={c.key}
-            style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}
-          >
-            <input
-              className="form-input"
-              style={{ flex: 1 }}
-              value={c.label}
-              placeholder="اسم البند (مثال: تجويد)"
-              onChange={(e) => {
-                const next = [...form.gradeRubric];
-                next[i] = { ...next[i], label: e.target.value };
-                sf("gradeRubric", next);
+        {/* Column headers — the meaning of each column is stated ONCE here
+            instead of repeating a label on every row. */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 92px 116px 40px",
+            gap: 8,
+            padding: "0 2px 8px",
+            fontSize: 11,
+            fontWeight: 700,
+            color: "var(--text3)",
+            borderBottom: "1px solid var(--border)",
+          }}
+        >
+          <span>البند</span>
+          <span style={{ textAlign: "center" }}>الدرجة</span>
+          <span style={{ textAlign: "center" }}>الاحتساب</span>
+          <span />
+        </div>
+
+        {form.gradeRubric.map((c, i) => {
+          const isOnly = form.gradeRubric.length === 1;
+          return (
+            <div
+              key={c.key}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 92px 116px 40px",
+                gap: 8,
+                alignItems: "center",
+                padding: "10px 2px",
+                borderBottom: "1px solid var(--border)",
               }}
-            />
-            <input
-              className="form-input"
-              type="number"
-              min={1}
-              style={{ width: 96 }}
-              value={c.max}
-              onChange={(e) => {
-                const next = [...form.gradeRubric];
-                next[i] = { ...next[i], max: Number(e.target.value) };
-                sf("gradeRubric", next);
-              }}
-            />
-            <label
-              title="يُحتسب كاملاً عند الحضور دون إدخال من المعلم"
-              style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--text2)", whiteSpace: "nowrap" }}
             >
               <input
-                type="checkbox"
-                checked={c.auto}
+                className="form-input"
+                value={c.label}
+                placeholder="اسم البند"
+                aria-label={`اسم البند ${i + 1}`}
                 onChange={(e) => {
                   const next = [...form.gradeRubric];
-                  next[i] = { ...next[i], auto: e.target.checked };
+                  next[i] = { ...next[i], label: e.target.value };
                   sf("gradeRubric", next);
                 }}
               />
-              تلقائي
-            </label>
+
+              <input
+                className="form-input"
+                type="number"
+                min={1}
+                value={c.max}
+                aria-label={`درجة بند ${c.label || i + 1}`}
+                // Tabular figures keep the column from jittering as digits change.
+                style={{ textAlign: "center", fontVariantNumeric: "tabular-nums" }}
+                onChange={(e) => {
+                  const next = [...form.gradeRubric];
+                  next[i] = { ...next[i], max: Number(e.target.value) };
+                  sf("gradeRubric", next);
+                }}
+              />
+
+              {/* On/off is carried by fill + icon + text, never by text alone —
+                  the previous checkbox showed "تلقائي" on every row, which read
+                  as though all four criteria were automatic. */}
+              <button
+                type="button"
+                role="switch"
+                aria-checked={c.auto}
+                aria-label={`احتساب بند ${c.label || i + 1} تلقائياً`}
+                title={c.auto
+                  ? "يُحتسب كاملاً عند الحضور — لا يُدخله المعلم"
+                  : "يُدخله المعلم يدوياً لكل طالب"}
+                onClick={() => {
+                  const next = [...form.gradeRubric];
+                  next[i] = { ...next[i], auto: !next[i].auto };
+                  sf("gradeRubric", next);
+                }}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                  minHeight: 40, borderRadius: 9,
+                  cursor: "pointer", fontSize: 11.5, fontWeight: 700,
+                  border: `1px solid ${c.auto ? "var(--green)" : "var(--border)"}`,
+                  background: c.auto ? "var(--green-pale)" : "transparent",
+                  color: c.auto ? "var(--green)" : "var(--text3)",
+                  transition: "background 160ms ease, color 160ms ease, border-color 160ms ease",
+                }}
+              >
+                <i className={c.auto ? "ti ti-bolt" : "ti ti-pencil"} />
+                {c.auto ? "تلقائي" : "يدوي"}
+              </button>
+
+              <button
+                type="button"
+                aria-label={`حذف بند ${c.label || i + 1}`}
+                title={isOnly ? "لا يمكن حذف البند الوحيد" : "حذف البند"}
+                disabled={isOnly}
+                onClick={() => sf("gradeRubric", form.gradeRubric.filter((_, n) => n !== i))}
+                style={{
+                  border: "none", background: "transparent",
+                  cursor: isOnly ? "not-allowed" : "pointer",
+                  opacity: isOnly ? 0.35 : 1,
+                  width: 40, height: 40, borderRadius: 9,
+                  color: "#b91c1c", fontSize: 16,
+                }}
+              >
+                <i className="ti ti-trash" />
+              </button>
+            </div>
+          );
+        })}
+
+        {/* Weight distribution — shows at a glance how the degrees are balanced,
+            which is the actual decision the teacher is making. */}
+        {totalMaxOf(form.gradeRubric) > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: "flex", height: 8, borderRadius: 999, overflow: "hidden", background: "var(--border)" }}>
+              {form.gradeRubric.map((c, i) => (
+                <div
+                  key={c.key}
+                  title={`${c.label || "بند"} — ${c.max}`}
+                  style={{
+                    width: `${(c.max / totalMaxOf(form.gradeRubric)) * 100}%`,
+                    background: RUBRIC_BAR_COLORS[i % RUBRIC_BAR_COLORS.length],
+                  }}
+                />
+              ))}
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 8 }}>
+              {form.gradeRubric.map((c, i) => (
+                <span key={c.key} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "var(--text2)" }}>
+                  <span style={{
+                    width: 8, height: 8, borderRadius: 2,
+                    background: RUBRIC_BAR_COLORS[i % RUBRIC_BAR_COLORS.length],
+                  }} />
+                  {c.label || "بند بلا اسم"} · {c.max}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16, flexWrap: "wrap", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <button
               type="button"
-              title="حذف البند"
-              onClick={() => sf("gradeRubric", form.gradeRubric.filter((_, n) => n !== i))}
+              onClick={() =>
+                sf("gradeRubric", [
+                  ...form.gradeRubric,
+                  {
+                    key: criterionKey("بند", form.gradeRubric.map((x) => x.key)),
+                    label: "",
+                    max: 1,
+                    auto: false,
+                  },
+                ])
+              }
               style={{
-                border: "1px solid var(--border)", background: "transparent", cursor: "pointer",
-                borderRadius: 8, width: 34, height: 34, color: "#b91c1c",
+                display: "flex", alignItems: "center", gap: 6,
+                minHeight: 40, padding: "0 14px", borderRadius: 9,
+                border: `1px dashed var(--green)`, background: "transparent",
+                color: "var(--green)", fontWeight: 700, fontSize: 13, cursor: "pointer",
               }}
             >
-              <i className="ti ti-trash" />
+              <i className="ti ti-plus" /> إضافة بند
             </button>
-          </div>
-        ))}
-
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 12 }}>
-          <button
-            type="button"
-            className="btn-ghost"
-            onClick={() =>
-              sf("gradeRubric", [
-                ...form.gradeRubric,
-                {
-                  key: criterionKey("بند", form.gradeRubric.map((x) => x.key)),
-                  label: "",
-                  max: 1,
-                  auto: false,
-                },
-              ])
-            }
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}
-          >
-            <i className="ti ti-plus" /> إضافة بند
-          </button>
-
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button
               type="button"
               onClick={() => sf("gradeRubric", DEFAULT_GRADE_RUBRIC.map((x) => ({ ...x })))}
-              style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: 12, color: "var(--text3)", textDecoration: "underline" }}
+              style={{
+                border: "none", background: "transparent", cursor: "pointer",
+                fontSize: 12, color: "var(--text3)", textDecoration: "underline",
+                minHeight: 40,
+              }}
             >
               استعادة الافتراضي
             </button>
-            <strong style={{ fontSize: 13, color: "var(--green)" }}>
-              المجموع: {totalMaxOf(form.gradeRubric)} درجة
-            </strong>
           </div>
+
+          {(() => {
+            const sum = totalMaxOf(form.gradeRubric);
+            const diff = sum - RUBRIC_TOTAL_DEGREES;
+            const ok = diff === 0;
+            return (
+              <div
+                // Status is icon + wording + colour together, never colour alone.
+                role="status"
+                aria-live="polite"
+                style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "8px 14px", borderRadius: 9,
+                  background: ok ? "var(--green-pale)" : "#fef2f2",
+                  color: ok ? "var(--green)" : "#b91c1c",
+                  border: `1px solid ${ok ? "transparent" : "#fecaca"}`,
+                }}
+              >
+                <i className={ok ? "ti ti-circle-check" : "ti ti-alert-circle"} style={{ fontSize: 16 }} />
+                <span style={{ fontSize: 11.5, fontWeight: 600 }}>مجموع الدرجة اليومية</span>
+                <strong style={{ fontSize: 18, fontVariantNumeric: "tabular-nums" }}>
+                  {sum}<span style={{ fontSize: 12, fontWeight: 600, opacity: 0.7 }}>/{RUBRIC_TOTAL_DEGREES}</span>
+                </strong>
+                {!ok && (
+                  <span style={{ fontSize: 11.5, fontWeight: 700 }}>
+                    {diff > 0 ? `زائد ${diff}` : `ناقص ${-diff}`}
+                  </span>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </Card>
 

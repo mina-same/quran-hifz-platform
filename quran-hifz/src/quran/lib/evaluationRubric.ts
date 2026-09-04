@@ -15,6 +15,10 @@ export type GradeCriterion = {
   auto: boolean;
 };
 
+/** Every plan's rubric must add up to exactly this. Daily grades are compared
+ *  across plans and reports, so the denominator is fixed. */
+export const RUBRIC_TOTAL_DEGREES = 10;
+
 export const DEFAULT_GRADE_RUBRIC: GradeCriterion[] = [
   { key: "attendance", label: "حضور", max: 3, auto: true },
   { key: "hifz", label: "حفظ", max: 4, auto: false },

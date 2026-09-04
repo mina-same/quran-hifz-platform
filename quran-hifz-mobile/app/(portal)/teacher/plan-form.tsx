@@ -20,7 +20,7 @@ import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet'
 import { useHalqat } from '@/lib/queries/halqat';
 import { useQuranPlan, useCreateQuranPlan, useUpdateQuranPlan } from '@/lib/queries/quranPlan';
 import {
-  DEFAULT_GRADE_RUBRIC, totalMaxOf, criterionKey, type GradeCriterion,
+  DEFAULT_GRADE_RUBRIC, RUBRIC_TOTAL_DEGREES, totalMaxOf, criterionKey, type GradeCriterion,
 } from '@/lib/evaluationRubric';
 import {
   computeMultiScheduleBreakdown, isReversedRange, validateSegmentDays, WEEK_DAYS,
@@ -78,6 +78,10 @@ function emptySegment(type: PlanType): FormSegment {
     rangeEnd: { surahNumber: 1, ayah: 1 },
   };
 }
+
+/** Distribution-bar palette; every segment is also labelled in the legend so
+ *  colour is never the only signal. */
+const RUBRIC_BAR_COLORS = ['#1B5E20', '#1d4ed8', '#c2410c', '#7c3aed', '#0891b2', '#b45309'];
 
 const EMPTY: FormFields = {
   name: '', description: '', halqa: '',
@@ -250,6 +254,7 @@ export default function TeacherPlanForm() {
     if (form.gradeRubric.length === 0) return setFormError('يرجى إضافة بند واحد على الأقل لتقسيمة الدرجات');
     if (form.gradeRubric.some((c) => !c.label.trim())) return setFormError('يرجى تسمية كل بنود تقسيمة الدرجات');
     if (form.gradeRubric.some((c) => !Number.isFinite(Number(c.max)) || Number(c.max) < 1)) return setFormError('درجة كل بند يجب أن تكون رقماً أكبر من صفر');
+    if (totalMaxOf(form.gradeRubric) !== RUBRIC_TOTAL_DEGREES) return setFormError(`مجموع درجات البنود يجب أن يساوي ${RUBRIC_TOTAL_DEGREES} بالضبط (الحالي ${totalMaxOf(form.gradeRubric)})`);
 
     const body: Record<string, unknown> = {
       name: form.name.trim(),
@@ -521,79 +526,178 @@ export default function TeacherPlanForm() {
 
         <Card>
           <CardHeader title="تقسيمة الدرجات اليومية" />
-          <Text style={{ fontSize: 12, color: theme.textMuted, lineHeight: 20, marginBottom: 12 }}>
+          <Text style={{ fontSize: 12.5, color: theme.textMuted, lineHeight: 21, marginBottom: 14 }}>
             حدّد بنود التقييم اليومي ودرجة كل بند. الافتراضي هو التقسيمة المعتادة
-            (حضور ٣ + حفظ ٤ + تجويد ٢ + تلاوة ١ = ١٠). بند «حضور» يُحتسب كاملاً عند الحضور،
-            وتُصفَّر كل البنود عند الغياب.
+            {' '}(حضور ٣ + حفظ ٤ + تجويد ٢ + تلاوة ١). المجموع يجب أن يساوي ١٠ دائماً، وتُصفَّر كل البنود عند غياب الطالب.
           </Text>
 
-          {form.gradeRubric.map((c, i) => (
-            <View key={c.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <View style={{ flex: 1 }}>
-                <FormInput
-                  placeholder="اسم البند"
-                  value={c.label}
-                  onChangeText={(v) => {
+          {/* Column meanings stated once, not repeated on every row. */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: theme.border }}>
+            <Text style={{ flex: 1, fontSize: 11, fontWeight: '700', color: theme.textMuted }}>البند</Text>
+            <Text style={{ width: 64, fontSize: 11, fontWeight: '700', color: theme.textMuted, textAlign: 'center' }}>الدرجة</Text>
+            <Text style={{ width: 84, fontSize: 11, fontWeight: '700', color: theme.textMuted, textAlign: 'center' }}>الاحتساب</Text>
+            <View style={{ width: 40 }} />
+          </View>
+
+          {form.gradeRubric.map((c, i) => {
+            const isOnly = form.gradeRubric.length === 1;
+            return (
+              <View
+                key={c.key}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: theme.border }}
+              >
+                <View style={{ flex: 1 }}>
+                  <FormInput
+                    placeholder="اسم البند"
+                    value={c.label}
+                    accessibilityLabel={`اسم البند ${i + 1}`}
+                    onChangeText={(v) => {
+                      const next = [...form.gradeRubric];
+                      next[i] = { ...next[i], label: v };
+                      sf('gradeRubric', next);
+                    }}
+                  />
+                </View>
+
+                <View style={{ width: 64 }}>
+                  <FormInput
+                    placeholder="0"
+                    keyboardType="number-pad"
+                    value={String(c.max)}
+                    accessibilityLabel={`درجة بند ${c.label || i + 1}`}
+                    style={{ textAlign: 'center' }}
+                    onChangeText={(v) => {
+                      const next = [...form.gradeRubric];
+                      next[i] = { ...next[i], max: Number(v.replace(/[^0-9]/g, '')) || 0 };
+                      sf('gradeRubric', next);
+                    }}
+                  />
+                </View>
+
+                {/* State is carried by fill + label together, so a row never
+                    reads as "تلقائي" when it is actually manual. */}
+                <Pressable
+                  haptic="select"
+                  accessibilityRole="switch"
+                  accessibilityState={{ checked: c.auto }}
+                  accessibilityLabel={`احتساب بند ${c.label || i + 1} تلقائياً`}
+                  onPress={() => {
                     const next = [...form.gradeRubric];
-                    next[i] = { ...next[i], label: v };
+                    next[i] = { ...next[i], auto: !next[i].auto };
                     sf('gradeRubric', next);
                   }}
-                />
-              </View>
-              <View style={{ width: 70 }}>
-                <FormInput
-                  placeholder="درجة"
-                  keyboardType="number-pad"
-                  value={String(c.max)}
-                  onChangeText={(v) => {
-                    const next = [...form.gradeRubric];
-                    next[i] = { ...next[i], max: Number(v.replace(/[^0-9]/g, '')) || 0 };
-                    sf('gradeRubric', next);
+                  style={{
+                    width: 84, minHeight: 44, borderRadius: 9,
+                    alignItems: 'center', justifyContent: 'center',
+                    borderWidth: 1,
+                    borderColor: c.auto ? theme.green : theme.border,
+                    backgroundColor: c.auto ? theme.greenAccent : 'transparent',
                   }}
-                />
+                >
+                  <Text style={{ fontSize: 11.5, fontWeight: '700', color: c.auto ? theme.green : theme.textMuted }}>
+                    {c.auto ? 'تلقائي' : 'يدوي'}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  haptic="select"
+                  disabled={isOnly}
+                  accessibilityLabel={`حذف بند ${c.label || i + 1}`}
+                  onPress={() => sf('gradeRubric', form.gradeRubric.filter((_, n) => n !== i))}
+                  style={{ width: 40, minHeight: 44, alignItems: 'center', justifyContent: 'center', opacity: isOnly ? 0.35 : 1 }}
+                >
+                  <Text style={{ color: theme.red, fontSize: 20 }}>×</Text>
+                </Pressable>
               </View>
-              <Pressable
-                haptic="select"
-                onPress={() => {
-                  const next = [...form.gradeRubric];
-                  next[i] = { ...next[i], auto: !next[i].auto };
-                  sf('gradeRubric', next);
-                }}
-                style={[s.toggleBtn, { paddingHorizontal: 10 }, c.auto && s.toggleBtnActive]}
-              >
-                <Text style={[s.toggleBtnText, { fontSize: 11 }, c.auto && s.toggleBtnTextActive]}>تلقائي</Text>
-              </Pressable>
-              <Pressable
-                haptic="select"
-                onPress={() => sf('gradeRubric', form.gradeRubric.filter((_, n) => n !== i))}
-                style={{ paddingHorizontal: 6, paddingVertical: 8 }}
-              >
-                <Text style={{ color: theme.red, fontSize: 18 }}>×</Text>
-              </Pressable>
+            );
+          })}
+
+          {/* Weight distribution at a glance. */}
+          {totalMaxOf(form.gradeRubric) > 0 && (
+            <View style={{ marginTop: 14 }}>
+              <View style={{ flexDirection: 'row', height: 8, borderRadius: 999, overflow: 'hidden', backgroundColor: theme.border }}>
+                {form.gradeRubric.map((c, i) => (
+                  <View
+                    key={c.key}
+                    style={{
+                      flex: c.max / totalMaxOf(form.gradeRubric),
+                      backgroundColor: RUBRIC_BAR_COLORS[i % RUBRIC_BAR_COLORS.length],
+                    }}
+                  />
+                ))}
+              </View>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 8 }}>
+                {form.gradeRubric.map((c, i) => (
+                  <View key={c.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: RUBRIC_BAR_COLORS[i % RUBRIC_BAR_COLORS.length] }} />
+                    <Text style={{ fontSize: 11, color: theme.textMuted }}>{c.label || 'بند بلا اسم'} · {c.max}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
-          ))}
+          )}
 
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
-            <Pressable
-              haptic="select"
-              onPress={() =>
-                sf('gradeRubric', [
-                  ...form.gradeRubric,
-                  { key: criterionKey('بند', form.gradeRubric.map((x) => x.key)), label: '', max: 1, auto: false },
-                ])
-              }
-            >
-              <Text style={{ color: theme.green, fontWeight: '700', fontSize: 13 }}>+ إضافة بند</Text>
-            </Pressable>
-
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <Pressable haptic="select" onPress={() => sf('gradeRubric', DEFAULT_GRADE_RUBRIC.map((x) => ({ ...x })))}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, flexWrap: 'wrap', gap: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <Pressable
+                haptic="select"
+                accessibilityLabel="إضافة بند لتقسيمة الدرجات"
+                onPress={() =>
+                  sf('gradeRubric', [
+                    ...form.gradeRubric,
+                    { key: criterionKey('بند', form.gradeRubric.map((x) => x.key)), label: '', max: 1, auto: false },
+                  ])
+                }
+                style={{
+                  minHeight: 44, paddingHorizontal: 14, borderRadius: 9,
+                  alignItems: 'center', justifyContent: 'center',
+                  borderWidth: 1, borderStyle: 'dashed', borderColor: theme.green,
+                }}
+              >
+                <Text style={{ color: theme.green, fontWeight: '700', fontSize: 13 }}>+ إضافة بند</Text>
+              </Pressable>
+              <Pressable
+                haptic="select"
+                accessibilityLabel="استعادة التقسيمة الافتراضية"
+                onPress={() => sf('gradeRubric', DEFAULT_GRADE_RUBRIC.map((x) => ({ ...x })))}
+                style={{ minHeight: 44, justifyContent: 'center' }}
+              >
                 <Text style={{ color: theme.textMuted, fontSize: 12, textDecorationLine: 'underline' }}>استعادة الافتراضي</Text>
               </Pressable>
-              <Text style={{ color: theme.green, fontWeight: '700', fontSize: 13 }}>
-                المجموع: {totalMaxOf(form.gradeRubric)}
-              </Text>
             </View>
+
+            {(() => {
+              const sum = totalMaxOf(form.gradeRubric);
+              const diff = sum - RUBRIC_TOTAL_DEGREES;
+              const ok = diff === 0;
+              return (
+                // Status reads from wording + colour together, never colour alone.
+                <View
+                  accessibilityRole="text"
+                  accessibilityLabel={ok
+                    ? `مجموع الدرجة ${sum} من ${RUBRIC_TOTAL_DEGREES}`
+                    : `مجموع الدرجة ${sum} من ${RUBRIC_TOTAL_DEGREES}، ${diff > 0 ? `زائد ${diff}` : `ناقص ${-diff}`}`}
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', gap: 6,
+                    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 9,
+                    backgroundColor: ok ? theme.greenAccent : '#fef2f2',
+                    borderWidth: 1, borderColor: ok ? 'transparent' : '#fecaca',
+                  }}
+                >
+                  <Text style={{ fontSize: 11.5, fontWeight: '600', color: ok ? theme.green : '#b91c1c' }}>
+                    مجموع الدرجة
+                  </Text>
+                  <Text style={{ fontSize: 18, fontWeight: '800', color: ok ? theme.green : '#b91c1c' }}>
+                    {sum}/{RUBRIC_TOTAL_DEGREES}
+                  </Text>
+                  {!ok && (
+                    <Text style={{ fontSize: 11.5, fontWeight: '700', color: '#b91c1c' }}>
+                      {diff > 0 ? `زائد ${diff}` : `ناقص ${-diff}`}
+                    </Text>
+                  )}
+                </View>
+              );
+            })()}
           </View>
         </Card>
 

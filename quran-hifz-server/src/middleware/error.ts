@@ -28,9 +28,21 @@ export function errorHandler(
     return;
   }
 
-  // Mongoose duplicate key
-  if ((err as NodeJS.ErrnoException).code === '11000') {
-    res.status(409).json({ success: false, message: 'القيمة موجودة مسبقاً' });
+  // Mongoose duplicate key. Mongo reports `code` as the NUMBER 11000; the old
+  // string comparison never matched, so duplicates surfaced as a generic 500.
+  const code = (err as { code?: number | string }).code;
+  if (code === 11000 || code === '11000') {
+    // Name the offending field so the client can point at the right input.
+    const key = Object.keys((err as { keyPattern?: Record<string, unknown> }).keyPattern ?? {})[0];
+    const FIELD_MESSAGES: Record<string, string> = {
+      nationalId: 'رقم الهوية مسجَّل لطالب آخر',
+      email:      'البريد الإلكتروني مستخدم بالفعل',
+    };
+    res.status(409).json({
+      success: false,
+      message: (key && FIELD_MESSAGES[key]) || 'القيمة موجودة مسبقاً',
+      field: key,
+    });
     return;
   }
 

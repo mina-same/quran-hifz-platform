@@ -13,6 +13,48 @@
 
 ## Key Learnings
 
+### Rubric total is LOCKED to 10 (2026-09-04)
+A plan's `gradeRubric` degrees must sum to exactly `RUBRIC_TOTAL_DEGREES = 10`.
+Enforced in three places, all of which must stay in sync:
+- server: `.refine()` on `gradeRubricSchema` in quran-plan.controller.ts
+- web: `TeacherPlanForm` submit guard + live زائد/ناقص chip
+- mobile: `plan-form.tsx` submit guard + same chip
+The constant is declared in `QuranPlan.model.ts` and mirrored into both
+`evaluationRubric.ts` libs. Teachers may re-DISTRIBUTE the 10 freely and rename
+or replace the criteria, but never change the denominator — daily grades are
+compared across plans, halqas and reports.
+
+### Student nationalId (رقم الهوية) — 2026-09-04
+`Student.nationalId` is optional, 10 digits, `/^[12][0-9]{9}$/` (1 = مواطن,
+2 = مقيم), with a SPARSE unique index so the many students without one don't
+collide on null. Validated on the model, in the controller zod, and in all four
+client forms (web AdminRegister/AdminStudents, mobile register/student-form).
+
+
+### Daily grading rubric is PER PLAN, not global (2026-09-04)
+`MAX_SCORES` used to be a platform constant (حضور 3 + حفظ 4 + تجويد 2 + تلاوة 1 = 10)
+duplicated across server/web/mobile. It is now `QuranPlan.gradeRubric` —
+`{key,label,max,auto}[]` — and teachers compose it per plan. `DEFAULT_GRADE_RUBRIC`
+reproduces the old split, so behaviour is unchanged unless a teacher edits it.
+
+Key facts for future work:
+- `auto: true` (حضور) is awarded in FULL on presence, never typed. Absent ⇒ every
+  criterion is forced to 0 server-side; the client is never trusted.
+- `Evaluation.criteria[]` is a SNAPSHOT ({key,label,max,value}) plus `totalMax`.
+  Editing a plan's rubric must never retroactively rewrite old records — that is
+  why label/max are copied, not referenced.
+- `Evaluation.scores` (legacy 4-key object) is still mirrored ONLY when the rubric
+  keeps the four original keys, so old reports/CSV keep working. It is `undefined`
+  for custom rubrics — read it via `legacyScoresOf(e)` which falls back to criteria.
+- Evaluations are keyed by (halqa|specialTrack, date), NOT by plan, and one halqa
+  can own several plans. `resolveRubric()` picks an explicit `plan`, else the single
+  active plan, else falls back to the default and sets `ambiguous: true`.
+  GET /api/evaluations/rubric returns the rubric + candidate plans for the picker.
+- Mongoose `default:` on gradeRubric applies on hydration, so pre-existing plans
+  read back the default without a migration. Evaluations DID need one:
+  `npm run backfill-evaluation-rubric` (already run on 12 records).
+
+
 ### PlanType is exactly two values: حفظ | مراجعة
 Plan/segment day types were reduced from four to two on 2026-08-31 (ترتيل and تلاوة removed).
 `PlanType` is declared in FOUR separate places that must stay in sync — there is no shared package:

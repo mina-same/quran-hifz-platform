@@ -25,6 +25,10 @@ export interface IGradeCriterion {
   auto: boolean;
 }
 
+/** Every plan's rubric must add up to exactly this. Daily grades are compared
+ *  across plans, halqas and reports, so a shared denominator is required. */
+export const RUBRIC_TOTAL_DEGREES = 10;
+
 /** The historical fixed rubric: حضور 3 + حفظ 4 + تجويد 2 + تلاوة 1 = 10. */
 export const DEFAULT_GRADE_RUBRIC: IGradeCriterion[] = [
   { key: 'attendance', label: 'حضور',  max: 3, auto: true  },

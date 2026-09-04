@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { Student } from '../models/Student.model';
+import { Student, NATIONAL_ID_RE } from '../models/Student.model';
 import { User } from '../models/User.model';
 import { SpecialTrack } from '../models/SpecialTrack.model';
 import { ParentStudent } from '../models/ParentStudent.model';
@@ -8,6 +8,12 @@ import { AppError } from '../middleware/error';
 
 const studentSchema = z.object({
   name:             z.string().min(2, 'الاسم مطلوب'),
+  /** Empty string is normalised to undefined so a blank field clears rather
+   *  than failing the 10-digit check. */
+  nationalId:       z.preprocess(
+    (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+    z.string().regex(NATIONAL_ID_RE, 'رقم الهوية يجب أن يكون ١٠ أرقام ويبدأ بـ ١ أو ٢').optional(),
+  ),
   path:             z.enum(['حفظ كامل', 'عشرون جزءاً', 'عشرة أجزاء', 'خمسة أجزاء']),
   halqa:            z.string().min(1, 'الحلقة مطلوبة'),
   masjid:           z.string().min(1, 'المسجد مطلوب'),

@@ -12,6 +12,12 @@ import { useHalqat } from "../../api/halqat";
 
 const schema = z.object({
   name: z.string().min(2, "الاسم مطلوب (٢ أحرف على الأقل)"),
+  // 10 digits; the leading digit encodes citizen (1) vs resident (2).
+  nationalId: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((v) => !v || /^[12]\d{9}$/.test(v), "رقم الهوية ١٠ أرقام ويبدأ بـ ١ أو ٢"),
   age: z.string().min(1, "العمر مطلوب").refine((v) => Number(v) >= 4 && Number(v) <= 80, "العمر بين ٤ و٨٠"),
   guardianPhone: z
     .string()
@@ -77,6 +83,7 @@ export function AdminRegister() {
       name:          data.name,
       guardian:      "",
       guardianPhone: data.guardianPhone,
+      nationalId: data.nationalId?.trim() || undefined,
       halqa:         data.halqa,
       masjid:        data.masjid,
       path:          masar?.path ?? "حفظ كامل",
@@ -100,6 +107,22 @@ export function AdminRegister() {
               <label className="form-label">الاسم الكامل <span>*</span></label>
               <input className="form-input" placeholder="اسم الطالب رباعياً" {...register("name")} />
               <FieldError msg={errors.name?.message} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">رقم الهوية</label>
+              <input
+                className="form-input"
+                type="text"
+                inputMode="numeric"
+                dir="ltr"
+                maxLength={10}
+                placeholder="١٠ أرقام"
+                {...register("nationalId")}
+              />
+              <FieldError msg={errors.nationalId?.message} />
+              <small style={{ fontSize: 11, color: "var(--text3)" }}>
+                هوية وطنية (تبدأ بـ ١) أو إقامة (تبدأ بـ ٢)
+              </small>
             </div>
             <div className="form-group">
               <label className="form-label">العمر <span>*</span></label>

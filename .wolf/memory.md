@@ -2837,3 +2837,21 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 11:02 | Created docs/superpowers/specs/2026-09-04-same-day-multi-segment-plans-design.md | — | ~2985 |
+| 11:04 | Session end: 1 writes across 1 files (2026-09-04-same-day-multi-segment-plans-design.md) | 8 reads | ~20944 tok |
+| 11:05 | Per-plan grading rubric (gradeRubric) replaces global MAX_SCORES: teacher defines items + degrees, default = old 3/4/2/1; Evaluation snapshots criteria[]+totalMax; legacy scores mirrored when keys unchanged | 20 files, 3 packages + backfill migration | tsc clean x3, jest 75/75, HTTP e2e verified (custom rubric 17/20) | ~120k |
+| 11:05 | Session end: 1 writes across 1 files (2026-09-04-same-day-multi-segment-plans-design.md) | 8 reads | ~20944 tok |
+| 11:11 | Student nationalId (Saudi 10-digit, 1/2 prefix, sparse-unique) across server+web+mobile forms; fixed E11000 string-vs-number bug in error middleware; redesigned rubric editor (column headers, تلقائي/يدوي toggle, weight bar, a11y labels) | 12 files | tsc x3 clean, jest 75/75, HTTP verified (invalid/valid/duplicate) | ~55k |
+| 11:13 | Rubric total locked to exactly 10 (RUBRIC_TOTAL_DEGREES) — server zod refine + web/mobile form validation + live زائد/ناقص feedback | 6 files | HTTP verified: total 11 rejected, custom 2+6+2=10 accepted | ~20k |
+| 11:14 | Created docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md | — | ~16458 |
+| 11:14 | Session end: 2 writes across 2 files (2026-09-04-same-day-multi-segment-plans-design.md, 2026-09-04-same-day-multi-segment-plans.md) | 36 reads | ~165979 tok |
+| 11:15 | Edited docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md | added optional chaining | ~681 |
+| 11:15 | Edited docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md | expanded (+12 lines) | ~593 |
+| 11:15 | Edited docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md | 3→6 lines | ~256 |
+| 11:15 | Edited docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md | expanded (+8 lines) | ~348 |
+| 11:15 | Edited docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md | expanded (+7 lines) | ~228 |
+| 11:16 | Edited docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md | added 1 condition(s) | ~413 |
+| 11:16 | Edited docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md | added nullish coalescing | ~871 |
+| 11:17 | Edited docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md | added nullish coalescing | ~714 |
+| 11:17 | Edited docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md | 2→3 lines | ~123 |
+| 11:17 | Edited docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md | 4→4 lines | ~66 |
+| 11:17 | Session end: 12 writes across 2 files (2026-09-04-same-day-multi-segment-plans-design.md, 2026-09-04-same-day-multi-segment-plans.md) | 37 reads | ~187303 tok |

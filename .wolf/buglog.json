@@ -6593,5 +6593,25 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-31T00:17:01.715678"
+  },
+  {
+    "id": "bug-390",
+    "timestamp": "2026-09-04T11:11:30.569685",
+    "error_message": "Mongoose duplicate-key (E11000) errors returned a generic 500 'خطأ داخلي في الخادم' instead of a 409",
+    "file": "quran-hifz-server/src/middleware/error.ts",
+    "root_cause": "The handler compared `err.code === '11000'` against a STRING, but MongoDB sets `code` to the NUMBER 11000, so the branch never matched and every duplicate-key error fell through to the generic 500 handler. Latent since the middleware was written; only surfaced when a unique index (students.nationalId) was added.",
+    "fix": "Compare against both number and string (`code === 11000 || code === '11000'`), and read `err.keyPattern` to name the offending field so the client gets a specific Arabic message (e.g. 'رقم الهوية مسجَّل لطالب آخر') plus a `field` key. Verified: duplicate nationalId now returns HTTP 409.",
+    "tags": [
+      "mongoose",
+      "error-handling",
+      "duplicate-key",
+      "E11000",
+      "type-coercion",
+      "validation",
+      "students"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-09-04T11:11:30.569685"
   }
 ]

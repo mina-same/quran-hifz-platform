@@ -10,6 +10,8 @@ export interface Student {
   totalPages: number;
   guardian: string;
   guardianPhone: string;
+  /** Saudi national ID — 10 digits, leading 1 (مواطن) or 2 (مقيم). */
+  nationalId?: string;
   lastMemorization: string;
   status: 'active' | 'inactive' | 'new';
   homeworkStatus: 'submitted' | 'pending' | 'late';
