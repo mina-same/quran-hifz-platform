@@ -74,6 +74,7 @@ export type QuranPlan = {
    * `todayAssignment` is single-valued. `schedule` is every segment's days
    * merged and date-sorted, each entry carrying its own `type`. */
   todayAssignment: (TodayAssignment & { type: PlanType }) | null;
+  todayAssignments: (TodayAssignment & { type: PlanType })[];
   progress: PlanProgress | null;
   juzProgress: JuzProgress | null;
   pageRange: PageRange | null;
