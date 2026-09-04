@@ -95,7 +95,7 @@ function TrackCard({ track, onOpen }: { track: SpecialTrack; onOpen: (t: Special
           </div>
         </div>
 
-        <div style={{ marginBottom: linkedPlan?.todayAssignment ? 10 : 0 }}>
+        <div style={{ marginBottom: linkedPlan?.todayAssignments && linkedPlan.todayAssignments.length > 0 ? 10 : 0 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
             <span style={{ fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>
               <i className="ti ti-user-check" style={{ marginLeft: 4 }} />الطلاب
@@ -107,17 +107,22 @@ function TrackCard({ track, onOpen }: { track: SpecialTrack; onOpen: (t: Special
           </div>
         </div>
 
-        {linkedPlan?.todayAssignment && (
+        {linkedPlan?.todayAssignments && linkedPlan.todayAssignments.length > 0 && (
           <div style={{ borderRadius: 10, padding: "10px 12px", background: "var(--green-pale)" }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: "var(--green)", marginBottom: 4 }}>
               <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />الجزء المطلوب اليوم
             </div>
-            <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
-              {(() => {
-                const a = orientSlice(linkedPlan.todayAssignment, segmentReversed(linkedPlan, linkedPlan.todayAssignment.type));
-                return <>{surahName(a.surahStart)} : {a.ayahStart}{" — "}{surahName(a.surahEnd)} : {a.ayahEnd}</>;
-              })()}
-            </div>
+            {linkedPlan.todayAssignments.map((entry, idx) => {
+              const a = orientSlice(entry, segmentReversed(linkedPlan, entry.type));
+              return (
+                <div key={idx} style={{ fontSize: 12, color: "var(--text)", fontWeight: 600, marginTop: idx > 0 ? 3 : 0 }}>
+                  {linkedPlan.todayAssignments.length > 1 && (
+                    <span style={{ fontWeight: 400, color: "var(--text2)" }}>{entry.type} · </span>
+                  )}
+                  {surahName(a.surahStart)} : {a.ayahStart}{" — "}{surahName(a.surahEnd)} : {a.ayahEnd}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

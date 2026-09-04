@@ -176,13 +176,13 @@ function TrackCard({ track }: { track: SpecialTrack }) {
         {linkedPlan && (
           <div style={{
             marginTop: 12, borderRadius: 10, padding: "10px 12px",
-            background: linkedPlan.todayAssignment ? "var(--green-pale)" : "var(--cream)",
+            background: linkedPlan.todayAssignments.length > 0 ? "var(--green-pale)" : "var(--cream)",
           }}>
             <div
               onClick={() => setPlanOpen((o) => !o)}
               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8, cursor: "pointer" }}
             >
-              <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, fontWeight: 700, color: linkedPlan.todayAssignment ? "var(--green)" : "var(--text3)" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, fontWeight: 700, color: linkedPlan.todayAssignments.length > 0 ? "var(--green)" : "var(--text3)" }}>
                 <i className="ti ti-target" />{linkedPlan.name}
                 {linkedPlan.progress && (
                   <span style={{ background: "var(--green)", color: "#fff", borderRadius: 99, padding: "1px 8px", fontSize: 10 }}>
@@ -209,20 +209,20 @@ function TrackCard({ track }: { track: SpecialTrack }) {
                   </div>
                 )}
                 <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
-                  {linkedPlan.todayAssignment ? (() => {
-                    const a = orientSlice(linkedPlan.todayAssignment, segmentReversed(linkedPlan, linkedPlan.todayAssignment.type));
+                  {linkedPlan.todayAssignments.length > 0 ? linkedPlan.todayAssignments.map((entry, idx) => {
+                    const a = orientSlice(entry, segmentReversed(linkedPlan, entry.type));
                     return (
-                    <>
-                      مقرَّر اليوم: {surahName(a.surahStart)} : {a.ayahStart}
+                    <div key={idx} style={{ marginTop: idx > 0 ? 4 : 0 }}>
+                      مقرَّر اليوم{linkedPlan.todayAssignments.length > 1 ? ` (${entry.type})` : ""}: {surahName(a.surahStart)} : {a.ayahStart}
                       {" — "}
                       {surahName(a.surahEnd)} : {a.ayahEnd}
                       <span style={{ fontWeight: 400, color: "var(--text2)" }}>
                         {" "}(صفحة {a.pageStart}
                         {a.pageEnd !== a.pageStart ? ` - ${a.pageEnd}` : ""})
                       </span>
-                    </>
+                    </div>
                     );
-                  })() : (
+                  }) : (
                     <span style={{ fontWeight: 400, color: "var(--text3)" }}>لا يوجد جزء مخصص لليوم</span>
                   )}
                 </div>

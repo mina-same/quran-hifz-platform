@@ -417,7 +417,7 @@ export function TeacherTrackDetail() {
   const linkedPlan = linkedPlans.find((p) => p.targetType === "specialTrack") ?? linkedPlans[0];
   // Reverse-direction plan → display the assigned ward in the plan's own
   // direction ("من" nearer the plan's start). Display-only; storage stays low→high.
-  const rangeReversed = !!linkedPlan && segmentReversed(linkedPlan, linkedPlan?.todayAssignment?.type);
+  const rangeReversed = !!linkedPlan && segmentReversed(linkedPlan, linkedPlan?.todayAssignments?.[0]?.type);
 
   // Each student can now have their own effective schedule (absence/shortfall
   // reflow, manual per-student overrides), so "today's assigned portion" is
@@ -1602,7 +1602,7 @@ export function TeacherTrackDetail() {
                 style={{
                   borderRadius: 10,
                   padding: "10px 12px",
-                  background: linkedPlan.todayAssignment ? "var(--green-pale)" : "var(--cream)",
+                  background: linkedPlan.todayAssignments.length > 0 ? "var(--green-pale)" : "var(--cream)",
                   marginBottom: 14,
                 }}
               >
@@ -1610,25 +1610,28 @@ export function TeacherTrackDetail() {
                   style={{
                     fontSize: 11,
                     fontWeight: 700,
-                    color: linkedPlan.todayAssignment ? "var(--green)" : "var(--text3)",
-                    marginBottom: linkedPlan.todayAssignment ? 4 : 0,
+                    color: linkedPlan.todayAssignments.length > 0 ? "var(--green)" : "var(--text3)",
+                    marginBottom: linkedPlan.todayAssignments.length > 0 ? 4 : 0,
                   }}
                 >
                   <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />
                   الجزء المطلوب اليوم
                 </div>
-                {linkedPlan.todayAssignment ? (
-                  (() => {
-                    const a = orientSlice(linkedPlan.todayAssignment, rangeReversed);
+                {linkedPlan.todayAssignments.length > 0 ? (
+                  linkedPlan.todayAssignments.map((entry, idx) => {
+                    const a = orientSlice(entry, segmentReversed(linkedPlan, entry.type));
                     return (
-                      <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
+                      <div key={idx} style={{ fontSize: 12, color: "var(--text)", fontWeight: 600, marginTop: idx > 0 ? 4 : 0 }}>
+                        {linkedPlan.todayAssignments.length > 1 && (
+                          <span style={{ fontWeight: 400, color: "var(--text2)" }}>{entry.type} · </span>
+                        )}
                         {surahName(a.surahStart)} : {a.ayahStart}
                         {" — "}
                         {surahName(a.surahEnd)} : {a.ayahEnd} (صفحة {a.pageStart}
                         {a.pageEnd !== a.pageStart ? ` - ${a.pageEnd}` : ""})
                       </div>
                     );
-                  })()
+                  })
                 ) : (
                   <div style={{ fontSize: 11, color: "var(--text3)" }}>لا يوجد جزء مخصص لليوم</div>
                 )}

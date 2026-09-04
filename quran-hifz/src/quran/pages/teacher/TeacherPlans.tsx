@@ -290,17 +290,18 @@ function PlanCard({
 
         <div style={{
           borderRadius: 10, padding: "10px 12px",
-          background: plan.todayAssignment ? "var(--green-pale)" : "var(--cream)",
+          background: plan.todayAssignments.length > 0 ? "var(--green-pale)" : "var(--cream)",
         }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: plan.todayAssignment ? "var(--green)" : "var(--text3)", marginBottom: plan.todayAssignment ? 4 : 0 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: plan.todayAssignments.length > 0 ? "var(--green)" : "var(--text3)", marginBottom: plan.todayAssignments.length > 0 ? 4 : 0 }}>
             <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />
-            الجزء المطلوب اليوم{plan.todayAssignment ? ` · ${plan.todayAssignment.type}` : ""}
+            الجزء المطلوب اليوم
           </div>
-          {plan.todayAssignment ? (() => {
+          {plan.todayAssignments.length > 0 ? plan.todayAssignments.map((entry, idx) => {
             // Direction is per segment — orient by the type actually due today.
-            const a = orientSlice(plan.todayAssignment, segmentReversed(plan, plan.todayAssignment.type));
+            const a = orientSlice(entry, segmentReversed(plan, entry.type));
             return (
-            <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
+            <div key={idx} style={{ fontSize: 12, color: "var(--text)", fontWeight: 600, marginTop: idx > 0 ? 4 : 0 }}>
+              <span style={{ fontWeight: 400, color: "var(--text2)" }}>{entry.type} · </span>
               {surahName(a.surahStart)} : {a.ayahStart}
               {" — "}
               {surahName(a.surahEnd)} : {a.ayahEnd}
@@ -310,7 +311,7 @@ function PlanCard({
               </span>
             </div>
             );
-          })() : (
+          }) : (
             <div style={{ fontSize: 11, color: "var(--text3)" }}>لا يوجد جزء مخصص لليوم</div>
           )}
         </div>

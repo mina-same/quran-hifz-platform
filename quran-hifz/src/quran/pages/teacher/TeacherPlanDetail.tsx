@@ -78,8 +78,6 @@ export function TeacherPlanDetail() {
   }
 
   const typeCfg = PLAN_TYPE_CFG[plan.type] ?? PLAN_TYPE_CFG["حفظ"];
-  // Direction is per segment — orient today's ward by the type actually due.
-  const reversed = segmentReversed(plan, plan.todayAssignment?.type);
   const targetLabel =
     plan.targetType === "halqa" ? getName(plan.halqa!) :
     plan.targetType === "specialTrack" ? (plan.specialTrack ? (typeof plan.specialTrack === "object" ? plan.specialTrack.title : plan.specialTrack) : "—") :
@@ -187,15 +185,17 @@ export function TeacherPlanDetail() {
 
         <div style={{
           borderRadius: 10, padding: "12px 14px", marginTop: 16,
-          background: plan.todayAssignment ? "var(--green-pale)" : "var(--cream)",
+          background: plan.todayAssignments.length > 0 ? "var(--green-pale)" : "var(--cream)",
         }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: plan.todayAssignment ? "var(--green)" : "var(--text3)", marginBottom: plan.todayAssignment ? 5 : 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: plan.todayAssignments.length > 0 ? "var(--green)" : "var(--text3)", marginBottom: plan.todayAssignments.length > 0 ? 5 : 0 }}>
             <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />الجزء المطلوب اليوم
           </div>
-          {plan.todayAssignment ? (() => {
-            const a = orientSlice(plan.todayAssignment, reversed);
+          {plan.todayAssignments.length > 0 ? plan.todayAssignments.map((entry, idx) => {
+            // Direction is per segment — orient by the type actually due today.
+            const a = orientSlice(entry, segmentReversed(plan, entry.type));
             return (
-            <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 600 }}>
+            <div key={idx} style={{ fontSize: 13, color: "var(--text)", fontWeight: 600, marginTop: idx > 0 ? 6 : 0 }}>
+              <span style={{ fontWeight: 400, color: "var(--text2)" }}>{entry.type} · </span>
               {surahName(a.surahStart)} : {a.ayahStart}
               {" — "}
               {surahName(a.surahEnd)} : {a.ayahEnd}
@@ -205,7 +205,7 @@ export function TeacherPlanDetail() {
               </span>
             </div>
             );
-          })() : (
+          }) : (
             <div style={{ fontSize: 12, color: "var(--text3)" }}>لا يوجد جزء مخصص لليوم</div>
           )}
         </div>
@@ -232,7 +232,7 @@ export function TeacherPlanDetail() {
               </thead>
               <tbody>
                 {plan.schedule.map((s) => {
-                  const a = orientSlice(s, reversed);
+                  const a = orientSlice(s, segmentReversed(plan, s.type));
                   return (
                   <tr key={s.occurrenceIndex}>
                     <td>{s.occurrenceIndex}</td>
