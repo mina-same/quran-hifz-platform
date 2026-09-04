@@ -203,8 +203,13 @@ function withPlanComputed(plan: InstanceType<typeof QuranPlan>) {
     };
   });
 
-  // Days are partitioned, so at most one segment can be due today.
-  const todayAssignment = shaped.find((s) => s.todayAssignment)?.todayAssignment ?? null;
+  // A day can now fund more than one segment (حفظ + مراجعة sharing a
+  // weekday) — every segment due today is exposed via `todayAssignments`.
+  // `todayAssignment` (singular) is kept as a best-effort first-match for
+  // screens that only ever render one type; new/updated screens should read
+  // `todayAssignments` instead.
+  const todayAssignments = shaped.map((s) => s.todayAssignment).filter((a): a is NonNullable<typeof a> => a != null);
+  const todayAssignment = todayAssignments[0] ?? null;
 
   const totals = shaped.reduce(
     (acc, s) => {
@@ -229,6 +234,7 @@ function withPlanComputed(plan: InstanceType<typeof QuranPlan>) {
     type: todayAssignment?.type ?? shaped[0]?.type ?? plan.type,
     days: unionDays(segmentInputs),
     todayAssignment,
+    todayAssignments,
     progress: totals.total > 0
       ? { completed: totals.completed, total: totals.total, percent: Math.round((totals.completed / totals.total) * 100) }
       : null,
