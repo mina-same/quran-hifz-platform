@@ -752,8 +752,6 @@ function createS(theme: AppTheme) {
     holidayRangeRow: { flexDirection: 'row', gap: 10 },
     flex1: { flex: 1 },
     chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
-    chipDisabled: { opacity: 0.35, borderStyle: 'dashed' },
-    chipTextDisabled: { color: theme.textMuted },
     typeHint: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 8, lineHeight: 18 },
     chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
     chipText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
