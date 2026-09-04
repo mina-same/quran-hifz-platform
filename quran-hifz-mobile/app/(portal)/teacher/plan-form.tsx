@@ -197,8 +197,8 @@ export default function TeacherPlanForm() {
     }));
   }
 
-  /** Toggling a day for one type; a day already owned by another type is not
-   * offered, so this can only ever add a free day. */
+  /** Toggling a day for one type. حفظ and مراجعة may now share the same
+   * weekday, so each segment's days are toggled independently. */
   function toggleSegmentDay(type: PlanType, day: string) {
     setForm((f) => ({
       ...f,
@@ -209,11 +209,13 @@ export default function TeacherPlanForm() {
     }));
   }
 
-  /** Which type owns each weekday — a day belongs to at most one. */
-  const dayOwner = useMemo(() => {
-    const owner = new Map<string, PlanType>();
-    for (const sg of form.segments) for (const d of sg.days) owner.set(d, sg.type);
-    return owner;
+  /** Weekdays used by at least one segment, regardless of type. Both types
+   * may now run on the same day, so this no longer tracks ownership — it
+   * only powers the holiday tooltip below (is this weekday active at all). */
+  const activeWeekdays = useMemo(() => {
+    const days = new Set<string>();
+    for (const sg of form.segments) for (const d of sg.days) days.add(d);
+    return days;
   }, [form.segments]);
 
   /** Live breakdown across every segment — the same computation the server
@@ -358,9 +360,9 @@ export default function TeacherPlanForm() {
           )}
         </Card>
 
-        {/* One card per selected type: its own days and its own range. A day
-            already taken by another type is disabled and says who owns it —
-            the partition is what keeps each day's ward single-valued. */}
+        {/* One card per selected type: its own days and its own range. حفظ
+            and مراجعة may now share the same weekday — each segment's days
+            are picked independently, with no cross-segment restriction. */}
         {form.segments.map((seg) => {
           const segReversed = isReversedRange(seg.rangeStart, seg.rangeEnd);
           return (
@@ -369,26 +371,20 @@ export default function TeacherPlanForm() {
               <FormGroup label="الأيام" required>
                 <View style={s.chipRow}>
                   {WEEK_DAYS.map((d) => {
-                    const owner = dayOwner.get(d);
-                    const mine = owner === seg.type;
-                    const taken = !!owner && !mine;
+                    const mine = seg.days.includes(d);
                     return (
                       <Pressable
                         haptic="select"
                         key={d}
-                        disabled={taken}
-                        style={[s.chip, mine && s.chipActive, taken && s.chipDisabled]}
+                        style={[s.chip, mine && s.chipActive]}
                         onPress={() => toggleSegmentDay(seg.type, d)}
-                        accessibilityLabel={taken ? `${d} — مُسنَد لـ${owner}` : d}
+                        accessibilityLabel={d}
                       >
-                        <Text style={[s.chipText, mine && s.chipTextActive, taken && s.chipTextDisabled]}>{d}</Text>
+                        <Text style={[s.chipText, mine && s.chipTextActive]}>{d}</Text>
                       </Pressable>
                     );
                   })}
                 </View>
-                {form.segments.length > 1 && (
-                  <Text style={s.typeHint}>الأيام الباهتة مُسنَدة لنوع آخر — اليوم الواحد لنوع واحد فقط.</Text>
-                )}
               </FormGroup>
 
               <View style={{ height: 12 }} />
@@ -471,7 +467,7 @@ export default function TeacherPlanForm() {
                 const weekday = WEEK_DAYS[(new Date(`${h}T00:00:00`).getDay() + 1) % 7];
                 // A holiday only has an effect if some type actually runs
                 // that weekday — with several types, that means any of them.
-                const active = dayOwner.has(weekday);
+                const active = activeWeekdays.has(weekday);
                 return (
                   <Pressable
                     key={h}
