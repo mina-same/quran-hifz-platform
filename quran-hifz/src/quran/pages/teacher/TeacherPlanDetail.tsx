@@ -223,6 +223,7 @@ export function TeacherPlanDetail() {
               <thead>
                 <tr>
                   <th>#</th>
+                  <th>النوع</th>
                   <th>التاريخ</th>
                   <th>الجزء</th>
                   <th>من</th>
@@ -234,8 +235,9 @@ export function TeacherPlanDetail() {
                 {plan.schedule.map((s) => {
                   const a = orientSlice(s, segmentReversed(plan, s.type));
                   return (
-                  <tr key={s.occurrenceIndex}>
+                  <tr key={`${s.type}-${s.occurrenceIndex}`}>
                     <td>{s.occurrenceIndex}</td>
+                    <td><Badge tone={s.type === "حفظ" ? "green" : "gold"}>{s.type}</Badge></td>
                     <td>{fmtDate(s.date)}</td>
                     <td><Badge tone="green">جزء {s.juz}</Badge></td>
                     <td>{surahName(a.surahStart)} : {a.ayahStart}</td>
