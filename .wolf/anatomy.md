@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-04T14:57:03.589Z
-> Files: 542 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-04T15:06:04.296Z
+> Files: 543 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -246,13 +246,14 @@
 
 ## .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md (~1635 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md (~1913 tok)
 - `task-1-report.md` — Task 1: Mobile `quranRange.ts` — Completion Report (~1978 tok)
 - `task-2-report.md` — Task 2 Report: Web `quranRange.ts` Mirror (~1156 tok)
 - `task-3-report.md` — Task 3 Report: Server `quranRange.ts` mirror + `computeMultiTodayAssignment` → plural + fix `backfil (~1105 tok)
 - `task-4-report.md` — Task 4 Report: Server `quran-plan.controller.ts` — `todayAssignments` Array (~1334 tok)
 - `task-5-report.md` — Task 5 Report: API type declarations — add `todayAssignments` field (web + mobile) (~833 tok)
 - `task-6-report.md` — Task 6 Report: Web plan builder — remove cross-segment day disabling (~1378 tok)
+- `task-7-report.md` — Task 7 Report: Mobile plan builder — remove cross-segment day disabling (~2185 tok)
 
 ## docs/superpowers/plans/
 
@@ -352,7 +353,7 @@
 - `homework.tsx` — getName — renders form (~1264 tok)
 - `myhalqa.tsx` — TeacherHalqa (~1077 tok)
 - `plan-detail.tsx` — STATUS_VARIANT (~2476 tok)
-- `plan-form.tsx` — Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local (~10514 tok)
+- `plan-form.tsx` — Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local (~10482 tok)
 - `plans.tsx` — STATUS_VARIANT (~1529 tok)
 - `recordlesson.tsx` — LESSON_TYPES (~3004 tok)
 - `reports.tsx` — TeacherReports (~642 tok)
@@ -806,7 +807,7 @@
 - `AdminParents.tsx` — EMPTY_ADD, ChildChip — renders table, modal, search bar, avatars (~5900 tok)
 - `AdminRegister.tsx` — schema — renders form (~3079 tok)
 - `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~324 tok)
-- `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13471 tok)
+- `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13551 tok)
 - `AdminStudents.tsx` — PATH_TONE — renders table (~5525 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4598 tok)
 
@@ -833,7 +834,7 @@
 - `StudentMessages.tsx` — StudentMessages (~768 tok)
 - `StudentPoints.tsx` — MY_POINTS (~1322 tok)
 - `StudentSchedule.tsx` — getId (~840 tok)
-- `StudentSpecialTracks.tsx` — surahName (~4351 tok)
+- `StudentSpecialTracks.tsx` — surahName (~4412 tok)
 - `StudentStore.tsx` — MY_POINTS (~882 tok)
 
 ## quran-hifz/src/quran/pages/teacher/
@@ -844,15 +845,15 @@
 - `TeacherGroupHomework.tsx` — STUDENTS (~2940 tok)
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
-- `TeacherPlanDetail.tsx` — surahName — renders table (~3637 tok)
+- `TeacherPlanDetail.tsx` — surahName — renders table (~3891 tok)
 - `TeacherPlanForm.tsx` — One type's track in the form: its own days and its own range. The plan's (~14465 tok)
-- `TeacherPlans.tsx` — surahName (~4282 tok)
+- `TeacherPlans.tsx` — surahName (~4519 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
-- `TeacherSpecialTracks.tsx` — surahName (~2791 tok)
+- `TeacherSpecialTracks.tsx` — surahName (~2892 tok)
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2471 tok)
-- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~18810 tok)
+- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~23735 tok)
 
 ## quran-hifz/src/quran/router/
 
