@@ -55,3 +55,6 @@ web-build/
 
 # Testing
 coverage/
+
+# Subagent-driven-development scratch workspaces
+.superpowers/
