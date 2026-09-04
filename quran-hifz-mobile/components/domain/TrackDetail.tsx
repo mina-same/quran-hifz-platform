@@ -299,14 +299,16 @@ export default function TrackDetail({ trackId, role }: Props) {
                 linkedPlan={linkedPlan}
                 daySchedule={daySchedule}
                 emptyLabel="لا يوجد طلاب مسجّلون بعد"
-                renderExtra={(student, dayType) => (
+                renderExtra={(student) => (
                   linkedPlan
+                    // No `type` passed: a multi-type plan's individual overlay
+                    // now shows every type's occurrences together in one panel
+                    // rather than one panel per type due today.
                     ? <IndividualPlanPanel
                         planId={linkedPlan._id}
                         studentId={student._id}
                         studentName={student.name}
                         basePlan={linkedPlan}
-                        type={dayType}
                       />
                     : <Text style={s.muted}>اربط خطة حفظ بالمسار أولاً لعرض التوزيع الفردي</Text>
                 )}
