@@ -25,6 +25,7 @@ import {
   type QuranPlan,
   type RangePoint,
   type ScheduleEntry,
+  type PlanType,
   segmentReversed,
 } from "../../api/quran-plans";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
@@ -396,9 +397,11 @@ export function TeacherTrackDetail() {
   }
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
   const [overrides, setOverrides] = useState<Record<string, StudentEval>>({});
-  // Which surah+ayah each student actually reached today — defaults to the
-  // day's full assigned end point (i.e. "finished it all") until the teacher
-  // pulls it back for a student who fell short.
+  // Which surah+ayah each student actually reached today, per ward type —
+  // defaults to that ward's full assigned end point (i.e. "finished it all")
+  // until the teacher pulls it back for a student who fell short. Keyed by
+  // `${studentId}::${type}` since a student can now have two independent
+  // wards (حفظ and مراجعة) due the same day.
   const [completionOverrides, setCompletionOverrides] = useState<Record<string, RangePoint>>({});
   const recordOccurrence = useRecordStudentOccurrence();
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
@@ -542,12 +545,14 @@ export function TeacherTrackDetail() {
   const { scheduledSet, scheduledSorted, assignmentByDate, dayChips, effectiveDate } =
     useMemo(() => {
       const set = new Set<string>();
-      const byDate = new Map<string, ScheduleEntry>();
+      const byDate = new Map<string, (ScheduleEntry & { type: PlanType })[]>();
       for (const e of linkedPlan?.schedule ?? []) {
         if (!e.date) continue;
         const d = toDateOnly(e.date);
         set.add(d);
-        if (!byDate.has(d)) byDate.set(d, e);
+        const list = byDate.get(d) ?? [];
+        list.push(e);
+        byDate.set(d, list);
       }
       const sorted = Array.from(set).sort();
       const chips = sorted.length ? buildDayChips(sorted[0], sorted[sorted.length - 1], today) : [];
@@ -660,19 +665,30 @@ export function TeacherTrackDetail() {
   function unlockStudent(studentId: string) {
     setUnlockedIds((prev) => new Set(prev).add(studentId));
   }
-  /** Direction of this student's own ward. Their individual overlay can run the
-   * opposite way to the shared plan (a custom-range individual plan), so infer
-   * it from their own schedule first and only fall back to the base plan. */
-  function reversedForStudent(studentId: string): boolean {
-    return isReversedSchedule(progressByStudentId[studentId]?.effectiveSchedule) ?? rangeReversed;
+  /** Direction of this student's own ward, for one type. Their individual
+   * overlay can run the opposite way to the shared plan (a custom-range
+   * individual plan), so infer it from their own schedule first and only
+   * fall back to the base plan's own direction for that type. Filtered to
+   * `type` because `occurrenceIndex` — what `isReversedSchedule` sorts by —
+   * restarts at 1 within each type's own segment; mixing both types' entries
+   * together would scramble that ordering. */
+  function reversedForStudent(studentId: string, type: PlanType): boolean {
+    const ownSchedule = progressByStudentId[studentId]?.effectiveSchedule.filter(
+      (o) => o.type === type,
+    );
+    return isReversedSchedule(ownSchedule) ?? segmentReversed(linkedPlan, type);
   }
-  function completedPointFor(studentId: string, forAssignment: ScheduleEntry): RangePoint {
+  function completedPointFor(
+    studentId: string,
+    forAssignment: ScheduleEntry & { type: PlanType },
+  ): RangePoint {
     return (
-      completionOverrides[studentId] ?? dayFinishPoint(forAssignment, reversedForStudent(studentId))
+      completionOverrides[`${studentId}::${forAssignment.type}`] ??
+      dayFinishPoint(forAssignment, reversedForStudent(studentId, forAssignment.type))
     );
   }
-  function setCompletedPoint(studentId: string, point: RangePoint) {
-    setCompletionOverrides((prev) => ({ ...prev, [studentId]: point }));
+  function setCompletedPoint(studentId: string, type: PlanType, point: RangePoint) {
+    setCompletionOverrides((prev) => ({ ...prev, [`${studentId}::${type}`]: point }));
   }
   /** Clamps a teacher-picked completion point to what the student could
    * plausibly have reached: no earlier than the start of the day's own ward,
@@ -682,23 +698,24 @@ export function TeacherTrackDetail() {
    * low→high the way slices are always stored. */
   function clampReached(
     point: RangePoint,
-    assignment: ScheduleEntry,
+    assignment: ScheduleEntry & { type: PlanType },
     studentId: string,
   ): RangePoint {
-    const reversed = reversedForStudent(studentId);
+    const reversed = reversedForStudent(studentId, assignment.type);
     const dayStart = reversed
       ? { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd }
       : { surahNumber: assignment.surahStart, ayah: assignment.ayahStart };
-    const finish =
-      planFinishPoint(progressByStudentId[studentId]?.effectiveSchedule ?? [], reversed) ??
-      dayFinishPoint(assignment, reversed);
+    const ownSchedule = (progressByStudentId[studentId]?.effectiveSchedule ?? []).filter(
+      (o) => o.type === assignment.type,
+    );
+    const finish = planFinishPoint(ownSchedule, reversed) ?? dayFinishPoint(assignment, reversed);
     const loFlat = Math.min(toFlatIndex(dayStart), toFlatIndex(finish));
     const hiFlat = Math.max(toFlatIndex(dayStart), toFlatIndex(finish));
     return fromFlatIndex(Math.max(loFlat, Math.min(hiFlat, toFlatIndex(point))));
   }
   /** The picker's own selectable window — the same bounds as `clampReached`,
    * obtained by clamping the mushaf's own extremes. */
-  function reachedBounds(assignment: ScheduleEntry, studentId: string) {
+  function reachedBounds(assignment: ScheduleEntry & { type: PlanType }, studentId: string) {
     return {
       lo: clampReached({ surahNumber: 1, ayah: 1 }, assignment, studentId),
       hi: clampReached({ surahNumber: 114, ayah: 6 }, assignment, studentId),
@@ -721,77 +738,92 @@ export function TeacherTrackDetail() {
       { teacher: teacherId!, specialTrack: track._id, date: effectiveDate, records },
       {
         onSuccess: () => {
-          // Feed the day's outcome into the student's individual plan overlay so
-          // an absence or a partial completion gets redistributed across their
-          // remaining days — only meaningful when there's an assigned portion.
-          const studentAssignment =
+          // Feed the day's outcome into each of the student's individual plan
+          // overlays so an absence or a partial completion gets redistributed
+          // across their remaining days — one `record` call per ward due today
+          // (usually one, but up to two when حفظ/مراجعة share the weekday), only
+          // meaningful when there's an assigned portion. The first (and, on a
+          // normal single-type day, only) assignment resolves through the same
+          // shared toast the save action started with; any further assignment
+          // gets its own toast labeled by type, since more than one ward outcome
+          // no longer fits in a single message.
+          const studentAssignments =
             linkedPlan && planCoversStudent(linkedPlan, studentId)
-              ? assignmentForStudent(studentId)
-              : undefined;
-          if (!linkedPlan || !studentAssignment) {
+              ? assignmentsForStudent(studentId)
+              : [];
+          if (!linkedPlan || studentAssignments.length === 0) {
             toast.success("تم الحفظ بنجاح", { id: toastId });
             return;
           }
-          const completedPoint = completedPointFor(studentId, studentAssignment);
-          // Signed in the plan's own direction — for a reverse plan the undone part
-          // is the low side of the day's slice, not the high one. Negative = fell
-          // short of the day's ward, positive = recited past it.
-          const delta = dayDeltaAyahs(
-            studentAssignment,
-            reversedForStudent(studentId),
-            completedPoint,
-          );
-          const status = e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
 
-          if (status === "done" && delta === 0) {
-            toast.success("تم حفظ الحضور والتقييم بنجاح", { id: toastId });
-            recordOccurrence.mutate({
-              planId: linkedPlan._id,
-              studentId,
-              occurrenceIndex: studentAssignment.occurrenceIndex,
-              status,
-            });
-            return;
-          }
+          studentAssignments.forEach((studentAssignment, i) => {
+            const thisToastId = i === 0 ? toastId : toast.loading("جاري حفظ الحضور والتقييم...");
+            const typeLabel = studentAssignments.length > 1 ? `${studentAssignment.type} — ` : "";
+            const completedPoint = completedPointFor(studentId, studentAssignment);
+            // Signed in the plan's own direction — for a reverse plan the undone part
+            // is the low side of the day's slice, not the high one. Negative = fell
+            // short of the day's ward, positive = recited past it.
+            const delta = dayDeltaAyahs(
+              studentAssignment,
+              reversedForStudent(studentId, studentAssignment.type),
+              completedPoint,
+            );
+            const status = e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
 
-          toast.loading(
-            status === "absent"
-              ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
-              : delta > 0
-                ? `جاري تعديل باقي أيام خطة ${studentName} بعد التسميع الإضافي...`
-                : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`,
-            { id: toastId },
-          );
-          recordOccurrence.mutate(
-            {
-              planId: linkedPlan._id,
-              studentId,
-              occurrenceIndex: studentAssignment.occurrenceIndex,
-              status,
-              // Sent for an over-achievement too (status "done"), so the server can
-              // take the surplus off the student's remaining days.
-              completedThroughSurah: status === "absent" ? undefined : completedPoint.surahNumber,
-              completedThroughAyah: status === "absent" ? undefined : completedPoint.ayah,
-            },
-            {
-              onSuccess: (res) => {
-                toast.success(
-                  status === "absent"
-                    ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
-                    : delta > 0
-                      ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
-                      : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`,
-                  { id: toastId },
-                );
-                if (res.data.overflowPages > 0) {
-                  toast.warning(
-                    `لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`,
-                  );
-                }
+            if (status === "done" && delta === 0) {
+              toast.success(`${typeLabel}تم حفظ الحضور والتقييم بنجاح`, { id: thisToastId });
+              recordOccurrence.mutate({
+                planId: linkedPlan._id,
+                studentId,
+                type: studentAssignment.type,
+                occurrenceIndex: studentAssignment.occurrenceIndex,
+                status,
+              });
+              return;
+            }
+
+            toast.loading(
+              typeLabel +
+                (status === "absent"
+                  ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
+                  : delta > 0
+                    ? `جاري تعديل باقي أيام خطة ${studentName} بعد التسميع الإضافي...`
+                    : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`),
+              { id: thisToastId },
+            );
+            recordOccurrence.mutate(
+              {
+                planId: linkedPlan._id,
+                studentId,
+                type: studentAssignment.type,
+                occurrenceIndex: studentAssignment.occurrenceIndex,
+                status,
+                // Sent for an over-achievement too (status "done"), so the server can
+                // take the surplus off the student's remaining days.
+                completedThroughSurah: status === "absent" ? undefined : completedPoint.surahNumber,
+                completedThroughAyah: status === "absent" ? undefined : completedPoint.ayah,
               },
-              onError: (err) => toast.error((err as Error).message, { id: toastId }),
-            },
-          );
+              {
+                onSuccess: (res) => {
+                  toast.success(
+                    typeLabel +
+                      (status === "absent"
+                        ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
+                        : delta > 0
+                          ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
+                          : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`),
+                    { id: thisToastId },
+                  );
+                  if (res.data.overflowPages > 0) {
+                    toast.warning(
+                      `${typeLabel}لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`,
+                    );
+                  }
+                },
+                onError: (err) => toast.error((err as Error).message, { id: thisToastId }),
+              },
+            );
+          });
         },
         onError: (err) => toast.error((err as Error).message, { id: toastId }),
       },
@@ -871,14 +903,16 @@ export function TeacherTrackDetail() {
   const enrolled = roster.length;
   const pct = Math.min(100, Math.round((enrolled / track.maxStudents) * 100));
   const barClr = pct >= 90 ? "#ef4444" : pct >= 70 ? "#f59e0b" : "var(--green)";
-  // Each student's own assigned portion for the selected day — falls back to
-  // the shared plan schedule (assignmentByDate) for anyone with no individual
-  // overlay yet, matching the API's own graceful-degradation behavior.
-  function assignmentForStudent(studentId: string): ScheduleEntry | undefined {
-    const perStudent = progressByStudentId[studentId]?.effectiveSchedule.find(
+  // Each student's own assigned portion(s) for the selected day — falls back
+  // to the shared plan schedule (assignmentByDate) for anyone with no
+  // individual overlay yet, matching the API's own graceful-degradation
+  // behavior. Plural: a day can now carry up to one entry per type (حفظ and
+  // مراجعة) when both share the same weekday, instead of always exactly one.
+  function assignmentsForStudent(studentId: string): (ScheduleEntry & { type: PlanType })[] {
+    const perStudent = (progressByStudentId[studentId]?.effectiveSchedule ?? []).filter(
       (o) => toDateOnly(o.date) === effectiveDate,
     );
-    return perStudent ?? assignmentByDate.get(effectiveDate);
+    return perStudent.length > 0 ? perStudent : (assignmentByDate.get(effectiveDate) ?? []);
   }
 
   return (
@@ -1199,7 +1233,7 @@ export function TeacherTrackDetail() {
                   const isUnlocked = unlockedIds.has(id);
                   const controlsLocked = isFutureDay || (hasSaved && !isUnlocked);
                   const hasIndividualPlan = !!linkedPlan && planCoversStudent(linkedPlan, id);
-                  const assignment = hasIndividualPlan ? assignmentForStudent(id) : undefined;
+                  const assignments = hasIndividualPlan ? assignmentsForStudent(id) : [];
                   return (
                     <div
                       key={id}
@@ -1235,18 +1269,31 @@ export function TeacherTrackDetail() {
 
                       {isExpanded && (
                         <div style={{ padding: "10px 2px 4px" }}>
-                          {assignment ? (
-                            (() => {
-                              const reversed = reversedForStudent(id);
+                          {assignments.length > 0 ? (
+                            assignments.map((assignment) => {
+                              const reversed = reversedForStudent(id, assignment.type);
                               const a = orientSlice(assignment, reversed);
                               return (
-                                <div className="assignment-banner" style={{ marginBottom: 10 }}>
+                                <div
+                                  key={assignment.type}
+                                  className="assignment-banner"
+                                  style={{ marginBottom: 10 }}
+                                >
                                   <div className="assignment-icon">
                                     <i className="ti ti-book-2" />
                                   </div>
                                   <div className="assignment-body">
                                     <div className="assignment-label">
                                       <i className="ti ti-clipboard-text" /> الورد المقرر
+                                      {assignments.length > 1 && (
+                                        <span style={{ marginRight: 6 }}>
+                                          <Badge
+                                            tone={assignment.type === "حفظ" ? "green" : "gold"}
+                                          >
+                                            {assignment.type}
+                                          </Badge>
+                                        </span>
+                                      )}
                                       {reversed && (
                                         <span style={{ fontWeight: 400, color: "var(--text3)" }}>
                                           {" "}
@@ -1278,7 +1325,7 @@ export function TeacherTrackDetail() {
                                   </div>
                                 </div>
                               );
-                            })()
+                            })
                           ) : (
                             <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10 }}>
                               لا يوجد جزء مخصص لهذا اليوم
@@ -1314,17 +1361,17 @@ export function TeacherTrackDetail() {
                           </div>
 
                           {!isAbsent &&
-                            assignment &&
-                            (() => {
+                            assignments.map((assignment) => {
                               // "وصل إلى" and the leftover are both measured in the plan's
                               // own direction: a reverse day is worked from its high end
                               // down, so it's complete once the student reaches its low end.
-                              const reversedHere = reversedForStudent(id);
+                              const reversedHere = reversedForStudent(id, assignment.type);
                               const actualPoint = completedPointFor(id, assignment);
                               const delta = dayDeltaAyahs(assignment, reversedHere, actualPoint);
                               const isFull = delta === 0;
                               return (
                                 <div
+                                  key={assignment.type}
                                   style={{
                                     border: "1px dashed var(--border)",
                                     borderRadius: 10,
@@ -1346,6 +1393,13 @@ export function TeacherTrackDetail() {
                                       style={{ marginLeft: 4, color: "var(--green)" }}
                                     />{" "}
                                     الورد الفعلي — السورة والآية التي وصل إليها الطالب
+                                    {assignments.length > 1 && (
+                                      <span style={{ marginRight: 6 }}>
+                                        <Badge tone={assignment.type === "حفظ" ? "green" : "gold"}>
+                                          {assignment.type}
+                                        </Badge>
+                                      </span>
+                                    )}
                                   </label>
                                   <div
                                     style={{
@@ -1360,7 +1414,11 @@ export function TeacherTrackDetail() {
                                       disabled={controlsLocked}
                                       bounds={reachedBounds(assignment, id)}
                                       onChange={(v) =>
-                                        setCompletedPoint(id, clampReached(v, assignment, id))
+                                        setCompletedPoint(
+                                          id,
+                                          assignment.type,
+                                          clampReached(v, assignment, id),
+                                        )
                                       }
                                     />
                                     <span style={{ fontSize: 11, color: "var(--text3)" }}>
@@ -1388,6 +1446,7 @@ export function TeacherTrackDetail() {
                                         onClick={() =>
                                           setCompletedPoint(
                                             id,
+                                            assignment.type,
                                             dayFinishPoint(assignment, reversedHere),
                                           )
                                         }
@@ -1425,7 +1484,7 @@ export function TeacherTrackDetail() {
                                   </div>
                                 </div>
                               );
-                            })()}
+                            })}
 
                           <div className="eval-scores">
                             {manualCriteria(rubric).map((cat) => (
