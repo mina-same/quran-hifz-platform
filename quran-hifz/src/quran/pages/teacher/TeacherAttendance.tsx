@@ -229,13 +229,15 @@ export function TeacherAttendance() {
   const { scheduledSet, scheduledSorted, assignmentByDate, dayChips, effectiveDate } =
     useMemo(() => {
       const set = new Set<string>();
-      const byDate = new Map<string, ScheduleEntry & { type?: PlanType }>();
+      const byDate = new Map<string, (ScheduleEntry & { type: PlanType })[]>();
       for (const p of plans) {
         for (const e of p.schedule ?? []) {
           if (!e.date) continue;
           const d = toDateOnly(e.date);
           set.add(d);
-          if (!byDate.has(d)) byDate.set(d, e);
+          const list = byDate.get(d) ?? [];
+          list.push(e);
+          byDate.set(d, list);
         }
       }
       const sorted = Array.from(set).sort();
@@ -258,11 +260,10 @@ export function TeacherAttendance() {
       };
     }, [plans, selectedDate, today]);
 
-  // Days are partitioned across types, so the selected date resolves to
-  // exactly one — that segment decides the ward, the direction the teacher
-  // reads "من/إلى" in, and which segment a shortfall reflows into.
-  const dayType = assignmentByDate.get(effectiveDate)?.type;
-  const rangeReversed = segmentReversed(linkedPlan, dayType);
+  // A day can now carry up to one entry per type (حفظ/مراجعة) when both
+  // share the same weekday — each entry decides its own ward, its own
+  // "من/إلى" direction, and which segment a shortfall reflows into.
+  const dayAssignments = assignmentByDate.get(effectiveDate) ?? [];
 
   // Each covered student can have their own effective schedule (absence/
   // shortfall reflow, manual per-student overrides) once they have an
@@ -384,9 +385,11 @@ export function TeacherAttendance() {
   }, [history]);
 
   const [overrides, setOverrides] = useState<Record<string, StudentEval>>({});
-  // Which surah+ayah each student actually reached today — defaults to the
-  // day's full assigned end point (i.e. "finished it all") until the teacher
-  // pulls it back for a student who fell short.
+  // Which surah+ayah each student actually reached today, per ward type —
+  // defaults to that ward's full assigned end point (i.e. "finished it all")
+  // until the teacher pulls it back for a student who fell short. Keyed by
+  // `${studentId}::${type}` since a student can now have two independent
+  // wards (حفظ and مراجعة) due the same day.
   const [completionOverrides, setCompletionOverrides] = useState<Record<string, RangePoint>>({});
   // Transient message when the teacher taps a day-chip that isn't part of the
   // plan — those chips are visually disabled but still clickable so the click
@@ -418,17 +421,23 @@ export function TeacherAttendance() {
   function unlockStudent(studentId: string) {
     setUnlockedIds((prev) => new Set(prev).add(studentId));
   }
-  /** Direction of this student's own ward. Their individual overlay can run the
-   * opposite way to the shared plan (a custom-range individual plan), so infer
-   * it from their own schedule first and only fall back to the base plan. */
-  function reversedForStudent(studentId: string): boolean {
-    return isReversedSchedule(progressByStudentId[studentId]?.effectiveSchedule) ?? rangeReversed;
+  /** Direction of this student's own ward, for one type. Their individual
+   * overlay can run the opposite way to the shared plan (a custom-range
+   * individual plan), so infer it from their own schedule first and only
+   * fall back to the base plan's own direction for that type. Filtered to
+   * `type` because `occurrenceIndex` — what `isReversedSchedule` sorts by —
+   * restarts at 1 within each type's own segment; mixing both types' entries
+   * together would scramble that ordering. */
+  function reversedForStudent(studentId: string, type: PlanType): boolean {
+    const ownSchedule = progressByStudentId[studentId]?.effectiveSchedule.filter((o) => o.type === type);
+    return isReversedSchedule(ownSchedule) ?? segmentReversed(linkedPlan, type);
   }
-  function completedPointFor(studentId: string, forAssignment: ScheduleEntry): RangePoint {
-    return completionOverrides[studentId] ?? dayFinishPoint(forAssignment, reversedForStudent(studentId));
+  function completedPointFor(studentId: string, forAssignment: ScheduleEntry & { type: PlanType }): RangePoint {
+    return completionOverrides[`${studentId}::${forAssignment.type}`]
+      ?? dayFinishPoint(forAssignment, reversedForStudent(studentId, forAssignment.type));
   }
-  function setCompletedPoint(studentId: string, point: RangePoint) {
-    setCompletionOverrides((prev) => ({ ...prev, [studentId]: point }));
+  function setCompletedPoint(studentId: string, type: PlanType, point: RangePoint) {
+    setCompletionOverrides((prev) => ({ ...prev, [`${studentId}::${type}`]: point }));
   }
   /** Clamps a teacher-picked completion point to what the student could
    * plausibly have reached: no earlier than the start of the day's own ward,
@@ -436,12 +445,13 @@ export function TeacherAttendance() {
    * recite past today's ward into the following days, but never past the plan
    * itself. Both bounds are read in the plan's own direction, then applied
    * low→high the way slices are always stored. */
-  function clampReached(point: RangePoint, assignment: ScheduleEntry, studentId: string): RangePoint {
-    const reversed = reversedForStudent(studentId);
+  function clampReached(point: RangePoint, assignment: ScheduleEntry & { type: PlanType }, studentId: string): RangePoint {
+    const reversed = reversedForStudent(studentId, assignment.type);
     const dayStart = reversed
       ? { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd }
       : { surahNumber: assignment.surahStart, ayah: assignment.ayahStart };
-    const finish = planFinishPoint(progressByStudentId[studentId]?.effectiveSchedule ?? [], reversed)
+    const ownSchedule = (progressByStudentId[studentId]?.effectiveSchedule ?? []).filter((o) => o.type === assignment.type);
+    const finish = planFinishPoint(ownSchedule, reversed)
       ?? dayFinishPoint(assignment, reversed);
     const loFlat = Math.min(toFlatIndex(dayStart), toFlatIndex(finish));
     const hiFlat = Math.max(toFlatIndex(dayStart), toFlatIndex(finish));
@@ -449,18 +459,21 @@ export function TeacherAttendance() {
   }
   /** The picker's own selectable window — the same bounds as `clampReached`,
    * obtained by clamping the mushaf's own extremes. */
-  function reachedBounds(assignment: ScheduleEntry, studentId: string) {
+  function reachedBounds(assignment: ScheduleEntry & { type: PlanType }, studentId: string) {
     return {
       lo: clampReached({ surahNumber: 1, ayah: 1 }, assignment, studentId),
       hi: clampReached({ surahNumber: 114, ayah: 6 }, assignment, studentId),
     };
   }
-  // Each student's own assigned portion for the selected day — falls back to
-  // the shared plan schedule (assignmentByDate) for anyone with no individual
-  // overlay yet, matching the API's own graceful-degradation behavior.
-  function assignmentForStudent(studentId: string): ScheduleEntry | undefined {
-    const perStudent = progressByStudentId[studentId]?.effectiveSchedule.find((o) => toDateOnly(o.date) === effectiveDate);
-    return perStudent ?? assignmentByDate.get(effectiveDate);
+  // Each student's own assigned portion(s) for the selected day — falls back
+  // to the shared plan schedule (dayAssignments) for anyone with no
+  // individual overlay yet, matching the API's own graceful-degradation
+  // behavior. Plural: a day can now carry up to one entry per type (حفظ and
+  // مراجعة) when both share the same weekday, instead of always exactly one.
+  function assignmentsForStudent(studentId: string): (ScheduleEntry & { type: PlanType })[] {
+    const perStudent = (progressByStudentId[studentId]?.effectiveSchedule ?? [])
+      .filter((o) => toDateOnly(o.date) === effectiveDate);
+    return perStudent.length > 0 ? perStudent : dayAssignments;
   }
 
   const isFutureDay = effectiveDate > today;
@@ -484,61 +497,72 @@ export function TeacherAttendance() {
       },
       {
         onSuccess: () => {
-          // Feed the day's outcome into the student's individual plan overlay so
-          // an absence or a partial completion gets redistributed across their
-          // remaining days — only meaningful when there's an assigned portion.
-          const studentAssignment = linkedPlan && planCoversStudent(linkedPlan, studentId) ? assignmentForStudent(studentId) : undefined;
-          if (!linkedPlan || !studentAssignment) {
+          // Feed the day's outcome into each of the student's individual plan
+          // overlays so an absence or a partial completion gets redistributed
+          // across their remaining days — one `record` call per ward due today
+          // (usually one, but up to two when حفظ/مراجعة share the weekday), only
+          // meaningful when there's an assigned portion. The first (and, on a
+          // normal single-type day, only) assignment resolves through the same
+          // shared toast the save action started with; any further assignment
+          // gets its own toast labeled by type, since more than one ward outcome
+          // no longer fits in a single message.
+          const studentAssignments = linkedPlan && planCoversStudent(linkedPlan, studentId) ? assignmentsForStudent(studentId) : [];
+          if (!linkedPlan || studentAssignments.length === 0) {
             toast.success("تم الحفظ بنجاح", { id: toastId });
             return;
           }
-          const completedPoint = completedPointFor(studentId, studentAssignment);
-          // Signed in the plan's own direction — for a reverse plan the undone part
-          // is the low side of the day's slice, not the high one. Negative = fell
-          // short of the day's ward, positive = recited past it.
-          const delta = dayDeltaAyahs(studentAssignment, reversedForStudent(studentId), completedPoint);
-          const status = e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
 
-          if (status === "done" && delta === 0) {
-            toast.success("تم حفظ الحضور والتقييم بنجاح", { id: toastId });
-            recordOccurrence.mutate({ planId: linkedPlan._id, studentId, type: dayType, occurrenceIndex: studentAssignment.occurrenceIndex, status });
-            return;
-          }
+          studentAssignments.forEach((studentAssignment, i) => {
+            const thisToastId = i === 0 ? toastId : toast.loading("جاري حفظ الحضور والتقييم...");
+            const typeLabel = studentAssignments.length > 1 ? `${studentAssignment.type} — ` : "";
+            const completedPoint = completedPointFor(studentId, studentAssignment);
+            // Signed in the plan's own direction — for a reverse plan the undone part
+            // is the low side of the day's slice, not the high one. Negative = fell
+            // short of the day's ward, positive = recited past it.
+            const delta = dayDeltaAyahs(studentAssignment, reversedForStudent(studentId, studentAssignment.type), completedPoint);
+            const status = e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
 
-          toast.loading(
-            status === "absent"
-              ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
-                : delta > 0
-                  ? `جاري تعديل باقي أيام خطة ${studentName} بعد التسميع الإضافي...`
-                  : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`,
-            { id: toastId },
-          );
-          recordOccurrence.mutate(
-            {
-              planId: linkedPlan._id, studentId, type: dayType, occurrenceIndex: studentAssignment.occurrenceIndex,
-              status,
-              // Sent for an over-achievement too (status "done"), so the server can
-              // take the surplus off the student's remaining days.
-              completedThroughSurah: status === "absent" ? undefined : completedPoint.surahNumber,
-              completedThroughAyah: status === "absent" ? undefined : completedPoint.ayah,
-            },
-            {
-              onSuccess: (res) => {
-                toast.success(
-                  status === "absent"
-                    ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
-                      : delta > 0
-                        ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
-                        : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`,
-                  { id: toastId },
-                );
-                if (res.data.overflowPages > 0) {
-                  toast.warning(`لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`);
-                }
+            if (status === "done" && delta === 0) {
+              toast.success(`${typeLabel}تم حفظ الحضور والتقييم بنجاح`, { id: thisToastId });
+              recordOccurrence.mutate({ planId: linkedPlan._id, studentId, type: studentAssignment.type, occurrenceIndex: studentAssignment.occurrenceIndex, status });
+              return;
+            }
+
+            toast.loading(
+              typeLabel + (status === "absent"
+                ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
+                  : delta > 0
+                    ? `جاري تعديل باقي أيام خطة ${studentName} بعد التسميع الإضافي...`
+                    : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`),
+              { id: thisToastId },
+            );
+            recordOccurrence.mutate(
+              {
+                planId: linkedPlan._id, studentId, type: studentAssignment.type, occurrenceIndex: studentAssignment.occurrenceIndex,
+                status,
+                // Sent for an over-achievement too (status "done"), so the server can
+                // take the surplus off the student's remaining days.
+                completedThroughSurah: status === "absent" ? undefined : completedPoint.surahNumber,
+                completedThroughAyah: status === "absent" ? undefined : completedPoint.ayah,
               },
-              onError: (err) => toast.error((err as Error).message, { id: toastId }),
-            },
-          );
+              {
+                onSuccess: (res) => {
+                  toast.success(
+                    typeLabel + (status === "absent"
+                      ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
+                        : delta > 0
+                          ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
+                          : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`),
+                    { id: thisToastId },
+                  );
+                  if (res.data.overflowPages > 0) {
+                    toast.warning(`${typeLabel}لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`);
+                  }
+                },
+                onError: (err) => toast.error((err as Error).message, { id: thisToastId }),
+              },
+            );
+          });
         },
         onError: (err) => toast.error((err as Error).message, { id: toastId }),
       },
@@ -686,7 +710,7 @@ export function TeacherAttendance() {
                 const isUnlocked = unlockedIds.has(s._id);
                 const controlsLocked = isFutureDay || (hasSaved && !isUnlocked);
                 const hasIndividualPlan = !!linkedPlan && planCoversStudent(linkedPlan, s._id);
-                const assignment = hasIndividualPlan ? assignmentForStudent(s._id) : undefined;
+                const assignments = hasIndividualPlan ? assignmentsForStudent(s._id) : [];
                 return (
                   <div key={s._id} className={`att-row ${isAbsent && isExpanded ? "is-absent" : ""}`}>
                     <div className="att-row-top" style={{ cursor: "pointer" }} onClick={() => toggleStudent(s._id)}>
@@ -712,10 +736,10 @@ export function TeacherAttendance() {
 
                     {isExpanded && (
                       <div style={{ padding: "10px 2px 4px" }}>
-                        {assignment ? (() => {
+                        {assignments.length > 0 ? assignments.map((assignment) => {
                           // Swap the displayed endpoints for a reverse plan so the
                           // banner reads in the plan's own direction (back→front).
-                          const reversed = reversedForStudent(s._id);
+                          const reversed = reversedForStudent(s._id, assignment.type);
                           const from = reversed
                             ? { surah: assignment.surahEnd, ayah: assignment.ayahEnd, page: assignment.pageEnd }
                             : { surah: assignment.surahStart, ayah: assignment.ayahStart, page: assignment.pageStart };
@@ -723,13 +747,18 @@ export function TeacherAttendance() {
                             ? { surah: assignment.surahStart, ayah: assignment.ayahStart, page: assignment.pageStart }
                             : { surah: assignment.surahEnd, ayah: assignment.ayahEnd, page: assignment.pageEnd };
                           return (
-                          <div className="assignment-banner" style={{ marginBottom: 10 }}>
+                          <div key={assignment.type} className="assignment-banner" style={{ marginBottom: 10 }}>
                             <div className="assignment-icon">
                               <i className="ti ti-book-2" />
                             </div>
                             <div className="assignment-body">
                               <div className="assignment-label">
                                 <i className="ti ti-clipboard-text" /> الورد المقرر
+                                {assignments.length > 1 && (
+                                  <span style={{ marginRight: 6 }}>
+                                    <Badge tone={assignment.type === "حفظ" ? "green" : "gold"}>{assignment.type}</Badge>
+                                  </span>
+                                )}
                                 {reversed && <span style={{ fontWeight: 400, color: "var(--text3)" }}> · بالعكس</span>}
                               </div>
                               <div className="assignment-range">
@@ -752,7 +781,7 @@ export function TeacherAttendance() {
                             </div>
                           </div>
                           );
-                        })() : (
+                        }) : (
                           <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10 }}>لا يوجد جزء مخصص لهذا اليوم</div>
                         )}
 
@@ -771,24 +800,29 @@ export function TeacherAttendance() {
                           </button>
                         </div>
 
-                        {!isAbsent && assignment && (() => {
+                        {!isAbsent && assignments.map((assignment) => {
                           // "وصل إلى" and the leftover are both measured in the plan's
                           // own direction: a reverse day is worked from its high end
                           // down, so it's complete once the student reaches its low end.
-                          const reversedHere = reversedForStudent(s._id);
+                          const reversedHere = reversedForStudent(s._id, assignment.type);
                           const actualPoint = completedPointFor(s._id, assignment);
                           const delta = dayDeltaAyahs(assignment, reversedHere, actualPoint);
                           const isFull = delta === 0;
                           return (
-                            <div style={{ border: "1px dashed var(--border)", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+                            <div key={assignment.type} style={{ border: "1px dashed var(--border)", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
                               <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text2)", display: "block", marginBottom: 6 }}>
                                 <i className="ti ti-bookmark" style={{ marginLeft: 4, color: "var(--green)" }} /> الورد الفعلي — السورة والآية التي وصل إليها الطالب
+                                {assignments.length > 1 && (
+                                  <span style={{ marginRight: 6 }}>
+                                    <Badge tone={assignment.type === "حفظ" ? "green" : "gold"}>{assignment.type}</Badge>
+                                  </span>
+                                )}
                               </label>
                               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                                 <CompactSurahAyah
                                   value={actualPoint} disabled={controlsLocked}
                                   bounds={reachedBounds(assignment, s._id)}
-                                  onChange={(v) => setCompletedPoint(s._id, clampReached(v, assignment, s._id))}
+                                  onChange={(v) => setCompletedPoint(s._id, assignment.type, clampReached(v, assignment, s._id))}
                                 />
                                 <span style={{ fontSize: 11, color: "var(--text3)" }}>
                                   {reversedHere
@@ -801,7 +835,7 @@ export function TeacherAttendance() {
                                     type="button"
                                     className="topbar-btn btn-ghost"
                                     style={{ fontSize: 11, padding: "4px 10px" }}
-                                    onClick={() => setCompletedPoint(s._id, dayFinishPoint(assignment, reversedHere))}
+                                    onClick={() => setCompletedPoint(s._id, assignment.type, dayFinishPoint(assignment, reversedHere))}
                                   >
                                     الورد كامل
                                   </button>
@@ -817,7 +851,7 @@ export function TeacherAttendance() {
                               </div>
                             </div>
                           );
-                        })()}
+                        })}
 
                         <div className="eval-scores">
                           {manualCriteria(rubric).map((cat) => (
