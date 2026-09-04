@@ -10,7 +10,7 @@ import { ENV } from '../config/env';
 import { Halqa } from '../models/Halqa.model';
 import { SpecialTrack } from '../models/SpecialTrack.model';
 import { QuranPlan } from '../models/QuranPlan.model';
-import { WEEK_DAYS, computeMultiTodayAssignment, pageRangeOfAyahRange } from '../lib/quranRange';
+import { WEEK_DAYS, computeMultiTodayAssignments, pageRangeOfAyahRange } from '../lib/quranRange';
 
 // A modest, multi-page starting range (Al-Fatiha + most of Al-Baqarah's first
 // juz') so the day's assignment banner has something meaningful to show.
@@ -46,11 +46,11 @@ async function backfill(): Promise<void> {
         ? [{ type: p.type, days: p.days, rangeStart: p.rangeStart, rangeEnd: p.rangeEnd }]
         : [];
     if (segments.length === 0) return false;
-    return computeMultiTodayAssignment({
+    return computeMultiTodayAssignments({
       startDate: p.startDate, holidays: p.holidays,
       endType: p.endType, activeDaysCount: p.activeDaysCount, endDate: p.endDate,
       segments,
-    }, today) !== null;
+    }, today).length > 0;
   };
 
   for (const halqa of halqat) {

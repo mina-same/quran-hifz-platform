@@ -58,9 +58,10 @@ export interface IScheduleEntry {
  * One type's track inside a plan: its own weekdays, its own stretch of the
  * mushaf, and its own frozen day-by-day breakdown.
  *
- * The weekdays are PARTITIONED across a plan's segments — no date belongs to
- * two types. That is what keeps a day's ward, its evaluation and its reflow
- * single-valued (see validateSegmentDays in lib/quranRange.ts).
+ * A weekday may now be shared by more than one segment (حفظ + مراجعة on the
+ * same day) — see validateSegmentDays in lib/quranRange.ts. Ward and
+ * occurrence tracking stay per-segment, so each type counts and tracks
+ * independently even when sharing a calendar day.
  *
  * `schedule[].occurrenceIndex` is 1-based WITHIN THIS SEGMENT, so an
  * occurrence is addressed by the pair (type, occurrenceIndex) — never by index
