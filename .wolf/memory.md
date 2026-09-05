@@ -3057,3 +3057,48 @@
 | 14:25 | Edited quran-hifz-server/src/models/Student.model.ts | 2→1 lines | ~7 |
 | 14:25 | Edited quran-hifz-server/src/models/Student.model.ts | 2→1 lines | ~24 |
 | 14:25 | Edited quran-hifz-server/src/models/Student.model.ts | 2→1 lines | ~10 |
+| 14:26 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-3-5-report.md | — | ~1064 |
+| 14:27 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→2 lines | ~243 |
+| 14:30 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→2 lines | ~380 |
+| 14:30 | Session end: 15 writes across 10 files (progress.md, Masjid.model.ts, masjid.controller.ts, Track.model.ts, task-1-2-report.md) | 16 reads | ~16847 tok |
+| 14:30 | Edited quran-hifz-server/src/controllers/student.controller.ts | added 1 condition(s) | ~188 |
+| 14:31 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-3-5-report.md | added 2 condition(s) | ~795 |
+| 14:32 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→2 lines | ~229 |
+| 14:33 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→2 lines | ~86 |
+| 14:33 | Edited quran-hifz-server/src/app.ts | 18→17 lines | ~286 |
+| 14:34 | Edited quran-hifz-server/src/app.ts | 19→18 lines | ~250 |
+| 14:34 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-4-report.md | — | ~687 |
+| 14:35 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→2 lines | ~362 |
+| 14:36 | Session end: 23 writes across 12 files (progress.md, Masjid.model.ts, masjid.controller.ts, Track.model.ts, task-1-2-report.md) | 20 reads | ~22326 tok |
+| 14:36 | Edited quran-hifz-server/src/controllers/teacher.controller.ts | 7→7 lines | ~93 |
+| 14:36 | Edited quran-hifz-server/src/controllers/teacher.controller.ts | modified getTeachers() | ~237 |
+| 14:36 | Edited quran-hifz-server/src/controllers/teacher.controller.ts | modified getTeacher() | ~124 |
+| 14:37 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-4-report.md | modified Created() | ~491 |
+| 14:39 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→2 lines | ~371 |
+| 14:40 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→2 lines | ~387 |
+| 14:41 | Session end: 29 writes across 13 files (progress.md, Masjid.model.ts, masjid.controller.ts, Track.model.ts, task-1-2-report.md) | 23 reads | ~25458 tok |
+| 14:41 | Edited quran-hifz-server/src/models/Teacher.model.ts | reduced (-14 lines) | ~19 |
+| 14:41 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-4-report.md | modified Created() | ~346 |
+| 14:42 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→3 lines | ~236 |
+| 14:43 | Edited quran-hifz-server/src/models/Attendance.model.ts | 2→1 lines | ~17 |
+| 14:44 | Edited quran-hifz-server/src/models/Attendance.model.ts | 6→5 lines | ~66 |
+| 14:44 | Edited quran-hifz-server/src/models/Homework.model.ts | 2→1 lines | ~17 |
+| 14:44 | Edited quran-hifz-server/src/models/Homework.model.ts | 6→5 lines | ~65 |
+| 14:44 | Edited quran-hifz-server/src/models/GroupHomework.model.ts | 2→1 lines | ~15 |
+| 14:44 | Edited quran-hifz-server/src/models/GroupHomework.model.ts | 4→3 lines | ~44 |
+| 14:44 | Edited quran-hifz-server/src/models/LessonRecording.model.ts | 2→1 lines | ~15 |
+| 14:44 | Edited quran-hifz-server/src/models/LessonRecording.model.ts | 4→3 lines | ~47 |
+| 14:44 | Edited quran-hifz-server/src/controllers/attendance.controller.ts | 8→7 lines | ~92 |
+| 14:44 | Edited quran-hifz-server/src/controllers/attendance.controller.ts | 7→7 lines | ~82 |
+| 14:44 | Edited quran-hifz-server/src/controllers/attendance.controller.ts | 9→9 lines | ~92 |
+| 14:44 | Edited quran-hifz-server/src/controllers/homework.controller.ts | 5→4 lines | ~53 |
+| 14:44 | Edited quran-hifz-server/src/controllers/homework.controller.ts | 10→10 lines | ~106 |
+| 14:44 | Edited quran-hifz-server/src/controllers/group-homework.controller.ts | 5→4 lines | ~56 |
+| 14:45 | Edited quran-hifz-server/src/controllers/group-homework.controller.ts | 9→9 lines | ~101 |
+| 14:45 | Edited quran-hifz-server/src/controllers/lesson-recording.controller.ts | 5→4 lines | ~57 |
+| 14:45 | Edited quran-hifz-server/src/controllers/lesson-recording.controller.ts | 12→12 lines | ~126 |
+| 14:45 | Edited quran-hifz-server/src/models/Evaluation.model.ts | 2→1 lines | ~17 |
+| 14:45 | Edited quran-hifz-server/src/models/Evaluation.model.ts | 6→5 lines | ~66 |
+| 14:45 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | 8→7 lines | ~131 |
+| 14:46 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | 8→8 lines | ~91 |
+| 14:47 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-6-report.md | — | ~2145 |

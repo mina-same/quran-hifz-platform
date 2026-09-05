@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T11:25:57.221Z
-> Files: 559 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T11:47:02.267Z
+> Files: 562 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -265,8 +265,11 @@
 
 ## .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase1-server.md (~807 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase1-server.md (~2085 tok)
 - `task-1-2-report.md` — Task 1 & 2 Implementation Report (~1147 tok)
+- `task-3-5-report.md` — Task 3 + 5 Report — Track controller/routes, Student.track (~1674 tok)
+- `task-4-report.md` — Task 4 Report: Delete Halqa Entirely; Update app.ts Route Registration (~1370 tok)
+- `task-6-report.md` — Task 6 Report: Remove `validators/context.ts` and its usage everywhere (~2011 tok)
 
 ## docs/superpowers/plans/
 
@@ -515,7 +518,7 @@
 - `_verify_juz.ts` — Plan: Al-Baqarah 1:1 through Al-Baqarah 2:286 (juz 1-3), daily, 10 active days, started 5 days ago. (~358 tok)
 - `_verify_reverse.ts` — Declares show (~422 tok)
 - `_verify_teacher_profileid.ts` — Declares run (~332 tok)
-- `app.ts` — API routes: GET (1 endpoints) (~881 tok)
+- `app.ts` — API routes: GET (1 endpoints) (~850 tok)
 - `server.ts` — Declares bootstrap (~198 tok)
 
 ## quran-hifz-server/src/config/
@@ -526,15 +529,15 @@
 ## quran-hifz-server/src/controllers/
 
 - `admin.controller.ts` — Zod schemas: updateParentSchema, createParentSchema (~1450 tok)
-- `attendance.controller.ts` — Upserts one Attendance doc per {student, date} and recalculates each (~1736 tok)
+- `attendance.controller.ts` — Upserts one Attendance doc per {student, date} and recalculates each (~1589 tok)
 - `auth.controller.ts` — Zod schemas: loginSchema, updateProfileSchema, changePasswordSchema, pushTokenSchema (~1176 tok)
-- `evaluation.controller.ts` — Fixed-weight evaluation rubric: حضور 3 + حفظ 4 + تجويد 2 + تلاوة 1 = 10. (~1524 tok)
-- `group-homework.controller.ts` — Zod schemas: groupHomeworkSchema (~495 tok)
+- `evaluation.controller.ts` — The rubric is no longer platform-wide — each plan carries its own (~2706 tok)
+- `group-homework.controller.ts` — Zod schemas: groupHomeworkSchema (~550 tok)
 - `halqa.controller.ts` — Zod schemas: halqaSchema (~904 tok)
 - `hifz.controller.ts` — Zod schemas: entrySchema (~739 tok)
-- `homework.controller.ts` — Zod schemas: homeworkSchema, reviewSchema (~750 tok)
+- `homework.controller.ts` — Zod schemas: homeworkSchema, reviewSchema (~824 tok)
 - `kpi.controller.ts` — Zod schemas: kpiSchema (~389 tok)
-- `lesson-recording.controller.ts` — Zod schemas: recordingSchema (~559 tok)
+- `lesson-recording.controller.ts` — Zod schemas: recordingSchema (~626 tok)
 - `masjid.controller.ts` — Zod schemas: masjidSchema (~729 tok)
 - `message.controller.ts` — Zod schemas: messageSchema (~568 tok)
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
@@ -542,8 +545,8 @@
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
 - `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~4346 tok)
-- `student.controller.ts` — Empty string is normalised to undefined so a blank field clears rather (~1948 tok)
-- `teacher.controller.ts` — Zod schemas: teacherSchema (~1398 tok)
+- `student.controller.ts` — Empty string is normalised to undefined so a blank field clears rather (~2010 tok)
+- `teacher.controller.ts` — Zod schemas: teacherSchema (~1390 tok)
 - `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~1691 tok)
 
 ## quran-hifz-server/src/data/
@@ -567,15 +570,15 @@
 
 ## quran-hifz-server/src/models/
 
-- `Attendance.model.ts` — Exports IAttendance, Attendance (~378 tok)
-- `Evaluation.model.ts` — Exports IEvaluationScores, IEvaluation, Evaluation (~541 tok)
-- `GroupHomework.model.ts` — Exports IGroupHomework, GroupHomework (~242 tok)
+- `Attendance.model.ts` — Exports IAttendance, Attendance (~308 tok)
+- `Evaluation.model.ts` — Legacy fixed-shape scores. Still written whenever the plan's rubric uses (~968 tok)
+- `GroupHomework.model.ts` — Exports IGroupHomework, GroupHomework (~288 tok)
 - `Halqa.model.ts` — Exports IHalqa, Halqa (~366 tok)
 - `HifzEntry.model.ts` — Exports IHifzEntry, HifzEntry (~267 tok)
-- `Homework.model.ts` — Exports IHomework, Homework (~373 tok)
+- `Homework.model.ts` — Exports IHomework, Homework (~415 tok)
 - `IndividualPlan.model.ts` — Exports IIndividualPlan, IndividualPlan (~302 tok)
 - `KPI.model.ts` — Exports IKPI, KPI (~199 tok)
-- `LessonRecording.model.ts` — Exports ILessonRecording, LessonRecording (~308 tok)
+- `LessonRecording.model.ts` — Exports ILessonRecording, LessonRecording (~355 tok)
 - `Masjid.model.ts` — Drives the جامع (male) / دار (female) display label on the client — (~204 tok)
 - `Message.model.ts` — Exports IMessage, Message (~334 tok)
 - `ParentStudent.model.ts` — Exports IParentStudent, ParentStudent (~172 tok)
@@ -583,7 +586,7 @@
 - `SpecialTrack.model.ts` — Exports ISpecialTrack, SpecialTrack (~429 tok)
 - `Student.model.ts` — Saudi national ID (رقم الهوية الوطنية): exactly 10 digits from الأحوال المدنية. (~704 tok)
 - `StudentPlanProgress.model.ts` — Exports StudentOccurrenceStatus, IStudentOccurrence, IStudentPlanProgress, StudentPlanProgress (~994 tok)
-- `Teacher.model.ts` — Exports ITeacher, Teacher (~289 tok)
+- `Teacher.model.ts` — Exports ITeacher, Teacher (~216 tok)
 - `Track.model.ts` — Exports ITrack, Track (~404 tok)
 - `User.model.ts` — Exports UserRole, IUser, User (~442 tok)
 
