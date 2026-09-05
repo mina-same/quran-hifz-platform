@@ -2,7 +2,7 @@ import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
-import { useSpecialTracks, TRACK_DETAIL_ID_KEY, type SpecialTrack } from "../../api/special-tracks";
+import { useTracks, TRACK_DETAIL_ID_KEY, type Track } from "../../api/tracks";
 import { useQuranPlans, segmentReversed } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
@@ -19,19 +19,16 @@ const STATUS_CFG = {
 };
 
 /* ─── simple, click-to-open summary card ─── */
-function TrackCard({ track, onOpen }: { track: SpecialTrack; onOpen: (t: SpecialTrack) => void }) {
+function TrackCard({ track, onOpen }: { track: Track; onOpen: (t: Track) => void }) {
   const cfg = STATUS_CFG[track.status];
-  const enrolled = track.enrolledStudents.length;
+  const enrolled = track.studentCount ?? 0;
   const pct = Math.min(100, Math.round((enrolled / track.maxStudents) * 100));
   const barClr = pct >= 90 ? "#ef4444" : pct >= 70 ? "#f59e0b" : "var(--green)";
 
   // Small "N+1" fetch just for the at-a-glance today's-target teaser — same
   // trade-off already accepted elsewhere in this file (small per-teacher lists).
-  const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: track._id });
-  // Prefer the plan actually targeting the whole track over a narrower
-  // students-only plan that merely still carries a stale specialTrack
-  // reference (see the same fix/comment in TeacherTrackDetail.tsx).
-  const linkedPlan = linkedPlans.find((p) => p.targetType === "specialTrack") ?? linkedPlans[0];
+  const { data: linkedPlans = [] } = useQuranPlans({ track: track._id });
+  const linkedPlan = linkedPlans.find((p) => p.targetType === "track") ?? linkedPlans[0];
 
   return (
     <div
@@ -131,23 +128,23 @@ function TrackCard({ track, onOpen }: { track: SpecialTrack; onOpen: (t: Special
 }
 
 /* ════════════════════════════════════════════════ */
-export function TeacherSpecialTracks() {
+export function TeacherTracks() {
   useTopbar("ti-calendar-event", "مساراتي");
   const { user, showPage } = usePortal();
   const teacherId = user?.profileId as string | undefined;
 
-  const { data: tracks = [], isLoading } = useSpecialTracks(undefined, teacherId);
+  const { data: tracks = [], isLoading } = useTracks(undefined, teacherId);
 
   const active = tracks.filter((t) => t.status === "active");
   const upcoming = tracks.filter((t) => t.status === "upcoming");
   const ended = tracks.filter((t) => t.status === "ended");
 
-  function openDetail(track: SpecialTrack) {
+  function openDetail(track: Track) {
     sessionStorage.setItem(TRACK_DETAIL_ID_KEY, track._id);
     showPage("trackdetail");
   }
 
-  function Section({ title, color, items }: { title: string; color: string; items: SpecialTrack[] }) {
+  function Section({ title, color, items }: { title: string; color: string; items: Track[] }) {
     if (!items.length) return null;
     return (
       <div style={{ marginBottom: 28 }}>
