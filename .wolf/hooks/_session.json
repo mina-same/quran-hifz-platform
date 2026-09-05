@@ -1,1529 +1,166 @@
 {
-  "session_id": "session-2026-09-04-1051",
-  "started": "2026-09-04T07:51:46.092Z",
+  "session_id": "session-2026-09-05-1417",
+  "started": "2026-09-05T11:17:21.980Z",
   "files_read": {
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/QuranPlan.model.ts": {
-      "count": 2,
-      "tokens": 1198,
-      "first_read": "2026-09-04T07:53:33.014Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/lib/quranRange.ts": {
-      "count": 9,
-      "tokens": 6514,
-      "first_read": "2026-09-04T07:53:33.442Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Evaluation.model.ts": {
-      "count": 1,
-      "tokens": 541,
-      "first_read": "2026-09-04T07:56:14.728Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Attendance.model.ts": {
-      "count": 1,
-      "tokens": 378,
-      "first_read": "2026-09-04T07:56:15.274Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/StudentPlanProgress.model.ts": {
-      "count": 3,
-      "tokens": 994,
-      "first_read": "2026-09-04T07:56:15.828Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/lib/studentPlanReflow.ts": {
-      "count": 2,
-      "tokens": 3376,
-      "first_read": "2026-09-04T08:00:05.572Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/student-plan-progress.controller.ts": {
-      "count": 4,
-      "tokens": 4346,
-      "first_read": "2026-09-04T08:00:06.145Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/quran-plan.controller.ts": {
-      "count": 9,
-      "tokens": 5967,
-      "first_read": "2026-09-04T08:00:06.329Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx": {
-      "count": 23,
-      "tokens": 16384,
-      "first_read": "2026-09-04T08:05:52.393Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/api/quran-plans.ts": {
-      "count": 8,
-      "tokens": 2495,
-      "first_read": "2026-09-04T08:05:58.607Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/attendance.tsx": {
-      "count": 3,
-      "tokens": 9000,
-      "first_read": "2026-09-04T08:06:00.825Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/queries/quranPlan.ts": {
-      "count": 8,
-      "tokens": 3560,
-      "first_read": "2026-09-04T08:06:01.364Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/DaySlider.tsx": {
-      "count": 6,
-      "tokens": 2042,
-      "first_read": "2026-09-04T08:06:01.918Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/SurahAyahPicker.tsx": {
-      "count": 1,
-      "tokens": 828,
-      "first_read": "2026-09-04T08:06:02.267Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/api/student-plan-progress.ts": {
-      "count": 3,
-      "tokens": 1673,
-      "first_read": "2026-09-04T08:06:03.935Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx": {
-      "count": 18,
-      "tokens": 9200,
-      "first_read": "2026-09-04T08:06:08.211Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx": {
-      "count": 13,
-      "tokens": 14465,
-      "first_read": "2026-09-04T08:06:10.009Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx": {
-      "count": 30,
-      "tokens": 24978,
-      "first_read": "2026-09-04T08:06:12.663Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx": {
-      "count": 12,
-      "tokens": 10482,
-      "first_read": "2026-09-04T08:06:16.529Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/queries/evaluations.ts": {
-      "count": 1,
-      "tokens": 692,
-      "first_read": "2026-09-04T08:06:18.634Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/ScheduleSheet.tsx": {
-      "count": 1,
-      "tokens": 1700,
-      "first_read": "2026-09-04T08:06:19.169Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx": {
-      "count": 3,
-      "tokens": 4519,
-      "first_read": "2026-09-04T08:06:22.980Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx": {
-      "count": 8,
-      "tokens": 3932,
-      "first_read": "2026-09-04T08:06:23.569Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx": {
-      "count": 2,
-      "tokens": 2791,
-      "first_read": "2026-09-04T08:06:24.636Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.ts": {
-      "count": 5,
-      "tokens": 6197,
-      "first_read": "2026-09-04T08:06:24.926Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx": {
-      "count": 3,
-      "tokens": 4351,
-      "first_read": "2026-09-04T08:06:25.744Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx": {
-      "count": 3,
-      "tokens": 13471,
-      "first_read": "2026-09-04T08:06:26.146Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx": {
-      "count": 1,
-      "tokens": 4146,
-      "first_read": "2026-09-04T08:06:27.334Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/IndividualPlanPanel.tsx": {
-      "count": 4,
-      "tokens": 1783,
-      "first_read": "2026-09-04T08:06:28.338Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plans.tsx": {
-      "count": 4,
-      "tokens": 3580,
-      "first_read": "2026-09-04T08:06:29.124Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plan-detail.tsx": {
-      "count": 3,
-      "tokens": 3418,
-      "first_read": "2026-09-04T08:06:30.228Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/student/special_tracks.tsx": {
-      "count": 4,
-      "tokens": 3229,
-      "first_read": "2026-09-04T08:06:34.218Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx": {
-      "count": 3,
-      "tokens": 12026,
-      "first_read": "2026-09-04T08:06:34.741Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/TrackDetail.tsx": {
-      "count": 10,
-      "tokens": 6562,
-      "first_read": "2026-09-04T08:06:35.601Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/seeds/backfillPlans.ts": {
-      "count": 2,
-      "tokens": 1052,
-      "first_read": "2026-09-04T08:08:50.189Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.test.ts": {
-      "count": 3,
-      "tokens": 6746,
-      "first_read": "2026-09-04T08:08:50.893Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md": {
-      "count": 3,
-      "tokens": 18220,
-      "first_read": "2026-09-04T08:16:04.230Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-1-brief.md": {
-      "count": 3,
-      "tokens": 0,
-      "first_read": "2026-09-04T08:31:29.990Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-1-report.md": {
-      "count": 2,
-      "tokens": 1978,
-      "first_read": "2026-09-04T09:51:58.212Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-1ac13c2..03105e5.diff": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-1-brief.md": {
       "count": 2,
       "tokens": 0,
-      "first_read": "2026-09-04T09:52:00.988Z"
+      "first_read": "2026-09-05T11:21:31.411Z"
     },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-2-brief.md": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-2-brief.md": {
       "count": 2,
       "tokens": 0,
-      "first_read": "2026-09-04T14:31:47.657Z"
+      "first_read": "2026-09-05T11:21:31.904Z"
     },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/lib/quranRange.ts": {
-      "count": 4,
-      "tokens": 6220,
-      "first_read": "2026-09-04T14:31:53.383Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-2-report.md": {
-      "count": 1,
-      "tokens": 1156,
-      "first_read": "2026-09-04T14:33:47.746Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-03105e5..8e64f80.diff": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-09-04T14:33:48.099Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-3-brief.md": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Masjid.model.ts": {
       "count": 2,
-      "tokens": 0,
-      "first_read": "2026-09-04T14:35:24.391Z"
+      "tokens": 204,
+      "first_read": "2026-09-05T11:21:37.634Z"
     },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-3-report.md": {
-      "count": 1,
-      "tokens": 1105,
-      "first_read": "2026-09-04T14:37:47.530Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-8e64f80..b9e0330.diff": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-09-04T14:37:48.332Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-4-brief.md": {
-      "count": 3,
-      "tokens": 0,
-      "first_read": "2026-09-04T14:38:59.040Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-server/src/controllers/quran-plan.controller.ts": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-09-04T14:42:19.042Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-4-report.md": {
-      "count": 1,
-      "tokens": 1334,
-      "first_read": "2026-09-04T14:43:55.182Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-b9e0330..4aff3ac.diff": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-09-04T14:43:55.831Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-5-brief.md": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/masjid.controller.ts": {
       "count": 2,
-      "tokens": 0,
-      "first_read": "2026-09-04T14:44:53.761Z"
+      "tokens": 729,
+      "first_read": "2026-09-05T11:21:37.924Z"
     },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-5-report.md": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/SpecialTrack.model.ts": {
       "count": 1,
-      "tokens": 833,
-      "first_read": "2026-09-04T14:46:27.263Z"
+      "tokens": 429,
+      "first_read": "2026-09-05T11:21:38.373Z"
     },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-4aff3ac..9f0251d.diff": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-1-2-report.md": {
+      "count": 1,
+      "tokens": 1147,
+      "first_read": "2026-09-05T11:23:28.738Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/review-7187fba..b66bace.diff": {
       "count": 1,
       "tokens": 0,
-      "first_read": "2026-09-04T14:46:27.789Z"
+      "first_read": "2026-09-05T11:23:29.373Z"
     },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-6-brief.md": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Track.model.ts": {
       "count": 2,
-      "tokens": 0,
-      "first_read": "2026-09-04T14:47:26.416Z"
+      "tokens": 404,
+      "first_read": "2026-09-05T11:23:53.859Z"
     },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/components/common/DaysOfWeekPicker.tsx": {
-      "count": 2,
-      "tokens": 481,
-      "first_read": "2026-09-04T14:47:30.342Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-6-report.md": {
-      "count": 1,
-      "tokens": 1378,
-      "first_read": "2026-09-04T14:53:22.262Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-9f0251d..640c212.diff": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-3-brief.md": {
       "count": 1,
       "tokens": 0,
-      "first_read": "2026-09-04T14:53:24.964Z"
+      "first_read": "2026-09-05T11:25:01.454Z"
     },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-7-brief.md": {
-      "count": 2,
-      "tokens": 0,
-      "first_read": "2026-09-04T14:55:58.467Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-7-report.md": {
-      "count": 1,
-      "tokens": 2185,
-      "first_read": "2026-09-04T15:01:23.681Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-8-brief.md": {
-      "count": 2,
-      "tokens": 0,
-      "first_read": "2026-09-04T15:03:12.407Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-8300f82..8cb6148.diff": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-5-brief.md": {
       "count": 1,
       "tokens": 0,
-      "first_read": "2026-09-04T15:08:17.488Z"
+      "first_read": "2026-09-05T11:25:01.488Z"
     },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-9-brief.md": {
-      "count": 2,
-      "tokens": 0,
-      "first_read": "2026-09-04T15:13:08.901Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-9-report.md": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Student.model.ts": {
       "count": 1,
-      "tokens": 1423,
-      "first_read": "2026-09-04T15:19:02.753Z"
+      "tokens": 498,
+      "first_read": "2026-09-05T11:25:11.093Z"
     },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-10-brief.md": {
-      "count": 2,
-      "tokens": 0,
-      "first_read": "2026-09-04T15:20:47.500Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/components/common/Badge.tsx": {
-      "count": 3,
-      "tokens": 83,
-      "first_read": "2026-09-04T15:20:51.641Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-10-report.md": {
-      "count": 2,
-      "tokens": 1241,
-      "first_read": "2026-09-04T15:22:43.677Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-708c344..7d9bf8d.diff": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/special-track.controller.ts": {
       "count": 1,
-      "tokens": 0,
-      "first_read": "2026-09-04T15:22:44.394Z"
+      "tokens": 1132,
+      "first_read": "2026-09-05T11:25:11.614Z"
     },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-11-brief.md": {
-      "count": 2,
-      "tokens": 0,
-      "first_read": "2026-09-04T15:24:02.544Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-8-report.md": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/special-track.routes.ts": {
       "count": 1,
-      "tokens": 2274,
-      "first_read": "2026-09-04T15:24:43.597Z"
+      "tokens": 210,
+      "first_read": "2026-09-05T11:25:12.210Z"
     },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md": {
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/student.controller.ts": {
       "count": 1,
-      "tokens": 2757,
-      "first_read": "2026-09-04T15:25:37.680Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-11-report.md": {
-      "count": 2,
-      "tokens": 3140,
-      "first_read": "2026-09-04T15:36:47.836Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-7d9bf8d..6e0d343.diff": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-09-04T15:37:01.476Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-12-brief.md": {
-      "count": 2,
-      "tokens": 0,
-      "first_read": "2026-09-04T15:41:00.525Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-12-report.md": {
-      "count": 1,
-      "tokens": 2978,
-      "first_read": "2026-09-04T15:48:23.907Z"
-    },
-    "/Users/xontel/.claude/projects/-Users-xontel-Downloads-mina-work-quran-hifz-platform/c2c60ec9-d0f1-4d0f-b1fe-530470a08fbc/tool-results/bq0kvljxe.txt": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-09-04T15:48:31.148Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-13-brief.md": {
-      "count": 4,
-      "tokens": 0,
-      "first_read": "2026-09-04T15:51:17.268Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-13-report.md": {
-      "count": 3,
-      "tokens": 4077,
-      "first_read": "2026-09-05T08:06:38.590Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-346f356..6089ab5.diff": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-09-05T08:06:42.132Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-6089ab5..9cfa28c.diff": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-09-05T08:15:58.655Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-14-brief.md": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-09-05T08:18:18.023Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/evaluation.controller.ts": {
-      "count": 1,
-      "tokens": 1524,
-      "first_read": "2026-09-05T08:21:17.745Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/specs/2026-09-04-same-day-multi-segment-plans-design.md": {
-      "count": 1,
-      "tokens": 2798,
-      "first_read": "2026-09-05T08:26:24.080Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-1ac13c2..9cfa28c.diff": {
-      "count": 4,
-      "tokens": 0,
-      "first_read": "2026-09-05T08:26:36.723Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/final-review-fix-report.md": {
-      "count": 1,
-      "tokens": 3324,
-      "first_read": "2026-09-05T08:52:18.716Z"
-    },
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/review-9cfa28c..84325b8.diff": {
-      "count": 3,
-      "tokens": 0,
-      "first_read": "2026-09-05T08:52:19.104Z"
+      "tokens": 1815,
+      "first_read": "2026-09-05T11:25:15.584Z"
     }
   },
   "files_written": [
     {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/specs/2026-09-04-same-day-multi-segment-plans-design.md",
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md",
       "action": "create",
-      "tokens": 3198,
-      "at": "2026-09-04T08:02:54.041Z"
+      "tokens": 869,
+      "at": "2026-09-05T11:20:49.334Z"
     },
     {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md",
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Masjid.model.ts",
       "action": "create",
-      "tokens": 17633,
-      "at": "2026-09-04T08:14:10.188Z"
+      "tokens": 204,
+      "at": "2026-09-05T11:21:44.280Z"
     },
     {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md",
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+      "action": "create",
+      "tokens": 729,
+      "at": "2026-09-05T11:21:51.924Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Track.model.ts",
+      "action": "create",
+      "tokens": 404,
+      "at": "2026-09-05T11:21:55.318Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-1-2-report.md",
+      "action": "create",
+      "tokens": 1310,
+      "at": "2026-09-05T11:22:43.631Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md",
       "action": "edit",
-      "tokens": 730,
-      "at": "2026-09-04T08:15:09.470Z"
+      "tokens": 56,
+      "at": "2026-09-05T11:24:16.537Z"
     },
     {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md",
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/track.controller.ts",
+      "action": "create",
+      "tokens": 1691,
+      "at": "2026-09-05T11:25:34.113Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/track.routes.ts",
+      "action": "create",
+      "tokens": 223,
+      "at": "2026-09-05T11:25:36.476Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/student.controller.ts",
+      "action": "create",
+      "tokens": 1948,
+      "at": "2026-09-05T11:25:53.716Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Student.model.ts",
       "action": "edit",
-      "tokens": 635,
-      "at": "2026-09-04T08:15:24.027Z"
+      "tokens": 7,
+      "at": "2026-09-05T11:25:54.807Z"
     },
     {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md",
-      "action": "edit",
-      "tokens": 274,
-      "at": "2026-09-04T08:15:33.275Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md",
-      "action": "edit",
-      "tokens": 372,
-      "at": "2026-09-04T08:15:42.418Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md",
-      "action": "edit",
-      "tokens": 244,
-      "at": "2026-09-04T08:15:50.443Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md",
-      "action": "edit",
-      "tokens": 443,
-      "at": "2026-09-04T08:16:15.320Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md",
-      "action": "edit",
-      "tokens": 933,
-      "at": "2026-09-04T08:16:48.411Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md",
-      "action": "edit",
-      "tokens": 765,
-      "at": "2026-09-04T08:17:00.210Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md",
-      "action": "edit",
-      "tokens": 131,
-      "at": "2026-09-04T08:17:09.229Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md",
-      "action": "edit",
-      "tokens": 71,
-      "at": "2026-09-04T08:17:14.586Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.gitignore",
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Student.model.ts",
       "action": "edit",
       "tokens": 24,
-      "at": "2026-09-04T08:21:27.083Z"
+      "at": "2026-09-05T11:25:56.105Z"
     },
     {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "create",
-      "tokens": 1455,
-      "at": "2026-09-04T08:23:02.542Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.test.ts",
-      "action": "edit",
-      "tokens": 47,
-      "at": "2026-09-04T08:42:34.986Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.test.ts",
-      "action": "edit",
-      "tokens": 57,
-      "at": "2026-09-04T08:42:41.204Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.test.ts",
-      "action": "edit",
-      "tokens": 444,
-      "at": "2026-09-04T08:42:52.195Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.test.ts",
-      "action": "edit",
-      "tokens": 297,
-      "at": "2026-09-04T08:48:42.985Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.test.ts",
-      "action": "edit",
-      "tokens": 304,
-      "at": "2026-09-04T08:48:52.447Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 369,
-      "at": "2026-09-04T09:00:52.642Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 161,
-      "at": "2026-09-04T09:00:59.594Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 231,
-      "at": "2026-09-04T09:07:25.819Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 150,
-      "at": "2026-09-04T09:07:35.984Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-1-report.md",
-      "action": "create",
-      "tokens": 2261,
-      "at": "2026-09-04T09:39:36.223Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 66,
-      "at": "2026-09-04T14:31:17.263Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 154,
-      "at": "2026-09-04T14:32:03.763Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 369,
-      "at": "2026-09-04T14:32:14.335Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 161,
-      "at": "2026-09-04T14:32:20.904Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 231,
-      "at": "2026-09-04T14:32:30.346Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-2-report.md",
-      "action": "create",
-      "tokens": 1321,
-      "at": "2026-09-04T14:33:11.224Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 70,
-      "at": "2026-09-04T14:34:53.370Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 227,
-      "at": "2026-09-04T14:35:35.604Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 630,
-      "at": "2026-09-04T14:35:50.627Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 64,
-      "at": "2026-09-04T14:36:04.479Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/seeds/backfillPlans.ts",
-      "action": "edit",
-      "tokens": 28,
-      "at": "2026-09-04T14:36:13.817Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/seeds/backfillPlans.ts",
-      "action": "edit",
-      "tokens": 62,
-      "at": "2026-09-04T14:36:18.100Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/QuranPlan.model.ts",
-      "action": "edit",
-      "tokens": 78,
-      "at": "2026-09-04T14:36:27.065Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-3-report.md",
-      "action": "create",
-      "tokens": 1263,
-      "at": "2026-09-04T14:37:05.672Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 66,
-      "at": "2026-09-04T14:38:28.263Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/quran-plan.controller.ts",
-      "action": "edit",
-      "tokens": 144,
-      "at": "2026-09-04T14:42:29.896Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/quran-plan.controller.ts",
-      "action": "edit",
-      "tokens": 114,
-      "at": "2026-09-04T14:42:36.534Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-4-report.md",
-      "action": "create",
-      "tokens": 1524,
-      "at": "2026-09-04T14:43:18.708Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 144,
-      "at": "2026-09-04T14:44:29.228Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/api/quran-plans.ts",
-      "action": "edit",
-      "tokens": 129,
-      "at": "2026-09-04T14:45:13.364Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/queries/quranPlan.ts",
-      "action": "edit",
-      "tokens": 129,
-      "at": "2026-09-04T14:45:15.709Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-5-report.md",
-      "action": "create",
-      "tokens": 952,
-      "at": "2026-09-04T14:45:55.571Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 60,
-      "at": "2026-09-04T14:46:56.379Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx",
-      "action": "edit",
-      "tokens": 120,
-      "at": "2026-09-04T14:48:00.515Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx",
-      "action": "edit",
-      "tokens": 65,
-      "at": "2026-09-04T14:48:05.188Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx",
-      "action": "edit",
-      "tokens": 42,
-      "at": "2026-09-04T14:48:10.799Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx",
-      "action": "edit",
-      "tokens": 38,
-      "at": "2026-09-04T14:48:18.147Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-6-report.md",
-      "action": "create",
-      "tokens": 1575,
-      "at": "2026-09-04T14:52:41.106Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 195,
-      "at": "2026-09-04T14:55:28.035Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx",
-      "action": "edit",
-      "tokens": 57,
-      "at": "2026-09-04T14:56:41.555Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx",
-      "action": "edit",
-      "tokens": 120,
-      "at": "2026-09-04T14:56:43.686Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx",
-      "action": "edit",
-      "tokens": 340,
-      "at": "2026-09-04T14:56:53.227Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx",
-      "action": "edit",
-      "tokens": 17,
-      "at": "2026-09-04T14:57:03.601Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx",
-      "action": "edit",
-      "tokens": 67,
-      "at": "2026-09-04T14:57:21.128Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-7-report.md",
-      "action": "create",
-      "tokens": 2498,
-      "at": "2026-09-04T14:59:45.133Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 368,
-      "at": "2026-09-04T15:02:26.709Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx",
-      "action": "edit",
-      "tokens": 424,
-      "at": "2026-09-04T15:03:35.745Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
-      "action": "edit",
-      "tokens": 26,
-      "at": "2026-09-04T15:03:50.427Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
-      "action": "edit",
-      "tokens": 425,
-      "at": "2026-09-04T15:04:00.639Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
-      "action": "edit",
-      "tokens": 34,
-      "at": "2026-09-04T15:04:20.238Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
-      "action": "edit",
-      "tokens": 34,
-      "at": "2026-09-04T15:04:28.598Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx",
-      "action": "edit",
-      "tokens": 305,
-      "at": "2026-09-04T15:04:36.450Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
-      "action": "edit",
-      "tokens": 153,
-      "at": "2026-09-04T15:04:49.353Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx",
-      "action": "edit",
-      "tokens": 311,
-      "at": "2026-09-04T15:04:57.781Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
-      "action": "edit",
-      "tokens": 186,
-      "at": "2026-09-04T15:05:11.521Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx",
-      "action": "edit",
-      "tokens": 240,
-      "at": "2026-09-04T15:05:19.269Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 32,
-      "at": "2026-09-04T15:05:53.369Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 490,
-      "at": "2026-09-04T15:06:04.315Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-8-report.md",
-      "action": "create",
-      "tokens": 2598,
-      "at": "2026-09-04T15:07:18.149Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 284,
-      "at": "2026-09-04T15:11:13.224Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 317,
-      "at": "2026-09-04T15:12:33.696Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plans.tsx",
-      "action": "edit",
-      "tokens": 75,
-      "at": "2026-09-04T15:13:35.202Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plans.tsx",
-      "action": "edit",
-      "tokens": 246,
-      "at": "2026-09-04T15:13:42.951Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plan-detail.tsx",
-      "action": "edit",
-      "tokens": 70,
-      "at": "2026-09-04T15:14:02.740Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plan-detail.tsx",
-      "action": "edit",
-      "tokens": 165,
-      "at": "2026-09-04T15:14:08.684Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/student/special_tracks.tsx",
-      "action": "edit",
-      "tokens": 170,
-      "at": "2026-09-04T15:14:26.761Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/student/special_tracks.tsx",
-      "action": "edit",
-      "tokens": 200,
-      "at": "2026-09-04T15:14:37.156Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/student/special_tracks.tsx",
-      "action": "edit",
-      "tokens": 141,
-      "at": "2026-09-04T15:14:43.435Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
-      "action": "edit",
-      "tokens": 200,
-      "at": "2026-09-04T15:14:59.804Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx",
-      "action": "edit",
-      "tokens": 164,
-      "at": "2026-09-04T15:15:06.342Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/TrackDetail.tsx",
-      "action": "edit",
-      "tokens": 47,
-      "at": "2026-09-04T15:15:25.501Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/TrackDetail.tsx",
-      "action": "edit",
-      "tokens": 276,
-      "at": "2026-09-04T15:15:33.043Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plans.tsx",
-      "action": "edit",
-      "tokens": 278,
-      "at": "2026-09-04T15:15:57.352Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plan-detail.tsx",
-      "action": "edit",
-      "tokens": 182,
-      "at": "2026-09-04T15:16:04.737Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/TrackDetail.tsx",
-      "action": "edit",
-      "tokens": 226,
-      "at": "2026-09-04T15:16:12.326Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-9-report.md",
-      "action": "create",
-      "tokens": 1626,
-      "at": "2026-09-04T15:17:01.358Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 299,
-      "at": "2026-09-04T15:18:30.509Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 363,
-      "at": "2026-09-04T15:20:12.875Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx",
-      "action": "edit",
-      "tokens": 312,
-      "at": "2026-09-04T15:21:09.951Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-10-report.md",
-      "action": "create",
-      "tokens": 1418,
-      "at": "2026-09-04T15:22:07.221Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 137,
-      "at": "2026-09-04T15:23:16.801Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
-      "action": "edit",
-      "tokens": 116,
-      "at": "2026-09-04T15:30:23.543Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
-      "action": "edit",
-      "tokens": 80,
-      "at": "2026-09-04T15:30:29.371Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
-      "action": "edit",
-      "tokens": 150,
-      "at": "2026-09-04T15:31:06.038Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
-      "action": "edit",
-      "tokens": 1019,
-      "at": "2026-09-04T15:31:26.305Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
-      "action": "edit",
-      "tokens": 1153,
-      "at": "2026-09-04T15:31:53.993Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
-      "action": "edit",
-      "tokens": 54,
-      "at": "2026-09-04T15:32:02.158Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
-      "action": "edit",
-      "tokens": 929,
-      "at": "2026-09-04T15:32:22.919Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
-      "action": "edit",
-      "tokens": 1152,
-      "at": "2026-09-04T15:33:02.142Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-11-report.md",
-      "action": "create",
-      "tokens": 3588,
-      "at": "2026-09-04T15:35:12.949Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 478,
-      "at": "2026-09-04T15:36:00.957Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 248,
-      "at": "2026-09-04T15:40:07.742Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 51,
-      "at": "2026-09-04T15:42:32.453Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 128,
-      "at": "2026-09-04T15:42:37.758Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 103,
-      "at": "2026-09-04T15:42:44.090Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 844,
-      "at": "2026-09-04T15:43:04.307Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 1247,
-      "at": "2026-09-04T15:43:32.483Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 204,
-      "at": "2026-09-04T15:43:39.803Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 61,
-      "at": "2026-09-04T15:43:45.023Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 1013,
-      "at": "2026-09-04T15:43:58.427Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 945,
-      "at": "2026-09-04T15:44:15.403Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 114,
-      "at": "2026-09-04T15:44:26.066Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 30,
-      "at": "2026-09-04T15:44:29.675Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 167,
-      "at": "2026-09-04T15:45:41.071Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 108,
-      "at": "2026-09-04T15:45:44.843Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-12-report.md",
-      "action": "create",
-      "tokens": 3404,
-      "at": "2026-09-04T15:47:23.947Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 366,
-      "at": "2026-09-04T15:50:36.834Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/DaySlider.tsx",
-      "action": "edit",
-      "tokens": 48,
-      "at": "2026-09-04T15:53:45.854Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/DaySlider.tsx",
-      "action": "edit",
-      "tokens": 84,
-      "at": "2026-09-04T15:53:50.585Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 38,
-      "at": "2026-09-04T15:58:21.528Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 132,
-      "at": "2026-09-04T15:58:27.418Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 58,
-      "at": "2026-09-04T15:58:32.369Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 179,
-      "at": "2026-09-04T15:59:21.818Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 912,
-      "at": "2026-09-04T15:59:42.823Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 848,
-      "at": "2026-09-04T16:00:05.919Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 48,
-      "at": "2026-09-04T16:00:16.072Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 677,
-      "at": "2026-09-04T16:00:28.945Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 812,
-      "at": "2026-09-04T16:00:49.052Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Student.model.ts",
       "action": "edit",
       "tokens": 10,
-      "at": "2026-09-04T16:00:55.203Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/TrackDetail.tsx",
-      "action": "edit",
-      "tokens": 193,
-      "at": "2026-09-04T16:01:06.172Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-13-report.md",
-      "action": "create",
-      "tokens": 3296,
-      "at": "2026-09-04T16:03:57.501Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 436,
-      "at": "2026-09-04T16:05:26.764Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 128,
-      "at": "2026-09-05T08:11:16.499Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 455,
-      "at": "2026-09-05T08:12:43.352Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 1252,
-      "at": "2026-09-05T08:13:06.091Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 76,
-      "at": "2026-09-05T08:13:12.311Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 282,
-      "at": "2026-09-05T08:13:25.124Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-13-report.md",
-      "action": "edit",
-      "tokens": 1425,
-      "at": "2026-09-05T08:14:52.822Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-13-report.md",
-      "action": "edit",
-      "tokens": 105,
-      "at": "2026-09-05T08:14:59.024Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 73,
-      "at": "2026-09-05T08:15:21.884Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 191,
-      "at": "2026-09-05T08:17:16.603Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-14-report.md",
-      "action": "create",
-      "tokens": 4897,
-      "at": "2026-09-05T08:24:33.625Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 407,
-      "at": "2026-09-05T08:25:12.961Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 1048,
-      "at": "2026-09-05T08:34:34.517Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/student-plan-progress.controller.ts",
-      "action": "edit",
-      "tokens": 239,
-      "at": "2026-09-05T08:36:03.955Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
-      "action": "edit",
-      "tokens": 1156,
-      "at": "2026-09-05T08:36:48.175Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 1151,
-      "at": "2026-09-05T08:37:18.574Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx",
-      "action": "edit",
-      "tokens": 12,
-      "at": "2026-09-05T08:37:29.752Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
-      "action": "edit",
-      "tokens": 912,
-      "at": "2026-09-05T08:38:00.474Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
-      "action": "edit",
-      "tokens": 334,
-      "at": "2026-09-05T08:38:27.027Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
-      "action": "edit",
-      "tokens": 14,
-      "at": "2026-09-05T08:38:31.267Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/attendance.tsx",
-      "action": "edit",
-      "tokens": 26,
-      "at": "2026-09-05T08:39:38.452Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/attendance.tsx",
-      "action": "edit",
-      "tokens": 368,
-      "at": "2026-09-05T08:39:47.894Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/TrackDetail.tsx",
-      "action": "edit",
-      "tokens": 110,
-      "at": "2026-09-05T08:40:38.605Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/TrackDetail.tsx",
-      "action": "edit",
-      "tokens": 289,
-      "at": "2026-09-05T08:40:46.683Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 39,
-      "at": "2026-09-05T08:41:01.961Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.ts",
-      "action": "edit",
-      "tokens": 39,
-      "at": "2026-09-05T08:41:06.459Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/api/quran-plans.ts",
-      "action": "edit",
-      "tokens": 184,
-      "at": "2026-09-05T08:41:19.559Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/queries/quranPlan.ts",
-      "action": "edit",
-      "tokens": 184,
-      "at": "2026-09-05T08:41:31.380Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx",
-      "action": "edit",
-      "tokens": 151,
-      "at": "2026-09-05T08:42:00.300Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx",
-      "action": "edit",
-      "tokens": 21,
-      "at": "2026-09-05T08:42:04.858Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx",
-      "action": "edit",
-      "tokens": 144,
-      "at": "2026-09-05T08:42:19.888Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx",
-      "action": "edit",
-      "tokens": 14,
-      "at": "2026-09-05T08:42:24.120Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/quran-plan.controller.ts",
-      "action": "edit",
-      "tokens": 273,
-      "at": "2026-09-05T08:44:38.054Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/quran-plan.controller.ts",
-      "action": "edit",
-      "tokens": 66,
-      "at": "2026-09-05T08:44:48.936Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/quran-plan.controller.ts",
-      "action": "edit",
-      "tokens": 44,
-      "at": "2026-09-05T08:44:53.482Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/quranRange.test.ts",
-      "action": "edit",
-      "tokens": 26,
-      "at": "2026-09-05T08:45:57.245Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/final-review-fix-report.md",
-      "action": "create",
-      "tokens": 3799,
-      "at": "2026-09-05T08:49:21.339Z"
-    },
-    {
-      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md",
-      "action": "edit",
-      "tokens": 506,
-      "at": "2026-09-05T08:56:25.413Z"
+      "at": "2026-09-05T11:25:57.234Z"
     }
   ],
   "edit_counts": {
-    "docs/superpowers/specs/2026-09-04-same-day-multi-segment-plans-design.md": 1,
-    "docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md": 11,
-    ".gitignore": 1,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/progress.md": 23,
-    "quran-hifz-mobile/lib/quranRange.test.ts": 6,
-    "quran-hifz-mobile/lib/quranRange.ts": 5,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-1-report.md": 1,
-    "quran-hifz/src/quran/lib/quranRange.ts": 5,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-2-report.md": 1,
-    "quran-hifz-server/src/lib/quranRange.ts": 3,
-    "quran-hifz-server/src/seeds/backfillPlans.ts": 2,
-    "quran-hifz-server/src/models/QuranPlan.model.ts": 1,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-3-report.md": 1,
-    "quran-hifz-server/src/controllers/quran-plan.controller.ts": 5,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-4-report.md": 1,
-    "quran-hifz/src/quran/api/quran-plans.ts": 2,
-    "quran-hifz-mobile/lib/queries/quranPlan.ts": 2,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-5-report.md": 1,
-    "quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx": 6,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-6-report.md": 1,
-    "quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx": 7,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-7-report.md": 1,
-    "quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx": 1,
-    "quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx": 4,
-    "quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx": 2,
-    "quran-hifz/src/quran/pages/student/StudentSpecialTracks.tsx": 2,
-    "quran-hifz/src/quran/pages/admin/AdminSpecialTracks.tsx": 2,
-    "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx": 17,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-8-report.md": 1,
-    "quran-hifz-mobile/app/(portal)/teacher/plans.tsx": 3,
-    "quran-hifz-mobile/app/(portal)/teacher/plan-detail.tsx": 3,
-    "quran-hifz-mobile/app/(portal)/student/special_tracks.tsx": 3,
-    "quran-hifz-mobile/app/(portal)/admin/special_tracks.tsx": 2,
-    "quran-hifz-mobile/components/domain/TrackDetail.tsx": 6,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-9-report.md": 1,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-10-report.md": 1,
-    "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx": 11,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-11-report.md": 1,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-12-report.md": 1,
-    "quran-hifz-mobile/components/domain/DaySlider.tsx": 2,
-    "quran-hifz-mobile/components/domain/EvaluationRoster.tsx": 15,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-13-report.md": 3,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/task-14-report.md": 1,
-    "quran-hifz-server/src/controllers/student-plan-progress.controller.ts": 1,
-    "quran-hifz-mobile/app/(portal)/teacher/attendance.tsx": 2,
-    ".superpowers/sdd/2026-09-04-same-day-multi-segment-plans/final-review-fix-report.md": 1
+    ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md": 2,
+    "quran-hifz-server/src/models/Masjid.model.ts": 1,
+    "quran-hifz-server/src/controllers/masjid.controller.ts": 1,
+    "quran-hifz-server/src/models/Track.model.ts": 1,
+    ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-1-2-report.md": 1,
+    "quran-hifz-server/src/controllers/track.controller.ts": 1,
+    "quran-hifz-server/src/routes/track.routes.ts": 1,
+    "quran-hifz-server/src/controllers/student.controller.ts": 1,
+    "quran-hifz-server/src/models/Student.model.ts": 3
   },
-  "anatomy_hits": 57,
-  "anatomy_misses": 29,
-  "repeated_reads_warned": 216,
+  "anatomy_hits": 9,
+  "anatomy_misses": 5,
+  "repeated_reads_warned": 5,
   "cerebrum_warnings": 0,
-  "stop_count": 9
+  "stop_count": 1
 }

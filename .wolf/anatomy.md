@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T08:56:25.325Z
-> Files: 552 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T11:25:57.221Z
+> Files: 559 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -263,13 +263,20 @@
 - `task-8-report.md` — Task 8 Report: Web read-only "today's ward" banners → loop over `todayAssignments` (~2274 tok)
 - `task-9-report.md` — Task 9 Report: Mobile read-only "today's ward" banners → loop over `todayAssignments` (~1423 tok)
 
+## .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/
+
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase1-server.md (~807 tok)
+- `task-1-2-report.md` — Task 1 & 2 Implementation Report (~1147 tok)
+
 ## docs/superpowers/plans/
 
 - `2026-09-04-same-day-multi-segment-plans.md` — Same-day حفظ + مراجعة Plan Segments Implementation Plan (~18220 tok)
+- `2026-09-05-halqa-track-restructure-phase1-server.md` — Halqa Elimination / Track Restructure — Phase 1 (Server) Implementation Plan (~24218 tok)
 
 ## docs/superpowers/specs/
 
 - `2026-09-04-same-day-multi-segment-plans-design.md` — Same-day حفظ + مراجعة segments — design (~2798 tok)
+- `2026-09-05-halqa-track-restructure-design.md` — Halqa/Track restructure — design (~3171 tok)
 
 ## quran-hifz-mobile/
 
@@ -528,15 +535,16 @@
 - `homework.controller.ts` — Zod schemas: homeworkSchema, reviewSchema (~750 tok)
 - `kpi.controller.ts` — Zod schemas: kpiSchema (~389 tok)
 - `lesson-recording.controller.ts` — Zod schemas: recordingSchema (~559 tok)
-- `masjid.controller.ts` — Zod schemas: masjidSchema (~698 tok)
+- `masjid.controller.ts` — Zod schemas: masjidSchema (~729 tok)
 - `message.controller.ts` — Zod schemas: messageSchema (~568 tok)
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
 - `quran-plan.controller.ts` — One line of the plan's daily grading rubric: a label and its degrees. (~5967 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
 - `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~4346 tok)
-- `student.controller.ts` — Zod schemas: studentSchema (~1815 tok)
+- `student.controller.ts` — Empty string is normalised to undefined so a blank field clears rather (~1948 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1398 tok)
+- `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~1691 tok)
 
 ## quran-hifz-server/src/data/
 
@@ -568,14 +576,15 @@
 - `IndividualPlan.model.ts` — Exports IIndividualPlan, IndividualPlan (~302 tok)
 - `KPI.model.ts` — Exports IKPI, KPI (~199 tok)
 - `LessonRecording.model.ts` — Exports ILessonRecording, LessonRecording (~308 tok)
-- `Masjid.model.ts` — Exports IMasjid, Masjid (~125 tok)
+- `Masjid.model.ts` — Drives the جامع (male) / دار (female) display label on the client — (~204 tok)
 - `Message.model.ts` — Exports IMessage, Message (~334 tok)
 - `ParentStudent.model.ts` — Exports IParentStudent, ParentStudent (~172 tok)
 - `QuranPlan.model.ts` — One line of a plan's daily grading rubric: what is graded and out of how (~2435 tok)
 - `SpecialTrack.model.ts` — Exports ISpecialTrack, SpecialTrack (~429 tok)
-- `Student.model.ts` — Exports IStudent, Student (~498 tok)
+- `Student.model.ts` — Saudi national ID (رقم الهوية الوطنية): exactly 10 digits from الأحوال المدنية. (~704 tok)
 - `StudentPlanProgress.model.ts` — Exports StudentOccurrenceStatus, IStudentOccurrence, IStudentPlanProgress, StudentPlanProgress (~994 tok)
 - `Teacher.model.ts` — Exports ITeacher, Teacher (~289 tok)
+- `Track.model.ts` — Exports ITrack, Track (~404 tok)
 - `User.model.ts` — Exports UserRole, IUser, User (~442 tok)
 
 ## quran-hifz-server/src/routes/
@@ -598,6 +607,7 @@
 - `stats.routes.ts` — API routes: GET (1 endpoints) (~79 tok)
 - `student.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~173 tok)
 - `teacher.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~166 tok)
+- `track.routes.ts` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~223 tok)
 
 ## quran-hifz-server/src/seeds/
 
@@ -609,7 +619,7 @@
 - `regenerate-emails-from-names.ts` — One-off: rebuild every teacher/student email from their (Arabic) name. (~1112 tok)
 - `regenerate-emails-from-names.ts` — One-off: rebuild teacher/student emails from Arabic first name (compound عبد-names kept whole) via curated transliteration map; numeric suffix on dup; admin untouched. `npm run regenerate-emails` (~700 tok)
 - `rename-email-domain.ts` — One-off: rewrite every user's email domain to a new one, keeping the (~282 tok)
-- `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~4682 tok)
+- `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~5034 tok)
 - `wipe-all.ts` — One-time full wipe of the local dev database before importing real data. (~559 tok)
 
 ## quran-hifz-server/src/types/

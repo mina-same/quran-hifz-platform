@@ -227,8 +227,36 @@ async function seed(): Promise<void> {
       endType: 'activeDays',
       activeDaysCount: 15,
     },
+    // Demo plan for the same-day multi-segment feature: حفظ and مراجعة share
+    // every one of their weekdays, so التاريخ نفسه produces both wards at once.
+    {
+      name: 'خطة حفظ ومراجعة في نفس اليوم (تجريبية)',
+      description: 'خطة تجريبية لاختبار الحفظ والمراجعة في نفس الأيام على حلقة علي بن أبي طالب',
+      teacher: tFaisal._id,
+      targetType: 'halqa',
+      halqa: hAli._id,
+      segments: [
+        {
+          type: 'حفظ',
+          days: ['السبت', 'الاثنين', 'الأربعاء'],
+          rangeStart: { surahNumber: 67, ayah: 1 },
+          rangeEnd: { surahNumber: 77, ayah: 50 },
+          schedule: [],
+        },
+        {
+          type: 'مراجعة',
+          days: ['السبت', 'الاثنين', 'الأربعاء'],
+          rangeStart: { surahNumber: 1, ayah: 1 },
+          rangeEnd: { surahNumber: 2, ayah: 141 },
+          schedule: [],
+        },
+      ],
+      pointsEnabled: false,
+      endType: 'activeDays',
+      activeDaysCount: 9,
+    },
   ]);
-  console.log(`🎯  Seeded 3 Quran plans`);
+  console.log(`🎯  Seeded 4 Quran plans (incl. 1 same-day حفظ+مراجعة demo)`);
 
   // ── KPIs ───────────────────────────────────────────────────────────────────
   await KPI.insertMany([
@@ -242,14 +270,16 @@ async function seed(): Promise<void> {
   ]);
   console.log(`📊  Seeded ${7} KPIs`);
 
-  // ── Users (admin + teacher + student + parent) ────────────────────────────
-  const [, , , parentUser] = await Promise.all([
+  // ── Users (admin + teachers + student + parent) ───────────────────────────
+  const [, , , , parentUser] = await Promise.all([
     new User({ name: 'مدير النظام',       email: 'admin@quran-hifz.sa',    password: 'admin123',   role: 'admin',   isActive: true }).save(),
     new User({ name: 'ناصر الحميداني',   email: 'nasir@quran-hifz.sa',    password: 'teacher123', role: 'teacher', profileId: tNasir._id,    isActive: true }).save(),
+    // Owns the same-day حفظ+مراجعة demo plan (حلقة علي بن أبي طالب).
+    new User({ name: 'فيصل العتيبي',     email: 'faisal@quran-hifz.sa',   password: 'teacher123', role: 'teacher', profileId: tFaisal._id,   isActive: true }).save(),
     new User({ name: 'عبدالله الحميداني', email: 'abdullah@quran-hifz.sa', password: 'student123', role: 'student', profileId: students[0]._id, isActive: true }).save(),
     new User({ name: 'محمد الحميداني',   email: 'parent@quran-hifz.sa',   password: 'parent123',  role: 'parent',  isActive: true }).save(),
   ]);
-  console.log(`👤  Seeded 4 user accounts`);
+  console.log(`👤  Seeded 5 user accounts`);
 
   // ── Parent → Student links ─────────────────────────────────────────────────
   await ParentStudent.create([
