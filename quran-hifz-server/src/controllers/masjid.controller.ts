@@ -64,6 +64,10 @@ export async function updateMasjid(req: Request, res: Response, next: NextFuncti
 
 export async function deleteMasjid(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    const remainingTracks = await Track.countDocuments({ masjid: req.params.id });
+    if (remainingTracks > 0) {
+      throw new AppError('لا يمكن حذف مسجد به مسارات — احذف أو انقل المسارات أولاً', 400);
+    }
     const masjid = await Masjid.findByIdAndDelete(req.params.id);
     if (!masjid) throw new AppError('المسجد غير موجود', 404);
     res.json({ success: true, message: 'تم حذف المسجد بنجاح' });

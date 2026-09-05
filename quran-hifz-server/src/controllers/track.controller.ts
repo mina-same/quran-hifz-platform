@@ -2,6 +2,12 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { Track } from '../models/Track.model';
 import { Student } from '../models/Student.model';
+import { Attendance } from '../models/Attendance.model';
+import { Evaluation } from '../models/Evaluation.model';
+import { Homework } from '../models/Homework.model';
+import { GroupHomework } from '../models/GroupHomework.model';
+import { LessonRecording } from '../models/LessonRecording.model';
+import { QuranPlan } from '../models/QuranPlan.model';
 import { AppError } from '../middleware/error';
 
 const trackSchema = z.object({
@@ -107,33 +113,24 @@ export async function assignStudent(req: Request, res: Response, next: NextFunct
   }
 }
 
-/** There is no valid "no track" state (`Student.track` is required), so
- * unassigning only makes sense as part of a transfer to a DIFFERENT track —
- * this endpoint is kept only for API-shape continuity but now requires the
- * destination track explicitly. Callers should prefer `assignStudent` on
- * the destination track directly; this exists for a caller that only knows
- * "remove from track A" and a separate destination pick step. */
-export async function unassignStudent(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const { studentId, toTrackId } = req.body;
-    if (!toTrackId) throw new AppError('يجب تحديد المسار الجديد للطالب', 400);
-    const destination = await Track.findById(toTrackId);
-    if (!destination) throw new AppError('المسار الجديد غير موجود', 404);
-
-    const student = await Student.findByIdAndUpdate(studentId, { track: destination._id }, { new: true, runValidators: true });
-    if (!student) throw new AppError('الطالب غير موجود', 404);
-
-    res.json({ success: true, data: student });
-  } catch (err) {
-    next(err);
-  }
-}
-
 export async function deleteTrack(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const remainingStudents = await Student.countDocuments({ track: req.params.id });
     if (remainingStudents > 0) {
       throw new AppError('لا يمكن حذف مسار به طلاب — انقل الطلاب إلى مسار آخر أولاً', 400);
+    }
+    // Historical records (attendance, evaluations, homework, recordings, plans)
+    // reference the track too — deleting it would leave them dangling.
+    const [attendance, evaluations, homework, groupHomework, recordings, plans] = await Promise.all([
+      Attendance.countDocuments({ track: req.params.id }),
+      Evaluation.countDocuments({ track: req.params.id }),
+      Homework.countDocuments({ track: req.params.id }),
+      GroupHomework.countDocuments({ track: req.params.id }),
+      LessonRecording.countDocuments({ track: req.params.id }),
+      QuranPlan.countDocuments({ track: req.params.id }),
+    ]);
+    if (attendance + evaluations + homework + groupHomework + recordings + plans > 0) {
+      throw new AppError('لا يمكن حذف مسار به سجلات تاريخية مرتبطة به', 400);
     }
     const track = await Track.findByIdAndDelete(req.params.id);
     if (!track) throw new AppError('المسار غير موجود', 404);

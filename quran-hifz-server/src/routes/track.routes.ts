@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {
-  getTracks, getTrack, createTrack, updateTrack, assignStudent, unassignStudent, deleteTrack,
+  getTracks, getTrack, createTrack, updateTrack, assignStudent, deleteTrack,
 } from '../controllers/track.controller';
 import { authenticate } from '../middleware/auth';
 import { authorize } from '../middleware/role';
@@ -14,7 +14,6 @@ router.get('/:id',           getTrack);
 router.post('/',             authorize('admin'), createTrack);
 router.put('/:id',           authorize('admin'), updateTrack);
 router.post('/:id/assign',   authorize('admin', 'teacher'), assignStudent);
-router.post('/:id/unassign', authorize('admin', 'teacher'), unassignStudent);
 router.delete('/:id',        authorize('admin'), deleteTrack);
 
 export default router;
