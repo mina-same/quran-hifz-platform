@@ -10,9 +10,8 @@ import {
   PLAN_FORM_HANDOFF_KEY,
   type PlanFormHandoff, type PlanType, type RangePoint, type QuranPlan,
 } from "../../api/quran-plans";
-import { useHalqat } from "../../api/halqat";
+import { useTracks } from "../../api/tracks";
 import { useStudents } from "../../api/students";
-import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudentPlanProgressList } from "../../api/student-plan-progress";
 import { toAr, AR_LOCALE } from "../../../lib/format";
 import { Card } from "../../components/common/Card";
@@ -31,11 +30,11 @@ const PLAN_TYPES: { value: PlanType; label: string; icon: string; fg: string; bg
   { value: "مراجعة", label: "مراجعة", icon: "ti-refresh",   fg: "#1d4ed8",      bg: "#eff6ff" },
 ];
 
-// Plans are halqa-based only. "طلاب محددون" and "مسار" targets are intentionally
-// not offered here — per-student differentiation happens via individual plans,
-// managed per student after the halqa plan is saved.
-const TARGET_TYPES: { value: "halqa" | "students" | "specialTrack"; label: string; icon: string }[] = [
-  { value: "halqa",        label: "حلقة كاملة",    icon: "ti-school" },
+// Plans are track-based only. "طلاب محددون" is intentionally the only other
+// option offered here — per-student differentiation happens via individual
+// plans, managed per student after the track plan is saved.
+const TARGET_TYPES: { value: "track" | "students"; label: string; icon: string }[] = [
+  { value: "track", label: "مسار كامل", icon: "ti-route" },
 ];
 
 /** One type's track in the form: its own days and its own range. The plan's
@@ -60,10 +59,9 @@ type FormFields = {
   description: string;
   /** One per selected type, max four. Their days must not overlap. */
   segments: FormSegment[];
-  targetType: "halqa" | "students" | "specialTrack";
-  halqa: string;
+  targetType: "track" | "students";
+  track: string;
   students: string[];
-  specialTrack: string;
   holidays: string[];
   startDate: string;
   endType: "activeDays" | "date";
@@ -87,7 +85,7 @@ const RUBRIC_BAR_COLORS = ["var(--green)", "#1d4ed8", "#c2410c", "#7c3aed", "#08
 const EMPTY: FormFields = {
   name: "", description: "",
   segments: [emptySegment("حفظ")],
-  targetType: "halqa", halqa: "", students: [], specialTrack: "",
+  targetType: "track", track: "", students: [],
   holidays: [],
   startDate: todayISO(),
   endType: "activeDays",
@@ -103,15 +101,12 @@ function getId(v: { _id: string } | string) {
 function fieldsFromPlan(plan: QuranPlan, nameSuffix = ""): FormFields {
   return {
     name: `${plan.name}${nameSuffix}`, description: plan.description ?? "",
-    // The server always returns segments, migrating a legacy single-type plan
-    // into a one-element array, so there is no old shape to handle here.
     segments: plan.segments.map((seg) => ({
       type: seg.type, days: seg.days, rangeStart: seg.rangeStart, rangeEnd: seg.rangeEnd,
     })),
     targetType: plan.targetType,
-    halqa: plan.halqa ? getId(plan.halqa) : "",
+    track: plan.track ? getId(plan.track) : "",
     students: (plan.students ?? []).map(getId),
-    specialTrack: plan.specialTrack ? getId(plan.specialTrack) : "",
     holidays: plan.holidays ?? [],
     startDate: plan.startDate ? plan.startDate.split("T")[0] : todayISO(),
     endType: plan.endType,
@@ -138,9 +133,8 @@ export function TeacherPlanForm() {
     }
   });
 
-  const { data: halqat = [] }        = useHalqat({ teacher: teacherId });
-  const { data: allStudents = [] }   = useStudents();
-  const { data: specialTracks = [] } = useSpecialTracks(undefined, teacherId);
+  const { data: tracks = [] } = useTracks(undefined, teacherId);
+  const { data: allStudents = [] } = useStudents();
 
   const createPlan = useCreateQuranPlan();
   const updatePlan = useUpdateQuranPlan();
@@ -151,8 +145,8 @@ export function TeacherPlanForm() {
   const [form, setForm] = useState<FormFields>(() => {
     if (handoff?.mode === "edit") return fieldsFromPlan(handoff.plan);
     if (handoff?.mode === "duplicate") return fieldsFromPlan(handoff.plan, " (نسخة)");
-    if (handoff?.mode === "create" && handoff.halqaId) {
-      return { ...EMPTY, targetType: "halqa", halqa: handoff.halqaId };
+    if (handoff?.mode === "create" && handoff.trackId) {
+      return { ...EMPTY, targetType: "track", track: handoff.trackId };
     }
     return EMPTY;
   });
@@ -224,12 +218,10 @@ export function TeacherPlanForm() {
     return days;
   }, [form.segments]);
 
-  const { data: halqaStudents = [] } = useStudents({ halqa: form.halqa }, { enabled: form.targetType === "halqa" && !!form.halqa });
-  const { data: trackStudents = [] } = useStudents({ specialTrack: form.specialTrack }, { enabled: form.targetType === "specialTrack" && !!form.specialTrack });
+  const { data: trackStudents = [] } = useStudents({ track: form.track }, { enabled: form.targetType === "track" && !!form.track });
 
   const rosterStudents =
-    form.targetType === "halqa" ? halqaStudents :
-    form.targetType === "specialTrack" ? trackStudents :
+    form.targetType === "track" ? trackStudents :
     allStudents.filter((s) => form.students.includes(s._id));
 
   const progressByStudentId = useStudentPlanProgressList(planRecord?._id, rosterStudents.map((s) => s._id));
@@ -240,9 +232,8 @@ export function TeacherPlanForm() {
     // and no weekday claimed twice.
     const segmentError = validateSegmentDays(form.segments);
     if (segmentError) { setFormError(segmentError); return; }
-    if (form.targetType === "halqa" && !form.halqa) { setFormError("يرجى اختيار حلقة"); return; }
+    if (form.targetType === "track" && !form.track) { setFormError("يرجى اختيار مسار"); return; }
     if (form.targetType === "students" && form.students.length === 0) { setFormError("يرجى اختيار طالب واحد على الأقل"); return; }
-    if (form.targetType === "specialTrack" && !form.specialTrack) { setFormError("يرجى اختيار المسار"); return; }
     if (!form.startDate) { setFormError("يرجى تحديد تاريخ البداية"); return; }
     if (form.endType === "activeDays" && !form.activeDaysCount) { setFormError("يرجى تحديد عدد الأيام النشطة"); return; }
     if (form.endType === "date" && !form.endDate) { setFormError("يرجى تحديد تاريخ الانتهاء"); return; }
@@ -264,9 +255,8 @@ export function TeacherPlanForm() {
       segments: form.segments,
       teacher: teacherId,
       targetType: form.targetType,
-      halqa: form.targetType === "halqa" ? form.halqa : undefined,
+      track: form.targetType === "track" ? form.track : undefined,
       students: form.targetType === "students" ? form.students : undefined,
-      specialTrack: form.targetType === "specialTrack" ? form.specialTrack : undefined,
       holidays: form.holidays,
       startDate: form.startDate || undefined,
       endType: form.endType,
@@ -474,12 +464,12 @@ export function TeacherPlanForm() {
           ))}
         </div>
 
-        {form.targetType === "halqa" && (
+        {form.targetType === "track" && (
           <div className="form-group">
-            <label className="form-label">الحلقة <span>*</span></label>
-            <select className="form-input" value={form.halqa} onChange={(e) => sf("halqa", e.target.value)}>
-              <option value="">— اختر حلقة —</option>
-              {halqat.map((h) => <option key={h._id} value={h._id}>{h.name}</option>)}
+            <label className="form-label">المسار <span>*</span></label>
+            <select className="form-input" value={form.track} onChange={(e) => sf("track", e.target.value)}>
+              <option value="">— اختر مساراً —</option>
+              {tracks.map((t) => <option key={t._id} value={t._id}>{t.title}</option>)}
             </select>
           </div>
         )}
@@ -489,18 +479,6 @@ export function TeacherPlanForm() {
             selected={form.students}
             onChange={(students) => sf("students", students)}
           />
-        )}
-        {form.targetType === "specialTrack" && (
-          <div className="form-group">
-            <label className="form-label">المسار <span>*</span></label>
-            <select className="form-input" value={form.specialTrack} onChange={(e) => sf("specialTrack", e.target.value)}>
-              <option value="">— اختر مساراً —</option>
-              {specialTracks.map((t) => <option key={t._id} value={t._id}>{t.title}</option>)}
-            </select>
-            {specialTracks.length === 0 && (
-              <p style={{ margin: "6px 0 0", fontSize: 11, color: "var(--text3)" }}>لا يوجد مسارات مرتبطة بك بعد</p>
-            )}
-          </div>
         )}
       </Card>
 
