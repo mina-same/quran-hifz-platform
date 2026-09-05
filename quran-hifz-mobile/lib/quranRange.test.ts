@@ -539,7 +539,7 @@ describe('computeMultiScheduleBreakdown', () => {
     expect(rows.filter((r) => r.type === 'مراجعة').every((r) => r.surahEnd <= 9)).toBe(true);
   });
 
-  it('never puts two types on the same date', () => {
+  it("keeps each segment's own dates distinct within a non-overlapping fixture", () => {
     const byDate = new Map<string, string>();
     for (const r of computeMultiScheduleBreakdown(plan)) {
       const day = String(r.date).slice(0, 10);
