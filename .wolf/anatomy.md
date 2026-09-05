@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T12:01:28.771Z
-> Files: 565 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T12:16:07.751Z
+> Files: 568 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -265,8 +265,11 @@
 
 ## .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase1-server.md (~2342 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase1-server.md (~2680 tok)
 - `task-1-2-report.md` — Task 1 & 2 Implementation Report (~1147 tok)
+- `task-10-report.md` — Task 10 Report: QuranPlan model + controller — targetType drops 'halqa', specialTrack renamed to tra (~1832 tok)
+- `task-11-report.md` — Task 11 Report: parent.controller.ts and stats.controller.ts — final halqa/specialTrack cleanup (~849 tok)
+- `task-12-report.md` — Task 12 Report: Rewrite seed.ts (~1946 tok)
 - `task-3-5-report.md` — Task 3 + 5 Report — Track controller/routes, Student.track (~1674 tok)
 - `task-4-report.md` — Task 4 Report: Delete Halqa Entirely; Update app.ts Route Registration (~1370 tok)
 - `task-6-report.md` — Task 6 Report: Remove `validators/context.ts` and its usage everywhere (~2011 tok)
@@ -560,7 +563,7 @@
 ## quran-hifz-server/src/lib/
 
 - `notify.ts` — Builds one Message per student (skipping students with no linked parent (~655 tok)
-- `planStudents.ts` — Resolves which students are covered by a plan, branching on `targetType` (~654 tok)
+- `planStudents.ts` — Resolves which students are covered by a plan, branching on `targetType`: (~243 tok)
 - `push.ts` — Best-effort Expo push notification send — looks up each recipient's stored (~389 tok)
 - `quranRange.ts` — Standard 604-page Madani mushaf boundary table (surah:ayah each page starts at). (~6514 tok)
 - `studentPlanReflow.ts` — Per-student plan overlay: builds the occurrence array, then redistributes what's still owed (cursor → pinned finish line) whenever a day is absent, short, or over-recited; flags `noWard` days (~3376 tok)
@@ -625,7 +628,7 @@
 - `regenerate-emails-from-names.ts` — One-off: rebuild every teacher/student email from their (Arabic) name. (~1112 tok)
 - `regenerate-emails-from-names.ts` — One-off: rebuild teacher/student emails from Arabic first name (compound عبد-names kept whole) via curated transliteration map; numeric suffix on dup; admin untouched. `npm run regenerate-emails` (~700 tok)
 - `rename-email-domain.ts` — One-off: rewrite every user's email domain to a new one, keeping the (~282 tok)
-- `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~5034 tok)
+- `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~5176 tok)
 - `wipe-all.ts` — One-time full wipe of the local dev database before importing real data. (~559 tok)
 
 ## quran-hifz-server/src/types/

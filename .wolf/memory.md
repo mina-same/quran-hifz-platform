@@ -3140,3 +3140,17 @@
 | 15:01 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | 5→4 lines | ~62 |
 | 15:01 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | modified catch() | ~87 |
 | 15:01 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | modified deletePlan() | ~87 |
+| 15:02 | Created quran-hifz-server/src/lib/planStudents.ts | — | ~243 |
+| 15:03 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-10-report.md | — | ~1954 |
+| 15:05 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | modified minor() | ~181 |
+| 15:06 | Edited quran-hifz-server/src/controllers/parent.controller.ts | 3→2 lines | ~34 |
+| 15:06 | Edited quran-hifz-server/src/controllers/parent.controller.ts | inline fix | ~26 |
+| 15:06 | Edited quran-hifz-server/src/controllers/parent.controller.ts | 10→7 lines | ~102 |
+| 15:06 | Edited quran-hifz-server/src/controllers/stats.controller.ts | 5→4 lines | ~59 |
+| 15:06 | Edited quran-hifz-server/src/controllers/stats.controller.ts | 13→11 lines | ~94 |
+| 15:06 | Edited quran-hifz-server/src/controllers/stats.controller.ts | 4→3 lines | ~19 |
+| 15:07 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-11-report.md | — | ~906 |
+| 15:09 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→2 lines | ~166 |
+| 15:12 | Created quran-hifz-server/src/seeds/seed.ts | — | ~5176 |
+| 15:14 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-12-report.md | — | ~2076 |
+| 15:16 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | modified minor() | ~215 |
