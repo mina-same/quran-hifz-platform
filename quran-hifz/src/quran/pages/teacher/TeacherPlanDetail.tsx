@@ -79,12 +79,10 @@ export function TeacherPlanDetail() {
 
   const typeCfg = PLAN_TYPE_CFG[plan.type] ?? PLAN_TYPE_CFG["حفظ"];
   const targetLabel =
-    plan.targetType === "halqa" ? getName(plan.halqa!) :
-    plan.targetType === "specialTrack" ? (plan.specialTrack ? (typeof plan.specialTrack === "object" ? plan.specialTrack.title : plan.specialTrack) : "—") :
+    plan.targetType === "track" ? (plan.track ? (typeof plan.track === "object" ? plan.track.title : plan.track) : "—") :
     `${(plan.students ?? []).length} طالب`;
   const targetIcon =
-    plan.targetType === "halqa" ? "ti-school" :
-    plan.targetType === "specialTrack" ? "ti-calendar-event" : "ti-users";
+    plan.targetType === "track" ? "ti-route" : "ti-users";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>

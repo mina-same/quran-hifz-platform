@@ -5,7 +5,6 @@ import {
   useQuranPlans, useDeleteQuranPlan,
   PLAN_FORM_HANDOFF_KEY, PLAN_DETAIL_ID_KEY,
   type QuranPlan, type PlanType, type RangePoint,
-  type PlanHalqa,
   segmentReversed,
 } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
@@ -164,12 +163,10 @@ function PlanCard({
 }) {
   const typeCfg = PLAN_TYPES.find((t) => t.value === plan.type) ?? PLAN_TYPES[0];
   const targetLabel =
-    plan.targetType === "halqa" ? getName(plan.halqa as PlanHalqa | string) :
-    plan.targetType === "specialTrack" ? (plan.specialTrack ? (typeof plan.specialTrack === "object" ? plan.specialTrack.title : plan.specialTrack) : "—") :
+    plan.targetType === "track" ? (plan.track ? (typeof plan.track === "object" ? plan.track.title : plan.track) : "—") :
     `${(plan.students ?? []).length} طالب`;
   const targetIcon =
-    plan.targetType === "halqa" ? "ti-school" :
-    plan.targetType === "specialTrack" ? "ti-calendar-event" : "ti-users";
+    plan.targetType === "track" ? "ti-route" : "ti-users";
 
   return (
     <div
@@ -239,7 +236,7 @@ function PlanCard({
             icon={targetIcon}
             label="الهدف"
             val={targetLabel}
-            onClick={plan.targetType === "specialTrack" ? onViewTrack : undefined}
+            onClick={plan.targetType === "track" ? onViewTrack : undefined}
           />
 
           {plan.endType === "date" && plan.endDate
