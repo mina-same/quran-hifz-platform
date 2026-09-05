@@ -14,7 +14,7 @@ import Button from '@/components/ui/Button';
 import Leaderboard, { type LeaderboardRow } from '@/components/ui/Leaderboard';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import ContextCard, { halqaToContext, trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
-import DaySlider, { useDaySchedule } from '@/components/domain/DaySlider';
+import DaySlider, { useDaySchedule, type DayEntry } from '@/components/domain/DaySlider';
 import EvaluationRoster from '@/components/domain/EvaluationRoster';
 import { useHalqat } from '@/lib/queries/halqat';
 import { useSpecialTracks } from '@/lib/queries/specialTracks';
@@ -60,8 +60,30 @@ export default function TeacherAttendance() {
     () => plans.flatMap((p) => p.schedule ?? []),
     [plans],
   );
-  const daySchedule = useDaySchedule(scheduleEntries, selectedDate);
-  const { scheduledSorted, assignmentByDate, effectiveDate, today, isFutureDay } = daySchedule;
+  const baseDaySchedule = useDaySchedule(scheduleEntries, selectedDate);
+  // The day strip itself (scheduledSet/dayChips/effectiveDate, above) still
+  // needs every plan in context so a day covered only by a stray unrelated
+  // plan stays selectable. But the actual per-date assignment lookup must
+  // only ever come from `linkedPlan` — otherwise a stray plan sharing this
+  // weekday piles its entries into the same date bucket (colliding React
+  // keys, colliding completion-override keys, and `recordOccurrence` calls
+  // sent with `occurrenceIndex` values that belong to a different plan).
+  const linkedAssignmentByDate = useMemo(() => {
+    const byDate = new Map<string, DayEntry[]>();
+    for (const e of linkedPlan?.schedule ?? []) {
+      if (!e.date) continue;
+      const d = toDateOnly(e.date);
+      const list = byDate.get(d) ?? [];
+      list.push(e);
+      byDate.set(d, list);
+    }
+    return byDate;
+  }, [linkedPlan]);
+  const daySchedule = useMemo(
+    () => ({ ...baseDaySchedule, assignmentByDate: linkedAssignmentByDate }),
+    [baseDaySchedule, linkedAssignmentByDate],
+  );
+  const { scheduledSorted, effectiveDate, today, isFutureDay } = daySchedule;
 
   // Full session history for this context, for the log + leaderboards below.
   const { data: history = [] } = useEvaluations(contextFilter);

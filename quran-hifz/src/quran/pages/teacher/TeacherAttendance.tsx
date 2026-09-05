@@ -14,20 +14,49 @@ import {
 } from "../../components/common/ContextPicker";
 import { SkeletonCard, SkeletonTable } from "../../components/common/Skeleton";
 import { Leaderboard } from "../../components/common/Leaderboard";
-import { IndividualPlanPanel, planCoversStudent } from "../../components/common/IndividualPlanPanel";
+import {
+  IndividualPlanPanel,
+  planCoversStudent,
+} from "../../components/common/IndividualPlanPanel";
 import { useHalqat } from "../../api/halqat";
 import { useSpecialTracks } from "../../api/special-tracks";
 import { useStudents } from "../../api/students";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
-import { useQuranPlans, type ScheduleEntry, type RangePoint, segmentReversed, type PlanType } from "../../api/quran-plans";
-import { useEvaluations, useRubric, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
-import { useRecordStudentOccurrence, useStudentPlanProgressList } from "../../api/student-plan-progress";
 import {
-  MAX_SCORES, TOTAL_MAX, legacyScoresOf, manualCriteria, totalMaxOf,
-  DEFAULT_GRADE_RUBRIC, type GradeCriterion,
+  useQuranPlans,
+  type ScheduleEntry,
+  type RangePoint,
+  segmentReversed,
+  type PlanType,
+} from "../../api/quran-plans";
+import {
+  useEvaluations,
+  useRubric,
+  useBulkEvaluate,
+  type BulkEvaluateRecord,
+} from "../../api/evaluations";
+import {
+  useRecordStudentOccurrence,
+  useStudentPlanProgressList,
+} from "../../api/student-plan-progress";
+import {
+  MAX_SCORES,
+  TOTAL_MAX,
+  legacyScoresOf,
+  manualCriteria,
+  totalMaxOf,
+  DEFAULT_GRADE_RUBRIC,
+  type GradeCriterion,
 } from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
-import { toFlatIndex, fromFlatIndex, isReversedSchedule, dayFinishPoint, dayDeltaAyahs, planFinishPoint } from "../../lib/quranRange";
+import {
+  toFlatIndex,
+  fromFlatIndex,
+  isReversedSchedule,
+  dayFinishPoint,
+  dayDeltaAyahs,
+  planFinishPoint,
+} from "../../lib/quranRange";
 import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 
 function surahName(n: number) {
@@ -47,7 +76,17 @@ const compactInputStyle = { fontSize: 12, padding: "6px 8px" };
  * except that one appeared to do nothing when picked, since the value bounced
  * straight back on the next render. Pre-filtering the options means every
  * choice the teacher can see is one that actually sticks. */
-function CompactSurahAyah({ value, onChange, disabled, bounds }: { value: RangePoint; onChange: (v: RangePoint) => void; disabled?: boolean; bounds?: { lo: RangePoint; hi: RangePoint } }) {
+function CompactSurahAyah({
+  value,
+  onChange,
+  disabled,
+  bounds,
+}: {
+  value: RangePoint;
+  onChange: (v: RangePoint) => void;
+  disabled?: boolean;
+  bounds?: { lo: RangePoint; hi: RangePoint };
+}) {
   const surah = SURAHS.find((s) => s.number === value.surahNumber) ?? SURAHS[0];
   const loFlat = bounds ? toFlatIndex(bounds.lo) : undefined;
   const hiFlat = bounds ? toFlatIndex(bounds.hi) : undefined;
@@ -59,12 +98,17 @@ function CompactSurahAyah({ value, onChange, disabled, bounds }: { value: RangeP
       return f >= loFlat && f <= hiFlat;
     });
   }
-  const surahs = loFlat == null || hiFlat == null ? SURAHS : SURAHS.filter((s) => ayahsOf(s).length > 0);
+  const surahs =
+    loFlat == null || hiFlat == null ? SURAHS : SURAHS.filter((s) => ayahsOf(s).length > 0);
   const ayahs = ayahsOf(surah);
   function setSurah(surahNumber: number) {
     const s = SURAHS.find((x) => x.number === surahNumber) ?? SURAHS[0];
     const opts = ayahsOf(s);
-    const ayah = opts.length ? (opts.includes(value.ayah) ? value.ayah : opts[0]) : Math.min(value.ayah, s.ayahCount);
+    const ayah = opts.length
+      ? opts.includes(value.ayah)
+        ? value.ayah
+        : opts[0]
+      : Math.min(value.ayah, s.ayahCount);
     onChange({ surahNumber, ayah });
   }
   function setAyah(ayah: number) {
@@ -72,17 +116,42 @@ function CompactSurahAyah({ value, onChange, disabled, bounds }: { value: RangeP
   }
   return (
     <div style={{ display: "flex", gap: 5 }}>
-      <select className="form-input" style={{ ...compactInputStyle, flex: "1 1 auto", minWidth: 90 }} value={value.surahNumber} disabled={disabled} onChange={(e) => setSurah(Number(e.target.value))}>
-        {surahs.map((s) => <option key={s.number} value={s.number}>{s.number}. {s.name}</option>)}
+      <select
+        className="form-input"
+        style={{ ...compactInputStyle, flex: "1 1 auto", minWidth: 90 }}
+        value={value.surahNumber}
+        disabled={disabled}
+        onChange={(e) => setSurah(Number(e.target.value))}
+      >
+        {surahs.map((s) => (
+          <option key={s.number} value={s.number}>
+            {s.number}. {s.name}
+          </option>
+        ))}
       </select>
-      <select className="form-input" style={{ ...compactInputStyle, width: 62, flexShrink: 0 }} value={value.ayah} disabled={disabled} onChange={(e) => setAyah(Number(e.target.value))}>
-        {ayahs.map((n) => <option key={n} value={n}>{n}</option>)}
+      <select
+        className="form-input"
+        style={{ ...compactInputStyle, width: 62, flexShrink: 0 }}
+        value={value.ayah}
+        disabled={disabled}
+        onChange={(e) => setAyah(Number(e.target.value))}
+      >
+        {ayahs.map((n) => (
+          <option key={n} value={n}>
+            {n}
+          </option>
+        ))}
       </select>
     </div>
   );
 }
 function avatarInitials(name: string) {
-  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0] ?? "").join("");
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0] ?? "")
+    .join("");
 }
 
 // Matches the server's ARABIC_WEEKDAYS (attendance.controller.ts), indexed by
@@ -152,10 +221,7 @@ function blankEval(): StudentEval {
  *  presence rather than typed, mirroring the server's own calculation. */
 function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
   if (e.attendanceStatus === "غائب") return 0;
-  return rubric.reduce(
-    (a, c) => a + (c.auto ? c.max : Math.min(e.scores[c.key] ?? 0, c.max)),
-    0,
-  );
+  return rubric.reduce((a, c) => a + (c.auto ? c.max : Math.min(e.scores[c.key] ?? 0, c.max)), 0);
 }
 
 export function TeacherAttendance() {
@@ -219,7 +285,10 @@ export function TeacherAttendance() {
   // The plan whose target actually matches this context (a halqa/track can
   // still carry other stray plans) — the one individual per-student plans
   // (below) hang off of, same "one linked plan" model as TeacherTrackDetail.
-  const linkedPlan = plans.find((p) => p.targetType === (selected?.kind === "specialTrack" ? "specialTrack" : "halqa")) ?? plans[0];
+  const linkedPlan =
+    plans.find(
+      (p) => p.targetType === (selected?.kind === "specialTrack" ? "specialTrack" : "halqa"),
+    ) ?? plans[0];
 
   // A reverse-direction plan (rangeStart sits after rangeEnd in mushaf order):
   // the day's assignment is still recited/stored low→high internally, but the
@@ -228,17 +297,27 @@ export function TeacherAttendance() {
 
   const { scheduledSet, scheduledSorted, assignmentByDate, dayChips, effectiveDate } =
     useMemo(() => {
+      // The day-slider needs every plan in context (a stray unrelated plan
+      // sharing a weekday still makes that day selectable), but the actual
+      // per-date assignment lookup must only ever come from `linkedPlan` —
+      // otherwise a stray plan's entries pile into the same date bucket
+      // (colliding React keys, colliding completion-override keys, and
+      // `recordOccurrence` calls sent with `occurrenceIndex` values that
+      // belong to a plan other than the one they're tagged with).
       const set = new Set<string>();
-      const byDate = new Map<string, (ScheduleEntry & { type: PlanType })[]>();
       for (const p of plans) {
         for (const e of p.schedule ?? []) {
           if (!e.date) continue;
-          const d = toDateOnly(e.date);
-          set.add(d);
-          const list = byDate.get(d) ?? [];
-          list.push(e);
-          byDate.set(d, list);
+          set.add(toDateOnly(e.date));
         }
+      }
+      const byDate = new Map<string, (ScheduleEntry & { type: PlanType })[]>();
+      for (const e of linkedPlan?.schedule ?? []) {
+        if (!e.date) continue;
+        const d = toDateOnly(e.date);
+        const list = byDate.get(d) ?? [];
+        list.push(e);
+        byDate.set(d, list);
       }
       const sorted = Array.from(set).sort();
       const chips = sorted.length ? buildDayChips(sorted[0], sorted[sorted.length - 1], today) : [];
@@ -258,7 +337,7 @@ export function TeacherAttendance() {
         dayChips: chips,
         effectiveDate: effective,
       };
-    }, [plans, selectedDate, today]);
+    }, [plans, linkedPlan, selectedDate, today]);
 
   // A day can now carry up to one entry per type (حفظ/مراجعة) when both
   // share the same weekday — each entry decides its own ward, its own
@@ -429,12 +508,19 @@ export function TeacherAttendance() {
    * restarts at 1 within each type's own segment; mixing both types' entries
    * together would scramble that ordering. */
   function reversedForStudent(studentId: string, type: PlanType): boolean {
-    const ownSchedule = progressByStudentId[studentId]?.effectiveSchedule.filter((o) => o.type === type);
+    const ownSchedule = progressByStudentId[studentId]?.effectiveSchedule.filter(
+      (o) => o.type === type,
+    );
     return isReversedSchedule(ownSchedule) ?? segmentReversed(linkedPlan, type);
   }
-  function completedPointFor(studentId: string, forAssignment: ScheduleEntry & { type: PlanType }): RangePoint {
-    return completionOverrides[`${studentId}::${forAssignment.type}`]
-      ?? dayFinishPoint(forAssignment, reversedForStudent(studentId, forAssignment.type));
+  function completedPointFor(
+    studentId: string,
+    forAssignment: ScheduleEntry & { type: PlanType },
+  ): RangePoint {
+    return (
+      completionOverrides[`${studentId}::${forAssignment.type}`] ??
+      dayFinishPoint(forAssignment, reversedForStudent(studentId, forAssignment.type))
+    );
   }
   function setCompletedPoint(studentId: string, type: PlanType, point: RangePoint) {
     setCompletionOverrides((prev) => ({ ...prev, [`${studentId}::${type}`]: point }));
@@ -445,14 +531,19 @@ export function TeacherAttendance() {
    * recite past today's ward into the following days, but never past the plan
    * itself. Both bounds are read in the plan's own direction, then applied
    * low→high the way slices are always stored. */
-  function clampReached(point: RangePoint, assignment: ScheduleEntry & { type: PlanType }, studentId: string): RangePoint {
+  function clampReached(
+    point: RangePoint,
+    assignment: ScheduleEntry & { type: PlanType },
+    studentId: string,
+  ): RangePoint {
     const reversed = reversedForStudent(studentId, assignment.type);
     const dayStart = reversed
       ? { surahNumber: assignment.surahEnd, ayah: assignment.ayahEnd }
       : { surahNumber: assignment.surahStart, ayah: assignment.ayahStart };
-    const ownSchedule = (progressByStudentId[studentId]?.effectiveSchedule ?? []).filter((o) => o.type === assignment.type);
-    const finish = planFinishPoint(ownSchedule, reversed)
-      ?? dayFinishPoint(assignment, reversed);
+    const ownSchedule = (progressByStudentId[studentId]?.effectiveSchedule ?? []).filter(
+      (o) => o.type === assignment.type,
+    );
+    const finish = planFinishPoint(ownSchedule, reversed) ?? dayFinishPoint(assignment, reversed);
     const loFlat = Math.min(toFlatIndex(dayStart), toFlatIndex(finish));
     const hiFlat = Math.max(toFlatIndex(dayStart), toFlatIndex(finish));
     return fromFlatIndex(Math.max(loFlat, Math.min(hiFlat, toFlatIndex(point))));
@@ -471,8 +562,9 @@ export function TeacherAttendance() {
   // behavior. Plural: a day can now carry up to one entry per type (حفظ and
   // مراجعة) when both share the same weekday, instead of always exactly one.
   function assignmentsForStudent(studentId: string): (ScheduleEntry & { type: PlanType })[] {
-    const perStudent = (progressByStudentId[studentId]?.effectiveSchedule ?? [])
-      .filter((o) => toDateOnly(o.date) === effectiveDate);
+    const perStudent = (progressByStudentId[studentId]?.effectiveSchedule ?? []).filter(
+      (o) => toDateOnly(o.date) === effectiveDate,
+    );
     return perStudent.length > 0 ? perStudent : dayAssignments;
   }
 
@@ -481,11 +573,13 @@ export function TeacherAttendance() {
   function saveStudent(studentId: string, studentName: string) {
     if (isFutureDay || !selected) return;
     const e = evalFor(studentId);
-    const records: BulkEvaluateRecord[] = [{
-      student: studentId,
-      attendanceStatus: e.attendanceStatus,
-      scores: e.scores,
-    }];
+    const records: BulkEvaluateRecord[] = [
+      {
+        student: studentId,
+        attendanceStatus: e.attendanceStatus,
+        scores: e.scores,
+      },
+    ];
     setLastSavedId(studentId);
     const toastId = toast.loading("جاري حفظ الحضور والتقييم...");
     bulkEvaluate.mutate(
@@ -506,63 +600,94 @@ export function TeacherAttendance() {
           // shared toast the save action started with; any further assignment
           // gets its own toast labeled by type, since more than one ward outcome
           // no longer fits in a single message.
-          const studentAssignments = linkedPlan && planCoversStudent(linkedPlan, studentId) ? assignmentsForStudent(studentId) : [];
+          const studentAssignments =
+            linkedPlan && planCoversStudent(linkedPlan, studentId)
+              ? assignmentsForStudent(studentId)
+              : [];
           if (!linkedPlan || studentAssignments.length === 0) {
             toast.success("تم الحفظ بنجاح", { id: toastId });
             return;
           }
 
-          studentAssignments.forEach((studentAssignment, i) => {
-            const thisToastId = i === 0 ? toastId : toast.loading("جاري حفظ الحضور والتقييم...");
-            const typeLabel = studentAssignments.length > 1 ? `${studentAssignment.type} — ` : "";
-            const completedPoint = completedPointFor(studentId, studentAssignment);
-            // Signed in the plan's own direction — for a reverse plan the undone part
-            // is the low side of the day's slice, not the high one. Negative = fell
-            // short of the day's ward, positive = recited past it.
-            const delta = dayDeltaAyahs(studentAssignment, reversedForStudent(studentId, studentAssignment.type), completedPoint);
-            const status = e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
+          // Awaited sequentially (not fired in parallel via .forEach) so that
+          // two never-before-seen-progress-doc assignments for the same
+          // student (e.g. حفظ + مراجعة sharing this weekday) don't race the
+          // server's findOne→create init path in the same tick.
+          (async () => {
+            for (let i = 0; i < studentAssignments.length; i++) {
+              const studentAssignment = studentAssignments[i];
+              const thisToastId = i === 0 ? toastId : toast.loading("جاري حفظ الحضور والتقييم...");
+              const typeLabel = studentAssignments.length > 1 ? `${studentAssignment.type} — ` : "";
+              const completedPoint = completedPointFor(studentId, studentAssignment);
+              // Signed in the plan's own direction — for a reverse plan the undone part
+              // is the low side of the day's slice, not the high one. Negative = fell
+              // short of the day's ward, positive = recited past it.
+              const delta = dayDeltaAyahs(
+                studentAssignment,
+                reversedForStudent(studentId, studentAssignment.type),
+                completedPoint,
+              );
+              const status =
+                e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
 
-            if (status === "done" && delta === 0) {
-              toast.success(`${typeLabel}تم حفظ الحضور والتقييم بنجاح`, { id: thisToastId });
-              recordOccurrence.mutate({ planId: linkedPlan._id, studentId, type: studentAssignment.type, occurrenceIndex: studentAssignment.occurrenceIndex, status });
-              return;
-            }
+              if (status === "done" && delta === 0) {
+                toast.success(`${typeLabel}تم حفظ الحضور والتقييم بنجاح`, { id: thisToastId });
+                try {
+                  await recordOccurrence.mutateAsync({
+                    planId: linkedPlan._id,
+                    studentId,
+                    type: studentAssignment.type,
+                    occurrenceIndex: studentAssignment.occurrenceIndex,
+                    status,
+                  });
+                } catch {
+                  // Matches prior behavior for this branch: no onError was
+                  // attached, so a failure here was silent — just don't let
+                  // it block recording the remaining assignments.
+                }
+                continue;
+              }
 
-            toast.loading(
-              typeLabel + (status === "absent"
-                ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
-                  : delta > 0
-                    ? `جاري تعديل باقي أيام خطة ${studentName} بعد التسميع الإضافي...`
-                    : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`),
-              { id: thisToastId },
-            );
-            recordOccurrence.mutate(
-              {
-                planId: linkedPlan._id, studentId, type: studentAssignment.type, occurrenceIndex: studentAssignment.occurrenceIndex,
-                status,
-                // Sent for an over-achievement too (status "done"), so the server can
-                // take the surplus off the student's remaining days.
-                completedThroughSurah: status === "absent" ? undefined : completedPoint.surahNumber,
-                completedThroughAyah: status === "absent" ? undefined : completedPoint.ayah,
-              },
-              {
-                onSuccess: (res) => {
-                  toast.success(
-                    typeLabel + (status === "absent"
+              toast.loading(
+                typeLabel +
+                  (status === "absent"
+                    ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
+                    : delta > 0
+                      ? `جاري تعديل باقي أيام خطة ${studentName} بعد التسميع الإضافي...`
+                      : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`),
+                { id: thisToastId },
+              );
+              try {
+                const res = await recordOccurrence.mutateAsync({
+                  planId: linkedPlan._id,
+                  studentId,
+                  type: studentAssignment.type,
+                  occurrenceIndex: studentAssignment.occurrenceIndex,
+                  status,
+                  // Sent for an over-achievement too (status "done"), so the server can
+                  // take the surplus off the student's remaining days.
+                  completedThroughSurah: status === "absent" ? undefined : completedPoint.surahNumber,
+                  completedThroughAyah: status === "absent" ? undefined : completedPoint.ayah,
+                });
+                toast.success(
+                  typeLabel +
+                    (status === "absent"
                       ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
-                        : delta > 0
-                          ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
-                          : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`),
-                    { id: thisToastId },
+                      : delta > 0
+                        ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
+                        : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`),
+                  { id: thisToastId },
+                );
+                if (res.data.overflowPages > 0) {
+                  toast.warning(
+                    `${typeLabel}لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`,
                   );
-                  if (res.data.overflowPages > 0) {
-                    toast.warning(`${typeLabel}لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`);
-                  }
-                },
-                onError: (err) => toast.error((err as Error).message, { id: thisToastId }),
-              },
-            );
-          });
+                }
+              } catch (err) {
+                toast.error((err as Error).message, { id: thisToastId });
+              }
+            }
+          })();
         },
         onError: (err) => toast.error((err as Error).message, { id: toastId }),
       },
@@ -675,9 +800,9 @@ export function TeacherAttendance() {
 
       {!loadingPlans && scheduledSorted.length === 0 && (
         <Alert tone="warning">
-          لا يوجد خطة حفظ نشطة لهذه {selected.kind === "halqa" ? "الحلقة" : "المسار"} — لا يمكن تحديد
-          يوم محدد لتسجيل الحضور والتقييم، لكن يمكنك تسجيل حضور اليوم مباشرة أدناه. أضف خطة من صفحة
-          "الخطط القرآنية" أولاً لتفعيل التقويم.
+          لا يوجد خطة حفظ نشطة لهذه {selected.kind === "halqa" ? "الحلقة" : "المسار"} — لا يمكن
+          تحديد يوم محدد لتسجيل الحضور والتقييم، لكن يمكنك تسجيل حضور اليوم مباشرة أدناه. أضف خطة من
+          صفحة "الخطط القرآنية" أولاً لتفعيل التقويم.
         </Alert>
       )}
 
@@ -698,7 +823,9 @@ export function TeacherAttendance() {
           {loadingStudents ? (
             <SkeletonTable cols={3} rows={5} />
           ) : students.length === 0 ? (
-            <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>لا يوجد طلاب</div>
+            <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+              لا يوجد طلاب
+            </div>
           ) : (
             <div className="att-list">
               {students.map((s) => {
@@ -712,8 +839,15 @@ export function TeacherAttendance() {
                 const hasIndividualPlan = !!linkedPlan && planCoversStudent(linkedPlan, s._id);
                 const assignments = hasIndividualPlan ? assignmentsForStudent(s._id) : [];
                 return (
-                  <div key={s._id} className={`att-row ${isAbsent && isExpanded ? "is-absent" : ""}`}>
-                    <div className="att-row-top" style={{ cursor: "pointer" }} onClick={() => toggleStudent(s._id)}>
+                  <div
+                    key={s._id}
+                    className={`att-row ${isAbsent && isExpanded ? "is-absent" : ""}`}
+                  >
+                    <div
+                      className="att-row-top"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => toggleStudent(s._id)}
+                    >
                       <div className="att-avatar">{avatarInitials(s.name)}</div>
                       <div className="att-info">
                         <div className="att-name">{s.name}</div>
@@ -727,7 +861,10 @@ export function TeacherAttendance() {
                         type="button"
                         className="topbar-btn btn-ghost"
                         style={{ padding: "6px 10px" }}
-                        onClick={(ev) => { ev.stopPropagation(); toggleStudent(s._id); }}
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          toggleStudent(s._id);
+                        }}
                         aria-label={isExpanded ? "طي" : "توسيع"}
                       >
                         <i className={`ti ${isExpanded ? "ti-chevron-up" : "ti-chevron-down"}`} />
@@ -736,53 +873,88 @@ export function TeacherAttendance() {
 
                     {isExpanded && (
                       <div style={{ padding: "10px 2px 4px" }}>
-                        {assignments.length > 0 ? assignments.map((assignment) => {
-                          // Swap the displayed endpoints for a reverse plan so the
-                          // banner reads in the plan's own direction (back→front).
-                          const reversed = reversedForStudent(s._id, assignment.type);
-                          const from = reversed
-                            ? { surah: assignment.surahEnd, ayah: assignment.ayahEnd, page: assignment.pageEnd }
-                            : { surah: assignment.surahStart, ayah: assignment.ayahStart, page: assignment.pageStart };
-                          const to = reversed
-                            ? { surah: assignment.surahStart, ayah: assignment.ayahStart, page: assignment.pageStart }
-                            : { surah: assignment.surahEnd, ayah: assignment.ayahEnd, page: assignment.pageEnd };
-                          return (
-                          <div key={assignment.type} className="assignment-banner" style={{ marginBottom: 10 }}>
-                            <div className="assignment-icon">
-                              <i className="ti ti-book-2" />
-                            </div>
-                            <div className="assignment-body">
-                              <div className="assignment-label">
-                                <i className="ti ti-clipboard-text" /> الورد المقرر
-                                {assignments.length > 1 && (
-                                  <span style={{ marginRight: 6 }}>
-                                    <Badge tone={assignment.type === "حفظ" ? "green" : "gold"}>{assignment.type}</Badge>
+                        {assignments.length > 0 ? (
+                          assignments.map((assignment) => {
+                            // Swap the displayed endpoints for a reverse plan so the
+                            // banner reads in the plan's own direction (back→front).
+                            const reversed = reversedForStudent(s._id, assignment.type);
+                            const from = reversed
+                              ? {
+                                  surah: assignment.surahEnd,
+                                  ayah: assignment.ayahEnd,
+                                  page: assignment.pageEnd,
+                                }
+                              : {
+                                  surah: assignment.surahStart,
+                                  ayah: assignment.ayahStart,
+                                  page: assignment.pageStart,
+                                };
+                            const to = reversed
+                              ? {
+                                  surah: assignment.surahStart,
+                                  ayah: assignment.ayahStart,
+                                  page: assignment.pageStart,
+                                }
+                              : {
+                                  surah: assignment.surahEnd,
+                                  ayah: assignment.ayahEnd,
+                                  page: assignment.pageEnd,
+                                };
+                            return (
+                              <div
+                                key={assignment.type}
+                                className="assignment-banner"
+                                style={{ marginBottom: 10 }}
+                              >
+                                <div className="assignment-icon">
+                                  <i className="ti ti-book-2" />
+                                </div>
+                                <div className="assignment-body">
+                                  <div className="assignment-label">
+                                    <i className="ti ti-clipboard-text" /> الورد المقرر
+                                    {assignments.length > 1 && (
+                                      <span style={{ marginRight: 6 }}>
+                                        <Badge tone={assignment.type === "حفظ" ? "green" : "gold"}>
+                                          {assignment.type}
+                                        </Badge>
+                                      </span>
+                                    )}
+                                    {reversed && (
+                                      <span style={{ fontWeight: 400, color: "var(--text3)" }}>
+                                        {" "}
+                                        · بالعكس
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="assignment-range">
+                                    <span>
+                                      {surahName(from.surah)} : {toAr(from.ayah)}
+                                    </span>
+                                    <i className="ti ti-arrow-left assignment-arrow" />
+                                    <span>
+                                      {surahName(to.surah)} : {toAr(to.ayah)}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="assignment-meta">
+                                  <span className="assignment-pill">
+                                    <i className="ti ti-file-text" />
+                                    {from.page !== to.page
+                                      ? `من صفحة ${toAr(from.page)} إلى صفحة ${toAr(to.page)}`
+                                      : `صفحة ${toAr(from.page)}`}
                                   </span>
-                                )}
-                                {reversed && <span style={{ fontWeight: 400, color: "var(--text3)" }}> · بالعكس</span>}
+                                  <span className="assignment-pill">
+                                    <i className="ti ti-bookmark" />
+                                    الجزء {toAr(assignment.juz)}
+                                  </span>
+                                </div>
                               </div>
-                              <div className="assignment-range">
-                                <span>{surahName(from.surah)} : {toAr(from.ayah)}</span>
-                                <i className="ti ti-arrow-left assignment-arrow" />
-                                <span>{surahName(to.surah)} : {toAr(to.ayah)}</span>
-                              </div>
-                            </div>
-                            <div className="assignment-meta">
-                              <span className="assignment-pill">
-                                <i className="ti ti-file-text" />
-                                {from.page !== to.page
-                                  ? `من صفحة ${toAr(from.page)} إلى صفحة ${toAr(to.page)}`
-                                  : `صفحة ${toAr(from.page)}`}
-                              </span>
-                              <span className="assignment-pill">
-                                <i className="ti ti-bookmark" />
-                                الجزء {toAr(assignment.juz)}
-                              </span>
-                            </div>
+                            );
+                          })
+                        ) : (
+                          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10 }}>
+                            لا يوجد جزء مخصص لهذا اليوم
                           </div>
-                          );
-                        }) : (
-                          <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10 }}>لا يوجد جزء مخصص لهذا اليوم</div>
                         )}
 
                         {hasSaved && !isUnlocked && !isFutureDay && (
@@ -791,67 +963,153 @@ export function TeacherAttendance() {
                           </Alert>
                         )}
 
-                        <div className="att-toggle" style={{ display: "inline-flex", marginBottom: 10 }}>
-                          <button type="button" disabled={controlsLocked} className={!isAbsent ? "active present" : ""} onClick={() => setAttendance(s._id, "حاضر")}>
+                        <div
+                          className="att-toggle"
+                          style={{ display: "inline-flex", marginBottom: 10 }}
+                        >
+                          <button
+                            type="button"
+                            disabled={controlsLocked}
+                            className={!isAbsent ? "active present" : ""}
+                            onClick={() => setAttendance(s._id, "حاضر")}
+                          >
                             <i className="ti ti-check" /> حاضر
                           </button>
-                          <button type="button" disabled={controlsLocked} className={isAbsent ? "active absent" : ""} onClick={() => setAttendance(s._id, "غائب")}>
+                          <button
+                            type="button"
+                            disabled={controlsLocked}
+                            className={isAbsent ? "active absent" : ""}
+                            onClick={() => setAttendance(s._id, "غائب")}
+                          >
                             <i className="ti ti-x" /> غائب
                           </button>
                         </div>
 
-                        {!isAbsent && assignments.map((assignment) => {
-                          // "وصل إلى" and the leftover are both measured in the plan's
-                          // own direction: a reverse day is worked from its high end
-                          // down, so it's complete once the student reaches its low end.
-                          const reversedHere = reversedForStudent(s._id, assignment.type);
-                          const actualPoint = completedPointFor(s._id, assignment);
-                          const delta = dayDeltaAyahs(assignment, reversedHere, actualPoint);
-                          const isFull = delta === 0;
-                          return (
-                            <div key={assignment.type} style={{ border: "1px dashed var(--border)", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
-                              <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text2)", display: "block", marginBottom: 6 }}>
-                                <i className="ti ti-bookmark" style={{ marginLeft: 4, color: "var(--green)" }} /> الورد الفعلي — السورة والآية التي وصل إليها الطالب
-                                {assignments.length > 1 && (
-                                  <span style={{ marginRight: 6 }}>
-                                    <Badge tone={assignment.type === "حفظ" ? "green" : "gold"}>{assignment.type}</Badge>
+                        {!isAbsent &&
+                          assignments.map((assignment) => {
+                            // "وصل إلى" and the leftover are both measured in the plan's
+                            // own direction: a reverse day is worked from its high end
+                            // down, so it's complete once the student reaches its low end.
+                            const reversedHere = reversedForStudent(s._id, assignment.type);
+                            const actualPoint = completedPointFor(s._id, assignment);
+                            const delta = dayDeltaAyahs(assignment, reversedHere, actualPoint);
+                            const isFull = delta === 0;
+                            return (
+                              <div
+                                key={assignment.type}
+                                style={{
+                                  border: "1px dashed var(--border)",
+                                  borderRadius: 10,
+                                  padding: "10px 12px",
+                                  marginBottom: 10,
+                                }}
+                              >
+                                <label
+                                  style={{
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    color: "var(--text2)",
+                                    display: "block",
+                                    marginBottom: 6,
+                                  }}
+                                >
+                                  <i
+                                    className="ti ti-bookmark"
+                                    style={{ marginLeft: 4, color: "var(--green)" }}
+                                  />{" "}
+                                  الورد الفعلي — السورة والآية التي وصل إليها الطالب
+                                  {assignments.length > 1 && (
+                                    <span style={{ marginRight: 6 }}>
+                                      <Badge tone={assignment.type === "حفظ" ? "green" : "gold"}>
+                                        {assignment.type}
+                                      </Badge>
+                                    </span>
+                                  )}
+                                </label>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 8,
+                                    flexWrap: "wrap",
+                                  }}
+                                >
+                                  <CompactSurahAyah
+                                    value={actualPoint}
+                                    disabled={controlsLocked}
+                                    bounds={reachedBounds(assignment, s._id)}
+                                    onChange={(v) =>
+                                      setCompletedPoint(
+                                        s._id,
+                                        assignment.type,
+                                        clampReached(v, assignment, s._id),
+                                      )
+                                    }
+                                  />
+                                  <span style={{ fontSize: 11, color: "var(--text3)" }}>
+                                    {reversedHere ? (
+                                      <>
+                                        من {surahName(assignment.surahEnd)} :{" "}
+                                        {toAr(assignment.ayahEnd)} إلى{" "}
+                                        {surahName(assignment.surahStart)} :{" "}
+                                        {toAr(assignment.ayahStart)}
+                                      </>
+                                    ) : (
+                                      <>
+                                        من {surahName(assignment.surahStart)} :{" "}
+                                        {toAr(assignment.ayahStart)} إلى{" "}
+                                        {surahName(assignment.surahEnd)} :{" "}
+                                        {toAr(assignment.ayahEnd)}
+                                      </>
+                                    )}
                                   </span>
-                                )}
-                              </label>
-                              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                                <CompactSurahAyah
-                                  value={actualPoint} disabled={controlsLocked}
-                                  bounds={reachedBounds(assignment, s._id)}
-                                  onChange={(v) => setCompletedPoint(s._id, assignment.type, clampReached(v, assignment, s._id))}
-                                />
-                                <span style={{ fontSize: 11, color: "var(--text3)" }}>
-                                  {reversedHere
-                                    ? <>من {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)} إلى {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)}</>
-                                    : <>من {surahName(assignment.surahStart)} : {toAr(assignment.ayahStart)} إلى {surahName(assignment.surahEnd)} : {toAr(assignment.ayahEnd)}</>
-                                  }
-                                </span>
-                                {!isFull && !controlsLocked && (
-                                  <button
-                                    type="button"
-                                    className="topbar-btn btn-ghost"
-                                    style={{ fontSize: 11, padding: "4px 10px" }}
-                                    onClick={() => setCompletedPoint(s._id, assignment.type, dayFinishPoint(assignment, reversedHere))}
-                                  >
-                                    الورد كامل
-                                  </button>
-                                )}
+                                  {!isFull && !controlsLocked && (
+                                    <button
+                                      type="button"
+                                      className="topbar-btn btn-ghost"
+                                      style={{ fontSize: 11, padding: "4px 10px" }}
+                                      onClick={() =>
+                                        setCompletedPoint(
+                                          s._id,
+                                          assignment.type,
+                                          dayFinishPoint(assignment, reversedHere),
+                                        )
+                                      }
+                                    >
+                                      الورد كامل
+                                    </button>
+                                  )}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: 11,
+                                    marginTop: 6,
+                                    color: isFull || delta > 0 ? "var(--green)" : "#b45309",
+                                  }}
+                                >
+                                  {isFull ? (
+                                    <>
+                                      <i className="ti ti-check" style={{ marginLeft: 3 }} />
+                                      سيُسجَّل كمكتمل
+                                    </>
+                                  ) : delta > 0 ? (
+                                    <>
+                                      <i className="ti ti-arrow-down" style={{ marginLeft: 3 }} />
+                                      سمّع {toAr(delta)} آية إضافية — سيتم خصمها من باقي أيام خطته
+                                    </>
+                                  ) : (
+                                    <>
+                                      <i
+                                        className="ti ti-arrow-forward-up"
+                                        style={{ marginLeft: 3 }}
+                                      />
+                                      سيتم تعويض {toAr(-delta)} آية في باقي أيام خطته
+                                    </>
+                                  )}
+                                </div>
                               </div>
-                              <div style={{ fontSize: 11, marginTop: 6, color: isFull || delta > 0 ? "var(--green)" : "#b45309" }}>
-                                {isFull
-                                  ? <><i className="ti ti-check" style={{ marginLeft: 3 }} />سيُسجَّل كمكتمل</>
-                                  : delta > 0
-                                    ? <><i className="ti ti-arrow-down" style={{ marginLeft: 3 }} />سمّع {toAr(delta)} آية إضافية — سيتم خصمها من باقي أيام خطته</>
-                                    : <><i className="ti ti-arrow-forward-up" style={{ marginLeft: 3 }} />سيتم تعويض {toAr(-delta)} آية في باقي أيام خطته</>
-                                }
-                              </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
 
                         <div className="eval-scores">
                           {manualCriteria(rubric).map((cat) => (
@@ -872,7 +1130,9 @@ export function TeacherAttendance() {
                               </div>
                             </div>
                           ))}
-                          <span className={`eval-total ${total === 0 ? "zero" : ""}`}>{toAr(total)}/{toAr(rubricTotalMax)}</span>
+                          <span className={`eval-total ${total === 0 ? "zero" : ""}`}>
+                            {toAr(total)}/{toAr(rubricTotalMax)}
+                          </span>
                         </div>
 
                         {hasIndividualPlan && (
@@ -880,38 +1140,77 @@ export function TeacherAttendance() {
                             type="button"
                             className="topbar-btn btn-ghost"
                             style={{ fontSize: 11, padding: "5px 10px", marginBottom: 4 }}
-                            onClick={(ev) => { ev.stopPropagation(); togglePlanPanel(s._id); }}
+                            onClick={(ev) => {
+                              ev.stopPropagation();
+                              togglePlanPanel(s._id);
+                            }}
                           >
-                            {planPanelStudentId === s._id
-                              ? <><i className="ti ti-chevron-up" /> إخفاء الخطة الفردية</>
-                              : progressByStudentId[s._id]?.progressIsPersisted
-                                ? <><i className="ti ti-list-details" /> عرض الخطة الفردية</>
-                                : <><i className="ti ti-plus" /> أنشئ خطة فردية</>
-                            }
+                            {planPanelStudentId === s._id ? (
+                              <>
+                                <i className="ti ti-chevron-up" /> إخفاء الخطة الفردية
+                              </>
+                            ) : progressByStudentId[s._id]?.progressIsPersisted ? (
+                              <>
+                                <i className="ti ti-list-details" /> عرض الخطة الفردية
+                              </>
+                            ) : (
+                              <>
+                                <i className="ti ti-plus" /> أنشئ خطة فردية
+                              </>
+                            )}
                           </button>
                         )}
 
                         {hasIndividualPlan && linkedPlan && planPanelStudentId === s._id && (
-                          <IndividualPlanPanel planId={linkedPlan._id} studentId={s._id} studentName={s.name} basePlan={linkedPlan} />
+                          <IndividualPlanPanel
+                            planId={linkedPlan._id}
+                            studentId={s._id}
+                            studentName={s.name}
+                            basePlan={linkedPlan}
+                          />
                         )}
 
                         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
                           {isFutureDay ? (
-                            <button className="topbar-btn btn-ghost" style={{ padding: "8px 18px" }} disabled>
+                            <button
+                              className="topbar-btn btn-ghost"
+                              style={{ padding: "8px 18px" }}
+                              disabled
+                            >
                               <i className="ti ti-clock" /> اليوم لم يحن بعد
                             </button>
                           ) : hasSaved && !isUnlocked ? (
-                            <button className="topbar-btn btn-ghost" style={{ padding: "8px 18px" }} onClick={() => unlockStudent(s._id)}>
+                            <button
+                              className="topbar-btn btn-ghost"
+                              style={{ padding: "8px 18px" }}
+                              onClick={() => unlockStudent(s._id)}
+                            >
                               <i className="ti ti-edit" /> تعديل
                             </button>
                           ) : (
-                            <button className="topbar-btn btn-primary" style={{ padding: "8px 18px" }} onClick={() => saveStudent(s._id, s.name)} disabled={bulkEvaluate.isPending}>
-                              {bulkEvaluate.isPending && lastSavedId === s._id
-                                ? <><i className="ti ti-loader-2" style={{ animation: "spin 1s linear infinite" }} /> جارٍ الحفظ...</>
-                                : isUnlocked
-                                  ? <><i className="ti ti-device-floppy" /> حفظ التعديلات</>
-                                  : <><i className="ti ti-device-floppy" /> حفظ لهذا الطالب</>
-                              }
+                            <button
+                              className="topbar-btn btn-primary"
+                              style={{ padding: "8px 18px" }}
+                              onClick={() => saveStudent(s._id, s.name)}
+                              disabled={bulkEvaluate.isPending}
+                            >
+                              {bulkEvaluate.isPending && lastSavedId === s._id ? (
+                                <>
+                                  <i
+                                    className="ti ti-loader-2"
+                                    style={{ animation: "spin 1s linear infinite" }}
+                                  />{" "}
+                                  جارٍ الحفظ...
+                                </>
+                              ) : isUnlocked ? (
+                                <>
+                                  <i className="ti ti-device-floppy" /> حفظ التعديلات
+                                </>
+                              ) : (
+                                <>
+                                  <i className="ti ti-device-floppy" /> حفظ لهذا الطالب
+                                </>
+                              )}
                             </button>
                           )}
                         </div>
