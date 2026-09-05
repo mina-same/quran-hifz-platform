@@ -153,6 +153,10 @@ export default function TrackDetail({ trackId, role }: Props) {
   const scheduleEntries = useMemo(() => linkedPlan?.schedule ?? [], [linkedPlan]);
   const daySchedule = useDaySchedule(scheduleEntries, selectedDate);
   const { scheduledSorted, assignmentByDate, effectiveDate, isFutureDay } = daySchedule;
+  // A single representative type for today, for callers (the individual-plan
+  // panel below) that still expect one type rather than the full plural list
+  // — same "first match" fallback used elsewhere in this plan's work.
+  const dayAssignments = assignmentByDate.get(effectiveDate) ?? [];
 
   const roster = useMemo(() => {
     if (!track) return [];
@@ -301,14 +305,19 @@ export default function TrackDetail({ trackId, role }: Props) {
                 emptyLabel="لا يوجد طلاب مسجّلون بعد"
                 renderExtra={(student) => (
                   linkedPlan
-                    // No `type` passed: a multi-type plan's individual overlay
-                    // now shows every type's occurrences together in one panel
-                    // rather than one panel per type due today.
+                    // Passes today's single representative type (first of
+                    // possibly two same-day assignments) so a multi-segment
+                    // plan's panel still filters to one type and new-plan
+                    // creation still sends a type the server will accept
+                    // (required once a plan has more than one segment).
+                    // Showing every type's occurrences in one panel is a
+                    // separate, out-of-scope follow-up.
                     ? <IndividualPlanPanel
                         planId={linkedPlan._id}
                         studentId={student._id}
                         studentName={student.name}
                         basePlan={linkedPlan}
+                        type={dayAssignments[0]?.type}
                       />
                     : <Text style={s.muted}>اربط خطة حفظ بالمسار أولاً لعرض التوزيع الفردي</Text>
                 )}
