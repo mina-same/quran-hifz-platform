@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 import { Evaluation, type IEvaluationCriterion } from '../models/Evaluation.model';
 import { QuranPlan, DEFAULT_GRADE_RUBRIC, type IGradeCriterion } from '../models/QuranPlan.model';
 import { notifyParents } from '../lib/notify';
-import { deriveDayAndTime, upsertAttendanceRecords, type AttendanceContext } from './attendance.controller';
+import { deriveDayAndTime, upsertAttendanceRecords } from './attendance.controller';
 
 /**
  * The rubric is no longer platform-wide — each plan carries its own
@@ -18,14 +18,14 @@ const LEGACY_KEYS = ['attendance', 'hifz', 'tajweed', 'talawah'] as const;
 /**
  * Which plan's rubric governs a given session.
  *
- * Evaluations are keyed by (halqa|specialTrack, date) while rubrics live on
- * plans, and one halqa can own several plans — so the caller may name the plan
- * explicitly. Falling back: a single active plan for that context wins; if the
- * context is ambiguous or empty we grade against the default split rather than
+ * Evaluations are keyed by (track, date) while rubrics live on plans, and
+ * one track can own several plans — so the caller may name the plan
+ * explicitly. Falling back: a single active plan for that track wins; if
+ * ambiguous or empty we grade against the default split rather than
  * guessing, which keeps totals comparable with historical records.
  */
 export async function resolveRubric(
-  ctx: { halqa?: string; specialTrack?: string; plan?: string },
+  ctx: { track?: string; plan?: string },
 ): Promise<{ rubric: IGradeCriterion[]; planId?: string; ambiguous: boolean }> {
   if (ctx.plan) {
     const plan = await QuranPlan.findById(ctx.plan).select('gradeRubric');
@@ -34,14 +34,8 @@ export async function resolveRubric(
     }
   }
 
-  const filter = ctx.halqa
-    ? { halqa: new Types.ObjectId(ctx.halqa) }
-    : ctx.specialTrack
-      ? { specialTrack: new Types.ObjectId(ctx.specialTrack) }
-      : null;
-
-  if (filter) {
-    const plans = await QuranPlan.find({ ...filter, status: 'نشطة' }).select('gradeRubric');
+  if (ctx.track) {
+    const plans = await QuranPlan.find({ track: new Types.ObjectId(ctx.track), status: 'نشطة' }).select('gradeRubric');
     if (plans.length === 1 && plans[0].gradeRubric?.length) {
       return { rubric: plans[0].gradeRubric, planId: String(plans[0]._id), ambiguous: false };
     }
@@ -63,10 +57,9 @@ const recordSchema = z.object({
 });
 
 const bulkSchema = z.object({
-  teacher:      z.string().min(1),
-  halqa:        z.string().min(1).optional(),
-  specialTrack: z.string().min(1).optional(),
-  plan:         z.string().min(1).optional(),
+  teacher: z.string().min(1),
+  track:   z.string().min(1),
+  plan:    z.string().min(1).optional(),
   date:    z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
   records: z.array(recordSchema),
 });
@@ -74,18 +67,13 @@ const bulkSchema = z.object({
 /** GET /api/evaluations/rubric — what the evaluation screen should render. */
 export async function getRubric(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { halqa, specialTrack, plan } = req.query as Record<string, string | undefined>;
-    const { rubric, planId, ambiguous } = await resolveRubric({ halqa, specialTrack, plan });
+    const { track, plan } = req.query as Record<string, string | undefined>;
+    const { rubric, planId, ambiguous } = await resolveRubric({ track, plan });
 
     // When several plans could apply, hand the client the choices so the
     // teacher picks instead of silently grading against the default.
-    const filter = halqa
-      ? { halqa: new Types.ObjectId(halqa) }
-      : specialTrack
-        ? { specialTrack: new Types.ObjectId(specialTrack) }
-        : null;
-    const choices = filter
-      ? await QuranPlan.find({ ...filter, status: 'نشطة' }).select('name gradeRubric')
+    const choices = track
+      ? await QuranPlan.find({ track: new Types.ObjectId(track), status: 'نشطة' }).select('name gradeRubric')
       : [];
 
     res.json({
@@ -105,14 +93,13 @@ export async function getRubric(req: Request, res: Response, next: NextFunction)
 
 export async function getEvaluations(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { student, halqa, specialTrack, from, to } = req.query;
+    const { student, track, from, to } = req.query;
     const filter: Record<string, unknown> = {};
-    if (student)      filter.student      = student;
-    if (halqa) {
-      const ids = String(halqa).split(',').filter(Boolean);
-      filter.halqa = ids.length > 1 ? { $in: ids } : ids[0];
+    if (student) filter.student = student;
+    if (track) {
+      const ids = String(track).split(',').filter(Boolean);
+      filter.track = ids.length > 1 ? { $in: ids } : ids[0];
     }
-    if (specialTrack) filter.specialTrack = specialTrack;
     if (from || to) {
       filter.date = {};
       if (from) (filter.date as Record<string, Date>).$gte = new Date(from as string);
@@ -122,8 +109,7 @@ export async function getEvaluations(req: Request, res: Response, next: NextFunc
     const records = await Evaluation.find(filter)
       .populate('student', 'name')
       .populate('teacher', 'name')
-      .populate('halqa',   'name')
-      .populate('specialTrack', 'title')
+      .populate('track', 'title')
       .sort({ date: -1 });
 
     res.json({ success: true, count: records.length, data: records });
@@ -134,12 +120,12 @@ export async function getEvaluations(req: Request, res: Response, next: NextFunc
 
 export async function bulkEvaluate(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { teacher, halqa, specialTrack, plan, date, records } = bulkSchema.parse(req.body);
+    const { teacher, track, plan, date, records } = bulkSchema.parse(req.body);
     const dateObj = new Date(date);
     const { day } = deriveDayAndTime(dateObj);
-    const contextField = halqa ? { halqa: new Types.ObjectId(halqa) } : { specialTrack: new Types.ObjectId(specialTrack!) };
+    const trackId = new Types.ObjectId(track);
 
-    const { rubric, planId } = await resolveRubric({ halqa, specialTrack, plan });
+    const { rubric, planId } = await resolveRubric({ track, plan });
     const totalMax = rubric.reduce((a, c) => a + c.max, 0);
 
     // Reject out-of-range input against THIS plan's rubric before writing.
@@ -195,7 +181,7 @@ export async function bulkEvaluate(req: Request, res: Response, next: NextFuncti
           $set: {
             student: new Types.ObjectId(student),
             teacher: new Types.ObjectId(teacher),
-            ...contextField,
+            track: trackId,
             ...(planId ? { plan: new Types.ObjectId(planId) } : {}),
             date: dateObj,
             attendanceStatus,
@@ -215,7 +201,7 @@ export async function bulkEvaluate(req: Request, res: Response, next: NextFuncti
     // (attendancePct, absence tracking, ParentAttendance) — one Save button,
     // both records kept in sync.
     await upsertAttendanceRecords(
-      (halqa ? { halqa } : { specialTrack: specialTrack! }) as AttendanceContext,
+      track,
       dateObj,
       records.map((r) => ({ student: r.student, status: r.attendanceStatus })),
     );

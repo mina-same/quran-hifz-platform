@@ -24,8 +24,7 @@ export interface IEvaluationCriterion {
 export interface IEvaluation extends Document {
   student: Types.ObjectId;
   teacher: Types.ObjectId;
-  halqa?: Types.ObjectId;
-  specialTrack?: Types.ObjectId;
+  track: Types.ObjectId;
   /** Which plan's rubric graded this record, when one could be resolved. */
   plan?: Types.ObjectId;
   date: Date;
@@ -56,8 +55,7 @@ const evaluationSchema = new Schema<IEvaluation>(
   {
     student:      { type: Schema.Types.ObjectId, ref: 'Student', required: true },
     teacher:      { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
-    halqa:        { type: Schema.Types.ObjectId, ref: 'Halqa' },
-    specialTrack: { type: Schema.Types.ObjectId, ref: 'SpecialTrack' },
+    track:        { type: Schema.Types.ObjectId, ref: 'Track', required: true },
     plan:         { type: Schema.Types.ObjectId, ref: 'QuranPlan' },
     date:             { type: Date, required: true },
     attendanceStatus: { type: String, enum: ['حاضر', 'غائب'], required: true },
@@ -91,7 +89,6 @@ const evaluationSchema = new Schema<IEvaluation>(
 );
 
 evaluationSchema.index({ student: 1, date: -1 });
-evaluationSchema.index({ halqa: 1, date: -1 });
-evaluationSchema.index({ specialTrack: 1, date: -1 });
+evaluationSchema.index({ track: 1, date: -1 });
 
 export const Evaluation = model<IEvaluation>('Evaluation', evaluationSchema);
