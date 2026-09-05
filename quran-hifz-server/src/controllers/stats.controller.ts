@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { Student } from '../models/Student.model';
 import { Teacher } from '../models/Teacher.model';
-import { Halqa } from '../models/Halqa.model';
 import { Masjid } from '../models/Masjid.model';
 import { Attendance } from '../models/Attendance.model';
 import { Homework } from '../models/Homework.model';
-import { SpecialTrack } from '../models/SpecialTrack.model';
+import { Track } from '../models/Track.model';
 
 export async function getDashboardStats(_req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -13,8 +12,7 @@ export async function getDashboardStats(_req: Request, res: Response, next: Next
       totalStudents,
       activeStudents,
       totalTeachers,
-      totalHalqat,
-      totalSpecialTracks,
+      totalTracks,
       totalMasajid,
       pendingHomework,
       lateHomework,
@@ -22,8 +20,7 @@ export async function getDashboardStats(_req: Request, res: Response, next: Next
       Student.countDocuments(),
       Student.countDocuments({ status: 'active' }),
       Teacher.countDocuments({ status: 'active' }),
-      Halqa.countDocuments(),
-      SpecialTrack.countDocuments(),
+      Track.countDocuments(),
       Masjid.countDocuments(),
       Homework.countDocuments({ status: 'معلق' }),
       Homework.countDocuments({ status: 'متأخر' }),
@@ -49,8 +46,7 @@ export async function getDashboardStats(_req: Request, res: Response, next: Next
         totalStudents,
         activeStudents,
         totalTeachers,
-        totalHalqat,
-        totalSpecialTracks,
+        totalTracks,
         totalMasajid,
         pendingHomework,
         lateHomework,

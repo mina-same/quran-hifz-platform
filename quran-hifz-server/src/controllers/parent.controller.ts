@@ -4,7 +4,6 @@ import { Attendance } from '../models/Attendance.model';
 import { Homework } from '../models/Homework.model';
 import { GroupHomework } from '../models/GroupHomework.model';
 import { LessonRecording } from '../models/LessonRecording.model';
-import { SpecialTrack } from '../models/SpecialTrack.model';
 import { Message } from '../models/Message.model';
 import { HifzEntry } from '../models/HifzEntry.model';
 import { Student } from '../models/Student.model';
@@ -13,7 +12,7 @@ import { AppError } from '../middleware/error';
 export async function getChildren(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const links = await ParentStudent.find({ parent: req.user!.id })
-      .populate('student', 'name path juz halqa attendancePct progressPct progressPages');
+      .populate('student', 'name path juz track attendancePct progressPct progressPages');
     res.json({ success: true, data: links.map((l) => l.student) });
   } catch (err) {
     next(err);
@@ -48,15 +47,12 @@ export async function getChildAttendance(req: Request, res: Response, next: Next
 export async function getChildHomework(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     await assertChild(req.user!.id, req.params.studentId);
-    const student = await Student.findById(req.params.studentId).select('halqa');
+    const student = await Student.findById(req.params.studentId).select('track');
     if (!student) throw new AppError('الطالب غير موجود', 404);
-
-    const tracks = await SpecialTrack.find({ enrolledStudents: req.params.studentId }).select('_id');
-    const trackIds = tracks.map((t) => t._id);
 
     const [individual, group] = await Promise.all([
       Homework.find({ student: req.params.studentId }).sort({ dueDate: -1 }),
-      GroupHomework.find({ $or: [{ halqa: student.halqa }, { specialTrack: { $in: trackIds } }] }).sort({ dueDate: -1 }),
+      GroupHomework.find({ track: student.track }).sort({ dueDate: -1 }),
     ]);
     res.json({ success: true, data: { individual, group } });
   } catch (err) {
