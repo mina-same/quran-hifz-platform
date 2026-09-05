@@ -12,10 +12,7 @@ export const PLAN_DETAIL_ID_KEY = "qh_plan_detail_id";
 
 export const PLAN_FORM_HANDOFF_KEY = "qh_plan_form_handoff";
 export type PlanFormHandoff =
-  // Plans are halqa-based. `halqaId` pre-selects the halqa target so the track
-  // detail's "create plan" buttons open the form ready on that halqa. (`trackId`
-  // is legacy and no longer emitted by the UI.)
-  | { mode: "create"; trackId?: string; halqaId?: string }
+  | { mode: "create"; trackId?: string }
   | { mode: "edit" | "duplicate"; plan: QuranPlan };
 
 export type PlanType = "حفظ" | "مراجعة";
@@ -25,10 +22,9 @@ export type GradeCriterion = { key: string; label: string; max: number; auto: bo
 
 export type PointRule = { label: string; amount: number; kind: "خصم" | "زيادة" };
 export type RangePoint = { surahNumber: number; ayah: number };
-export type PlanTeacher     = { _id: string; name: string };
-export type PlanHalqa       = { _id: string; name: string };
-export type PlanStudent     = { _id: string; name: string };
-export type PlanSpecialTrack = { _id: string; title: string };
+export type PlanTeacher = { _id: string; name: string };
+export type PlanStudent = { _id: string; name: string };
+export type PlanTrack   = { _id: string; title: string };
 export type TodayAssignment = { surahStart: number; ayahStart: number; surahEnd: number; ayahEnd: number; pageStart: number; pageEnd: number };
 export type PlanProgress = { completed: number; total: number; percent: number };
 export type JuzProgress = { completed: number; total: number };
@@ -66,10 +62,9 @@ export type QuranPlan = {
   type: PlanType;
   teacher: PlanTeacher | string;
 
-  targetType: "halqa" | "students" | "specialTrack";
-  halqa?: PlanHalqa | string;
+  targetType: "track" | "students";
+  track?: PlanTrack | string;
   students?: (PlanStudent | string)[];
-  specialTrack?: PlanSpecialTrack | string;
 
   /** Rollup — every segment's days merged. Scheduling reads `segments`. */
   days: string[];
@@ -126,15 +121,14 @@ export function segmentReversed(plan: QuranPlan | undefined, type?: PlanType): b
 type ListResponse   = { success: boolean; count: number; data: QuranPlan[] };
 type SingleResponse = { success: boolean; data: QuranPlan };
 
-export function useQuranPlans(filters?: { teacher?: string; halqa?: string; student?: string; specialTrack?: string }) {
+export function useQuranPlans(filters?: { teacher?: string; track?: string; student?: string }) {
   const params = new URLSearchParams();
-  if (filters?.teacher)     params.set("teacher", filters.teacher);
-  if (filters?.halqa)       params.set("halqa", filters.halqa);
-  if (filters?.student)     params.set("student", filters.student);
-  if (filters?.specialTrack) params.set("specialTrack", filters.specialTrack);
+  if (filters?.teacher) params.set("teacher", filters.teacher);
+  if (filters?.track)   params.set("track", filters.track);
+  if (filters?.student) params.set("student", filters.student);
   const qs = params.toString() ? `?${params.toString()}` : "";
   return useQuery({
-    queryKey: ["quran-plans", filters?.teacher ?? "", filters?.halqa ?? "", filters?.student ?? "", filters?.specialTrack ?? ""],
+    queryKey: ["quran-plans", filters?.teacher ?? "", filters?.track ?? "", filters?.student ?? ""],
     queryFn: () => get<ListResponse>(`/quran-plans${qs}`).then((r) => r.data),
   });
 }
