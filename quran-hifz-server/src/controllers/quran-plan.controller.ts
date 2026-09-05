@@ -56,10 +56,9 @@ const quranPlanSchema = z.object({
   description: z.string().optional(),
   teacher:     z.string().min(1),
 
-  targetType:   z.enum(['halqa', 'students', 'specialTrack']),
-  halqa:        z.string().min(1).optional(),
-  students:     z.array(z.string().min(1)).optional(),
-  specialTrack: z.string().min(1).optional(),
+  targetType: z.enum(['track', 'students']),
+  students:   z.array(z.string().min(1)).optional(),
+  track:      z.string().min(1).optional(),
 
   /** One track per type. Max two (one per type), and their days must not
    * overlap — both enforced by validateSegmentDays in the refine below. */
@@ -82,14 +81,11 @@ const quranPlanSchema = z.object({
 // schema (used only for create) so `updatePlan` can still call `quranPlanSchema.partial()`,
 // same convention as homework.controller.ts's separate create/review schemas.
 const quranPlanCreateSchema = quranPlanSchema.superRefine((data, ctx) => {
-  if (data.targetType === 'halqa' && !data.halqa) {
-    ctx.addIssue({ code: 'custom', message: 'يجب اختيار حلقة', path: ['halqa'] });
-  }
   if (data.targetType === 'students' && (!data.students || data.students.length === 0)) {
     ctx.addIssue({ code: 'custom', message: 'يجب اختيار طالب واحد على الأقل', path: ['students'] });
   }
-  if (data.targetType === 'specialTrack' && !data.specialTrack) {
-    ctx.addIssue({ code: 'custom', message: 'يجب اختيار المسار الاستثنائي', path: ['specialTrack'] });
+  if (data.targetType === 'track' && !data.track) {
+    ctx.addIssue({ code: 'custom', message: 'يجب اختيار المسار', path: ['track'] });
   }
   if (data.endType === 'activeDays' && !data.activeDaysCount) {
     ctx.addIssue({ code: 'custom', message: 'يجب تحديد عدد الأيام النشطة', path: ['activeDaysCount'] });
@@ -267,18 +263,16 @@ function withPlanComputed(plan: InstanceType<typeof QuranPlan>) {
 
 export async function getPlans(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { teacher, halqa, student, specialTrack } = req.query;
+    const { teacher, student, track } = req.query;
     const filter: Record<string, unknown> = {};
-    if (teacher)     filter.teacher     = teacher;
-    if (halqa)       filter.halqa       = halqa;
-    if (student)     filter.students    = student;
-    if (specialTrack) filter.specialTrack = specialTrack;
+    if (teacher) filter.teacher  = teacher;
+    if (student) filter.students = student;
+    if (track)   filter.track    = track;
 
     const plans = await QuranPlan.find(filter)
       .populate('teacher', 'name')
-      .populate('halqa', 'name')
       .populate('students', 'name')
-      .populate('specialTrack', 'title')
+      .populate('track', 'title')
       .sort({ createdAt: -1 });
 
     res.json({ success: true, count: plans.length, data: plans.map(withPlanComputed) });
@@ -291,9 +285,8 @@ export async function getPlan(req: Request, res: Response, next: NextFunction): 
   try {
     const plan = await QuranPlan.findById(req.params.id)
       .populate('teacher', 'name')
-      .populate('halqa', 'name')
       .populate('students', 'name')
-      .populate('specialTrack', 'title');
+      .populate('track', 'title');
     if (!plan) throw new AppError('الخطة غير موجودة', 404);
     res.json({ success: true, data: withPlanComputed(plan) });
   } catch (err) {
@@ -324,9 +317,8 @@ export async function updatePlan(req: Request, res: Response, next: NextFunction
 
     const plan = await QuranPlan.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true })
       .populate('teacher', 'name')
-      .populate('halqa', 'name')
       .populate('students', 'name')
-      .populate('specialTrack', 'title');
+      .populate('track', 'title');
     if (!plan) throw new AppError('الخطة غير موجودة', 404);
     res.json({ success: true, data: withPlanComputed(plan) });
   } catch (err) {
@@ -375,9 +367,8 @@ export async function generateSchedule(req: Request, res: Response, next: NextFu
 
     const populated = await QuranPlan.findById(plan._id)
       .populate('teacher', 'name')
-      .populate('halqa', 'name')
       .populate('students', 'name')
-      .populate('specialTrack', 'title');
+      .populate('track', 'title');
     res.json({ success: true, data: withPlanComputed(populated!) });
   } catch (err) {
     next(err);
@@ -467,9 +458,8 @@ export async function updateScheduleEntry(req: Request, res: Response, next: Nex
 
     const populated = await QuranPlan.findById(plan._id)
       .populate('teacher', 'name')
-      .populate('halqa', 'name')
       .populate('students', 'name')
-      .populate('specialTrack', 'title');
+      .populate('track', 'title');
     res.json({ success: true, data: withPlanComputed(populated!) });
   } catch (err) {
     next(err);

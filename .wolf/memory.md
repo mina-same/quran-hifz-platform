@@ -3102,3 +3102,41 @@
 | 14:45 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | 8→7 lines | ~131 |
 | 14:46 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | 8→8 lines | ~91 |
 | 14:47 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-6-report.md | — | ~2145 |
+| 14:48 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→2 lines | ~199 |
+| 14:49 | Created quran-hifz-server/src/models/Attendance.model.ts | — | ~263 |
+| 14:49 | Created quran-hifz-server/src/controllers/attendance.controller.ts | — | ~1412 |
+| 14:50 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-7-report.md | — | ~1296 |
+| 14:52 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | modified minor() | ~185 |
+| 14:52 | Edited quran-hifz-server/src/models/Evaluation.model.ts | 2→1 lines | ~7 |
+| 14:53 | Edited quran-hifz-server/src/models/Evaluation.model.ts | 2→1 lines | ~23 |
+| 14:53 | Edited quran-hifz-server/src/models/Evaluation.model.ts | 3→2 lines | ~28 |
+| 14:53 | Created quran-hifz-server/src/controllers/evaluation.controller.ts | — | ~2487 |
+| 14:54 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-8-report.md | — | ~1301 |
+| 14:55 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→2 lines | ~99 |
+| 14:56 | Edited quran-hifz-server/src/models/Homework.model.ts | 15→14 lines | ~99 |
+| 14:56 | Edited quran-hifz-server/src/models/Homework.model.ts | 13→12 lines | ~187 |
+| 14:56 | Edited quran-hifz-server/src/models/Homework.model.ts | 3→3 lines | ~43 |
+| 14:56 | Edited quran-hifz-server/src/controllers/homework.controller.ts | 10→9 lines | ~95 |
+| 14:56 | Edited quran-hifz-server/src/controllers/homework.controller.ts | modified getHomework() | ~195 |
+| 14:56 | Edited quran-hifz-server/src/models/GroupHomework.model.ts | 11→10 lines | ~66 |
+| 14:56 | Edited quran-hifz-server/src/models/GroupHomework.model.ts | 9→8 lines | ~110 |
+| 14:56 | Edited quran-hifz-server/src/models/GroupHomework.model.ts | inline fix | ~16 |
+| 14:56 | Edited quran-hifz-server/src/controllers/group-homework.controller.ts | 9→8 lines | ~89 |
+| 14:56 | Edited quran-hifz-server/src/controllers/group-homework.controller.ts | modified getGroupHomework() | ~153 |
+| 14:57 | Edited quran-hifz-server/src/models/LessonRecording.model.ts | 14→13 lines | ~89 |
+| 14:57 | Edited quran-hifz-server/src/models/LessonRecording.model.ts | 12→11 lines | ~151 |
+| 14:57 | Edited quran-hifz-server/src/models/LessonRecording.model.ts | inline fix | ~17 |
+| 14:57 | Edited quran-hifz-server/src/controllers/lesson-recording.controller.ts | 12→11 lines | ~114 |
+| 14:57 | Edited quran-hifz-server/src/controllers/lesson-recording.controller.ts | modified getRecordings() | ~185 |
+| 14:58 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-9-report.md | — | ~2242 |
+| 15:00 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→2 lines | ~89 |
+| 15:01 | Edited quran-hifz-server/src/models/QuranPlan.model.ts | 4→3 lines | ~27 |
+| 15:01 | Edited quran-hifz-server/src/models/QuranPlan.model.ts | 4→3 lines | ~60 |
+| 15:01 | Edited quran-hifz-server/src/models/QuranPlan.model.ts | 3→2 lines | ~22 |
+| 15:01 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | 4→3 lines | ~41 |
+| 15:01 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | modified if() | ~96 |
+| 15:01 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | 13→11 lines | ~118 |
+| 15:01 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | modified createPlan() | ~103 |
+| 15:01 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | 5→4 lines | ~62 |
+| 15:01 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | modified catch() | ~87 |
+| 15:01 | Edited quran-hifz-server/src/controllers/quran-plan.controller.ts | modified deletePlan() | ~87 |

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T11:47:02.267Z
-> Files: 562 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T12:01:28.771Z
+> Files: 565 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -265,11 +265,14 @@
 
 ## .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase1-server.md (~2085 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase1-server.md (~2342 tok)
 - `task-1-2-report.md` — Task 1 & 2 Implementation Report (~1147 tok)
 - `task-3-5-report.md` — Task 3 + 5 Report — Track controller/routes, Student.track (~1674 tok)
 - `task-4-report.md` — Task 4 Report: Delete Halqa Entirely; Update app.ts Route Registration (~1370 tok)
 - `task-6-report.md` — Task 6 Report: Remove `validators/context.ts` and its usage everywhere (~2011 tok)
+- `task-7-report.md` — Task 7 Report: Attendance model + controller — single `track` field (~1215 tok)
+- `task-8-report.md` — Task 8 Report: Evaluation model + controller — single `track` field, simplified `resolveRubric` (~1219 tok)
+- `task-9-report.md` — Task 9 Implementation Report: `Homework`, `GroupHomework`, `LessonRecording` — Single `track` Field (~2102 tok)
 
 ## docs/superpowers/plans/
 
@@ -529,19 +532,19 @@
 ## quran-hifz-server/src/controllers/
 
 - `admin.controller.ts` — Zod schemas: updateParentSchema, createParentSchema (~1450 tok)
-- `attendance.controller.ts` — Upserts one Attendance doc per {student, date} and recalculates each (~1589 tok)
+- `attendance.controller.ts` — Upserts one Attendance doc per {student, date} and recalculates each (~1412 tok)
 - `auth.controller.ts` — Zod schemas: loginSchema, updateProfileSchema, changePasswordSchema, pushTokenSchema (~1176 tok)
-- `evaluation.controller.ts` — The rubric is no longer platform-wide — each plan carries its own (~2706 tok)
-- `group-homework.controller.ts` — Zod schemas: groupHomeworkSchema (~550 tok)
+- `evaluation.controller.ts` — The rubric is no longer platform-wide — each plan carries its own (~2487 tok)
+- `group-homework.controller.ts` — Zod schemas: groupHomeworkSchema (~500 tok)
 - `halqa.controller.ts` — Zod schemas: halqaSchema (~904 tok)
 - `hifz.controller.ts` — Zod schemas: entrySchema (~739 tok)
-- `homework.controller.ts` — Zod schemas: homeworkSchema, reviewSchema (~824 tok)
+- `homework.controller.ts` — Zod schemas: homeworkSchema, reviewSchema (~769 tok)
 - `kpi.controller.ts` — Zod schemas: kpiSchema (~389 tok)
-- `lesson-recording.controller.ts` — Zod schemas: recordingSchema (~626 tok)
+- `lesson-recording.controller.ts` — Zod schemas: recordingSchema (~574 tok)
 - `masjid.controller.ts` — Zod schemas: masjidSchema (~729 tok)
 - `message.controller.ts` — Zod schemas: messageSchema (~568 tok)
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
-- `quran-plan.controller.ts` — One line of the plan's daily grading rubric: a label and its degrees. (~5967 tok)
+- `quran-plan.controller.ts` — One line of the plan's daily grading rubric: a label and its degrees. (~5815 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
 - `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~4346 tok)
@@ -570,19 +573,19 @@
 
 ## quran-hifz-server/src/models/
 
-- `Attendance.model.ts` — Exports IAttendance, Attendance (~308 tok)
-- `Evaluation.model.ts` — Legacy fixed-shape scores. Still written whenever the plan's rubric uses (~968 tok)
-- `GroupHomework.model.ts` — Exports IGroupHomework, GroupHomework (~288 tok)
+- `Attendance.model.ts` — Exports IAttendance, Attendance (~263 tok)
+- `Evaluation.model.ts` — Legacy fixed-shape scores. Still written whenever the plan's rubric uses (~927 tok)
+- `GroupHomework.model.ts` — Exports IGroupHomework, GroupHomework (~258 tok)
 - `Halqa.model.ts` — Exports IHalqa, Halqa (~366 tok)
 - `HifzEntry.model.ts` — Exports IHifzEntry, HifzEntry (~267 tok)
-- `Homework.model.ts` — Exports IHomework, Homework (~415 tok)
+- `Homework.model.ts` — Exports IHomework, Homework (~387 tok)
 - `IndividualPlan.model.ts` — Exports IIndividualPlan, IndividualPlan (~302 tok)
 - `KPI.model.ts` — Exports IKPI, KPI (~199 tok)
-- `LessonRecording.model.ts` — Exports ILessonRecording, LessonRecording (~355 tok)
+- `LessonRecording.model.ts` — Exports ILessonRecording, LessonRecording (~326 tok)
 - `Masjid.model.ts` — Drives the جامع (male) / دار (female) display label on the client — (~204 tok)
 - `Message.model.ts` — Exports IMessage, Message (~334 tok)
 - `ParentStudent.model.ts` — Exports IParentStudent, ParentStudent (~172 tok)
-- `QuranPlan.model.ts` — One line of a plan's daily grading rubric: what is graded and out of how (~2435 tok)
+- `QuranPlan.model.ts` — One line of a plan's daily grading rubric: what is graded and out of how (~2382 tok)
 - `SpecialTrack.model.ts` — Exports ISpecialTrack, SpecialTrack (~429 tok)
 - `Student.model.ts` — Saudi national ID (رقم الهوية الوطنية): exactly 10 digits from الأحوال المدنية. (~704 tok)
 - `StudentPlanProgress.model.ts` — Exports StudentOccurrenceStatus, IStudentOccurrence, IStudentPlanProgress, StudentPlanProgress (~994 tok)

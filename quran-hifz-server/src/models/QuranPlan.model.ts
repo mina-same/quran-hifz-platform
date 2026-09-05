@@ -90,10 +90,9 @@ export interface IQuranPlan extends Document {
   type?: PlanType;
   teacher: Types.ObjectId;
 
-  targetType: 'halqa' | 'students' | 'specialTrack';
-  halqa?: Types.ObjectId;
+  targetType: 'track' | 'students';
   students?: Types.ObjectId[];
-  specialTrack?: Types.ObjectId;
+  track?: Types.ObjectId;
 
   days?: string[];
   rangeStart?: IRangePoint;
@@ -204,10 +203,9 @@ const quranPlanSchema = new Schema<IQuranPlan>(
     type:        { type: String, enum: PLAN_TYPE_VALUES },
     teacher:     { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
 
-    targetType:   { type: String, enum: ['halqa', 'students', 'specialTrack'], required: true },
-    halqa:        { type: Schema.Types.ObjectId, ref: 'Halqa' },
-    students:     [{ type: Schema.Types.ObjectId, ref: 'Student' }],
-    specialTrack: { type: Schema.Types.ObjectId, ref: 'SpecialTrack' },
+    targetType: { type: String, enum: ['track', 'students'], required: true },
+    students:   [{ type: Schema.Types.ObjectId, ref: 'Student' }],
+    track:      { type: Schema.Types.ObjectId, ref: 'Track' },
 
     days:       { type: [String] },
     rangeStart: { type: rangePointSchema },
@@ -240,7 +238,6 @@ const quranPlanSchema = new Schema<IQuranPlan>(
 );
 
 quranPlanSchema.index({ teacher: 1 });
-quranPlanSchema.index({ halqa: 1 });
-quranPlanSchema.index({ specialTrack: 1 });
+quranPlanSchema.index({ track: 1 });
 
 export const QuranPlan = model<IQuranPlan>('QuranPlan', quranPlanSchema);
