@@ -118,7 +118,20 @@ export default function EvaluationRoster({
   const [completionOverrides, setCompletionOverrides] = useState<Record<string, RangePoint>>({});
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
   const [lastSavedId, setLastSavedId] = useState<string | null>(null);
-  const [savedNotice, setSavedNotice] = useState<string | null>(null);
+  // One entry per outcome, not one shared slot: a save can now fire up to two
+  // independent `recordOccurrence` calls (one per type due that day), each
+  // resolving on its own network timing — sharing a single string would let
+  // whichever call resolves last silently overwrite the other's message.
+  // `type` is only set when the student had more than one assignment, so a
+  // single-type day's text is unprefixed, unchanged from before this file
+  // supported more than one type per day.
+  const [saveNotices, setSaveNotices] = useState<{ type?: PlanType; tone: 'success' | 'warning'; text: string }[]>([]);
+  // Likewise for errors: `recordOccurrence`'s own reactive `isError`/`error`
+  // are shared across every `.mutate()` call on this one mutation instance,
+  // so a second (successful) call flips `isError` back to `false` and hides
+  // an earlier failure. Each call's `onError` records its own outcome here
+  // instead of relying on that shared state.
+  const [saveErrors, setSaveErrors] = useState<{ type?: PlanType; text: string }[]>([]);
   // Absent students whose parent could not be notified — the save still went
   // through, so this is a warning rather than an error.
   const [unnotified, setUnnotified] = useState<{ id: string; name: string }[]>([]);
@@ -235,7 +248,8 @@ export default function EvaluationRoster({
       scores: e.scores,
     }];
     setLastSavedId(studentId);
-    setSavedNotice(null);
+    setSaveNotices([]);
+    setSaveErrors([]);
     setUnnotified([]);
     bulkEvaluate.mutate(
       { teacher: teacherId, ...contextFilter, date: effectiveDate, records },
@@ -250,19 +264,32 @@ export default function EvaluationRoster({
           // weekday), only meaningful when there's an assigned portion.
           const studentAssignments = linkedPlan && planCoversStudent(studentId) ? assignmentsForStudent(studentId) : [];
           if (!linkedPlan || studentAssignments.length === 0) {
-            setSavedNotice(`تم حفظ حضور وتقييم ${studentName}`);
+            setSaveNotices([{ tone: 'success', text: `تم حفظ حضور وتقييم ${studentName}` }]);
             return;
           }
+          // `type` is attached to each outcome below only when more than one
+          // assignment exists — a single-type day's notice/error stays
+          // unlabeled and unprefixed, unchanged from before.
           studentAssignments.forEach((assignment) => {
-            const typeLabel = studentAssignments.length > 1 ? `${assignment.type} — ` : '';
+            const outcomeType = studentAssignments.length > 1 ? assignment.type : undefined;
             const completedPoint = completedPointFor(studentId, assignment);
             // Signed in the plan's own direction: negative = fell short of the
             // day's ward, positive = recited past it.
             const delta = dayDeltaAyahs(assignment, reversedForStudent(studentId, assignment.type), completedPoint);
             const status = e.attendanceStatus === 'غائب' ? 'absent' : delta < 0 ? 'partial' : 'done';
             if (status === 'done' && delta === 0) {
-              recordOccurrence.mutate({ planId: linkedPlan._id, studentId, type: assignment.type, occurrenceIndex: assignment.occurrenceIndex, status });
-              setSavedNotice(`${typeLabel}تم حفظ حضور وتقييم ${studentName}`);
+              recordOccurrence.mutate(
+                { planId: linkedPlan._id, studentId, type: assignment.type, occurrenceIndex: assignment.occurrenceIndex, status },
+                {
+                  onSuccess: () => {
+                    setSaveNotices((prev) => [...prev, { type: outcomeType, tone: 'success', text: `تم حفظ حضور وتقييم ${studentName}` }]);
+                  },
+                  onError: (err) => {
+                    error();
+                    setSaveErrors((prev) => [...prev, { type: outcomeType, text: (err as Error).message }]);
+                  },
+                },
+              );
               return;
             }
             recordOccurrence.mutate(
@@ -275,17 +302,26 @@ export default function EvaluationRoster({
               },
               {
                 onSuccess: (res) => {
-                  setSavedNotice(
-                    typeLabel + (status === 'absent'
+                  if (res.data.overflowPages > 0) {
+                    warning();
+                    setSaveNotices((prev) => [...prev, {
+                      type: outcomeType, tone: 'warning',
+                      text: `لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`,
+                    }]);
+                    return;
+                  }
+                  setSaveNotices((prev) => [...prev, {
+                    type: outcomeType, tone: 'success',
+                    text: status === 'absent'
                       ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
                       : delta > 0
                         ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
-                        : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`),
-                  );
-                  if (res.data.overflowPages > 0) {
-                    warning();
-                    setSavedNotice(`${typeLabel}لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`);
-                  }
+                        : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`,
+                  }]);
+                },
+                onError: (err) => {
+                  error();
+                  setSaveErrors((prev) => [...prev, { type: outcomeType, text: (err as Error).message }]);
                 },
               },
             );
@@ -302,16 +338,27 @@ export default function EvaluationRoster({
 
   return (
     <>
-      {!!savedNotice && (
-        <Alert variant="success" icon={<IconCircleCheck size={18} color={theme.tone.green.text} />}>{savedNotice}</Alert>
-      )}
+      {/* One Alert per outcome — a two-type save can produce two independent
+          notices (or one notice and one error), and each must stay visible on
+          its own rather than sharing a slot the other overwrites. */}
+      {saveNotices.map((n, i) => (
+        <Alert
+          key={`notice-${i}`}
+          variant={n.tone}
+          icon={n.tone === 'success' ? <IconCircleCheck size={18} color={theme.tone.green.text} /> : undefined}
+        >
+          {n.type ? `${n.type} — ` : ''}{n.text}
+        </Alert>
+      ))}
       {unnotified.length > 0 && (
         <Alert variant="warning">
           تعذر إرسال إشعار عن غياب: {unnotified.map((u) => u.name).join('، ')} — لا يوجد ولي أمر مرتبط بالحساب.
         </Alert>
       )}
       {bulkEvaluate.isError && <Alert variant="error">{(bulkEvaluate.error as Error).message}</Alert>}
-      {recordOccurrence.isError && <Alert variant="error">{(recordOccurrence.error as Error).message}</Alert>}
+      {saveErrors.map((er, i) => (
+        <Alert key={`error-${i}`} variant="error">{er.type ? `${er.type} — ` : ''}{er.text}</Alert>
+      ))}
       {!teacherId && (
         <Alert variant="warning">
           لا يمكن تسجيل الحضور والتقييم — لا يوجد معلم مُسنَد لهذا السياق.
