@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T14:03:23.579Z
-> Files: 579 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T15:41:27.072Z
+> Files: 585 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -282,11 +282,15 @@
 
 ## .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md (~955 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md (~1372 tok)
 - `task-1-report.md` — Task 1: Track/Halqa API modules — Completion Report (~1188 tok)
 - `task-2-report.md` — Task 2: Context-field collapse across attendance/evaluations/group-homework/students APIs — Completi (~1247 tok)
 - `task-3-report.md` — Task 3 Completion Report (~903 tok)
 - `task-4-report.md` — Task 4 Report: Rename AdminSpecialTracks.tsx → AdminTracks.tsx (~1257 tok)
+- `task-5-report.md` — Task 5 Report: Rename TeacherSpecialTracks.tsx → TeacherTracks.tsx (~666 tok)
+- `task-6-report.md` — Task 6 Report: Rename StudentSpecialTracks.tsx → StudentTracks.tsx (~1068 tok)
+- `task-7-report.md` — Task 7 Report: AdminMasajid.tsx — Gender Field + Tracks List (~1048 tok)
+- `task-8-report.md` — Task 8 Report: AdminStudents.tsx — Collapse halqa+masjid to track (~958 tok)
 
 ## docs/superpowers/plans/
 
@@ -768,7 +772,7 @@
 - `homework.ts` — Exports Homework, HomeworkFilters, useHomework, useCreateHomework + 2 more (~628 tok)
 - `kpis.ts` — Exports Kpi, useKpis, useCreateKpi, useUpdateKpi (~314 tok)
 - `lesson-recordings.ts` — Exports LessonRecording, useRecordings, useCreateRecording, useDeleteRecording (~488 tok)
-- `masajid.ts` — Exports Masjid, useMasajid, useMasjid, useCreateMasjid + 2 more (~461 tok)
+- `masajid.ts` — The server's `getMasajid`/`getMasjid` select this exact field set — no (~561 tok)
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
 - `quran-plans.ts` — PLAN_FORM_HANDOFF_KEY, QuranPlan.targetType="track"|"students", PlanTrack type, useQuranPlans({teacher?, track?, student?}), +5 hooks (~1835 tok)
@@ -844,12 +848,12 @@
 - `AdminDashboard.tsx` — PageLoading (~1287 tok)
 - `AdminHalqat.tsx` — OVERLAY — renders modal (~3688 tok)
 - `AdminKpis.tsx` — RATING_TONE — renders table (~743 tok)
-- `AdminMasajid.tsx` — OVERLAY — renders modal (~2682 tok)
+- `AdminMasajid.tsx` — OVERLAY — renders modal (~3106 tok)
 - `AdminParents.tsx` — EMPTY_ADD, ChildChip — renders table, modal, search bar, avatars (~5900 tok)
 - `AdminRegister.tsx` — schema — renders form (~3079 tok)
 - `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~324 tok)
 - `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13551 tok)
-- `AdminStudents.tsx` — PATH_TONE — renders table (~5525 tok)
+- `AdminStudents.tsx` — PATH_TONE — renders table (~5640 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4598 tok)
 - `AdminTracks.tsx` — surahName — renders form, modal (~12981 tok)
 
@@ -878,6 +882,7 @@
 - `StudentSchedule.tsx` — getId (~840 tok)
 - `StudentSpecialTracks.tsx` — surahName (~4412 tok)
 - `StudentStore.tsx` — MY_POINTS (~882 tok)
+- `StudentTracks.tsx` — surahName (~4511 tok)
 
 ## quran-hifz/src/quran/pages/teacher/
 
@@ -896,6 +901,7 @@
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2471 tok)
 - `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~24978 tok)
+- `TeacherTracks.tsx` — surahName (~2808 tok)
 
 ## quran-hifz/src/quran/router/
 
