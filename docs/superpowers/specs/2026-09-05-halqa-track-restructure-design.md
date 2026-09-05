@@ -134,11 +134,16 @@ Track belongs to.
   meetLink?: string;
   teachers: ObjectId[];       // ref Teacher — unchanged
   maxStudents: number;
-  enrolledStudents: ObjectId[]; // ref Student — unchanged
   notes?: string;
 }
 ```
-Dropped from today's shape: `location` (superseded by `masjid.location`).
+Dropped from today's shape: `location` (superseded by `masjid.location`) and
+`enrolledStudents` (an implementation-time correction to this spec, confirmed
+with the user afterward: `Student.track` is the sole membership mechanism —
+a student belongs to exactly one track, full stop. There is no "temporary
+program" concept any more; a short-term cohort like a Ramadan intensive is
+just another Track, and joining one means leaving whichever track a student
+was in before, not holding both at once.)
 
 ### Student
 ```ts
