@@ -9,6 +9,10 @@ export async function getPlanStudentIds(plan: IQuranPlan): Promise<Types.ObjectI
   if (plan.targetType === 'students') {
     return (plan.students ?? []) as Types.ObjectId[];
   }
+  // Without a track, `Student.find({ track: undefined })` would match every
+  // student (Mongoose drops the undefined key, casting the filter to `{}`).
+  // A `targetType: 'track'` plan with no `track` set covers no one.
+  if (!plan.track) return [];
   const students = await Student.find({ track: plan.track }, '_id');
   return students.map((s) => s._id as Types.ObjectId);
 }

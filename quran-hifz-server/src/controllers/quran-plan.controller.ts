@@ -311,6 +311,23 @@ export async function createPlan(req: Request, res: Response, next: NextFunction
 export async function updatePlan(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const data = quranPlanSchema.partial().parse(req.body);
+
+    // `.partial()` skips the create-only superRefine, so an update that flips
+    // targetType (or clears track/students) could otherwise leave the plan
+    // targeting nothing — merge onto the existing document to check the same
+    // consistency the create schema enforces.
+    const existing = await QuranPlan.findById(req.params.id);
+    if (!existing) throw new AppError('الخطة غير موجودة', 404);
+    const targetType = data.targetType ?? existing.targetType;
+    const track    = data.track !== undefined ? data.track : existing.track;
+    const students = data.students !== undefined ? data.students : existing.students;
+    if (targetType === 'track' && !track) {
+      throw new AppError('يجب اختيار المسار', 400);
+    }
+    if (targetType === 'students' && (!students || students.length === 0)) {
+      throw new AppError('يجب اختيار طالب واحد على الأقل', 400);
+    }
+
     const update: Record<string, unknown> = { ...data };
     if (data.startDate) update.startDate = new Date(data.startDate);
     if (data.endDate)   update.endDate   = new Date(data.endDate);
