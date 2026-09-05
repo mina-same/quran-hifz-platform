@@ -270,62 +270,60 @@ export default function EvaluationRoster({
           // `type` is attached to each outcome below only when more than one
           // assignment exists — a single-type day's notice/error stays
           // unlabeled and unprefixed, unchanged from before.
-          studentAssignments.forEach((assignment) => {
-            const outcomeType = studentAssignments.length > 1 ? assignment.type : undefined;
-            const completedPoint = completedPointFor(studentId, assignment);
-            // Signed in the plan's own direction: negative = fell short of the
-            // day's ward, positive = recited past it.
-            const delta = dayDeltaAyahs(assignment, reversedForStudent(studentId, assignment.type), completedPoint);
-            const status = e.attendanceStatus === 'غائب' ? 'absent' : delta < 0 ? 'partial' : 'done';
-            if (status === 'done' && delta === 0) {
-              recordOccurrence.mutate(
-                { planId: linkedPlan._id, studentId, type: assignment.type, occurrenceIndex: assignment.occurrenceIndex, status },
-                {
-                  onSuccess: () => {
-                    setSaveNotices((prev) => [...prev, { type: outcomeType, tone: 'success', text: `تم حفظ حضور وتقييم ${studentName}` }]);
-                  },
-                  onError: (err) => {
-                    error();
-                    setSaveErrors((prev) => [...prev, { type: outcomeType, text: (err as Error).message }]);
-                  },
-                },
-              );
-              return;
-            }
-            recordOccurrence.mutate(
-              {
-                planId: linkedPlan._id, studentId, type: assignment.type, occurrenceIndex: assignment.occurrenceIndex, status,
-                // Sent for an over-achievement too, so the server can take the
-                // surplus off the student's remaining days.
-                completedThroughSurah: status === 'absent' ? undefined : completedPoint.surahNumber,
-                completedThroughAyah: status === 'absent' ? undefined : completedPoint.ayah,
-              },
-              {
-                onSuccess: (res) => {
-                  if (res.data.overflowPages > 0) {
-                    warning();
-                    setSaveNotices((prev) => [...prev, {
-                      type: outcomeType, tone: 'warning',
-                      text: `لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`,
-                    }]);
-                    return;
-                  }
-                  setSaveNotices((prev) => [...prev, {
-                    type: outcomeType, tone: 'success',
-                    text: status === 'absent'
-                      ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
-                      : delta > 0
-                        ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
-                        : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`,
-                  }]);
-                },
-                onError: (err) => {
+          // Awaited sequentially (not fired in parallel via .forEach) so that
+          // two never-before-seen-progress-doc assignments for the same
+          // student (e.g. حفظ + مراجعة sharing this weekday) don't race the
+          // server's findOne→create init path in the same tick.
+          (async () => {
+            for (const assignment of studentAssignments) {
+              const outcomeType = studentAssignments.length > 1 ? assignment.type : undefined;
+              const completedPoint = completedPointFor(studentId, assignment);
+              // Signed in the plan's own direction: negative = fell short of the
+              // day's ward, positive = recited past it.
+              const delta = dayDeltaAyahs(assignment, reversedForStudent(studentId, assignment.type), completedPoint);
+              const status = e.attendanceStatus === 'غائب' ? 'absent' : delta < 0 ? 'partial' : 'done';
+              if (status === 'done' && delta === 0) {
+                try {
+                  await recordOccurrence.mutateAsync(
+                    { planId: linkedPlan._id, studentId, type: assignment.type, occurrenceIndex: assignment.occurrenceIndex, status },
+                  );
+                  setSaveNotices((prev) => [...prev, { type: outcomeType, tone: 'success', text: `تم حفظ حضور وتقييم ${studentName}` }]);
+                } catch (err) {
                   error();
                   setSaveErrors((prev) => [...prev, { type: outcomeType, text: (err as Error).message }]);
-                },
-              },
-            );
-          });
+                }
+                continue;
+              }
+              try {
+                const res = await recordOccurrence.mutateAsync({
+                  planId: linkedPlan._id, studentId, type: assignment.type, occurrenceIndex: assignment.occurrenceIndex, status,
+                  // Sent for an over-achievement too, so the server can take the
+                  // surplus off the student's remaining days.
+                  completedThroughSurah: status === 'absent' ? undefined : completedPoint.surahNumber,
+                  completedThroughAyah: status === 'absent' ? undefined : completedPoint.ayah,
+                });
+                if (res.data.overflowPages > 0) {
+                  warning();
+                  setSaveNotices((prev) => [...prev, {
+                    type: outcomeType, tone: 'warning',
+                    text: `لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`,
+                  }]);
+                  continue;
+                }
+                setSaveNotices((prev) => [...prev, {
+                  type: outcomeType, tone: 'success',
+                  text: status === 'absent'
+                    ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
+                    : delta > 0
+                      ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
+                      : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`,
+                }]);
+              } catch (err) {
+                error();
+                setSaveErrors((prev) => [...prev, { type: outcomeType, text: (err as Error).message }]);
+              }
+            }
+          })();
         },
         onError: () => error(),
       },

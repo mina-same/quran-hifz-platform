@@ -756,74 +756,84 @@ export function TeacherTrackDetail() {
             return;
           }
 
-          studentAssignments.forEach((studentAssignment, i) => {
-            const thisToastId = i === 0 ? toastId : toast.loading("جاري حفظ الحضور والتقييم...");
-            const typeLabel = studentAssignments.length > 1 ? `${studentAssignment.type} — ` : "";
-            const completedPoint = completedPointFor(studentId, studentAssignment);
-            // Signed in the plan's own direction — for a reverse plan the undone part
-            // is the low side of the day's slice, not the high one. Negative = fell
-            // short of the day's ward, positive = recited past it.
-            const delta = dayDeltaAyahs(
-              studentAssignment,
-              reversedForStudent(studentId, studentAssignment.type),
-              completedPoint,
-            );
-            const status = e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
+          // Awaited sequentially (not fired in parallel via .forEach) so that
+          // two never-before-seen-progress-doc assignments for the same
+          // student (e.g. حفظ + مراجعة sharing this weekday) don't race the
+          // server's findOne→create init path in the same tick.
+          (async () => {
+            for (let i = 0; i < studentAssignments.length; i++) {
+              const studentAssignment = studentAssignments[i];
+              const thisToastId = i === 0 ? toastId : toast.loading("جاري حفظ الحضور والتقييم...");
+              const typeLabel = studentAssignments.length > 1 ? `${studentAssignment.type} — ` : "";
+              const completedPoint = completedPointFor(studentId, studentAssignment);
+              // Signed in the plan's own direction — for a reverse plan the undone part
+              // is the low side of the day's slice, not the high one. Negative = fell
+              // short of the day's ward, positive = recited past it.
+              const delta = dayDeltaAyahs(
+                studentAssignment,
+                reversedForStudent(studentId, studentAssignment.type),
+                completedPoint,
+              );
+              const status = e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
 
-            if (status === "done" && delta === 0) {
-              toast.success(`${typeLabel}تم حفظ الحضور والتقييم بنجاح`, { id: thisToastId });
-              recordOccurrence.mutate({
-                planId: linkedPlan._id,
-                studentId,
-                type: studentAssignment.type,
-                occurrenceIndex: studentAssignment.occurrenceIndex,
-                status,
-              });
-              return;
-            }
+              if (status === "done" && delta === 0) {
+                toast.success(`${typeLabel}تم حفظ الحضور والتقييم بنجاح`, { id: thisToastId });
+                try {
+                  await recordOccurrence.mutateAsync({
+                    planId: linkedPlan._id,
+                    studentId,
+                    type: studentAssignment.type,
+                    occurrenceIndex: studentAssignment.occurrenceIndex,
+                    status,
+                  });
+                } catch {
+                  // Matches prior behavior for this branch: no onError was
+                  // attached, so a failure here was silent — just don't let
+                  // it block recording the remaining assignments.
+                }
+                continue;
+              }
 
-            toast.loading(
-              typeLabel +
-                (status === "absent"
-                  ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
-                  : delta > 0
-                    ? `جاري تعديل باقي أيام خطة ${studentName} بعد التسميع الإضافي...`
-                    : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`),
-              { id: thisToastId },
-            );
-            recordOccurrence.mutate(
-              {
-                planId: linkedPlan._id,
-                studentId,
-                type: studentAssignment.type,
-                occurrenceIndex: studentAssignment.occurrenceIndex,
-                status,
-                // Sent for an over-achievement too (status "done"), so the server can
-                // take the surplus off the student's remaining days.
-                completedThroughSurah: status === "absent" ? undefined : completedPoint.surahNumber,
-                completedThroughAyah: status === "absent" ? undefined : completedPoint.ayah,
-              },
-              {
-                onSuccess: (res) => {
-                  toast.success(
-                    typeLabel +
-                      (status === "absent"
-                        ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
-                        : delta > 0
-                          ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
-                          : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`),
-                    { id: thisToastId },
+              toast.loading(
+                typeLabel +
+                  (status === "absent"
+                    ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
+                    : delta > 0
+                      ? `جاري تعديل باقي أيام خطة ${studentName} بعد التسميع الإضافي...`
+                      : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`),
+                { id: thisToastId },
+              );
+              try {
+                const res = await recordOccurrence.mutateAsync({
+                  planId: linkedPlan._id,
+                  studentId,
+                  type: studentAssignment.type,
+                  occurrenceIndex: studentAssignment.occurrenceIndex,
+                  status,
+                  // Sent for an over-achievement too (status "done"), so the server can
+                  // take the surplus off the student's remaining days.
+                  completedThroughSurah: status === "absent" ? undefined : completedPoint.surahNumber,
+                  completedThroughAyah: status === "absent" ? undefined : completedPoint.ayah,
+                });
+                toast.success(
+                  typeLabel +
+                    (status === "absent"
+                      ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
+                      : delta > 0
+                        ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
+                        : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`),
+                  { id: thisToastId },
+                );
+                if (res.data.overflowPages > 0) {
+                  toast.warning(
+                    `${typeLabel}لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`,
                   );
-                  if (res.data.overflowPages > 0) {
-                    toast.warning(
-                      `${typeLabel}لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`,
-                    );
-                  }
-                },
-                onError: (err) => toast.error((err as Error).message, { id: thisToastId }),
-              },
-            );
-          });
+                }
+              } catch (err) {
+                toast.error((err as Error).message, { id: thisToastId });
+              }
+            }
+          })();
         },
         onError: (err) => toast.error((err as Error).message, { id: toastId }),
       },

@@ -19,15 +19,17 @@ async function loadPlanAndValidateStudent(planId: string, studentId: string) {
 }
 
 async function getOrInitProgress(planId: string, studentId: string, plan: InstanceType<typeof QuranPlan>) {
-  let doc = await StudentPlanProgress.findOne({ plan: planId, student: studentId });
-  if (!doc) {
-    doc = await StudentPlanProgress.create({
-      plan: planId,
-      student: studentId,
-      occurrences: initStudentOccurrences(plan),
-      overflowPages: 0,
-    });
-  }
+  // Upsert atomically: two near-simultaneous requests for the same
+  // never-before-seen student (e.g. one حفظ + one مراجعة ward due the same
+  // day) must not both attempt a plain create() and race on the unique
+  // {plan, student} index (E11000). findOneAndUpdate with upsert is atomic
+  // at the document level, so the loser of the race gets back the winner's
+  // freshly-created doc instead of a duplicate-key error.
+  const doc = await StudentPlanProgress.findOneAndUpdate(
+    { plan: planId, student: studentId },
+    { $setOnInsert: { plan: planId, student: studentId, occurrences: initStudentOccurrences(plan), overflowPages: 0 } },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
   return doc;
 }
 
