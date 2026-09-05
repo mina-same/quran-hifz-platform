@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T12:48:33.312Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T12:53:15.735Z
 > Files: 571 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
@@ -266,7 +266,7 @@
 ## .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/
 
 - `final-review-fix-report.md` — Final whole-branch review — fix report (~1722 tok)
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase1-server.md (~4390 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase1-server.md (~4572 tok)
 - `task-1-2-report.md` — Task 1 & 2 Implementation Report (~1147 tok)
 - `task-10-report.md` — Task 10 Report: QuranPlan model + controller — targetType drops 'halqa', specialTrack renamed to tra (~1832 tok)
 - `task-11-report.md` — Task 11 Report: parent.controller.ts and stats.controller.ts — final halqa/specialTrack cleanup (~849 tok)
