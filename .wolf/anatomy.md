@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T12:53:15.735Z
-> Files: 571 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T13:18:22.747Z
+> Files: 573 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -287,8 +287,10 @@
 
 ## docs/superpowers/specs/
 
+- `2026-09-04-halqa-track-phase2-web-research.md` — Phase 2 (web) — research handoff (~2232 tok)
 - `2026-09-04-same-day-multi-segment-plans-design.md` — Same-day حفظ + مراجعة segments — design (~2798 tok)
 - `2026-09-05-halqa-track-restructure-design.md` — Halqa/Track restructure — design (~3262 tok)
+- `2026-09-05-halqa-track-restructure-phase2-web-design.md` — Halqa/Track Restructure — Phase 2 (Web) Design (~3328 tok)
 
 ## quran-hifz-mobile/
 
