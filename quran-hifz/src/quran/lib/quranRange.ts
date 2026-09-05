@@ -492,7 +492,7 @@ export function computeMultiScheduleBreakdown(plan: MultiPlanInput): SegmentSche
       out.push({ ...entry, type: seg.type });
     }
   }
-  return out.sort((a, b) => a.date.localeCompare(b.date));
+  return out.sort((a, b) => a.date.localeCompare(b.date) || a.type.localeCompare(b.type));
 }
 
 /** Every segment that owns a given date — a date can now belong to more than
