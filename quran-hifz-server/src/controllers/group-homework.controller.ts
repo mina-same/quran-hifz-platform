@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { GroupHomework } from '../models/GroupHomework.model';
 import { AppError } from '../middleware/error';
-import { contextRefinement } from '../validators/context';
 
 const groupHomeworkSchema = z.object({
   halqa:        z.string().min(1).optional(),
@@ -12,7 +11,7 @@ const groupHomeworkSchema = z.object({
   description: z.string().min(1),
   dueDay:      z.string().min(1),
   dueDate:     z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
-}).superRefine(contextRefinement);
+});
 
 export async function getGroupHomework(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {

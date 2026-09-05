@@ -1,5 +1,4 @@
 import { Schema, model, Document, Types } from 'mongoose';
-import { applyContextValidation } from '../validators/context';
 
 /** Legacy fixed-shape scores. Still written whenever the plan's rubric uses
  *  the four original keys, so existing reports and CSV exports keep working. */
@@ -94,6 +93,5 @@ const evaluationSchema = new Schema<IEvaluation>(
 evaluationSchema.index({ student: 1, date: -1 });
 evaluationSchema.index({ halqa: 1, date: -1 });
 evaluationSchema.index({ specialTrack: 1, date: -1 });
-applyContextValidation(evaluationSchema);
 
 export const Evaluation = model<IEvaluation>('Evaluation', evaluationSchema);

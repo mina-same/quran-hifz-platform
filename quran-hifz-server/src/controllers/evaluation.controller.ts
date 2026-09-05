@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { Types } from 'mongoose';
 import { Evaluation, type IEvaluationCriterion } from '../models/Evaluation.model';
 import { QuranPlan, DEFAULT_GRADE_RUBRIC, type IGradeCriterion } from '../models/QuranPlan.model';
-import { contextRefinement } from '../validators/context';
 import { notifyParents } from '../lib/notify';
 import { deriveDayAndTime, upsertAttendanceRecords, type AttendanceContext } from './attendance.controller';
 
@@ -70,7 +69,7 @@ const bulkSchema = z.object({
   plan:         z.string().min(1).optional(),
   date:    z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
   records: z.array(recordSchema),
-}).superRefine(contextRefinement);
+});
 
 /** GET /api/evaluations/rubric — what the evaluation screen should render. */
 export async function getRubric(req: Request, res: Response, next: NextFunction): Promise<void> {

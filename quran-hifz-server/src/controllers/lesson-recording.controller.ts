@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { LessonRecording } from '../models/LessonRecording.model';
 import { AppError } from '../middleware/error';
-import { contextRefinement } from '../validators/context';
 
 const recordingSchema = z.object({
   student:      z.string().min(1),
@@ -15,7 +14,7 @@ const recordingSchema = z.object({
   teacherNote: z.string().optional(),
   audioUrl:    z.string().url().optional(),
   recordedAt:  z.string().optional(),
-}).superRefine(contextRefinement);
+});
 
 export async function getRecordings(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {

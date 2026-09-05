@@ -1,5 +1,4 @@
 import { Schema, model, Document } from 'mongoose';
-import { applyContextValidation } from '../validators/context';
 
 export interface ILessonRecording extends Document {
   student: Schema.Types.ObjectId;
@@ -33,6 +32,5 @@ const lessonRecordingSchema = new Schema<ILessonRecording>(
 );
 
 lessonRecordingSchema.index({ specialTrack: 1, recordedAt: -1 });
-applyContextValidation(lessonRecordingSchema);
 
 export const LessonRecording = model<ILessonRecording>('LessonRecording', lessonRecordingSchema);

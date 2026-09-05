@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { Homework } from '../models/Homework.model';
 import { AppError } from '../middleware/error';
-import { contextRefinement } from '../validators/context';
 
 const homeworkSchema = z.object({
   student:      z.string().min(1),
@@ -13,7 +12,7 @@ const homeworkSchema = z.object({
   segment: z.string().min(1),
   dueDate: z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
   notes:   z.string().optional(),
-}).superRefine(contextRefinement);
+});
 
 const reviewSchema = z.object({
   status:      z.enum(['مراجع', 'معلق', 'متأخر']).optional(),

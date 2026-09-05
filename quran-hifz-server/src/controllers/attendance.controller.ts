@@ -4,7 +4,6 @@ import { Types } from 'mongoose';
 import { Attendance } from '../models/Attendance.model';
 import { Student } from '../models/Student.model';
 import { AppError } from '../middleware/error';
-import { contextRefinement } from '../validators/context';
 import { notifyParents } from '../lib/notify';
 
 const recordSchema = z.object({
@@ -13,7 +12,7 @@ const recordSchema = z.object({
   specialTrack: z.string().min(1).optional(),
   date:    z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
   status:  z.enum(['حاضر', 'غائب', 'متأخر']),
-}).superRefine(contextRefinement);
+});
 
 const bulkSchema = z.object({
   halqa:        z.string().min(1).optional(),
@@ -23,7 +22,7 @@ const bulkSchema = z.object({
     student: z.string().min(1),
     status:  z.enum(['حاضر', 'غائب', 'متأخر']),
   })),
-}).superRefine(contextRefinement);
+});
 
 // The client only knows the calendar date it's marking attendance for — day-of-week
 // and time-of-recording are derived here rather than trusted from the request body.

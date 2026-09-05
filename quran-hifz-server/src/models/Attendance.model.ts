@@ -1,5 +1,4 @@
 import { Schema, model, Document, Types } from 'mongoose';
-import { applyContextValidation } from '../validators/context';
 
 export interface IAttendance extends Document {
   student: Types.ObjectId;
@@ -29,6 +28,5 @@ const attendanceSchema = new Schema<IAttendance>(
 attendanceSchema.index({ student: 1, date: -1 });
 attendanceSchema.index({ halqa: 1, date: -1 });
 attendanceSchema.index({ specialTrack: 1, date: -1 });
-applyContextValidation(attendanceSchema);
 
 export const Attendance = model<IAttendance>('Attendance', attendanceSchema);
