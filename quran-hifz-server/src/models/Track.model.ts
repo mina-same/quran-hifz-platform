@@ -1,6 +1,7 @@
 import { Schema, model, Document } from 'mongoose';
 
-export interface ISpecialTrack extends Document {
+export interface ITrack extends Document {
+  masjid: Schema.Types.ObjectId;
   title: string;
   type: string;
   status: 'active' | 'upcoming' | 'ended';
@@ -8,19 +9,18 @@ export interface ISpecialTrack extends Document {
   endDate: Date;
   daysPerWeek: string;
   timeSlot: string;
-  location: string;
   isOnline: boolean;
   meetLink?: string;
   teachers: Schema.Types.ObjectId[];
   maxStudents: number;
-  enrolledStudents: Schema.Types.ObjectId[];
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const specialTrackSchema = new Schema<ISpecialTrack>(
+const trackSchema = new Schema<ITrack>(
   {
+    masjid:           { type: Schema.Types.ObjectId, ref: 'Masjid', required: true },
     title:            { type: String, required: true, trim: true },
     type:             { type: String, required: true },
     status:           { type: String, enum: ['active', 'upcoming', 'ended'], default: 'upcoming' },
@@ -28,15 +28,15 @@ const specialTrackSchema = new Schema<ISpecialTrack>(
     endDate:          { type: Date, required: true },
     daysPerWeek:      { type: String, required: true },
     timeSlot:         { type: String, required: true },
-    location:         { type: String, required: true },
     isOnline:         { type: Boolean, default: false },
     meetLink:         { type: String },
     teachers:         [{ type: Schema.Types.ObjectId, ref: 'Teacher' }],
     maxStudents:      { type: Number, required: true },
-    enrolledStudents: [{ type: Schema.Types.ObjectId, ref: 'Student' }],
     notes:            { type: String },
   },
   { timestamps: true },
 );
 
-export const SpecialTrack = model<ISpecialTrack>('SpecialTrack', specialTrackSchema);
+trackSchema.index({ masjid: 1 });
+
+export const Track = model<ITrack>('Track', trackSchema);

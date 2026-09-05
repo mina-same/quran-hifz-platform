@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { Masjid } from '../models/Masjid.model';
-import { Halqa } from '../models/Halqa.model';
+import { Track } from '../models/Track.model';
 import { AppError } from '../middleware/error';
 
 const masjidSchema = z.object({
   name:     z.string().min(2, 'اسم المسجد مطلوب'),
   location: z.string().min(2, 'الموقع مطلوب'),
+  gender:   z.enum(['male', 'female'], { errorMap: () => ({ message: 'يجب تحديد جنس المسجد' }) }),
 });
 
 export async function getMasajid(_req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -15,10 +16,10 @@ export async function getMasajid(_req: Request, res: Response, next: NextFunctio
 
     const enriched = await Promise.all(
       masajid.map(async (m) => {
-        const halqat = await Halqa.find({ masjid: m._id })
-          .populate('teacher', 'name')
-          .select('name days time studentCount capacity');
-        return { ...m.toObject(), halqat };
+        const tracks = await Track.find({ masjid: m._id })
+          .populate('teachers', 'name')
+          .select('title daysPerWeek timeSlot maxStudents status');
+        return { ...m.toObject(), tracks };
       }),
     );
 
@@ -33,8 +34,8 @@ export async function getMasjid(req: Request, res: Response, next: NextFunction)
     const masjid = await Masjid.findById(req.params.id);
     if (!masjid) throw new AppError('المسجد غير موجود', 404);
 
-    const halqat = await Halqa.find({ masjid: masjid._id }).populate('teacher', 'name specialty');
-    res.json({ success: true, data: { ...masjid.toObject(), halqat } });
+    const tracks = await Track.find({ masjid: masjid._id }).populate('teachers', 'name specialty');
+    res.json({ success: true, data: { ...masjid.toObject(), tracks } });
   } catch (err) {
     next(err);
   }
