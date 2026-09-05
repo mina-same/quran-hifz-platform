@@ -1,9 +1,8 @@
-import type { Halqa } from "../../api/halqat";
-import type { SpecialTrack } from "../../api/special-tracks";
+import type { Track } from "../../api/tracks";
 
-/** Unified shape for "teaching context" — either a Halqa or a SpecialTrack. */
+/** Unified shape for "teaching context" — always a Track now that Halqa is
+ * gone and every track has direct students via `Student.track`. */
 export type TeachingContext = {
-  kind: "halqa" | "specialTrack";
   id: string;
   title: string;
   subtitle?: string;
@@ -16,37 +15,17 @@ function getName(v: unknown): string {
   return typeof v === "string" ? v : "";
 }
 
-export function halqaToContext(h: Halqa): TeachingContext {
+export function trackToContext(t: Track): TeachingContext {
   return {
-    kind: "halqa",
-    id: h._id,
-    title: h.name,
-    subtitle: getName(h.masjid),
-    scheduleLabel: [h.days, h.time].filter(Boolean).join(" | "),
-    studentCount: h.studentCount,
-  };
-}
-
-/** A track with no direct enrollment isn't a valid attendance/homework
- * context on its own — its real students live on its halaqat instead, which
- * already appear as their own halqa contexts. Filter tracks through this
- * before mapping with trackToContext. */
-export function hasDirectEnrollment(t: SpecialTrack): boolean {
-  return t.enrolledStudents.length > 0;
-}
-
-export function trackToContext(t: SpecialTrack): TeachingContext {
-  return {
-    kind: "specialTrack",
     id: t._id,
     title: t.title,
-    subtitle: t.isOnline ? "أونلاين" : t.location,
+    subtitle: t.isOnline ? "أونلاين" : getName(t.masjid),
     scheduleLabel: [t.daysPerWeek, t.timeSlot].filter(Boolean).join(" | "),
-    studentCount: t.enrolledStudents.length,
+    studentCount: t.studentCount,
   };
 }
 
-/** Grid of selectable context cards (halqat + special tracks combined). */
+/** Grid of selectable context cards (tracks). */
 export function ContextPicker({
   contexts,
   onSelect,
@@ -58,15 +37,15 @@ export function ContextPicker({
   contexts: TeachingContext[];
   onSelect: (ctx: TeachingContext) => void;
   emptyLabel?: string;
-  /** Short line above the grid stating what selecting a card will do (e.g. "اختر الحلقة أو المسار لأخذ الحضور"). Keeps otherwise-identical picker screens across pages visually distinguishable. */
+  /** Short line above the grid stating what selecting a card will do (e.g. "اختر المسار لأخذ الحضور"). Keeps otherwise-identical picker screens across pages visually distinguishable. */
   heading?: string;
-  /** Overrides the default "اختيار الحلقة/المسار" button text with an action-specific label (e.g. "أخذ الحضور"). */
+  /** Overrides the default "اختيار المسار" button text with an action-specific label (e.g. "أخذ الحضور"). */
   actionLabel?: string;
-  /** Overrides the button icon (defaults to the halqa/track kind icon). */
+  /** Overrides the button icon (defaults to ti-calendar-event). */
   actionIcon?: string;
 }) {
   if (contexts.length === 0) {
-    return <div className="page-loading">{emptyLabel ?? "لا توجد حلقات أو مسارات مسجلة"}</div>;
+    return <div className="page-loading">{emptyLabel ?? "لا توجد مسارات مسجلة"}</div>;
   }
 
   return (
@@ -80,7 +59,7 @@ export function ContextPicker({
       >
         {contexts.map((ctx) => (
           <div
-            key={`${ctx.kind}-${ctx.id}`}
+            key={ctx.id}
             className="card"
             style={{
               cursor: "pointer",
@@ -93,13 +72,12 @@ export function ContextPicker({
           >
             <div className="card-header">
               <div className="card-title">
-                <i className={`ti ${ctx.kind === "halqa" ? "ti-school" : "ti-calendar-event"}`} />{" "}
-                {ctx.title}
+                <i className="ti ti-calendar-event" /> {ctx.title}
               </div>
             </div>
             {ctx.subtitle && (
               <div className="halqa-row">
-                <span className="lbl">{ctx.kind === "halqa" ? "المسجد" : "المكان"}</span>
+                <span className="lbl">المسجد</span>
                 <span className="val">{ctx.subtitle}</span>
               </div>
             )}
@@ -123,10 +101,8 @@ export function ContextPicker({
                 onSelect(ctx);
               }}
             >
-              <i
-                className={`ti ${actionIcon ?? (ctx.kind === "halqa" ? "ti-school" : "ti-calendar-event")}`}
-              />
-              {actionLabel ?? (ctx.kind === "halqa" ? "اختيار الحلقة" : "اختيار المسار")}
+              <i className={`ti ${actionIcon ?? "ti-calendar-event"}`} />
+              {actionLabel ?? "اختيار المسار"}
             </button>
           </div>
         ))}

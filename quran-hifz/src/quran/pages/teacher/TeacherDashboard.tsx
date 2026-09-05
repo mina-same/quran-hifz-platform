@@ -5,20 +5,18 @@ import { Card } from "../../components/common/Card";
 import { Alert } from "../../components/common/Alert";
 import { Badge } from "../../components/common/Badge";
 import { useStats } from "../../api/stats";
-import { useHalqat } from "../../api/halqat";
-import { useSpecialTracks } from "../../api/special-tracks";
+import { useTracks } from "../../api/tracks";
 import { useHomework } from "../../api/homework";
 import { toAr } from "../../../lib/format";
-import { halqaToContext, trackToContext, hasDirectEnrollment } from "../../components/common/ContextPicker";
+import { trackToContext } from "../../components/common/ContextPicker";
 
 export function TeacherDashboard() {
   const { showPage, user } = usePortal();
   const { data: stats } = useStats();
-  const { data: halqat = [] } = useHalqat({ teacher: user?.profileId });
-  const { data: tracks = [] } = useSpecialTracks(undefined, user?.profileId as string | undefined);
+  const { data: tracks = [] } = useTracks(undefined, user?.profileId as string | undefined);
   const { data: pendingHW = [] } = useHomework({ teacher: user?.profileId, status: "معلق" });
 
-  const contexts = [...halqat.map(halqaToContext), ...tracks.filter(hasDirectEnrollment).map(trackToContext)];
+  const contexts = tracks.map(trackToContext);
   const totalStudents = contexts.reduce((sum, c) => sum + (c.studentCount ?? 0), 0);
 
   useTopbar(
@@ -34,7 +32,7 @@ export function TeacherDashboard() {
       <StatsRow
         items={[
           { num: toAr(totalStudents), label: "طلابي الكلي", icon: "ti-users" },
-          { num: toAr(contexts.length), label: "حلقاتي ومساراتي", icon: "ti-school", variant: "gold" },
+          { num: toAr(contexts.length), label: "مساراتي", icon: "ti-calendar-event", variant: "gold" },
           { num: toAr(stats?.avgAttendancePct ?? 0) + "٪", label: "متوسط الحضور", icon: "ti-calendar-check", variant: "blue" },
           { num: toAr(pendingHW.length), label: "واجبات معلقة", icon: "ti-microphone", variant: "red" },
         ]}
@@ -45,9 +43,9 @@ export function TeacherDashboard() {
             <div className="page-loading">لا توجد حلقات أو مسارات مسجلة</div>
           )}
           {contexts.map((c) => (
-            <div key={`${c.kind}-${c.id}`} className="halqa-row-item">
+            <div key={c.id} className="halqa-row-item">
               <span className="h-name">
-                <i className={`ti ${c.kind === "halqa" ? "ti-school" : "ti-calendar-event"}`} style={{ fontSize: 11 }} /> {c.title}
+                <i className="ti ti-calendar-event" style={{ fontSize: 11 }} /> {c.title}
               </span>
               <Badge tone="gold">{c.subtitle || "—"}</Badge>
               <span className="h-info">
