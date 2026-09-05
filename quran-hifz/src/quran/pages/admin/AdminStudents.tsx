@@ -5,8 +5,7 @@ import { Card } from "../../components/common/Card";
 import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { SkeletonTable } from "../../components/common/Skeleton";
 import { useStudents, useUpdateStudent, useDeleteStudent, type Student } from "../../api/students";
-import { useHalqat } from "../../api/halqat";
-import { useMasajid } from "../../api/masajid";
+import { useTracks } from "../../api/tracks";
 import { useAdminParents, useStudentParent, useSetStudentParent } from "../../api/admin-parents";
 import { toAr } from "../../../lib/format";
 
@@ -19,12 +18,13 @@ const PATH_TONE: Record<string, BadgeTone> = {
 
 function getObjName(h: unknown): string {
   if (h && typeof h === "object" && "name" in h) return (h as { name: string }).name;
+  if (h && typeof h === "object" && "title" in h) return (h as { title: string }).title;
   return "";
 }
-function getTrackTitle(halqa: Student["halqa"]): string {
-  if (!halqa || typeof halqa !== "object") return "";
-  const t = halqa.specialTrack;
-  if (t && typeof t === "object" && "title" in t) return t.title;
+function getTrackMasjidName(track: Student["track"]): string {
+  if (!track || typeof track !== "object") return "";
+  const m = track.masjid;
+  if (m && typeof m === "object" && "name" in m) return (m as { name: string }).name;
   return "";
 }
 function getObjId(h: unknown): string {
@@ -37,8 +37,7 @@ type EditFormFields = {
   name: string;
   path: string;
   level: string;
-  halqa: string;
-  masjid: string;
+  track: string;
   guardianPhone: string;
   nationalId: string;
   status: "active" | "inactive" | "new";
@@ -61,8 +60,7 @@ const DIALOG: React.CSSProperties = {
 export function AdminStudents() {
   const { showPage } = usePortal();
   const { data: students = [], isLoading, error } = useStudents();
-  const { data: halqat = [] } = useHalqat();
-  const { data: masajid = [] } = useMasajid();
+  const { data: tracks = [] } = useTracks();
   const { data: parents = [] } = useAdminParents();
   const updateStudent    = useUpdateStudent();
   const deleteStudent    = useDeleteStudent();
@@ -72,7 +70,7 @@ export function AdminStudents() {
   const [pathFilter, setPathFilter] = useState("");
   const [editItem, setEditItem] = useState<Student | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [form, setForm] = useState<EditFormFields>({ name: "", path: "", level: "", halqa: "", masjid: "", guardianPhone: "", nationalId: "", status: "active", email: "", password: "" });
+  const [form, setForm] = useState<EditFormFields>({ name: "", path: "", level: "", track: "", guardianPhone: "", nationalId: "", status: "active", email: "", password: "" });
   const [formError, setFormError] = useState("");
   const [selectedParentId, setSelectedParentId] = useState<string>("");
 
@@ -83,8 +81,7 @@ export function AdminStudents() {
       name:          s.name,
       path:          s.path,
       level:         s.level != null ? String(s.level) : "",
-      halqa:         getObjId(s.halqa),
-      masjid:        getObjId(s.masjid),
+      track:         getObjId(s.track),
       guardianPhone: s.guardianPhone,
       nationalId:    s.nationalId ?? "",
       status:        s.status,
@@ -112,8 +109,7 @@ export function AdminStudents() {
         id:            editItem!._id,
         name:          form.name.trim(),
         path:          form.path,
-        halqa:         form.halqa || undefined,
-        masjid:        form.masjid || undefined,
+        track:         form.track || undefined,
         guardianPhone: form.guardianPhone.trim(),
         // Blank clears the field rather than failing the 10-digit check.
         nationalId:    form.nationalId.trim() || undefined,
@@ -204,7 +200,6 @@ export function AdminStudents() {
                   <th>الاسم</th>
                   <th>المسار</th>
                   <th>المستوى</th>
-                  <th>الحلقة</th>
                   <th>المسجد</th>
                   <th>ولي الأمر</th>
                   <th>الحالة</th>
@@ -217,15 +212,14 @@ export function AdminStudents() {
                     <td style={{ fontWeight: 600 }}>{s.name}</td>
                     <td>
                       {(() => {
-                        const trackTitle = getTrackTitle(s.halqa);
+                        const trackTitle = getObjName(s.track);
                         if (trackTitle) return <Badge tone="green">{trackTitle}</Badge>;
                         if (s.path) return <Badge tone={PATH_TONE[s.path] ?? "blue"}>{s.path}</Badge>;
                         return <span style={{ color: "var(--text3)" }}>—</span>;
                       })()}
                     </td>
                     <td>{s.level != null ? toAr(s.level) : "—"}</td>
-                    <td>{getObjName(s.halqa)}</td>
-                    <td>{getObjName(s.masjid)}</td>
+                    <td>{getTrackMasjidName(s.track)}</td>
                     <td style={{ fontSize: 12 }}>
                       {(() => {
                         const par = parentByStudentId.get(s._id);
@@ -263,7 +257,7 @@ export function AdminStudents() {
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={8} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                    <td colSpan={7} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
                       لا توجد نتائج
                     </td>
                   </tr>
@@ -332,22 +326,12 @@ export function AdminStudents() {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">الحلقة</label>
-                <select className="form-input" value={form.halqa} onChange={(e) => setField("halqa", e.target.value)}>
-                  <option value="">اختر الحلقة</option>
-                  {halqat.map((h) => (
-                    <option key={h._id} value={h._id}>{h.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">المسجد</label>
-                <select className="form-input" value={form.masjid} onChange={(e) => setField("masjid", e.target.value)}>
-                  <option value="">اختر المسجد</option>
-                  {masajid.map((m) => (
-                    <option key={m._id} value={m._id}>{m.name}</option>
+              <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+                <label className="form-label">المسار</label>
+                <select className="form-input" value={form.track} onChange={(e) => setField("track", e.target.value)}>
+                  <option value="">اختر المسار</option>
+                  {tracks.map((t) => (
+                    <option key={t._id} value={t._id}>{t.title}</option>
                   ))}
                 </select>
               </div>
