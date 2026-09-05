@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T15:49:33.769Z
-> Files: 586 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T15:55:05.607Z
+> Files: 588 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -282,8 +282,10 @@
 
 ## .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md (~1543 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md (~1654 tok)
 - `task-1-report.md` — Task 1: Track/Halqa API modules — Completion Report (~1188 tok)
+- `task-10-report.md` — Task 10 Report: TeacherGroupHomework.tsx Consumer Update (~831 tok)
+- `task-11-report.md` — Task 11: TeacherPlanForm.tsx Rewrite — Completion Report (~838 tok)
 - `task-2-report.md` — Task 2: Context-field collapse across attendance/evaluations/group-homework/students APIs — Completi (~1247 tok)
 - `task-3-report.md` — Task 3 Completion Report (~903 tok)
 - `task-4-report.md` — Task 4 Report: Rename AdminSpecialTracks.tsx → AdminTracks.tsx (~1257 tok)
@@ -894,7 +896,7 @@
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
 - `TeacherPlanDetail.tsx` — surahName — renders table (~3932 tok)
-- `TeacherPlanForm.tsx` — One type's track in the form: its own days and its own range. The plan's (~14549 tok)
+- `TeacherPlanForm.tsx` — One type's track in the form: its own days and its own range. The plan's (~14108 tok)
 - `TeacherPlans.tsx` — surahName (~4519 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
