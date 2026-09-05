@@ -2,11 +2,11 @@ import { useState, type CSSProperties } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import {
-  useSpecialTracks, useCreateTrack, useUpdateTrack, useDeleteTrack,
-  useEnrollStudent, useUnenrollStudent,
+  useTracks, useCreateTrack, useUpdateTrack, useDeleteTrack,
+  useAssignStudent,
   TRACK_DETAIL_ID_KEY,
-  type SpecialTrack, type EnrolledStudent, type TrackTeacher,
-} from "../../api/special-tracks";
+  type Track, type TrackTeacher,
+} from "../../api/tracks";
 import { useTeachers } from "../../api/teachers";
 import { useMasajid } from "../../api/masajid";
 import { useStudents } from "../../api/students";
@@ -23,8 +23,6 @@ function surahName(n: number) {
 }
 
 /* ─── helpers ─────────────────────────────────────────────── */
-function getEnrolledId(v: EnrolledStudent | string)  { return typeof v === "object" ? v._id  : v; }
-function getEnrolledName(v: EnrolledStudent | string){ return typeof v === "object" ? v.name : v; }
 function getTeacherId(v: TrackTeacher | string)      { return typeof v === "object" ? v._id  : v; }
 function getTeacherName(v: TrackTeacher | string)    { return typeof v === "object" ? v.name : v; }
 function fmtDate(d: string) {
@@ -43,18 +41,18 @@ const AVATAR_COLORS = [
 /* ─── types ───────────────────────────────────────────────── */
 type FormFields = {
   title: string; type: string; timeSlot: string;
-  locationSelect: string; locationCustom: string;
+  masjid: string;
   isOnline: boolean; meetLink: string;
   teachers: string[];
   maxStudents: string;
   startDate: string; endDate: string;
   daysPerWeek: string;
-  status: SpecialTrack["status"];
+  status: Track["status"];
   notes: string;
 };
 const EMPTY: FormFields = {
   title: "", type: "", timeSlot: "",
-  locationSelect: "", locationCustom: "",
+  masjid: "",
   isOnline: false, meetLink: "",
   teachers: [], maxStudents: "30",
   startDate: "", endDate: "",
@@ -63,8 +61,8 @@ const EMPTY: FormFields = {
 
 type Modal =
   | null
-  | { mode: "form"; item?: SpecialTrack }
-  | { mode: "students"; item: SpecialTrack };
+  | { mode: "form"; item?: Track }
+  | { mode: "students"; item: Track };
 
 /* ─── overlay / dialog styles ─────────────────────────────── */
 const OVERLAY: CSSProperties = {
@@ -88,8 +86,8 @@ const TYPE_OPTS = ["مراجعة مكثّفة","تجويد","إجازة","ختم
 const DAYS_OPTS = ["يومياً","السبت والثلاثاء","السبت والاثنين والأربعاء","عطلة نهاية الأسبوع","ثلاث مرات أسبوعياً","مرتين أسبوعياً"];
 
 /* ════════════════════════════════════════════════════════════ */
-export function AdminSpecialTracks() {
-  const { data: tracks = [], isLoading } = useSpecialTracks();
+export function AdminTracks() {
+  const { data: tracks = [], isLoading } = useTracks();
   const { data: teachers = [] }          = useTeachers();
   const { data: masajid  = [] }          = useMasajid();
   const { data: allStudents = [] }       = useStudents();
@@ -97,11 +95,10 @@ export function AdminSpecialTracks() {
   const createTrack    = useCreateTrack();
   const updateTrack    = useUpdateTrack();
   const deleteTrack    = useDeleteTrack();
-  const enrollStudent  = useEnrollStudent();
-  const unenrollSt     = useUnenrollStudent();
+  const assignStudent  = useAssignStudent();
   const { showPage }   = usePortal();
 
-  function openDetail(track: SpecialTrack) {
+  function openDetail(track: Track) {
     sessionStorage.setItem(TRACK_DETAIL_ID_KEY, track._id);
     showPage("trackdetail");
   }
@@ -117,15 +114,13 @@ export function AdminSpecialTracks() {
   function openAdd() {
     setForm(EMPTY); setFormError(""); setModal({ mode: "form" });
   }
-  function openEdit(item: SpecialTrack) {
+  function openEdit(item: Track) {
     const d = (s: string) => s ? new Date(s).toISOString().split("T")[0] : "";
-    const matched = masajid.find((m) => m.name === item.location);
     setForm({
       title:          item.title,
       type:           item.type,
       timeSlot:       item.timeSlot,
-      locationSelect: item.isOnline ? "" : (matched ? matched._id : "custom"),
-      locationCustom: item.isOnline ? "" : (matched ? "" : item.location),
+      masjid:         typeof item.masjid === "object" ? item.masjid._id : item.masjid,
       isOnline:       item.isOnline ?? false,
       meetLink:       item.meetLink ?? "",
       teachers:       item.teachers.map(getTeacherId),
@@ -138,7 +133,7 @@ export function AdminSpecialTracks() {
     });
     setFormError(""); setModal({ mode: "form", item });
   }
-  function openStudents(item: SpecialTrack) {
+  function openStudents(item: Track) {
     setAddStudentId(""); setStudentsSearch(""); setModal({ mode: "students", item });
   }
 
@@ -156,7 +151,7 @@ export function AdminSpecialTracks() {
 
   /* ── submit ── */
   async function handleSubmit() {
-    const { title, type, timeSlot, isOnline, locationSelect, locationCustom,
+    const { title, type, timeSlot, isOnline, masjid,
             meetLink, teachers: tids, maxStudents, startDate, endDate, daysPerWeek } = form;
 
     if (!title.trim())        { setFormError("اسم المسار مطلوب"); return; }
@@ -166,21 +161,12 @@ export function AdminSpecialTracks() {
     if (!daysPerWeek.trim())  { setFormError("الأيام مطلوبة"); return; }
     if (!startDate || !endDate) { setFormError("التواريخ مطلوبة"); return; }
     if (isOnline && !meetLink.trim()) { setFormError("رابط الجلسة مطلوب"); return; }
-    if (!isOnline && !locationSelect) { setFormError("يرجى اختيار الموقع"); return; }
-    if (!isOnline && locationSelect === "custom" && !locationCustom.trim()) {
-      setFormError("يرجى كتابة اسم الموقع"); return;
-    }
-
-    const location = isOnline
-      ? "عبر الإنترنت"
-      : locationSelect === "custom"
-        ? locationCustom.trim()
-        : (masajid.find((m) => m._id === locationSelect)?.name ?? locationCustom.trim());
+    if (!masjid) { setFormError("يرجى اختيار المسجد"); return; }
 
     setFormError("");
     const body = {
       title: title.trim(), type: type.trim(), status: form.status,
-      timeSlot: timeSlot.trim(), location, isOnline,
+      timeSlot: timeSlot.trim(), masjid, isOnline,
       meetLink: isOnline ? meetLink.trim() : "",
       teachers: tids, maxStudents: Number(maxStudents) || 30,
       startDate, endDate, daysPerWeek: daysPerWeek.trim(),
@@ -271,7 +257,6 @@ export function AdminSpecialTracks() {
       {modal?.mode === "form" && (
         <div style={OVERLAY} onClick={() => setModal(null)}>
           <div style={{ ...DIALOG, maxWidth: 560 }} onClick={(e) => e.stopPropagation()}>
-            {/* header */}
             <div style={{
               display: "flex", justifyContent: "space-between", alignItems: "center",
               padding: "20px 24px 16px", borderBottom: "1px solid var(--border)",
@@ -308,7 +293,6 @@ export function AdminSpecialTracks() {
                 </div>
               )}
 
-              {/* ── Section: نوع الجلسة ── */}
               <FormSection label="نوع الجلسة" icon="ti-device-laptop">
                 <div style={{ display: "flex", gap: 8 }}>
                   {([false, true] as const).map((online) => (
@@ -333,7 +317,6 @@ export function AdminSpecialTracks() {
                 </div>
               </FormSection>
 
-              {/* ── Section: المعلومات الأساسية ── */}
               <FormSection label="المعلومات الأساسية" icon="ti-info-circle">
                 <div className="form-grid-2">
                   <div className="form-group" style={{ gridColumn: "1 / -1" }}>
@@ -349,10 +332,17 @@ export function AdminSpecialTracks() {
                   </div>
                   <div className="form-group">
                     <label className="form-label">الحالة</label>
-                    <select className="form-input" value={form.status} onChange={(e) => sf("status", e.target.value as SpecialTrack["status"])}>
+                    <select className="form-input" value={form.status} onChange={(e) => sf("status", e.target.value as Track["status"])}>
                       <option value="upcoming">قادم</option>
                       <option value="active">نشط</option>
                       <option value="ended">منتهي</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">المسجد <span>*</span></label>
+                    <select className="form-input" value={form.masjid} onChange={(e) => sf("masjid", e.target.value)}>
+                      <option value="">— اختر مسجداً —</option>
+                      {masajid.map((m) => <option key={m._id} value={m._id}>{m.name}</option>)}
                     </select>
                   </div>
                   <div className="form-group">
@@ -366,7 +356,6 @@ export function AdminSpecialTracks() {
                 </div>
               </FormSection>
 
-              {/* ── Section: المعلمون ── */}
               <FormSection label="المعلمون المسؤولون" icon="ti-chalkboard">
                 {form.teachers.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
@@ -445,8 +434,7 @@ export function AdminSpecialTracks() {
                 </div>
               </FormSection>
 
-              {/* ── Section: الجدول والموقع ── */}
-              <FormSection label="الجدول والموقع" icon="ti-map-pin">
+              <FormSection label="الجدول" icon="ti-map-pin">
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">الوقت <span>*</span></label>
@@ -471,28 +459,15 @@ export function AdminSpecialTracks() {
                     <label className="form-label">تاريخ النهاية <span>*</span></label>
                     <input className="form-input" type="date" dir="ltr" value={form.endDate} onChange={(e) => sf("endDate", e.target.value)} />
                   </div>
-                  {form.isOnline ? (
+                  {form.isOnline && (
                     <div className="form-group" style={{ gridColumn: "1 / -1" }}>
                       <label className="form-label">رابط الجلسة <span>*</span></label>
                       <input className="form-input" dir="ltr" placeholder="https://meet.google.com/xxx-xxxx-xxx" value={form.meetLink} onChange={(e) => sf("meetLink", e.target.value)} />
-                    </div>
-                  ) : (
-                    <div className="form-group" style={{ gridColumn: "1 / -1" }}>
-                      <label className="form-label">الموقع <span>*</span></label>
-                      <select className="form-input" value={form.locationSelect} onChange={(e) => sf("locationSelect", e.target.value)}>
-                        <option value="">— اختر مسجداً —</option>
-                        {masajid.map((m) => <option key={m._id} value={m._id}>{m.name} — {m.location}</option>)}
-                        <option value="custom">موقع آخر (أدخل يدوياً)</option>
-                      </select>
-                      {form.locationSelect === "custom" && (
-                        <input className="form-input" style={{ marginTop: 6 }} placeholder="اسم المسجد أو القاعة" value={form.locationCustom} onChange={(e) => sf("locationCustom", e.target.value)} />
-                      )}
                     </div>
                   )}
                 </div>
               </FormSection>
 
-              {/* actions */}
               <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
                 <button
                   className="topbar-btn btn-primary"
@@ -511,22 +486,28 @@ export function AdminSpecialTracks() {
         </div>
       )}
 
-      {/* ════════ STUDENTS MODAL ════════ */}
+      {/* ════════ STUDENTS MODAL — transfer-only, since a student's track is
+          exclusive: this panel shows who's currently on the track (a live
+          query, not a stored array) and offers "نقل طالب" (moves a student's
+          `track` field here), never "add" alongside an existing track. ════════ */}
       {modal?.mode === "students" && (() => {
-        const track       = tracks.find((t) => t._id === modal.item._id) ?? modal.item;
-        const enrolledCnt = track.enrolledStudents.length;
+        const track = tracks.find((t) => t._id === modal.item._id) ?? modal.item;
+        const enrolledStudents = allStudents.filter((s) => {
+          const tId = typeof s.track === "object" ? s.track._id : s.track;
+          return tId === track._id;
+        });
+        const enrolledCnt = enrolledStudents.length;
         const capPct      = Math.min(100, Math.round((enrolledCnt / track.maxStudents) * 100));
         const barClr      = capPct >= 90 ? "#ef4444" : capPct >= 70 ? "#f59e0b" : "var(--green)";
         const isFull      = enrolledCnt >= track.maxStudents;
-        const enrolledIds = new Set(track.enrolledStudents.map(getEnrolledId));
-        const available   = allStudents.filter(
-          (s) => !enrolledIds.has(s._id) && (!studentsSearch.trim() || s.name.includes(studentsSearch.trim()))
-        );
+        const available   = allStudents.filter((s) => {
+          const tId = typeof s.track === "object" ? s.track._id : s.track;
+          return tId !== track._id && (!studentsSearch.trim() || s.name.includes(studentsSearch.trim()));
+        });
 
         return (
           <div style={OVERLAY} onClick={() => { setModal(null); setStudentsSearch(""); }}>
             <div style={{ ...DIALOG, maxWidth: 500 }} onClick={(e) => e.stopPropagation()}>
-              {/* header */}
               <div style={{
                 display: "flex", justifyContent: "space-between", alignItems: "flex-start",
                 padding: "18px 22px 14px", borderBottom: "1px solid var(--border)",
@@ -546,7 +527,6 @@ export function AdminSpecialTracks() {
               </div>
 
               <div style={{ padding: "16px 22px" }}>
-                {/* capacity */}
                 <div style={{ background: "var(--cream)", borderRadius: 12, padding: "12px 14px", marginBottom: 16 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                     <span style={{ fontSize: 12, color: "var(--text2)", fontWeight: 600 }}>
@@ -560,11 +540,10 @@ export function AdminSpecialTracks() {
                   {isFull && <p style={{ margin: "8px 0 0", fontSize: 11, color: "#ef4444", fontWeight: 600 }}><i className="ti ti-alert-circle" style={{ marginLeft: 4 }} />وصل المسار للحد الأقصى</p>}
                 </div>
 
-                {/* add student */}
                 {!isFull && (
                   <div style={{ border: "1.5px dashed var(--border2)", borderRadius: 10, padding: 14, marginBottom: 16 }}>
                     <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 700, color: "var(--text2)" }}>
-                      <i className="ti ti-user-plus" style={{ marginLeft: 5, color: "var(--green)" }} />إضافة طالب
+                      <i className="ti ti-user-plus" style={{ marginLeft: 5, color: "var(--green)" }} />نقل طالب إلى هذا المسار
                     </p>
                     <div style={{ display: "flex", gap: 8 }}>
                       <select className="form-input" style={{ flex: 1, fontSize: 13 }} value={addStudentId} onChange={(e) => setAddStudentId(e.target.value)}>
@@ -574,22 +553,21 @@ export function AdminSpecialTracks() {
                       <button
                         className="topbar-btn btn-primary"
                         style={{ padding: "0 16px", whiteSpace: "nowrap", fontSize: 13 }}
-                        disabled={!addStudentId || enrollStudent.isPending}
+                        disabled={!addStudentId || assignStudent.isPending}
                         onClick={async () => {
                           if (!addStudentId) return;
-                          await enrollStudent.mutateAsync({ id: track._id, studentId: addStudentId });
+                          await assignStudent.mutateAsync({ id: track._id, studentId: addStudentId });
                           setAddStudentId("");
                         }}
                       >
-                        {enrollStudent.isPending
+                        {assignStudent.isPending
                           ? <i className="ti ti-loader-2" style={{ animation: "spin 1s linear infinite" }} />
-                          : <><i className="ti ti-plus" /> إضافة</>}
+                          : <><i className="ti ti-plus" /> نقل</>}
                       </button>
                     </div>
                   </div>
                 )}
 
-                {/* enrolled list header */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text2)" }}>الطلاب المسجّلون</span>
                   {enrolledCnt > 0 && (
@@ -604,14 +582,12 @@ export function AdminSpecialTracks() {
                   </div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 260, overflowY: "auto" }}>
-                    {track.enrolledStudents
-                      .filter((s) => !studentsSearch.trim() || getEnrolledName(s).includes(studentsSearch.trim()))
+                    {enrolledStudents
+                      .filter((s) => !studentsSearch.trim() || s.name.includes(studentsSearch.trim()))
                       .map((s, idx) => {
-                        const name = getEnrolledName(s);
-                        const id   = getEnrolledId(s);
-                        const c    = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+                        const c = AVATAR_COLORS[idx % AVATAR_COLORS.length];
                         return (
-                          <div key={id} style={{
+                          <div key={s._id} style={{
                             display: "flex", alignItems: "center", justifyContent: "space-between",
                             padding: "9px 12px", background: "var(--cream)", borderRadius: 10,
                             border: "1px solid var(--border)",
@@ -622,25 +598,22 @@ export function AdminSpecialTracks() {
                                 background: c.bg, color: c.fg,
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 fontSize: 11, fontWeight: 800, flexShrink: 0,
-                              }}>{avatarInitials(name)}</div>
+                              }}>{avatarInitials(s.name)}</div>
                               <div>
-                                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{name}</div>
+                                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{s.name}</div>
                                 <div style={{ fontSize: 10, color: "var(--text3)" }}>#{idx + 1}</div>
                               </div>
                             </div>
-                            <button
-                              className="topbar-btn btn-ghost"
-                              style={{ padding: "5px 11px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.25)" }}
-                              disabled={unenrollSt.isPending}
-                              onClick={() => unenrollSt.mutate({ id: track._id, studentId: id })}
-                            >
-                              <i className="ti ti-user-minus" />
-                            </button>
                           </div>
                         );
                       })}
                   </div>
                 )}
+
+                <p style={{ margin: "12px 0 0", fontSize: 11, color: "var(--text3)" }}>
+                  <i className="ti ti-info-circle" style={{ marginLeft: 4 }} />
+                  لإزالة طالب من المسار، انقله إلى مسار آخر من صفحة إدارة الطلاب.
+                </p>
 
                 <button
                   className="topbar-btn btn-ghost"
@@ -688,24 +661,29 @@ export function AdminSpecialTracks() {
   );
 }
 
-/* ── track card (module scope so it doesn't remount on every keystroke/state change in AdminSpecialTracks) ── */
+/* ── track card ── */
 function TrackCard({
   t, onManageStudents, onEdit, onDelete, onOpen,
 }: {
-  t: SpecialTrack;
-  onManageStudents: (t: SpecialTrack) => void;
-  onEdit: (t: SpecialTrack) => void;
+  t: Track;
+  onManageStudents: (t: Track) => void;
+  onEdit: (t: Track) => void;
   onDelete: (id: string) => void;
-  onOpen: (t: SpecialTrack) => void;
+  onOpen: (t: Track) => void;
 }) {
-  const cfg     = STATUS_CFG[t.status];
-  const enrolled = t.enrolledStudents.length;
+  const cfg      = STATUS_CFG[t.status];
+  const enrolled = t.studentCount ?? 0;
   const pct      = Math.min(100, Math.round((enrolled / t.maxStudents) * 100));
   const barClr   = pct >= 90 ? "#ef4444" : pct >= 70 ? "#f59e0b" : "var(--green)";
 
-  const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: t._id });
+  const { data: linkedPlans = [] } = useQuranPlans({ track: t._id });
   const linkedPlan = linkedPlans[0];
   const [planOpen, setPlanOpen] = useState(false);
+
+  function getName(v: unknown): string {
+    if (v && typeof v === "object" && "name" in v) return (v as { name: string }).name;
+    return typeof v === "string" ? v : "";
+  }
 
   return (
     <div
@@ -716,11 +694,9 @@ function TrackCard({
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(t); } }}
       style={{ cursor: "pointer" }}
     >
-      {/* coloured top strip */}
       <div style={{ height: 4, background: cfg.bar }} />
 
       <div style={{ padding: "16px 18px" }}>
-        {/* row 1: badges + actions */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, flex: 1 }}>
             <Badge tone={cfg.tone}>{cfg.label}</Badge>
@@ -737,7 +713,6 @@ function TrackCard({
                 </span>
             }
           </div>
-          {/* action buttons */}
           <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
             <button
               className="topbar-btn btn-ghost"
@@ -764,10 +739,8 @@ function TrackCard({
           </div>
         </div>
 
-        {/* title */}
         <h3 style={{ margin: "10px 0 12px", fontSize: 15, fontWeight: 800, color: "var(--text)" }}>{t.title}</h3>
 
-        {/* info grid */}
         <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12, color: "var(--text2)", marginBottom: 12 }}>
           <InfoRow icon="ti-clock"    label="الوقت"    val={t.timeSlot} />
           <InfoRow icon="ti-calendar-repeat" label="الأيام" val={t.daysPerWeek} />
@@ -775,13 +748,12 @@ function TrackCard({
           <InfoRow icon="ti-calendar-off" label="النهاية" val={fmtDate(t.endDate)} />
           <InfoRow
             icon={t.isOnline ? "ti-video" : "ti-map-pin"}
-            label="المكان"
-            val={t.isOnline ? "أونلاين" : t.location}
+            label="المسجد"
+            val={t.isOnline ? "أونلاين" : getName(t.masjid)}
             span
           />
         </div>
 
-        {/* teachers */}
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6, fontWeight: 600 }}>المعلمون</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -811,7 +783,6 @@ function TrackCard({
           </div>
         </div>
 
-        {/* capacity bar */}
         <div style={{ background: "var(--cream)", borderRadius: 10, padding: "10px 12px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
             <span style={{ fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>
@@ -826,7 +797,6 @@ function TrackCard({
           </div>
         </div>
 
-        {/* linked Quran plan (collapsible) */}
         <div style={{
           marginTop: 12, borderRadius: 10, padding: "10px 12px",
           background: linkedPlan?.todayAssignments && linkedPlan.todayAssignments.length > 0 ? "var(--green-pale)" : "var(--cream)",
@@ -886,7 +856,6 @@ function TrackCard({
           )}
         </div>
 
-        {/* meet link */}
         {t.isOnline && t.meetLink && (
           <a
             href={t.meetLink} target="_blank" rel="noreferrer"
