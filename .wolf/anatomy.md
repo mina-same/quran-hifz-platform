@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T12:16:07.751Z
-> Files: 568 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T12:27:10.224Z
+> Files: 570 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -265,11 +265,13 @@
 
 ## .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase1-server.md (~2680 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase1-server.md (~3016 tok)
 - `task-1-2-report.md` — Task 1 & 2 Implementation Report (~1147 tok)
 - `task-10-report.md` — Task 10 Report: QuranPlan model + controller — targetType drops 'halqa', specialTrack renamed to tra (~1832 tok)
 - `task-11-report.md` — Task 11 Report: parent.controller.ts and stats.controller.ts — final halqa/specialTrack cleanup (~849 tok)
 - `task-12-report.md` — Task 12 Report: Rewrite seed.ts (~1946 tok)
+- `task-13-report.md` — Task 13 Report: Rewrite wipe-all.ts, backfillPlans.ts, import-real-halaqat.ts (~1195 tok)
+- `task-14-report.md` — Task 14 Report: End-to-end verification — wipe, reseed, smoke-test the API (~2165 tok)
 - `task-3-5-report.md` — Task 3 + 5 Report — Track controller/routes, Student.track (~1674 tok)
 - `task-4-report.md` — Task 4 Report: Delete Halqa Entirely; Update app.ts Route Registration (~1370 tok)
 - `task-6-report.md` — Task 6 Report: Remove `validators/context.ts` and its usage everywhere (~2011 tok)
@@ -620,16 +622,16 @@
 
 ## quran-hifz-server/src/seeds/
 
-- `backfillPlans.ts` — Additive-only script — for every Halqa or SpecialTrack that has no QuranPlan (~1349 tok)
+- `backfillPlans.ts` — Additive-only script — for every Track that has no QuranPlan producing a (~1046 tok)
 - `create-parent-accounts.ts` — Additive, idempotent: create one parent account per student and link it. (~786 tok)
 - `ensure-admin.ts` — Idempotent admin bootstrap. Run:  npm run ensure-admin (~421 tok)
-- `import-real-halaqat.ts` — One-time import of real special-track/halqa/teacher/student data. (~1864 tok)
+- `import-real-halaqat.ts` — One-time import of real track/teacher/student data. (~1655 tok)
 - `list-users.ts` — Default seed passwords by role (import-real-halaqat.ts + ensure-admin.ts). (~540 tok)
 - `regenerate-emails-from-names.ts` — One-off: rebuild every teacher/student email from their (Arabic) name. (~1112 tok)
 - `regenerate-emails-from-names.ts` — One-off: rebuild teacher/student emails from Arabic first name (compound عبد-names kept whole) via curated transliteration map; numeric suffix on dup; admin untouched. `npm run regenerate-emails` (~700 tok)
 - `rename-email-domain.ts` — One-off: rewrite every user's email domain to a new one, keeping the (~282 tok)
 - `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~5176 tok)
-- `wipe-all.ts` — One-time full wipe of the local dev database before importing real data. (~559 tok)
+- `wipe-all.ts` — One-time full wipe of the local dev database before importing real data. (~537 tok)
 
 ## quran-hifz-server/src/types/
 

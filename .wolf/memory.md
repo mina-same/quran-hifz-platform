@@ -3154,3 +3154,10 @@
 | 15:12 | Created quran-hifz-server/src/seeds/seed.ts | — | ~5176 |
 | 15:14 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-12-report.md | — | ~2076 |
 | 15:16 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | modified minor() | ~215 |
+| 15:16 | Created quran-hifz-server/src/seeds/wipe-all.ts | — | ~537 |
+| 15:17 | Created quran-hifz-server/src/seeds/backfillPlans.ts | — | ~1046 |
+| 15:17 | Created quran-hifz-server/src/seeds/import-real-halaqat.ts | — | ~1655 |
+| 15:18 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-13-report.md | — | ~1275 |
+| 15:20 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | modified minor() | ~278 |
+| 15:26 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-14-report.md | — | ~2309 |
+| 15:27 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md | 1→3 lines | ~241 |
