@@ -7,7 +7,6 @@ import { ENV } from '../config/env';
 import { Attendance } from '../models/Attendance.model';
 import { Evaluation } from '../models/Evaluation.model';
 import { GroupHomework } from '../models/GroupHomework.model';
-import { Halqa } from '../models/Halqa.model';
 import { HifzEntry } from '../models/HifzEntry.model';
 import { Homework } from '../models/Homework.model';
 import { IndividualPlan } from '../models/IndividualPlan.model';
@@ -17,16 +16,16 @@ import { Masjid } from '../models/Masjid.model';
 import { Message } from '../models/Message.model';
 import { ParentStudent } from '../models/ParentStudent.model';
 import { QuranPlan } from '../models/QuranPlan.model';
-import { SpecialTrack } from '../models/SpecialTrack.model';
+import { Track } from '../models/Track.model';
 import { Student } from '../models/Student.model';
 import { StudentPlanProgress } from '../models/StudentPlanProgress.model';
 import { Teacher } from '../models/Teacher.model';
 import { User } from '../models/User.model';
 
 const MODELS: mongoose.Model<any>[] = [
-  Attendance, Evaluation, GroupHomework, Halqa, HifzEntry, Homework,
+  Attendance, Evaluation, GroupHomework, HifzEntry, Homework,
   IndividualPlan, KPI, LessonRecording, Masjid, Message, ParentStudent,
-  QuranPlan, SpecialTrack, Student, StudentPlanProgress, Teacher, User,
+  QuranPlan, Track, Student, StudentPlanProgress, Teacher, User,
 ];
 
 async function wipeAll(): Promise<void> {
