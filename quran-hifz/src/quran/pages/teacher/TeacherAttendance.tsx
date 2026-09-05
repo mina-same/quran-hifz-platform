@@ -7,9 +7,7 @@ import { Alert } from "../../components/common/Alert";
 import { Badge } from "../../components/common/Badge";
 import {
   ContextPicker,
-  halqaToContext,
   trackToContext,
-  hasDirectEnrollment,
   type TeachingContext,
 } from "../../components/common/ContextPicker";
 import { SkeletonCard, SkeletonTable } from "../../components/common/Skeleton";
@@ -18,8 +16,7 @@ import {
   IndividualPlanPanel,
   planCoversStudent,
 } from "../../components/common/IndividualPlanPanel";
-import { useHalqat } from "../../api/halqat";
-import { useSpecialTracks } from "../../api/special-tracks";
+import { useTracks } from "../../api/tracks";
 import { useStudents } from "../../api/students";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
 import {
@@ -229,13 +226,9 @@ export function TeacherAttendance() {
   const teacherId = user?.profileId as string | undefined;
   const [selected, setSelected] = useState<TeachingContext | null>(null);
 
-  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: teacherId });
-  const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, teacherId);
+  const { data: tracks = [], isLoading: loadingTracks } = useTracks(undefined, teacherId);
 
-  const contexts: TeachingContext[] = [
-    ...halqat.map(halqaToContext),
-    ...tracks.filter(hasDirectEnrollment).map(trackToContext),
-  ];
+  const contexts: TeachingContext[] = tracks.map(trackToContext);
 
   // Deep link from the Special Tracks page's "تسجيل الحضور" button.
   // Applied at most once (ref-guarded) so the teacher's explicit "رجوع" click
@@ -256,11 +249,7 @@ export function TeacherAttendance() {
     }
   }, [pendingTrackId, tracks]);
 
-  const contextFilter = selected
-    ? selected.kind === "halqa"
-      ? { halqa: selected.id }
-      : { specialTrack: selected.id }
-    : undefined;
+  const contextFilter = selected ? { track: selected.id } : undefined;
 
   // The grading split now comes from the plan governing this halqa/track. If
   // none resolves (or several do), the server hands back the default split so
@@ -286,9 +275,7 @@ export function TeacherAttendance() {
   // still carry other stray plans) — the one individual per-student plans
   // (below) hang off of, same "one linked plan" model as TeacherTrackDetail.
   const linkedPlan =
-    plans.find(
-      (p) => p.targetType === (selected?.kind === "specialTrack" ? "specialTrack" : "halqa"),
-    ) ?? plans[0];
+    plans.find((p) => p.targetType === "track") ?? plans[0];
 
   // A reverse-direction plan (rangeStart sits after rangeEnd in mushaf order):
   // the day's assignment is still recited/stored low→high internally, but the
@@ -585,7 +572,7 @@ export function TeacherAttendance() {
     bulkEvaluate.mutate(
       {
         teacher: teacherId!,
-        ...(selected.kind === "halqa" ? { halqa: selected.id } : { specialTrack: selected.id }),
+        track: selected.id,
         date: effectiveDate,
         records,
       },
@@ -713,7 +700,7 @@ export function TeacherAttendance() {
 
   // ── View 1: context selector ──────────────────────────────────────
   if (!selected) {
-    if (loadingHalqat || loadingTracks) {
+    if (loadingTracks) {
       return <SkeletonCard lines={2} />;
     }
     return (
@@ -800,7 +787,7 @@ export function TeacherAttendance() {
 
       {!loadingPlans && scheduledSorted.length === 0 && (
         <Alert tone="warning">
-          لا يوجد خطة حفظ نشطة لهذه {selected.kind === "halqa" ? "الحلقة" : "المسار"} — لا يمكن
+          لا يوجد خطة حفظ نشطة لهذا المسار — لا يمكن
           تحديد يوم محدد لتسجيل الحضور والتقييم، لكن يمكنك تسجيل حضور اليوم مباشرة أدناه. أضف خطة من
           صفحة "الخطط القرآنية" أولاً لتفعيل التقويم.
         </Alert>
@@ -814,7 +801,7 @@ export function TeacherAttendance() {
 
       {(loadingPlans || scheduledSorted.length > 0) && (
         <Card
-          icon={selected.kind === "halqa" ? "ti-school" : "ti-calendar-event"}
+          icon="ti-calendar-event"
           title={selected.title}
           headerExtra={
             <span style={{ fontSize: 12, color: "var(--text2)" }}>{fmtDate(effectiveDate)}</span>
