@@ -2,12 +2,11 @@ import { useState } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import { useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework } from "../../api/group-homework";
-import { useHalqat } from "../../api/halqat";
-import { useSpecialTracks } from "../../api/special-tracks";
+import { useTracks } from "../../api/tracks";
 import { Card } from "../../components/common/Card";
 import { Alert } from "../../components/common/Alert";
 import { Badge } from "../../components/common/Badge";
-import { ContextPicker, halqaToContext, trackToContext, hasDirectEnrollment, type TeachingContext } from "../../components/common/ContextPicker";
+import { ContextPicker, trackToContext, type TeachingContext } from "../../components/common/ContextPicker";
 import { SkeletonCard, SkeletonList } from "../../components/common/Skeleton";
 
 const STUDENTS = ["عبدالله الحميداني", "يوسف الزهراني", "أحمد الشهري", "فارس العسيري", "سالم الدوسري"];
@@ -94,19 +93,11 @@ export function TeacherGroupHomework() {
   const { user } = usePortal();
   const [selected, setSelected] = useState<TeachingContext | null>(null);
 
-  const { data: halqat = [], isLoading: loadingHalqat } = useHalqat({ teacher: user?.profileId });
-  const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, user?.profileId as string | undefined);
-  const contexts: TeachingContext[] = [
-    ...halqat.map(halqaToContext),
-    ...tracks.filter(hasDirectEnrollment).map(trackToContext),
-  ];
+  const { data: tracks = [], isLoading: loadingTracks } = useTracks(undefined, user?.profileId as string | undefined);
+  const contexts: TeachingContext[] = tracks.map(trackToContext);
 
   const { data: homeworks, isLoading } = useGroupHomework(
-    selected
-      ? selected.kind === "halqa"
-        ? { halqa: selected.id }
-        : { specialTrack: selected.id }
-      : undefined
+    selected ? { track: selected.id } : undefined
   );
   const createHW = useCreateGroupHomework();
   const deleteHW = useDeleteGroupHomework();
@@ -133,7 +124,7 @@ export function TeacherGroupHomework() {
   async function handleAdd() {
     if (!selected || !form.title.trim() || !form.desc.trim()) return;
     await createHW.mutateAsync({
-      ...(selected.kind === "halqa" ? { halqa: selected.id } : { specialTrack: selected.id }),
+      track:       selected.id,
       title:       form.title,
       description: form.desc,
       dueDay:      form.dueDay,
@@ -147,7 +138,7 @@ export function TeacherGroupHomework() {
 
   // ── View 1: context selector ──────────────────────────────────────
   if (!selected) {
-    if (loadingHalqat || loadingTracks) {
+    if (loadingTracks) {
       return <SkeletonCard lines={3} />;
     }
     return (
