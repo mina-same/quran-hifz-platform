@@ -14,8 +14,7 @@ export type EvaluationRecord = {
   _id: string;
   student: { _id: string; name: string } | string;
   teacher?: { _id: string; name: string } | string;
-  halqa?: { _id: string; name: string } | string;
-  specialTrack?: { _id: string; title: string } | string;
+  track?: { _id: string; title: string } | string;
   date: string;
   attendanceStatus: "حاضر" | "غائب";
   criteria?: EvaluationCriterion[];
@@ -28,8 +27,7 @@ export type EvaluationRecord = {
 
 export type EvaluationFilters = {
   student?: string;
-  halqa?: string;
-  specialTrack?: string;
+  track?: string;
   from?: string;
   to?: string;
 };
@@ -40,8 +38,7 @@ function buildQuery(f?: EvaluationFilters) {
   if (!f) return "";
   const p = new URLSearchParams();
   if (f.student) p.set("student", f.student);
-  if (f.halqa) p.set("halqa", f.halqa);
-  if (f.specialTrack) p.set("specialTrack", f.specialTrack);
+  if (f.track) p.set("track", f.track);
   if (f.from) p.set("from", f.from);
   if (f.to) p.set("to", f.to);
   const q = p.toString();
@@ -87,11 +84,10 @@ export type RubricResponse = {
   };
 };
 
-/** The rubric the evaluation screen should render for a halqa/track session. */
-export function useRubric(ctx: { halqa?: string; specialTrack?: string; plan?: string } | undefined) {
+/** The rubric the evaluation screen should render for a track session. */
+export function useRubric(ctx: { track?: string; plan?: string } | undefined) {
   const p = new URLSearchParams();
-  if (ctx?.halqa) p.set("halqa", ctx.halqa);
-  if (ctx?.specialTrack) p.set("specialTrack", ctx.specialTrack);
+  if (ctx?.track) p.set("track", ctx.track);
   if (ctx?.plan) p.set("plan", ctx.plan);
   const q = p.toString();
   return useQuery({
@@ -104,7 +100,7 @@ export function useRubric(ctx: { halqa?: string; specialTrack?: string; plan?: s
 export function useBulkEvaluate() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { teacher: string; halqa?: string; specialTrack?: string; plan?: string; date: string; records: BulkEvaluateRecord[] }) =>
+    mutationFn: (body: { teacher: string; track?: string; plan?: string; date: string; records: BulkEvaluateRecord[] }) =>
       post<BulkEvaluateResponse>("/evaluations/bulk", body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["evaluations"] });

@@ -6,8 +6,13 @@ export type Student = {
   name: string;
   path: string;
   level?: number;
-  halqa: { _id: string; name: string; specialTrack?: { _id: string; title: string } | string } | string;
-  masjid: { _id: string; name: string } | string;
+  track: {
+    _id: string;
+    title: string;
+    daysPerWeek?: string;
+    timeSlot?: string;
+    masjid?: { _id: string; name: string; location?: string; gender: "male" | "female" } | string;
+  } | string;
   attendancePct: number;
   progressPct: number;
   progressPages: number;
@@ -25,8 +30,7 @@ export type Student = {
 };
 
 export type StudentFilters = {
-  halqa?: string;
-  specialTrack?: string;
+  track?: string;
   masjid?: string;
   status?: string;
   search?: string;
@@ -39,8 +43,7 @@ type CreateResponse = { success: boolean; data: Student; credentials?: { email: 
 function buildQuery(filters?: StudentFilters) {
   if (!filters) return "";
   const params = new URLSearchParams();
-  if (filters.halqa) params.set("halqa", filters.halqa);
-  if (filters.specialTrack) params.set("specialTrack", filters.specialTrack);
+  if (filters.track) params.set("track", filters.track);
   if (filters.masjid) params.set("masjid", filters.masjid);
   if (filters.status) params.set("status", filters.status);
   if (filters.search) params.set("search", filters.search);

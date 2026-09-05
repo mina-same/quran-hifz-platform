@@ -1,16 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { get, post } from "../../lib/api";
 
-/** sessionStorage key used to hand off "take attendance for this special track" from
- * the Special Tracks page to TeacherAttendance, which reads it on mount and jumps
+/** sessionStorage key used to hand off "take attendance for this track" from
+ * the Tracks page to TeacherAttendance, which reads it on mount and jumps
  * straight to that track's attendance list instead of showing the picker. */
 export const ATTENDANCE_PREFILL_TRACK_KEY = "qh_prefill_attendance_track";
 
 export type AttendanceRecord = {
   _id: string;
   student: { _id: string; name: string } | string;
-  halqa?: { _id: string; name: string } | string;
-  specialTrack?: { _id: string; title: string } | string;
+  track?: { _id: string; title: string } | string;
   date: string;
   day: string;
   time: string;
@@ -19,8 +18,7 @@ export type AttendanceRecord = {
 
 export type AttendanceFilters = {
   student?: string;
-  halqa?: string;
-  specialTrack?: string;
+  track?: string;
   from?: string;
   to?: string;
 };
@@ -31,8 +29,7 @@ function buildQuery(f?: AttendanceFilters) {
   if (!f) return "";
   const p = new URLSearchParams();
   if (f.student) p.set("student", f.student);
-  if (f.halqa) p.set("halqa", f.halqa);
-  if (f.specialTrack) p.set("specialTrack", f.specialTrack);
+  if (f.track) p.set("track", f.track);
   if (f.from) p.set("from", f.from);
   if (f.to) p.set("to", f.to);
   const q = p.toString();
@@ -43,14 +40,14 @@ export function useAttendance(filters?: AttendanceFilters) {
   return useQuery({
     queryKey: ["attendance", filters],
     queryFn: () => get<ListResponse>(`/attendance${buildQuery(filters)}`).then((r) => r.data),
-    enabled: !!(filters?.student || filters?.halqa || filters?.specialTrack),
+    enabled: !!(filters?.student || filters?.track),
   });
 }
 
 export function useRecordAttendance() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { student: string; halqa?: string; specialTrack?: string; date: string; status: string }) =>
+    mutationFn: (body: { student: string; track?: string; date: string; status: string }) =>
       post("/attendance", body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["attendance"] });
@@ -69,7 +66,7 @@ export type BulkAttendanceResponse = {
 export function useBulkAttendance() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { halqa?: string; specialTrack?: string; date: string; records: { student: string; status: string }[] }) =>
+    mutationFn: (body: { track?: string; date: string; records: { student: string; status: string }[] }) =>
       post<BulkAttendanceResponse>("/attendance/bulk", body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["attendance"] });
