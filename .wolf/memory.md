@@ -2,6 +2,7 @@
 
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
+| 2026-09-05 | Task 1: Halqa→Track API migration (Phase 2 web) — deleted halqat.ts + special-tracks.ts, created tracks.ts with new unified Track types/hooks (useTracks, useTrack, useCreateTrack, useUpdateTrack, useDeleteTrack, useAssignStudent). Updated quran-plans.ts: PlanFormHandoff now trackId-only, removed PlanHalqa/PlanSpecialTrack, added PlanTrack, targetType="track"|"students", useQuranPlans filters={teacher,track,student}. tsc --noEmit: 118 expected errors in 22 files (all importing deleted modules or using old fields/comparisons). Committed 0d14116. No unrelated breakage. | quran-hifz/src/quran/api/tracks.ts (new), api/quran-plans.ts, api/halqat.ts (deleted), api/special-tracks.ts (deleted) | complete | ~6000 |
 | 2026-07-27 22:15 | Added "الملف الشخصي" (account/profile) tab for student + teacher portals: view email, edit display name, change password (current+new+confirm). Backend: PUT /auth/profile (syncs Teacher/Student.name too, kept in sync with User.name), PUT /auth/change-password (verifies currentPassword via comparePassword). Frontend: new shared AccountSettings.tsx page + api/account.ts hooks, AuthContext gained updateUser() so sidebar name updates live, nav item added to both portals.ts configs + pageRegistry.ts. Verified end-to-end via Playwright (teacher atiqa@tahfeez.com + student abdulaziz@tahfeez.com): name edit reflects in sidebar immediately, wrong-current-password shows warning alert, correct password change round-tripped (change → logout → login with new password → change back → login with original) all succeeded. tsc --noEmit clean on both server and web (2 pre-existing unrelated errors in ParentHomeworkView.tsx/sitemap route, untouched). | quran-hifz-server/src/controllers/auth.controller.ts, routes/auth.routes.ts, quran-hifz/src/quran/api/account.ts (new), pages/common/AccountSettings.tsx (new), context/AuthContext.tsx, config/portals.ts, router/pageRegistry.ts | complete | ~9000 |
 | 2026-07-06 | User then said the whole plan-detail feature (previous entry below) was a mistake and asked to remove it, keeping only the Special Tracks work. Reverted via `git checkout HEAD --` (nothing had been committed) on every file touched solely for the plan feature — quran-hifz-server/{validators/context.ts, models/Attendance.model.ts, models/Evaluation.model.ts, controllers/attendance.controller.ts, controllers/evaluation.controller.ts, controllers/student.controller.ts} and quran-hifz/src/quran/{api/attendance.ts, api/evaluations.ts, api/students.ts, api/quran-plans.ts, components/common/ContextPicker.tsx, pages/teacher/TeacherAttendance.tsx, pages/teacher/TeacherPlans.tsx, pages/teacher/TeacherSpecialTracks.tsx, api/special-tracks.ts, router/pageRegistry.ts} — all fully restored to original, plus deleted the untracked TeacherPlanDetail.tsx. This undid the 3-way attendance/evaluation context (plan support) entirely, back to the original halqa/specialTrack-only XOR. Then rebuilt the Special Tracks version cleanly on top of the clean baseline: added a NEW dedicated detail page `TeacherTrackDetail.tsx` (registry key "trackdetail", reached by clicking a track card; reads id from new `TRACK_DETAIL_ID_KEY` sessionStorage key in api/special-tracks.ts) containing everything the old inline `TrackCard` used to render (info grid, teachers, capacity bar, linked-plan collapsible section incl. LinkPlanModal, meet link) PLUS the per-student expandable attendance/points rows (reusing original ATTENDANCE_PREFILL_TRACK_KEY, unmodified specialTrack-only evaluate/attendance APIs — no backend changes needed this time). `TeacherSpecialTracks.tsx` itself was slimmed down to simple, clickable summary cards (status strip, badges, time/days, capacity bar, today's-target teaser) matching the visual language of TeacherPlans' PlanCard — click anywhere on a card opens the detail page. tsc/eslint clean. **Lesson: when a multi-file cross-cutting change (shared backend context, shared components) turns out to be premised on a misunderstood target page, `git checkout HEAD -- <files>` is far cleaner than trying to manually un-diff each edit — verify with `git status`/`git diff --stat` afterward that only the intended files remain touched.** | quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx (new), TeacherSpecialTracks.tsx, api/special-tracks.ts, router/pageRegistry.ts | complete | ~4200 |
 | 2026-07-06 (REVERTED, see entry above) | User clarified the "expand student row → today's part + attendance/points + save" request was actually meant for the Special Tracks page (#specialtracks), not Plans (kept the plan-detail work below as-is, unreverted). Added the same expandable-row feature into TeacherSpecialTracks.tsx's TrackCard student list (its "تسجيل الحضور" group button already existed) — reused .att-row/.eval-* CSS, useEvaluations({specialTrack, from:today, to:today}) for prefill, single-record useBulkEvaluate({specialTrack, ...}) per student save; today's part sourced from the track's linkedPlan.todayAssignment (falls back to "لا يوجد جزء مخصص لليوم" if no plan linked). tsc/eslint clean | quran-hifz/src/quran/pages/teacher/TeacherSpecialTracks.tsx | complete | ~2600 |
@@ -3192,3 +3193,50 @@
 | 16:18 | Edited docs/superpowers/specs/2026-09-05-halqa-track-restructure-phase2-web-design.md | 5→6 lines | ~107 |
 | 16:18 | Edited docs/superpowers/specs/2026-09-05-halqa-track-restructure-phase2-web-design.md | 5→6 lines | ~106 |
 | 16:18 | Session end: 5 writes across 2 files (2026-09-04-halqa-track-phase2-web-research.md, 2026-09-05-halqa-track-restructure-phase2-web-design.md) | 1 reads | ~9254 tok |
+| 16:31 | Created docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md | — | ~37127 |
+| 16:32 | Edited docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md | modified row() | ~515 |
+
+## Session: 2026-09-05 16:33
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:34 | Edited docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md | added error handling | ~1546 |
+| 16:35 | Edited docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md | 9→12 lines | ~129 |
+| 16:35 | Edited docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md | toAr() → count() | ~320 |
+| 16:36 | Edited docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md | added optional chaining | ~242 |
+| 16:36 | Edited docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md | modified StudentTracks() | ~387 |
+| 16:36 | Edited docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md | "StudentFilters.track" → "student.controller.ts" | ~94 |
+| 16:37 | Session end: 6 writes across 1 files (2026-09-05-halqa-track-restructure-phase2-web.md) | 4 reads | ~5432 tok |
+| 16:44 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | — | ~812 |
+| 16:45 | Created quran-hifz/src/quran/api/tracks.ts | — | ~933 |
+| 16:45 | Edited quran-hifz/src/quran/api/quran-plans.ts | 7→4 lines | ~53 |
+| 16:45 | Edited quran-hifz/src/quran/api/quran-plans.ts | 4→3 lines | ~49 |
+| 16:45 | Edited quran-hifz/src/quran/api/quran-plans.ts | 4→3 lines | ~30 |
+| 16:45 | Edited quran-hifz/src/quran/api/quran-plans.ts | modified useQuranPlans() | ~171 |
+| 16:46 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-1-report.md | — | ~1267 |
+| 16:49 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | 1→3 lines | ~70 |
+| 16:50 | Edited quran-hifz/src/quran/api/students.ts | 30→34 lines | ~243 |
+| 16:50 | Edited quran-hifz/src/quran/api/students.ts | modified buildQuery() | ~118 |
+| 16:50 | Edited quran-hifz/src/quran/api/attendance.ts | 23→21 lines | ~186 |
+| 16:50 | Edited quran-hifz/src/quran/api/attendance.ts | modified buildQuery() | ~89 |
+| 16:50 | Edited quran-hifz/src/quran/api/attendance.ts | modified useAttendance() | ~79 |
+| 16:50 | Edited quran-hifz/src/quran/api/attendance.ts | modified useRecordAttendance() | ~63 |
+| 16:51 | Edited quran-hifz/src/quran/api/attendance.ts | modified useBulkAttendance() | ~75 |
+| 16:51 | Edited quran-hifz/src/quran/api/evaluations.ts | 23→21 lines | ~156 |
+| 16:51 | Edited quran-hifz/src/quran/api/evaluations.ts | modified buildQuery() | ~89 |
+| 16:51 | Edited quran-hifz/src/quran/api/evaluations.ts | modified useRubric() | ~79 |
+| 16:51 | Edited quran-hifz/src/quran/api/evaluations.ts | modified useBulkEvaluate() | ~78 |
+| 16:51 | Edited quran-hifz/src/quran/api/group-homework.ts | 12→11 lines | ~81 |
+| 16:51 | Edited quran-hifz/src/quran/api/group-homework.ts | modified buildQuery() | ~57 |
+| 16:52 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-2-report.md | — | ~1331 |
+| 16:54 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | 1→2 lines | ~88 |
+| 16:55 | Created quran-hifz/src/quran/components/common/ContextPicker.tsx | — | ~1067 |
+| 16:55 | Edited quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | 6→5 lines | ~73 |
+| 16:55 | Edited quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | 5→4 lines | ~76 |
+| 16:55 | Edited quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | inline fix | ~14 |
+| 16:55 | Edited quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | "حلقاتي ومساراتي" → "مساراتي" | ~30 |
+| 16:56 | Edited quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | 5→5 lines | ~69 |
+| 16:57 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-3-report.md | — | ~963 |
+| 16:59 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | modified Minor() | ~140 |
+| 17:01 | Created quran-hifz/src/quran/pages/admin/AdminTracks.tsx | — | ~12981 |
+| 17:03 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-4-report.md | — | ~1341 |

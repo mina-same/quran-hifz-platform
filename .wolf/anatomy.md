@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T13:18:22.747Z
-> Files: 573 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T14:03:23.579Z
+> Files: 579 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -280,10 +280,19 @@
 - `task-8-report.md` — Task 8 Report: Evaluation model + controller — single `track` field, simplified `resolveRubric` (~1219 tok)
 - `task-9-report.md` — Task 9 Implementation Report: `Homework`, `GroupHomework`, `LessonRecording` — Single `track` Field (~2102 tok)
 
+## .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/
+
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md (~955 tok)
+- `task-1-report.md` — Task 1: Track/Halqa API modules — Completion Report (~1188 tok)
+- `task-2-report.md` — Task 2: Context-field collapse across attendance/evaluations/group-homework/students APIs — Completi (~1247 tok)
+- `task-3-report.md` — Task 3 Completion Report (~903 tok)
+- `task-4-report.md` — Task 4 Report: Rename AdminSpecialTracks.tsx → AdminTracks.tsx (~1257 tok)
+
 ## docs/superpowers/plans/
 
 - `2026-09-04-same-day-multi-segment-plans.md` — Same-day حفظ + مراجعة Plan Segments Implementation Plan (~18220 tok)
 - `2026-09-05-halqa-track-restructure-phase1-server.md` — Halqa Elimination / Track Restructure — Phase 1 (Server) Implementation Plan (~24218 tok)
+- `2026-09-05-halqa-track-restructure-phase2-web.md` — Halqa/Track Restructure — Phase 2 (Web) Implementation Plan (~35198 tok)
 
 ## docs/superpowers/specs/
 
@@ -752,10 +761,9 @@
 - `account.ts` — Exports MeUser, useMe, useUpdateProfile, useChangePassword (~258 tok)
 - `account.ts` — Exports MeUser, useMe (GET /auth/me), useUpdateProfile (PUT /auth/profile), useChangePassword (PUT /auth/change-password) (~150 tok)
 - `admin-parents.ts` — Exports ParentUser, useAdminParents, useCreateParent, useLinkChild + 4 more (~787 tok)
-- `attendance.ts` — ATTENDANCE_PREFILL_TRACK_KEY (bare track-id sessionStorage handoff), AttendanceRecord/Filters, useAttendance, useRecordAttendance, useBulkAttendance. halqa/specialTrack only, no `plan` field (~699 tok)
-- `evaluations.ts` — EvaluationRecord/Filters, useEvaluations (pass `undefined` to skip fetching), useBulkEvaluate. halqa/specialTrack only, no `plan` field (~709 tok)
-- `group-homework.ts` — Exports GroupHomework, useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework (~359 tok)
-- `halqat.ts` — Exports Halqa, HalqaFilters, useHalqat, useHalqa + 3 more (~608 tok)
+- `attendance.ts` — sessionStorage key used to hand off "take attendance for this track" from (~681 tok)
+- `evaluations.ts` — Legacy fixed shape — the server still mirrors it whenever a plan's rubric (~1105 tok)
+- `group-homework.ts` — Exports GroupHomework, GroupHomeworkFilters, useGroupHomework, useCreateGroupHomework, useDeleteGrou (~435 tok)
 - `hifz.ts` — Exports HifzEntry, useHifz, useUpsertHifz, useDeleteHifz (~388 tok)
 - `homework.ts` — Exports Homework, HomeworkFilters, useHomework, useCreateHomework + 2 more (~628 tok)
 - `kpis.ts` — Exports Kpi, useKpis, useCreateKpi, useUpdateKpi (~314 tok)
@@ -763,12 +771,12 @@
 - `masajid.ts` — Exports Masjid, useMasajid, useMasjid, useCreateMasjid + 2 more (~461 tok)
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
-- `quran-plans.ts` — sessionStorage key used to hand off "open the plan form" from wherever a (~2559 tok)
-- `special-tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~891 tok)
+- `quran-plans.ts` — PLAN_FORM_HANDOFF_KEY, QuranPlan.targetType="track"|"students", PlanTrack type, useQuranPlans({teacher?, track?, student?}), +5 hooks (~1835 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~166 tok)
 - `student-plan-progress.ts` — False when the student has no individual overlay yet — `effectiveSchedule` (~1673 tok)
-- `students.ts` — Exports Student, StudentFilters, useStudents, useStudent + 3 more (~821 tok)
+- `students.ts` — Saudi national ID — 10 digits, leading 1 (مواطن) or 2 (مقيم). (~834 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~504 tok)
+- `tracks.ts` — TRACK_DETAIL_ID_KEY, Track/TrackTeacher/TrackMasjid types, useTracks(status?, teacherId?), useTrack(id?), useCreateTrack, useUpdateTrack, useDeleteTrack, useAssignStudent (~990 tok)
 
 ## quran-hifz/src/quran/components/
 
@@ -785,7 +793,7 @@
 - `Badge.tsx` — Badge (~83 tok)
 - `BentoTile.tsx` — Bento-grid tile: a flatter, lighter-weight alternative to `Card` — small (~313 tok)
 - `Card.tsx` — Card (~181 tok)
-- `ContextPicker.tsx` — Unified shape for "teaching context" — either a Halqa or a SpecialTrack. (~1352 tok)
+- `ContextPicker.tsx` — Unified shape for "teaching context" — always a Track now that Halqa is (~1067 tok)
 - `DaysOfWeekPicker.tsx` — WEEK_DAYS (~481 tok)
 - `Donut.tsx` — Reusable donut chart with a centered label and optional legend. (~766 tok)
 - `FormSection.tsx` — FormSection (~195 tok)
@@ -843,6 +851,7 @@
 - `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13551 tok)
 - `AdminStudents.tsx` — PATH_TONE — renders table (~5525 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4598 tok)
+- `AdminTracks.tsx` — surahName — renders form, modal (~12981 tok)
 
 ## quran-hifz/src/quran/pages/common/
 
@@ -873,7 +882,7 @@
 ## quran-hifz/src/quran/pages/teacher/
 
 - `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~16563 tok)
-- `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1433 tok)
+- `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1348 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
 - `TeacherGroupHomework.tsx` — STUDENTS (~2940 tok)
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
