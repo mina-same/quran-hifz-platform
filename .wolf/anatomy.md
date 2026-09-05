@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-04T15:45:44.833Z
-> Files: 547 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T08:56:25.325Z
+> Files: 552 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -246,10 +246,14 @@
 
 ## .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md (~3160 tok)
+- `final-review-fix-report.md` — Final whole-branch review — fix report (~3324 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-04-same-day-multi-segment-plans.md (~5432 tok)
 - `task-1-report.md` — Task 1: Mobile `quranRange.ts` — Completion Report (~1978 tok)
 - `task-10-report.md` — Task 10 Report: Web `TeacherPlanDetail.tsx` full schedule table — type badge + per-row orientation (~1241 tok)
 - `task-11-report.md` — Task 11 Report: Web `TeacherAttendance.tsx` — dual per-type ward recording (~3140 tok)
+- `task-12-report.md` — Task 12 Report: Web `TeacherTrackDetail.tsx` — dual per-type ward recording (+ missing `type` param) (~2978 tok)
+- `task-13-report.md` — Task 13 Report: Mobile DaySlider.tsx + EvaluationRoster.tsx — dual per-type ward recording (~4077 tok)
+- `task-14-report.md` — Task 14: End-to-end manual verification — Report (~4285 tok)
 - `task-2-report.md` — Task 2 Report: Web `quranRange.ts` Mirror (~1156 tok)
 - `task-3-report.md` — Task 3 Report: Server `quranRange.ts` mirror + `computeMultiTodayAssignment` → plural + fix `backfil (~1105 tok)
 - `task-4-report.md` — Task 4 Report: Server `quran-plan.controller.ts` — `todayAssignments` Array (~1334 tok)
@@ -350,14 +354,14 @@
 ## quran-hifz-mobile/app/(portal)/teacher/
 
 - `_layout.tsx` — TeacherTabLayout (~681 tok)
-- `attendance.tsx` — Teacher "الحضور والتقييم" — full parity with web TeacherAttendance: day slider over the plan schedule (disabled un-planned days + notice), per-student expandable rows (avatar, status/score summary), حاضر/غائب toggle, الورد الفعلي picker with clamped bounds + "الورد كامل", حفظ/تجويد/تلاوة score chips, per-student save via /evaluations/bulk + plan-occurrence reflow, save-then-تعديل lock, سجل الجلسات, أبرز الطلاب leaderboards (~9000 tok)
+- `attendance.tsx` — TeacherAttendance (~4416 tok)
 - `dashboard.tsx` — getName (~1383 tok)
 - `evaluate.tsx` — Scores start at 0 so the teacher consciously awards points rather than (~3688 tok)
 - `grouphomework.tsx` — DAYS (~2777 tok)
 - `homework.tsx` — getName — renders form (~1264 tok)
 - `myhalqa.tsx` — TeacherHalqa (~1077 tok)
 - `plan-detail.tsx` — STATUS_VARIANT (~3418 tok)
-- `plan-form.tsx` — Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local (~10482 tok)
+- `plan-form.tsx` — Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local (~10560 tok)
 - `plans.tsx` — One label/value line in the plan card's detail grid. (~3580 tok)
 - `recordlesson.tsx` — LESSON_TYPES (~3004 tok)
 - `reports.tsx` — TeacherReports (~642 tok)
@@ -372,14 +376,15 @@
 - `AudioRecorder.tsx` — AudioRecorder — uses useState, useEffect (~1336 tok)
 - `BiometricLockScreen.tsx` — Shown after a stored session resumes silently, when the user has opted into (~1123 tok)
 - `ContextCard.tsx` — Normalized TeachingContext (halqa|specialTrack) card + halqaToContext/trackToContext mappers (~950 tok)
-- `DaySlider.tsx` — Horizontal calendar strip for picking a plan's scheduled day, plus the `useDaySchedule(entries, selectedDate)` hook that derives scheduledSet/Sorted, assignmentByDate, dayChips, effectiveDate and isFutureDay. Shared by teacher attendance and TrackDetail. (~1948 tok)
+- `DaySlider.tsx` — A schedule day, carrying the segment it belongs to when the plan has more (~2042 tok)
+- `EvaluationRoster.tsx` — Scores are keyed by the active plan's rubric — not known at compile time. (~9255 tok)
 - `HalqaCard.tsx` — nameOf (~816 tok)
 - `IndividualPlanPanel.tsx` — The shared halqa/track plan this student's overlay hangs off — used as the (~1783 tok)
 - `MasjidAccordion.tsx` — This masjid's own halqat — the real /masajid endpoint doesn't nest them, (~1180 tok)
 - `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~5750 tok)
 - `ScheduleSheet.tsx` — Day-by-day plan breakdown as a bottom sheet of compact cards (replaced the 6-column ScheduleTable). Exports scheduleItems()/fmtShortDate()/fmtPages() + the ScheduleItem shape. (~1700 tok)
 - `SurahAyahPicker.tsx` — When given, restricts BOTH pickers to only the surahs/ayat that fall inside (~828 tok)
-- `TrackDetail.tsx` — First letter of the first two words — the same initials the web chips show. (~6331 tok)
+- `TrackDetail.tsx` — First letter of the first two words — the same initials the web chips show. (~6562 tok)
 
 ## quran-hifz-mobile/components/forms/
 
@@ -434,8 +439,8 @@
 - `auth-storage.ts` — Exports getToken, setToken, clearToken (~229 tok)
 - `evaluationRubric.ts` — Manual mirror of quran-hifz/src/quran/lib/evaluationRubric.ts (no shared (~112 tok)
 - `haptics.ts` — App-wide haptic taxonomy over expo-haptics: tap/select/medium/success/warning/error + setHapticsEnabled. Native only, Android uses performAndroidHapticsAsync, every call fire-and-forget (~560 tok)
-- `quranRange.test.ts` — / <reference types="jest" /> (~6736 tok)
-- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~6197 tok)
+- `quranRange.test.ts` — / <reference types="jest" /> (~6746 tok)
+- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~6206 tok)
 - `theme.ts` — Exports ThemeMode, buildTheme(mode), Theme, textStart/textEnd. Mode-independent `base` (brand/status ink, shape, spacing, fonts, shadow) merged with light/darkSurfaces (bg, card, cardAlt, inputBg, overlay, text*, border, greenAccent, the pastel tints, and the `tone` bg/border/text map). Deliberately exports NO frozen `theme` object — read colours via useAppTheme() (~1050 tok)
 
 ## quran-hifz-mobile/lib/constants/
@@ -465,7 +470,7 @@
 - `masajid.ts` — Exports Masjid, useMasajid, useMasjid (~189 tok)
 - `messages.ts` — Exports Message, useMessages (~154 tok)
 - `parent.ts` — Exports ParentChild, ChildHifzEntry, ChildAttendanceRecord, ChildHomework + 9 more (~896 tok)
-- `quranPlan.ts` — One line of a plan's daily grading rubric — what is graded, out of how many. (~3560 tok)
+- `quranPlan.ts` — One line of a plan's daily grading rubric — what is graded, out of how many. (~3625 tok)
 - `specialTracks.ts` — Exports EnrolledStudent, TrackTeacher, SpecialTrack, useSpecialTracks + 5 more (~801 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~165 tok)
 - `students.ts` — Legacy fields — real guardian identity comes from parentName/parentEmail below. (~845 tok)
@@ -526,10 +531,10 @@
 - `masjid.controller.ts` — Zod schemas: masjidSchema (~698 tok)
 - `message.controller.ts` — Zod schemas: messageSchema (~568 tok)
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
-- `quran-plan.controller.ts` — One line of the plan's daily grading rubric: a label and its degrees. (~5786 tok)
+- `quran-plan.controller.ts` — One line of the plan's daily grading rubric: a label and its degrees. (~5967 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
-- `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~3554 tok)
+- `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~4346 tok)
 - `student.controller.ts` — Zod schemas: studentSchema (~1815 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1398 tok)
 
@@ -734,7 +739,7 @@
 - `masajid.ts` — Exports Masjid, useMasajid, useMasjid, useCreateMasjid + 2 more (~461 tok)
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
-- `quran-plans.ts` — sessionStorage key used to hand off "open the plan form" from wherever a (~2495 tok)
+- `quran-plans.ts` — sessionStorage key used to hand off "open the plan form" from wherever a (~2559 tok)
 - `special-tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~891 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~166 tok)
 - `student-plan-progress.ts` — False when the student has no individual overlay yet — `effectiveSchedule` (~1673 tok)
@@ -794,7 +799,7 @@
 ## quran-hifz/src/quran/lib/
 
 - `evaluationRubric.ts` — Exports MAX_SCORES, TOTAL_MAX (~34 tok)
-- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~6220 tok)
+- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~6229 tok)
 
 ## quran-hifz/src/quran/pages/
 
@@ -843,21 +848,21 @@
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~14219 tok)
+- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~16563 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1433 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
 - `TeacherGroupHomework.tsx` — STUDENTS (~2940 tok)
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
 - `TeacherPlanDetail.tsx` — surahName — renders table (~3932 tok)
-- `TeacherPlanForm.tsx` — One type's track in the form: its own days and its own range. The plan's (~14465 tok)
+- `TeacherPlanForm.tsx` — One type's track in the form: its own days and its own range. The plan's (~14549 tok)
 - `TeacherPlans.tsx` — surahName (~4519 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
 - `TeacherSpecialTracks.tsx` — surahName (~2892 tok)
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~2471 tok)
-- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~24771 tok)
+- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~24978 tok)
 
 ## quran-hifz/src/quran/router/
 
