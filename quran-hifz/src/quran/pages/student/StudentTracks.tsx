@@ -4,7 +4,8 @@ import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
-import { useSpecialTracks, type SpecialTrack, type TrackTeacher } from "../../api/special-tracks";
+import { useTracks, type Track, type TrackTeacher } from "../../api/tracks";
+import { useStudent } from "../../api/students";
 import { useQuranPlans, segmentReversed } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
@@ -45,10 +46,14 @@ function fmtDate(d: string) {
 function daysLeft(endDate: string): number {
   return Math.max(0, Math.ceil((new Date(endDate).getTime() - Date.now()) / 86400000));
 }
+function getName(v: unknown): string {
+  if (v && typeof v === "object" && "name" in v) return (v as { name: string }).name;
+  return typeof v === "string" ? v : "";
+}
 
-function TrackCard({ track }: { track: SpecialTrack }) {
+function TrackCard({ track }: { track: Track }) {
   const days = daysLeft(track.endDate);
-  const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: track._id });
+  const { data: linkedPlans = [] } = useQuranPlans({ track: track._id });
   const linkedPlan = linkedPlans[0];
   const [planOpen, setPlanOpen] = useState(false);
 
@@ -149,7 +154,7 @@ function TrackCard({ track }: { track: SpecialTrack }) {
             </span>
             <div>
               <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>المكان</div>
-              <div style={{ fontWeight: 600 }}>{track.isOnline ? "أونلاين" : track.location}</div>
+              <div style={{ fontWeight: 600 }}>{track.isOnline ? "أونلاين" : getName(track.masjid)}</div>
             </div>
           </div>
         </div>
@@ -266,15 +271,14 @@ function TrackCard({ track }: { track: SpecialTrack }) {
   );
 }
 
-export function StudentSpecialTracks() {
-  useTopbar("ti-star", "مساراتي");
+export function StudentTracks() {
+  useTopbar("ti-star", "مساري");
   const { user } = usePortal();
+  const { data: student } = useStudent(user?.profileId as string | undefined);
+  const studentTrackId = typeof student?.track === "object" ? student.track._id : student?.track;
 
-  const { data: tracks = [], isLoading } = useSpecialTracks(
-    undefined,
-    undefined,
-    user?.profileId as string | undefined,
-  );
+  const { data: allTracks = [], isLoading } = useTracks();
+  const tracks = allTracks.filter((t) => t._id === studentTrackId);
 
   const active   = tracks.filter((t) => t.status === "active");
   const upcoming = tracks.filter((t) => t.status === "upcoming");
