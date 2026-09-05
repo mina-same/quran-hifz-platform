@@ -90,9 +90,12 @@ export type QuranPlan = {
   status: "نشطة" | "متوقفة" | "منتهية";
 
   /* ── rollups across every segment ──────────────────────────────────────
-   * Days are partitioned, so at most one type is due on any date and
-   * `todayAssignment` is single-valued. `schedule` is every segment's days
-   * merged and date-sorted, each entry carrying its own `type`. */
+   * A date can now belong to more than one segment (حفظ + مراجعة sharing a
+   * weekday), so use the plural `todayAssignments` — it holds every type due
+   * today. `todayAssignment` is a deprecated first-match fallback (the first
+   * entry of `todayAssignments`, or null), kept only for callers that still
+   * assume a single value. `schedule` is every segment's days merged and
+   * date-sorted, each entry carrying its own `type`. */
   todayAssignment: (TodayAssignment & { type: PlanType }) | null;
   todayAssignments: (TodayAssignment & { type: PlanType })[];
   progress: PlanProgress | null;
