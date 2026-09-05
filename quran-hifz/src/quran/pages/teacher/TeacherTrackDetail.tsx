@@ -8,14 +8,12 @@ import { Alert } from "../../components/common/Alert";
 import { ScopeTabs } from "../../components/common/ScopeTabs";
 import { SkeletonCard } from "../../components/common/Skeleton";
 import {
-  useSpecialTracks,
+  useTracks,
   TRACK_DETAIL_ID_KEY,
-  type SpecialTrack,
-  type EnrolledStudent,
+  type Track,
   type TrackTeacher,
-} from "../../api/special-tracks";
-import { useHalqat } from "../../api/halqat";
-import { useStudents } from "../../api/students";
+} from "../../api/tracks";
+import { useStudents, type Student } from "../../api/students";
 import {
   useQuranPlans,
   useUpdateQuranPlan,
@@ -152,12 +150,6 @@ function CompactSurahAyah({
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
 }
-function getEnrolledName(v: EnrolledStudent | string) {
-  return typeof v === "object" ? v.name : v;
-}
-function getEnrolledId(v: EnrolledStudent | string) {
-  return typeof v === "object" ? v._id : v;
-}
 function getTeacherName(v: TrackTeacher | string) {
   return typeof v === "object" ? v.name : v;
 }
@@ -255,7 +247,7 @@ function LinkPlanPanel({
   onLinked,
   onCreateNew,
 }: {
-  track: SpecialTrack;
+  track: Track;
   teacherId?: string;
   onLinked: () => void;
   onCreateNew: () => void;
@@ -265,13 +257,13 @@ function LinkPlanPanel({
 
   const linkable = myPlans.filter(
     (p) =>
-      p.specialTrack !== track._id &&
-      (typeof p.specialTrack !== "object" || p.specialTrack?._id !== track._id),
+      p.track !== track._id &&
+      (typeof p.track !== "object" || p.track?._id !== track._id),
   );
 
   function link(plan: QuranPlan) {
     updatePlan.mutate(
-      { id: plan._id, targetType: "specialTrack", specialTrack: track._id },
+      { id: plan._id, targetType: "track", track: track._id },
       { onSuccess: onLinked },
     );
   }
@@ -358,32 +350,19 @@ export function TeacherTrackDetail() {
   const teacherId = user?.profileId as string | undefined;
   const [trackId] = useState(() => sessionStorage.getItem(TRACK_DETAIL_ID_KEY));
 
-  // No GET /special-tracks/:id endpoint server-side — reuse the same
-  // teacher-scoped list the Special Tracks page already fetches (small list,
-  // cheap) and find this one client-side.
-  const { data: tracks = [], isLoading: loadingTracks } = useSpecialTracks(undefined, teacherId);
+  // No GET /tracks/:id endpoint used here — reuse the same teacher-scoped list
+  // the Tracks page already fetches (small list, cheap) and find this one
+  // client-side, exactly as before.
+  const { data: tracks = [], isLoading: loadingTracks } = useTracks(undefined, teacherId);
   const track = tracks.find((t) => t._id === trackId);
 
-  // This track's real roster lives on its halaqat, not on `enrolledStudents`
-  // (that field is for tracks with no halqa layer — direct enrollment). Scope
-  // it further to just the halaqat *this* teacher teaches within the track,
-  // so a teacher only ever sees their own students here, not every halqa's.
-  const { data: myHalqat = [] } = useHalqat({ teacher: teacherId });
-  const myHalqaIdsInTrack = myHalqat
-    .filter((h) => {
-      const t = h.specialTrack;
-      const tId = t && typeof t === "object" ? t._id : t;
-      return !!track && tId === track._id;
-    })
-    .map((h) => h._id);
+  // `Student.track` is now the sole membership mechanism — the roster is a
+  // direct query, no more halqa-mediated derivation.
   const { data: rosterStudents = [] } = useStudents(
-    { halqa: myHalqaIdsInTrack.join(",") },
-    { enabled: myHalqaIdsInTrack.length > 0 },
+    { track: track?._id },
+    { enabled: !!track },
   );
-  const roster: (EnrolledStudent | string)[] = rosterStudents.map((s) => ({
-    _id: s._id,
-    name: s.name,
-  }));
+  const roster: Student[] = rosterStudents;
 
   const [tab, setTab] = useState<TabKey>("students");
   // Only one of the plan tab's expandable sections (link-another-plan /
@@ -410,14 +389,14 @@ export function TeacherTrackDetail() {
   const [selectedDate, setSelectedDate] = useState("");
   const [planPanelStudentId, setPlanPanelStudentId] = useState<string | null>(null);
 
-  const { data: linkedPlans = [] } = useQuranPlans(track ? { specialTrack: track._id } : undefined);
-  // A plan can carry a stale `specialTrack` field left over from before its
+  const { data: linkedPlans = [] } = useQuranPlans(track ? { track: track._id } : undefined);
+  // A plan can carry a stale `track` field left over from before its
   // targetType was switched to "students" (see planCoversStudent above), so
-  // useQuranPlans({specialTrack}) can return several plans for this track —
-  // prefer the one actually targeting the whole track (targetType:
-  // "specialTrack") over a narrower students-only plan that merely still
-  // points at it, regardless of which was created/updated more recently.
-  const linkedPlan = linkedPlans.find((p) => p.targetType === "specialTrack") ?? linkedPlans[0];
+  // useQuranPlans({track}) can return several plans for this track — prefer
+  // the one actually targeting the whole track (targetType: "track") over a
+  // narrower students-only plan that merely still points at it, regardless of
+  // which was created/updated more recently.
+  const linkedPlan = linkedPlans.find((p) => p.targetType === "track") ?? linkedPlans[0];
   // Reverse-direction plan → display the assigned ward in the plan's own
   // direction ("من" nearer the plan's start). Display-only; storage stays low→high.
   const rangeReversed = !!linkedPlan && segmentReversed(linkedPlan, linkedPlan?.todayAssignments?.[0]?.type);
@@ -434,7 +413,7 @@ export function TeacherTrackDetail() {
   // arrived, leaving every student's progress permanently empty.
   const coveredStudentIds = useMemo(() => {
     if (!track || !linkedPlan) return [];
-    return roster.map(getEnrolledId).filter((id) => planCoversStudent(linkedPlan, id));
+    return roster.map((s) => s._id).filter((id) => planCoversStudent(linkedPlan, id));
   }, [track, linkedPlan, rosterStudents]);
   const progressByStudentId = useStudentPlanProgressList(linkedPlan?._id, coveredStudentIds);
 
@@ -607,7 +586,7 @@ export function TeacherTrackDetail() {
   }, [effectiveDate, dayChips]);
 
   const { data: savedForDay = [] } = useEvaluations(
-    track ? { specialTrack: track._id, from: effectiveDate, to: effectiveDate } : undefined,
+    track ? { track: track._id, from: effectiveDate, to: effectiveDate } : undefined,
   );
   const savedById: Record<string, StudentEval> = {};
   for (const r of savedForDay) {
@@ -619,7 +598,7 @@ export function TeacherTrackDetail() {
   }
   // Grading split comes from the plan governing this track; falls back to the
   // historical default when no single plan resolves.
-  const { data: rubricData } = useRubric(track ? { specialTrack: track._id } : undefined);
+  const { data: rubricData } = useRubric(track ? { track: track._id } : undefined);
   const rubric = rubricData?.rubric ?? DEFAULT_GRADE_RUBRIC;
   const rubricTotalMax = totalMaxOf(rubric);
 
@@ -735,7 +714,7 @@ export function TeacherTrackDetail() {
     setLastSavedId(studentId);
     const toastId = toast.loading("جاري حفظ الحضور والتقييم...");
     bulkEvaluate.mutate(
-      { teacher: teacherId!, specialTrack: track._id, date: effectiveDate, records },
+      { teacher: teacherId!, track: track._id, date: effectiveDate, records },
       {
         onSuccess: () => {
           // Feed the day's outcome into each of the student's individual plan
@@ -851,10 +830,7 @@ export function TeacherTrackDetail() {
   }
   function createNewPlan() {
     if (!track) return;
-    // Plans are halqa-based. If this teacher has exactly one halqa in the track,
-    // pre-select it; otherwise open the form on the halqa flow with no pick.
-    const halqaId = myHalqaIdsInTrack.length === 1 ? myHalqaIdsInTrack[0] : undefined;
-    sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "create", halqaId }));
+    sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "create", trackId: track._id }));
     showPage("planform");
   }
   function editLinkedPlan() {
@@ -865,12 +841,12 @@ export function TeacherTrackDetail() {
     );
     showPage("planform");
   }
-  // Plans are halqa-based: open the plan form pre-selected on this student's
-  // halqa (covers the whole halqa), available even with no track-level plan.
-  function createPlanForStudent(studentId: string) {
-    const st = rosterStudents.find((s) => s._id === studentId);
-    const halqaId = st ? (typeof st.halqa === "object" ? st.halqa._id : st.halqa) : undefined;
-    sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "create", halqaId }));
+  // A track's students are always exactly its own roster now (single-track-
+  // per-student), so there's no per-student ambiguity to resolve — the
+  // handoff is identical to createNewPlan's.
+  function createPlanForStudent(_studentId: string) {
+    if (!track) return;
+    sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "create", trackId: track._id }));
     showPage("planform");
   }
 
@@ -995,9 +971,9 @@ export function TeacherTrackDetail() {
               style={{ color: "var(--green)", marginTop: 1, flexShrink: 0 }}
             />
             <div>
-              <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>المكان</div>
+              <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>المسجد</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text)", marginTop: 1 }}>
-                {track.isOnline ? "أونلاين" : track.location}
+                {track.isOnline ? "أونلاين" : (typeof track.masjid === "object" ? track.masjid.name : track.masjid)}
               </div>
             </div>
           </div>
@@ -1234,8 +1210,8 @@ export function TeacherTrackDetail() {
             ) : (
               <div className="att-list">
                 {roster.map((s) => {
-                  const name = getEnrolledName(s);
-                  const id = getEnrolledId(s);
+                  const name = s.name;
+                  const id = s._id;
                   const e = evalFor(id);
                   const isAbsent = e.attendanceStatus === "غائب";
                   const isExpanded = expandedStudentId === id;
@@ -1573,7 +1549,7 @@ export function TeacherTrackDetail() {
                                 createPlanForStudent(id);
                               }}
                             >
-                              <i className="ti ti-plus" /> أضف خطة للحلقة
+                              <i className="ti ti-plus" /> أضف خطة للمسار
                             </button>
                           )}
 
