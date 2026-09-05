@@ -7,16 +7,14 @@ import { AppError } from '../middleware/error';
 import { notifyParents } from '../lib/notify';
 
 const recordSchema = z.object({
-  student:      z.string().min(1),
-  halqa:        z.string().min(1).optional(),
-  specialTrack: z.string().min(1).optional(),
+  student: z.string().min(1),
+  track:   z.string().min(1),
   date:    z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
   status:  z.enum(['حاضر', 'غائب', 'متأخر']),
 });
 
 const bulkSchema = z.object({
-  halqa:        z.string().min(1).optional(),
-  specialTrack: z.string().min(1).optional(),
+  track:   z.string().min(1),
   date:    z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
   records: z.array(z.object({
     student: z.string().min(1),
@@ -36,8 +34,6 @@ export function deriveDayAndTime(date: Date): { day: string; time: string } {
   };
 }
 
-export type AttendanceContext = { halqa: string; specialTrack?: undefined } | { halqa?: undefined; specialTrack: string };
-
 /**
  * Upserts one Attendance doc per {student, date} and recalculates each
  * student's attendancePct. Shared by the plain attendance bulk-save endpoint
@@ -45,19 +41,17 @@ export type AttendanceContext = { halqa: string; specialTrack?: undefined } | { 
  * alongside scores from the same "الحضور والتقييم" page in one request).
  */
 export async function upsertAttendanceRecords(
-  context: AttendanceContext,
+  track: string,
   dateObj: Date,
   records: { student: string; status: 'حاضر' | 'غائب' | 'متأخر' }[],
 ): Promise<void> {
   const { day, time } = deriveDayAndTime(dateObj);
-  const contextField = context.halqa
-    ? { halqa: new Types.ObjectId(context.halqa) }
-    : { specialTrack: new Types.ObjectId(context.specialTrack!) };
+  const trackId = new Types.ObjectId(track);
 
   const ops = records.map(({ student, status }) => ({
     updateOne: {
       filter: { student: new Types.ObjectId(student), date: dateObj },
-      update: { $set: { student: new Types.ObjectId(student), ...contextField, date: dateObj, day, time, status } },
+      update: { $set: { student: new Types.ObjectId(student), track: trackId, date: dateObj, day, time, status } },
       upsert: true,
     },
   }));
@@ -68,11 +62,10 @@ export async function upsertAttendanceRecords(
 
 export async function getAttendance(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { student, halqa, specialTrack, from, to } = req.query;
+    const { student, track, from, to } = req.query;
     const filter: Record<string, unknown> = {};
-    if (student)      filter.student      = student;
-    if (halqa)        filter.halqa        = halqa;
-    if (specialTrack) filter.specialTrack = specialTrack;
+    if (student) filter.student = student;
+    if (track)   filter.track   = track;
     if (from || to) {
       filter.date = {};
       if (from) (filter.date as Record<string, Date>).$gte = new Date(from as string);
@@ -81,8 +74,7 @@ export async function getAttendance(req: Request, res: Response, next: NextFunct
 
     const records = await Attendance.find(filter)
       .populate('student', 'name')
-      .populate('halqa',   'name')
-      .populate('specialTrack', 'title')
+      .populate('track', 'title')
       .sort({ date: -1 });
 
     res.json({ success: true, count: records.length, data: records });
@@ -113,15 +105,11 @@ export async function recordAttendance(req: Request, res: Response, next: NextFu
 
 export async function bulkAttendance(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { halqa, specialTrack, date, records } = bulkSchema.parse(req.body);
+    const { track, date, records } = bulkSchema.parse(req.body);
     const dateObj = new Date(date);
     const { day } = deriveDayAndTime(dateObj);
 
-    await upsertAttendanceRecords(
-      (halqa ? { halqa } : { specialTrack: specialTrack! }) as AttendanceContext,
-      dateObj,
-      records,
-    );
+    await upsertAttendanceRecords(track, dateObj, records);
 
     const { notified, unnotified } = await notifyParents(
       records.filter((r) => r.status === 'غائب').map((r) => r.student),
