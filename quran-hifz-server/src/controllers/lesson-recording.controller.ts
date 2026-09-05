@@ -6,8 +6,7 @@ import { AppError } from '../middleware/error';
 const recordingSchema = z.object({
   student:      z.string().min(1),
   teacher:      z.string().min(1),
-  halqa:        z.string().min(1).optional(),
-  specialTrack: z.string().min(1).optional(),
+  track:        z.string().min(1, 'المسار مطلوب'),
   type:        z.string().min(1),
   segment:     z.string().min(1),
   points:      z.number().int().min(0).optional(),
@@ -18,17 +17,15 @@ const recordingSchema = z.object({
 
 export async function getRecordings(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { student, teacher, halqa, specialTrack } = req.query;
+    const { student, teacher, track } = req.query;
     const filter: Record<string, unknown> = {};
-    if (student)      filter.student      = student;
-    if (teacher)      filter.teacher      = teacher;
-    if (halqa)        filter.halqa        = halqa;
-    if (specialTrack) filter.specialTrack = specialTrack;
+    if (student) filter.student = student;
+    if (teacher) filter.teacher = teacher;
+    if (track)   filter.track   = track;
     const recordings = await LessonRecording.find(filter)
       .populate('student', 'name')
       .populate('teacher', 'name')
-      .populate('halqa', 'name')
-      .populate('specialTrack', 'title')
+      .populate('track', 'title')
       .sort({ recordedAt: -1 });
     res.json({ success: true, count: recordings.length, data: recordings });
   } catch (err) {

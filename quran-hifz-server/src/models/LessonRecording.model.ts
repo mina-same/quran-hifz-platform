@@ -3,8 +3,7 @@ import { Schema, model, Document } from 'mongoose';
 export interface ILessonRecording extends Document {
   student: Schema.Types.ObjectId;
   teacher: Schema.Types.ObjectId;
-  halqa?: Schema.Types.ObjectId;
-  specialTrack?: Schema.Types.ObjectId;
+  track: Schema.Types.ObjectId;
   type: string;
   segment: string;
   points: number;
@@ -19,8 +18,7 @@ const lessonRecordingSchema = new Schema<ILessonRecording>(
   {
     student:      { type: Schema.Types.ObjectId, ref: 'Student', required: true },
     teacher:      { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
-    halqa:        { type: Schema.Types.ObjectId, ref: 'Halqa' },
-    specialTrack: { type: Schema.Types.ObjectId, ref: 'SpecialTrack' },
+    track:        { type: Schema.Types.ObjectId, ref: 'Track', required: true },
     type:        { type: String, required: true },
     segment:     { type: String, required: true },
     points:      { type: Number, default: 0 },
@@ -31,6 +29,6 @@ const lessonRecordingSchema = new Schema<ILessonRecording>(
   { timestamps: true },
 );
 
-lessonRecordingSchema.index({ specialTrack: 1, recordedAt: -1 });
+lessonRecordingSchema.index({ track: 1, recordedAt: -1 });
 
 export const LessonRecording = model<ILessonRecording>('LessonRecording', lessonRecordingSchema);

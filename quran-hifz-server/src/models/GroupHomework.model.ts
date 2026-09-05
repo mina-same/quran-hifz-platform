@@ -1,8 +1,7 @@
 import { Schema, model, Document } from 'mongoose';
 
 export interface IGroupHomework extends Document {
-  halqa?: Schema.Types.ObjectId;
-  specialTrack?: Schema.Types.ObjectId;
+  track: Schema.Types.ObjectId;
   teacher: Schema.Types.ObjectId;
   title: string;
   description: string;
@@ -14,8 +13,7 @@ export interface IGroupHomework extends Document {
 
 const groupHomeworkSchema = new Schema<IGroupHomework>(
   {
-    halqa:        { type: Schema.Types.ObjectId, ref: 'Halqa' },
-    specialTrack: { type: Schema.Types.ObjectId, ref: 'SpecialTrack' },
+    track:       { type: Schema.Types.ObjectId, ref: 'Track', required: true },
     teacher:     { type: Schema.Types.ObjectId, ref: 'Teacher', required: true },
     title:       { type: String, required: true, trim: true },
     description: { type: String, required: true },
@@ -25,6 +23,6 @@ const groupHomeworkSchema = new Schema<IGroupHomework>(
   { timestamps: true },
 );
 
-groupHomeworkSchema.index({ specialTrack: 1, dueDate: -1 });
+groupHomeworkSchema.index({ track: 1, dueDate: -1 });
 
 export const GroupHomework = model<IGroupHomework>('GroupHomework', groupHomeworkSchema);

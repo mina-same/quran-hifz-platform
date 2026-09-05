@@ -4,8 +4,7 @@ import { GroupHomework } from '../models/GroupHomework.model';
 import { AppError } from '../middleware/error';
 
 const groupHomeworkSchema = z.object({
-  halqa:        z.string().min(1).optional(),
-  specialTrack: z.string().min(1).optional(),
+  track:        z.string().min(1, 'المسار مطلوب'),
   teacher:     z.string().min(1),
   title:       z.string().min(1),
   description: z.string().min(1),
@@ -15,15 +14,13 @@ const groupHomeworkSchema = z.object({
 
 export async function getGroupHomework(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { halqa, specialTrack, teacher } = req.query;
+    const { track, teacher } = req.query;
     const filter: Record<string, unknown> = {};
-    if (halqa)        filter.halqa        = halqa;
-    if (specialTrack) filter.specialTrack = specialTrack;
-    if (teacher)       filter.teacher      = teacher;
+    if (track)   filter.track   = track;
+    if (teacher) filter.teacher = teacher;
     const hw = await GroupHomework.find(filter)
       .populate('teacher', 'name')
-      .populate('halqa', 'name')
-      .populate('specialTrack', 'title')
+      .populate('track', 'title')
       .sort({ dueDate: -1 });
     res.json({ success: true, count: hw.length, data: hw });
   } catch (err) {
