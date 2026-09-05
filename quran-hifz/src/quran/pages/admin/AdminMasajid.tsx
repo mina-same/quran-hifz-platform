@@ -44,11 +44,13 @@ export function AdminMasajid() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
+  const [gender, setGender] = useState<"male" | "female">("male");
   const [formError, setFormError] = useState("");
 
   function openAdd() {
     setName("");
     setLocation("");
+    setGender("male");
     setFormError("");
     setModal({ mode: "add" });
   }
@@ -56,6 +58,7 @@ export function AdminMasajid() {
   function openEdit(item: Masjid) {
     setName(item.name);
     setLocation(item.location);
+    setGender(item.gender);
     setFormError("");
     setModal({ mode: "edit", item });
   }
@@ -68,9 +71,9 @@ export function AdminMasajid() {
     setFormError("");
     try {
       if (modal?.mode === "add") {
-        await createMasjid.mutateAsync({ name: name.trim(), location: location.trim() });
+        await createMasjid.mutateAsync({ name: name.trim(), location: location.trim(), gender });
       } else if (modal?.mode === "edit") {
-        await updateMasjid.mutateAsync({ id: modal.item._id, name: name.trim(), location: location.trim() });
+        await updateMasjid.mutateAsync({ id: modal.item._id, name: name.trim(), location: location.trim(), gender });
       }
       setModal(null);
     } catch (e) {
@@ -99,7 +102,7 @@ export function AdminMasajid() {
 
   useTopbar(
     "ti-building-arch",
-    "المساجد والحلقات",
+    "المساجد والمسارات",
     <button className="topbar-btn btn-primary" onClick={openAdd}>
       <i className="ti ti-plus" /> مسجد جديد
     </button>,
@@ -127,7 +130,7 @@ export function AdminMasajid() {
               </span>
             </span>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <Badge tone="green">{toAr(m.halqat?.length ?? 0)} حلقات</Badge>
+              <Badge tone="green">{toAr(m.tracks?.length ?? 0)} مسارات</Badge>
               <button
                 className="topbar-btn btn-ghost"
                 style={{ padding: "3px 9px", fontSize: 12 }}
@@ -147,20 +150,22 @@ export function AdminMasajid() {
             </div>
           </div>
           <div className={`masjid-body${open.has(m._id) ? " open" : ""}`}>
-            {(m.halqat ?? []).map((h) => (
-              <div key={h._id} className="halqa-row-item">
-                <span className="h-name">{h.name}</span>
-                <Badge tone="blue">{toAr(h.studentCount ?? 0)}/{toAr(h.capacity ?? 0)}</Badge>
-                {h.time && (
+            {(m.tracks ?? []).map((t) => (
+              <div key={t._id} className="halqa-row-item">
+                <span className="h-name">{t.title}</span>
+                <Badge tone={t.status === "active" ? "green" : t.status === "upcoming" ? "gold" : "gray"}>
+                  {t.status === "active" ? "نشط" : t.status === "upcoming" ? "قادم" : "منتهي"}
+                </Badge>
+                {t.timeSlot && (
                   <span className="h-info">
-                    <i className="ti ti-clock" style={{ fontSize: 12 }} /> {h.time}
+                    <i className="ti ti-clock" style={{ fontSize: 12 }} /> {t.timeSlot}
                   </span>
                 )}
               </div>
             ))}
-            {!m.halqat?.length && (
+            {!m.tracks?.length && (
               <div style={{ padding: "10px 16px", color: "var(--text3)", fontSize: 13 }}>
-                لا توجد حلقات مسجلة
+                لا توجد مسارات مسجلة
               </div>
             )}
           </div>
@@ -213,6 +218,32 @@ export function AdminMasajid() {
                 placeholder="حي السلام، الرياض"
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
               />
+            </div>
+
+            <div className="form-group" style={{ marginTop: 12 }}>
+              <label className="form-label">الجنس <span>*</span></label>
+              <div style={{ display: "flex", gap: 8 }}>
+                {([
+                  { value: "male" as const, label: "جامع (رجال)" },
+                  { value: "female" as const, label: "دار (نساء)" },
+                ]).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setGender(opt.value)}
+                    style={{
+                      flex: 1, padding: "11px 0", borderRadius: 10, cursor: "pointer",
+                      border: `2px solid ${gender === opt.value ? "var(--green)" : "var(--border)"}`,
+                      background: gender === opt.value ? "var(--green-pale)" : "var(--cream)",
+                      color: gender === opt.value ? "var(--green)" : "var(--text2)",
+                      fontWeight: gender === opt.value ? 700 : 400,
+                      fontSize: 13,
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
