@@ -7,14 +7,13 @@ import { ENV } from '../config/env';
 import { User } from '../models/User.model';
 import { Teacher } from '../models/Teacher.model';
 import { Masjid } from '../models/Masjid.model';
-import { Halqa } from '../models/Halqa.model';
+import { Track } from '../models/Track.model';
 import { Student } from '../models/Student.model';
 import { HifzEntry } from '../models/HifzEntry.model';
 import { Attendance } from '../models/Attendance.model';
 import { Homework } from '../models/Homework.model';
 import { GroupHomework } from '../models/GroupHomework.model';
 import { LessonRecording } from '../models/LessonRecording.model';
-import { SpecialTrack } from '../models/SpecialTrack.model';
 import { KPI } from '../models/KPI.model';
 import { ParentStudent } from '../models/ParentStudent.model';
 import { QuranPlan } from '../models/QuranPlan.model';
@@ -28,14 +27,13 @@ async function seed(): Promise<void> {
     User.deleteMany({}),
     Teacher.deleteMany({}),
     Masjid.deleteMany({}),
-    Halqa.deleteMany({}),
+    Track.deleteMany({}),
     Student.deleteMany({}),
     HifzEntry.deleteMany({}),
     Attendance.deleteMany({}),
     Homework.deleteMany({}),
     GroupHomework.deleteMany({}),
     LessonRecording.deleteMany({}),
-    SpecialTrack.deleteMany({}),
     KPI.deleteMany({}),
     ParentStudent.deleteMany({}),
     QuranPlan.deleteMany({}),
@@ -53,38 +51,55 @@ async function seed(): Promise<void> {
 
   // ── Masajid ────────────────────────────────────────────────────────────────
   const masajid = await Masjid.insertMany([
-    { name: 'مسجد الفاروق', location: 'حي العماير الشمالي' },
-    { name: 'مسجد النور',   location: 'حي العماير الجنوبي' },
-    { name: 'مسجد التقوى', location: 'حي العماير الغربي' },
-    { name: 'مسجد الهدى',  location: 'حي العماير الشرقي' },
+    { name: 'الفاروق', location: 'حي العماير الشمالي',       gender: 'male'   },
+    { name: 'النور',   location: 'حي العماير الجنوبي',       gender: 'male'   },
+    { name: 'التقوى',  location: 'حي العماير الغربي',        gender: 'male'   },
+    { name: 'الهدى',   location: 'حي العماير الشرقي',        gender: 'male'   },
+    { name: 'خديجة',   location: 'حي العماير الجنوبي الغربي', gender: 'female' },
   ]);
   console.log(`🕌  Seeded ${masajid.length} masajid`);
 
-  const [mFaruq, mNur, mTaqwa, mHuda] = masajid;
+  const [mFaruq, mNur, mTaqwa, mHuda, mKhadija] = masajid;
   const [tNasir, tSaad, tFaisal, tMohammad] = teachers;
 
-  // ── Halqat ─────────────────────────────────────────────────────────────────
-  const halqat = await Halqa.insertMany([
-    { name: 'حلقة عمر بن الخطاب',      teacher: tNasir._id,    masjid: mFaruq._id,    days: 'السبت، الاثنين، الخميس',    time: '٥:٠٠ م - ٦:٣٠ م', capacity: 15, attendancePct: 92, completionPct: 65 },
-    { name: 'حلقة أبي بكر الصديق',      teacher: tSaad._id,     masjid: mNur._id,      days: 'الأحد، الثلاثاء، الجمعة',  time: '٤:٣٠ م - ٦:٠٠ م', capacity: 15, attendancePct: 87, completionPct: 72 },
-    { name: 'حلقة علي بن أبي طالب',     teacher: tFaisal._id,   masjid: mTaqwa._id,    days: 'السبت، الاثنين، الأربعاء', time: '٥:٣٠ م - ٧:٠٠ م', capacity: 15, attendancePct: 95, completionPct: 58 },
-    { name: 'حلقة عثمان بن عفان',       teacher: tMohammad._id, masjid: mFaruq._id,    days: 'الثلاثاء، الخميس، السبت',  time: '٤:٠٠ م - ٥:٣٠ م', capacity: 12, attendancePct: 83, completionPct: 80 },
-    { name: 'حلقة عبدالرحمن بن عوف',   teacher: tNasir._id,    masjid: mHuda._id,     days: 'الأحد، الثلاثاء، الخميس',  time: '٦:٠٠ م - ٧:٣٠ م', capacity: 15, attendancePct: 90, completionPct: 70 },
+  // ── Tracks (masjid-linked memorization/review groups, incl. multi-teacher
+  //    special tracks — both are the same shape now) ─────────────────────────
+  const tracks = await Track.insertMany([
+    { masjid: mFaruq._id,   title: 'مسار عمر بن الخطاب',        type: 'تحفيظ', status: 'active',   startDate: new Date('2024-09-01'), endDate: new Date('2025-06-01'), daysPerWeek: 'السبت، الاثنين، الخميس',    timeSlot: '٥:٠٠ م - ٦:٣٠ م', isOnline: false, teachers: [tNasir._id],           maxStudents: 15 },
+    { masjid: mNur._id,     title: 'مسار أبي بكر الصديق',        type: 'تحفيظ', status: 'active',   startDate: new Date('2024-09-01'), endDate: new Date('2025-06-01'), daysPerWeek: 'الأحد، الثلاثاء، الجمعة',  timeSlot: '٤:٣٠ م - ٦:٠٠ م', isOnline: false, teachers: [tSaad._id],            maxStudents: 15 },
+    { masjid: mTaqwa._id,   title: 'مسار علي بن أبي طالب',       type: 'تحفيظ', status: 'active',   startDate: new Date('2024-09-01'), endDate: new Date('2025-06-01'), daysPerWeek: 'السبت، الاثنين، الأربعاء', timeSlot: '٥:٣٠ م - ٧:٠٠ م', isOnline: false, teachers: [tFaisal._id],          maxStudents: 15 },
+    { masjid: mFaruq._id,   title: 'مسار عثمان بن عفان',         type: 'تحفيظ', status: 'active',   startDate: new Date('2024-09-01'), endDate: new Date('2025-06-01'), daysPerWeek: 'الثلاثاء، الخميس، السبت',  timeSlot: '٤:٠٠ م - ٥:٣٠ م', isOnline: false, teachers: [tMohammad._id],        maxStudents: 12 },
+    { masjid: mHuda._id,    title: 'مسار عبدالرحمن بن عوف',      type: 'تحفيظ', status: 'active',   startDate: new Date('2024-09-01'), endDate: new Date('2025-06-01'), daysPerWeek: 'الأحد، الثلاثاء، الخميس',  timeSlot: '٦:٠٠ م - ٧:٣٠ م', isOnline: false, teachers: [tNasir._id],           maxStudents: 15 },
+    { masjid: mKhadija._id, title: 'مسار الطالبات لحفظ القرآن',  type: 'تحفيظ', status: 'upcoming', startDate: new Date('2025-01-01'), endDate: new Date('2025-12-01'), daysPerWeek: 'الأحد، الثلاثاء، الخميس',  timeSlot: '٤:٠٠ م - ٥:٣٠ م', isOnline: false, teachers: [tMohammad._id],        maxStudents: 15 },
+    {
+      masjid: mFaruq._id,
+      title: 'دورة رمضان المكثفة',
+      type: 'رمضاني',
+      status: 'active',
+      startDate: new Date('2024-10-01'),
+      endDate: new Date('2024-12-01'),
+      daysPerWeek: 'السبت، الأحد، الثلاثاء',
+      timeSlot: '٨:٠٠ م - ٩:٣٠ م',
+      isOnline: false,
+      teachers: [tNasir._id, tSaad._id],
+      maxStudents: 20,
+      notes: 'مسار مكثف لختم جزء إضافي خلال الفترة',
+    },
   ]);
-  console.log(`📚  Seeded ${halqat.length} halqat`);
+  console.log(`📚  Seeded ${tracks.length} مسارات`);
 
-  const [hOmar, hAbuBakr, hAli, hOthman, hAbdulRahman] = halqat;
+  const [tOmar, tAbuBakr, tAli, tOthman, tAbdulRahman, , tRamadan] = tracks;
 
   // ── Students ───────────────────────────────────────────────────────────────
   const students = await Student.insertMany([
-    { name: 'عبدالله الحميداني', path: 'حفظ كامل',      halqa: hOmar._id,          masjid: mFaruq._id,  attendancePct: 94,  progressPct: 68, progressPages: 408, totalPages: 604, guardian: 'محمد الحميداني', guardianPhone: '0512345678', lastMemorization: 'البقرة ١-٢٠',      status: 'active', homeworkStatus: 'submitted' },
-    { name: 'يوسف العمري',       path: 'حفظ كامل',      halqa: hOmar._id,          masjid: mFaruq._id,  attendancePct: 88,  progressPct: 52, progressPages: 314, totalPages: 604, guardian: 'عمر العمري',    guardianPhone: '0523456789', lastMemorization: 'آل عمران ١-١٥',   status: 'active', homeworkStatus: 'pending'   },
-    { name: 'سلطان المطيري',     path: 'عشرون جزءاً',  halqa: hAbuBakr._id,       masjid: mNur._id,    attendancePct: 100, progressPct: 78, progressPages: 235, totalPages: 302, guardian: 'فيصل المطيري',   guardianPhone: '0534567890', lastMemorization: 'النساء ٥-١٢',      status: 'active', homeworkStatus: 'submitted' },
-    { name: 'فهد الشمري',        path: 'عشرة أجزاء',   halqa: hAbuBakr._id,       masjid: mNur._id,    attendancePct: 75,  progressPct: 45, progressPages: 68,  totalPages: 151, guardian: 'خالد الشمري',    guardianPhone: '0545678901', lastMemorization: 'المائدة ١-٨',      status: 'active', homeworkStatus: 'late'      },
-    { name: 'ماجد القحطاني',     path: 'حفظ كامل',      halqa: hAli._id,           masjid: mTaqwa._id,  attendancePct: 82,  progressPct: 35, progressPages: 211, totalPages: 604, guardian: 'ناصر القحطاني',  guardianPhone: '0556789012', lastMemorization: 'الأنعام ١-٦',      status: 'active', homeworkStatus: 'submitted' },
-    { name: 'عمر الدوسري',       path: 'عشرون جزءاً',  halqa: hAli._id,           masjid: mTaqwa._id,  attendancePct: 91,  progressPct: 62, progressPages: 187, totalPages: 302, guardian: 'سعد الدوسري',    guardianPhone: '0567890123', lastMemorization: 'الأعراف ١-١٠',    status: 'active', homeworkStatus: 'submitted' },
-    { name: 'خالد العنزي',       path: 'عشرة أجزاء',   halqa: hOthman._id,        masjid: mFaruq._id,  attendancePct: 85,  progressPct: 60, progressPages: 91,  totalPages: 151, guardian: 'محمد العنزي',    guardianPhone: '0578901234', lastMemorization: 'الأنفال ١-٥',      status: 'active', homeworkStatus: 'submitted' },
-    { name: 'عبدالرحمن الغامدي', path: 'حفظ كامل',      halqa: hAbdulRahman._id,   masjid: mHuda._id,   attendancePct: 97,  progressPct: 85, progressPages: 513, totalPages: 604, guardian: 'أحمد الغامدي',   guardianPhone: '0589012345', lastMemorization: 'التوبة ١-٢٠',      status: 'active', homeworkStatus: 'submitted' },
+    { name: 'عبدالله الحميداني', path: 'حفظ كامل',      track: tOmar._id,         attendancePct: 94,  progressPct: 68, progressPages: 408, totalPages: 604, guardian: 'محمد الحميداني', guardianPhone: '0512345678', lastMemorization: 'البقرة ١-٢٠',      status: 'active', homeworkStatus: 'submitted' },
+    { name: 'يوسف العمري',       path: 'حفظ كامل',      track: tOmar._id,         attendancePct: 88,  progressPct: 52, progressPages: 314, totalPages: 604, guardian: 'عمر العمري',    guardianPhone: '0523456789', lastMemorization: 'آل عمران ١-١٥',   status: 'active', homeworkStatus: 'pending'   },
+    { name: 'سلطان المطيري',     path: 'عشرون جزءاً',  track: tAbuBakr._id,      attendancePct: 100, progressPct: 78, progressPages: 235, totalPages: 302, guardian: 'فيصل المطيري',   guardianPhone: '0534567890', lastMemorization: 'النساء ٥-١٢',      status: 'active', homeworkStatus: 'submitted' },
+    { name: 'فهد الشمري',        path: 'عشرة أجزاء',   track: tAbuBakr._id,      attendancePct: 75,  progressPct: 45, progressPages: 68,  totalPages: 151, guardian: 'خالد الشمري',    guardianPhone: '0545678901', lastMemorization: 'المائدة ١-٨',      status: 'active', homeworkStatus: 'late'      },
+    { name: 'ماجد القحطاني',     path: 'حفظ كامل',      track: tAli._id,          attendancePct: 82,  progressPct: 35, progressPages: 211, totalPages: 604, guardian: 'ناصر القحطاني',  guardianPhone: '0556789012', lastMemorization: 'الأنعام ١-٦',      status: 'active', homeworkStatus: 'submitted' },
+    { name: 'عمر الدوسري',       path: 'عشرون جزءاً',  track: tAli._id,          attendancePct: 91,  progressPct: 62, progressPages: 187, totalPages: 302, guardian: 'سعد الدوسري',    guardianPhone: '0567890123', lastMemorization: 'الأعراف ١-١٠',    status: 'active', homeworkStatus: 'submitted' },
+    { name: 'خالد العنزي',       path: 'عشرة أجزاء',   track: tOthman._id,       attendancePct: 85,  progressPct: 60, progressPages: 91,  totalPages: 151, guardian: 'محمد العنزي',    guardianPhone: '0578901234', lastMemorization: 'الأنفال ١-٥',      status: 'active', homeworkStatus: 'submitted' },
+    { name: 'عبدالرحمن الغامدي', path: 'حفظ كامل',      track: tAbdulRahman._id,  attendancePct: 97,  progressPct: 85, progressPages: 513, totalPages: 604, guardian: 'أحمد الغامدي',   guardianPhone: '0589012345', lastMemorization: 'التوبة ١-٢٠',      status: 'active', homeworkStatus: 'submitted' },
   ]);
   console.log(`🧑‍🎓  Seeded ${students.length} students`);
 
@@ -118,62 +133,41 @@ async function seed(): Promise<void> {
   ] as const;
 
   await Attendance.insertMany(
-    attendanceSeed.map((a) => ({ ...a, student: students[0]._id, halqa: hOmar._id })),
+    attendanceSeed.map((a) => ({ ...a, student: students[0]._id, track: tOmar._id })),
   );
   console.log(`✅  Seeded attendance records`);
 
   // ── Homework ───────────────────────────────────────────────────────────────
   await Homework.insertMany([
-    { student: students[0]._id, teacher: tNasir._id, halqa: hOmar._id, type: 'حفظ جديد',   segment: 'البقرة ٢١-٤٠',       dueDate: new Date('2024-10-24'), status: 'معلق',  rating: undefined },
-    { student: students[1]._id, teacher: tNasir._id, halqa: hOmar._id, type: 'مراجعة',      segment: 'آل عمران ١-١٥',      dueDate: new Date('2024-10-24'), status: 'مراجع', rating: 'جيد' },
-    { student: students[2]._id, teacher: tSaad._id,  halqa: hAbuBakr._id, type: 'تلاوة',   segment: 'النساء ٥-١٢',         dueDate: new Date('2024-10-22'), status: 'مراجع', rating: 'ممتاز' },
-    { student: students[3]._id, teacher: tSaad._id,  halqa: hAbuBakr._id, type: 'مراجعة',  segment: 'المائدة ١-٨',         dueDate: new Date('2024-10-20'), status: 'متأخر', rating: undefined },
+    { student: students[0]._id, teacher: tNasir._id, track: tOmar._id,    type: 'حفظ جديد',   segment: 'البقرة ٢١-٤٠',       dueDate: new Date('2024-10-24'), status: 'معلق',  rating: undefined },
+    { student: students[1]._id, teacher: tNasir._id, track: tOmar._id,    type: 'مراجعة',      segment: 'آل عمران ١-١٥',      dueDate: new Date('2024-10-24'), status: 'مراجع', rating: 'جيد' },
+    { student: students[2]._id, teacher: tSaad._id,  track: tAbuBakr._id, type: 'تلاوة',       segment: 'النساء ٥-١٢',         dueDate: new Date('2024-10-22'), status: 'مراجع', rating: 'ممتاز' },
+    { student: students[3]._id, teacher: tSaad._id,  track: tAbuBakr._id, type: 'مراجعة',      segment: 'المائدة ١-٨',         dueDate: new Date('2024-10-20'), status: 'متأخر', rating: undefined },
   ]);
   console.log(`📝  Seeded homework records`);
 
-  // ── Special Tracks (multi-teacher, many-to-many enrollment) ───────────────
-  const specialTracks = await SpecialTrack.insertMany([
-    {
-      title: 'دورة رمضان المكثفة',
-      type: 'رمضاني',
-      status: 'active',
-      startDate: new Date('2024-10-01'),
-      endDate: new Date('2024-12-01'),
-      daysPerWeek: 'السبت، الأحد، الثلاثاء',
-      timeSlot: '٨:٠٠ م - ٩:٣٠ م',
-      location: mFaruq.name,
-      isOnline: false,
-      teachers: [tNasir._id, tSaad._id],
-      maxStudents: 20,
-      enrolledStudents: [students[0]._id, students[2]._id],
-      notes: 'مسار مكثف لختم جزء إضافي خلال الفترة',
-    },
-  ]);
-  console.log(`🌙  Seeded ${specialTracks.length} special tracks`);
-  const [trackRamadan] = specialTracks;
-
-  // ── Group homework (one halqa-linked, one specialTrack-linked) ────────────
+  // ── Group homework (both track-linked) ─────────────────────────────────────
   await GroupHomework.insertMany([
-    { halqa: hOmar._id, teacher: tNasir._id, title: 'مراجعة جماعية', description: 'مراجعة سورة البقرة كاملة', dueDay: 'الخميس', dueDate: new Date('2024-10-24') },
-    { specialTrack: trackRamadan._id, teacher: tNasir._id, title: 'ورد رمضان', description: 'حفظ نصف جزء إضافي', dueDay: 'الثلاثاء', dueDate: new Date('2024-10-29') },
+    { track: tOmar._id,    teacher: tNasir._id, title: 'مراجعة جماعية', description: 'مراجعة سورة البقرة كاملة', dueDay: 'الخميس',    dueDate: new Date('2024-10-24') },
+    { track: tRamadan._id, teacher: tNasir._id, title: 'ورد رمضان',      description: 'حفظ نصف جزء إضافي',        dueDay: 'الثلاثاء', dueDate: new Date('2024-10-29') },
   ]);
   console.log(`📋  Seeded group homework records`);
 
-  // ── Lesson recordings (one halqa-linked, one specialTrack-linked) ─────────
+  // ── Lesson recordings (both track-linked) ──────────────────────────────────
   await LessonRecording.insertMany([
-    { student: students[0]._id, teacher: tNasir._id, halqa: hOmar._id, type: 'تسميع', segment: 'البقرة ١-٢٠', points: 9, teacherNote: 'أداء ممتاز' },
-    { student: students[0]._id, teacher: tNasir._id, specialTrack: trackRamadan._id, type: 'تسميع', segment: 'جزء إضافي', points: 8, teacherNote: 'التزام جيد بورد المسار' },
+    { student: students[0]._id, teacher: tNasir._id, track: tOmar._id,    type: 'تسميع', segment: 'البقرة ١-٢٠', points: 9, teacherNote: 'أداء ممتاز' },
+    { student: students[0]._id, teacher: tNasir._id, track: tRamadan._id, type: 'تسميع', segment: 'جزء إضافي',   points: 8, teacherNote: 'التزام جيد بورد المسار' },
   ]);
   console.log(`🎙️  Seeded lesson recordings`);
 
-  // ── Special-track attendance (cross-halqa roster) ──────────────────────────
+  // ── Track attendance (cross-track roster for the Ramadan track) ───────────
   await Attendance.insertMany([
-    { student: students[0]._id, specialTrack: trackRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'حاضر' },
-    { student: students[2]._id, specialTrack: trackRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'غائب' },
+    { student: students[0]._id, track: tRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'حاضر' },
+    { student: students[2]._id, track: tRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'غائب' },
   ]);
-  console.log(`✅  Seeded special-track attendance records`);
+  console.log(`✅  Seeded track attendance records`);
 
-  // ── Quran plans (halqa-, students-, and specialTrack-targeted) ────────────
+  // ── Quran plans (track- and students-targeted) ─────────────────────────────
   const today = new Date();
   const inAMonth = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
   const ALL_WEEK_DAYS = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
@@ -184,8 +178,8 @@ async function seed(): Promise<void> {
       type: 'حفظ',
       description: 'حفظ سورة البقرة كاملة على مدار الشهر',
       teacher: tNasir._id,
-      targetType: 'halqa',
-      halqa: hOmar._id,
+      targetType: 'track',
+      track: tOmar._id,
       days: ALL_WEEK_DAYS,
       rangeStart: { surahNumber: 1, ayah: 1 },
       rangeEnd: { surahNumber: 2, ayah: 286 },
@@ -217,8 +211,8 @@ async function seed(): Promise<void> {
       type: 'مراجعة',
       description: 'ورد مراجعة يومي لمتابعي مسار رمضان المكثف',
       teacher: tNasir._id,
-      targetType: 'specialTrack',
-      specialTrack: trackRamadan._id,
+      targetType: 'track',
+      track: tRamadan._id,
       days: ['السبت', 'الأحد', 'الثلاثاء'],
       rangeStart: { surahNumber: 1, ayah: 1 },
       rangeEnd: { surahNumber: 2, ayah: 50 },
@@ -231,10 +225,10 @@ async function seed(): Promise<void> {
     // every one of their weekdays, so التاريخ نفسه produces both wards at once.
     {
       name: 'خطة حفظ ومراجعة في نفس اليوم (تجريبية)',
-      description: 'خطة تجريبية لاختبار الحفظ والمراجعة في نفس الأيام على حلقة علي بن أبي طالب',
+      description: 'خطة تجريبية لاختبار الحفظ والمراجعة في نفس الأيام على مسار علي بن أبي طالب',
       teacher: tFaisal._id,
-      targetType: 'halqa',
-      halqa: hAli._id,
+      targetType: 'track',
+      track: tAli._id,
       segments: [
         {
           type: 'حفظ',
@@ -274,7 +268,7 @@ async function seed(): Promise<void> {
   const [, , , , parentUser] = await Promise.all([
     new User({ name: 'مدير النظام',       email: 'admin@quran-hifz.sa',    password: 'admin123',   role: 'admin',   isActive: true }).save(),
     new User({ name: 'ناصر الحميداني',   email: 'nasir@quran-hifz.sa',    password: 'teacher123', role: 'teacher', profileId: tNasir._id,    isActive: true }).save(),
-    // Owns the same-day حفظ+مراجعة demo plan (حلقة علي بن أبي طالب).
+    // Owns the same-day حفظ+مراجعة demo plan (مسار علي بن أبي طالب).
     new User({ name: 'فيصل العتيبي',     email: 'faisal@quran-hifz.sa',   password: 'teacher123', role: 'teacher', profileId: tFaisal._id,   isActive: true }).save(),
     new User({ name: 'عبدالله الحميداني', email: 'abdullah@quran-hifz.sa', password: 'student123', role: 'student', profileId: students[0]._id, isActive: true }).save(),
     new User({ name: 'محمد الحميداني',   email: 'parent@quran-hifz.sa',   password: 'parent123',  role: 'parent',  isActive: true }).save(),
