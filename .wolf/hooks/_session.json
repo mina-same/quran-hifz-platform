@@ -53,8 +53,8 @@
       "first_read": "2026-09-05T11:25:01.488Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Student.model.ts": {
-      "count": 1,
-      "tokens": 498,
+      "count": 2,
+      "tokens": 704,
       "first_read": "2026-09-05T11:25:11.093Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/special-track.controller.ts": {
@@ -248,8 +248,8 @@
       "first_read": "2026-09-05T12:00:57.171Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/quran-plan.controller.ts": {
-      "count": 3,
-      "tokens": 5815,
+      "count": 4,
+      "tokens": 6070,
       "first_read": "2026-09-05T12:00:57.645Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-10-report.md": {
@@ -293,8 +293,8 @@
       "first_read": "2026-09-05T12:09:51.056Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/seeds/seed.ts": {
-      "count": 3,
-      "tokens": 5176,
+      "count": 5,
+      "tokens": 5410,
       "first_read": "2026-09-05T12:09:51.127Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-12-report.md": {
@@ -353,7 +353,7 @@
       "first_read": "2026-09-05T12:24:40.216Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/specs/2026-09-05-halqa-track-restructure-design.md": {
-      "count": 1,
+      "count": 2,
       "tokens": 3171,
       "first_read": "2026-09-05T12:28:42.961Z"
     },
@@ -371,6 +371,16 @@
       "count": 1,
       "tokens": 4346,
       "first_read": "2026-09-05T12:30:56.918Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/lib/planStudents.ts": {
+      "count": 1,
+      "tokens": 243,
+      "first_read": "2026-09-05T12:39:32.963Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/track.routes.ts": {
+      "count": 1,
+      "tokens": 223,
+      "first_read": "2026-09-05T12:39:40.001Z"
     }
   },
   "files_written": [
@@ -1057,16 +1067,106 @@
       "action": "edit",
       "tokens": 1128,
       "at": "2026-09-05T12:34:25.823Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md",
+      "action": "edit",
+      "tokens": 724,
+      "at": "2026-09-05T12:37:48.177Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/specs/2026-09-05-halqa-track-restructure-design.md",
+      "action": "edit",
+      "tokens": 172,
+      "at": "2026-09-05T12:38:12.393Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/lib/planStudents.ts",
+      "action": "edit",
+      "tokens": 120,
+      "at": "2026-09-05T12:41:52.262Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "action": "edit",
+      "tokens": 389,
+      "at": "2026-09-05T12:42:00.889Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+      "action": "edit",
+      "tokens": 110,
+      "at": "2026-09-05T12:42:07.696Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/track.controller.ts",
+      "action": "edit",
+      "tokens": 166,
+      "at": "2026-09-05T12:42:13.372Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/track.controller.ts",
+      "action": "edit",
+      "tokens": 338,
+      "at": "2026-09-05T12:42:24.990Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/track.routes.ts",
+      "action": "edit",
+      "tokens": 37,
+      "at": "2026-09-05T12:42:35.723Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/track.routes.ts",
+      "action": "edit",
+      "tokens": 40,
+      "at": "2026-09-05T12:42:40.375Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/seeds/seed.ts",
+      "action": "edit",
+      "tokens": 993,
+      "at": "2026-09-05T12:43:16.294Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/seeds/seed.ts",
+      "action": "edit",
+      "tokens": 57,
+      "at": "2026-09-05T12:43:25.140Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/seeds/seed.ts",
+      "action": "edit",
+      "tokens": 47,
+      "at": "2026-09-05T12:43:30.121Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/seeds/seed.ts",
+      "action": "edit",
+      "tokens": 128,
+      "at": "2026-09-05T12:43:37.107Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/quran-plan.controller.ts",
+      "action": "edit",
+      "tokens": 65,
+      "at": "2026-09-05T12:45:28.474Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/final-review-fix-report.md",
+      "action": "create",
+      "tokens": 1968,
+      "at": "2026-09-05T12:48:33.339Z"
     }
   ],
   "edit_counts": {
-    ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md": 20,
+    ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/progress.md": 21,
     "quran-hifz-server/src/models/Masjid.model.ts": 1,
-    "quran-hifz-server/src/controllers/masjid.controller.ts": 1,
+    "quran-hifz-server/src/controllers/masjid.controller.ts": 2,
     "quran-hifz-server/src/models/Track.model.ts": 1,
     ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-1-2-report.md": 1,
-    "quran-hifz-server/src/controllers/track.controller.ts": 1,
-    "quran-hifz-server/src/routes/track.routes.ts": 1,
+    "quran-hifz-server/src/controllers/track.controller.ts": 3,
+    "quran-hifz-server/src/routes/track.routes.ts": 3,
     "quran-hifz-server/src/controllers/student.controller.ts": 2,
     "quran-hifz-server/src/models/Student.model.ts": 3,
     ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-3-5-report.md": 2,
@@ -1089,23 +1189,25 @@
     ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-8-report.md": 1,
     ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-9-report.md": 1,
     "quran-hifz-server/src/models/QuranPlan.model.ts": 3,
-    "quran-hifz-server/src/controllers/quran-plan.controller.ts": 7,
-    "quran-hifz-server/src/lib/planStudents.ts": 1,
+    "quran-hifz-server/src/controllers/quran-plan.controller.ts": 9,
+    "quran-hifz-server/src/lib/planStudents.ts": 2,
     ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-10-report.md": 1,
     "quran-hifz-server/src/controllers/parent.controller.ts": 3,
     "quran-hifz-server/src/controllers/stats.controller.ts": 3,
     ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-11-report.md": 1,
-    "quran-hifz-server/src/seeds/seed.ts": 1,
+    "quran-hifz-server/src/seeds/seed.ts": 5,
     ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-12-report.md": 1,
     "quran-hifz-server/src/seeds/wipe-all.ts": 1,
     "quran-hifz-server/src/seeds/backfillPlans.ts": 1,
     "quran-hifz-server/src/seeds/import-real-halaqat.ts": 1,
     ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-13-report.md": 1,
-    ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-14-report.md": 1
+    ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/task-14-report.md": 1,
+    "docs/superpowers/specs/2026-09-05-halqa-track-restructure-design.md": 1,
+    ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase1-server/final-review-fix-report.md": 1
   },
-  "anatomy_hits": 45,
+  "anatomy_hits": 47,
   "anatomy_misses": 27,
-  "repeated_reads_warned": 64,
+  "repeated_reads_warned": 69,
   "cerebrum_warnings": 0,
   "stop_count": 4
 }

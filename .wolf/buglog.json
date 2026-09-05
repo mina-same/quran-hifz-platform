@@ -6613,5 +6613,109 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-09-04T11:11:30.569685"
+  },
+  {
+    "id": "bug-391",
+    "timestamp": "2026-09-05T15:45:00",
+    "error_message": "getPlanStudentIds returned EVERY student when a track-targeted plan had no track set",
+    "file": "quran-hifz-server/src/lib/planStudents.ts",
+    "root_cause": "Student.find({ track: plan.track }) with plan.track undefined casts to Student.find({}) in Mongoose, matching every student. Reachable via PATCH /api/quran-plans/:id (updatePlan uses quranPlanSchema.partial(), which skips the create-only superRefine validation), so a plan could end up with targetType:'track' and no track value.",
+    "fix": "Added an explicit guard: if targetType !== students and !plan.track, return [] immediately. Also added a merge-and-validate check in updatePlan that rejects an update leaving targetType:track with no track (or targetType:students with no students), mirroring the create schema superRefine.",
+    "tags": [
+      "authorization",
+      "mongoose",
+      "quran-plan",
+      "security"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-09-05T15:45:00"
+  },
+  {
+    "id": "bug-392",
+    "timestamp": "2026-09-05T15:45:00",
+    "error_message": "Seed data: دورة رمضان المكثفة (Ramadan track) had Attendance/Homework/LessonRecording rows referencing students not actually enrolled in it",
+    "file": "quran-hifz-server/src/seeds/seed.ts",
+    "root_cause": "No seed student had Student.track pointing at the Ramadan track, yet Attendance/LessonRecording/Homework rows referenced students belonging to other tracks under the Ramadan track id — incoherent now that Student.track is the sole membership mechanism.",
+    "fix": "Moved two students (فهد الشمري, عمر الدوسري) to track: tRamadan, and repointed the previously-mismatched Attendance/Homework/LessonRecording rows to reference them instead.",
+    "tags": [
+      "seed-data",
+      "track",
+      "data-integrity"
+    ],
+    "related_bugs": [
+      "bug-391"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-09-05T15:45:00"
+  },
+  {
+    "id": "bug-393",
+    "timestamp": "2026-09-05T15:45:00",
+    "error_message": "Seed data: the one female-gender masjid (خديجة) track had zero students",
+    "file": "quran-hifz-server/src/seeds/seed.ts",
+    "root_cause": "مسار الطالبات لحفظ القرآن (the track at the only Masjid.gender: female masjid) had no students in Student.insertMany, so the female/gender display path had no real seed data to exercise.",
+    "fix": "Added two new students (نورة السبيعي, ريم الحربي) with track pointing at that track.",
+    "tags": [
+      "seed-data",
+      "gender",
+      "masjid"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-09-05T15:45:00"
+  },
+  {
+    "id": "bug-394",
+    "timestamp": "2026-09-05T15:45:00",
+    "error_message": "deleteMasjid had no guard against Track documents still referencing it (Track.masjid is required)",
+    "file": "quran-hifz-server/src/controllers/masjid.controller.ts",
+    "root_cause": "Track.masjid is a required ref; deleting a masjid with tracks still pointing at it leaves those tracks with a dangling required reference (populates to null), silently breaking the gender-label display path.",
+    "fix": "Added a Track.countDocuments({ masjid: req.params.id }) check before delete, refusing with an AppError(400) if any tracks remain — mirrors deleteTrack's existing student guard.",
+    "tags": [
+      "masjid",
+      "track",
+      "data-integrity",
+      "delete-guard"
+    ],
+    "related_bugs": [
+      "bug-395"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-09-05T15:45:00"
+  },
+  {
+    "id": "bug-395",
+    "timestamp": "2026-09-05T15:45:00",
+    "error_message": "deleteTrack only guarded against remaining students, not historical Attendance/Evaluation/Homework/GroupHomework/LessonRecording/QuranPlan records referencing the track",
+    "file": "quran-hifz-server/src/controllers/track.controller.ts",
+    "root_cause": "Those six collections all carry a required track ref; deleting a track that still has historical records pointing at it would leave them dangling.",
+    "fix": "Extended deleteTrack to also Promise.all six countDocuments({ track }) calls across those collections and refuse deletion (AppError 400) if any are nonzero.",
+    "tags": [
+      "track",
+      "data-integrity",
+      "delete-guard"
+    ],
+    "related_bugs": [
+      "bug-394"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-09-05T15:45:00"
+  },
+  {
+    "id": "bug-396",
+    "timestamp": "2026-09-05T15:45:00",
+    "error_message": "track.controller.ts unassignStudent was functionally identical to assignStudent under a misleading name",
+    "file": "quran-hifz-server/src/controllers/track.controller.ts",
+    "root_cause": "unassignStudent never read req.params.id (the track it claimed to unassign from); it just set Student.track to a target track id, same as assignStudent. No client called it (no web/mobile phase built yet for this restructure).",
+    "fix": "Deleted unassignStudent and its POST /:id/unassign route registration; assignStudent already covers moving a student to a different track.",
+    "tags": [
+      "track",
+      "dead-code",
+      "api-cleanup"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-09-05T15:45:00"
   }
 ]
