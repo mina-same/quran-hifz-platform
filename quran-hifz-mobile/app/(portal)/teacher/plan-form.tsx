@@ -241,6 +241,10 @@ export default function TeacherPlanForm() {
 
   const requestedOccurrences = form.endType === 'activeDays' ? Number(form.activeDaysCount || 0) : schedulePreview.length;
   const previewShortfall = requestedOccurrences > 0 && schedulePreview.length < requestedOccurrences;
+  // `schedulePreview` now holds one row per segment per day (both types'
+  // entries merged), so counting rows double-counts any day حفظ and مراجعة
+  // share — count distinct calendar days instead.
+  const previewDayCount = new Set(schedulePreview.map((s) => s.date)).size;
 
   async function handleSubmit() {
     if (!form.name.trim()) return setFormError('اسم الخطة مطلوب');
@@ -707,7 +711,7 @@ export default function TeacherPlanForm() {
             )}
             <SheetTriggerRow
               label="عرض التقسيمة اليومية"
-              value={`${schedulePreview.length} يوم`}
+              value={`${previewDayCount} يوم`}
               icon={<IconCalendarEvent size={17} color={theme.green} />}
               onPress={() => setShowSchedule(true)}
             />

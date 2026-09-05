@@ -324,6 +324,10 @@ export function TeacherPlanForm() {
   const requestedOccurrences =
     form.endType === "activeDays" ? Number(form.activeDaysCount || 0) : schedulePreview.length;
   const previewShortfall = requestedOccurrences > 0 && schedulePreview.length < requestedOccurrences;
+  // `schedulePreview` now holds one row per segment per day (both types'
+  // entries merged), so counting rows double-counts any day حفظ and مراجعة
+  // share. `activeDaysCount` means distinct calendar days — count those.
+  const previewDayCount = new Set(schedulePreview.map((s) => s.date)).size;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -952,7 +956,7 @@ export function TeacherPlanForm() {
               display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
             }}>
               <i className="ti ti-info-circle" style={{ color: "var(--green)" }} />
-              <span>عدد الأيام: <strong>{schedulePreview.length}</strong></span>
+              <span>عدد الأيام: <strong>{previewDayCount}</strong></span>
               {form.segments.length > 1 && (
                 <span>· {form.segments.map((sg) => sg.type).join("، ")}</span>
               )}

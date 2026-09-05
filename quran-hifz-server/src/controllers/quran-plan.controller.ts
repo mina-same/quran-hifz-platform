@@ -211,13 +211,24 @@ function withPlanComputed(plan: InstanceType<typeof QuranPlan>) {
   const todayAssignments = shaped.map((s) => s.todayAssignment).filter((a): a is NonNullable<typeof a> => a != null);
   const todayAssignment = todayAssignments[0] ?? null;
 
+  // Day-count progress ("X / Y يوم" on ~20 read-only screens) has to be
+  // distinct calendar days across the whole plan, not summed per-segment
+  // occurrence counts — a day حفظ and مراجعة share must only count once.
+  // Derived straight from the already-shaped per-segment schedules (which
+  // already account for page-shortfall truncation etc.) rather than
+  // recomputed, so this can't drift from what `schedule` itself shows.
+  const scheduleDates = Array.from(new Set(shaped.flatMap((s) => s.schedule.map((e) => e.date)))).sort();
+  const totalDays = scheduleDates.length;
+  const todayMidnight = new Date();
+  todayMidnight.setHours(0, 0, 0, 0);
+  const completedDays = scheduleDates.filter((d) => new Date(d).getTime() <= todayMidnight.getTime()).length;
+
   const totals = shaped.reduce(
     (acc, s) => {
-      if (s.progress) { acc.completed += s.progress.completed; acc.total += s.progress.total; }
       if (s.juzProgress) { acc.juzCompleted += s.juzProgress.completed; acc.juzTotal += s.juzProgress.total; }
       return acc;
     },
-    { completed: 0, total: 0, juzCompleted: 0, juzTotal: 0 },
+    { juzCompleted: 0, juzTotal: 0 },
   );
 
   const pageStarts = shaped.map((s) => s.pageRange.pageStart);
@@ -235,8 +246,8 @@ function withPlanComputed(plan: InstanceType<typeof QuranPlan>) {
     days: unionDays(segmentInputs),
     todayAssignment,
     todayAssignments,
-    progress: totals.total > 0
-      ? { completed: totals.completed, total: totals.total, percent: Math.round((totals.completed / totals.total) * 100) }
+    progress: totalDays > 0
+      ? { completed: completedDays, total: totalDays, percent: Math.round((completedDays / totalDays) * 100) }
       : null,
     juzProgress: totals.juzTotal > 0
       ? { completed: totals.juzCompleted, total: totals.juzTotal }
