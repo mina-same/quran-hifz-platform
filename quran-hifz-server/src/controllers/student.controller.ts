@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { Student, NATIONAL_ID_RE } from '../models/Student.model';
 import { User } from '../models/User.model';
-import { SpecialTrack } from '../models/SpecialTrack.model';
+import { Track } from '../models/Track.model';
 import { ParentStudent } from '../models/ParentStudent.model';
 import { AppError } from '../middleware/error';
 
@@ -15,8 +15,7 @@ const studentSchema = z.object({
     z.string().regex(NATIONAL_ID_RE, 'رقم الهوية يجب أن يكون ١٠ أرقام ويبدأ بـ ١ أو ٢').optional(),
   ),
   path:             z.enum(['حفظ كامل', 'عشرون جزءاً', 'عشرة أجزاء', 'خمسة أجزاء']),
-  halqa:            z.string().min(1, 'الحلقة مطلوبة'),
-  masjid:           z.string().min(1, 'المسجد مطلوب'),
+  track:            z.string().min(1, 'المسار مطلوب'),
   guardian:         z.string().optional(),
   guardianPhone:    z.string().optional(),
   lastMemorization: z.string().optional(),
@@ -29,25 +28,28 @@ const studentSchema = z.object({
 
 export async function getStudents(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { halqa, specialTrack, masjid, status, search } = req.query;
+    const { track, masjid, status, search } = req.query;
     const filter: Record<string, unknown> = {};
 
-    if (halqa) {
-      const ids = String(halqa).split(',').filter(Boolean);
-      filter.halqa = ids.length > 1 ? { $in: ids } : ids[0];
+    if (track) {
+      const ids = String(track).split(',').filter(Boolean);
+      filter.track = ids.length > 1 ? { $in: ids } : ids[0];
     }
-    if (masjid)  filter.masjid = masjid;
     if (status)  filter.status = status;
     if (search)  filter.name   = { $regex: search, $options: 'i' };
 
-    if (specialTrack) {
-      const track = await SpecialTrack.findById(specialTrack).select('enrolledStudents');
-      filter._id = { $in: track ? track.enrolledStudents : [] };
+    // `masjid` filters by the student's track's masjid — Student itself no
+    // longer stores masjid directly, so this needs a two-step resolve.
+    if (masjid) {
+      const tracksAtMasjid = await Track.find({ masjid }).select('_id');
+      const trackIds = tracksAtMasjid.map((t) => t._id);
+      filter.track = filter.track
+        ? { $in: trackIds, ...(filter.track as Record<string, unknown>) }
+        : { $in: trackIds };
     }
 
     const students = await Student.find(filter)
-      .populate({ path: 'halqa', select: 'name time days specialTrack', populate: { path: 'specialTrack', select: 'title' } })
-      .populate('masjid', 'name location')
+      .populate({ path: 'track', select: 'title masjid', populate: { path: 'masjid', select: 'name location gender' } })
       .sort({ createdAt: -1 });
 
     const studentIds = students.map((s) => s._id);
@@ -82,8 +84,7 @@ export async function getStudents(req: Request, res: Response, next: NextFunctio
 export async function getStudent(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const student = await Student.findById(req.params.id)
-      .populate('halqa',  'name teacher time days capacity')
-      .populate('masjid', 'name location');
+      .populate({ path: 'track', select: 'title daysPerWeek timeSlot masjid', populate: { path: 'masjid', select: 'name location gender' } });
 
     if (!student) throw new AppError('الطالب غير موجود', 404);
     res.json({ success: true, data: student });

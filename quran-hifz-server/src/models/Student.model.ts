@@ -14,8 +14,7 @@ export interface IStudent extends Document {
   path?: string;
   level?: number;
   plan?: string;
-  halqa: Types.ObjectId;
-  masjid: Types.ObjectId;
+  track: Types.ObjectId;
   attendancePct: number;
   progressPct: number;
   progressPages: number;
@@ -40,8 +39,7 @@ const studentSchema = new Schema<IStudent>(
     path:             { type: String, enum: ['حفظ كامل', 'عشرون جزءاً', 'عشرة أجزاء', 'خمسة أجزاء'] },
     level:            { type: Number, min: 1, max: 10 },
     plan:             { type: String, trim: true },
-    halqa:            { type: Schema.Types.ObjectId, ref: 'Halqa',  required: true },
-    masjid:           { type: Schema.Types.ObjectId, ref: 'Masjid', required: true },
+    track:            { type: Schema.Types.ObjectId, ref: 'Track', required: true },
     attendancePct:    { type: Number, default: 0, min: 0, max: 100 },
     progressPct:      { type: Number, default: 0, min: 0, max: 100 },
     progressPages:    { type: Number, default: 0, min: 0 },
@@ -58,8 +56,7 @@ const studentSchema = new Schema<IStudent>(
 // Sparse so the many students without an ID don't collide on `null`, unique so
 // the same identity can't be registered twice.
 studentSchema.index({ nationalId: 1 }, { unique: true, sparse: true });
-studentSchema.index({ halqa: 1 });
-studentSchema.index({ masjid: 1 });
+studentSchema.index({ track: 1 });
 studentSchema.index({ status: 1 });
 
 export const Student = model<IStudent>('Student', studentSchema);
