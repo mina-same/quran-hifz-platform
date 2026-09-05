@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T15:41:27.072Z
-> Files: 585 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T15:49:33.769Z
+> Files: 586 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -282,7 +282,7 @@
 
 ## .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md (~1372 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md (~1543 tok)
 - `task-1-report.md` — Task 1: Track/Halqa API modules — Completion Report (~1188 tok)
 - `task-2-report.md` — Task 2: Context-field collapse across attendance/evaluations/group-homework/students APIs — Completi (~1247 tok)
 - `task-3-report.md` — Task 3 Completion Report (~903 tok)
@@ -291,6 +291,7 @@
 - `task-6-report.md` — Task 6 Report: Rename StudentSpecialTracks.tsx → StudentTracks.tsx (~1068 tok)
 - `task-7-report.md` — Task 7 Report: AdminMasajid.tsx — Gender Field + Tracks List (~1048 tok)
 - `task-8-report.md` — Task 8 Report: AdminStudents.tsx — Collapse halqa+masjid to track (~958 tok)
+- `task-9-report.md` — Task 9 Report: TeacherAttendance.tsx Consumer Update (~725 tok)
 
 ## docs/superpowers/plans/
 
@@ -886,10 +887,10 @@
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~16563 tok)
+- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~16392 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1348 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
-- `TeacherGroupHomework.tsx` — STUDENTS (~2940 tok)
+- `TeacherGroupHomework.tsx` — STUDENTS (~2809 tok)
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
 - `TeacherPlanDetail.tsx` — surahName — renders table (~3932 tok)
