@@ -42,10 +42,15 @@ export async function getStudents(req: Request, res: Response, next: NextFunctio
     // longer stores masjid directly, so this needs a two-step resolve.
     if (masjid) {
       const tracksAtMasjid = await Track.find({ masjid }).select('_id');
-      const trackIds = tracksAtMasjid.map((t) => t._id);
-      filter.track = filter.track
-        ? { $in: trackIds, ...(filter.track as Record<string, unknown>) }
-        : { $in: trackIds };
+      const masjidTrackIds = tracksAtMasjid.map((t) => String(t._id));
+      if (filter.track) {
+        const requestedIds = typeof filter.track === 'string'
+          ? [filter.track]
+          : (filter.track as { $in: string[] }).$in.map(String);
+        filter.track = { $in: requestedIds.filter((id) => masjidTrackIds.includes(id)) };
+      } else {
+        filter.track = { $in: masjidTrackIds };
+      }
     }
 
     const students = await Student.find(filter)
