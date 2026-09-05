@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { Teacher } from '../models/Teacher.model';
-import { Halqa } from '../models/Halqa.model';
+import { Track } from '../models/Track.model';
 import { Student } from '../models/Student.model';
 import { User } from '../models/User.model';
 import { AppError } from '../middleware/error';
@@ -23,11 +23,11 @@ export async function getTeachers(req: Request, res: Response, next: NextFunctio
 
     const enriched = await Promise.all(
       teachers.map(async (t) => {
-        const halqatCount  = await Halqa.countDocuments({ teacher: t._id });
-        const halqatIds    = await Halqa.find({ teacher: t._id }).select('_id');
-        const studentCount = await Student.countDocuments({ halqa: { $in: halqatIds.map((h) => h._id) } });
+        const trackIds     = await Track.find({ teachers: t._id }).select('_id');
+        const tracksCount  = trackIds.length;
+        const studentCount = await Student.countDocuments({ track: { $in: trackIds.map((tr) => tr._id) } });
         const userDoc      = await User.findOne({ role: 'teacher', profileId: t._id }).select('email');
-        return { ...t.toObject(), halqatCount, studentCount, email: userDoc?.email ?? null };
+        return { ...t.toObject(), tracksCount, studentCount, email: userDoc?.email ?? null };
       }),
     );
 
@@ -42,8 +42,8 @@ export async function getTeacher(req: Request, res: Response, next: NextFunction
     const teacher = await Teacher.findById(req.params.id);
     if (!teacher) throw new AppError('المعلم غير موجود', 404);
 
-    const halqat = await Halqa.find({ teacher: teacher._id }).populate('masjid', 'name');
-    res.json({ success: true, data: { ...teacher.toObject(), halqat } });
+    const tracks = await Track.find({ teachers: teacher._id }).populate('masjid', 'name');
+    res.json({ success: true, data: { ...teacher.toObject(), tracks } });
   } catch (err) {
     next(err);
   }
