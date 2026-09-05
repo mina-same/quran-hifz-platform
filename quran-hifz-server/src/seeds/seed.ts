@@ -88,18 +88,23 @@ async function seed(): Promise<void> {
   ]);
   console.log(`📚  Seeded ${tracks.length} مسارات`);
 
-  const [tOmar, tAbuBakr, tAli, tOthman, tAbdulRahman, , tRamadan] = tracks;
+  const [tOmar, tAbuBakr, tAli, tOthman, tAbdulRahman, tTalibat, tRamadan] = tracks;
 
   // ── Students ───────────────────────────────────────────────────────────────
+  // فهد (تحفيظ جزئي، كان في مسار أبي بكر) وعمر (كان في مسار علي) انتقلا إلى
+  // الدورة الرمضانية المكثفة — طالب واحد في مسار واحد فقط، فالانضمام لرمضان
+  // يعني ترك المسار العادي، تماماً كأي نقل آخر.
   const students = await Student.insertMany([
     { name: 'عبدالله الحميداني', path: 'حفظ كامل',      track: tOmar._id,         attendancePct: 94,  progressPct: 68, progressPages: 408, totalPages: 604, guardian: 'محمد الحميداني', guardianPhone: '0512345678', lastMemorization: 'البقرة ١-٢٠',      status: 'active', homeworkStatus: 'submitted' },
     { name: 'يوسف العمري',       path: 'حفظ كامل',      track: tOmar._id,         attendancePct: 88,  progressPct: 52, progressPages: 314, totalPages: 604, guardian: 'عمر العمري',    guardianPhone: '0523456789', lastMemorization: 'آل عمران ١-١٥',   status: 'active', homeworkStatus: 'pending'   },
     { name: 'سلطان المطيري',     path: 'عشرون جزءاً',  track: tAbuBakr._id,      attendancePct: 100, progressPct: 78, progressPages: 235, totalPages: 302, guardian: 'فيصل المطيري',   guardianPhone: '0534567890', lastMemorization: 'النساء ٥-١٢',      status: 'active', homeworkStatus: 'submitted' },
-    { name: 'فهد الشمري',        path: 'عشرة أجزاء',   track: tAbuBakr._id,      attendancePct: 75,  progressPct: 45, progressPages: 68,  totalPages: 151, guardian: 'خالد الشمري',    guardianPhone: '0545678901', lastMemorization: 'المائدة ١-٨',      status: 'active', homeworkStatus: 'late'      },
+    { name: 'فهد الشمري',        path: 'عشرة أجزاء',   track: tRamadan._id,      attendancePct: 75,  progressPct: 45, progressPages: 68,  totalPages: 151, guardian: 'خالد الشمري',    guardianPhone: '0545678901', lastMemorization: 'المائدة ١-٨',      status: 'active', homeworkStatus: 'late'      },
     { name: 'ماجد القحطاني',     path: 'حفظ كامل',      track: tAli._id,          attendancePct: 82,  progressPct: 35, progressPages: 211, totalPages: 604, guardian: 'ناصر القحطاني',  guardianPhone: '0556789012', lastMemorization: 'الأنعام ١-٦',      status: 'active', homeworkStatus: 'submitted' },
-    { name: 'عمر الدوسري',       path: 'عشرون جزءاً',  track: tAli._id,          attendancePct: 91,  progressPct: 62, progressPages: 187, totalPages: 302, guardian: 'سعد الدوسري',    guardianPhone: '0567890123', lastMemorization: 'الأعراف ١-١٠',    status: 'active', homeworkStatus: 'submitted' },
+    { name: 'عمر الدوسري',       path: 'عشرون جزءاً',  track: tRamadan._id,      attendancePct: 91,  progressPct: 62, progressPages: 187, totalPages: 302, guardian: 'سعد الدوسري',    guardianPhone: '0567890123', lastMemorization: 'الأعراف ١-١٠',    status: 'active', homeworkStatus: 'submitted' },
     { name: 'خالد العنزي',       path: 'عشرة أجزاء',   track: tOthman._id,       attendancePct: 85,  progressPct: 60, progressPages: 91,  totalPages: 151, guardian: 'محمد العنزي',    guardianPhone: '0578901234', lastMemorization: 'الأنفال ١-٥',      status: 'active', homeworkStatus: 'submitted' },
     { name: 'عبدالرحمن الغامدي', path: 'حفظ كامل',      track: tAbdulRahman._id,  attendancePct: 97,  progressPct: 85, progressPages: 513, totalPages: 604, guardian: 'أحمد الغامدي',   guardianPhone: '0589012345', lastMemorization: 'التوبة ١-٢٠',      status: 'active', homeworkStatus: 'submitted' },
+    { name: 'نورة السبيعي',      path: 'عشرة أجزاء',   track: tTalibat._id,      attendancePct: 90,  progressPct: 40, progressPages: 60,  totalPages: 151, guardian: 'سعود السبيعي',   guardianPhone: '0591234567', lastMemorization: 'النساء ١-٥',       status: 'active', homeworkStatus: 'submitted' },
+    { name: 'ريم الحربي',        path: 'حفظ كامل',      track: tTalibat._id,      attendancePct: 95,  progressPct: 30, progressPages: 181, totalPages: 604, guardian: 'عبدالعزيز الحربي', guardianPhone: '0592345678', lastMemorization: 'آل عمران ١-١٠',   status: 'active', homeworkStatus: 'pending'   },
   ]);
   console.log(`🧑‍🎓  Seeded ${students.length} students`);
 
@@ -142,7 +147,7 @@ async function seed(): Promise<void> {
     { student: students[0]._id, teacher: tNasir._id, track: tOmar._id,    type: 'حفظ جديد',   segment: 'البقرة ٢١-٤٠',       dueDate: new Date('2024-10-24'), status: 'معلق',  rating: undefined },
     { student: students[1]._id, teacher: tNasir._id, track: tOmar._id,    type: 'مراجعة',      segment: 'آل عمران ١-١٥',      dueDate: new Date('2024-10-24'), status: 'مراجع', rating: 'جيد' },
     { student: students[2]._id, teacher: tSaad._id,  track: tAbuBakr._id, type: 'تلاوة',       segment: 'النساء ٥-١٢',         dueDate: new Date('2024-10-22'), status: 'مراجع', rating: 'ممتاز' },
-    { student: students[3]._id, teacher: tSaad._id,  track: tAbuBakr._id, type: 'مراجعة',      segment: 'المائدة ١-٨',         dueDate: new Date('2024-10-20'), status: 'متأخر', rating: undefined },
+    { student: students[3]._id, teacher: tSaad._id,  track: tRamadan._id, type: 'مراجعة',      segment: 'المائدة ١-٨',         dueDate: new Date('2024-10-20'), status: 'متأخر', rating: undefined },
   ]);
   console.log(`📝  Seeded homework records`);
 
@@ -156,16 +161,16 @@ async function seed(): Promise<void> {
   // ── Lesson recordings (both track-linked) ──────────────────────────────────
   await LessonRecording.insertMany([
     { student: students[0]._id, teacher: tNasir._id, track: tOmar._id,    type: 'تسميع', segment: 'البقرة ١-٢٠', points: 9, teacherNote: 'أداء ممتاز' },
-    { student: students[0]._id, teacher: tNasir._id, track: tRamadan._id, type: 'تسميع', segment: 'جزء إضافي',   points: 8, teacherNote: 'التزام جيد بورد المسار' },
+    { student: students[3]._id, teacher: tNasir._id, track: tRamadan._id, type: 'تسميع', segment: 'جزء إضافي',   points: 8, teacherNote: 'التزام جيد بورد المسار' },
   ]);
   console.log(`🎙️  Seeded lesson recordings`);
 
-  // ── Track attendance (cross-track roster for the Ramadan track) ───────────
+  // ── Attendance for the Ramadan track ───────────────────────────────────────
   await Attendance.insertMany([
-    { student: students[0]._id, track: tRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'حاضر' },
-    { student: students[2]._id, track: tRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'غائب' },
+    { student: students[3]._id, track: tRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'حاضر' },
+    { student: students[5]._id, track: tRamadan._id, date: new Date('2024-10-15'), day: 'الثلاثاء', time: '٨:٠٠ م', status: 'غائب' },
   ]);
-  console.log(`✅  Seeded track attendance records`);
+  console.log(`✅  Seeded Ramadan track attendance records`);
 
   // ── Quran plans (track- and students-targeted) ─────────────────────────────
   const today = new Date();
