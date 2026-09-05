@@ -21,18 +21,4 @@ const teacherSchema = new Schema<ITeacher>(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
 
-teacherSchema.virtual('halqatCount', {
-  ref: 'Halqa',
-  localField: '_id',
-  foreignField: 'teacher',
-  count: true,
-});
-
-teacherSchema.virtual('studentCount', {
-  ref: 'Student',
-  localField: '_id',
-  foreignField: 'halqa.teacher',
-  count: true,
-});
-
 export const Teacher = model<ITeacher>('Teacher', teacherSchema);
