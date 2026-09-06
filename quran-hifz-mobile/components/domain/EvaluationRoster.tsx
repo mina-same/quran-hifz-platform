@@ -46,13 +46,12 @@ function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
 }
 
 export interface RosterContext {
-  kind: 'halqa' | 'specialTrack';
   id: string;
 }
 
 interface Props {
   students: { _id: string; name: string }[];
-  /** The halqa or track the evaluation is filed under. */
+  /** The track the evaluation is filed under. */
   context: RosterContext;
   /** Teacher the evaluation is recorded against. The bulk-evaluate payload
    * requires one, so a screen with no teacher in hand (the admin drill-down)
@@ -105,7 +104,7 @@ export default function EvaluationRoster({
     if (linkedPlan.targetType === 'students') {
       return (linkedPlan.students ?? []).some((s) => (typeof s === 'string' ? s : s._id) === studentId);
     }
-    return true; // a halqa/track plan covers every student fetched under that context
+    return true; // a track plan covers every student fetched under that context
   }
   const coveredStudentIds = useMemo(
     () => (linkedPlan ? students.map((s) => s._id).filter(planCoversStudent) : []),
@@ -158,7 +157,7 @@ export default function EvaluationRoster({
   }, [bulkEvaluate.isSuccess]);
 
   // Already-saved evaluations for the selected day.
-  const contextFilter = context.kind === 'halqa' ? { halqa: context.id } : { specialTrack: context.id };
+  const contextFilter = { track: context.id };
 
   // Grading split comes from the plan governing this context; the server falls
   // back to the historical default when no single plan resolves.
