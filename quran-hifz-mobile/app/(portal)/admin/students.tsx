@@ -23,24 +23,23 @@ import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
-function getName(v: { _id: string; name: string } | string | undefined): string {
-  if (v && typeof v === 'object' && 'name' in v) return v.name;
-  if (typeof v === 'string') return v;
-  return '—';
-}
 function getId(v: unknown): string {
   if (v && typeof v === 'object' && '_id' in v) return (v as { _id: string })._id;
   if (typeof v === 'string') return v;
   return '';
 }
 
-/** المسار: real track lives one hop away via halqa.specialTrack, not the unused legacy `path` enum. */
+/** المسار: real track lives one hop away via `Student.track`, not the unused legacy `path` enum. */
 function trackLabel(s: Student): string | null {
-  const halqa = typeof s.halqa === 'object' ? s.halqa : null;
-  const track = halqa?.specialTrack;
-  if (track && typeof track === 'object' && track.title) return track.title;
+  const track = typeof s.track === 'object' ? s.track : null;
+  if (track?.title) return track.title;
   if (s.path) return s.path;
   return null;
+}
+function getTrackName(v: { title: string } | string | undefined): string {
+  if (v && typeof v === 'object' && 'title' in v) return v.title;
+  if (typeof v === 'string') return v;
+  return '—';
 }
 
 type Tone = 'green' | 'gold' | 'red';
@@ -149,10 +148,7 @@ export default function AdminStudents() {
 
                   <View style={s.chips}>
                     <View style={s.chip}>
-                      <Text style={s.chipText} numberOfLines={1}>الحلقة: {getName(st.halqa)}</Text>
-                    </View>
-                    <View style={s.chip}>
-                      <Text style={s.chipText} numberOfLines={1}>المسجد: {getName(st.masjid)}</Text>
+                      <Text style={s.chipText} numberOfLines={1}>المسار: {getTrackName(st.track)}</Text>
                     </View>
                     {typeof st.level === 'number' && (
                       <View style={s.chip}>
