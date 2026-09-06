@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T20:18:51.350Z
-> Files: 632 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T20:43:39.763Z
+> Files: 637 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -249,6 +249,8 @@
 - `task-1-report.md` — Task 1 Report: `lib/queries/tracks.ts` + `lib/queries/quranPlan.ts` (~1229 tok)
 - `task-10-report.md` — Task 10 Report: `components/ui/ScopeTabs.tsx` — drop `'halqa'` from the kind union (~423 tok)
 - `task-11-report.md` — Task 11 Report: Delete dead screens (~938 tok)
+- `task-12-report.md` — Task 12 Report: `admin/special_tracks.tsx` → `admin/tracks.tsx` (~1041 tok)
+- `task-13-report.md` — Task 13 Report: AdminRegister — Single Track Picker (~980 tok)
 - `task-2-report.md` — Task 2 Completion Report: Context-field collapse across attendance/evaluations/groupHomework/homewor (~1157 tok)
 - `task-3-report.md` — Task 3 Completion Report: Query-Layer Field Renames (~7105 tok)
 - `task-4-report.md` — Task 4 Report: Delete dead code — `lib/types/*`, `lib/data/students.ts` (~554 tok)
@@ -258,10 +260,16 @@
 - `task-8-report.md` — Task 8 Completion Report: MasjidAccordion + Admin Masajid Forms (~1424 tok)
 - `task-9-report.md` — Task 9 Implementation Report (~1475 tok)
 
+## .claude/worktrees/phase3-mobile/.wolf/
+
+- `anatomy.md` — anatomy.md (~13287 tok)
+
 ## .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/admin/
 
 - `masajid.tsx` — AdminMasajid (~1179 tok)
 - `masjid-form.tsx` — AdminMasjidForm — renders form (~738 tok)
+- `register.tsx` — EMPTY — renders form (~2822 tok)
+- `tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~11665 tok)
 
 ## .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/domain/
 
