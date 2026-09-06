@@ -6,7 +6,7 @@ import {
 import {
   IconAlertCircle, IconBuildingArch, IconCalendar, IconCalendarEvent, IconCalendarOff,
   IconCalendarRepeat, IconChevronDown, IconChevronUp, IconClock, IconMapPin, IconPencil,
-  IconTarget, IconTrash, IconUserCheck, IconUserMinus, IconUserOff, IconUsers, IconVideo, IconWifi,
+  IconTarget, IconTrash, IconUserCheck, IconUserOff, IconUsers, IconVideo, IconWifi,
 } from '@tabler/icons-react-native';
 import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
@@ -20,18 +20,17 @@ import FormInput from '@/components/forms/FormInput';
 import FormSelect from '@/components/forms/FormSelect';
 import FormDatePicker from '@/components/forms/FormDatePicker';
 import {
-  useSpecialTracks,
+  useTracks,
   useCreateTrack,
   useUpdateTrack,
   useDeleteTrack,
-  useEnrollStudent,
-  useUnenrollStudent,
-  type SpecialTrack,
+  useAssignStudent,
+  type Track,
   type TrackTeacher,
-  type EnrolledStudent,
-} from '@/lib/queries/specialTracks';
+} from '@/lib/queries/tracks';
 import { useTeachers } from '@/lib/queries/teachers';
 import { useStudents } from '@/lib/queries/students';
+import type { Student } from '@/lib/queries/students';
 import { useMasajid } from '@/lib/queries/masajid';
 import { useQuranPlans, segmentReversed } from '@/lib/queries/quranPlan';
 import { SURAHS } from '@/lib/data/surahs';
@@ -48,12 +47,6 @@ function getTeacherId(v: TrackTeacher | string) {
 function getTeacherName(v: TrackTeacher | string) {
   return typeof v === 'object' ? v.name : v;
 }
-function getEnrolledId(v: EnrolledStudent | string) {
-  return typeof v === 'object' ? v._id : v;
-}
-function getEnrolledName(v: EnrolledStudent | string) {
-  return typeof v === 'object' ? v.name : v;
-}
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? '';
 }
@@ -62,8 +55,8 @@ function avatarInitials(name: string) {
   return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0] ?? '').join('');
 }
 
-const STATUS_LABEL: Record<SpecialTrack['status'], string> = { active: 'نشط', upcoming: 'قادم', ended: 'منتهي' };
-const STATUS_VARIANT: Record<SpecialTrack['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
+const STATUS_LABEL: Record<Track['status'], string> = { active: 'نشط', upcoming: 'قادم', ended: 'منتهي' };
+const STATUS_VARIANT: Record<Track['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
 
 const TYPE_OPTS = ['مراجعة مكثّفة', 'تجويد', 'إجازة', 'ختمة مسرّعة', 'برنامج رمضاني', 'تحضير مسابقة', 'أخرى'];
 const DAYS_OPTS = [
@@ -94,7 +87,7 @@ type FormFields = {
   title: string;
   type: string;
   timeSlot: string;
-  location: string;
+  masjid: string;
   isOnline: boolean;
   meetLink: string;
   teachers: string[];
@@ -102,20 +95,20 @@ type FormFields = {
   startDate: string;
   endDate: string;
   daysPerWeek: string;
-  status: SpecialTrack['status'];
+  status: Track['status'];
   notes: string;
 };
 const EMPTY: FormFields = {
-  title: '', type: '', timeSlot: '', location: '', isOnline: false, meetLink: '',
+  title: '', type: '', timeSlot: '', masjid: '', isOnline: false, meetLink: '',
   teachers: [], maxStudents: '30', startDate: '', endDate: '', daysPerWeek: '',
   status: 'upcoming', notes: '',
 };
 
-export default function AdminSpecialTracks() {
+export default function AdminTracks() {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
-  const { data: tracks = [], isLoading, isRefetching, refetch } = useSpecialTracks();
+  const { data: tracks = [], isLoading, isRefetching, refetch } = useTracks();
   const { data: teachers = [], isRefetching: teachersRefetching, refetch: refetchTeachers } = useTeachers();
   const { data: allStudents = [], isRefetching: studentsRefetching, refetch: refetchStudents } = useStudents();
   const { data: masajid = [] } = useMasajid();
@@ -130,8 +123,7 @@ export default function AdminSpecialTracks() {
   const createTrack = useCreateTrack();
   const updateTrack = useUpdateTrack();
   const deleteTrack = useDeleteTrack();
-  const enrollStudent = useEnrollStudent();
-  const unenrollStudent = useUnenrollStudent();
+  const assignStudent = useAssignStudent();
 
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -142,9 +134,8 @@ export default function AdminSpecialTracks() {
   const [addStudentId, setAddStudentId] = useState('');
   const [studentsSearch, setStudentsSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  // Free-text fallbacks: the pickers list masajid / preset day patterns, and
-  // either can drop to a manual entry the way the web selects do.
-  const [customLocation, setCustomLocation] = useState(false);
+  // Free-text fallback: the days picker lists preset patterns and can drop to
+  // a manual entry the way the web select does.
   const [customDays, setCustomDays] = useState(false);
 
   function sf<K extends keyof FormFields>(k: K, v: FormFields[K]) {
@@ -162,18 +153,17 @@ export default function AdminSpecialTracks() {
     setForm(EMPTY);
     setFormError('');
     setEditId(null);
-    setCustomLocation(false);
     setCustomDays(false);
     setShowForm(true);
   }
 
-  function openEdit(t: SpecialTrack) {
+  function openEdit(t: Track) {
     const d = (v: string) => (v ? new Date(v).toISOString().split('T')[0] : '');
     setForm({
       title: t.title,
       type: t.type,
       timeSlot: t.timeSlot,
-      location: t.location,
+      masjid: typeof t.masjid === 'object' ? t.masjid._id : t.masjid,
       isOnline: t.isOnline,
       meetLink: t.meetLink ?? '',
       teachers: t.teachers.map(getTeacherId),
@@ -184,7 +174,6 @@ export default function AdminSpecialTracks() {
       status: t.status,
       notes: t.notes ?? '',
     });
-    setCustomLocation(!!t.location && !masajid.some((m) => m.name === t.location));
     setCustomDays(!!t.daysPerWeek && !DAYS_OPTS.includes(t.daysPerWeek));
     setFormError('');
     setEditId(t._id);
@@ -199,14 +188,14 @@ export default function AdminSpecialTracks() {
     if (!form.daysPerWeek.trim()) { setFormError('الأيام مطلوبة'); return; }
     if (!form.startDate || !form.endDate) { setFormError('التواريخ مطلوبة'); return; }
     if (form.isOnline && !form.meetLink.trim()) { setFormError('رابط الجلسة مطلوب'); return; }
-    if (!form.isOnline && !form.location.trim()) { setFormError('الموقع مطلوب'); return; }
+    if (!form.masjid) { setFormError('يرجى اختيار المسجد'); return; }
 
     const body = {
       title: form.title.trim(),
       type: form.type.trim(),
       status: form.status,
       timeSlot: form.timeSlot.trim(),
-      location: form.isOnline ? 'عبر الإنترنت' : form.location.trim(),
+      masjid: form.masjid,
       isOnline: form.isOnline,
       meetLink: form.isOnline ? form.meetLink.trim() : '',
       teachers: form.teachers,
@@ -236,17 +225,26 @@ export default function AdminSpecialTracks() {
   const upcoming = tracks.filter((t) => t.status === 'upcoming');
   const ended = tracks.filter((t) => t.status === 'ended');
 
-  function renderStudentsPanel(t: SpecialTrack) {
+  function trackIdOf(v: Student['track']): string {
+    return typeof v === 'object' ? v._id : v;
+  }
+
+  /** Read-mostly panel: shows who is currently on the track (a live query, not
+   * a stored array) and offers "نقل طالب" (moves a student's `track` field
+   * here), never "add" alongside an existing track — a student always
+   * belongs to exactly one track, so there is no per-track enroll list to
+   * manage independently, and no unassign without moving elsewhere. */
+  function renderTransferPanel(t: Track) {
     if (studentsPanelId !== t._id) return null;
 
-    const enrolledCnt = t.enrolledStudents.length;
+    const enrolled = allStudents.filter((st) => trackIdOf(st.track) === t._id);
+    const enrolledCnt = enrolled.length;
     const capPct = Math.min(100, Math.round((enrolledCnt / t.maxStudents) * 100));
     const barClr = capacityColor(theme, capPct);
     const isFull = enrolledCnt >= t.maxStudents;
-    const enrolledIds = new Set(t.enrolledStudents.map(getEnrolledId));
     const q = studentsSearch.trim();
-    const available = allStudents.filter((st) => !enrolledIds.has(st._id));
-    const shown = t.enrolledStudents.filter((st) => !q || getEnrolledName(st).includes(q));
+    const available = allStudents.filter((st) => trackIdOf(st.track) !== t._id && (!q || st.name.includes(q)));
+    const shown = enrolled.filter((st) => !q || st.name.includes(q));
 
     return (
       <View style={s.studentsPanel}>
@@ -273,7 +271,7 @@ export default function AdminSpecialTracks() {
 
         {!isFull && (
           <View style={s.addStudentBox}>
-            <Text style={s.addStudentLabel}>إضافة طالب</Text>
+            <Text style={s.addStudentLabel}>نقل طالب إلى هذا المسار</Text>
             <View style={s.row}>
               <View style={s.flex1}>
                 <FormSelect
@@ -284,13 +282,13 @@ export default function AdminSpecialTracks() {
                 />
               </View>
               <Button
-                label="إضافة"
+                label="نقل"
                 onPress={() => {
                   if (!addStudentId) return;
-                  enrollStudent.mutate({ id: t._id, studentId: addStudentId });
+                  assignStudent.mutate({ id: t._id, studentId: addStudentId });
                   setAddStudentId('');
                 }}
-                disabled={!addStudentId || enrollStudent.isPending}
+                disabled={!addStudentId || assignStudent.isPending}
               />
             </View>
           </View>
@@ -313,26 +311,17 @@ export default function AdminSpecialTracks() {
         ) : (
           shown.map((st, idx) => {
             const tone = avatarTone(theme, idx);
-            const name = getEnrolledName(st);
             return (
-              <View key={getEnrolledId(st)} style={s.studentRow}>
+              <View key={st._id} style={s.studentRow}>
                 <View style={s.studentIdentity}>
                   <View style={[s.avatar, { backgroundColor: tone.bg }]}>
-                    <Text style={[s.avatarText, { color: tone.text }]}>{avatarInitials(name)}</Text>
+                    <Text style={[s.avatarText, { color: tone.text }]}>{avatarInitials(st.name)}</Text>
                   </View>
                   <View style={s.flex1}>
-                    <Text style={s.studentName} numberOfLines={1}>{name}</Text>
+                    <Text style={s.studentName} numberOfLines={1}>{st.name}</Text>
                     <Text style={s.studentIndex}>#{idx + 1}</Text>
                   </View>
                 </View>
-                <Pressable
-                  haptic="medium"
-                  style={s.iconBtnDanger}
-                  onPress={() => unenrollStudent.mutate({ id: t._id, studentId: getEnrolledId(st) })}
-                  disabled={unenrollStudent.isPending}
-                >
-                  <IconUserMinus size={16} color={theme.red} />
-                </Pressable>
               </View>
             );
           })
@@ -345,7 +334,7 @@ export default function AdminSpecialTracks() {
     );
   }
 
-  function renderSection(label: string, color: string, list: SpecialTrack[], dimmed?: boolean) {
+  function renderSection(label: string, color: string, list: Track[], dimmed?: boolean) {
     if (list.length === 0) return null;
     return (
       <View style={s.section}>
@@ -372,7 +361,7 @@ export default function AdminSpecialTracks() {
               onEdit={() => openEdit(t)}
               onDelete={() => setDeleteId(t._id)}
             >
-              {renderStudentsPanel(t)}
+              {renderTransferPanel(t)}
             </TrackCard>
           ))}
         </View>
@@ -414,12 +403,20 @@ export default function AdminSpecialTracks() {
             <Text style={s.label}>الحالة</Text>
             <FormSelect
               value={form.status}
-              onChange={(v) => sf('status', v as SpecialTrack['status'])}
+              onChange={(v) => sf('status', v as Track['status'])}
               options={[
                 { value: 'upcoming', label: 'قادم' },
                 { value: 'active', label: 'نشط' },
                 { value: 'ended', label: 'منتهي' },
               ]}
+            />
+
+            <Text style={s.label}>المسجد</Text>
+            <FormSelect
+              value={form.masjid}
+              onChange={(v) => sf('masjid', v)}
+              options={masajid.map((m) => ({ value: m._id, label: m.name }))}
+              placeholder="اختر المسجد"
             />
 
             <Text style={s.label}>المعلمون المسؤولون</Text>
@@ -452,31 +449,10 @@ export default function AdminSpecialTracks() {
               </Pressable>
             </View>
 
-            {form.isOnline ? (
+            {form.isOnline && (
               <>
                 <Text style={s.label}>رابط الجلسة</Text>
                 <FormInput placeholder="https://meet.google.com/xxx" value={form.meetLink} onChangeText={(v) => sf('meetLink', v)} />
-              </>
-            ) : (
-              <>
-                <Text style={s.label}>الموقع</Text>
-                <FormSelect
-                  value={customLocation ? CUSTOM : form.location}
-                  onChange={(v) => {
-                    if (v === CUSTOM) { setCustomLocation(true); sf('location', ''); }
-                    else { setCustomLocation(false); sf('location', v); }
-                  }}
-                  options={[
-                    ...masajid.map((m) => ({ value: m.name, label: m.name })),
-                    { value: CUSTOM, label: 'موقع آخر (أدخل يدوياً)' },
-                  ]}
-                  placeholder="اختر المسجد"
-                />
-                {customLocation && (
-                  <View style={{ marginTop: 6 }}>
-                    <FormInput placeholder="اسم المسجد أو القاعة" value={form.location} onChangeText={(v) => sf('location', v)} />
-                  </View>
-                )}
               </>
             )}
 
@@ -579,7 +555,7 @@ export default function AdminSpecialTracks() {
 function TrackCard({
   t, theme, s, onOpen, onManageStudents, onEdit, onDelete, children,
 }: {
-  t: SpecialTrack;
+  t: Track;
   theme: AppTheme;
   s: Styles;
   onOpen: () => void;
@@ -589,14 +565,14 @@ function TrackCard({
   children?: React.ReactNode;
 }) {
   const [planOpen, setPlanOpen] = useState(false);
-  const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: t._id });
-  // A plan keeps its `specialTrack` ref after its targetType is switched to
+  const { data: linkedPlans = [] } = useQuranPlans({ track: t._id });
+  // A plan keeps its `track` ref after its targetType is switched to
   // "students", so this filter can return several plans for one track. Prefer
   // the one actually targeting the whole track, or this card's "مقرَّر اليوم"
   // disagrees with the track-detail screen for the same track.
-  const linkedPlan = linkedPlans.find((p) => p.targetType === 'specialTrack') ?? linkedPlans[0];
+  const linkedPlan = linkedPlans.find((p) => p.targetType === 'track') ?? linkedPlans[0];
 
-  const enrolled = t.enrolledStudents.length;
+  const enrolled = t.studentCount ?? 0;
   const pct = Math.min(100, Math.round((enrolled / t.maxStudents) * 100));
   const barClr = capacityColor(theme, pct);
   const statusTone = theme.tone[STATUS_VARIANT[t.status]];
@@ -652,7 +628,7 @@ function TrackCard({
             s={s}
             icon={t.isOnline ? <IconVideo size={15} color={theme.green} /> : <IconMapPin size={15} color={theme.green} />}
             label="المكان"
-            val={t.isOnline ? 'أونلاين' : t.location}
+            val={t.isOnline ? 'أونلاين' : (typeof t.masjid === 'object' ? t.masjid.name : t.masjid)}
             span
           />
         </View>
@@ -888,7 +864,6 @@ function createS(theme: AppTheme) {
     avatarText: { fontSize: 11, fontFamily: theme.fontCairoBold },
     studentName: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
     studentIndex: { fontSize: 10, fontFamily: theme.fontCairo, color: theme.textMuted },
-    iconBtnDanger: { borderWidth: 1, borderColor: theme.tone.red.border, borderRadius: 8, paddingHorizontal: 11, paddingVertical: 6 },
     closeText: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', marginTop: 4 },
 
     // ── delete dialog ──
