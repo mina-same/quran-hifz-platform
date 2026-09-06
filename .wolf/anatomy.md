@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-05T15:55:05.607Z
-> Files: 588 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T11:51:51.658Z
+> Files: 594 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -282,10 +282,16 @@
 
 ## .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md (~1654 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md (~2336 tok)
 - `task-1-report.md` — Task 1: Track/Halqa API modules — Completion Report (~1188 tok)
 - `task-10-report.md` — Task 10 Report: TeacherGroupHomework.tsx Consumer Update (~831 tok)
 - `task-11-report.md` — Task 11: TeacherPlanForm.tsx Rewrite — Completion Report (~838 tok)
+- `task-12-report.md` — Task 12: TeacherPlanDetail.tsx + TeacherPlans.tsx Display Fixes (~665 tok)
+- `task-13-report.md` — Task 13 Report: TeacherTrackDetail.tsx rewrite (~1892 tok)
+- `task-14-report.md` — Task 14 Report: IndividualPlanPanel.tsx Comment Fix (~237 tok)
+- `task-15-report.md` — Task 15: TeacherStudents.tsx roster simplification — Completion Report (~702 tok)
+- `task-16-report.md` — Task 16: Reports — ReportsDashboard.tsx + StudentReportPanel.tsx + TeacherReports.tsx + AdminReports (~2150 tok)
+- `task-17-report.md` — Task 17 Report — Routing cleanup: delete Halqa pages, rename route keys, update nav (~2712 tok)
 - `task-2-report.md` — Task 2: Context-field collapse across attendance/evaluations/group-homework/students APIs — Completi (~1247 tok)
 - `task-3-report.md` — Task 3 Completion Report (~903 tok)
 - `task-4-report.md` — Task 4 Report: Rename AdminSpecialTracks.tsx → AdminTracks.tsx (~1257 tok)
@@ -797,7 +803,7 @@
 
 - `Alert.tsx` — ICONS — now supports `danger` tone (~165 tok)
 - `AyahBar.tsx` — AyahBar (~40 tok)
-- `Badge.tsx` — Badge (~83 tok)
+- `Badge.tsx` — Badge (~104 tok)
 - `BentoTile.tsx` — Bento-grid tile: a flatter, lighter-weight alternative to `Card` — small (~313 tok)
 - `Card.tsx` — Card (~181 tok)
 - `ContextPicker.tsx` — Unified shape for "teaching context" — always a Track now that Halqa is (~1067 tok)
@@ -806,21 +812,21 @@
 - `FormSection.tsx` — FormSection (~195 tok)
 - `HalqaRow.tsx` — HalqaRow (~104 tok)
 - `HonorBoard.tsx` — Podium-style top-3 showcase (crown/medal icons, RTL-correct rank order via array index not DOM order) — visually distinct from `Leaderboard`'s ranked-row list. Degrades gracefully with <3 rows (~584 tok)
-- `IndividualPlanPanel.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~4146 tok)
+- `IndividualPlanPanel.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~4441 tok)
 - `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
-- `ReportsDashboard.tsx` — Reports engine v3 (bento-grid redesign, replaces the v2 gauge/rubric-card layout — `Gauge.tsx` deleted, unused after this pass): `.bento-grid` of variable-span `BentoTile`s — hero tile (huge headline avg-eval number + inline AreaChart sparkline + half-over-half trend delta chip, min 8 samples required to show a delta), 4 standalone rubric-dimension tiles (حضور/حفظ/تجويد/تلاوة), full-width gradient trend AreaChart, `HonorBoard` podium for top-3 + `Leaderboard` watchlist, halqa evaluation-comparison table, hifz-progress donut, admin KPI/teacher-workload tiles — plus `StudentReportPanel` deep-dive below the grid (unchanged). Drives both AdminReports & TeacherReports (~8344 tok)
+- `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~8273 tok)
 - `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)
 - `Skeleton.tsx` — Skeleton — renders table (~816 tok)
 - `StatsRow.tsx` — StatsRow (~146 tok)
-- `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from a student's plans — no dedicated (~4975 tok)
+- `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from a student's plans — no dedicated (~5066 tok)
 - `SurahRangePicker.tsx` — SurahPointFields (~439 tok)
 
 ## quran-hifz/src/quran/config/
 
 - `masarMap.ts` — Exports MasarLevel, ServerPath, MasarInfo, MASAR_MAP, pickMasar (~416 tok)
-- `portals.ts` — Exports PortalKey, NavItem, NavGroup, PortalConfig, PORTALS (~1318 tok)
+- `portals.ts` — Exports PortalKey, NavItem, NavGroup, PortalConfig, PORTALS (~1267 tok)
 
 ## quran-hifz/src/quran/context/
 
@@ -853,8 +859,8 @@
 - `AdminKpis.tsx` — RATING_TONE — renders table (~743 tok)
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~3106 tok)
 - `AdminParents.tsx` — EMPTY_ADD, ChildChip — renders table, modal, search bar, avatars (~5900 tok)
-- `AdminRegister.tsx` — schema — renders form (~3079 tok)
-- `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~324 tok)
+- `AdminRegister.tsx` — schema — renders form (~3130 tok)
+- `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~286 tok)
 - `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13551 tok)
 - `AdminStudents.tsx` — PATH_TONE — renders table (~5640 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4598 tok)
@@ -877,38 +883,38 @@
 ## quran-hifz/src/quran/pages/student/
 
 - `StudentAttendance.tsx` — STATUS_TONE — renders table (~1101 tok)
-- `StudentDashboard.tsx` — getName (~1717 tok)
+- `StudentDashboard.tsx` — getField (~1763 tok)
 - `StudentHifz.tsx` — tone — renders table (~1058 tok)
 - `StudentHomework.tsx` — AR_DIGITS — uses useState, useEffect (~1000 tok)
 - `StudentMessages.tsx` — StudentMessages (~768 tok)
 - `StudentPoints.tsx` — MY_POINTS (~1322 tok)
-- `StudentSchedule.tsx` — getId (~840 tok)
+- `StudentSchedule.tsx` — getId (~916 tok)
 - `StudentSpecialTracks.tsx` — surahName (~4412 tok)
 - `StudentStore.tsx` — MY_POINTS (~882 tok)
 - `StudentTracks.tsx` — surahName (~4511 tok)
 
 ## quran-hifz/src/quran/pages/teacher/
 
-- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~16392 tok)
+- `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~16389 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1348 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
-- `TeacherGroupHomework.tsx` — STUDENTS (~2809 tok)
+- `TeacherGroupHomework.tsx` — STUDENTS (~2806 tok)
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1646 tok)
-- `TeacherPlanDetail.tsx` — surahName — renders table (~3932 tok)
+- `TeacherPlanDetail.tsx` — surahName — renders table (~3887 tok)
 - `TeacherPlanForm.tsx` — One type's track in the form: its own days and its own range. The plan's (~14108 tok)
-- `TeacherPlans.tsx` — surahName (~4519 tok)
+- `TeacherPlans.tsx` — surahName (~4459 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
-- `TeacherReports.tsx` — Teacher reports — scoped to the teacher's own halqat (and tracks they teach). (~320 tok)
+- `TeacherReports.tsx` — Teacher reports — scoped to the tracks the teacher teaches. (~268 tok)
 - `TeacherSpecialTracks.tsx` — surahName (~2892 tok)
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
-- `TeacherStudents.tsx` — HW_TONE — renders table (~2471 tok)
-- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~24978 tok)
+- `TeacherStudents.tsx` — HW_TONE — renders table (~1543 tok)
+- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~24617 tok)
 - `TeacherTracks.tsx` — surahName (~2808 tok)
 
 ## quran-hifz/src/quran/router/
 
-- `pageRegistry.ts` — Exports PAGE_REGISTRY (~1392 tok)
+- `pageRegistry.ts` — Exports PAGE_REGISTRY (~1250 tok)
 
 ## quran-hifz/src/routes/
 

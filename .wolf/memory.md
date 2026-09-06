@@ -2,6 +2,7 @@
 
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
+| 2026-09-06 | Task 14: IndividualPlanPanel.tsx comment fix (Phase 2 web). Updated JSDoc comment (lines 67-70) from "halqa/specialTrack-targeted plans" to "track-targeted plans". Comment-only change, no code logic. tsc --noEmit: no new errors (pre-existing errors unchanged). Committed d258a4a. | quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | complete | ~600 |
 | 2026-09-05 | Task 7: AdminMasajid.tsx — gender field + tracks list (Phase 2 web). Updated Masjid type: added gender:"male"|"female" field, replaced halqat with tracks array (title/daysPerWeek/timeSlot/maxStudents/status). AdminMasajid.tsx: added gender state + UI (2-button toggle), seeded on add (default "male") and edit (from item.gender), included in create/update mutations. Replaced "حلقات" badge with "مسارات", replaced nested halqat list with tracks showing status badges (نشط/قادم/منتهي) instead of enrollment ratio (API doesn't provide per-track counts). Updated topbar title "المساجد والحلقات" → "المساجد والمسارات". tsc --noEmit: no errors in modified files. Committed dccc82d. | quran-hifz/src/quran/api/masajid.ts, quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | complete | ~2500 |
 | 2026-09-05 | Task 1: Halqa→Track API migration (Phase 2 web) — deleted halqat.ts + special-tracks.ts, created tracks.ts with new unified Track types/hooks (useTracks, useTrack, useCreateTrack, useUpdateTrack, useDeleteTrack, useAssignStudent). Updated quran-plans.ts: PlanFormHandoff now trackId-only, removed PlanHalqa/PlanSpecialTrack, added PlanTrack, targetType="track"|"students", useQuranPlans filters={teacher,track,student}. tsc --noEmit: 118 expected errors in 22 files (all importing deleted modules or using old fields/comparisons). Committed 0d14116. No unrelated breakage. | quran-hifz/src/quran/api/tracks.ts (new), api/quran-plans.ts, api/halqat.ts (deleted), api/special-tracks.ts (deleted) | complete | ~6000 |
 | 2026-07-27 22:15 | Added "الملف الشخصي" (account/profile) tab for student + teacher portals: view email, edit display name, change password (current+new+confirm). Backend: PUT /auth/profile (syncs Teacher/Student.name too, kept in sync with User.name), PUT /auth/change-password (verifies currentPassword via comparePassword). Frontend: new shared AccountSettings.tsx page + api/account.ts hooks, AuthContext gained updateUser() so sidebar name updates live, nav item added to both portals.ts configs + pageRegistry.ts. Verified end-to-end via Playwright (teacher atiqa@tahfeez.com + student abdulaziz@tahfeez.com): name edit reflects in sidebar immediately, wrong-current-password shows warning alert, correct password change round-tripped (change → logout → login with new password → change back → login with original) all succeeded. tsc --noEmit clean on both server and web (2 pre-existing unrelated errors in ParentHomeworkView.tsx/sitemap route, untouched). | quran-hifz-server/src/controllers/auth.controller.ts, routes/auth.routes.ts, quran-hifz/src/quran/api/account.ts (new), pages/common/AccountSettings.tsx (new), context/AuthContext.tsx, config/portals.ts, router/pageRegistry.ts | complete | ~9000 |
@@ -3307,3 +3308,93 @@
 | 18:54 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | CSS: track, track | ~51 |
 | 18:54 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | reduced (-12 lines) | ~196 |
 | 18:55 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-11-report.md | — | ~894 |
+| 18:57 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | modified Minor() | ~121 |
+| 18:58 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx | 8→6 lines | ~96 |
+| 18:58 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | 7→6 lines | ~55 |
+| 18:58 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | 8→6 lines | ~100 |
+| 18:58 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | 6→6 lines | ~56 |
+| 18:59 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-12-report.md | — | ~709 |
+| 10:45 | Task 12: TeacherPlanDetail.tsx + TeacherPlans.tsx display fixes | quran-hifz/src/quran/pages/teacher/{TeacherPlanDetail,TeacherPlans}.tsx | targetLabel/targetIcon updated for track-only targeting; removed PlanHalqa import; fixed onClick condition; preserved "specialtracks" string for Task 17 | ~2800 |
+| 19:01 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | modified Minor() | ~116 |
+| 19:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 9→7 lines | ~49 |
+| 19:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | modified getTeacherName() | ~15 |
+| 19:03 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | modified link() | ~153 |
+| 19:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | added optional chaining | ~178 |
+| 19:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: track | ~174 |
+| 19:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | inline fix | ~25 |
+| 19:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | inline fix | ~25 |
+| 19:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | inline fix | ~24 |
+| 19:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | inline fix | ~23 |
+| 19:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: trackId, _studentId, trackId | ~232 |
+| 19:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: name | ~95 |
+| 19:04 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 3→3 lines | ~32 |
+| 19:05 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | inline fix | ~21 |
+| 19:06 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-13-report.md | — | ~2018 |
+| 19:09 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | modified Minor() | ~253 |
+
+## Session: 2026-09-06 10:31
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-06 10:31
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-06 14:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-06 14:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:26 | Edited quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | 4→4 lines | ~67 |
+| 14:26 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-14-report.md | — | ~253 |
+| 14:27 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | 1→3 lines | ~282 |
+| 14:28 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | 9→8 lines | ~123 |
+| 14:28 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | CSS: trackId, trackName | ~58 |
+| 14:28 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | CSS: _id, trackId, trackName | ~352 |
+| 14:28 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | reduced (-17 lines) | ~947 |
+| 14:29 | Edited quran-hifz/src/quran/pages/teacher/TeacherStudents.tsx | reduced (-8 lines) | ~37 |
+| 14:30 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-15-report.md | — | ~748 |
+| 14:32 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | 1→2 lines | ~154 |
+| 14:33 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | 9→8 lines | ~142 |
+| 14:33 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | modified ReportsDashboard() | ~96 |
+| 14:33 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | 7→6 lines | ~74 |
+| 14:33 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | CSS: title | ~210 |
+| 14:33 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | modified for() | ~427 |
+| 14:34 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | modified if() | ~88 |
+| 14:34 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | exportHalqaEval() → exportTrackEval() | ~101 |
+| 14:34 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | halqaNameOf() → trackNameOf() | ~72 |
+| 14:34 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | 6→6 lines | ~123 |
+| 14:34 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | 7→6 lines | ~111 |
+| 14:34 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | 9→6 lines | ~70 |
+| 14:34 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | 42→42 lines | ~480 |
+| 14:34 | Edited quran-hifz/src/quran/components/common/StudentReportPanel.tsx | modified StudentReportPanel() | ~59 |
+| 14:35 | Created quran-hifz/src/quran/pages/teacher/TeacherReports.tsx | — | ~268 |
+| 14:35 | Created quran-hifz/src/quran/pages/admin/AdminReports.tsx | — | ~286 |
+| 14:36 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-16-report.md | — | ~2294 |
+| 14:41 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | "لا يوجد طلاب في حلقاتك بع" → "لا يوجد طلاب في مساراتك ب" | ~15 |
+| 14:41 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | 1→3 lines | ~329 |
+| 14:43 | Created quran-hifz/src/quran/router/pageRegistry.ts | — | ~1250 |
+| 14:43 | Edited quran-hifz/src/quran/config/portals.ts | 3→3 lines | ~36 |
+| 14:43 | Edited quran-hifz/src/quran/config/portals.ts | 8→7 lines | ~140 |
+| 14:43 | Edited quran-hifz/src/quran/config/portals.ts | 5→4 lines | ~61 |
+| 14:43 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | inline fix | ~15 |
+| 14:43 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | inline fix | ~16 |
+| 14:43 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | "specialtracks" → "tracks" | ~16 |
+| 14:43 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | "specialtracks" → "tracks" | ~15 |
+| 14:47 | Edited quran-hifz/src/quran/pages/student/StudentDashboard.tsx | getName() → getTrackMasjidName() | ~125 |
+| 14:47 | Edited quran-hifz/src/quran/pages/student/StudentDashboard.tsx | getName() → getTrackMasjidName() | ~66 |
+| 14:47 | Edited quran-hifz/src/quran/pages/student/StudentDashboard.tsx | 15→15 lines | ~205 |
+| 14:48 | Edited quran-hifz/src/quran/pages/student/StudentSchedule.tsx | CSS: teachers | ~916 |
+| 14:48 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | 3→2 lines | ~29 |
+| 14:48 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | CSS: track | ~14 |
+| 14:48 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | 3→2 lines | ~26 |
+| 14:48 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | CSS: track | ~39 |
+| 14:48 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | reduced (-12 lines) | ~128 |
+| 14:49 | Edited quran-hifz/src/quran/components/common/Badge.tsx | modified Badge() | ~103 |
+| 14:51 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-17-report.md | — | ~2893 |
