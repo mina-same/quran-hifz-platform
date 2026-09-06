@@ -64,8 +64,8 @@ const OCCURRENCE_STATUS_CFG: Record<StudentOccurrence["status"], { label: string
   absent: { label: "غياب", tone: "red" },
 };
 
-/** Whether a plan actually covers a given student — true for halqa/specialTrack
- * -targeted plans (which by definition cover their whole roster), but for
+/** Whether a plan actually covers a given student — true for track-targeted
+ * plans (which by definition cover their whole roster), but for
  * `targetType: "students"` plans only true if the student is in that explicit
  * list. */
 export function planCoversStudent(plan: QuranPlan, studentId: string): boolean {
