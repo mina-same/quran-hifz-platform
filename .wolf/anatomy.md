@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T19:53:44.703Z
-> Files: 614 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T20:18:51.350Z
+> Files: 632 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -247,8 +247,35 @@
 ## .claude/worktrees/phase3-mobile/.superpowers/sdd/2026-09-06-halqa-track-restructure-phase3-mobile/
 
 - `task-1-report.md` — Task 1 Report: `lib/queries/tracks.ts` + `lib/queries/quranPlan.ts` (~1229 tok)
+- `task-10-report.md` — Task 10 Report: `components/ui/ScopeTabs.tsx` — drop `'halqa'` from the kind union (~423 tok)
+- `task-11-report.md` — Task 11 Report: Delete dead screens (~938 tok)
 - `task-2-report.md` — Task 2 Completion Report: Context-field collapse across attendance/evaluations/groupHomework/homewor (~1157 tok)
 - `task-3-report.md` — Task 3 Completion Report: Query-Layer Field Renames (~7105 tok)
+- `task-4-report.md` — Task 4 Report: Delete dead code — `lib/types/*`, `lib/data/students.ts` (~554 tok)
+- `task-5-report.md` — Task 5 Report: ContextCard.tsx Rewrite (~591 tok)
+- `task-6-report.md` — Task 6 Report: `components/domain/EvaluationRoster.tsx` — drop `kind` (~572 tok)
+- `task-7-report.md` — Task 7 Report: TrackDetail.tsx Rewrite (~1321 tok)
+- `task-8-report.md` — Task 8 Completion Report: MasjidAccordion + Admin Masajid Forms (~1424 tok)
+- `task-9-report.md` — Task 9 Implementation Report (~1475 tok)
+
+## .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/admin/
+
+- `masajid.tsx` — AdminMasajid (~1179 tok)
+- `masjid-form.tsx` — AdminMasjidForm — renders form (~738 tok)
+
+## .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/domain/
+
+- `ContextCard.tsx` — Normalized shape for anything a teacher/student/admin can act on — always a (~1375 tok)
+- `EvaluationRoster.tsx` — Scores are keyed by the active plan's rubric — not known at compile time. (~9224 tok)
+- `IndividualPlanPanel.tsx` — The shared track plan this student's overlay hangs off — used as the (~2214 tok)
+- `MasjidAccordion.tsx` — Admin edit/delete buttons — rendered in the header, beside the count badge. (~1554 tok)
+- `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~6708 tok)
+- `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from the student's plans — the same (~4284 tok)
+- `TrackDetail.tsx` — First letter of the first two words — the same initials the web chips show. (~6183 tok)
+
+## .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/ui/
+
+- `ScopeTabs.tsx` — Drives the chip's icon: the "all" tab or a track. (~1276 tok)
 
 ## .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/queries/
 
