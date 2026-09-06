@@ -1117,7 +1117,7 @@ Replace with:
                 context={{ id: trackId }}
 ```
 
-- [ ] **Step 11: Replace lines 409-414 (`LinkPlanPanel`'s "ربط" mutation) — rename `specialTrack`→`track`**
+- [ ] **Step 11: Replace lines 409-412 (`LinkPlanPanel`'s "ربط" mutation call) — rename `specialTrack`→`track`**
 
 ```tsx
                       onPress={() => updatePlan.mutate(
@@ -1428,7 +1428,7 @@ git commit -m "feat(mobile): MasjidAccordion reads masjid.tracks directly, add g
 
 - [ ] **Step 1: `ReportsScreen.tsx` — drop `halqat` prop, track-comparison leaderboard**
 
-Replace lines 22-24 (imports — drop `Halqa`, rename `SpecialTrack`→`Track`):
+Replace lines 23-25 (imports — drop `Halqa`, rename `SpecialTrack`→`Track`):
 
 ```tsx
 import type { Track } from '@/lib/queries/tracks';
@@ -1436,7 +1436,7 @@ import type { KPI } from '@/lib/queries/kpis';
 import type { Teacher } from '@/lib/queries/teachers';
 ```
 
-Replace lines 30-42 (helper functions — rename `evalHalqaId`/`evalHalqaName`):
+Replace lines 31-42 (helper functions — rename `evalHalqaId`/`evalHalqaName`):
 
 ```tsx
 function studentIdOf(e: EvaluationRecord): string {
@@ -1523,7 +1523,7 @@ Replace lines 232-259 (`halqaEvalStats` → `trackEvalStats`):
   }, [evaluations, tracks]);
 ```
 
-Replace lines 326-334 (the CSV export's "مقارنة الحلقات" item — rename to tracks, `halqaEvalStats`→`trackEvalStats`, CSV column "الحلقة"→"المسار"):
+Replace lines 325-335 (the CSV export's "مقارنة الحلقات" item — rename to tracks, `halqaEvalStats`→`trackEvalStats`, CSV column "الحلقة"→"المسار"):
 
 ```tsx
     {
@@ -1539,7 +1539,7 @@ Replace lines 326-334 (the CSV export's "مقارنة الحلقات" item — r
     },
 ```
 
-Replace lines 341-347 (the "ذوي المتابعة" export's per-row `st.halqa` read — `Student.track` now, one hop, field is `title` not `name`):
+Replace lines 339-348 (the "ذوي المتابعة" export's `run` function — `Student.track` now, one hop, field is `title` not `name`):
 
 ```tsx
       run: () => shareCsv(
@@ -3030,12 +3030,13 @@ git commit -m "feat(mobile): admin teachers/dashboard — tracksCount chip, tota
 **Interfaces:**
 - Consumes: `ReportsScreen` (Task 9, no longer accepts `halqat`), `useTracks` (Task 1).
 
-- [ ] **Step 1: Replace lines 5-6 (imports)**
+- [ ] **Step 1: Replace lines 5-6 (imports) — one `useTracks` import replaces both `useHalqat`+`useSpecialTracks`**
 
 ```tsx
 import { useTracks } from '@/lib/queries/tracks';
-import { useKpis } from '@/lib/queries/kpis';
 ```
+
+(Lines 7-8, `useKpis`/`useTeachers`, are untouched.)
 
 - [ ] **Step 2: Replace lines 18-29 (data fetching + refresh) — drop `halqat`**
 
@@ -3301,7 +3302,7 @@ git commit -m "feat(mobile): rename TeacherSpecialTracks to TeacherTracks"
 **Interfaces:**
 - Consumes: `useTracks` from Task 1; `Student.track` from Task 3.
 
-- [ ] **Step 1: `teacher/dashboard.tsx` — replace lines 14-16 (imports)**
+- [ ] **Step 1: `teacher/dashboard.tsx` — replace lines 15-17 (imports)**
 
 ```tsx
 import { useTracks } from '@/lib/queries/tracks';
@@ -6016,7 +6017,7 @@ Replace lines 13-14 (`MORE_IDS`):
 const MORE_IDS = ['register', 'teachers', 'parents', 'masajid'];
 ```
 
-Replace lines 37-52 (the `Tabs.Screen` list) — `halqat` tab removed, `tracks` (renamed from `special_tracks`) promoted into its now-vacant visible slot:
+Replace lines 37-60 (the entire `Tabs.Screen` list, dashboard through `plan-form`) — `halqat` tab and `halqa-form` route removed, `tracks` (renamed from `special_tracks`) promoted into `halqat`'s now-vacant visible slot:
 
 ```tsx
       <Tabs.Screen name="dashboard" options={{ title: 'لوحة التحكم', tabBarIcon: ({ color, size }) => <IconLayoutDashboard size={size} color={color} /> }} />

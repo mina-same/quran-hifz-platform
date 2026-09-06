@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T14:31:10.060Z
-> Files: 599 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T15:22:17.943Z
+> Files: 608 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -244,6 +244,21 @@
 
 - `SKILL.md` — UI/UX Pro Max - Design Intelligence (~11172 tok)
 
+## .claude/worktrees/phase3-mobile/.superpowers/sdd/2026-09-06-halqa-track-restructure-phase3-mobile/
+
+- `task-1-report.md` — Task 1 Report: `lib/queries/tracks.ts` + `lib/queries/quranPlan.ts` (~1229 tok)
+- `task-2-report.md` — Task 2 Completion Report: Context-field collapse across attendance/evaluations/groupHomework/homewor (~1157 tok)
+
+## .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/queries/
+
+- `attendance.ts` — Exports AttendanceRecord, AttendanceFilters, useAttendance, useRecordAttendance + 2 more (~630 tok)
+- `evaluations.ts` — Legacy fixed shape — mirrored by the server only when a plan's rubric (~1004 tok)
+- `groupHomework.ts` — Exports GroupHomework, GroupHomeworkFilters, useGroupHomework, useCreateGroupHomework, useDeleteGrou (~445 tok)
+- `homework.ts` — Exports Homework, HomeworkFilters, useHomework, useCreateHomework + 2 more (~653 tok)
+- `lessonRecordings.ts` — Exports LessonRecording, LessonRecordingFilters, useRecordings, useCreateRecording, useDeleteRecordi (~519 tok)
+- `quranPlan.ts` — One line of a plan's daily grading rubric — what is graded, out of how many. (~3552 tok)
+- `tracks.ts` — Computed server-side (`Student.countDocuments({track})`) — present on (~1000 tok)
+
 ## .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/
 
 - `final-review-fix-report.md` — Final whole-branch review — fix report (~3324 tok)
@@ -306,7 +321,7 @@
 - `2026-09-04-same-day-multi-segment-plans.md` — Same-day حفظ + مراجعة Plan Segments Implementation Plan (~18220 tok)
 - `2026-09-05-halqa-track-restructure-phase1-server.md` — Halqa Elimination / Track Restructure — Phase 1 (Server) Implementation Plan (~24218 tok)
 - `2026-09-05-halqa-track-restructure-phase2-web.md` — Halqa/Track Restructure — Phase 2 (Web) Implementation Plan (~35198 tok)
-- `2026-09-06-halqa-track-restructure-phase3-mobile.md` — Halqa/Track Restructure — Phase 3 (Mobile) Implementation Plan (~62674 tok)
+- `2026-09-06-halqa-track-restructure-phase3-mobile.md` — Halqa/Track Restructure — Phase 3 (Mobile) Implementation Plan (~62709 tok)
 
 ## docs/superpowers/specs/
 
