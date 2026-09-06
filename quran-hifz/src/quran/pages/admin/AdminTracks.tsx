@@ -2,20 +2,16 @@ import { useState, type CSSProperties } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import {
-  useTracks, useCreateTrack, useUpdateTrack, useDeleteTrack,
-  useAssignStudent,
-  TRACK_DETAIL_ID_KEY,
-  type Track, type TrackTeacher,
+  useTracks, useDeleteTrack,
+  TRACK_DETAIL_ID_KEY, TRACK_FORM_HANDOFF_KEY,
+  type Track, type TrackTeacher, type TrackFormHandoff,
 } from "../../api/tracks";
-import { useTeachers } from "../../api/teachers";
-import { useMasajid } from "../../api/masajid";
-import { useStudents } from "../../api/students";
 import { useQuranPlans, segmentReversed } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
-import { FormSection } from "../../components/common/FormSection";
+import { TrackStudentsPanel } from "../../components/common/TrackStudentsPanel";
 import { AR_LOCALE } from "@/lib/format";
 
 function surahName(n: number) {
@@ -38,30 +34,8 @@ const AVATAR_COLORS = [
   { bg: "#fde8f0",           fg: "#9d174d" },
 ];
 
-/* ─── types ───────────────────────────────────────────────── */
-type FormFields = {
-  title: string; type: string; timeSlot: string;
-  masjid: string;
-  isOnline: boolean; meetLink: string;
-  teachers: string[];
-  maxStudents: string;
-  startDate: string; endDate: string;
-  daysPerWeek: string;
-  status: Track["status"];
-  notes: string;
-};
-const EMPTY: FormFields = {
-  title: "", type: "", timeSlot: "",
-  masjid: "",
-  isOnline: false, meetLink: "",
-  teachers: [], maxStudents: "30",
-  startDate: "", endDate: "",
-  daysPerWeek: "", status: "upcoming", notes: "",
-};
-
 type Modal =
   | null
-  | { mode: "form"; item?: Track }
   | { mode: "students"; item: Track };
 
 /* ─── overlay / dialog styles ─────────────────────────────── */
@@ -82,20 +56,11 @@ const STATUS_CFG = {
   upcoming: { label: "قادم",   tone: "gold"  as const, color: "#d97706",       bg: "var(--gold-pale)",  bar: "linear-gradient(90deg,#f59e0b,#fbbf24)" },
   ended:    { label: "منتهي",  tone: "gray"  as const, color: "var(--text3)",  bg: "var(--cream)",      bar: "var(--border)" },
 };
-const TYPE_OPTS = ["مراجعة مكثّفة","تجويد","إجازة","ختمة مسرّعة","برنامج رمضاني","تحضير مسابقة","أخرى"];
-const DAYS_OPTS = ["يومياً","السبت والثلاثاء","السبت والاثنين والأربعاء","عطلة نهاية الأسبوع","ثلاث مرات أسبوعياً","مرتين أسبوعياً"];
-
 /* ════════════════════════════════════════════════════════════ */
 export function AdminTracks() {
   const { data: tracks = [], isLoading } = useTracks();
-  const { data: teachers = [] }          = useTeachers();
-  const { data: masajid  = [] }          = useMasajid();
-  const { data: allStudents = [] }       = useStudents();
 
-  const createTrack    = useCreateTrack();
-  const updateTrack    = useUpdateTrack();
   const deleteTrack    = useDeleteTrack();
-  const assignStudent  = useAssignStudent();
   const { showPage }   = usePortal();
 
   function openDetail(track: Track) {
@@ -103,83 +68,22 @@ export function AdminTracks() {
     showPage("trackdetail");
   }
 
-  const [modal,         setModal]         = useState<Modal>(null);
-  const [deleteId,      setDeleteId]      = useState<string | null>(null);
-  const [form,          setForm]          = useState<FormFields>(EMPTY);
-  const [formError,     setFormError]     = useState("");
-  const [addStudentId,  setAddStudentId]  = useState("");
-  const [studentsSearch,setStudentsSearch]= useState("");
+  const [modal,    setModal]    = useState<Modal>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   /* ── open helpers ── */
   function openAdd() {
-    setForm(EMPTY); setFormError(""); setModal({ mode: "form" });
+    const handoff: TrackFormHandoff = { mode: "create" };
+    sessionStorage.setItem(TRACK_FORM_HANDOFF_KEY, JSON.stringify(handoff));
+    showPage("trackform");
   }
   function openEdit(item: Track) {
-    const d = (s: string) => s ? new Date(s).toISOString().split("T")[0] : "";
-    setForm({
-      title:          item.title,
-      type:           item.type,
-      timeSlot:       item.timeSlot,
-      masjid:         typeof item.masjid === "object" ? item.masjid._id : item.masjid,
-      isOnline:       item.isOnline ?? false,
-      meetLink:       item.meetLink ?? "",
-      teachers:       item.teachers.map(getTeacherId),
-      maxStudents:    String(item.maxStudents),
-      startDate:      d(item.startDate),
-      endDate:        d(item.endDate),
-      daysPerWeek:    item.daysPerWeek,
-      status:         item.status,
-      notes:          item.notes ?? "",
-    });
-    setFormError(""); setModal({ mode: "form", item });
+    const handoff: TrackFormHandoff = { mode: "edit", track: item };
+    sessionStorage.setItem(TRACK_FORM_HANDOFF_KEY, JSON.stringify(handoff));
+    showPage("trackform");
   }
   function openStudents(item: Track) {
-    setAddStudentId(""); setStudentsSearch(""); setModal({ mode: "students", item });
-  }
-
-  function sf<K extends keyof FormFields>(k: K, v: FormFields[K]) {
-    setForm((p) => ({ ...p, [k]: v }));
-  }
-  function toggleTeacher(id: string) {
-    setForm((p) => ({
-      ...p,
-      teachers: p.teachers.includes(id)
-        ? p.teachers.filter((x) => x !== id)
-        : [...p.teachers, id],
-    }));
-  }
-
-  /* ── submit ── */
-  async function handleSubmit() {
-    const { title, type, timeSlot, isOnline, masjid,
-            meetLink, teachers: tids, maxStudents, startDate, endDate, daysPerWeek } = form;
-
-    if (!title.trim())        { setFormError("اسم المسار مطلوب"); return; }
-    if (!type.trim())         { setFormError("نوع المسار مطلوب"); return; }
-    if (tids.length === 0)    { setFormError("يرجى اختيار معلم واحد على الأقل"); return; }
-    if (!timeSlot.trim())     { setFormError("وقت الجلسة مطلوب"); return; }
-    if (!daysPerWeek.trim())  { setFormError("الأيام مطلوبة"); return; }
-    if (!startDate || !endDate) { setFormError("التواريخ مطلوبة"); return; }
-    if (isOnline && !meetLink.trim()) { setFormError("رابط الجلسة مطلوب"); return; }
-    if (!masjid) { setFormError("يرجى اختيار المسجد"); return; }
-
-    setFormError("");
-    const body = {
-      title: title.trim(), type: type.trim(), status: form.status,
-      timeSlot: timeSlot.trim(), masjid, isOnline,
-      meetLink: isOnline ? meetLink.trim() : "",
-      teachers: tids, maxStudents: Number(maxStudents) || 30,
-      startDate, endDate, daysPerWeek: daysPerWeek.trim(),
-      notes: form.notes.trim(),
-    };
-    try {
-      if (modal && "item" in modal && modal.item) {
-        await updateTrack.mutateAsync({ id: modal.item._id, ...body });
-      } else {
-        await createTrack.mutateAsync(body);
-      }
-      setModal(null);
-    } catch (e) { setFormError((e as Error).message); }
+    setModal({ mode: "students", item });
   }
 
   useTopbar("ti-calendar-event", "المسارات",
@@ -187,8 +91,6 @@ export function AdminTracks() {
       <i className="ti ti-plus" /> مسار جديد
     </button>,
   );
-
-  const isPending = createTrack.isPending || updateTrack.isPending;
 
   /* ── group by status ── */
   const active   = tracks.filter((t) => t.status === "active");
@@ -253,238 +155,6 @@ export function AdminTracks() {
         </div>
       )}
 
-      {/* ════════ FORM MODAL ════════ */}
-      {modal?.mode === "form" && (
-        <div style={OVERLAY} onClick={() => setModal(null)}>
-          <div style={{ ...DIALOG, maxWidth: 560 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-              padding: "20px 24px 16px", borderBottom: "1px solid var(--border)",
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: 10,
-                  background: "var(--green-pale)", color: "var(--green)",
-                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
-                }}>
-                  <i className="ti ti-calendar-event" />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "var(--text)" }}>
-                    {"item" in modal && modal.item ? "تعديل المسار" : "مسار جديد"}
-                  </h3>
-                  <p style={{ margin: 0, fontSize: 11, color: "var(--text3)" }}>أدخل بيانات المسار بالكامل</p>
-                </div>
-              </div>
-              <button className="topbar-btn btn-ghost" style={{ padding: "6px 9px" }} onClick={() => setModal(null)}>
-                <i className="ti ti-x" />
-              </button>
-            </div>
-
-            <div style={{ padding: "20px 24px" }}>
-              {formError && (
-                <div style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  color: "#ef4444", fontSize: 13, marginBottom: 16,
-                  padding: "10px 14px", background: "#fef2f2", borderRadius: 10,
-                  border: "1px solid rgba(239,68,68,0.2)",
-                }}>
-                  <i className="ti ti-alert-circle" style={{ flexShrink: 0 }} /> {formError}
-                </div>
-              )}
-
-              <FormSection label="نوع الجلسة" icon="ti-device-laptop">
-                <div style={{ display: "flex", gap: 8 }}>
-                  {([false, true] as const).map((online) => (
-                    <button
-                      key={String(online)}
-                      type="button"
-                      onClick={() => sf("isOnline", online)}
-                      style={{
-                        flex: 1, padding: "11px 0", borderRadius: 10, cursor: "pointer",
-                        border: `2px solid ${form.isOnline === online ? "var(--green)" : "var(--border)"}`,
-                        background: form.isOnline === online ? "var(--green-pale)" : "var(--cream)",
-                        color: form.isOnline === online ? "var(--green)" : "var(--text2)",
-                        fontWeight: form.isOnline === online ? 700 : 400,
-                        fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-                        transition: "all .15s",
-                      }}
-                    >
-                      <i className={`ti ${online ? "ti-video" : "ti-building-mosque"}`} />
-                      {online ? "أونلاين" : "حضوري"}
-                    </button>
-                  ))}
-                </div>
-              </FormSection>
-
-              <FormSection label="المعلومات الأساسية" icon="ti-info-circle">
-                <div className="form-grid-2">
-                  <div className="form-group" style={{ gridColumn: "1 / -1" }}>
-                    <label className="form-label">اسم المسار <span>*</span></label>
-                    <input className="form-input" placeholder="مثال: دورة المراجعة الصيفية ١٤٤٧" value={form.title} onChange={(e) => sf("title", e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">النوع <span>*</span></label>
-                    <select className="form-input" value={form.type} onChange={(e) => sf("type", e.target.value)}>
-                      <option value="">— اختر —</option>
-                      {TYPE_OPTS.map((o) => <option key={o} value={o}>{o}</option>)}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">الحالة</label>
-                    <select className="form-input" value={form.status} onChange={(e) => sf("status", e.target.value as Track["status"])}>
-                      <option value="upcoming">قادم</option>
-                      <option value="active">نشط</option>
-                      <option value="ended">منتهي</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">المسجد <span>*</span></label>
-                    <select className="form-input" value={form.masjid} onChange={(e) => sf("masjid", e.target.value)}>
-                      <option value="">— اختر مسجداً —</option>
-                      {masajid.map((m) => <option key={m._id} value={m._id}>{m.name}</option>)}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">الحد الأقصى للطلاب</label>
-                    <input className="form-input" type="number" min={1} value={form.maxStudents} onChange={(e) => sf("maxStudents", e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">ملاحظات</label>
-                    <input className="form-input" placeholder="أي معلومات إضافية..." value={form.notes} onChange={(e) => sf("notes", e.target.value)} />
-                  </div>
-                </div>
-              </FormSection>
-
-              <FormSection label="المعلمون المسؤولون" icon="ti-chalkboard">
-                {form.teachers.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
-                    {form.teachers.map((id) => {
-                      const t = teachers.find((x) => x._id === id);
-                      return (
-                        <div key={id} style={{
-                          display: "flex", alignItems: "center", gap: 6,
-                          background: "var(--green-pale)", color: "var(--green)",
-                          borderRadius: 99, padding: "5px 10px 5px 6px", fontSize: 12, fontWeight: 700,
-                        }}>
-                          <div style={{
-                            width: 20, height: 20, borderRadius: "50%",
-                            background: "var(--green)", color: "#fff",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 8, fontWeight: 800,
-                          }}>
-                            {avatarInitials(t?.name ?? "")}
-                          </div>
-                          {t?.name}
-                          <button
-                            type="button"
-                            onClick={() => toggleTeacher(id)}
-                            style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, lineHeight: 1, marginRight: 2 }}
-                          >
-                            <i className="ti ti-x" style={{ fontSize: 11 }} />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                <div style={{
-                  border: "1px solid var(--border)", borderRadius: 10,
-                  maxHeight: 160, overflowY: "auto",
-                }}>
-                  {teachers.length === 0 && (
-                    <div style={{ padding: 12, fontSize: 12, color: "var(--text3)", textAlign: "center" }}>
-                      لا يوجد معلمون مسجّلون
-                    </div>
-                  )}
-                  {teachers.map((tc, i) => {
-                    const selected = form.teachers.includes(tc._id);
-                    return (
-                      <label
-                        key={tc._id}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 10,
-                          padding: "9px 12px", cursor: "pointer",
-                          borderBottom: i < teachers.length - 1 ? "1px solid var(--border)" : "none",
-                          background: selected ? "var(--green-pale)" : "transparent",
-                          transition: "background .12s",
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selected}
-                          onChange={() => toggleTeacher(tc._id)}
-                          style={{ accentColor: "var(--green)", width: 15, height: 15, flexShrink: 0 }}
-                        />
-                        <div style={{
-                          width: 28, height: 28, borderRadius: "50%",
-                          background: selected ? "var(--green)" : "var(--cream)",
-                          color: selected ? "#fff" : "var(--text2)",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: 10, fontWeight: 800, flexShrink: 0,
-                        }}>
-                          {avatarInitials(tc.name)}
-                        </div>
-                        <span style={{ fontSize: 13, fontWeight: selected ? 700 : 400, color: selected ? "var(--green)" : "var(--text)" }}>
-                          {tc.name}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </FormSection>
-
-              <FormSection label="الجدول" icon="ti-map-pin">
-                <div className="form-grid-2">
-                  <div className="form-group">
-                    <label className="form-label">الوقت <span>*</span></label>
-                    <input className="form-input" placeholder="بعد الفجر | ٦:١٠ – ٧:٣٠" value={form.timeSlot} onChange={(e) => sf("timeSlot", e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">الأيام <span>*</span></label>
-                    <select className="form-input" value={form.daysPerWeek} onChange={(e) => sf("daysPerWeek", e.target.value)}>
-                      <option value="">— اختر —</option>
-                      {DAYS_OPTS.map((o) => <option key={o} value={o}>{o}</option>)}
-                      <option value="custom">أخرى (أدخل يدوياً)</option>
-                    </select>
-                    {form.daysPerWeek === "custom" && (
-                      <input className="form-input" style={{ marginTop: 6 }} placeholder="مثال: السبت والثلاثاء والخميس" onChange={(e) => sf("daysPerWeek", e.target.value)} />
-                    )}
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">تاريخ البداية <span>*</span></label>
-                    <input className="form-input" type="date" dir="ltr" value={form.startDate} onChange={(e) => sf("startDate", e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">تاريخ النهاية <span>*</span></label>
-                    <input className="form-input" type="date" dir="ltr" value={form.endDate} onChange={(e) => sf("endDate", e.target.value)} />
-                  </div>
-                  {form.isOnline && (
-                    <div className="form-group" style={{ gridColumn: "1 / -1" }}>
-                      <label className="form-label">رابط الجلسة <span>*</span></label>
-                      <input className="form-input" dir="ltr" placeholder="https://meet.google.com/xxx-xxxx-xxx" value={form.meetLink} onChange={(e) => sf("meetLink", e.target.value)} />
-                    </div>
-                  )}
-                </div>
-              </FormSection>
-
-              <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-                <button
-                  className="topbar-btn btn-primary"
-                  style={{ flex: 1, justifyContent: "center", padding: "11px 0" }}
-                  onClick={handleSubmit} disabled={isPending}
-                >
-                  {isPending
-                    ? <><i className="ti ti-loader-2" style={{ animation: "spin 1s linear infinite" }} /> جارٍ الحفظ...</>
-                    : <><i className="ti ti-check" /> حفظ المسار</>
-                  }
-                </button>
-                <button className="topbar-btn btn-ghost" style={{ padding: "11px 20px" }} onClick={() => setModal(null)}>إلغاء</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ════════ STUDENTS MODAL — transfer-only, since a student's track is
           exclusive: this panel shows who's currently on the track (a live

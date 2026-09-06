@@ -370,3 +370,28 @@ swap keys off the view's layout direction independently.
 Content pinned at the bottom of a sheet (a footer, a "تم" button) gets swallowed by the home indicator.
 The shared wrapper adds `paddingBottom: 24 + insets.bottom` for every sheet — never add a magic paddingBottom
 at the call site. Insets resolve because expo-router's ExpoRoot mounts SafeAreaProvider above app/_layout.tsx.
+
+### Individual (per-student) plans needed a panel PER SEGMENT TYPE, not one (2026-09-07)
+User: "مش المفروض في الخطه الفرديه يكون في خطه للحفظ و خطه للمراجعه مش بس الحفظ." `IndividualPlanPanel`
+(web `quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx` + mobile
+`quran-hifz-mobile/components/domain/IndividualPlanPanel.tsx`) already took an optional `type` prop from the
+same-day-multi-segment-plans work (see [[bug-log]] bug-397..399), but every one of its 4 call sites
+(`TeacherTrackDetail.tsx`, `TeacherAttendance.tsx`, `TeacherPlanForm.tsx` on web; `TrackDetail.tsx` on mobile)
+rendered exactly ONE panel per student with no type (or mobile's `dayAssignments[0]?.type` — first-match
+only) — so a plan with both حفظ and مراجعة segments could only ever get one custom range. Fixed by rendering
+`basePlan.segments.map(seg => <IndividualPlanPanel type={seg.type} .../>)` at all 4 sites when
+`segments.length > 1`, falling back to the old untyped single panel otherwise.
+Two deeper bugs surfaced fixing this, both worth remembering for any future per-segment-type UI:
+1. **The panel's own schedule table ignored `type`.** It already computed a correctly-filtered `ownSchedule`
+   (used for direction/reversed detection) but rendered `progress.effectiveSchedule` (unfiltered, both types
+   mixed) in the actual table/cards. Any future edit to this component must render from `ownSchedule`, not
+   `progress.effectiveSchedule`, or two stacked panels will show the identical mixed list.
+2. **`initStudentProgress` (student-plan-progress.controller.ts) discarded the OTHER type's progress on
+   re-init.** It always called `initStudentOccurrences(plan, {type, rangeStart, rangeEnd})` and replaced the
+   whole `occurrences` array — that function rebuilds every non-targeted segment fresh from the BASE PLAN,
+   not from the student's own overlay. So creating a custom مراجعة range after a حفظ range already had
+   recorded progress/manual-overrides would silently wipe the حفظ history. Fixed by fetching the existing doc
+   first and splicing its other-type occurrences back in unchanged (via `.toObject()` — see the Mongoose
+   subdocument-spreading gotcha above) instead of rebuilding them. `overflowPages` is doc-level, not per-type
+   (a pre-existing schema limitation, NOT fixed here) — preserved the existing value rather than hard-resetting
+   to 0, but two segments independently overflowing will still combine into one number.

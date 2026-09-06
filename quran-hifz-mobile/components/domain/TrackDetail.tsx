@@ -152,11 +152,7 @@ export default function TrackDetail({ trackId, role }: Props) {
   const [dayNotice, setDayNotice] = useState<string | null>(null);
   const scheduleEntries = useMemo(() => linkedPlan?.schedule ?? [], [linkedPlan]);
   const daySchedule = useDaySchedule(scheduleEntries, selectedDate);
-  const { scheduledSorted, assignmentByDate, effectiveDate, isFutureDay } = daySchedule;
-  // A single representative type for today, for callers (the individual-plan
-  // panel below) that still expect one type rather than the full plural list
-  // — same "first match" fallback used elsewhere in this plan's work.
-  const dayAssignments = assignmentByDate.get(effectiveDate) ?? [];
+  const { scheduledSorted, effectiveDate, isFutureDay } = daySchedule;
 
   const roster = useMemo(() => {
     if (!track) return [];
@@ -305,20 +301,30 @@ export default function TrackDetail({ trackId, role }: Props) {
                 emptyLabel="لا يوجد طلاب مسجّلون بعد"
                 renderExtra={(student) => (
                   linkedPlan
-                    // Passes today's single representative type (first of
-                    // possibly two same-day assignments) so a multi-segment
-                    // plan's panel still filters to one type and new-plan
-                    // creation still sends a type the server will accept
-                    // (required once a plan has more than one segment).
-                    // Showing every type's occurrences in one panel is a
-                    // separate, out-of-scope follow-up.
-                    ? <IndividualPlanPanel
-                        planId={linkedPlan._id}
-                        studentId={student._id}
-                        studentName={student.name}
-                        basePlan={linkedPlan}
-                        type={dayAssignments[0]?.type}
-                      />
+                    // One panel per segment type — a multi-segment plan needs
+                    // a separate حفظ overlay and مراجعة overlay, each with its
+                    // own custom range.
+                    ? <>
+                        {(linkedPlan.segments && linkedPlan.segments.length > 1
+                          ? linkedPlan.segments.map((seg) => (
+                              <IndividualPlanPanel
+                                key={seg.type}
+                                planId={linkedPlan._id}
+                                studentId={student._id}
+                                studentName={student.name}
+                                basePlan={linkedPlan}
+                                type={seg.type}
+                              />
+                            ))
+                          : (
+                            <IndividualPlanPanel
+                              planId={linkedPlan._id}
+                              studentId={student._id}
+                              studentName={student.name}
+                              basePlan={linkedPlan}
+                            />
+                          ))}
+                      </>
                     : <Text style={s.muted}>اربط خطة حفظ بالمسار أولاً لعرض التوزيع الفردي</Text>
                 )}
               />

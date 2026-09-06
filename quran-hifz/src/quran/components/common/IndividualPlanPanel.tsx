@@ -163,6 +163,11 @@ export function IndividualPlanPanel({
         <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text2)", marginBottom: 8 }}>
           <i className="ti ti-target" style={{ marginLeft: 4, color: "var(--green)" }} />
           إنشاء خطة فردية لـ{studentName}
+          {segType && (
+            <span style={{ marginRight: 6 }}>
+              <Badge tone={segType === "حفظ" ? "green" : "gold"}>{segType}</Badge>
+            </span>
+          )}
         </div>
         <p style={{ margin: "0 0 10px", fontSize: 11, color: "var(--text3)" }}>
           اختر النطاق الذي سيحفظه {studentName} — سيُقسَّم على نفس أيام الخطة العامة. يمكن أن تكون نقطة "من" بعد نقطة "إلى" في المصحف (خطة بالعكس).
@@ -189,7 +194,10 @@ export function IndividualPlanPanel({
   return (
     <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", marginBottom: 10 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
-        <Badge tone="green">توزيع فردي محفوظ</Badge>
+        <span style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <Badge tone="green">توزيع فردي محفوظ</Badge>
+          {segType && <Badge tone={segType === "حفظ" ? "green" : "gold"}>{segType}</Badge>}
+        </span>
         <button
           className="topbar-btn btn-ghost"
           style={{ fontSize: 11 }}
@@ -217,7 +225,7 @@ export function IndividualPlanPanel({
             </tr>
           </thead>
           <tbody>
-            {progress.effectiveSchedule.map((s) => {
+            {ownSchedule.map((s) => {
               const isEditingRow = editingIndex === s.occurrenceIndex;
               const changed =
                 s.baseSurahStart !== s.surahStart || s.baseAyahStart !== s.ayahStart ||

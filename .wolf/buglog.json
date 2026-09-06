@@ -6717,5 +6717,63 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-09-05T15:45:00"
+  },
+  {
+    "id": "bug-397",
+    "timestamp": "2026-09-07T00:00:00",
+    "error_message": "User: individual plan for a student should have a separate حفظ plan and a separate مراجعة plan, not just one range",
+    "file": "quran-hifz-server/src/controllers/student-plan-progress.controller.ts",
+    "root_cause": "initStudentProgress rebuilt the ENTIRE per-student overlay from initStudentOccurrences(plan, {type, rangeStart, rangeEnd}) on every call, which reconstructs every segment from the base plan except the one being customized. So creating a custom range for one type after another type already had recorded progress/manual-overrides silently discarded that other type's history.",
+    "fix": "When an overlay already exists, only rebuild the targeted type's occurrences; splice in the OTHER type(s)' occurrences unchanged from the existing persisted doc (via .toObject()) instead of re-cloning them from the plan. First-time creation (no existing doc) still builds every segment fresh, unchanged. Also preserved overflowPages from the existing doc instead of hard-resetting to 0.",
+    "tags": [
+      "individual-plan",
+      "multi-segment",
+      "data-loss",
+      "student-plan-progress"
+    ],
+    "related_bugs": [
+      "bug-398",
+      "bug-399"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-09-07T00:00:00"
+  },
+  {
+    "id": "bug-398",
+    "timestamp": "2026-09-07T00:00:00",
+    "error_message": "The individual-plan schedule table showed both حفظ and مراجعة occurrences mixed together even when the panel was scoped to one type",
+    "file": "quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx, quran-hifz-mobile/components/domain/IndividualPlanPanel.tsx",
+    "root_cause": "Both the web and mobile IndividualPlanPanel already computed a type-filtered `ownSchedule` (used correctly to infer direction/reversed), but the persisted-overlay table/list rendered the raw, unfiltered `progress.effectiveSchedule` instead — so a multi-segment plan's per-student overlay always showed every type's days in one list no matter which type the panel claimed to represent.",
+    "fix": "Render the schedule table/cards from the already-computed `ownSchedule` instead of `progress.effectiveSchedule` in both files (web table body + mobile `items`/`doneCount`). Also added a type Badge next to the panel headings so two stacked panels (حفظ/مراجعة) are visually distinguishable.",
+    "tags": [
+      "individual-plan",
+      "multi-segment",
+      "ui-bug"
+    ],
+    "related_bugs": [
+      "bug-397",
+      "bug-399"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-09-07T00:00:00"
+  },
+  {
+    "id": "bug-399",
+    "timestamp": "2026-09-07T00:00:00",
+    "error_message": "Teachers could only set one custom individual-plan range per student, even on a plan with both حفظ and مراجعة segments",
+    "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx, quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx, quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx, quran-hifz-mobile/components/domain/TrackDetail.tsx",
+    "root_cause": "IndividualPlanPanel already supported an optional `type` prop (built for the same-day multi-segment plans feature), but every caller rendered exactly one panel per student without passing `type` (web) or passed only `dayAssignments[0]?.type`, the first of possibly two same-day assignments (mobile) — so a plan with both segments never got a second panel for the other type.",
+    "fix": "All four call sites now render one IndividualPlanPanel per segment (passing that segment's `type`) when `basePlan.segments.length > 1`, falling back to the previous single untyped panel for ordinary single-segment plans. Removed the now-dead `dayAssignments` derivation in mobile TrackDetail.tsx that only existed to feed the old single-panel call.",
+    "tags": [
+      "individual-plan",
+      "multi-segment",
+      "missing-feature"
+    ],
+    "related_bugs": [
+      "bug-397",
+      "bug-398"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-09-07T00:00:00"
   }
 ]

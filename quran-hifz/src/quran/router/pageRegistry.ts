@@ -9,6 +9,7 @@ import { AdminMasajid }       from "../pages/admin/AdminMasajid";
 import { AdminKpis }          from "../pages/admin/AdminKpis";
 import { AdminReports }       from "../pages/admin/AdminReports";
 import { AdminTracks }        from "../pages/admin/AdminTracks";
+import { AdminTrackForm }     from "../pages/admin/AdminTrackForm";
 import { AdminParents }       from "../pages/admin/AdminParents";
 
 import { TeacherDashboard }      from "../pages/teacher/TeacherDashboard";
@@ -53,6 +54,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     kpis:        AdminKpis,
     reports:     AdminReports,
     tracks:      AdminTracks,
+    trackform:   AdminTrackForm,
     parents:     AdminParents,
     // Admin reuses the teacher's track detail (and the pages it navigates to).
     trackdetail: TeacherTrackDetail,

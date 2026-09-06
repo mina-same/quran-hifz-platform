@@ -526,7 +526,13 @@ export function TeacherPlanForm() {
                   )}
                 </div>
                 {planRecord && planPanelStudentId === s._id && (
-                  <IndividualPlanPanel planId={planRecord._id} studentId={s._id} studentName={s.name} basePlan={planRecord} />
+                  planRecord.segments.length > 1
+                    ? planRecord.segments.map((seg) => (
+                      <IndividualPlanPanel key={seg.type} planId={planRecord._id} studentId={s._id} studentName={s.name} basePlan={planRecord} type={seg.type} />
+                    ))
+                    : (
+                      <IndividualPlanPanel planId={planRecord._id} studentId={s._id} studentName={s.name} basePlan={planRecord} />
+                    )
                 )}
               </div>
             ))}

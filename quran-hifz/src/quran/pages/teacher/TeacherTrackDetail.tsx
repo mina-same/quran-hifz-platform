@@ -1525,12 +1525,25 @@ export function TeacherTrackDetail() {
                           )}
 
                           {hasIndividualPlan && linkedPlan && planPanelStudentId === id && (
-                            <IndividualPlanPanel
-                              planId={linkedPlan._id}
-                              studentId={id}
-                              studentName={name}
-                              basePlan={linkedPlan}
-                            />
+                            linkedPlan.segments.length > 1
+                              ? linkedPlan.segments.map((seg) => (
+                                <IndividualPlanPanel
+                                  key={seg.type}
+                                  planId={linkedPlan._id}
+                                  studentId={id}
+                                  studentName={name}
+                                  basePlan={linkedPlan}
+                                  type={seg.type}
+                                />
+                              ))
+                              : (
+                                <IndividualPlanPanel
+                                  planId={linkedPlan._id}
+                                  studentId={id}
+                                  studentName={name}
+                                  basePlan={linkedPlan}
+                                />
+                              )
                           )}
 
                           {!hasIndividualPlan && (

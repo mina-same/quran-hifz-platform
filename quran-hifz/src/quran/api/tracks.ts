@@ -6,6 +6,15 @@ import { get, post, put, del } from "../../lib/api";
  * track to show (the hash-based router has no room for per-page params). */
 export const TRACK_DETAIL_ID_KEY = "qh_track_detail_id";
 
+/** sessionStorage key used to hand off "open the track form" from the Tracks
+ * list to AdminTrackForm — same no-router-params pattern as
+ * TRACK_DETAIL_ID_KEY / PLAN_FORM_HANDOFF_KEY. The full `Track` is carried in
+ * the payload for edit mode (already in memory in the caller). */
+export const TRACK_FORM_HANDOFF_KEY = "qh_track_form_handoff";
+export type TrackFormHandoff =
+  | { mode: "create" }
+  | { mode: "edit"; track: Track };
+
 export type TrackTeacher = { _id: string; name: string };
 export type TrackMasjid  = { _id: string; name: string; location?: string; gender: "male" | "female" };
 

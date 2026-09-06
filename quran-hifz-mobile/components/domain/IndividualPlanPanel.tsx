@@ -86,7 +86,10 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
   if (!progress?.progressIsPersisted) {
     return (
       <View style={s.box}>
-        <Text style={s.boxTitle}>لا توجد خطة فردية لـ{studentName} بعد</Text>
+        <View style={s.headRow}>
+          <Text style={s.boxTitle}>لا توجد خطة فردية لـ{studentName} بعد</Text>
+          {segType && <Badge label={segType} variant={segType === 'حفظ' ? 'green' : 'gold'} />}
+        </View>
         <Text style={s.label}>نطاق مخصص (اختياري — افتراضيًا نفس نطاق الخطة)</Text>
         <View style={{ gap: 10 }}>
           <SurahAyahPicker value={customStart} onChange={setCustomStart} />
@@ -105,7 +108,7 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
 
   // One card per occurrence: the six-column table this replaced could only be
   // read by scrolling sideways inside an already-nested, already-scrolling row.
-  const items: ScheduleItem[] = progress.effectiveSchedule.map((occ) => {
+  const items: ScheduleItem[] = ownSchedule.map((occ) => {
     const changed = occ.baseSurahStart !== occ.surahStart || occ.baseAyahStart !== occ.ayahStart
       || occ.baseSurahEnd !== occ.surahEnd || occ.baseAyahEnd !== occ.ayahEnd;
     const baseOriented = orientSlice(
@@ -132,12 +135,15 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
     };
   });
 
-  const doneCount = progress.effectiveSchedule.filter((o) => o.status === 'done').length;
+  const doneCount = ownSchedule.filter((o) => o.status === 'done').length;
 
   return (
     <View style={s.box}>
       <View style={s.headRow}>
-        <Badge label="توزيع فردي محفوظ" variant="green" />
+        <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+          <Badge label="توزيع فردي محفوظ" variant="green" />
+          {segType && <Badge label={segType} variant={segType === 'حفظ' ? 'green' : 'gold'} />}
+        </View>
         <Button
           label={reflow.isPending ? '...' : 'إعادة حساب التوزيع'}
           variant="ghost"

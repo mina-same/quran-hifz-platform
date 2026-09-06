@@ -1149,12 +1149,25 @@ export function TeacherAttendance() {
                         )}
 
                         {hasIndividualPlan && linkedPlan && planPanelStudentId === s._id && (
-                          <IndividualPlanPanel
-                            planId={linkedPlan._id}
-                            studentId={s._id}
-                            studentName={s.name}
-                            basePlan={linkedPlan}
-                          />
+                          linkedPlan.segments.length > 1
+                            ? linkedPlan.segments.map((seg) => (
+                              <IndividualPlanPanel
+                                key={seg.type}
+                                planId={linkedPlan._id}
+                                studentId={s._id}
+                                studentName={s.name}
+                                basePlan={linkedPlan}
+                                type={seg.type}
+                              />
+                            ))
+                            : (
+                              <IndividualPlanPanel
+                                planId={linkedPlan._id}
+                                studentId={s._id}
+                                studentName={s.name}
+                                basePlan={linkedPlan}
+                              />
+                            )
                         )}
 
                         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>

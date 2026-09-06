@@ -274,12 +274,25 @@ export async function initStudentProgress(req: Request, res: Response, next: Nex
       const rangeType = data.type ?? (segmentTypes.length === 1 ? segmentTypes[0] : undefined);
       if (!rangeType) throw new AppError('يجب تحديد النوع الذي ينطبق عليه النطاق المخصص', 400);
 
-      const occurrences = initStudentOccurrences(plan, {
+      // If an overlay already exists, only rebuild the targeted type's
+      // occurrences — keep every other type exactly as persisted (its own
+      // recorded progress/manual overrides), rather than re-cloning it fresh
+      // from the base plan and silently discarding that history. On first
+      // creation there is nothing to preserve, so every type is built fresh.
+      const existing = await StudentPlanProgress.findOne({ plan: planId, student: studentId });
+      const freshAll = initStudentOccurrences(plan, {
         type: rangeType, rangeStart: data.rangeStart, rangeEnd: data.rangeEnd,
       });
+      const occurrences = existing
+        ? [
+          ...freshAll.filter((o) => o.type === rangeType),
+          ...existing.toObject().occurrences.filter((o: { type: string }) => o.type !== rangeType),
+        ]
+        : freshAll;
+
       doc = await StudentPlanProgress.findOneAndUpdate(
         { plan: planId, student: studentId },
-        { plan: planId, student: studentId, occurrences, overflowPages: 0, $unset: { lastReflowedAt: 1 } },
+        { plan: planId, student: studentId, occurrences, overflowPages: existing?.overflowPages ?? 0, $unset: { lastReflowedAt: 1 } },
         { upsert: true, new: true, setDefaultsOnInsert: true },
       );
     } else {
