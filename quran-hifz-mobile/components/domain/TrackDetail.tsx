@@ -17,9 +17,8 @@ import IndividualPlanPanel from '@/components/domain/IndividualPlanPanel';
 import EvaluationRoster from '@/components/domain/EvaluationRoster';
 import DaySlider, { useDaySchedule } from '@/components/domain/DaySlider';
 import {
-  useSpecialTracks, type SpecialTrack, type EnrolledStudent, type TrackTeacher,
-} from '@/lib/queries/specialTracks';
-import { useHalqat } from '@/lib/queries/halqat';
+  useTracks, type Track, type TrackTeacher,
+} from '@/lib/queries/tracks';
 import { useStudents } from '@/lib/queries/students';
 import {
   useQuranPlans, useUpdateQuranPlan, segmentReversed, type QuranPlan,
@@ -33,8 +32,6 @@ import { AR_LOCALE, fmtDayLabel } from '@/lib/date';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
-function getEnrolledId(v: EnrolledStudent | string) { return typeof v === 'object' ? v._id : v; }
-function getEnrolledName(v: EnrolledStudent | string) { return typeof v === 'object' ? v.name : v; }
 function getTeacherName(v: TrackTeacher | string) { return typeof v === 'object' ? v.name : v; }
 function fmtDate(d: string) { return new Date(d).toLocaleDateString(AR_LOCALE, { year: 'numeric', month: 'short', day: 'numeric' }); }
 
@@ -48,11 +45,11 @@ function avatarTone(theme: AppTheme, i: number) {
   return theme.tone[order[i % order.length]];
 }
 
-const STATUS_LABEL: Record<SpecialTrack['status'], string> = { active: 'نشط', upcoming: 'قادم', ended: 'منتهي' };
-const STATUS_VARIANT: Record<SpecialTrack['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
+const STATUS_LABEL: Record<Track['status'], string> = { active: 'نشط', upcoming: 'قادم', ended: 'منتهي' };
+const STATUS_VARIANT: Record<Track['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
 
 function planTargetsTrack(plan: QuranPlan, trackId: string): boolean {
-  const ref = plan.specialTrack;
+  const ref = plan.track;
   const id = typeof ref === 'object' ? ref?._id : ref;
   return id === trackId;
 }
@@ -88,35 +85,23 @@ export default function TrackDetail({ trackId, role }: Props) {
   // resolves out of the same react-query cache instead of refetching: a
   // teacher only ever sees their own tracks, an admin sees all of them.
   const teacherScope = role === 'teacher' ? profileId : undefined;
-  const { data: tracks = [], isLoading: loadingTrack } = useSpecialTracks(undefined, teacherScope);
+  const { data: tracks = [], isLoading: loadingTrack } = useTracks(undefined, teacherScope);
   const track = tracks.find((t) => t._id === trackId);
 
-  // This track's real roster lives on its halaqat, not on `enrolledStudents`
-  // (that field is only for tracks with no halqa layer — direct enrollment).
-  // Scope the halaqat to just the ones *this* teacher teaches within the
-  // track, so a teacher sees their own students and not every halqa's; an
-  // admin gets every halqa in the track.
-  const { data: halqat = [] } = useHalqat(role === 'teacher' ? { teacher: profileId } : undefined);
-  const halqaIdsInTrack = useMemo(
-    () => halqat
-      .filter((h) => {
-        const ref = h.specialTrack;
-        return (typeof ref === 'object' ? ref?._id : ref) === trackId;
-      })
-      .map((h) => h._id),
-    [halqat, trackId],
-  );
-  const { data: halqaStudents = [] } = useStudents(
-    { halqa: halqaIdsInTrack.join(',') },
-    { enabled: halqaIdsInTrack.length > 0 },
+  // `Student.track` is now the sole membership mechanism — the roster is a
+  // direct query, no more halqa-mediated derivation.
+  const { data: trackStudents = [] } = useStudents(
+    { track: trackId },
+    { enabled: !!track },
   );
 
-  const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: trackId });
-  // A plan can carry a stale `specialTrack` field left over from before its
-  // targetType was switched to "students", so this filter can return several
-  // plans for one track — prefer the one actually targeting the whole track
-  // over a narrower students-only plan that merely still points at it.
-  const linkedPlan = linkedPlans.find((p) => p.targetType === 'specialTrack') ?? linkedPlans[0];
+  const { data: linkedPlans = [] } = useQuranPlans({ track: trackId });
+  // A plan can carry a stale `track` field left over from before its
+  // targetType was switched to "students" (see planCoversStudent above), so
+  // useQuranPlans({track}) can return several plans for this track — prefer
+  // the one actually targeting the whole track over a narrower students-only
+  // plan that merely still points at it.
+  const linkedPlan = linkedPlans.find((p) => p.targetType === 'track') ?? linkedPlans[0];
 
   // Only the teacher-only "link another plan" panel reads this. An admin has no
   // profileId, so an ungated call would drop the `teacher` filter and pull every
@@ -158,18 +143,10 @@ export default function TrackDetail({ trackId, role }: Props) {
   // — same "first match" fallback used elsewhere in this plan's work.
   const dayAssignments = assignmentByDate.get(effectiveDate) ?? [];
 
-  const roster = useMemo(() => {
-    if (!track) return [];
-    const map = new Map<string, { _id: string; name: string }>();
-    // Directly-enrolled students first (tracks with no halqa layer), then the
-    // students reached through this track's halaqat.
-    track.enrolledStudents.forEach((es) => {
-      const id = getEnrolledId(es);
-      map.set(id, { _id: id, name: getEnrolledName(es) });
-    });
-    halqaStudents.forEach((st) => map.set(st._id, { _id: st._id, name: st.name }));
-    return Array.from(map.values());
-  }, [track, halqaStudents]);
+  const roster = useMemo(
+    () => trackStudents.map((st) => ({ _id: st._id, name: st.name })),
+    [trackStudents],
+  );
 
   const scheduleRows = useMemo(
     () => (linkedPlan ? scheduleItems(linkedPlan.schedule, (e) => segmentReversed(linkedPlan, e.type)) : []),
@@ -186,7 +163,7 @@ export default function TrackDetail({ trackId, role }: Props) {
     return <Alert variant="error">هذا المسار غير موجود أو لم تعد مُسنَداً إليه.</Alert>;
   }
 
-  const enrolledCount = track.enrolledStudents.length;
+  const enrolledCount = roster.length;
   const capacityPct = track.maxStudents > 0 ? Math.min(100, Math.round((enrolledCount / track.maxStudents) * 100)) : 0;
 
   return (
@@ -208,7 +185,7 @@ export default function TrackDetail({ trackId, role }: Props) {
         </View>
 
         <Text style={s.infoLabel}>المكان</Text>
-        <Text style={[s.infoValue, { marginBottom: 10 }]}>{track.isOnline ? 'أونلاين' : track.location}</Text>
+        <Text style={[s.infoValue, { marginBottom: 10 }]}>{track.isOnline ? 'أونلاين' : (typeof track.masjid === 'object' ? track.masjid.name : track.masjid)}</Text>
 
         {track.isOnline && !!track.meetLink && (
           <Pressable
@@ -298,7 +275,7 @@ export default function TrackDetail({ trackId, role }: Props) {
             <View style={{ paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}>
               <EvaluationRoster
                 students={roster}
-                context={{ kind: 'specialTrack', id: trackId }}
+                context={{ id: trackId }}
                 teacherId={evaluatingTeacherId}
                 linkedPlan={linkedPlan}
                 daySchedule={daySchedule}
@@ -407,7 +384,7 @@ export default function TrackDetail({ trackId, role }: Props) {
                     <Button
                       label="ربط"
                       onPress={() => updatePlan.mutate(
-                        { id: p._id, targetType: 'specialTrack', specialTrack: trackId },
+                        { id: p._id, targetType: 'track', track: trackId },
                         { onSuccess: () => setShowLinkPanel(false) },
                       )}
                       disabled={updatePlan.isPending}
