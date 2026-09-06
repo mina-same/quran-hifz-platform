@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
-import { IconRoute, IconSchool, IconUsers } from '@tabler/icons-react-native';
+import { IconRoute, IconUsers } from '@tabler/icons-react-native';
 import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -10,8 +10,8 @@ type AppTheme = ReturnType<typeof useAppTheme>;
 export interface ScopeOption {
   value: string;
   label: string;
-  /** Drives the chip's icon: the "all" tab, a halqa, or a programme. */
-  kind?: 'all' | 'halqa' | 'track';
+  /** Drives the chip's icon: the "all" tab or a track. */
+  kind?: 'all' | 'track';
 }
 
 interface Props {
@@ -32,7 +32,6 @@ export default function ScopeTabs({ options, value, onChange }: Props) {
 
   function iconFor(opt: ScopeOption, active: boolean) {
     const color = active ? theme.white : theme.textMuted;
-    if (opt.kind === 'halqa') return <IconSchool size={14} color={color} />;
     if (opt.kind === 'track') return <IconRoute size={14} color={color} />;
     if (opt.kind === 'all') return <IconUsers size={14} color={color} />;
     return null;
