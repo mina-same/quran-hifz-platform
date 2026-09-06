@@ -30,7 +30,7 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
       { group: "الأنشطة", items: [
         { id: "attendance",    icon: "ti-calendar-check",  label: "الحضور والغياب" },
         { id: "schedule",      icon: "ti-clock",           label: "مواعيد حلقتي" },
-        { id: "specialtracks", icon: "ti-calendar-event",  label: "مساراتي" },
+        { id: "tracks", icon: "ti-calendar-event",  label: "مساري" },
       ]},
       { group: "النقاط والمكافآت", items: [
         { id: "points", icon: "ti-star",          label: "نقاطي" },
@@ -51,13 +51,12 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
       { group: "الرئيسية", items: [
         { id: "dashboard", icon: "ti-layout-dashboard", label: "لوحة التحكم" },
       ]},
-      { group: "الحلقات", items: [
-        { id: "myhalqa",       icon: "ti-school",          label: "حلقاتي" },
-        { id: "specialtracks", icon: "ti-calendar-event",  label: "مساراتي" },
+      { group: "المسارات", items: [
+        { id: "tracks",        icon: "ti-calendar-event",  label: "مساراتي" },
         { id: "students",      icon: "ti-users",           label: "طلابي" },
         { id: "attendance",    icon: "ti-calendar-check",  label: "الحضور والتقييم",    dot: true },
-        { id: "recordlesson",  icon: "ti-player-record",   label: "سجّل درس الحلقة",   dot: true },
-        { id: "grouphomework", icon: "ti-list-check",      label: "واجبات الحلقة" },
+        { id: "recordlesson",  icon: "ti-player-record",   label: "سجّل درس المسار",   dot: true },
+        { id: "grouphomework", icon: "ti-list-check",      label: "واجبات المسار" },
       ]},
       { group: "التقييم", items: [
         { id: "homework", icon: "ti-microphone", label: "مراجعة الواجبات", dot: true },
@@ -82,10 +81,9 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "teachers", icon: "ti-chalkboard",   label: "المعلمون" },
         { id: "parents",  icon: "ti-user-heart",   label: "أولياء الأمور" },
       ]},
-      { group: "الحلقات والمساجد", items: [
-        { id: "halqat",         icon: "ti-school",          label: "الحلقات" },
-        { id: "masajid",        icon: "ti-building-arch",   label: "المساجد" },
-        { id: "special_tracks", icon: "ti-calendar-event",  label: "المسارات", dot: true },
+      { group: "المساجد والمسارات", items: [
+        { id: "masajid", icon: "ti-building-arch",   label: "المساجد" },
+        { id: "tracks",  icon: "ti-calendar-event",  label: "المسارات", dot: true },
       ]},
       { group: "التقارير", items: [
         { id: "kpis",    icon: "ti-target",    label: "مؤشرات الأداء" },

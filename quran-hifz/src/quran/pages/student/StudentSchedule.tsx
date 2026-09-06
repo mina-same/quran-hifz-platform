@@ -5,7 +5,7 @@ import { Alert } from "../../components/common/Alert";
 import { HalqaRow } from "../../components/common/HalqaRow";
 import { SkeletonCard } from "../../components/common/Skeleton";
 import { useStudent } from "../../api/students";
-import { useHalqa } from "../../api/halqat";
+import { useTrack, type TrackTeacher } from "../../api/tracks";
 
 function getId(v: unknown): string {
   if (v && typeof v === "object" && "_id" in v) return (v as { _id: string })._id;
@@ -16,24 +16,28 @@ function getName(v: unknown): string {
   if (v && typeof v === "object" && "name" in v) return (v as { name: string }).name;
   return "—";
 }
+function teacherNames(teachers: (TrackTeacher | string)[] | undefined): string {
+  if (!teachers || teachers.length === 0) return "—";
+  return teachers.map((t) => (typeof t === "object" ? t.name : t)).join(" · ");
+}
 
 export function StudentSchedule() {
   const { user } = usePortal();
   const { data: student } = useStudent(user?.profileId);
-  const halqaId = student ? getId(student.halqa) : undefined;
-  const { data: halqa, isLoading } = useHalqa(halqaId);
+  const trackId = student ? getId(student.track) : undefined;
+  const { data: track, isLoading } = useTrack(trackId);
 
-  useTopbar("ti-clock", "مواعيد حلقتي");
+  useTopbar("ti-clock", "مواعيد مساري");
 
   if (isLoading) {
     return <SkeletonCard lines={4} />;
   }
 
-  const days = halqa?.days?.split(/[،,]/).map((d) => d.trim()).filter(Boolean) ?? [];
+  const days = track?.daysPerWeek?.split(/[،,]/).map((d) => d.trim()).filter(Boolean) ?? [];
 
   return (
     <>
-      <Card icon="ti-school" title={halqa?.name ?? "حلقتي"}>
+      <Card icon="ti-calendar-event" title={track?.title ?? "مساري"}>
         {days.length > 0 && (
           <div
             className="grid-collapse"
@@ -55,13 +59,13 @@ export function StudentSchedule() {
                 }}
               >
                 <div style={{ fontSize: 15, fontWeight: 700, color: "var(--green)" }}>{day}</div>
-                {halqa?.time && (
+                {track?.timeSlot && (
                   <>
                     <div style={{ fontSize: 12, color: "var(--text2)", marginTop: 4 }}>
                       بعد صلاة الفجر
                     </div>
                     <div style={{ fontSize: 13, color: "var(--text)", marginTop: 2, fontWeight: 600 }} dir="ltr">
-                      {halqa.time}
+                      {track.timeSlot}
                     </div>
                   </>
                 )}
@@ -69,8 +73,8 @@ export function StudentSchedule() {
             ))}
           </div>
         )}
-        <HalqaRow label="الموقع" value={getName(halqa?.masjid)} />
-        <HalqaRow label="المعلم" value={getName(halqa?.teacher)} />
+        <HalqaRow label="الموقع" value={getName(track?.masjid)} />
+        <HalqaRow label="المعلم" value={teacherNames(track?.teachers)} />
         <HalqaRow
           label="الموعد القادم"
           value="الثلاثاء — بعد غد"

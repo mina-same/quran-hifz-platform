@@ -5,15 +5,13 @@ import { AdminDashboard }     from "../pages/admin/AdminDashboard";
 import { AdminStudents }      from "../pages/admin/AdminStudents";
 import { AdminRegister }      from "../pages/admin/AdminRegister";
 import { AdminTeachers }      from "../pages/admin/AdminTeachers";
-import { AdminHalqat }        from "../pages/admin/AdminHalqat";
 import { AdminMasajid }       from "../pages/admin/AdminMasajid";
 import { AdminKpis }          from "../pages/admin/AdminKpis";
 import { AdminReports }       from "../pages/admin/AdminReports";
-import { AdminSpecialTracks } from "../pages/admin/AdminSpecialTracks";
+import { AdminTracks }        from "../pages/admin/AdminTracks";
 import { AdminParents }       from "../pages/admin/AdminParents";
 
 import { TeacherDashboard }      from "../pages/teacher/TeacherDashboard";
-import { TeacherHalqa }          from "../pages/teacher/TeacherHalqa";
 import { TeacherStudents }       from "../pages/teacher/TeacherStudents";
 import { TeacherAttendance }     from "../pages/teacher/TeacherAttendance";
 import { TeacherHomework }       from "../pages/teacher/TeacherHomework";
@@ -23,7 +21,7 @@ import { TeacherPlanDetail }     from "../pages/teacher/TeacherPlanDetail";
 import { TeacherReports }        from "../pages/teacher/TeacherReports";
 import { TeacherRecordLesson }   from "../pages/teacher/TeacherRecordLesson";
 import { TeacherGroupHomework }  from "../pages/teacher/TeacherGroupHomework";
-import { TeacherSpecialTracks }  from "../pages/teacher/TeacherSpecialTracks";
+import { TeacherTracks }         from "../pages/teacher/TeacherTracks";
 import { TeacherTrackDetail }    from "../pages/teacher/TeacherTrackDetail";
 
 import { StudentDashboard }      from "../pages/student/StudentDashboard";
@@ -34,7 +32,7 @@ import { StudentSchedule }       from "../pages/student/StudentSchedule";
 import { StudentMessages }       from "../pages/student/StudentMessages";
 import { StudentPoints }         from "../pages/student/StudentPoints";
 import { StudentStore }          from "../pages/student/StudentStore";
-import { StudentSpecialTracks }  from "../pages/student/StudentSpecialTracks";
+import { StudentTracks }         from "../pages/student/StudentTracks";
 
 import { AccountSettings }    from "../pages/common/AccountSettings";
 
@@ -47,27 +45,23 @@ import { ParentHomeworkView } from "../pages/parent/ParentHomeworkView";
 
 export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
   admin: {
-    dashboard:      AdminDashboard,
-    students:       AdminStudents,
-    register:       AdminRegister,
-    teachers:       AdminTeachers,
-    halqat:         AdminHalqat,
-    masajid:        AdminMasajid,
-    kpis:           AdminKpis,
-    reports:        AdminReports,
-    special_tracks: AdminSpecialTracks,
-    parents:        AdminParents,
+    dashboard:   AdminDashboard,
+    students:    AdminStudents,
+    register:    AdminRegister,
+    teachers:    AdminTeachers,
+    masajid:     AdminMasajid,
+    kpis:        AdminKpis,
+    reports:     AdminReports,
+    tracks:      AdminTracks,
+    parents:     AdminParents,
     // Admin reuses the teacher's track detail (and the pages it navigates to).
-    // `specialtracks` (no underscore) aliases the tracks list so the detail's
-    // back button lands back here under the admin portal.
-    trackdetail:    TeacherTrackDetail,
-    specialtracks:  AdminSpecialTracks,
-    planform:       TeacherPlanForm,
-    attendance:     TeacherAttendance,
+    trackdetail: TeacherTrackDetail,
+    planform:    TeacherPlanForm,
+    attendance:  TeacherAttendance,
   },
   teacher: {
     dashboard:     TeacherDashboard,
-    myhalqa:       TeacherHalqa,
+    tracks:        TeacherTracks,
     students:      TeacherStudents,
     attendance:    TeacherAttendance,
     homework:      TeacherHomework,
@@ -77,21 +71,20 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     reports:       TeacherReports,
     recordlesson:  TeacherRecordLesson,
     grouphomework: TeacherGroupHomework,
-    specialtracks: TeacherSpecialTracks,
     trackdetail:   TeacherTrackDetail,
     account:       AccountSettings,
   },
   student: {
-    dashboard:     StudentDashboard,
-    myhifz:        StudentHifz,
-    homework:      StudentHomework,
-    attendance:    StudentAttendance,
-    schedule:      StudentSchedule,
-    messages:      StudentMessages,
-    points:        StudentPoints,
-    store:         StudentStore,
-    specialtracks: StudentSpecialTracks,
-    account:       AccountSettings,
+    dashboard: StudentDashboard,
+    myhifz:    StudentHifz,
+    homework:  StudentHomework,
+    attendance: StudentAttendance,
+    schedule:  StudentSchedule,
+    messages:  StudentMessages,
+    points:    StudentPoints,
+    store:     StudentStore,
+    tracks:    StudentTracks,
+    account:   AccountSettings,
   },
   parent: {
     dashboard:    ParentDashboard,

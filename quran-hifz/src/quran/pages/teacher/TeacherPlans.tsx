@@ -109,7 +109,7 @@ export function TeacherPlans() {
               onEdit={openEdit}
               onDelete={setDeleteId}
               onDuplicate={openDuplicate}
-              onViewTrack={() => showPage("specialtracks")}
+              onViewTrack={() => showPage("tracks")}
             />
           ))}
         </div>

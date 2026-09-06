@@ -693,7 +693,7 @@ export function TeacherAttendance() {
           setSelectedDate("");
         }}
       >
-        <i className="ti ti-arrow-right" /> الحلقات والمسارات
+        <i className="ti ti-arrow-right" /> المسارات
       </button>
     ) : undefined,
   );

@@ -11,12 +11,14 @@ import { useStudent } from "../../api/students";
 import { useHomework } from "../../api/homework";
 import { toAr, pct } from "../../../lib/format";
 
-function getName(v: unknown): string {
-  if (v && typeof v === "object" && "name" in v) return (v as { name: string }).name;
-  return "—";
-}
 function getField(v: unknown, field: string): string {
   if (v && typeof v === "object" && field in v) return String((v as Record<string, unknown>)[field]);
+  return "—";
+}
+function getTrackMasjidName(track: unknown): string {
+  if (!track || typeof track !== "object") return "—";
+  const m = (track as { masjid?: unknown }).masjid;
+  if (m && typeof m === "object" && "name" in m) return (m as { name: string }).name;
   return "—";
 }
 
@@ -49,10 +51,10 @@ export function StudentDashboard() {
 
   const submittedCount = homework.filter((h) => h.status === "مراجع").length;
   const juz = student ? Math.round((student.progressPct / 100) * 30) : 0;
-  const halqaName = getName(student?.halqa);
-  const masjidName = getName(student?.masjid);
-  const halqaDays = getField(student?.halqa, "days");
-  const halqaTime = getField(student?.halqa, "time");
+  const trackName = getField(student?.track, "title");
+  const masjidName = getTrackMasjidName(student?.track);
+  const trackDays = getField(student?.track, "daysPerWeek");
+  const trackTime = getField(student?.track, "timeSlot");
   const isTopStudent = (student?.attendancePct ?? 0) >= 90 && (student?.progressPct ?? 0) >= 60;
 
   return (
@@ -95,18 +97,18 @@ export function StudentDashboard() {
           </div>
         </Card>
 
-        {/* معلومات حلقتي */}
-        <Card icon="ti-school" title="معلومات حلقتي">
+        {/* معلومات مساري */}
+        <Card icon="ti-calendar-event" title="معلومات مساري">
           <div style={{ fontSize: 12 }}>
-            <HalqaRow label="الحلقة" value={halqaName} valueStyle={{ fontWeight: 700, color: "var(--green)" }} />
+            <HalqaRow label="المسار" value={trackName} valueStyle={{ fontWeight: 700, color: "var(--green)" }} />
             <HalqaRow label="المسجد" value={masjidName} />
-            {halqaDays !== "—" && <HalqaRow label="المواعيد" value={`${halqaDays} | ${halqaTime}`} />}
+            {trackDays !== "—" && <HalqaRow label="المواعيد" value={`${trackDays} | ${trackTime}`} />}
           </div>
           <hr className="divider" />
           {isTopStudent && (
             <div className="alert alert-success" style={{ margin: 0 }}>
               <i className="ti ti-star" />
-              <div>أنت من أفضل طلاب الحلقة هذا الأسبوع!</div>
+              <div>أنت من أفضل طلاب المسار هذا الأسبوع!</div>
             </div>
           )}
         </Card>

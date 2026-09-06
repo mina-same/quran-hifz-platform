@@ -112,7 +112,7 @@ export function TeacherGroupHomework() {
     selected ? (
       <div style={{ display: "flex", gap: 8 }}>
         <button className="topbar-btn btn-ghost" onClick={() => setSelected(null)}>
-          <i className="ti ti-arrow-right" /> الحلقات والمسارات
+          <i className="ti ti-arrow-right" /> المسارات
         </button>
         <button className="topbar-btn btn-primary" onClick={() => setShowForm(true)}>
           <i className="ti ti-plus" /> واجب جديد

@@ -857,7 +857,7 @@ export function TeacherTrackDetail() {
       <button
         className="topbar-btn btn-ghost"
         onClick={() => {
-          if (guardDiscardDayEdit()) showPage("specialtracks");
+          if (guardDiscardDayEdit()) showPage("tracks");
         }}
       >
         <i className="ti ti-arrow-right" /> المسارات

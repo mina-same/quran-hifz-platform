@@ -7,8 +7,7 @@ import { Card } from "../../components/common/Card";
 import { Alert } from "../../components/common/Alert";
 import { pickMasar } from "../../config/masarMap";
 import { useCreateStudent } from "../../api/students";
-import { useMasajid } from "../../api/masajid";
-import { useHalqat } from "../../api/halqat";
+import { useTracks } from "../../api/tracks";
 
 const schema = z.object({
   name: z.string().min(2, "الاسم مطلوب (٢ أحرف على الأقل)"),
@@ -28,8 +27,7 @@ const schema = z.object({
     .string()
     .optional()
     .refine((v) => !v || (Number(v) >= 1 && Number(v) <= 10), "المستوى بين ١ و١٠"),
-  masjid: z.string().min(1, "يرجى اختيار المسجد"),
-  halqa: z.string().min(1, "يرجى اختيار الحلقة"),
+  track: z.string().min(1, "يرجى اختيار المسار"),
   email: z.string().email("البريد الإلكتروني غير صحيح").optional().or(z.literal("")),
   password: z.string().optional(),
 });
@@ -57,8 +55,7 @@ function FieldError({ msg }: { msg?: string }) {
 export function AdminRegister() {
   useTopbar("ti-user-plus", "تسجيل طالب جديد");
 
-  const { data: masajid = [] } = useMasajid();
-  const { data: halqat = [] } = useHalqat();
+  const { data: tracks = [] } = useTracks();
   const createStudent = useCreateStudent();
 
   const [credentials, setCredentials] = useState<Credentials | null>(null);
@@ -84,8 +81,7 @@ export function AdminRegister() {
       guardian:      "",
       guardianPhone: data.guardianPhone,
       nationalId: data.nationalId?.trim() || undefined,
-      halqa:         data.halqa,
-      masjid:        data.masjid,
+      track:         data.track,
       path:          masar?.path ?? "حفظ كامل",
       status:        "new",
     };
@@ -171,27 +167,15 @@ export function AdminRegister() {
 
           <hr className="divider" />
 
-          <div className="form-grid-2">
-            <div className="form-group">
-              <label className="form-label">المسجد <span>*</span></label>
-              <select className="form-input" {...register("masjid")}>
-                <option value="">اختر المسجد</option>
-                {masajid.map((m) => (
-                  <option key={m._id} value={m._id}>{m.name}</option>
-                ))}
-              </select>
-              <FieldError msg={errors.masjid?.message} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">الحلقة <span>*</span></label>
-              <select className="form-input" {...register("halqa")}>
-                <option value="">اختر الحلقة</option>
-                {halqat.map((h) => (
-                  <option key={h._id} value={h._id}>{h.name}</option>
-                ))}
-              </select>
-              <FieldError msg={errors.halqa?.message} />
-            </div>
+          <div className="form-group">
+            <label className="form-label">المسار <span>*</span></label>
+            <select className="form-input" {...register("track")}>
+              <option value="">اختر المسار</option>
+              {tracks.map((t) => (
+                <option key={t._id} value={t._id}>{t.title}</option>
+              ))}
+            </select>
+            <FieldError msg={errors.track?.message} />
           </div>
 
           <hr className="divider" />
