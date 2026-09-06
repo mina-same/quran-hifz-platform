@@ -17,7 +17,7 @@ import FormDatePicker from '@/components/forms/FormDatePicker';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
 import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet';
-import { useHalqat } from '@/lib/queries/halqat';
+import { useTracks } from '@/lib/queries/tracks';
 import { useQuranPlan, useCreateQuranPlan, useUpdateQuranPlan } from '@/lib/queries/quranPlan';
 import {
   DEFAULT_GRADE_RUBRIC, RUBRIC_TOTAL_DEGREES, totalMaxOf, criterionKey, type GradeCriterion,
@@ -59,7 +59,7 @@ type FormSegment = {
 type FormFields = {
   name: string;
   description: string;
-  halqa: string;
+  track: string;
   /** One per selected type, max four. Their days must not overlap. */
   segments: FormSegment[];
   holidays: string[];
@@ -84,7 +84,7 @@ function emptySegment(type: PlanType): FormSegment {
 const RUBRIC_BAR_COLORS = ['#1B5E20', '#1d4ed8', '#c2410c', '#7c3aed', '#0891b2', '#b45309'];
 
 const EMPTY: FormFields = {
-  name: '', description: '', halqa: '',
+  name: '', description: '', track: '',
   segments: [emptySegment('حفظ')],
   holidays: [], startDate: todayISO(),
   endType: 'activeDays', activeDaysCount: '', endDate: '',
@@ -95,7 +95,7 @@ export default function TeacherPlanForm() {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
-  const params = useLocalSearchParams<{ mode?: string; id?: string; halqaId?: string }>();
+  const params = useLocalSearchParams<{ mode?: string; id?: string; trackId?: string }>();
   const isEdit = params.mode === 'edit' && !!params.id;
   // Duplicate prefills from an existing plan but saves as a new one, matching
   // the web's "نسخ الخطة" handoff.
@@ -104,22 +104,23 @@ export default function TeacherPlanForm() {
   const profileId = usePortalStore((s) => s.authUser?.profileId);
 
   const { data: existingPlan } = useQuranPlan(prefillFrom);
-  const { data: halqat = [] } = useHalqat({ teacher: profileId });
+  const { data: tracks = [] } = useTracks(undefined, profileId);
 
   const createPlan = useCreateQuranPlan();
   const updatePlan = useUpdateQuranPlan();
 
   const [form, setForm] = useState<FormFields>(() => ({
     ...EMPTY,
-    halqa: params.halqaId ?? '',
+    track: params.trackId ?? '',
   }));
   const [formError, setFormError] = useState('');
   const [prefilled, setPrefilled] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
-  // A plan created before the mobile "halqa-only" picker (or one linked to a
-  // specialTrack via the track-detail "link plan" action) may have a non-halqa
-  // target — this form doesn't offer changing that, matches the web form's
-  // "targetType editing not offered here" convention.
+  // A plan linked to a track via the track-detail "link plan" action always
+  // shows this form's track picker unlocked (targetType is only 'track' or
+  // 'students' now — no more special-casing a track-targeted plan). Only a
+  // plan explicitly targeting an explicit student list locks the target,
+  // matching the web form's "targetType editing not offered here" convention.
   const [lockedTarget, setLockedTarget] = useState<{ targetType: string; label: string } | null>(null);
 
   useEffect(() => {
@@ -127,8 +128,8 @@ export default function TeacherPlanForm() {
       setForm({
         name: isDuplicate ? `${existingPlan.name} (نسخة)` : existingPlan.name,
         description: existingPlan.description ?? '',
-        halqa: existingPlan.targetType === 'halqa'
-          ? (typeof existingPlan.halqa === 'object' ? existingPlan.halqa?._id ?? '' : existingPlan.halqa ?? '')
+        track: existingPlan.targetType === 'track'
+          ? (typeof existingPlan.track === 'object' ? existingPlan.track?._id ?? '' : existingPlan.track ?? '')
           : '',
         // The server always returns segments, migrating a legacy single-type
         // plan into a one-element array, so there is no old shape to handle.
@@ -145,11 +146,8 @@ export default function TeacherPlanForm() {
           ? existingPlan.gradeRubric.map((c) => ({ ...c }))
           : DEFAULT_GRADE_RUBRIC.map((c) => ({ ...c })),
       });
-      if (existingPlan.targetType !== 'halqa') {
-        const label = existingPlan.targetType === 'specialTrack'
-          ? `مسار: ${typeof existingPlan.specialTrack === 'object' ? existingPlan.specialTrack?.title ?? '' : ''}`
-          : `${existingPlan.students?.length ?? 0} طالب محدد`;
-        setLockedTarget({ targetType: existingPlan.targetType, label });
+      if (existingPlan.targetType === 'students') {
+        setLockedTarget({ targetType: existingPlan.targetType, label: `${existingPlan.students?.length ?? 0} طالب محدد` });
       }
       setPrefilled(true);
     }
@@ -252,7 +250,7 @@ export default function TeacherPlanForm() {
     // and no weekday claimed twice.
     const segmentError = validateSegmentDays(form.segments);
     if (segmentError) return setFormError(segmentError);
-    if (!lockedTarget && !form.halqa) return setFormError('يرجى اختيار حلقة');
+    if (!lockedTarget && !form.track) return setFormError('يرجى اختيار مسار');
     if (!form.startDate) return setFormError('يرجى تحديد تاريخ البداية');
     if (form.endType === 'activeDays' && !form.activeDaysCount) return setFormError('يرجى تحديد عدد الأيام النشطة');
     if (form.endType === 'date' && !form.endDate) return setFormError('يرجى تحديد تاريخ الانتهاء');
@@ -274,18 +272,18 @@ export default function TeacherPlanForm() {
       gradeRubric: form.gradeRubric.map((c) => ({ ...c, label: c.label.trim(), max: Number(c.max) })),
     };
     if (!lockedTarget) {
-      body.targetType = 'halqa';
-      body.halqa = form.halqa;
+      body.targetType = 'track';
+      body.track = form.track;
     }
     if (!isEdit) {
       // `teacher` is required by the server on create. An admin reaching this
       // form from the track drill-down has no profileId of their own, so fall
-      // back to the teacher who owns the halqa the plan targets.
-      const halqaTeacher = halqat.find((h) => h._id === form.halqa)?.teacher;
+      // back to the teacher who owns the track the plan targets.
+      const trackTeacher = tracks.find((t) => t._id === form.track)?.teachers[0];
       body.teacher = profileId
-        ?? (typeof halqaTeacher === 'object' ? halqaTeacher?._id : halqaTeacher);
+        ?? (typeof trackTeacher === 'object' ? trackTeacher?._id : trackTeacher);
       if (!body.teacher) {
-        setFormError('تعذّر تحديد المعلم لهذه الخطة — اختر حلقة لها معلم مُسنَد.');
+        setFormError('تعذّر تحديد المعلم لهذه الخطة — اختر مسارًا له معلم مُسنَد.');
         return;
       }
     }
@@ -353,12 +351,12 @@ export default function TeacherPlanForm() {
               <Text style={s.lockedText}>{lockedTarget.label} (لا يمكن تغييرها من هنا)</Text>
             </FormGroup>
           ) : (
-            <FormGroup label="الحلقة" required>
+            <FormGroup label="المسار" required>
               <FormSelect
-                value={form.halqa}
-                onChange={(v) => sf('halqa', v)}
-                options={halqat.map((h) => ({ value: h._id, label: h.name }))}
-                placeholder="اختر حلقة"
+                value={form.track}
+                onChange={(v) => sf('track', v)}
+                options={tracks.map((t) => ({ value: t._id, label: t.title }))}
+                placeholder="اختر مسارًا"
               />
             </FormGroup>
           )}
