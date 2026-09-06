@@ -4,16 +4,16 @@ import Text from '@/components/ui/Text';
 import Badge from '@/components/ui/Badge';
 import ProgressBar from '@/components/ui/ProgressBar';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import type { Track } from '@/lib/queries/tracks';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
 /**
- * Normalized shape for anything a teacher/student/admin can act on:
- * a Halqa or a SpecialTrack. Mirrors web's `TeachingContext` type
- * (see quran-hifz/src/quran/components/common/ContextPicker.tsx).
+ * Normalized shape for anything a teacher/student/admin can act on — always a
+ * Track now that Halqa is gone. Mirrors web's `TeachingContext` type (see
+ * quran-hifz/src/quran/components/common/ContextPicker.tsx).
  */
 export type TeachingContext = {
-  kind: 'halqa' | 'specialTrack';
   id: string;
   title: string;
   subtitle?: string;
@@ -23,45 +23,18 @@ export type TeachingContext = {
   status?: 'active' | 'upcoming' | 'ended';
 };
 
-export function halqaToContext(h: {
-  _id: string;
-  name: string;
-  masjid?: { _id: string; name: string } | string;
-  days?: string;
-  time?: string;
-  studentCount?: number;
-  capacity?: number;
-}): TeachingContext {
-  const masjidName = typeof h.masjid === 'object' && h.masjid ? h.masjid.name : (h.masjid as string | undefined);
-  return {
-    kind: 'halqa',
-    id: h._id,
-    title: h.name,
-    subtitle: masjidName,
-    scheduleLabel: [h.days, h.time].filter(Boolean).join(' | '),
-    studentCount: h.studentCount,
-    capacity: h.capacity,
-  };
+function getName(v: unknown): string {
+  if (v && typeof v === 'object' && 'name' in v) return (v as { name: string }).name;
+  return typeof v === 'string' ? v : '';
 }
 
-export function trackToContext(t: {
-  _id: string;
-  title: string;
-  location?: string;
-  isOnline?: boolean;
-  timeSlot?: string;
-  daysPerWeek?: string;
-  enrolledStudents?: unknown[];
-  maxStudents?: number;
-  status?: 'active' | 'upcoming' | 'ended';
-}): TeachingContext {
+export function trackToContext(t: Track): TeachingContext {
   return {
-    kind: 'specialTrack',
     id: t._id,
     title: t.title,
-    subtitle: t.isOnline ? 'أونلاين' : t.location,
+    subtitle: t.isOnline ? 'أونلاين' : getName(t.masjid),
     scheduleLabel: [t.daysPerWeek, t.timeSlot].filter(Boolean).join(' | '),
-    studentCount: t.enrolledStudents?.length,
+    studentCount: t.studentCount,
     capacity: t.maxStudents,
     status: t.status,
   };
@@ -92,19 +65,19 @@ export default function ContextCard({ context, actions }: Props) {
 
   return (
     <View style={styles.card}>
-      <View style={[styles.header, context.kind === 'specialTrack' && styles.headerTrack]}>
+      <View style={styles.header}>
         <Text style={styles.headerName} numberOfLines={1}>{context.title}</Text>
         {context.status ? (
           <Badge label={STATUS_LABEL[context.status]} variant={STATUS_VARIANT[context.status]} />
         ) : (
-          <Badge label={context.kind === 'halqa' ? 'حلقة' : 'مسار'} variant="gold" />
+          <Badge label="مسار" variant="gold" />
         )}
       </View>
 
       <View style={styles.body}>
         {!!context.subtitle && (
           <View style={styles.row}>
-            <Text style={styles.rowLabel}>{context.kind === 'halqa' ? 'المسجد' : 'المكان'}</Text>
+            <Text style={styles.rowLabel}>المكان</Text>
             <Text style={styles.rowValue}>{context.subtitle}</Text>
           </View>
         )}
@@ -153,9 +126,6 @@ function createStyles(theme: AppTheme) {
       justifyContent: 'space-between',
       alignItems: 'center',
       gap: 8,
-    },
-    headerTrack: {
-      backgroundColor: theme.brown,
     },
     headerName: {
       fontSize: 13,
