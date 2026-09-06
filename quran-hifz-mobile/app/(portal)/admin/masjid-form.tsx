@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import Text from '@/components/ui/Text';
 import FormPage, { useFormPageStyles } from '@/components/ui/FormPage';
 import FormInput from '@/components/forms/FormInput';
+import FormSelect from '@/components/forms/FormSelect';
 import { useMasajid, useCreateMasjid, useUpdateMasjid } from '@/lib/queries/masajid';
 
 export default function AdminMasjidForm() {
@@ -16,6 +17,7 @@ export default function AdminMasjidForm() {
 
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
+  const [gender, setGender] = useState<'male' | 'female'>('male');
   const [error, setError] = useState('');
 
   // The list query is already cached, so editing needs no extra fetch — but it
@@ -25,6 +27,7 @@ export default function AdminMasjidForm() {
     if (!existing) return;
     setName(existing.name);
     setLocation(existing.location);
+    setGender(existing.gender);
   }, [existing?._id]);
 
   async function handleSubmit() {
@@ -34,7 +37,7 @@ export default function AdminMasjidForm() {
     }
     try {
       setError('');
-      const body = { name: name.trim(), location: location.trim() };
+      const body = { name: name.trim(), location: location.trim(), gender };
       if (id) await updateMasjid.mutateAsync({ id, ...body });
       else await createMasjid.mutateAsync(body);
       router.back();
@@ -55,6 +58,17 @@ export default function AdminMasjidForm() {
 
       <Text style={s.label}>الموقع *</Text>
       <FormInput placeholder="حي السلام، الرياض" value={location} onChangeText={setLocation} />
+
+      <Text style={s.label}>الجنس *</Text>
+      <FormSelect
+        value={gender}
+        onChange={(v) => setGender(v as 'male' | 'female')}
+        options={[
+          { value: 'male', label: 'رجال (جامع)' },
+          { value: 'female', label: 'نساء (دار)' },
+        ]}
+        title="الجنس"
+      />
     </FormPage>
   );
 }
