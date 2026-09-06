@@ -70,7 +70,7 @@ export function AdminDashboard() {
       <StatsRow
         items={[
           { num: toAr(stats?.totalStudents ?? 0), label: "إجمالي الطلاب", icon: "ti-users" },
-          { num: toAr(stats?.totalHalqat ?? 0), label: "حلقات نشطة", icon: "ti-school", variant: "gold" },
+          { num: toAr(stats?.totalTracks ?? 0), label: "مسارات نشطة", icon: "ti-calendar-event", variant: "gold" },
           { num: toAr(stats?.totalTeachers ?? 0), label: "المعلمون", icon: "ti-chalkboard", variant: "blue" },
           { num: pct(stats?.avgAttendancePct ?? 0), label: "نسبة الحضور", icon: "ti-calendar-check" },
         ]}

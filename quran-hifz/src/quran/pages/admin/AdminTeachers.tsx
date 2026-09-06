@@ -136,7 +136,7 @@ export function AdminTeachers() {
                   <th>الاسم</th>
                   <th>التخصص</th>
                   <th>الجوال</th>
-                  <th>الحلقات</th>
+                  <th>المسارات</th>
                   <th>الطلاب</th>
                   <th>التقييم</th>
                   <th>الحالة</th>
@@ -149,7 +149,7 @@ export function AdminTeachers() {
                     <td style={{ fontWeight: 600 }}>{t.name}</td>
                     <td><Badge tone="blue">{t.specialty || "—"}</Badge></td>
                     <td style={{ fontSize: 12, direction: "ltr" }}>{t.phone || "—"}</td>
-                    <td>{toAr(t.halqatCount ?? 0)}</td>
+                    <td>{toAr(t.tracksCount ?? 0)}</td>
                     <td>{toAr(t.studentCount ?? 0)}</td>
                     <td>{t.rating || "—"}</td>
                     <td>

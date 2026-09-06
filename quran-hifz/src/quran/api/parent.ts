@@ -12,7 +12,7 @@ export type ParentChild = {
   attendancePct: number;
   progressPct: number;
   progressPages: number;
-  halqa: { _id: string; name: string } | string;
+  track: { _id: string; title: string } | string;
 };
 
 export type ChildRecording = {

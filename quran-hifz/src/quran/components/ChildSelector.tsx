@@ -59,7 +59,7 @@ export function ChildSelector({ onBack }: { onBack: () => void }) {
 
       <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center", maxWidth: 720 }}>
         {(children ?? []).map((child: ParentChild) => {
-          const halqaName = typeof child.halqa === "object" ? child.halqa.name : child.halqa;
+          const trackName = typeof child.track === "object" ? child.track.title : child.track;
           const initials = child.name.slice(0, 2);
           return (
             <div
@@ -116,7 +116,7 @@ export function ChildSelector({ onBack }: { onBack: () => void }) {
               >
                 {child.progressPages} صفحة &bull; {child.attendancePct}٪ حضور
               </div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 6 }}>{halqaName}</div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 6 }}>{trackName}</div>
             </div>
           );
         })}
