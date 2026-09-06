@@ -3398,3 +3398,33 @@
 | 14:48 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | reduced (-12 lines) | ~128 |
 | 14:49 | Edited quran-hifz/src/quran/components/common/Badge.tsx | modified Badge() | ~103 |
 | 14:51 | Created .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-17-report.md | — | ~2893 |
+| 15:00 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | modified 17() | ~447 |
+| 15:00 | Edited quran-hifz/src/quran/api/parent.ts | inline fix | ~14 |
+| 15:00 | Edited quran-hifz/src/quran/pages/parent/ParentDashboard.tsx | CSS: title, track | ~42 |
+| 15:00 | Edited quran-hifz/src/quran/pages/parent/ParentDashboard.tsx | "الحلقة" → "المسار" | ~17 |
+| 15:01 | Edited quran-hifz/src/quran/components/ChildSelector.tsx | inline fix | ~27 |
+| 15:01 | Edited quran-hifz/src/quran/components/ChildSelector.tsx | inline fix | ~31 |
+| 15:01 | Edited quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx | CSS: track, track, track | ~172 |
+| 15:01 | Edited quran-hifz/src/quran/api/homework.ts | 3→2 lines | ~19 |
+| 15:01 | Edited quran-hifz/src/quran/api/homework.ts | 3→2 lines | ~11 |
+| 15:01 | Edited quran-hifz/src/quran/api/homework.ts | 3→2 lines | ~24 |
+| 15:02 | Edited quran-hifz/src/quran/api/lesson-recordings.ts | modified buildQuery() | ~182 |
+| 15:02 | Edited quran-hifz/src/quran/api/stats.ts | inline fix | ~7 |
+| 15:03 | Edited quran-hifz/src/quran/pages/admin/AdminDashboard.tsx | "حلقات نشطة" → "مسارات نشطة" | ~33 |
+| 15:03 | Edited quran-hifz/src/quran/api/teachers.ts | inline fix | ~7 |
+| 15:03 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | inline fix | ~10 |
+| 15:03 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | inline fix | ~16 |
+| 15:08 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | modified fix() | ~472 |
+
+## Session: 2026-09-06 15:12
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:14 | Edited .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md | modified sweep() | ~420 |
+| 15:14 | Session end: 1 writes across 1 files (progress.md) | 0 reads | ~450 tok |
+| 15:52 | Session end: 1 writes across 1 files (progress.md) | 2 reads | ~5944 tok |
+
+## Session: 2026-09-06 15:52
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

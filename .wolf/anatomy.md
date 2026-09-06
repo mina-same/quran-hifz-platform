@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T11:51:51.658Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T12:14:25.267Z
 > Files: 594 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
@@ -282,7 +282,7 @@
 
 ## .superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md (~2336 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-05-halqa-track-restructure-phase2-web.md (~3231 tok)
 - `task-1-report.md` — Task 1: Track/Halqa API modules — Completion Report (~1188 tok)
 - `task-10-report.md` — Task 10 Report: TeacherGroupHomework.tsx Consumer Update (~831 tok)
 - `task-11-report.md` — Task 11: TeacherPlanForm.tsx Rewrite — Completion Report (~838 tok)
@@ -778,7 +778,7 @@
 - `evaluations.ts` — Legacy fixed shape — the server still mirrors it whenever a plan's rubric (~1105 tok)
 - `group-homework.ts` — Exports GroupHomework, GroupHomeworkFilters, useGroupHomework, useCreateGroupHomework, useDeleteGrou (~435 tok)
 - `hifz.ts` — Exports HifzEntry, useHifz, useUpsertHifz, useDeleteHifz (~388 tok)
-- `homework.ts` — Exports Homework, HomeworkFilters, useHomework, useCreateHomework + 2 more (~628 tok)
+- `homework.ts` — Exports Homework, HomeworkFilters, useHomework, useCreateHomework + 2 more (~629 tok)
 - `kpis.ts` — Exports Kpi, useKpis, useCreateKpi, useUpdateKpi (~314 tok)
 - `lesson-recordings.ts` — Exports LessonRecording, useRecordings, useCreateRecording, useDeleteRecording (~488 tok)
 - `masajid.ts` — The server's `getMasajid`/`getMasjid` select this exact field set — no (~561 tok)
@@ -793,7 +793,7 @@
 
 ## quran-hifz/src/quran/components/
 
-- `ChildSelector.tsx` — Post-login child picker for parent portal; fetches from useParentChildren(), calls setActiveChild from ParentContext (~900 tok)
+- `ChildSelector.tsx` — LOGO_SRC (~1453 tok)
 - `PageOutlet.tsx` — PageOutlet (~131 tok)
 - `PortalScreen.tsx` — LOGO_SRC (~516 tok)
 - `Sidebar.tsx` — LOGO_SRC (~694 tok)
@@ -854,7 +854,7 @@
 
 ## quran-hifz/src/quran/pages/admin/
 
-- `AdminDashboard.tsx` — PageLoading (~1287 tok)
+- `AdminDashboard.tsx` — PageLoading (~1289 tok)
 - `AdminHalqat.tsx` — OVERLAY — renders modal (~3688 tok)
 - `AdminKpis.tsx` — RATING_TONE — renders table (~743 tok)
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~3106 tok)
@@ -874,7 +874,7 @@
 ## quran-hifz/src/quran/pages/parent/
 
 - `ParentAttendance.tsx` — STATUS_TONE — renders table (~1420 tok)
-- `ParentDashboard.tsx` — NOTIFICATIONS (~1190 tok)
+- `ParentDashboard.tsx` — NOTIFICATIONS (~1224 tok)
 - `ParentHomeworkView.tsx` — ParentHomeworkView (~1027 tok)
 - `ParentMessages.tsx` — ParentMessages (~546 tok)
 - `ParentRecordings.tsx` — ParentRecordings — renders table (~896 tok)
