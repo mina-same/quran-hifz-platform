@@ -9,9 +9,8 @@ import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import { SkeletonRows } from '@/components/ui/Skeleton';
-import ContextCard, { halqaToContext, trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
-import { useHalqat } from '@/lib/queries/halqat';
-import { useSpecialTracks } from '@/lib/queries/specialTracks';
+import ContextCard, { trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
+import { useTracks } from '@/lib/queries/tracks';
 import { useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework } from '@/lib/queries/groupHomework';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -29,23 +28,17 @@ export default function TeacherGroupHomework() {
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({ title: '', desc: '', dueDay: DAYS[0] });
 
-  const { data: halqat = [], isLoading: loadingHalqat, refetch: refetchHalqat, isRefetching: refetchingHalqat } = useHalqat({ teacher: profileId });
-  const { data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useSpecialTracks(undefined, profileId);
+  const { data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useTracks(undefined, profileId);
 
   const { data: homeworks = [], isLoading: loadingHw, refetch: refetchHw, isRefetching: refetchingHw } = useGroupHomework(
-    selected
-      ? selected.kind === 'halqa'
-        ? { halqa: selected.id }
-        : { specialTrack: selected.id }
-      : undefined,
+    selected ? { track: selected.id } : undefined,
   );
   const createHW = useCreateGroupHomework();
   const deleteHW = useDeleteGroupHomework();
 
-  const isLoading = loadingHalqat || loadingTracks;
-  const isRefreshing = refetchingHalqat || refetchingTracks || refetchingHw;
+  const isLoading = loadingTracks;
+  const isRefreshing = refetchingTracks || refetchingHw;
   function handleRefresh() {
-    refetchHalqat();
     refetchTracks();
     refetchHw();
   }
@@ -53,7 +46,7 @@ export default function TeacherGroupHomework() {
   async function handleAdd() {
     if (!selected || !form.title.trim() || !form.desc.trim()) return;
     await createHW.mutateAsync({
-      ...(selected.kind === 'halqa' ? { halqa: selected.id } : { specialTrack: selected.id }),
+      track: selected.id,
       title: form.title,
       description: form.desc,
       dueDay: form.dueDay,
@@ -74,14 +67,9 @@ export default function TeacherGroupHomework() {
           refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
         >
           {isLoading && <SkeletonRows count={4} rowHeight={72} />}
-          {!isLoading && halqat.length === 0 && tracks.length === 0 && (
-            <Text style={s.muted}>لا توجد حلقات أو مسارات مسندة إليك</Text>
+          {!isLoading && tracks.length === 0 && (
+            <Text style={s.muted}>لا توجد مسارات مسندة إليك</Text>
           )}
-          {halqat.map((h) => (
-            <Pressable key={h._id} onPress={() => setSelected(halqaToContext(h))}>
-              <ContextCard context={halqaToContext(h)} />
-            </Pressable>
-          ))}
           {tracks.map((t) => (
             <Pressable key={t._id} onPress={() => setSelected(trackToContext(t))}>
               <ContextCard context={trackToContext(t)} />
@@ -102,7 +90,7 @@ export default function TeacherGroupHomework() {
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         <Pressable onPress={() => setSelected(null)}>
-          <Text style={s.backLink}>‹ رجوع لاختيار الحلقة/المسار</Text>
+          <Text style={s.backLink}>‹ رجوع لاختيار المسار</Text>
         </Pressable>
 
         {saved && <Text style={s.successBanner}>تم إضافة الواجب الجماعي ✓</Text>}
