@@ -2650,3 +2650,2214 @@ git commit -m "feat(mobile): rewrite AdminSpecialTracks as AdminTracks with masj
 ```
 
 ---
+
+### Task 13: `admin/register.tsx` — single track picker
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/admin/register.tsx`
+
+**Interfaces:**
+- Consumes: `useTracks` from Task 1's `tracks.ts`.
+- Produces: `AdminRegister` submitting `body.track` (drops separate `body.halqa`/`body.masjid`).
+
+Finding during planning: the design doc's §13 also lists `lib/constants/masarMap.ts` as a file to modify for the "الحلقة المقترحة" → "المسار المقترح" copy reword. A direct grep (`grep -rn "الحلقة المقترحة" quran-hifz-mobile`) confirms that exact string exists **only** inside this file's JSX (line 162) — `masarMap.ts` itself has no such string (its `MasarInfo.halqa` field holds cosmetic placeholder values like `"حلقة أبي بكر الصديق"`, never this label text). So `masarMap.ts` needs no code change; the cosmetic fix folds into this task's Step 3 below.
+
+- [ ] **Step 1: Replace imports (lines 13-16) — drop `useMasajid`/`useHalqat`, add `useTracks`**
+
+```tsx
+import { useCreateStudent } from '@/lib/queries/students';
+import { useTracks } from '@/lib/queries/tracks';
+import { pickMasar, READING_LEVELS } from '@/lib/constants/masarMap';
+```
+
+- [ ] **Step 2: Replace lines 21-30 (`Fields` type + `EMPTY`) — collapse `masjid`+`halqa` to `track`**
+
+```tsx
+type Fields = {
+  name: string; age: string; guardianPhone: string; nationalId: string;
+  level: string; studentLevel: string;
+  track: string;
+  email: string; password: string;
+};
+const EMPTY: Fields = {
+  name: '', age: '', guardianPhone: '', nationalId: '', level: '', studentLevel: '',
+  track: '', email: '', password: '',
+};
+```
+
+- [ ] **Step 3: Replace lines 34-47 (`validate`) — single track requirement, cosmetic label fixed downstream in Step 6**
+
+```tsx
+function validate(f: Fields): string | null {
+  if (f.name.trim().length < 2) return 'الاسم مطلوب (٢ أحرف على الأقل)';
+  if (!f.age.trim()) return 'العمر مطلوب';
+  if (Number(f.age) < 4 || Number(f.age) > 80) return 'العمر بين ٤ و٨٠';
+  if (!f.guardianPhone.trim()) return 'جوال ولي الأمر مطلوب';
+  if (!/^05\d{8}$/.test(f.guardianPhone.trim())) return 'صيغة الجوال: 05XXXXXXXX';
+  // Optional, but must be well-formed when provided.
+  if (f.nationalId.trim() && !/^[12]\d{9}$/.test(f.nationalId.trim())) return 'رقم الهوية ١٠ أرقام ويبدأ بـ ١ أو ٢';
+  if (!f.level) return 'يرجى اختيار مستوى القراءة';
+  if (f.studentLevel.trim() && (Number(f.studentLevel) < 1 || Number(f.studentLevel) > 10)) return 'المستوى بين ١ و١٠';
+  if (!f.track) return 'يرجى اختيار المسار';
+  if (f.email.trim() && !/^\S+@\S+\.\S+$/.test(f.email.trim())) return 'البريد الإلكتروني غير صحيح';
+  return null;
+}
+```
+
+- [ ] **Step 4: Replace lines 54-55 (data fetching) — `useTracks()` replaces `useMasajid()`+`useHalqat()`**
+
+```tsx
+  const { data: tracks = [] } = useTracks();
+  const createStudent = useCreateStudent();
+```
+
+- [ ] **Step 5: Replace lines 77-89 (`handleSubmit`'s body) — `track` replaces `halqa`+`masjid`**
+
+```tsx
+    const body: Record<string, unknown> = {
+      name: form.name.trim(),
+      guardian: '',
+      guardianPhone: form.guardianPhone.trim(),
+      nationalId: form.nationalId.trim() || undefined,
+      track: form.track,
+      path: masar?.path ?? 'حفظ كامل',
+      status: 'new',
+    };
+```
+
+- [ ] **Step 6: Replace lines 157-164 (masar suggestion box) — cosmetic label fix**
+
+```tsx
+            {masar && (
+              <View style={s.masar}>
+                <Text style={s.masarLabel}>المسار المقترح تلقائياً</Text>
+                <Text style={s.masarName}>{masar.name}</Text>
+                <Text style={s.masarDesc}>{masar.desc}</Text>
+                <Text style={s.masarHalqa}>المسار المقترح: {masar.halqa}</Text>
+              </View>
+            )}
+```
+
+- [ ] **Step 7: Replace lines 167-187 (the "المسجد والحلقة" card) — single "المسار" `FormSelect`**
+
+```tsx
+          <Card>
+            <CardHeader title="المسار" />
+            <View style={s.formCol}>
+              <FormGroup label="المسار" required>
+                <FormSelect
+                  value={form.track}
+                  onChange={(v) => sf('track', v)}
+                  options={tracks.map((t) => ({ value: t._id, label: t.title }))}
+                  placeholder="اختر المسار"
+                />
+              </FormGroup>
+            </View>
+          </Card>
+```
+
+- [ ] **Step 8: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: `admin/register.tsx` no longer errors.
+
+- [ ] **Step 9: Manual verification against the real dev server**
+
+Log in as admin, open "تسجيل طالب جديد": confirm the form shows a single "المسار" select (no separate مسجد/حلقة steps), that the reading-level-derived masar box still shows "المسار المقترح تلقائياً" + "المسار المقترح: …", and that submitting creates the student with the chosen track.
+
+- [ ] **Step 10: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/admin/register.tsx
+git commit -m "feat(mobile): AdminRegister — single track picker replaces masjid+halqa two-step"
+```
+
+---
+
+### Task 14: `admin/students.tsx` + `admin/student-form.tsx` — one-hop track label + single track select
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/admin/students.tsx`
+- Modify: `quran-hifz-mobile/app/(portal)/admin/student-form.tsx`
+
+**Interfaces:**
+- Consumes: `Student.track` (Task 3), `useTracks` (Task 1).
+
+- [ ] **Step 1: `admin/students.tsx` — replace lines 26-44 (`getName`/`getId`/`trackLabel`) — one-hop**
+
+```tsx
+function getId(v: unknown): string {
+  if (v && typeof v === 'object' && '_id' in v) return (v as { _id: string })._id;
+  if (typeof v === 'string') return v;
+  return '';
+}
+
+/** المسار: real track lives one hop away via `Student.track`, not the unused legacy `path` enum. */
+function trackLabel(s: Student): string | null {
+  const track = typeof s.track === 'object' ? s.track : null;
+  if (track?.title) return track.title;
+  if (s.path) return s.path;
+  return null;
+}
+function getTrackName(v: { title: string } | string | undefined): string {
+  if (v && typeof v === 'object' && 'title' in v) return v.title;
+  if (typeof v === 'string') return v;
+  return '—';
+}
+```
+
+(`getName` — which read `.name` off `st.halqa`/`st.masjid` — is deleted entirely; both call sites are replaced in Step 2 with a single track chip via `getTrackName`.)
+
+- [ ] **Step 2: Replace lines 150-162 (the chips row) — collapse "الحلقة"/"المسجد" chips to one "المسار" chip**
+
+```tsx
+                  <View style={s.chips}>
+                    <View style={s.chip}>
+                      <Text style={s.chipText} numberOfLines={1}>المسار: {getTrackName(st.track)}</Text>
+                    </View>
+                    {typeof st.level === 'number' && (
+                      <View style={s.chip}>
+                        <Text style={s.chipText} numberOfLines={1}>المستوى: {st.level}</Text>
+                      </View>
+                    )}
+                  </View>
+```
+
+- [ ] **Step 3: `admin/student-form.tsx` — replace imports (lines 8-10)**
+
+```tsx
+import { useStudents, useUpdateStudent, type Student } from '@/lib/queries/students';
+import { useTracks } from '@/lib/queries/tracks';
+import { useAdminParents, useStudentParent, useSetStudentParent } from '@/lib/queries/adminParents';
+```
+
+- [ ] **Step 4: Replace lines 28-30 (data fetching) — drop `halqat`/`masajid`, add `tracks`**
+
+```tsx
+  const { data: students = [] } = useStudents();
+  const { data: tracks = [] } = useTracks();
+  const { data: parents = [] } = useAdminParents();
+```
+
+- [ ] **Step 5: Replace lines 37-48 (state + prefill effect) — collapse `halqa`+`masjid` to `track`**
+
+```tsx
+  const [name, setName] = useState('');
+  const [path, setPath] = useState('');
+  const [level, setLevel] = useState('');
+  const [track, setTrack] = useState('');
+  const [guardianPhone, setGuardianPhone] = useState('');
+  const [nationalId, setNationalId] = useState('');
+  const [status, setStatus] = useState<Student['status']>('active');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [selectedParentId, setSelectedParentId] = useState('');
+  const [error, setError] = useState('');
+
+  const existing = id ? students.find((st) => st._id === id) : undefined;
+  useEffect(() => {
+    if (!existing) return;
+    setName(existing.name);
+    setPath(existing.path);
+    setLevel(existing.level != null ? String(existing.level) : '');
+    setTrack(getId(existing.track));
+    setGuardianPhone(existing.guardianPhone ?? '');
+    setNationalId(existing.nationalId ?? '');
+    setStatus(existing.status);
+    setEmail(existing.email ?? '');
+  }, [existing?._id]);
+```
+
+- [ ] **Step 6: Replace lines 71-85 (`handleSubmit`) — `track` replaces `halqa`+`masjid`**
+
+```tsx
+    try {
+      setError('');
+      await updateStudent.mutateAsync({
+        id,
+        name: name.trim(),
+        path,
+        track: track || undefined,
+        guardianPhone: guardianPhone.trim(),
+        nationalId: nationalId.trim() || undefined,
+        status,
+        ...(level.trim() && { level: Number(level) }),
+        ...(email.trim() && { email: email.trim() }),
+        ...(password && { password }),
+      });
+```
+
+- [ ] **Step 7: Replace lines 122-138 (the "الحلقة"/"المسجد" selects) — single "المسار" select**
+
+```tsx
+      <Text style={s.label}>المسار</Text>
+      <FormSelect
+        value={track}
+        onChange={setTrack}
+        options={tracks.map((t) => ({ value: t._id, label: t.title }))}
+        placeholder="اختر المسار"
+        title="المسار"
+      />
+```
+
+- [ ] **Step 8: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: both files no longer error.
+
+- [ ] **Step 9: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/admin/students.tsx quran-hifz-mobile/app/\(portal\)/admin/student-form.tsx
+git commit -m "feat(mobile): AdminStudents/AdminStudentForm — one-hop track label + single track select"
+```
+
+---
+
+### Task 15: `admin/teachers.tsx` + `admin/dashboard.tsx`
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/admin/teachers.tsx`
+- Modify: `quran-hifz-mobile/app/(portal)/admin/dashboard.tsx`
+
+**Interfaces:**
+- Consumes: `Teacher.tracksCount`/`DashboardStats.totalTracks` from Task 3.
+
+- [ ] **Step 1: `admin/teachers.tsx` — replace line 68 (`الحلقات` chip)**
+
+```tsx
+                  <View style={s.chip}><Text style={s.chipText}>المسارات: {t.tracksCount ?? 0}</Text></View>
+```
+
+- [ ] **Step 2: `admin/dashboard.tsx` — replace imports (lines 14-19) — drop `HalqaCard`/`useHalqat`**
+
+```tsx
+import { useStats } from '@/lib/queries/stats';
+import { useKpis } from '@/lib/queries/kpis';
+import { useStudents, type Student } from '@/lib/queries/students';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+```
+
+- [ ] **Step 3: Delete lines 24-28 (the dead `nameOf` helper) — its only call sites (`s.halqa`/`s.masjid`) are removed in Step 6**
+
+(No replacement — `nameOf` is deleted outright.)
+
+- [ ] **Step 4: Replace lines 30-37 (`trackLabel`) — one-hop**
+
+```tsx
+/** المسار: real track lives one hop away via `Student.track` — same fallback chain as admin/students.tsx. */
+function trackLabel(s: Student): string | null {
+  const track = typeof s.track === 'object' ? s.track : null;
+  if (track?.title) return track.title;
+  if (s.path) return s.path;
+  return null;
+}
+```
+
+- [ ] **Step 5: Replace lines 42-58 (data fetching) — drop `halqatQuery`**
+
+```tsx
+  const stats = useStats();
+  const kpisQuery = useKpis();
+  const studentsQuery = useStudents();
+
+  const isLoading = stats.isLoading || kpisQuery.isLoading || studentsQuery.isLoading;
+  const isRefreshing = stats.isRefetching || kpisQuery.isRefetching || studentsQuery.isRefetching;
+  const onRefresh = () => {
+    stats.refetch();
+    kpisQuery.refetch();
+    studentsQuery.refetch();
+  };
+
+  const kpis = kpisQuery.data ?? [];
+  const students = studentsQuery.data ?? [];
+```
+
+- [ ] **Step 6: Replace lines 79-84 (`STATS`) — `totalHalqat` → `totalTracks`**
+
+```tsx
+  const STATS = stats.data ? [
+    { label: 'الطلاب المسجلون', value: stats.data.totalStudents, color: theme.green },
+    { label: 'المعلمون',         value: stats.data.totalTeachers, color: theme.gold },
+    { label: 'المسارات',         value: stats.data.totalTracks,   color: theme.blue },
+    { label: 'المساجد',          value: stats.data.totalMasajid,  color: theme.red },
+  ] : [];
+```
+
+- [ ] **Step 7: Delete lines 132-135 (the `HalqaCard` mini-list) — no replacement, matches "no new features"**
+
+```tsx
+        {/* Programme distribution */}
+        <Card>
+          <CardHeader title="توزيع المسارات" />
+```
+
+(i.e. the "Halqat overview (first 2)" comment block and its `.map` are removed outright; the "Programme distribution" `Card` that follows it is unaffected and now runs directly after the "+ طالب جديد" button.)
+
+- [ ] **Step 8: Replace lines 173-177 (recent-registrations `infoGrid`) — one "المسار" line replaces "الحلقة"/"المسجد"**
+
+```tsx
+                  <View style={styles.infoGrid}>
+                    <Text style={styles.infoItem}>المسار: {trackLabel(s) ?? '—'}</Text>
+                  </View>
+```
+
+- [ ] **Step 9: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: both files no longer error.
+
+- [ ] **Step 10: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/admin/teachers.tsx quran-hifz-mobile/app/\(portal\)/admin/dashboard.tsx
+git commit -m "feat(mobile): admin teachers/dashboard — tracksCount chip, totalTracks stat, drop HalqaCard"
+```
+
+---
+
+### Task 16: `admin/reports.tsx` — drop `halqat` prop
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/admin/reports.tsx`
+
+**Interfaces:**
+- Consumes: `ReportsScreen` (Task 9, no longer accepts `halqat`), `useTracks` (Task 1).
+
+- [ ] **Step 1: Replace lines 5-6 (imports)**
+
+```tsx
+import { useTracks } from '@/lib/queries/tracks';
+import { useKpis } from '@/lib/queries/kpis';
+```
+
+- [ ] **Step 2: Replace lines 18-29 (data fetching + refresh) — drop `halqat`**
+
+```tsx
+  const { data: tracks = [], isRefetching: tracksRefetching, refetch: refetchTracks } = useTracks();
+  const { data: kpis = [], isRefetching: kpisRefetching, refetch: refetchKpis } = useKpis();
+  const { data: teachers = [], isRefetching: teachersRefetching, refetch: refetchTeachers } = useTeachers();
+
+  const refreshing = tracksRefetching || kpisRefetching || teachersRefetching;
+  const onRefresh = () => {
+    refetchTracks();
+    refetchKpis();
+    refetchTeachers();
+  };
+```
+
+- [ ] **Step 3: Replace lines 38-46 (`<ReportsScreen>` call) — drop `halqat` prop**
+
+```tsx
+        <ReportsScreen
+          baseFilter={{}}
+          tracks={tracks}
+          scopeAllLabel="كل المدرسة"
+          showAdmin
+          kpis={kpis}
+          teachers={teachers}
+        />
+```
+
+- [ ] **Step 4: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: `admin/reports.tsx` no longer errors.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/admin/reports.tsx
+git commit -m "feat(mobile): AdminReports drops halqat prop"
+```
+
+---
+
+### Task 17: `teacher/special_tracks.tsx` → `teacher/tracks.tsx`
+
+**Files:**
+- Delete: `quran-hifz-mobile/app/(portal)/teacher/special_tracks.tsx`
+- Create: `quran-hifz-mobile/app/(portal)/teacher/tracks.tsx`
+
+**Interfaces:**
+- Consumes: `useTracks`, `Track`, `TrackTeacher` from Task 1.
+- Produces: exported `TeacherTracks` component — consumed by Task 28's `teacher/_layout.tsx` (registered under the route name `tracks`, promoted into the now-vacant visible-tab slot that `myhalqa` occupied).
+
+`enrolledStudents.length`/`t.location` are the only real behavior changes (`enrolledStudents` is server-dropped; `location` is superseded by `masjid`) — everything else is a mechanical rename.
+
+- [ ] **Step 1: Delete the old file**
+
+```bash
+git rm quran-hifz-mobile/app/\(portal\)/teacher/special_tracks.tsx
+```
+
+- [ ] **Step 2: Create `teacher/tracks.tsx`**
+
+```tsx
+import { useMemo } from 'react';
+import { useRouter } from 'expo-router';
+import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
+import Text from '@/components/ui/Text';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Card from '@/components/ui/Card';
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
+import ProgressBar from '@/components/ui/ProgressBar';
+import { SkeletonRows } from '@/components/ui/Skeleton';
+import {
+  useTracks,
+  type Track,
+  type TrackTeacher,
+} from '@/lib/queries/tracks';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+import { AR_LOCALE } from '@/lib/date';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
+
+function getTeacherName(v: TrackTeacher | string) {
+  return typeof v === 'object' ? v.name : v;
+}
+function getMasjidName(v: unknown): string {
+  if (v && typeof v === 'object' && 'name' in v) return (v as { name: string }).name;
+  return typeof v === 'string' ? v : '—';
+}
+function fmtDate(d: string) {
+  return new Date(d).toLocaleDateString(AR_LOCALE, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+const STATUS_LABEL: Record<Track['status'], string> = { active: 'نشط', upcoming: 'قادم', ended: 'منتهي' };
+const STATUS_VARIANT: Record<Track['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
+
+function TrackCard({ track, onOpenDetail }: { track: Track; onOpenDetail: () => void }) {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
+  const enrolled = track.studentCount ?? 0;
+  const pct = track.maxStudents > 0 ? Math.min(100, Math.round((enrolled / track.maxStudents) * 100)) : 0;
+
+  return (
+    <Card>
+      <View style={s.headRow}>
+        <Badge label={STATUS_LABEL[track.status]} variant={STATUS_VARIANT[track.status]} />
+        <Text style={s.typeTag}>{track.type}</Text>
+        {track.isOnline && <Text style={s.onlineTag}>أونلاين</Text>}
+      </View>
+
+      <Text style={s.title}>{track.title}</Text>
+
+      <View style={s.infoGrid}>
+        <View style={s.infoItem}>
+          <Text style={s.infoLabel}>الوقت</Text>
+          <Text style={s.infoValue}>{track.timeSlot}</Text>
+        </View>
+        <View style={s.infoItem}>
+          <Text style={s.infoLabel}>الأيام</Text>
+          <Text style={s.infoValue}>{track.daysPerWeek}</Text>
+        </View>
+        <View style={s.infoItem}>
+          <Text style={s.infoLabel}>البداية</Text>
+          <Text style={s.infoValue}>{fmtDate(track.startDate)}</Text>
+        </View>
+        <View style={s.infoItem}>
+          <Text style={s.infoLabel}>النهاية</Text>
+          <Text style={s.infoValue}>{fmtDate(track.endDate)}</Text>
+        </View>
+      </View>
+
+      <Text style={s.infoLabel}>المكان</Text>
+      <Text style={[s.infoValue, { marginBottom: 10 }]}>{track.isOnline ? 'أونلاين' : getMasjidName(track.masjid)}</Text>
+
+      {track.teachers.length > 0 && (
+        <>
+          <Text style={s.infoLabel}>المعلمون</Text>
+          <Text style={[s.infoValue, { marginBottom: 10 }]}>{track.teachers.map(getTeacherName).join('، ')}</Text>
+        </>
+      )}
+
+      <View style={s.capacityBox}>
+        <View style={s.capacityRow}>
+          <Text style={s.capacityLabel}>الطلاب</Text>
+          <Text style={s.capacityValue}>{enrolled} / {track.maxStudents}</Text>
+        </View>
+        <ProgressBar value={pct} showPercent={false} />
+      </View>
+
+      {track.isOnline && track.meetLink && (
+        <Text style={s.meetLink}>رابط الجلسة: {track.meetLink}</Text>
+      )}
+
+      <Button label={`عرض التفاصيل (${enrolled} طالب)`} variant="secondary" onPress={onOpenDetail} fullWidth />
+    </Card>
+  );
+}
+
+export default function TeacherTracks() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
+  const router = useRouter();
+  const profileId = usePortalStore((s) => s.authUser?.profileId);
+  const { data: tracks = [], isLoading, refetch, isRefetching } = useTracks(undefined, profileId);
+
+  const active = tracks.filter((t) => t.status === 'active');
+  const upcoming = tracks.filter((t) => t.status === 'upcoming');
+  const ended = tracks.filter((t) => t.status === 'ended');
+
+  function openDetail(id: string) {
+    router.push({ pathname: '/(portal)/teacher/track-detail', params: { id } } as any);
+  }
+
+  return (
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.spinner]} tintColor={theme.spinner} />}
+      >
+        {isLoading && <SkeletonRows count={3} rowHeight={220} gap={14} />}
+
+        {!isLoading && tracks.length === 0 && (
+          <Text style={s.muted}>لا توجد مسارات مُسنَدة إليك</Text>
+        )}
+
+        {active.length > 0 && (
+          <>
+            <Text style={s.sectionTitle}>المسارات النشطة ({active.length})</Text>
+            {active.map((t) => <TrackCard key={t._id} track={t} onOpenDetail={() => openDetail(t._id)} />)}
+          </>
+        )}
+        {upcoming.length > 0 && (
+          <>
+            <Text style={s.sectionTitle}>المسارات القادمة ({upcoming.length})</Text>
+            {upcoming.map((t) => <TrackCard key={t._id} track={t} onOpenDetail={() => openDetail(t._id)} />)}
+          </>
+        )}
+        {ended.length > 0 && (
+          <>
+            <Text style={s.sectionTitle}>المسارات المنتهية ({ended.length})</Text>
+            {ended.map((t) => <TrackCard key={t._id} track={t} onOpenDetail={() => openDetail(t._id)} />)}
+          </>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
+    sectionTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 6 },
+    headRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
+    typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+    onlineTag: { fontSize: 11, backgroundColor: theme.bluePale, color: theme.blue, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+    title: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 12 },
+    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 6 },
+    infoItem: { width: '46%' },
+    infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
+    infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
+    capacityBox: { backgroundColor: theme.bg, borderRadius: 10, padding: 10, marginBottom: 10 },
+    capacityRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+    capacityLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
+    capacityValue: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.text },
+    meetLink: { fontSize: 11, color: theme.blue, fontFamily: theme.fontCairo, marginBottom: 10 },
+  });
+}
+```
+
+- [ ] **Step 3: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: `teacher/tracks.tsx` no longer errors.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/teacher/tracks.tsx
+git commit -m "feat(mobile): rename TeacherSpecialTracks to TeacherTracks"
+```
+
+---
+
+### Task 18: `teacher/dashboard.tsx` + `teacher/students.tsx`
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/teacher/dashboard.tsx`
+- Modify: `quran-hifz-mobile/app/(portal)/teacher/students.tsx`
+
+**Interfaces:**
+- Consumes: `useTracks` from Task 1; `Student.track` from Task 3.
+
+- [ ] **Step 1: `teacher/dashboard.tsx` — replace lines 14-16 (imports)**
+
+```tsx
+import { useTracks } from '@/lib/queries/tracks';
+import { useHomework } from '@/lib/queries/homework';
+import { useStats } from '@/lib/queries/stats';
+```
+
+- [ ] **Step 2: Replace lines 31-53 (data fetching) — `useTracks` replaces `useHalqat`**
+
+```tsx
+  const { data: stats, refetch: refetchStats, isRefetching: statsRefetching } = useStats();
+  const {
+    data: tracks = [],
+    isLoading: tracksLoading,
+    isError: tracksError,
+    refetch: refetchTracks,
+    isRefetching: tracksRefetching,
+  } = useTracks(undefined, authUser?.profileId);
+  const {
+    data: pendingHW = [],
+    isLoading: hwLoading,
+    isError: hwError,
+    refetch: refetchHW,
+    isRefetching: hwRefetching,
+  } = useHomework({ teacher: authUser?.profileId, status: 'معلق' });
+
+  const isError = tracksError || hwError;
+  const isRefreshing = statsRefetching || tracksRefetching || hwRefetching;
+  const onRefresh = () => {
+    refetchStats();
+    refetchTracks();
+    refetchHW();
+  };
+
+  const totalStudents = tracks.reduce((sum, t) => sum + (t.studentCount ?? 0), 0);
+
+  const STATS = [
+    { label: 'طلابي الكلي', value: totalStudents, color: theme.green },
+    { label: 'مساراتي', value: tracks.length, color: theme.gold },
+    { label: 'متوسط الحضور', value: `${stats?.avgAttendancePct ?? 0}٪`, color: theme.blue },
+    { label: 'واجبات معلقة', value: pendingHW.length, color: theme.red },
+  ];
+```
+
+- [ ] **Step 3: Replace lines 92-111 (the "حلقاتي" card) — "مساراتي" card over `tracks`**
+
+```tsx
+        {/* My tracks */}
+        <Card>
+          <CardHeader title="مساراتي" />
+          {tracksLoading ? (
+            <SkeletonRows count={2} rowHeight={40} />
+          ) : tracks.length === 0 ? (
+            <Text style={styles.muted}>لا توجد مسارات مسجلة</Text>
+          ) : (
+            <View style={{ gap: 10 }}>
+              {tracks.map((t) => (
+                <View key={t._id} style={styles.halqaRow}>
+                  <Text style={styles.bold}>{t.title}</Text>
+                  <Badge label={getName(t.masjid) || '—'} variant="gold" />
+                  <Text style={styles.muted}>{t.timeSlot}</Text>
+                  <Text style={styles.muted}>{t.studentCount ?? 0} طالب</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </Card>
+```
+
+(`styles.halqaRow` is a style-key name only — unchanged, per this plan's convention of leaving pure style identifiers alone unless the field they describe changed shape too.)
+
+- [ ] **Step 4: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: `teacher/dashboard.tsx` no longer errors.
+
+- [ ] **Step 5: `teacher/students.tsx` — full replacement**
+
+The `"halqa:<id>"` filter branch and the `studentTracks` aggregation map both existed only because a student could belong to a halqa AND separately be enrolled in several tracks at once. Single-track-per-student removes that entirely — a student's track is just `student.track`, no aggregation needed. This is a full rewrite, not a line-patch, because removing the aggregation changes the file's control flow throughout.
+
+```tsx
+import { useMemo, useState } from 'react';
+import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Card from '@/components/ui/Card';
+import CardHeader from '@/components/ui/CardHeader';
+import Badge from '@/components/ui/Badge';
+import Alert from '@/components/ui/Alert';
+import ProgressBar from '@/components/ui/ProgressBar';
+import { SkeletonRows } from '@/components/ui/Skeleton';
+import { usePortalStore } from '@/lib/store/portalStore';
+import ScopeTabs from '@/components/ui/ScopeTabs';
+import { useTracks } from '@/lib/queries/tracks';
+import { useStudents } from '@/lib/queries/students';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+const hwVariant = (s: string) =>
+  s === 'submitted' ? 'green' : s === 'late' ? 'red' : 'gold';
+const hwLabel = (s: string) =>
+  s === 'submitted' ? 'مُسلَّم' : s === 'late' ? 'متأخر' : 'معلق';
+
+function getTrackName(v: { title: string } | string | undefined): string {
+  if (v && typeof v === 'object' && 'title' in v) return v.title;
+  return typeof v === 'string' ? v : '—';
+}
+
+export default function TeacherStudents() {
+  const theme = useAppTheme();
+  const authUser = usePortalStore((s) => s.authUser);
+  // "all" | "track:<id>" — narrower vocabulary now that a student belongs to
+  // exactly one track (no more halqa-vs-track duality to filter across).
+  const [filter, setFilter] = useState('all');
+
+  const { data: myTracks = [], refetch: refetchTracks, isRefetching: refetchingTracks } = useTracks(undefined, authUser?.profileId);
+  // A teacher can run several tracks — fetch across all of them, not just the
+  // first, or every student outside track #1 silently disappears.
+  const trackIds = useMemo(() => myTracks.map((t) => t._id), [myTracks]);
+  const {
+    data: students = [],
+    isLoading,
+    isError,
+    refetch: refetchStudents,
+    isRefetching: refetchingStudents,
+  } = useStudents({ track: trackIds.join(',') }, { enabled: trackIds.length > 0 });
+
+  const filterOptions = useMemo(() => [
+    { value: 'all', label: 'كل الطلاب' },
+    ...myTracks.map((t) => ({ value: `track:${t._id}`, label: t.title })),
+  ], [myTracks]);
+
+  const shown = useMemo(() => {
+    if (filter.startsWith('track:')) {
+      const id = filter.slice(6);
+      return students.filter((st) => (typeof st.track === 'object' ? st.track?._id : st.track) === id);
+    }
+    return students;
+  }, [students, filter]);
+
+  const isRefreshing = refetchingStudents || refetchingTracks;
+  const onRefresh = () => {
+    refetchStudents();
+    refetchTracks();
+  };
+
+  const styles = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    row: { paddingVertical: 14, gap: 8 },
+    rowBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
+    rowHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+    name: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
+    muted: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    filterLabel: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.textMuted },
+    infoItem: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
+    progressWrap: { gap: 4 },
+    empty: { textAlign: 'center', color: theme.textMuted, fontFamily: theme.fontCairo, fontSize: 13, paddingVertical: 24 },
+  }), [theme]);
+
+  return (
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <ScrollView
+        contentContainerStyle={styles.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
+      >
+        {isError && <Alert variant="error">تعذر تحميل الطلاب</Alert>}
+
+        {filterOptions.length > 1 && (
+          <View style={{ gap: 6 }}>
+            <Text style={styles.filterLabel}>تصفية الطلاب</Text>
+            <ScopeTabs options={filterOptions} value={filter} onChange={setFilter} />
+          </View>
+        )}
+
+        <Card noPadding>
+          <CardHeader title={`الطلاب (${shown.length})`} style={{ padding: 16, paddingBottom: 8 }} />
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            {isLoading && <SkeletonRows count={5} />}
+            {!isLoading && shown.length === 0 && <Text style={styles.empty}>لا يوجد طلاب</Text>}
+
+            {!isLoading && shown.map((s, i) => {
+              const guardianName = s.parentName || s.guardian || '—';
+              return (
+                <View key={s._id} style={[styles.row, i < shown.length - 1 && styles.rowBorder]}>
+                  <View style={styles.rowHead}>
+                    <Text style={styles.name} numberOfLines={1}>{s.name}</Text>
+                    <Badge label={hwLabel(s.homeworkStatus)} variant={hwVariant(s.homeworkStatus) as any} />
+                  </View>
+
+                  <View style={styles.infoGrid}>
+                    <Text style={styles.infoItem}>المسار: {getTrackName(s.track)}</Text>
+                    <Text style={styles.infoItem}>·</Text>
+                    <Text style={styles.infoItem}>آخر حفظ: {s.lastMemorization || '—'}</Text>
+                  </View>
+
+                  <View style={styles.rowHead}>
+                    <Text style={[styles.muted, { color: s.attendancePct >= 90 ? theme.green : theme.red, fontFamily: theme.fontCairoBold }]}>
+                      الحضور {s.attendancePct}٪
+                    </Text>
+                    <Text style={styles.muted}>ولي الأمر: {guardianName}</Text>
+                  </View>
+
+                  <View style={styles.progressWrap}>
+                    <Text style={styles.muted}>التقدم {s.progressPct}٪</Text>
+                    <ProgressBar value={s.progressPct} showPercent={false} />
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+```
+
+- [ ] **Step 6: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: both files no longer error.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/teacher/dashboard.tsx quran-hifz-mobile/app/\(portal\)/teacher/students.tsx
+git commit -m "feat(mobile): teacher dashboard/students — useTracks, drop halqa aggregation"
+```
+
+---
+
+### Task 19: `teacher/attendance.tsx` — single-kind context collapse
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/teacher/attendance.tsx`
+
+**Interfaces:**
+- Consumes: `trackToContext`/`TeachingContext` from Task 5's `ContextCard.tsx`; `useTracks` from Task 1; `EvaluationRoster` with `{id}`-only context from Task 6.
+
+This is the heaviest concentration of `kind === 'halqa'` ternaries in the app (`contextFilter`, the linked-plan match, and the View-1 dual-list rendering) — a full rewrite, not a line-patch, since the halqa/track duality is threaded through nearly every hook call and JSX branch in this 336-line file.
+
+- [ ] **Step 1: Full replacement**
+
+```tsx
+import { useMemo, useState } from 'react';
+import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  IconClock, IconCalendarOff, IconTrophy, IconCalendarCheck, IconHistory, IconMedal,
+} from '@tabler/icons-react-native';
+import Card from '@/components/ui/Card';
+import CardHeader from '@/components/ui/CardHeader';
+import Alert from '@/components/ui/Alert';
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
+import Leaderboard, { type LeaderboardRow } from '@/components/ui/Leaderboard';
+import { SkeletonRows } from '@/components/ui/Skeleton';
+import ContextCard, { trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
+import DaySlider, { useDaySchedule, type DayEntry } from '@/components/domain/DaySlider';
+import EvaluationRoster from '@/components/domain/EvaluationRoster';
+import { useTracks } from '@/lib/queries/tracks';
+import { useStudents } from '@/lib/queries/students';
+import { useEvaluations } from '@/lib/queries/evaluations';
+import { useQuranPlans } from '@/lib/queries/quranPlan';
+import { MAX_SCORES, TOTAL_MAX, legacyScoresOf } from '@/lib/evaluationRubric';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { fmtDayLabel, toDateOnly } from '@/lib/date';
+
+export default function TeacherAttendance() {
+  const theme = useAppTheme();
+  const profileId = usePortalStore((s) => s.authUser?.profileId);
+  const [selected, setSelected] = useState<TeachingContext | null>(null);
+
+  const {
+    data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks,
+  } = useTracks(undefined, profileId);
+
+  const contextFilter = selected ? { track: selected.id } : undefined;
+
+  const {
+    data: students = [], isLoading: loadingStudents, refetch: refetchStudents, isRefetching: refetchingStudents,
+  } = useStudents(contextFilter);
+
+  const { data: plans = [], isLoading: loadingPlans, refetch: refetchPlans, isRefetching: refetchingPlans } =
+    useQuranPlans(contextFilter);
+  const linkedPlan = plans.find((p) => p.targetType === 'track') ?? plans[0];
+
+  // ── Day slider ─────────────────────────────────────────────────────────
+  const [selectedDate, setSelectedDate] = useState('');
+  const [dayNotice, setDayNotice] = useState<string | null>(null);
+  // A track context can carry several plans at once, so every plan's schedule
+  // feeds the same strip of days.
+  const scheduleEntries = useMemo(
+    () => plans.flatMap((p) => p.schedule ?? []),
+    [plans],
+  );
+  const baseDaySchedule = useDaySchedule(scheduleEntries, selectedDate);
+  // The day strip itself (scheduledSet/dayChips/effectiveDate, above) still
+  // needs every plan in context so a day covered only by a stray unrelated
+  // plan stays selectable. But the actual per-date assignment lookup must
+  // only ever come from `linkedPlan` — otherwise a stray plan sharing this
+  // weekday piles its entries into the same date bucket (colliding React
+  // keys, colliding completion-override keys, and `recordOccurrence` calls
+  // sent with `occurrenceIndex` values that belong to a different plan).
+  const linkedAssignmentByDate = useMemo(() => {
+    const byDate = new Map<string, DayEntry[]>();
+    for (const e of linkedPlan?.schedule ?? []) {
+      if (!e.date) continue;
+      const d = toDateOnly(e.date);
+      const list = byDate.get(d) ?? [];
+      list.push(e);
+      byDate.set(d, list);
+    }
+    return byDate;
+  }, [linkedPlan]);
+  const daySchedule = useMemo(
+    () => ({ ...baseDaySchedule, assignmentByDate: linkedAssignmentByDate }),
+    [baseDaySchedule, linkedAssignmentByDate],
+  );
+  const { scheduledSorted, effectiveDate, today, isFutureDay } = daySchedule;
+
+  // Full session history for this context, for the log + leaderboards below.
+  const { data: history = [] } = useEvaluations(contextFilter);
+
+  const { topScoreRows, topAttendanceRows } = useMemo(() => {
+    type Agg = { id: string; name: string; totalSum: number; sessions: number; present: number };
+    const byStudent = new Map<string, Agg>();
+    for (const r of history) {
+      const id = typeof r.student === 'string' ? r.student : r.student._id;
+      const name = typeof r.student === 'string' ? r.student : r.student.name;
+      const agg = byStudent.get(id) ?? { id, name, totalSum: 0, sessions: 0, present: 0 };
+      agg.totalSum += r.total;
+      agg.sessions += 1;
+      if (r.attendanceStatus === 'حاضر') agg.present += 1;
+      byStudent.set(id, agg);
+    }
+    const all = Array.from(byStudent.values());
+    const byScore: LeaderboardRow[] = [...all]
+      .sort((a, b) => b.totalSum / b.sessions - a.totalSum / a.sessions)
+      .slice(0, 3)
+      .map((a) => ({
+        id: a.id,
+        name: a.name,
+        value: Math.round(a.totalSum / a.sessions),
+        max: TOTAL_MAX,
+        sub: a.sessions === 1 ? 'جلسة واحدة' : `متوسط ${a.sessions} جلسات`,
+      }));
+    const byAttendance: LeaderboardRow[] = [...all]
+      .sort((a, b) => b.present / b.sessions - a.present / a.sessions)
+      .slice(0, 3)
+      .map((a) => ({
+        id: a.id,
+        name: a.name,
+        value: Math.round((a.present / a.sessions) * 100),
+        max: 100,
+        sub: `${a.present} من ${a.sessions} جلسة`,
+      }));
+    return { topScoreRows: byScore, topAttendanceRows: byAttendance };
+  }, [history]);
+
+  const isRefreshingSelection = refetchingTracks;
+  const onRefreshSelection = () => { refetchTracks(); };
+  const isRefreshingDetail = refetchingStudents || refetchingPlans;
+  const onRefreshDetail = () => { refetchStudents(); refetchPlans(); };
+
+  const styles = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+    backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
+
+    histRow: { paddingVertical: 9, gap: 4 },
+    histTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    histName: { flex: 1, fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
+    histDate: { fontSize: 10, fontFamily: theme.fontCairo, color: theme.textMuted },
+    histScores: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
+    rowBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
+
+    spotTitle: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, marginBottom: 4 },
+    spotTitleText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
+  }), [theme]);
+
+  // ── View 1: context selector ────────────────────────────────────────────
+  if (!selected) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        <ScrollView
+          contentContainerStyle={styles.page}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={isRefreshingSelection} onRefresh={onRefreshSelection} colors={[theme.spinner]} tintColor={theme.spinner} />}
+        >
+          {loadingTracks && <SkeletonRows count={3} rowHeight={92} />}
+          {!loadingTracks && tracks.length === 0 && (
+            <Text style={styles.muted}>لا توجد مسارات مسندة إليك</Text>
+          )}
+          {tracks.map((t) => (
+            <Pressable key={t._id} onPress={() => setSelected(trackToContext(t))}>
+              <ContextCard context={trackToContext(t)} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  // ── View 2: day slider + per-student attendance/evaluation roster ────────
+
+  return (
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <ScrollView
+        contentContainerStyle={styles.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefreshingDetail} onRefresh={onRefreshDetail} colors={[theme.spinner]} tintColor={theme.spinner} />}
+      >
+        <Pressable onPress={() => { setSelected(null); setSelectedDate(''); }}>
+          <Text style={styles.backLink}>‹ رجوع لاختيار المسار</Text>
+        </Pressable>
+
+        {/* Day slider — only when this context has scheduled days */}
+        {loadingPlans ? (
+          <SkeletonRows count={1} rowHeight={44} />
+        ) : (
+          <DaySlider
+            schedule={daySchedule}
+            onSelect={(iso) => { setDayNotice(null); setSelectedDate(iso); }}
+            onBlocked={(iso) => setDayNotice(`${fmtDayLabel(iso)} — هذا اليوم غير مشمول بخطة الحفظ الحالية`)}
+          />
+        )}
+
+        {!!dayNotice && (
+          <Alert variant="warning" icon={<IconCalendarOff size={16} color="#92400E" />}>{dayNotice}</Alert>
+        )}
+
+        {!loadingPlans && scheduledSorted.length === 0 && (
+          <Alert variant="warning">
+            لا يوجد خطة حفظ نشطة لهذا المسار — أضف خطة من صفحة "الخطط الفردية" أولاً لتفعيل التقويم.
+          </Alert>
+        )}
+
+        {isFutureDay && (
+          <Alert variant="warning" icon={<IconClock size={16} color="#92400E" />}>
+            هذا اليوم لم يحن بعد — لا يمكن تسجيل الحضور والتقييم مسبقًا لجلسة لم تُعقد.
+          </Alert>
+        )}
+
+        <Card>
+          <CardHeader title={`${selected.title} — ${fmtDayLabel(effectiveDate)}`} />
+
+          {loadingStudents && <SkeletonRows count={4} />}
+          {!loadingStudents && (
+            <EvaluationRoster
+              students={students}
+              context={{ id: selected.id }}
+              teacherId={profileId}
+              linkedPlan={linkedPlan}
+              daySchedule={daySchedule}
+            />
+          )}
+        </Card>
+
+        {history.length > 0 && (
+          <Card>
+            <CardHeader title="سجل الجلسات" right={<IconHistory size={18} color={theme.green} />} />
+            {history.map((r, i) => (
+              <View key={r._id} style={[styles.histRow, i < history.length - 1 && styles.rowBorder]}>
+                <View style={styles.histTop}>
+                  <Text style={styles.histName}>
+                    {typeof r.student === 'string' ? r.student : r.student.name}
+                  </Text>
+                  <Badge label={r.attendanceStatus} variant={r.attendanceStatus === 'حاضر' ? 'green' : 'red'} />
+                  <Text style={styles.histDate}>{toDateOnly(r.date)}</Text>
+                </View>
+                <Text style={styles.histScores}>
+                  حضور {legacyScoresOf(r).attendance}/{MAX_SCORES.attendance} · حفظ {legacyScoresOf(r).hifz}/{MAX_SCORES.hifz} ·
+                  تجويد {legacyScoresOf(r).tajweed}/{MAX_SCORES.tajweed} · تلاوة {legacyScoresOf(r).talawah}/{MAX_SCORES.talawah} ·
+                  المجموع {r.total}/{TOTAL_MAX}
+                </Text>
+              </View>
+            ))}
+          </Card>
+        )}
+
+        {(topScoreRows.length > 0 || topAttendanceRows.length > 0) && (
+          <Card>
+            <CardHeader title="أبرز الطلاب" right={<IconMedal size={18} color={theme.gold} />} />
+            {topScoreRows.length > 0 && (
+              <>
+                <View style={styles.spotTitle}>
+                  <IconTrophy size={14} color={theme.gold} />
+                  <Text style={styles.spotTitleText}>الأعلى تقييمًا</Text>
+                </View>
+                <Leaderboard rows={topScoreRows} />
+              </>
+            )}
+            {topAttendanceRows.length > 0 && (
+              <>
+                <View style={styles.spotTitle}>
+                  <IconCalendarCheck size={14} color={theme.green} />
+                  <Text style={styles.spotTitleText}>الأعلى حضورًا</Text>
+                </View>
+                <Leaderboard rows={topAttendanceRows} />
+              </>
+            )}
+          </Card>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+```
+
+Note for the implementer: the original file's style sheet also carried a large block of `row`/`rowTop`/`avatar`/`banner`/`toggleRow`/`completionBox`/`catLabel`/`scoreChipRow`/`disabled`-family keys that no JSX in this file actually referenced (the roster is rendered via `<EvaluationRoster>`, not inlined) — that was pre-existing dead code unrelated to this restructure, and this rewrite drops it as ordinary cleanup rather than carrying it forward; if a stricter "only touch what the migration requires" reading is preferred, those keys can be pasted back in unchanged with no functional difference either way.
+
+- [ ] **Step 2: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: `teacher/attendance.tsx` no longer errors.
+
+- [ ] **Step 3: Manual verification against the real dev server**
+
+Log in as a teacher, open "الحضور": confirm the picker shows only tracks (no halqat), confirm a track's day slider + roster loads and a save records correctly, and confirm the session log/leaderboards still populate.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/teacher/attendance.tsx
+git commit -m "feat(mobile): TeacherAttendance collapses to single-kind track context"
+```
+
+---
+
+### Task 20: `teacher/evaluate.tsx` + `teacher/grouphomework.tsx` + `teacher/recordlesson.tsx` — identical dual-kind collapse
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/teacher/evaluate.tsx`
+- Modify: `quran-hifz-mobile/app/(portal)/teacher/grouphomework.tsx`
+- Modify: `quran-hifz-mobile/app/(portal)/teacher/recordlesson.tsx`
+
+**Interfaces:**
+- Consumes: `trackToContext`/`TeachingContext` from Task 5; `useTracks` from Task 1; `useRubric`/`useBulkEvaluate` (Task 2), `useGroupHomework`/`useCreateGroupHomework`/`useDeleteGroupHomework` (Task 2), `useStudents`/`useCreateRecording` (Tasks 2-3).
+
+All three screens share the exact same dual-kind-context-picker structure `teacher/attendance.tsx` had (View-1 picks a halqa-or-track, the mutation payload ternaries on `selected.kind`) — grouped into one task per this plan's "closely-related mechanical renames across small files share one task" rule (mirrors Phase 2's grouping of `TeacherAttendance.tsx`/`TeacherGroupHomework.tsx` consumer updates). Each is a full replacement, since the kind-based branch touches the data-fetch, the picker JSX, and the mutation payload in each file.
+
+- [ ] **Step 1: `teacher/evaluate.tsx` — full replacement**
+
+```tsx
+import { useMemo, useState } from 'react';
+import { ScrollView, View, StyleSheet, RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { IconCircleCheck, IconLock } from '@tabler/icons-react-native';
+import Card from '@/components/ui/Card';
+import CardHeader from '@/components/ui/CardHeader';
+import Alert from '@/components/ui/Alert';
+import Button from '@/components/ui/Button';
+import { SkeletonRows } from '@/components/ui/Skeleton';
+import FormTextarea from '@/components/forms/FormTextarea';
+import ContextCard, { trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
+import { useTracks } from '@/lib/queries/tracks';
+import { useStudents } from '@/lib/queries/students';
+import { useEvaluations, useRubric, useBulkEvaluate, type BulkEvaluateRecord } from '@/lib/queries/evaluations';
+import {
+  MAX_SCORES, TOTAL_MAX, manualCriteria, totalMaxOf, DEFAULT_GRADE_RUBRIC,
+  type GradeCriterion,
+} from '@/lib/evaluationRubric';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { success, error } from '@/lib/haptics';
+
+/** Scores are keyed by the active plan's rubric, so categories are not known
+ * at compile time any more. */
+type StudentEval = { attendanceStatus: 'حاضر' | 'غائب'; scores: Record<string, number>; note: string };
+
+/** Scores start at 0 so the teacher consciously awards points rather than
+ * every student defaulting to full marks. */
+function blankEval(): StudentEval {
+  return { attendanceStatus: 'حاضر', scores: {}, note: '' };
+}
+/** Absent → 0. `auto` criteria (حضور) are awarded in full on presence. */
+function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
+  if (e.attendanceStatus === 'غائب') return 0;
+  return rubric.reduce((a, c) => a + (c.auto ? c.max : Math.min(e.scores[c.key] ?? 0, c.max)), 0);
+}
+
+export default function TeacherEvaluate() {
+  const theme = useAppTheme();
+  const profileId = usePortalStore((s) => s.authUser?.profileId);
+  const [selected, setSelected] = useState<TeachingContext | null>(null);
+  const [overrides, setOverrides] = useState<Record<string, StudentEval>>({});
+  const [saved, setSaved] = useState(false);
+
+  const { data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useTracks(undefined, profileId);
+
+  const contextFilter = selected ? { track: selected.id } : undefined;
+
+  const { data: students = [], isLoading: loadingStudents, refetch: refetchStudents, isRefetching: refetchingStudents } = useStudents(contextFilter);
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // Today's already-saved evaluations for this context — prefill + once-a-day lock.
+  const { data: savedToday = [], refetch: refetchEvaluations, isRefetching: refetchingEvaluations } = useEvaluations(
+    contextFilter ? { ...contextFilter, from: today, to: today } : undefined,
+  );
+  const savedById: Record<string, StudentEval> = {};
+  for (const r of savedToday) {
+    const id = typeof r.student === 'string' ? r.student : r.student._id;
+    savedById[id] = {
+      attendanceStatus: r.attendanceStatus,
+      scores: Object.fromEntries((r.criteria ?? []).map((c) => [c.key, c.value])),
+      note: r.note ?? '',
+    };
+  }
+  const alreadySubmitted = savedToday.length > 0;
+
+  const evalFor = (studentId: string): StudentEval => overrides[studentId] ?? savedById[studentId] ?? blankEval();
+  function setAttendance(studentId: string, status: 'حاضر' | 'غائب') {
+    setOverrides((p) => ({ ...p, [studentId]: { ...evalFor(studentId), attendanceStatus: status } }));
+  }
+  function setScore(studentId: string, key: string, value: number) {
+    setOverrides((p) => {
+      const current = evalFor(studentId);
+      return { ...p, [studentId]: { ...current, scores: { ...current.scores, [key]: value } } };
+    });
+  }
+  function setNote(studentId: string, note: string) {
+    setOverrides((p) => ({ ...p, [studentId]: { ...evalFor(studentId), note } }));
+  }
+
+  // Grading split comes from the plan governing this track; the server falls
+  // back to the historical default when no single plan resolves.
+  const { data: rubricData } = useRubric(contextFilter);
+  const rubric = rubricData?.rubric ?? DEFAULT_GRADE_RUBRIC;
+  const rubricTotalMax = totalMaxOf(rubric);
+
+  const bulkEvaluate = useBulkEvaluate();
+
+  function handleSave() {
+    if (!selected || alreadySubmitted) return;
+    const records: BulkEvaluateRecord[] = students.map((s) => {
+      const e = evalFor(s._id);
+      return {
+        student: s._id,
+        attendanceStatus: e.attendanceStatus,
+        scores: e.scores,
+        note: e.note.trim() || undefined,
+      };
+    });
+    bulkEvaluate.mutate(
+      {
+        teacher: profileId!,
+        track: selected.id,
+        date: today,
+        records,
+      },
+      {
+        onSuccess: () => {
+          success();
+          setSaved(true);
+          setTimeout(() => setSaved(false), 4000);
+        },
+        onError: () => error(),
+      },
+    );
+  }
+
+  const isLoading = loadingTracks;
+  const isRefreshing = refetchingTracks || refetchingStudents || refetchingEvaluations;
+  function handleRefresh() {
+    refetchTracks();
+    refetchStudents();
+    refetchEvaluations();
+  }
+
+  const styles = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+    backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
+    studentRow: { paddingVertical: 14, gap: 10 },
+    rowBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
+    studentName: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
+    toggleRow: { flexDirection: 'row', gap: 8 },
+    toggleBtn: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: theme.radiusSm,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    toggleText: {
+      fontSize: 12,
+      fontFamily: theme.fontCairo,
+      color: theme.text,
+    },
+    categoryBlock: { gap: 6 },
+    categoryLabel: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.textMuted },
+    chipRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
+    chip: {
+      minWidth: 32,
+      alignItems: 'center',
+      paddingVertical: 6,
+      paddingHorizontal: 10,
+      borderRadius: theme.radiusSm,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    chipText: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    totalRow: { flexDirection: 'row', justifyContent: 'flex-end' },
+    totalText: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.green },
+  }), [theme]);
+
+  if (!selected) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        <ScrollView
+          contentContainerStyle={styles.page}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
+        >
+          {isLoading && <SkeletonRows count={4} rowHeight={72} />}
+          {!isLoading && tracks.length === 0 && (
+            <Text style={styles.muted}>لا توجد مسارات مسندة إليك</Text>
+          )}
+          {tracks.map((t) => (
+            <Pressable key={t._id} onPress={() => setSelected(trackToContext(t))}>
+              <ContextCard context={trackToContext(t)} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <ScrollView
+          contentContainerStyle={styles.page}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
+        >
+        {saved && (
+          <Alert variant="success" icon={<IconCircleCheck size={18} color={theme.green} />}>
+            تم حفظ التقييم بنجاح.
+          </Alert>
+        )}
+        {bulkEvaluate.isError && (
+          <Alert variant="error">{(bulkEvaluate.error as Error).message}</Alert>
+        )}
+        {alreadySubmitted && (
+          <Alert variant="success" icon={<IconLock size={18} color={theme.green} />}>
+            تم تسجيل التقييم لهذا اليوم بالفعل. اختر يومًا آخر أو راجع السجل لاحقًا للتعديل.
+          </Alert>
+        )}
+
+        <Pressable onPress={() => { setSelected(null); setOverrides({}); }}>
+          <Text style={styles.backLink}>‹ رجوع لاختيار المسار</Text>
+        </Pressable>
+
+        <Card>
+          <CardHeader title={`${selected.title} — ${today}`} />
+
+          {loadingStudents && <View style={{ paddingHorizontal: 4 }}><SkeletonRows count={3} rowHeight={140} gap={14} /></View>}
+          {!loadingStudents && students.length === 0 && (
+            <Text style={styles.muted}>لا يوجد طلاب</Text>
+          )}
+
+          {students.map((st, i) => {
+            const e = evalFor(st._id);
+            const isAbsent = e.attendanceStatus === 'غائب';
+            const total = totalOf(e, rubric);
+            return (
+              <View key={st._id} style={[styles.studentRow, i < students.length - 1 && styles.rowBorder]}>
+                <Text style={styles.studentName}>{st.name}</Text>
+
+                <View style={styles.toggleRow}>
+                  <Pressable
+                    haptic="select"
+                    disabled={alreadySubmitted}
+                    onPress={() => setAttendance(st._id, 'حاضر')}
+                    style={[styles.toggleBtn, !isAbsent && { backgroundColor: theme.greenPale, borderColor: theme.greenAccent }]}
+                  >
+                    <Text style={[styles.toggleText, !isAbsent && { color: theme.green, fontFamily: theme.fontCairoBold }]}>حاضر</Text>
+                  </Pressable>
+                  <Pressable
+                    haptic="select"
+                    disabled={alreadySubmitted}
+                    onPress={() => setAttendance(st._id, 'غائب')}
+                    style={[styles.toggleBtn, isAbsent && { backgroundColor: theme.red + '20', borderColor: theme.red }]}
+                  >
+                    <Text style={[styles.toggleText, isAbsent && { color: theme.red, fontFamily: theme.fontCairoBold }]}>غائب</Text>
+                  </Pressable>
+                </View>
+
+                {!isAbsent && (
+                  <>
+                    {manualCriteria(rubric).map((cat) => (
+                      <View key={cat.key} style={styles.categoryBlock}>
+                        <Text style={styles.categoryLabel}>{cat.label} (٠-{cat.max})</Text>
+                        <View style={styles.chipRow}>
+                          {Array.from({ length: cat.max + 1 }, (_, n) => n).map((n) => {
+                            const active = (e.scores[cat.key] ?? 0) === n;
+                            return (
+                              <Pressable
+                                haptic="select"
+                                key={n}
+                                disabled={alreadySubmitted}
+                                onPress={() => setScore(st._id, cat.key, n)}
+                                style={[styles.chip, active && { backgroundColor: theme.greenAccent, borderColor: theme.green }]}
+                              >
+                                <Text style={[styles.chipText, active && { color: theme.white }]}>{n}</Text>
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    ))}
+                    <View style={styles.totalRow}>
+                      <Text style={styles.totalText}>{total}/{rubricTotalMax}</Text>
+                    </View>
+                  </>
+                )}
+
+                <FormTextarea
+                  rows={2}
+                  editable={!alreadySubmitted}
+                  placeholder="ملاحظات (اختياري)"
+                  value={e.note}
+                  onChangeText={(v) => setNote(st._id, v)}
+                />
+              </View>
+            );
+          })}
+        </Card>
+
+        <Button
+          label={alreadySubmitted ? 'تم الإرسال لهذا اليوم' : bulkEvaluate.isPending ? 'جارٍ الحفظ...' : 'حفظ التقييم'}
+          onPress={handleSave}
+          disabled={alreadySubmitted || bulkEvaluate.isPending || students.length === 0}
+          fullWidth
+        />
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+```
+
+- [ ] **Step 2: `teacher/grouphomework.tsx` — full replacement**
+
+```tsx
+import { useMemo, useState } from 'react';
+import {
+  ScrollView, View, TextInput, StyleSheet, RefreshControl, KeyboardAvoidingView, Platform,
+} from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Card from '@/components/ui/Card';
+import CardHeader from '@/components/ui/CardHeader';
+import Badge from '@/components/ui/Badge';
+import { SkeletonRows } from '@/components/ui/Skeleton';
+import ContextCard, { trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
+import { useTracks } from '@/lib/queries/tracks';
+import { useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework } from '@/lib/queries/groupHomework';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
+
+const DAYS = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+
+export default function TeacherGroupHomework() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
+  const profileId = usePortalStore((s) => s.authUser?.profileId);
+  const [selected, setSelected] = useState<TeachingContext | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [form, setForm] = useState({ title: '', desc: '', dueDay: DAYS[0] });
+
+  const { data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useTracks(undefined, profileId);
+
+  const { data: homeworks = [], isLoading: loadingHw, refetch: refetchHw, isRefetching: refetchingHw } = useGroupHomework(
+    selected ? { track: selected.id } : undefined,
+  );
+  const createHW = useCreateGroupHomework();
+  const deleteHW = useDeleteGroupHomework();
+
+  const isLoading = loadingTracks;
+  const isRefreshing = refetchingTracks || refetchingHw;
+  function handleRefresh() {
+    refetchTracks();
+    refetchHw();
+  }
+
+  async function handleAdd() {
+    if (!selected || !form.title.trim() || !form.desc.trim()) return;
+    await createHW.mutateAsync({
+      track: selected.id,
+      title: form.title,
+      description: form.desc,
+      dueDay: form.dueDay,
+      dueDate: new Date().toISOString(),
+    });
+    setForm({ title: '', desc: '', dueDay: DAYS[0] });
+    setShowForm(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  }
+
+  if (!selected) {
+    return (
+      <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
+        <ScrollView
+          contentContainerStyle={s.page}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
+        >
+          {isLoading && <SkeletonRows count={4} rowHeight={72} />}
+          {!isLoading && tracks.length === 0 && (
+            <Text style={s.muted}>لا توجد مسارات مسندة إليك</Text>
+          )}
+          {tracks.map((t) => (
+            <Pressable key={t._id} onPress={() => setSelected(trackToContext(t))}>
+              <ContextCard context={trackToContext(t)} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
+      >
+        <Pressable onPress={() => setSelected(null)}>
+          <Text style={s.backLink}>‹ رجوع لاختيار المسار</Text>
+        </Pressable>
+
+        {saved && <Text style={s.successBanner}>تم إضافة الواجب الجماعي ✓</Text>}
+        {createHW.isError && <Text style={s.errorBanner}>فشلت الإضافة، حاول مجدداً.</Text>}
+
+        <Pressable style={s.addBtn} onPress={() => setShowForm((v) => !v)}>
+          <Text style={s.addBtnText}>+ واجب جديد لـ {selected.title}</Text>
+        </Pressable>
+
+        {showForm && (
+          <Card>
+            <CardHeader title="إضافة واجب جماعي" />
+            <Text style={s.label}>عنوان الواجب</Text>
+            <TextInput style={s.input} placeholder="عنوان الواجب..." value={form.title} onChangeText={(v) => setForm((f) => ({ ...f, title: v }))} textAlign="right" placeholderTextColor={theme.textMuted} />
+            <Text style={s.label}>الوصف</Text>
+            <TextInput style={[s.input, { minHeight: 60 }]} placeholder="وصف الواجب..." value={form.desc} onChangeText={(v) => setForm((f) => ({ ...f, desc: v }))} multiline textAlignVertical="top" textAlign="right" placeholderTextColor={theme.textMuted} />
+            <Text style={s.label}>موعد التسليم</Text>
+            <View style={s.chipsRow}>
+              {DAYS.map((d) => (
+                <Pressable haptic="select" key={d} style={[s.chip, form.dueDay === d && s.chipActive]} onPress={() => setForm((f) => ({ ...f, dueDay: d }))}>
+                  <Text style={[s.chipText, form.dueDay === d && s.chipTextActive]}>{d}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <View style={s.row}>
+              <Pressable style={s.saveBtn} onPress={handleAdd} disabled={createHW.isPending}>
+                <Text style={s.saveBtnText}>{createHW.isPending ? 'جارٍ الحفظ...' : 'إضافة'}</Text>
+              </Pressable>
+              <Pressable style={s.cancelBtn} onPress={() => setShowForm(false)}>
+                <Text style={s.cancelText}>إلغاء</Text>
+              </Pressable>
+            </View>
+          </Card>
+        )}
+
+        <Card>
+          <CardHeader title="الواجبات الجماعية الحالية" />
+          {loadingHw && <SkeletonRows count={3} rowHeight={64} />}
+          {!loadingHw && homeworks.length === 0 && <Text style={s.muted}>لا توجد واجبات جماعية بعد</Text>}
+          {homeworks.map((hw, i) => (
+            <View key={hw._id} style={[s.hwItem, i > 0 && s.border]}>
+              <Text style={s.hwTitle}>{hw.title}</Text>
+              <Text style={s.hwDesc}>{hw.description}</Text>
+              <View style={s.hwFoot}>
+                <Badge label={`موعد: ${hw.dueDay}`} variant="gold" />
+                <Pressable haptic="medium" onPress={() => deleteHW.mutate(hw._id)} disabled={deleteHW.isPending}>
+                  <Text style={s.delText}>حذف</Text>
+                </Pressable>
+              </View>
+            </View>
+          ))}
+        </Card>
+      </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: 16, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
+    backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
+    successBanner: { backgroundColor: theme.greenPale, color: theme.green, fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
+    errorBanner: { backgroundColor: theme.redPale, color: theme.red, fontFamily: theme.fontCairoBold, fontSize: 13, padding: 12, borderRadius: 8, textAlign: 'center' },
+    addBtn: { backgroundColor: theme.greenAccent, borderRadius: 8, padding: 12, alignItems: 'center' },
+    addBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 14 },
+    label: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 6, marginTop: 10 , textAlign: 'left'},
+    input: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo, fontSize: 13, color: theme.text, backgroundColor: theme.inputBg },
+    chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
+    chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
+    chipText: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
+    chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
+    row: { flexDirection: 'row', gap: 12, marginTop: 12 },
+    saveBtn: { backgroundColor: theme.greenAccent, borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10, flex: 1, alignItems: 'center' },
+    saveBtnText: { color: theme.white, fontFamily: theme.fontCairoBold },
+    cancelBtn: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10, flex: 1, alignItems: 'center' },
+    cancelText: { color: theme.textMuted, fontFamily: theme.fontCairo },
+    hwItem: { paddingVertical: 12 },
+    border: { borderTopWidth: 1, borderTopColor: theme.border },
+    hwTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 4 },
+    hwDesc: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, marginBottom: 6 },
+    hwFoot: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    delText: { fontSize: 12, color: theme.red, fontFamily: theme.fontCairo },
+  });
+}
+```
+
+- [ ] **Step 3: `teacher/recordlesson.tsx` — full replacement**
+
+```tsx
+import { useMemo, useState } from 'react';
+import {
+  ScrollView, View, TextInput, StyleSheet, RefreshControl, KeyboardAvoidingView, Platform,
+} from 'react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { IconMicrophone, IconPlayerStop, IconSend } from '@tabler/icons-react-native';
+import {
+  useAudioRecorder,
+  useAudioRecorderState,
+  RecordingPresets,
+} from 'expo-audio';
+import Card from '@/components/ui/Card';
+import CardHeader from '@/components/ui/CardHeader';
+import Alert from '@/components/ui/Alert';
+import Badge from '@/components/ui/Badge';
+import { SkeletonRows } from '@/components/ui/Skeleton';
+import ContextCard, { trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
+import { useTracks } from '@/lib/queries/tracks';
+import { useStudents, type Student } from '@/lib/queries/students';
+import { useCreateRecording } from '@/lib/queries/lessonRecordings';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+import { success, error } from '@/lib/haptics';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
+
+const LESSON_TYPES = ['حفظ جديد', 'مراجعة قريبة', 'مراجعة بعيدة', 'تحسين تلاوة', 'اختبار'];
+
+function StudentRecorderCard({ student, context, onSent }: { student: Student; context: TeachingContext; onSent: () => void }) {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const state = useAudioRecorderState(recorder);
+  const createRecording = useCreateRecording();
+
+  const [type, setType] = useState(LESSON_TYPES[0]);
+  const [segment, setSegment] = useState(student.lastMemorization ?? '');
+  const [points, setPoints] = useState('700');
+  const [note, setNote] = useState('');
+  const [sent, setSent] = useState(false);
+
+  const hasStopped = !state.isRecording && !!recorder.uri;
+
+  async function handleToggle() {
+    if (state.isRecording) {
+      await recorder.stop();
+    } else {
+      await recorder.prepareToRecordAsync();
+      recorder.record();
+    }
+  }
+
+  async function handleSend() {
+    if (!segment.trim()) return;
+    try {
+      await createRecording.mutateAsync({
+        student: student._id,
+        track: context.id,
+        type,
+        segment,
+        points: Number(points) || 0,
+        teacherNote: note,
+      });
+    } catch {
+      error();
+      return; // failure is surfaced by createRecording.isError
+    }
+    success();
+    setSent(true);
+    onSent();
+  }
+
+  return (
+    <Card>
+      <View style={s.studentHead}>
+        <View style={s.avatar}>
+          <Text style={s.avatarText}>{student.name.charAt(0)}</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={s.studentName}>{student.name}</Text>
+          <Text style={s.lastHifz}>آخر حفظ: {student.lastMemorization || '—'}</Text>
+        </View>
+        {sent ? <Badge label="أُرسل ✓" variant="green" /> : <Badge label="لم يُسجَّل" variant="gold" />}
+      </View>
+
+      {sent ? (
+        <Alert variant="success">تم الإرسال لـ {student.name} وولي أمره — النقاط: {points}</Alert>
+      ) : (
+        <>
+          <Text style={s.label}>نوع الواجب</Text>
+          <View style={s.chipsRow}>
+            {LESSON_TYPES.map((t) => (
+              <Pressable haptic="select" key={t} style={[s.chip, type === t && s.chipActive]} onPress={() => setType(t)}>
+                <Text style={[s.chipText, type === t && s.chipTextActive]}>{t}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text style={s.label}>المقطع</Text>
+          <TextInput style={s.input} placeholder="البقرة ٢٤٠-٢٤٥" value={segment} onChangeText={setSegment} textAlign="right" placeholderTextColor={theme.textMuted} />
+
+          <View style={s.recArea}>
+            <Pressable haptic="medium" style={[s.recBtn, state.isRecording && s.recBtnStop]} onPress={handleToggle}>
+              {state.isRecording ? <IconPlayerStop size={18} color={theme.white} /> : <IconMicrophone size={18} color={theme.white} />}
+              <Text style={s.recBtnText}>{state.isRecording ? 'إيقاف' : hasStopped ? 'تسجيل جديد' : 'ابدأ التسجيل'}</Text>
+            </Pressable>
+            {state.isRecording && (
+              <Text style={s.timer}>{Math.floor((state.durationMillis ?? 0) / 1000)} ث</Text>
+            )}
+          </View>
+
+          {hasStopped && (
+            <>
+              <Text style={s.label}>النقاط (٠–١٠٠٠)</Text>
+              <TextInput style={s.input} keyboardType="number-pad" value={points} onChangeText={setPoints} textAlign="right" placeholderTextColor={theme.textMuted} />
+              <Text style={s.label}>ملاحظة للطالب</Text>
+              <TextInput style={s.input} placeholder="اختياري..." value={note} onChangeText={setNote} textAlign="right" placeholderTextColor={theme.textMuted} />
+              <Pressable style={s.sendBtn} onPress={handleSend} disabled={createRecording.isPending}>
+                <IconSend size={18} color={theme.white} />
+                <Text style={s.recBtnText}>{createRecording.isPending ? 'جارٍ الإرسال...' : 'إرسال للطالب وولي الأمر'}</Text>
+              </Pressable>
+            </>
+          )}
+        </>
+      )}
+    </Card>
+  );
+}
+
+export default function TeacherRecordLesson() {
+  const theme = useAppTheme();
+  const s = useMemo(() => createS(theme), [theme]);
+  const profileId = usePortalStore((s) => s.authUser?.profileId);
+  const [selected, setSelected] = useState<TeachingContext | null>(null);
+  const [, forceRerender] = useState(0);
+
+  const { data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useTracks(undefined, profileId);
+
+  const { data: students = [], isLoading: loadingStudents, refetch: refetchStudents, isRefetching: refetchingStudents } = useStudents(
+    selected ? { track: selected.id } : undefined,
+  );
+
+  const isLoading = loadingTracks;
+  const isRefreshing = refetchingTracks || refetchingStudents;
+  function handleRefresh() {
+    refetchTracks();
+    refetchStudents();
+  }
+
+  if (!selected) {
+    return (
+      <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
+        <ScrollView
+          contentContainerStyle={s.page}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
+        >
+          {isLoading && <SkeletonRows count={4} rowHeight={72} />}
+          {!isLoading && tracks.length === 0 && (
+            <Text style={s.muted}>لا توجد مسارات مسندة إليك</Text>
+          )}
+          {tracks.map((t) => (
+            <Pressable key={t._id} onPress={() => setSelected(trackToContext(t))}>
+              <ContextCard context={trackToContext(t)} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
+      >
+        <Pressable onPress={() => setSelected(null)}>
+          <Text style={s.backLink}>‹ رجوع لاختيار المسار</Text>
+        </Pressable>
+
+        <Alert variant="info">سجّل واجب كل طالب صوتياً — يُرسل تلقائياً للطالب وولي أمره فور الانتهاء.</Alert>
+
+        {loadingStudents && <SkeletonRows count={3} rowHeight={160} gap={14} />}
+        {!loadingStudents && students.length === 0 && <Text style={s.muted}>لا يوجد طلاب في هذا السياق</Text>}
+
+        {students.map((st) => (
+          <StudentRecorderCard key={st._id} student={st} context={selected} onSent={() => forceRerender((n) => n + 1)} />
+        ))}
+      </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+function createS(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+    backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
+    studentHead: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
+    avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: theme.greenPale, alignItems: 'center', justifyContent: 'center' },
+    avatarText: { fontSize: 18, fontFamily: theme.fontCairoBold, color: theme.green },
+    studentName: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.text },
+    lastHifz: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
+    label: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 6, marginTop: 10 },
+    input: { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo, fontSize: 13, color: theme.text, backgroundColor: theme.inputBg },
+    chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
+    chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
+    chipText: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
+    chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
+    recArea: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },
+    recBtn: { backgroundColor: theme.greenAccent, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 8 },
+    recBtnStop: { backgroundColor: theme.red },
+    recBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 13 },
+    timer: { fontSize: 16, fontFamily: theme.fontCairoBold, color: theme.green },
+    sendBtn: { backgroundColor: theme.gold, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center', marginTop: 12 },
+  });
+}
+```
+
+- [ ] **Step 4: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: all three files no longer error.
+
+- [ ] **Step 5: Manual verification against the real dev server**
+
+Log in as a teacher and step through "تقييم الجلسة", "واجب جماعي", and "تسجيل الدرس": confirm each picker shows tracks only, and confirm a save/create/record action on each succeeds.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/teacher/evaluate.tsx quran-hifz-mobile/app/\(portal\)/teacher/grouphomework.tsx quran-hifz-mobile/app/\(portal\)/teacher/recordlesson.tsx
+git commit -m "feat(mobile): collapse evaluate/grouphomework/recordlesson to single-kind track context"
+```
+
+---
+
+### Task 21: `teacher/homework.tsx` + `teacher/plans.tsx` + `teacher/plan-detail.tsx` — display fixes
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/teacher/homework.tsx`
+- Modify: `quran-hifz-mobile/app/(portal)/teacher/plans.tsx`
+- Modify: `quran-hifz-mobile/app/(portal)/teacher/plan-detail.tsx`
+
+**Interfaces:**
+- Consumes: `Homework.track` from Task 2, `QuranPlan.targetType`/`.track` from Task 1.
+
+- [ ] **Step 1: `teacher/homework.tsx` — replace line 76 — always "المسار: {…}"**
+
+```tsx
+                  <Text style={styles.infoItem}>{`المسار: ${getTitle(h.track)}`}</Text>
+```
+
+(`getName` — now only used for `h.student` on line 67 — and `getTitle` are otherwise unchanged.)
+
+- [ ] **Step 2: `teacher/plans.tsx` — replace lines 7-11 (icon imports) — drop `IconSchool`**
+
+```tsx
+import {
+  IconPlus, IconPencil, IconCopy, IconTrash, IconCalendarEvent,
+  IconUsers, IconCalendarWeek, IconBook, IconBook2, IconFiles, IconCalendarDue,
+  IconProgress, IconCalendarStar,
+} from '@tabler/icons-react-native';
+```
+
+- [ ] **Step 3: Replace lines 33-41 (`targetLabel`) — two-way branch**
+
+```tsx
+function targetLabel(plan: QuranPlan): string {
+  if (plan.targetType === 'track') {
+    return typeof plan.track === 'object' ? plan.track?.title ?? '—' : '—';
+  }
+  return `${plan.students?.length ?? 0} طالب محدد`;
+}
+```
+
+- [ ] **Step 4: Replace lines 83-87 (`PlanCard`'s `targetIcon`) — two-way branch**
+
+```tsx
+  const targetIcon = plan.targetType === 'track'
+    ? <IconCalendarEvent size={15} color={theme.textMuted} />
+    : <IconUsers size={15} color={theme.textMuted} />;
+```
+
+- [ ] **Step 5: `teacher/plan-detail.tsx` — replace lines 30-34 (`targetLabel`) — two-way branch**
+
+```tsx
+function targetLabel(plan: QuranPlan): string {
+  if (plan.targetType === 'track') return typeof plan.track === 'object' ? plan.track?.title ?? '—' : '—';
+  return `${plan.students?.length ?? 0} طالب محدد`;
+}
+```
+
+- [ ] **Step 6: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: all three files no longer error.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/teacher/homework.tsx quran-hifz-mobile/app/\(portal\)/teacher/plans.tsx quran-hifz-mobile/app/\(portal\)/teacher/plan-detail.tsx
+git commit -m "feat(mobile): teacher homework/plans/plan-detail — track-only display"
+```
+
+---
+
+### Task 22: `teacher/plan-form.tsx` — `form.halqa` → `form.track` (789 lines, second-largest file in this phase)
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx`
+
+**Interfaces:**
+- Consumes: `useTracks` from Task 1's `tracks.ts`; `QuranPlan.targetType`/`.track` from Task 1's `quranPlan.ts`.
+- Produces: `TeacherPlanForm` submitting `{ targetType: 'track', track }` (unless `lockedTarget` is set) — unchanged export name/route.
+
+Mobile-specific quirk confirmed by reading the file directly: this form has **no `targetType` picker in the UI at all** — it always hardcoded `targetType: 'halqa'` on submit; the only way a plan got a different target was the read-only `lockedTarget` display when editing a plan whose `existingPlan.targetType !== 'halqa'`. Since `targetType` is now only `'track' | 'students'`, `lockedTarget` narrows to only the `students`-targeted case — editing a track-targeted plan is no longer special-cased, matching every other track-targeted flow in this app.
+
+- [ ] **Step 1: Replace line 20 (import) — `useTracks` replaces `useHalqat`**
+
+```tsx
+import { useTracks } from '@/lib/queries/tracks';
+```
+
+- [ ] **Step 2: Replace lines 59-72 (`FormFields` type) — `halqa` → `track`**
+
+```tsx
+type FormFields = {
+  name: string;
+  description: string;
+  track: string;
+  /** One per selected type, max four. Their days must not overlap. */
+  segments: FormSegment[];
+  holidays: string[];
+  startDate: string;
+  endType: 'activeDays' | 'date';
+  activeDaysCount: string;
+  endDate: string;
+  /** Daily grading split for this plan. Seeded from DEFAULT_GRADE_RUBRIC. */
+  gradeRubric: GradeCriterion[];
+};
+```
+
+- [ ] **Step 3: Replace lines 86-92 (`EMPTY`) — `halqa: ''` → `track: ''`**
+
+```tsx
+const EMPTY: FormFields = {
+  name: '', description: '', track: '',
+  segments: [emptySegment('حفظ')],
+  holidays: [], startDate: todayISO(),
+  endType: 'activeDays', activeDaysCount: '', endDate: '',
+  gradeRubric: DEFAULT_GRADE_RUBRIC.map((c) => ({ ...c })),
+};
+```
+
+- [ ] **Step 4: Replace line 98 (`params` type) — `halqaId` → `trackId`**
+
+```tsx
+  const params = useLocalSearchParams<{ mode?: string; id?: string; trackId?: string }>();
+```
+
+- [ ] **Step 5: Replace line 107 (data fetching) — `useTracks` replaces `useHalqat`**
+
+```tsx
+  const { data: tracks = [] } = useTracks(undefined, profileId);
+```
+
+- [ ] **Step 6: Replace lines 112-115 (initial form state) — `halqa` → `track`**
+
+```tsx
+  const [form, setForm] = useState<FormFields>(() => ({
+    ...EMPTY,
+    track: params.trackId ?? '',
+  }));
+```
+
+- [ ] **Step 7: Replace lines 119-123 (`lockedTarget` state's doc comment) — narrows to students-only**
+
+```tsx
+  // A plan linked to a track via the track-detail "link plan" action always
+  // shows this form's track picker unlocked (targetType is only 'track' or
+  // 'students' now — no more special-casing a track-targeted plan). Only a
+  // plan explicitly targeting an explicit student list locks the target,
+  // matching the web form's "targetType editing not offered here" convention.
+  const [lockedTarget, setLockedTarget] = useState<{ targetType: string; label: string } | null>(null);
+```
+
+- [ ] **Step 8: Replace lines 126-156 (prefill `useEffect`) — `halqa`→`track`, `lockedTarget` narrows to `'students'`**
+
+```tsx
+  useEffect(() => {
+    if (prefillFrom && existingPlan && !prefilled) {
+      setForm({
+        name: isDuplicate ? `${existingPlan.name} (نسخة)` : existingPlan.name,
+        description: existingPlan.description ?? '',
+        track: existingPlan.targetType === 'track'
+          ? (typeof existingPlan.track === 'object' ? existingPlan.track?._id ?? '' : existingPlan.track ?? '')
+          : '',
+        // The server always returns segments, migrating a legacy single-type
+        // plan into a one-element array, so there is no old shape to handle.
+        segments: existingPlan.segments.map((seg) => ({
+          type: seg.type, days: seg.days,
+          rangeStart: seg.rangeStart, rangeEnd: seg.rangeEnd,
+        })),
+        holidays: existingPlan.holidays ?? [],
+        startDate: existingPlan.startDate ? existingPlan.startDate.split('T')[0] : todayISO(),
+        endType: existingPlan.endType,
+        activeDaysCount: existingPlan.activeDaysCount ? String(existingPlan.activeDaysCount) : '',
+        endDate: existingPlan.endDate ? existingPlan.endDate.split('T')[0] : '',
+        gradeRubric: existingPlan.gradeRubric?.length
+          ? existingPlan.gradeRubric.map((c) => ({ ...c }))
+          : DEFAULT_GRADE_RUBRIC.map((c) => ({ ...c })),
+      });
+      if (existingPlan.targetType === 'students') {
+        setLockedTarget({ targetType: existingPlan.targetType, label: `${existingPlan.students?.length ?? 0} طالب محدد` });
+      }
+      setPrefilled(true);
+    }
+  }, [prefillFrom, isDuplicate, existingPlan, prefilled]);
+```
+
+- [ ] **Step 9: Replace line 255 (validation) — "حلقة" → "مسار"**
+
+```tsx
+    if (!lockedTarget && !form.track) return setFormError('يرجى اختيار مسار');
+```
+
+- [ ] **Step 10: Replace lines 276-290 (`body.targetType`/`.track` + teacher fallback) — `halqa`→`track`**
+
+```tsx
+    if (!lockedTarget) {
+      body.targetType = 'track';
+      body.track = form.track;
+    }
+    if (!isEdit) {
+      // `teacher` is required by the server on create. An admin reaching this
+      // form from the track drill-down has no profileId of their own, so fall
+      // back to the teacher who owns the track the plan targets.
+      const trackTeacher = tracks.find((t) => t._id === form.track)?.teachers[0];
+      body.teacher = profileId
+        ?? (typeof trackTeacher === 'object' ? trackTeacher?._id : trackTeacher);
+      if (!body.teacher) {
+        setFormError('تعذّر تحديد المعلم لهذه الخطة — اختر مسارًا له معلم مُسنَد.');
+        return;
+      }
+    }
+```
+
+- [ ] **Step 11: Replace lines 350-364 (the target `FormGroup` in the JSX) — "الحلقة" → "المسار"**
+
+```tsx
+          {lockedTarget ? (
+            <FormGroup label="الفئة المستهدفة">
+              <Text style={s.lockedText}>{lockedTarget.label} (لا يمكن تغييرها من هنا)</Text>
+            </FormGroup>
+          ) : (
+            <FormGroup label="المسار" required>
+              <FormSelect
+                value={form.track}
+                onChange={(v) => sf('track', v)}
+                options={tracks.map((t) => ({ value: t._id, label: t.title }))}
+                placeholder="اختر مسارًا"
+              />
+            </FormGroup>
+          )}
+```
+
+- [ ] **Step 12: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: `teacher/plan-form.tsx` no longer errors.
+
+- [ ] **Step 13: Manual verification against the real dev server**
+
+Log in as a teacher, open "الخطط الفردية" → "خطة جديدة": confirm the form shows "المسار" (not "الحلقة") sourced from your tracks, that segments/holidays/duration/rubric all still work exactly as before, and that submitting creates a track-targeted plan. Edit an existing students-targeted plan and confirm its target still shows locked/read-only.
+
+- [ ] **Step 14: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/teacher/plan-form.tsx
+git commit -m "feat(mobile): TeacherPlanForm — form.track replaces form.halqa, lockedTarget narrows to students-only"
+```
+
+---

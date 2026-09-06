@@ -391,10 +391,40 @@
       "action": "edit",
       "tokens": 12994,
       "at": "2026-09-06T14:13:05.126Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-06-halqa-track-restructure-phase3-mobile.md",
+      "action": "edit",
+      "tokens": 6787,
+      "at": "2026-09-06T14:15:50.276Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-06-halqa-track-restructure-phase3-mobile.md",
+      "action": "edit",
+      "tokens": 6877,
+      "at": "2026-09-06T14:18:15.690Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-06-halqa-track-restructure-phase3-mobile.md",
+      "action": "edit",
+      "tokens": 10025,
+      "at": "2026-09-06T14:20:02.476Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-06-halqa-track-restructure-phase3-mobile.md",
+      "action": "edit",
+      "tokens": 754,
+      "at": "2026-09-06T14:20:34.559Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/plans/2026-09-06-halqa-track-restructure-phase3-mobile.md",
+      "action": "edit",
+      "tokens": 2143,
+      "at": "2026-09-06T14:21:21.139Z"
     }
   ],
   "edit_counts": {
-    "docs/superpowers/plans/2026-09-06-halqa-track-restructure-phase3-mobile.md": 3
+    "docs/superpowers/plans/2026-09-06-halqa-track-restructure-phase3-mobile.md": 8
   },
   "anatomy_hits": 67,
   "anatomy_misses": 7,
