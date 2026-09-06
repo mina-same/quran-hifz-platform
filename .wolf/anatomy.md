@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T12:14:25.267Z
-> Files: 594 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T13:06:23.800Z
+> Files: 596 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -313,6 +313,10 @@
 - `2026-09-04-same-day-multi-segment-plans-design.md` — Same-day حفظ + مراجعة segments — design (~2798 tok)
 - `2026-09-05-halqa-track-restructure-design.md` — Halqa/Track restructure — design (~3262 tok)
 - `2026-09-05-halqa-track-restructure-phase2-web-design.md` — Halqa/Track Restructure — Phase 2 (Web) Design (~3328 tok)
+- `2026-09-06-halqa-track-restructure-phase3-mobile-research.md` — Phase 3 (mobile) — research handoff (~4700 tok)
+- `2026-09-06-halqa-track-restructure-phase3-mobile-design.md` — Halqa/Track Restructure — Phase 3 (Mobile) Design (~2650 tok)
+- `2026-09-06-halqa-track-restructure-phase3-mobile-design.md` — Halqa/Track Restructure — Phase 3 (Mobile) Design (~3867 tok)
+- `2026-09-06-halqa-track-restructure-phase3-mobile-research.md` — Halqa/Track Restructure — Phase 3 (Mobile) Research (~4617 tok)
 
 ## quran-hifz-mobile/
 
