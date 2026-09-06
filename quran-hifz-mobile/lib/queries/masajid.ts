@@ -5,6 +5,19 @@ export type Masjid = {
   _id: string;
   name: string;
   location: string;
+  gender: 'male' | 'female';
+  /** The server's `getMasajid`/`getMasjid` select this exact field set — no
+   * `studentCount` here (unlike `Track` from `lib/queries/tracks.ts`, whose
+   * list endpoint computes it separately) — don't assume it's present. */
+  tracks?: {
+    _id: string;
+    title: string;
+    daysPerWeek: string;
+    timeSlot: string;
+    maxStudents: number;
+    status: 'active' | 'upcoming' | 'ended';
+    teachers: ({ _id: string; name: string } | string)[];
+  }[];
 };
 
 type ListResponse = { success: boolean; count: number; data: Masjid[] };
@@ -28,7 +41,8 @@ export function useMasjid(id: string | undefined) {
 export function useCreateMasjid() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { name: string; location: string }) => post<SingleResponse>('/masajid', body),
+    mutationFn: (body: { name: string; location: string; gender: 'male' | 'female' }) =>
+      post<SingleResponse>('/masajid', body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['masajid'] }),
   });
 }
@@ -36,7 +50,7 @@ export function useCreateMasjid() {
 export function useUpdateMasjid() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...body }: { id: string; name?: string; location?: string }) =>
+    mutationFn: ({ id, ...body }: { id: string; name?: string; location?: string; gender?: 'male' | 'female' }) =>
       put<SingleResponse>(`/masajid/${id}`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['masajid'] }),
   });

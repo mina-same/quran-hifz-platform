@@ -5,7 +5,7 @@ export type DashboardStats = {
   totalStudents: number;
   activeStudents: number;
   totalTeachers: number;
-  totalHalqat: number;
+  totalTracks: number;
   totalMasajid: number;
   pendingHomework: number;
   lateHomework: number;
