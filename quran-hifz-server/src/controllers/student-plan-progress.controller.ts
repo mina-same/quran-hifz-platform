@@ -25,9 +25,13 @@ async function getOrInitProgress(planId: string, studentId: string, plan: Instan
   // {plan, student} index (E11000). findOneAndUpdate with upsert is atomic
   // at the document level, so the loser of the race gets back the winner's
   // freshly-created doc instead of a duplicate-key error.
+  // .toObject(): initStudentOccurrences spreads each frozen segment's
+  // schedule entries (`{ ...s }`) — off the live document that drops their
+  // real field values (occurrenceIndex, surahStart, ...), same Mongoose
+  // subdocument-spread gotcha as quran-plan.controller.ts's withPlanComputed.
   const doc = await StudentPlanProgress.findOneAndUpdate(
     { plan: planId, student: studentId },
-    { $setOnInsert: { plan: planId, student: studentId, occurrences: initStudentOccurrences(plan), overflowPages: 0 } },
+    { $setOnInsert: { plan: planId, student: studentId, occurrences: initStudentOccurrences(plan.toObject()), overflowPages: 0 } },
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
   return doc;
@@ -52,7 +56,7 @@ export async function getStudentProgress(req: Request, res: Response, next: Next
       // base* included, defaulted) — not just the plan's bare ScheduleEntry[] —
       // so clients never have to special-case "no overlay yet" by field
       // presence, only by the `progressIsPersisted` flag.
-      const effectiveSchedule = initStudentOccurrences(plan).map((o) => ({ ...o, date: o.date.toISOString() }));
+      const effectiveSchedule = initStudentOccurrences(plan.toObject()).map((o) => ({ ...o, date: o.date.toISOString() }));
       res.json({ success: true, data: { effectiveSchedule, progressIsPersisted: false, overflowPages: 0 } });
       return;
     }
@@ -280,7 +284,7 @@ export async function initStudentProgress(req: Request, res: Response, next: Nex
       // from the base plan and silently discarding that history. On first
       // creation there is nothing to preserve, so every type is built fresh.
       const existing = await StudentPlanProgress.findOne({ plan: planId, student: studentId });
-      const freshAll = initStudentOccurrences(plan, {
+      const freshAll = initStudentOccurrences(plan.toObject(), {
         type: rangeType, rangeStart: data.rangeStart, rangeEnd: data.rangeEnd,
       });
       const occurrences = existing

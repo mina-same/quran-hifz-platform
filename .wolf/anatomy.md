@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T21:20:22.475Z
-> Files: 661 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T21:28:57.168Z
+> Files: 671 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -46,6 +46,7 @@
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/4301297e-c910-4091-83c8-1f9c7f7a67e6/scratchpad/
 
 - `fix_buglog.py` — Declares the (~579 tok)
+- `fix_buglog2.py` (~1130 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw/
 
@@ -258,15 +259,23 @@
 
 ## .claude/worktrees/agent-ab3e361eb27628a77/.superpowers/sdd/2026-09-06-halqa-track-restructure-phase3-mobile/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-06-halqa-track-restructure-phase3-mobile.md (~904 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-06-halqa-track-restructure-phase3-mobile.md (~938 tok)
 - `task-17-report.md` — Task 17 Report: `teacher/special_tracks.tsx` → `teacher/tracks.tsx` (~702 tok)
 - `task-18-report.md` — Task 18: Teacher Dashboard & Students — Implementation Report (~753 tok)
 - `task-19-report.md` — Task 19 Report: `teacher/attendance.tsx` single-kind context collapse (~894 tok)
+- `task-20-report.md` — Task 20 Report: evaluate.tsx + grouphomework.tsx + recordlesson.tsx — dual-kind collapse (~942 tok)
+- `task-21-report.md` — Task 21 Implementation Report: Teacher Portal Display Fixes (~629 tok)
 
 ## .claude/worktrees/agent-ab3e361eb27628a77/quran-hifz-mobile/app/(portal)/teacher/
 
 - `attendance.tsx` — TeacherAttendance (~3431 tok)
 - `dashboard.tsx` — getName (~1396 tok)
+- `evaluate.tsx` — Scores are keyed by the active plan's rubric, so categories are not known (~3705 tok)
+- `grouphomework.tsx` — DAYS (~2691 tok)
+- `homework.tsx` — getName — renders form (~1276 tok)
+- `plan-detail.tsx` — STATUS_VARIANT (~3382 tok)
+- `plans.tsx` — One label/value line in the plan card's detail grid. (~3509 tok)
+- `recordlesson.tsx` — LESSON_TYPES (~2987 tok)
 - `students.tsx` — hwVariant (~1763 tok)
 - `tracks.tsx` — getTeacherName (~2129 tok)
 
@@ -654,6 +663,7 @@
 - `_verify_cleanup4.ts` — Declares main (~124 tok)
 - `_verify_juz.ts` — Plan: Al-Baqarah 1:1 through Al-Baqarah 2:286 (juz 1-3), daily, 10 active days, started 5 days ago. (~358 tok)
 - `_verify_reverse.ts` — Declares show (~422 tok)
+- `_verify_schedule_data.ts` — Declares main (~342 tok)
 - `_verify_teacher_profileid.ts` — Declares run (~332 tok)
 - `app.ts` — API routes: GET (1 endpoints) (~850 tok)
 - `server.ts` — Declares bootstrap (~198 tok)
@@ -678,10 +688,10 @@
 - `masjid.controller.ts` — Zod schemas: masjidSchema (~789 tok)
 - `message.controller.ts` — Zod schemas: messageSchema (~568 tok)
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
-- `quran-plan.controller.ts` — One line of the plan's daily grading rubric: a label and its degrees. (~6068 tok)
+- `quran-plan.controller.ts` — One line of the plan's daily grading rubric: a label and its degrees. (~6217 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
 - `stats.controller.ts` — Exports getDashboardStats (~525 tok)
-- `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~4556 tok)
+- `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~4651 tok)
 - `student.controller.ts` — Empty string is normalised to undefined so a blank field clears rather (~2010 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1390 tok)
 - `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~1707 tok)

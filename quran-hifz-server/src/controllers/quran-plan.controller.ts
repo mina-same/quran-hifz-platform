@@ -151,7 +151,11 @@ function normalizePlanSegments(plan: IQuranPlan): IPlanSegment[] {
  */
 function withPlanComputed(plan: InstanceType<typeof QuranPlan>) {
   const obj = plan.toObject();
-  const segments = normalizePlanSegments(plan);
+  // Read segments off the already-plain `obj`, never the live document —
+  // spreading a Mongoose subdocument (each segment, each schedule entry)
+  // drops its real field values (occurrenceIndex, surahStart, ...), leaving
+  // them `undefined` on the wire. See the studentPlanReflow.ts precedent.
+  const segments = normalizePlanSegments(obj);
 
   const window: Omit<MultiPlanInput, 'segments'> = {
     startDate:       plan.startDate,
@@ -357,7 +361,10 @@ export async function generateSchedule(req: Request, res: Response, next: NextFu
 
     // Freeze every segment. A legacy document is normalized into segments
     // first, so this is also what migrates it in place on first generate.
-    const segments = normalizePlanSegments(plan);
+    // Read off `.toObject()`, not the live document — spreading a Mongoose
+    // subdocument below (`{ ...seg, schedule: ... }`) would otherwise save
+    // `type`/`days`/`rangeStart`/`rangeEnd` as undefined.
+    const segments = normalizePlanSegments(plan.toObject());
     if (segments.length === 0) throw new AppError('لا توجد أنواع مُعرَّفة لهذه الخطة', 400);
 
     const segmentInputs: PlanSegmentInput[] = segments.map((s) => ({

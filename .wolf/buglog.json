@@ -6775,5 +6775,25 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-09-07T00:00:00"
+  },
+  {
+    "id": "bug-400",
+    "timestamp": "2026-09-07T00:30:00",
+    "error_message": "User: track detail's persisted schedule table showed the literal text \"undefined\" in the # column, with two identical duplicate-looking rows for a plan with both حفظ and مراجعة segments",
+    "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts, quran-hifz-server/src/controllers/student-plan-progress.controller.ts",
+    "root_cause": "Third occurrence of the Mongoose-subdocument-spread gotcha (see the 2026-07-10 cerebrum entry for the first two). withPlanComputed's persisted-schedule branch did `seg.schedule.map((s) => ({ ...s, ... }))` where `seg` came from normalizePlanSegments(plan) called on the RAW live document (plan.toObject() was computed right above it but never used for this call) -- spreading each frozen schedule subdocument drops its real field values (occurrenceIndex, surahStart, ...), which then serialize as undefined over the API. Verified against real DB data: the stored plan 'ورد مراجعة المسار الرمضاني' has occurrenceIndex: 15 on direct property access, but `{ ...entry }` on the live subdocument reproduces `undefined` exactly. The client's `toAr(undefined)` renders the literal string 'undefined', and since occurrenceIndex collided to undefined for both of the plan's two segments' single day, the table's `key={s.occurrenceIndex}` collided too and the row-editing equality check (`editingDay?.occurrenceIndex === s.occurrenceIndex`) matched both undefined rows at once, which is why both looked like they were stuck in edit mode with placeholder Al-Fatiha/ayah-1 select values (SURAHS.find(...) ?? SURAHS[0] falling back when surahNumber is undefined). The same bug also existed in studentPlanReflow.ts's initStudentOccurrences, reached from student-plan-progress.controller.ts (3 call sites) with a raw, non-toObject'd plan -- meaning any individual-plan overlay initialized from a frozen base-plan segment carried the same corruption. generateSchedule (the freeze/regenerate endpoint) had the same raw-document read for its own `{ ...seg }` spread when reassigning plan.segments, which would have written type/days/rangeStart/rangeEnd as undefined back to the DB on save -- not confirmed to have actually fired (would likely hit the schema's `required` validators), but fixed defensively regardless.",
+    "fix": "quran-plan.controller.ts: withPlanComputed now calls normalizePlanSegments(obj) (the already-.toObject()'d plan) instead of normalizePlanSegments(plan). generateSchedule now calls normalizePlanSegments(plan.toObject()) before reassigning plan.segments. student-plan-progress.controller.ts: all 3 call sites of initStudentOccurrences now pass plan.toObject() instead of the raw document. No data migration needed -- confirmed via a throwaway read-only script that the DB's stored occurrenceIndex/surahStart values were always correct; only the read-time serialization was broken.",
+    "tags": [
+      "mongoose-subdocument-spread",
+      "quran-plan",
+      "individual-plan",
+      "data-serialization",
+      "recurring"
+    ],
+    "related_bugs": [
+      "bug-397"
+    ],
+    "occurrences": 3,
+    "last_seen": "2026-09-07T00:30:00"
   }
 ]
