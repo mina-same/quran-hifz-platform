@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T15:22:17.943Z
-> Files: 608 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T19:53:44.703Z
+> Files: 614 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -248,6 +248,7 @@
 
 - `task-1-report.md` — Task 1 Report: `lib/queries/tracks.ts` + `lib/queries/quranPlan.ts` (~1229 tok)
 - `task-2-report.md` — Task 2 Completion Report: Context-field collapse across attendance/evaluations/groupHomework/homewor (~1157 tok)
+- `task-3-report.md` — Task 3 Completion Report: Query-Layer Field Renames (~7105 tok)
 
 ## .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/queries/
 
@@ -256,7 +257,12 @@
 - `groupHomework.ts` — Exports GroupHomework, GroupHomeworkFilters, useGroupHomework, useCreateGroupHomework, useDeleteGrou (~445 tok)
 - `homework.ts` — Exports Homework, HomeworkFilters, useHomework, useCreateHomework + 2 more (~653 tok)
 - `lessonRecordings.ts` — Exports LessonRecording, LessonRecordingFilters, useRecordings, useCreateRecording, useDeleteRecordi (~519 tok)
+- `masajid.ts` — The server's `getMasajid`/`getMasjid` select this exact field set — no (~588 tok)
+- `parent.ts` — Human day label ("الثلاثاء") the teacher set — shown instead of a raw date. (~984 tok)
 - `quranPlan.ts` — One line of a plan's daily grading rubric — what is graded, out of how many. (~3552 tok)
+- `stats.ts` — Exports DashboardStats, useStats (~165 tok)
+- `students.ts` — Populated as `{title, daysPerWeek?, timeSlot?, masjid}` by the server — (~920 tok)
+- `teachers.ts` — null when the teacher has no login account yet. (~545 tok)
 - `tracks.ts` — Computed server-side (`Student.countDocuments({track})`) — present on (~1000 tok)
 
 ## .superpowers/sdd/2026-09-04-same-day-multi-segment-plans/
