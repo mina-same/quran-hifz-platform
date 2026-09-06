@@ -84,7 +84,7 @@ export function StudentReportPanel({
   aggregateTitle = "مقارنة الطلاب",
 }: {
   students: ReportStudent[];
-  aggregateFilter: { halqa?: string; specialTrack?: string };
+  aggregateFilter: { track?: string };
   aggregateTitle?: string;
 }) {
   // `students` starts empty until its query resolves, so a plain useState

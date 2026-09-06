@@ -7,8 +7,7 @@ import { useEvaluations, type EvaluationRecord } from "../../api/evaluations";
 import { MAX_SCORES, TOTAL_MAX, legacyScoresOf } from "../../lib/evaluationRubric";
 import type { Kpi } from "../../api/kpis";
 import type { Teacher } from "../../api/teachers";
-import type { Halqa } from "../../api/halqat";
-import type { SpecialTrack } from "../../api/special-tracks";
+import type { Track } from "../../api/tracks";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "./Card";
 import { StatsRow } from "./StatsRow";
@@ -24,11 +23,11 @@ import { StudentReportPanel } from "./StudentReportPanel";
 
 /* ── helpers ──────────────────────────────────────────────────────────── */
 
-function halqaIdOf(s: Student): string {
-  return typeof s.halqa === "object" ? s.halqa._id : (s.halqa ?? "");
+function trackIdOf(s: Student): string {
+  return typeof s.track === "object" ? s.track._id : (s.track ?? "");
 }
-function halqaNameOf(s: Student): string {
-  return typeof s.halqa === "object" ? s.halqa.name : (s.halqa ?? "");
+function trackNameOf(s: Student): string {
+  return typeof s.track === "object" ? s.track.title : (s.track ?? "");
 }
 function studentIdOf(e: EvaluationRecord): string {
   return typeof e.student === "string" ? e.student : e.student._id;
@@ -36,11 +35,11 @@ function studentIdOf(e: EvaluationRecord): string {
 function studentNameOf(e: EvaluationRecord): string {
   return typeof e.student === "string" ? e.student : e.student.name;
 }
-function evalHalqaId(e: EvaluationRecord): string {
-  return typeof e.halqa === "object" ? (e.halqa?._id ?? "") : (e.halqa ?? "");
+function evalTrackId(e: EvaluationRecord): string {
+  return typeof e.track === "object" ? (e.track?._id ?? "") : (e.track ?? "");
 }
-function evalHalqaName(e: EvaluationRecord): string {
-  return typeof e.halqa === "object" ? (e.halqa?.name ?? "") : "";
+function evalTrackName(e: EvaluationRecord): string {
+  return typeof e.track === "object" ? (e.track?.title ?? "") : "";
 }
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
@@ -104,7 +103,6 @@ export function ReportsDashboard({
   topbarIcon,
   topbarTitle,
   baseFilter,
-  halqat,
   tracks,
   kpis,
   teachers,
@@ -114,8 +112,7 @@ export function ReportsDashboard({
   topbarIcon: string;
   topbarTitle: string;
   baseFilter: StudentFilters;
-  halqat: Halqa[];
-  tracks: SpecialTrack[];
+  tracks: Track[];
   kpis?: Kpi[];
   teachers?: Teacher[];
   showAdmin?: boolean;
@@ -124,8 +121,7 @@ export function ReportsDashboard({
   const [scope, setScope] = useState("");
   const scopedFilter: StudentFilters = useMemo(() => {
     if (scope === "") return baseFilter;
-    if (scope.startsWith("halqa:")) return { halqa: scope.slice(6) };
-    if (scope.startsWith("track:")) return { specialTrack: scope.slice(6) };
+    if (scope.startsWith("track:")) return { track: scope.slice(6) };
     return baseFilter;
   }, [scope, baseFilter]);
 
@@ -207,16 +203,16 @@ export function ReportsDashboard({
     };
   }, [evaluations]);
 
-  /* ── halqa comparison (only meaningful when more than one halqa is in scope) ── */
-  const halqaEvalStats = useMemo(() => {
+  /* ── track comparison (only meaningful when more than one track is in scope) ── */
+  const trackEvalStats = useMemo(() => {
     const map = new Map<
       string,
       { name: string; sums: { attendance: number; hifz: number; tajweed: number; talawah: number; total: number }; count: number }
     >();
     for (const e of evaluations) {
-      const id = evalHalqaId(e);
+      const id = evalTrackId(e);
       if (!id) continue;
-      const name = evalHalqaName(e) || halqat.find((h) => h._id === id)?.name || "—";
+      const name = evalTrackName(e) || tracks.find((t) => t._id === id)?.title || "—";
       const entry = map.get(id) ?? {
         name,
         sums: { attendance: 0, hifz: 0, tajweed: 0, talawah: 0, total: 0 },
@@ -241,7 +237,7 @@ export function ReportsDashboard({
         count: e.count,
       }))
       .sort((a, b) => b.avgTotal - a.avgTotal);
-  }, [evaluations, halqat]);
+  }, [evaluations, tracks]);
 
   /* ── per-student evaluation leaderboard (honor board top-3 + needs-attention) ── */
   const studentEvalStats = useMemo(() => {
@@ -317,11 +313,11 @@ export function ReportsDashboard({
         </Alert>,
       );
     }
-    if (scope === "" && halqaEvalStats.length > 1) {
+    if (scope === "" && trackEvalStats.length > 1) {
       insights.push(
-        <Alert key="top-halqa" tone="info" icon="ti-trophy">
-          حلقة <b>{halqaEvalStats[0].name}</b> متصدّرة في التقييم بمتوسط{" "}
-          <b>{toAr(halqaEvalStats[0].avgTotal)}/{toAr(10)}</b>
+        <Alert key="top-track" tone="info" icon="ti-trophy">
+          مسار <b>{trackEvalStats[0].name}</b> متصدّرة في التقييم بمتوسط{" "}
+          <b>{toAr(trackEvalStats[0].avgTotal)}/{toAr(10)}</b>
         </Alert>,
       );
     }
@@ -362,25 +358,25 @@ export function ReportsDashboard({
       ]),
     );
   }
-  function exportHalqaEval() {
+  function exportTrackEval() {
     downloadCsv(
-      "تقرير-الحلقات-تقييم.csv",
-      ["الحلقة", "متوسط الحضور", "متوسط الحفظ", "متوسط التجويد", "متوسط التلاوة", "المتوسط الكلي", "عدد الجلسات"],
-      halqaEvalStats.map((h) => [h.name, `${h.avgAttendance}%`, `${h.avgHifz}%`, `${h.avgTajweed}%`, `${h.avgTalawah}%`, h.avgTotal, h.count]),
+      "تقرير-المسارات-تقييم.csv",
+      ["المسار", "متوسط الحضور", "متوسط الحفظ", "متوسط التجويد", "متوسط التلاوة", "المتوسط الكلي", "عدد الجلسات"],
+      trackEvalStats.map((h) => [h.name, `${h.avgAttendance}%`, `${h.avgHifz}%`, `${h.avgTajweed}%`, `${h.avgTalawah}%`, h.avgTotal, h.count]),
     );
   }
   function exportAtRisk() {
     downloadCsv(
       "تقرير-الطلاب-ذوي-المتابعة.csv",
-      ["الطالب", "الحلقة", "نسبة الحضور", "نسبة الإنجاز"],
-      m.atRisk.map((s) => [s.name, halqaNameOf(s), `${s.attendancePct}%`, `${s.progressPct}%`]),
+      ["الطالب", "المسار", "نسبة الحضور", "نسبة الإنجاز"],
+      m.atRisk.map((s) => [s.name, trackNameOf(s), `${s.attendancePct}%`, `${s.progressPct}%`]),
     );
   }
 
   const [exportOpen, setExportOpen] = useState(false);
   const exportItems = [
     { label: "تقرير التقييمات", icon: "ti-star", fn: exportEvaluations, disabled: evaluations.length === 0 },
-    { label: "مقارنة الحلقات (تقييم)", icon: "ti-school", fn: exportHalqaEval, disabled: halqaEvalStats.length === 0 },
+    { label: "مقارنة المسارات (تقييم)", icon: "ti-school", fn: exportTrackEval, disabled: trackEvalStats.length === 0 },
     { label: "تقرير ذوي المتابعة", icon: "ti-alert-triangle", fn: exportAtRisk, disabled: m.atRisk.length === 0 },
   ];
   const exportMenu = (
@@ -416,20 +412,16 @@ export function ReportsDashboard({
   /* ── scope options ────────────────────────────────────────────────── */
   const scopeOptions = useMemo(() => {
     const opts: { value: string; label: string; icon?: string }[] = [{ value: "", label: scopeAllLabel, icon: "ti-users" }];
-    halqat.forEach((h) => opts.push({ value: `halqa:${h._id}`, label: h.name, icon: "ti-school" }));
     tracks.forEach((t) => opts.push({ value: `track:${t._id}`, label: t.title, icon: "ti-route" }));
     return opts;
-  }, [halqat, tracks, scopeAllLabel]);
+  }, [tracks, scopeAllLabel]);
 
-  const selectedHalqa = halqat.find((h) => `halqa:${h._id}` === scope);
   const selectedTrack = tracks.find((t) => `track:${t._id}` === scope);
-  const aggregateTitle = selectedHalqa
-    ? `مقارنة طلاب ${selectedHalqa.name}`
-    : selectedTrack
-      ? `مقارنة طلاب ${selectedTrack.title}`
-      : showAdmin
-        ? "متوسط الدرجات لكل طلاب المدرسة"
-        : "متوسط الدرجات لطلابك";
+  const aggregateTitle = selectedTrack
+    ? `مقارنة طلاب ${selectedTrack.title}`
+    : showAdmin
+      ? "متوسط الدرجات لكل طلاب المدرسة"
+      : "متوسط الدرجات لطلابك";
 
   const empty = !isLoading && students.length === 0;
   const tier = evalStats ? tierOf(evalStats.avgTotalPct) : null;
@@ -588,19 +580,19 @@ export function ReportsDashboard({
               <Leaderboard rows={evalWatch} variant="watch" emptyText="لا يوجد طلاب بتقييم منخفض — الحمد لله" emptyIcon="ti-mood-smile" />
             </BentoTile>
 
-            {/* Halqa comparison (only when more than one halqa is in play) */}
-            {halqaEvalStats.length > 1 && (
+            {/* Track comparison (only when more than one track is in play) */}
+            {trackEvalStats.length > 1 && (
               <BentoTile
                 span="4"
                 icon="ti-school"
-                label="مقارنة الحلقات في التقييم"
-                badge={<Badge tone="green">{toAr(halqaEvalStats.length)} حلقة</Badge>}
+                label="مقارنة المسارات في التقييم"
+                badge={<Badge tone="green">{toAr(trackEvalStats.length)} مسار</Badge>}
               >
                 <div className="tbl-wrap">
                   <table className="tbl">
                     <thead>
                       <tr>
-                        <th>الحلقة</th>
+                        <th>المسار</th>
                         <th>حضور</th>
                         <th>حفظ</th>
                         <th>تجويد</th>
@@ -610,7 +602,7 @@ export function ReportsDashboard({
                       </tr>
                     </thead>
                     <tbody>
-                      {halqaEvalStats.map((h) => (
+                      {trackEvalStats.map((h) => (
                         <tr key={h.name}>
                           <td style={{ fontWeight: 700 }}>{h.name}</td>
                           <td>{pct(h.avgAttendance)}</td>
