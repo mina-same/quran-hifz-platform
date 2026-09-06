@@ -33,7 +33,7 @@
       "first_read": "2026-09-06T11:30:55.148Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/api/students.ts": {
-      "count": 2,
+      "count": 3,
       "tokens": 834,
       "first_read": "2026-09-06T11:31:49.249Z"
     },
@@ -73,18 +73,18 @@
       "first_read": "2026-09-06T11:37:47.458Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-17-brief.md": {
-      "count": 2,
+      "count": 3,
       "tokens": 0,
       "first_read": "2026-09-06T11:41:48.552Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/router/pageRegistry.ts": {
-      "count": 1,
-      "tokens": 1392,
+      "count": 2,
+      "tokens": 1250,
       "first_read": "2026-09-06T11:42:40.792Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/config/portals.ts": {
-      "count": 1,
-      "tokens": 1318,
+      "count": 2,
+      "tokens": 1267,
       "first_read": "2026-09-06T11:42:40.982Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx": {
@@ -108,13 +108,13 @@
       "first_read": "2026-09-06T11:43:46.166Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/api/tracks.ts": {
-      "count": 1,
+      "count": 2,
       "tokens": 990,
       "first_read": "2026-09-06T11:45:03.558Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminRegister.tsx": {
-      "count": 1,
-      "tokens": 3079,
+      "count": 2,
+      "tokens": 3130,
       "first_read": "2026-09-06T11:45:08.640Z"
     },
     "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/progress.md": {
@@ -156,6 +156,51 @@
       "count": 1,
       "tokens": 83,
       "first_read": "2026-09-06T11:49:02.420Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-17-report.md": {
+      "count": 2,
+      "tokens": 2712,
+      "first_read": "2026-09-06T11:52:52.261Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/.superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/review-2ea4170..44eabcb.diff": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-09-06T11:54:03.349Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/student.controller.ts": {
+      "count": 1,
+      "tokens": 2010,
+      "first_read": "2026-09-06T11:54:37.601Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/routes/sitemap[.]xml.ts": {
+      "count": 1,
+      "tokens": 159,
+      "first_read": "2026-09-06T11:55:18.500Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/api/lesson-recordings.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-09-06T11:56:10.083Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/teacher/TeacherDashboard.tsx": {
+      "count": 1,
+      "tokens": 1348,
+      "first_read": "2026-09-06T11:56:10.141Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/api/homework.ts": {
+      "count": 1,
+      "tokens": 628,
+      "first_read": "2026-09-06T11:56:10.936Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/parent/ParentDashboard.tsx": {
+      "count": 2,
+      "tokens": 1190,
+      "first_read": "2026-09-06T11:56:11.736Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/context/ParentContext.tsx": {
+      "count": 1,
+      "tokens": 206,
+      "first_read": "2026-09-06T11:56:46.537Z"
     }
   },
   "files_written": [
@@ -465,9 +510,9 @@
     "quran-hifz/src/quran/components/common/Badge.tsx": 1,
     ".superpowers/sdd/2026-09-05-halqa-track-restructure-phase2-web/task-17-report.md": 1
   },
-  "anatomy_hits": 24,
-  "anatomy_misses": 6,
-  "repeated_reads_warned": 15,
+  "anatomy_hits": 31,
+  "anatomy_misses": 7,
+  "repeated_reads_warned": 23,
   "cerebrum_warnings": 0,
   "stop_count": 0
 }
