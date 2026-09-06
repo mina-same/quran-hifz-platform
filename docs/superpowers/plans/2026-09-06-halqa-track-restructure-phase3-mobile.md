@@ -350,7 +350,7 @@ function buildQuery(f?: EvaluationFilters) {
 }
 ```
 
-Replace lines 85-96 (`useRubric`):
+Replace lines 85-97 (`useRubric`):
 
 ```ts
 /** The rubric the evaluation screen should render for a track session. */
@@ -1299,7 +1299,7 @@ Replace lines 29-39 (drop `halqatQuery`, `isLoading`/`isRefreshing`/`onRefresh` 
   const [deleteId, setDeleteId] = useState<string | null>(null);
 ```
 
-Replace lines 61-64 (drop the now-unused `masjidIdOf` helper's only call site — the accordion no longer needs it since it reads `masjid.tracks` directly, so delete the `masjidIdOf` function entirely, lines 20-24) and replace the `<MasjidAccordion>` render (lines 73-89):
+Delete the now-unused `masjidIdOf` helper entirely (lines 20-24) — the accordion no longer needs it since it reads `masjid.tracks` directly, not a caller-side `halqat.filter(...)` — and replace the `<MasjidAccordion>` render (lines 73-89):
 
 ```tsx
           {masajid.map((masjid) => (
@@ -1319,8 +1319,6 @@ Replace lines 61-64 (drop the now-unused `masjidIdOf` helper's only call site �
             />
           ))}
 ```
-
-(Also delete the now-dead `masjidIdOf` function at lines 20-24 in the same pass — its only call site was the removed `halqat.filter(...)` line.)
 
 - [ ] **Step 3: `admin/masjid-form.tsx` — add the required `gender` field**
 
@@ -2685,7 +2683,7 @@ const EMPTY: Fields = {
 };
 ```
 
-- [ ] **Step 3: Replace lines 34-47 (`validate`) — single track requirement, cosmetic label fixed downstream in Step 6**
+- [ ] **Step 3: Replace lines 34-48 (`validate`) — single track requirement, cosmetic label fixed downstream in Step 6**
 
 ```tsx
 function validate(f: Fields): string | null {
@@ -2993,12 +2991,11 @@ function trackLabel(s: Student): string | null {
 - [ ] **Step 7: Delete lines 132-135 (the `HalqaCard` mini-list) — no replacement, matches "no new features"**
 
 ```tsx
-        {/* Programme distribution */}
-        <Card>
-          <CardHeader title="توزيع المسارات" />
+        {/* KPIs */}
+        <Card noPadding>
 ```
 
-(i.e. the "Halqat overview (first 2)" comment block and its `.map` are removed outright; the "Programme distribution" `Card` that follows it is unaffected and now runs directly after the "+ طالب جديد" button.)
+The "Halqat overview (first 2)" comment block and its `.map` (lines 132-135) sit **between** the already-unaffected "Programme distribution" `Card` (lines 116-130, which reads `masarRows`/`trackLabel` and needs no change beyond Step 4's fix) and the "KPIs" `Card` (line 137 onward) — delete only the halqat block itself, so "Programme distribution" is directly followed by "KPIs" with nothing in between.
 
 - [ ] **Step 8: Replace lines 173-177 (recent-registrations `infoGrid`) — one "المسار" line replaces "الحلقة"/"المسجد"**
 
@@ -4761,7 +4758,7 @@ const EMPTY: FormFields = {
   const [lockedTarget, setLockedTarget] = useState<{ targetType: string; label: string } | null>(null);
 ```
 
-- [ ] **Step 8: Replace lines 126-156 (prefill `useEffect`) — `halqa`→`track`, `lockedTarget` narrows to `'students'`**
+- [ ] **Step 8: Replace lines 125-156 (prefill `useEffect`) — `halqa`→`track`, `lockedTarget` narrows to `'students'`**
 
 ```tsx
   useEffect(() => {
@@ -4801,7 +4798,7 @@ const EMPTY: FormFields = {
     if (!lockedTarget && !form.track) return setFormError('يرجى اختيار مسار');
 ```
 
-- [ ] **Step 10: Replace lines 276-290 (`body.targetType`/`.track` + teacher fallback) — `halqa`→`track`**
+- [ ] **Step 10: Replace lines 276-291 (`body.targetType`/`.track` + teacher fallback) — `halqa`→`track`**
 
 ```tsx
     if (!lockedTarget) {
@@ -4822,7 +4819,7 @@ const EMPTY: FormFields = {
     }
 ```
 
-- [ ] **Step 11: Replace lines 350-364 (the target `FormGroup` in the JSX) — "الحلقة" → "المسار"**
+- [ ] **Step 11: Replace lines 351-364 (the target `FormGroup` in the JSX, right after the `<View style={{ height: 12 }} />` spacer) — "الحلقة" → "المسار"**
 
 ```tsx
           {lockedTarget ? (
@@ -4861,3 +4858,1337 @@ git commit -m "feat(mobile): TeacherPlanForm — form.track replaces form.halqa,
 ```
 
 ---
+
+### Task 23: `teacher/reports.tsx` — `useTracks` replaces `useHalqat`
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/teacher/reports.tsx`
+
+**Interfaces:**
+- Consumes: `useTracks` from Task 1; `ReportsScreen` (Task 9, `tracks`-only prop) and `StudentFilters.track` (Task 3).
+
+- [ ] **Step 1: Replace lines 6-9 (imports)**
+
+```tsx
+import { useTracks } from '@/lib/queries/tracks';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import type { StudentFilters } from '@/lib/queries/students';
+```
+
+- [ ] **Step 2: Replace lines 20-33 (data fetching + `baseFilter`) — `track` replaces `halqa`, sentinel pattern unchanged**
+
+```tsx
+  // Same tracks-scoping source as teacher/tracks.tsx: every track taught by this teacher.
+  const { data: tracks = [], refetch: refetchTracks, isRefetching: refetchingTracks } = useTracks(undefined, profileId);
+  const isRefreshing = refetchingTracks;
+  const onRefresh = () => {
+    refetchTracks();
+  };
+
+  // Server's GET /students supports a comma-separated `track` list ($in). When the
+  // teacher has no tracks yet, use a sentinel id that matches nothing rather than
+  // an empty filter (which the query layer would treat as "no filter" = every student).
+  const myTrackIds = tracks.map((t) => t._id);
+  const baseFilter: StudentFilters = { track: myTrackIds.length > 0 ? myTrackIds.join(',') : '__none__' };
+```
+
+- [ ] **Step 3: Replace lines 42-47 (`<ReportsScreen>` call) — drop `halqat`**
+
+```tsx
+        <ReportsScreen
+          baseFilter={baseFilter}
+          tracks={tracks}
+          scopeAllLabel="كل مساراتي"
+        />
+```
+
+- [ ] **Step 4: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: `teacher/reports.tsx` no longer errors.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/teacher/reports.tsx
+git commit -m "feat(mobile): TeacherReports — useTracks replaces useHalqat"
+```
+
+---
+
+### Task 24: `student/special_tracks.tsx` → `student/tracks.tsx` — mirror the web `StudentTracks.tsx` precedent
+
+**Files:**
+- Delete: `quran-hifz-mobile/app/(portal)/student/special_tracks.tsx`
+- Create: `quran-hifz-mobile/app/(portal)/student/tracks.tsx`
+
+**Interfaces:**
+- Consumes: `useTracks`, `Track`, `TrackTeacher` from Task 1; `useStudent` from Task 3.
+- Produces: exported `StudentTracks` component — consumed by Task 28's `student/_layout.tsx` (registered under the route name `tracks`, stays in the "المزيد" overflow — `special_tracks` was never a visible tab there).
+
+Single-track-per-student makes this screen's original plural premise ("my tracks", fetched via the now-removed `?student=` filter) no longer match the data model. Per the design doc's confirmed decision, this mirrors the already-shipped web precedent exactly (`quran-hifz/src/quran/pages/student/StudentTracks.tsx`, read during planning): same list UI, same section headers (active/upcoming/ended), same empty state — just `useTracks()` filtered client-side to the one track matching `student.track` (renders 0 or 1 cards). No structural rewrite.
+
+- [ ] **Step 1: Delete the old file**
+
+```bash
+git rm quran-hifz-mobile/app/\(portal\)/student/special_tracks.tsx
+```
+
+- [ ] **Step 2: Create `student/tracks.tsx`**
+
+```tsx
+import { useMemo, useState } from 'react';
+import { ScrollView, View, RefreshControl, StyleSheet, Linking } from 'react-native';
+import { IconChevronDown, IconChevronUp, IconTarget, IconVideo } from '@tabler/icons-react-native';
+import Text from '@/components/ui/Text';
+import Pressable from '@/components/ui/Pressable';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Card from '@/components/ui/Card';
+import Badge from '@/components/ui/Badge';
+import { useTracks, type Track, type TrackTeacher } from '@/lib/queries/tracks';
+import { useStudent } from '@/lib/queries/students';
+import { useQuranPlans, segmentReversed } from '@/lib/queries/quranPlan';
+import { SURAHS } from '@/lib/data/surahs';
+import { orientSlice } from '@/lib/quranRange';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { AR_LOCALE } from '@/lib/date';
+
+function getTeacherName(v: TrackTeacher | string) {
+  return typeof v === 'object' ? v.name : v;
+}
+function getMasjidName(v: unknown): string {
+  if (v && typeof v === 'object' && 'name' in v) return (v as { name: string }).name;
+  return typeof v === 'string' ? v : '—';
+}
+function surahName(n: number) {
+  return SURAHS.find((su) => su.number === n)?.name ?? '';
+}
+function fmtDate(d: string) {
+  return new Date(d).toLocaleDateString(AR_LOCALE, { year: 'numeric', month: 'long', day: 'numeric' });
+}
+function daysLeft(endDate: string): number {
+  return Math.max(0, Math.ceil((new Date(endDate).getTime() - Date.now()) / 86400000));
+}
+
+const STATUS_LABEL: Record<Track['status'], string> = { active: 'نشط الآن', upcoming: 'قادم', ended: 'منتهي' };
+const STATUS_VARIANT: Record<Track['status'], 'green' | 'gold' | 'red'> = { active: 'green', upcoming: 'gold', ended: 'red' };
+
+function TrackCard({ track }: { track: Track }) {
+  const theme = useAppTheme();
+  const remaining = daysLeft(track.endDate);
+  const [planOpen, setPlanOpen] = useState(false);
+  // The track's own Quran plan — where "مقرَّر اليوم" comes from.
+  const { data: linkedPlans = [] } = useQuranPlans({ track: track._id });
+  const linkedPlan = linkedPlans[0];
+
+  const todayText = (() => {
+    const list = linkedPlan?.todayAssignments ?? [];
+    if (list.length === 0) return 'لا يوجد جزء مخصص لليوم';
+    const multi = list.length > 1;
+    // Direction is per segment — read it from the type that is actually due.
+    return list.map((entry) => {
+      const a = orientSlice(entry, segmentReversed(linkedPlan!, entry.type));
+      const pages = a.pageEnd !== a.pageStart ? `${a.pageStart} - ${a.pageEnd}` : `${a.pageStart}`;
+      const label = multi ? `مقرَّر اليوم (${entry.type})` : 'مقرَّر اليوم';
+      return `${label}: ${surahName(a.surahStart)} : ${a.ayahStart} — ${surahName(a.surahEnd)} : ${a.ayahEnd} (صفحة ${pages})`;
+    }).join('\n');
+  })();
+
+  const s = useMemo(() => StyleSheet.create({
+    headRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
+    typeTag: { fontSize: 11, backgroundColor: theme.bg, color: theme.textMuted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+    onlineTag: { fontSize: 11, backgroundColor: theme.bluePale, color: theme.blue, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, fontFamily: theme.fontCairo },
+    title: { fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.text, marginBottom: 12 },
+    infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 10 },
+    infoItem: { width: '46%' },
+    infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
+    infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
+    dateBox: { backgroundColor: theme.bg, borderRadius: 10, padding: 10, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+    dateText: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
+    dateRemaining: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.textMuted },
+    joinBtn: {
+      flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start',
+      backgroundColor: theme.tone.blue.bg, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 7, marginBottom: 8,
+    },
+    joinText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.tone.blue.text },
+    planBox: { backgroundColor: theme.cardAlt, borderRadius: 10, padding: 12, marginBottom: 8 },
+    planHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    planLabel: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 },
+    planName: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.textMuted, flexShrink: 1 },
+    planPct: { backgroundColor: theme.greenAccent, borderRadius: theme.radiusFull, paddingHorizontal: 8, paddingVertical: 1 },
+    planPctText: { fontSize: 10, fontFamily: theme.fontCairoBold, color: theme.white },
+    planDetail: { marginTop: 8, gap: 4 },
+    planTrack: { height: 6, backgroundColor: theme.border, borderRadius: 999, overflow: 'hidden' },
+    planFill: { height: '100%', borderRadius: 999, backgroundColor: theme.mode === 'dark' ? theme.greenLight : theme.green },
+    planMeta: { fontSize: 10, fontFamily: theme.fontCairo, color: theme.textMuted },
+    planToday: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.text },
+    notes: { fontSize: 12, color: theme.brown, backgroundColor: theme.goldPale, borderRadius: 8, padding: 10, fontFamily: theme.fontCairo },
+  }), [theme]);
+
+  return (
+    <Card>
+      <View style={s.headRow}>
+        <Badge label={STATUS_LABEL[track.status]} variant={STATUS_VARIANT[track.status]} />
+        <Text style={s.typeTag}>{track.type}</Text>
+        {track.isOnline && <Text style={s.onlineTag}>أونلاين</Text>}
+      </View>
+
+      <Text style={s.title}>{track.title}</Text>
+
+      <View style={s.infoGrid}>
+        <View style={s.infoItem}>
+          <Text style={s.infoLabel}>المعلمون</Text>
+          <Text style={s.infoValue}>{track.teachers.map(getTeacherName).join(' · ') || '—'}</Text>
+        </View>
+        <View style={s.infoItem}>
+          <Text style={s.infoLabel}>الوقت</Text>
+          <Text style={s.infoValue}>{track.timeSlot}</Text>
+        </View>
+        <View style={s.infoItem}>
+          <Text style={s.infoLabel}>الجدول</Text>
+          <Text style={s.infoValue}>{track.daysPerWeek}</Text>
+        </View>
+        <View style={s.infoItem}>
+          <Text style={s.infoLabel}>المكان</Text>
+          <Text style={s.infoValue}>{track.isOnline ? 'أونلاين' : getMasjidName(track.masjid)}</Text>
+        </View>
+      </View>
+
+      <View style={s.dateBox}>
+        <Text style={s.dateText}>{fmtDate(track.startDate)} — {fmtDate(track.endDate)}</Text>
+        {track.status !== 'ended' && (
+          <Text style={[s.dateRemaining, remaining <= 7 && { color: theme.red }]}>
+            {remaining > 0 ? `${remaining} يوم متبقي` : 'ينتهي اليوم'}
+          </Text>
+        )}
+      </View>
+
+      {!!linkedPlan && (
+        <View style={[s.planBox, linkedPlan.todayAssignments.length > 0 && { backgroundColor: theme.greenPale }]}>
+          <Pressable haptic="select" style={s.planHead} onPress={() => setPlanOpen((o) => !o)}>
+            <View style={s.planLabel}>
+              <IconTarget size={14} color={linkedPlan.todayAssignments.length > 0 ? theme.green : theme.textMuted} />
+              <Text style={[s.planName, linkedPlan.todayAssignments.length > 0 && { color: theme.green }]} numberOfLines={1}>
+                {linkedPlan.name}
+              </Text>
+              {!!linkedPlan.progress && (
+                <View style={s.planPct}>
+                  <Text style={s.planPctText}>{linkedPlan.progress.percent}%</Text>
+                </View>
+              )}
+            </View>
+            {planOpen
+              ? <IconChevronUp size={14} color={theme.textMuted} />
+              : <IconChevronDown size={14} color={theme.textMuted} />}
+          </Pressable>
+
+          {planOpen && (
+            <View style={s.planDetail}>
+              {!!linkedPlan.progress && (
+                <>
+                  <View style={s.planTrack}>
+                    <View style={[s.planFill, { width: `${linkedPlan.progress.percent}%` }]} />
+                  </View>
+                  <Text style={s.planMeta}>
+                    {linkedPlan.juzProgress ? `${linkedPlan.juzProgress.completed} / ${linkedPlan.juzProgress.total} جزء · ` : ''}
+                    {linkedPlan.progress.completed} / {linkedPlan.progress.total} يوم
+                  </Text>
+                </>
+              )}
+              <Text style={s.planToday}>{todayText}</Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      {track.isOnline && !!track.meetLink && track.status === 'active' && (
+        <Pressable style={s.joinBtn} onPress={() => Linking.openURL(track.meetLink!)}>
+          <IconVideo size={14} color={theme.tone.blue.text} />
+          <Text style={s.joinText}>انضم للجلسة الآن</Text>
+        </Pressable>
+      )}
+
+      {track.notes && <Text style={s.notes}>{track.notes}</Text>}
+    </Card>
+  );
+}
+
+export default function StudentTracks() {
+  const theme = useAppTheme();
+  const profileId = usePortalStore((s) => s.authUser?.profileId);
+  const { data: student } = useStudent(profileId);
+  const studentTrackId = typeof student?.track === 'object' ? student.track._id : student?.track;
+
+  const { data: allTracks = [], isLoading, isRefetching, refetch } = useTracks();
+  const tracks = allTracks.filter((t) => t._id === studentTrackId);
+
+  const s = useMemo(() => StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+    sectionTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 6 },
+    mutedSmall: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', marginTop: -14 },
+  }), [theme]);
+
+  const active = tracks.filter((t) => t.status === 'active');
+  const upcoming = tracks.filter((t) => t.status === 'upcoming');
+  const ended = tracks.filter((t) => t.status === 'ended');
+
+  return (
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
+      <ScrollView
+        contentContainerStyle={s.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.spinner]} tintColor={theme.spinner} />
+        }
+      >
+        {isLoading && <Text style={s.muted}>جارٍ التحميل...</Text>}
+
+        {!isLoading && tracks.length === 0 && (
+          <>
+            <Text style={s.muted}>لم تُسجَّل في أي مسار بعد</Text>
+            <Text style={s.mutedSmall}>تواصل مع معلمك أو الإدارة للانضمام إلى أحد البرامج</Text>
+          </>
+        )}
+
+        {active.length > 0 && (
+          <>
+            <Text style={s.sectionTitle}>المسارات النشطة ({active.length})</Text>
+            {active.map((t) => <TrackCard key={t._id} track={t} />)}
+          </>
+        )}
+        {upcoming.length > 0 && (
+          <>
+            <Text style={s.sectionTitle}>المسارات القادمة ({upcoming.length})</Text>
+            {upcoming.map((t) => <TrackCard key={t._id} track={t} />)}
+          </>
+        )}
+        {ended.length > 0 && (
+          <>
+            <Text style={s.sectionTitle}>المسارات المنتهية ({ended.length})</Text>
+            {ended.map((t) => <TrackCard key={t._id} track={t} />)}
+          </>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+```
+
+- [ ] **Step 3: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: `student/tracks.tsx` no longer errors.
+
+- [ ] **Step 4: Manual verification against the real dev server**
+
+Log in as a student: confirm "مساري" (the renamed nav entry, from Task 28) shows exactly the student's own single track (0 or 1 cards), matching the web `StudentTracks` page's layout for the same data.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/student/tracks.tsx
+git commit -m "feat(mobile): StudentSpecialTracks becomes StudentTracks, mirrors web precedent"
+```
+
+---
+
+### Task 25: `student/dashboard.tsx` + `student/homework.tsx`
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/student/dashboard.tsx`
+- Modify: `quran-hifz-mobile/app/(portal)/student/homework.tsx`
+
+**Interfaces:**
+- Consumes: `Student.track`/`Homework.track` from Tasks 2-3.
+
+- [ ] **Step 1: `student/dashboard.tsx` — replace lines 22-25 (`getName`) — add a track-title variant**
+
+```tsx
+function getName(v: unknown): string {
+  if (v && typeof v === 'object' && 'name' in v) return (v as { name: string }).name;
+  return '—';
+}
+function getTrackName(v: unknown): string {
+  if (v && typeof v === 'object' && 'title' in v) return (v as { title: string }).title;
+  return '—';
+}
+```
+
+- [ ] **Step 2: Replace lines 68-69 (`halqaObj`/`halqaSchedule`) — one-hop track schedule fields**
+
+```tsx
+  const trackObj = typeof student.track === 'object' ? student.track : null;
+  const trackSchedule = trackObj?.daysPerWeek && trackObj?.timeSlot ? `${trackObj.daysPerWeek} | ${trackObj.timeSlot}` : null;
+```
+
+- [ ] **Step 3: Replace lines 121-143 (the "معلومات حلقتي" card) — "معلومات مساري"**
+
+```tsx
+          {/* Track info */}
+          <Card>
+            <CardHeader title="معلومات مساري" />
+            <View style={styles.infoRow}>
+              <Text style={styles.infoKey}>المسار</Text>
+              <Text style={[styles.infoVal, { color: theme.green }]}>{getTrackName(student.track)}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoKey}>المسجد</Text>
+              <Text style={styles.infoVal}>{getName(trackObj?.masjid)}</Text>
+            </View>
+            {!!trackSchedule && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>المواعيد</Text>
+                <Text style={styles.infoVal}>{trackSchedule}</Text>
+              </View>
+            )}
+            {isTopStudent && (
+              <View style={styles.topAlert}>
+                <Alert variant="success">أنت من أفضل طلاب المسار هذا الأسبوع!</Alert>
+              </View>
+            )}
+          </Card>
+```
+
+- [ ] **Step 4: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: `student/dashboard.tsx` still errors only on the pending `student/homework.tsx` type import path — none, since both files' underlying query types were already fixed in Task 3; confirm zero errors.
+
+- [ ] **Step 5: `student/homework.tsx` — replace line 59 — always "مسار: {…}"**
+
+```tsx
+                <Text style={styles.gridValue}>{`مسار: ${getTitle(today.track)}`}</Text>
+```
+
+- [ ] **Step 6: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: both files no longer error.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/student/dashboard.tsx quran-hifz-mobile/app/\(portal\)/student/homework.tsx
+git commit -m "feat(mobile): student dashboard/homework — single track read"
+```
+
+---
+
+### Task 26: `student/schedule.tsx` — `useHalqa` → `useTrack`
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/student/schedule.tsx`
+
+**Interfaces:**
+- Consumes: `useTrack` (Task 1's new single-track fetch hook), `Student.track` (Task 3).
+
+Finding during planning: `Track.daysPerWeek` is a preset descriptive label (e.g. `"السبت والثلاثاء"`, `"يومياً"`) rather than always a comma-separated day list, unlike the free-text `Halqa.days` field this screen originally read. The weekly-grid day-splitting logic below (`split(/[،,]/)`) only lights up correctly for a comma-separated custom entry — this is the exact same pre-existing limitation `Halqa.days` had (the old admin halqa-form also accepted free text like `"الأحد، الثلاثاء، الخميس"`), so this task does the mechanical field rename only and does not attempt to standardize day-string formats across the app — that is a separate, out-of-scope concern.
+
+- [ ] **Step 1: Full replacement**
+
+```tsx
+import { useMemo } from 'react';
+import { ScrollView, View, RefreshControl, StyleSheet } from "react-native";
+import Text from "@/components/ui/Text";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Card from "@/components/ui/Card";
+import CardHeader from "@/components/ui/CardHeader";
+import Alert from "@/components/ui/Alert";
+import { SkeletonRows } from "@/components/ui/Skeleton";
+import { usePortalStore } from "@/lib/store/portalStore";
+import { useStudent } from "@/lib/queries/students";
+import { useTrack, type TrackTeacher } from "@/lib/queries/tracks";
+import { useAppTheme } from '@/lib/hooks/useAppTheme';
+
+type AppTheme = ReturnType<typeof useAppTheme>;
+
+const DAYS = [
+  "الأحد",
+  "الاثنين",
+  "الثلاثاء",
+  "الأربعاء",
+  "الخميس",
+  "الجمعة",
+  "السبت",
+];
+
+function getId(v: unknown): string | undefined {
+  if (v && typeof v === "object" && "_id" in v)
+    return (v as { _id: string })._id;
+  if (typeof v === "string") return v;
+  return undefined;
+}
+function getName(v: unknown): string {
+  if (v && typeof v === "object" && "name" in v)
+    return (v as { name: string }).name;
+  return "—";
+}
+function getTeacherNames(teachers: (TrackTeacher | string)[]): string {
+  return teachers.map((t) => (typeof t === "object" ? t.name : t)).join("، ") || "—";
+}
+
+export default function StudentSchedule() {
+  const theme = useAppTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const authUser = usePortalStore((s) => s.authUser);
+  const studentId = authUser?.profileId;
+
+  const {
+    data: student,
+    isLoading: studentLoading,
+    isError: studentError,
+    isRefetching: studentRefetching,
+    refetch: refetchStudent,
+  } = useStudent(studentId);
+  const trackId = student ? getId(student.track) : undefined;
+  const {
+    data: track,
+    isLoading: trackLoading,
+    isError: trackError,
+    isRefetching: trackRefetching,
+    refetch: refetchTrack,
+  } = useTrack(trackId);
+
+  const isLoading = studentLoading || (!!trackId && trackLoading);
+  const isRefetching = studentRefetching || (!!trackId && trackRefetching);
+  const onRefresh = () => {
+    refetchStudent();
+    if (trackId) refetchTrack();
+  };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safe} edges={["bottom"]}>
+        <View style={styles.page}>
+          <SkeletonRows count={5} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (studentError || trackError) {
+    return (
+      <SafeAreaView style={styles.safe} edges={["bottom"]}>
+        <View style={styles.page}>
+          <Alert variant="error">تعذر تحميل مواعيد المسار</Alert>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const sessionDays = new Set(
+    (track?.daysPerWeek ?? "")
+      .split(/[،,]/)
+      .map((d) => d.trim())
+      .filter(Boolean),
+  );
+
+  return (
+    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+      <ScrollView
+        contentContainerStyle={styles.page}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={onRefresh}
+            colors={[theme.spinner]}
+            tintColor={theme.spinner}
+          />
+        }
+      >
+        {!track ? (
+          <Card>
+            <Text style={styles.emptyText}>لا يوجد مسار مسجل بعد</Text>
+          </Card>
+        ) : (
+          <>
+            {/* Track info */}
+            <Card>
+              <CardHeader title="تفاصيل المسار" />
+              <View style={styles.grid}>
+                {[
+                  ["المسار", track.title],
+                  ["المعلمون", getTeacherNames(track.teachers)],
+                  ["المسجد", getName(track.masjid)],
+                  ["الوقت", track.timeSlot || "—"],
+                ].map(([k, v]) => (
+                  <View key={k} style={styles.gridItem}>
+                    <Text style={styles.gridLabel}>{k}</Text>
+                    <Text style={styles.gridValue}>{v}</Text>
+                  </View>
+                ))}
+              </View>
+            </Card>
+
+            {/* Weekly grid */}
+            <Card>
+              <CardHeader title="الجدول الأسبوعي" />
+              <View style={styles.weekGrid}>
+                {DAYS.map((day) => {
+                  const isSession = sessionDays.has(day);
+                  return (
+                    <View
+                      key={day}
+                      style={[
+                        styles.dayCell,
+                        isSession
+                          ? styles.dayCellActive
+                          : styles.dayCellInactive,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.dayName,
+                          isSession && styles.dayNameActive,
+                        ]}
+                      >
+                        {day}
+                      </Text>
+                      {isSession ? (
+                        <Text style={styles.sessionTime}>
+                          {track.timeSlot || "—"}
+                        </Text>
+                      ) : (
+                        <Text style={styles.dash}>—</Text>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+              <View style={styles.legend}>
+                <View style={styles.legendItem}>
+                  <View
+                    style={[styles.legendDot, { backgroundColor: theme.greenAccent }]}
+                  />
+                  <Text style={styles.legendText}>يوم مسار</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View
+                    style={[
+                      styles.legendDot,
+                      {
+                        backgroundColor: "#F9FAF5",
+                        borderWidth: 1,
+                        borderColor: theme.border,
+                      },
+                    ]}
+                  />
+                  <Text style={styles.legendText}>يوم عادي</Text>
+                </View>
+              </View>
+            </Card>
+
+            <Alert variant="info">
+              سيصلك تذكير على الواتساب قبل كل جلسة بساعة.
+            </Alert>
+          </>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: theme.bg },
+    page: { padding: theme.pagePadding, gap: 14 },
+    emptyText: {
+      fontSize: 13,
+      fontFamily: theme.fontCairo,
+      color: theme.textMuted,
+      textAlign: "center",
+      paddingVertical: 20,
+    },
+    grid: { flexDirection: "row", flexWrap: "wrap", gap: 14 },
+    gridItem: { width: "46%", gap: 4 },
+    gridLabel: {
+      fontSize: 12,
+      fontFamily: theme.fontCairo,
+      color: theme.textMuted,
+    },
+    gridValue: {
+      fontSize: 13,
+      fontFamily: theme.fontCairoBold,
+      color: theme.text,
+    },
+    weekGrid: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+    dayCell: {
+      width: "13%",
+      borderRadius: theme.radiusSm,
+      padding: 6,
+      alignItems: "center",
+      minWidth: 40,
+    },
+    dayCellActive: { backgroundColor: theme.greenAccent },
+    dayCellInactive: { backgroundColor: "#F9FAF5" },
+    dayName: {
+      fontSize: 10,
+      fontFamily: theme.fontCairo,
+      color: theme.textMuted,
+      textAlign: "center",
+      marginBottom: 2,
+    },
+    dayNameActive: { color: theme.white, fontFamily: theme.fontCairoBold },
+    sessionTime: {
+      fontSize: 9,
+      color: "rgba(255,255,255,0.8)",
+      fontFamily: theme.fontCairo,
+    },
+    dash: { fontSize: 10, color: theme.textMuted },
+    legend: { flexDirection: "row", gap: 16, marginTop: 10 },
+    legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+    legendDot: { width: 12, height: 12, borderRadius: 3 },
+    legendText: {
+      fontSize: 12,
+      fontFamily: theme.fontCairo,
+      color: theme.textMuted,
+    },
+  });
+}
+```
+
+- [ ] **Step 2: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: `student/schedule.tsx` no longer errors.
+
+- [ ] **Step 3: Manual verification against the real dev server**
+
+Log in as a student, open "مواعيد حلقتي" (nav label rename happens in Task 28): confirm the track info card and weekly grid render using the student's track.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/student/schedule.tsx
+git commit -m "feat(mobile): StudentSchedule — useTrack replaces useHalqa"
+```
+
+---
+
+### Task 27: `parent/dashboard.tsx` + `app/index.tsx` (login)
+
+**Files:**
+- Modify: `quran-hifz-mobile/app/(portal)/parent/dashboard.tsx`
+- Modify: `quran-hifz-mobile/app/index.tsx`
+
+**Interfaces:**
+- Consumes: `ParentChild.track` from Task 3.
+
+- [ ] **Step 1: `parent/dashboard.tsx` — replace line 49 (`halqaName`) — field rename + `.title` not `.name`**
+
+```tsx
+  const trackName = child ? (typeof child.track === 'object' ? child.track.title : child.track) : '—';
+```
+
+- [ ] **Step 2: Replace line 108 (the info row array) — "الحلقة" → "المسار"**
+
+```tsx
+              {[['المسار', trackName], ['الجلسة القادمة', 'الثلاثاء بعد الفجر']].map(([k, v]) => (
+```
+
+- [ ] **Step 3: `app/index.tsx` — replace lines 26-28 (`getHalqaName`) — rename + read `.title`**
+
+```tsx
+function getTrackName(t: ParentChild['track']): string {
+  return typeof t === 'object' && t ? t.title : '';
+}
+```
+
+- [ ] **Step 4: Replace line 298 (child-selector modal) — `getTrackName(child.track)`**
+
+```tsx
+                  <Text style={[styles.cardDesc, { color: 'rgba(255,255,255,0.9)' }]}>
+                    {getTrackName(child.track)}
+                  </Text>
+```
+
+- [ ] **Step 5: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: both files no longer error.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add quran-hifz-mobile/app/\(portal\)/parent/dashboard.tsx quran-hifz-mobile/app/index.tsx
+git commit -m "feat(mobile): parent dashboard + login child-selector read child.track"
+```
+
+---
+
+### Task 28: Nav config + routing — `lib/constants/portals.ts` + the three `_layout.tsx` files
+
+**Files:**
+- Modify: `quran-hifz-mobile/lib/constants/portals.ts`
+- Modify: `quran-hifz-mobile/app/(portal)/admin/_layout.tsx`
+- Modify: `quran-hifz-mobile/app/(portal)/teacher/_layout.tsx`
+- Modify: `quran-hifz-mobile/app/(portal)/student/_layout.tsx`
+
+**Interfaces:**
+- Consumes: `AdminTracks` (Task 12), `TeacherTracks` (Task 17), `StudentTracks` (Task 24) — the components now registered under the file name `tracks.tsx` in each portal's route folder (Expo Router derives the route name from the file name, so renaming the file already re-points the route — no separate registry file to update, unlike web's `pageRegistry.ts`).
+
+This is the final task before verification — it deletes the two now-fully-superseded Halqa nav entries/tabs, and does the project-wide route-key rename (`special_tracks`→`tracks`) plus the tab-bar-slot promotion in one pass so no intermediate task leaves a dangling reference. Because mobile has no single central route registry (unlike web's `pageRegistry.ts`), this task also greps the whole tree for stray `special_tracks`/`halqat`/`myhalqa` string literals.
+
+Grep confirms `portals.ts` also carries several cosmetic Arabic copy strings that say "حلقة"/"حلقات" in nav-item `desc` text and in each mock user's `role` field, beyond the two entries the design doc calls out by name — per the master design's "every reference to Halqa is removed, not just simplified" principle, and since this file is already open for this task's edits, this pass fixes all of them, not just the `role` field the design doc explicitly names.
+
+- [ ] **Step 1: Full replacement of `lib/constants/portals.ts`**
+
+```ts
+import type { PortalConfig } from "@/lib/types/portal";
+
+export const PORTALS: Record<string, PortalConfig> = {
+  student: {
+    badge: "بوابة الطالب",
+    user: {
+      name: "عبدالله الحميداني",
+      role: "طالب — مسار الإتقان",
+      initials: "عح",
+    },
+    nav: [
+      {
+        group: "الرئيسية",
+        items: [
+          {
+            id: "dashboard",
+            icon: "home",
+            label: "لوحتي",
+            desc: "نظرة عامة على يومك",
+          },
+          {
+            id: "myhifz",
+            icon: "book",
+            label: "خطة حفظي",
+            desc: "خطتك في الحفظ والمراجعة",
+          },
+        ],
+      },
+      {
+        group: "الأنشطة",
+        items: [
+          {
+            id: "homework",
+            icon: "microphone",
+            label: "تسجيل الواجب",
+            desc: "سجّل تلاوتك وأرسلها",
+            dot: true,
+          },
+          {
+            id: "attendance",
+            icon: "calendar-check",
+            label: "الحضور والغياب",
+            desc: "سجل حضورك في المسار",
+          },
+          {
+            id: "schedule",
+            icon: "clock",
+            label: "مواعيد مساري",
+            desc: "أوقات مسارك الأسبوعية",
+          },
+          {
+            id: "tracks",
+            icon: "calendar-event",
+            label: "مساري",
+            desc: "المسار المسجَّل به",
+          },
+        ],
+      },
+      {
+        group: "التواصل والتحفيز",
+        items: [
+          {
+            id: "messages",
+            icon: "message",
+            label: "الرسائل",
+            desc: "رسائلك مع المعلم",
+          },
+          {
+            id: "points",
+            icon: "star",
+            label: "نقاطي والمتصدرون",
+            desc: "نقاطك وترتيبك بين الطلاب",
+          },
+          {
+            id: "store",
+            icon: "gift",
+            label: "متجر المكافآت",
+            desc: "استبدل نقاطك بمكافآت",
+          },
+        ],
+      },
+      {
+        group: "الحساب",
+        items: [
+          {
+            id: "settings",
+            icon: "user-circle",
+            label: "الملف الشخصي",
+            desc: "تعديل بياناتك الشخصية",
+          },
+        ],
+      },
+    ],
+  },
+  teacher: {
+    badge: "بوابة المعلم",
+    user: {
+      name: "ناصر الحميداني",
+      role: "معلم — مسار الإتقان",
+      initials: "نح",
+    },
+    nav: [
+      {
+        group: "الرئيسية",
+        items: [
+          {
+            id: "dashboard",
+            icon: "layout-dashboard",
+            label: "لوحة التحكم",
+            desc: "نظرة عامة على مساراتك",
+          },
+        ],
+      },
+      {
+        group: "طلابي والحضور",
+        items: [
+          {
+            id: "students",
+            icon: "users",
+            label: "طلابي",
+            desc: "متابعة طلاب مساراتك",
+          },
+          {
+            id: "attendance",
+            icon: "calendar-check",
+            label: "الحضور اليومي",
+            desc: "تسجيل حضور اليوم",
+            dot: true,
+          },
+        ],
+      },
+      {
+        group: "التقييم",
+        items: [
+          {
+            id: "homework",
+            icon: "microphone",
+            label: "مراجعة الواجبات",
+            desc: "الاستماع للتلاوات وتقييمها",
+            dot: true,
+          },
+          {
+            id: "evaluate",
+            icon: "star",
+            label: "تقييم الجلسة",
+            desc: "قيم جلسة المراجعة",
+          },
+          {
+            id: "recordlesson",
+            icon: "video",
+            label: "تسجيل الدرس",
+            desc: "سجل دروسك الصوتية",
+          },
+          {
+            id: "grouphomework",
+            icon: "list-check",
+            label: "واجب جماعي",
+            desc: "متابعة واجبات المجموعة",
+          },
+          {
+            id: "plans",
+            icon: "target",
+            label: "الخطط الفردية",
+            desc: "تحديد أهدافك اليومية",
+          },
+          {
+            id: "reports",
+            icon: "chart-bar",
+            label: "تقارير الطلاب",
+            desc: "عرض أداء الطلاب",
+          },
+        ],
+      },
+      {
+        group: "المسارات",
+        items: [
+          {
+            id: "tracks",
+            icon: "calendar-event",
+            label: "مساراتي",
+            desc: "المسارات المسجَّل بها",
+          },
+        ],
+      },
+      {
+        group: "الحساب",
+        items: [
+          {
+            id: "settings",
+            icon: "user-circle",
+            label: "الملف الشخصي",
+            desc: "تعديل بياناتك الشخصية",
+          },
+        ],
+      },
+    ],
+  },
+  admin: {
+    badge: "بوابة الإدارة",
+    user: { name: "إدارة الجمعية", role: "مدير النظام", initials: "إد" },
+    nav: [
+      {
+        group: "الرئيسية",
+        items: [
+          {
+            id: "dashboard",
+            icon: "layout-dashboard",
+            label: "لوحة التحكم",
+            desc: "نظرة عامة على الجمعية",
+          },
+        ],
+      },
+      {
+        group: "الطلاب والمعلمون",
+        items: [
+          {
+            id: "students",
+            icon: "users",
+            label: "إدارة الطلاب",
+            desc: "بيانات الطلاب ومساراتهم",
+          },
+          {
+            id: "register",
+            icon: "user-plus",
+            label: "تسجيل طالب جديد",
+            desc: "إضافة طالب إلى مسار",
+          },
+          {
+            id: "teachers",
+            icon: "chalkboard",
+            label: "المعلمون",
+            desc: "بيانات المعلمين ومساراتهم",
+          },
+          {
+            id: "parents",
+            icon: "user-heart",
+            label: "أولياء الأمور",
+            desc: "حسابات أولياء الأمور وربطها",
+          },
+        ],
+      },
+      {
+        group: "المساجد",
+        items: [
+          {
+            id: "masajid",
+            icon: "building-arch",
+            label: "المساجد",
+            desc: "إدارة المساجد ومقارها",
+          },
+        ],
+      },
+      {
+        group: "التقارير والبرامج",
+        items: [
+          {
+            id: "kpis",
+            icon: "target",
+            label: "مؤشرات الأداء",
+            desc: "مؤشرات أداء الجمعية",
+          },
+          {
+            id: "reports",
+            icon: "chart-bar",
+            label: "التقارير",
+            desc: "تقارير الحفظ والحضور",
+          },
+          {
+            id: "tracks",
+            icon: "calendar-event",
+            label: "المسارات",
+            desc: "إدارة المسارات",
+            dot: true,
+          },
+        ],
+      },
+    ],
+  },
+  parent: {
+    badge: "بوابة ولي الأمر",
+    user: {
+      name: "عبدالحميد الحميداني",
+      role: "ولي أمر — عبدالله الحميداني",
+      initials: "عح",
+    },
+    nav: [
+      {
+        group: "الرئيسية",
+        items: [
+          {
+            id: "dashboard",
+            icon: "home",
+            label: "لوحتي",
+            desc: "نظرة عامة على ابنك",
+          },
+        ],
+      },
+      {
+        group: "متابعة الطالب",
+        items: [
+          {
+            id: "timeline",
+            icon: "timeline",
+            label: "مسيرة الحفظ",
+            desc: "تقدم ابنك في الحفظ",
+          },
+          {
+            id: "recordings",
+            icon: "microphone",
+            label: "الدروس المسجّلة",
+            desc: "استمع لتلاوات ابنك",
+            dot: true,
+          },
+          {
+            id: "homework_view",
+            icon: "list-check",
+            label: "واجبات ابني",
+            desc: "متابعة واجبات ابنك",
+            dot: true,
+          },
+          {
+            id: "attendance",
+            icon: "calendar-check",
+            label: "سجل الحضور",
+            desc: "سجل حضور ابنك",
+          },
+        ],
+      },
+      {
+        group: "التواصل",
+        items: [
+          {
+            id: "messages",
+            icon: "message",
+            label: "الرسائل",
+            desc: "رسائلك مع المعلم",
+          },
+        ],
+      },
+    ],
+  },
+};
+
+export const PORTAL_ROUTES: Record<string, string> = {
+  student: "/(portal)/student/dashboard",
+  teacher: "/(portal)/teacher/dashboard",
+  admin: "/(portal)/admin/dashboard",
+  parent: "/(portal)/parent/dashboard",
+};
+```
+
+- [ ] **Step 2: `admin/_layout.tsx` — remove `halqat` tab, promote `tracks` into its visible slot**
+
+Replace lines 13-14 (`MORE_IDS`):
+
+```tsx
+// Nav items with no tab of their own — the "المزيد" sheet lists exactly these.
+const MORE_IDS = ['register', 'teachers', 'parents', 'masajid'];
+```
+
+Replace lines 37-52 (the `Tabs.Screen` list) — `halqat` tab removed, `tracks` (renamed from `special_tracks`) promoted into its now-vacant visible slot:
+
+```tsx
+      <Tabs.Screen name="dashboard" options={{ title: 'لوحة التحكم', tabBarIcon: ({ color, size }) => <IconLayoutDashboard size={size} color={color} /> }} />
+      <Tabs.Screen name="students"  options={{ title: 'الطلاب',       tabBarIcon: ({ color, size }) => <IconUsers           size={size} color={color} /> }} />
+      <Tabs.Screen name="tracks"    options={{ title: 'المسارات',     tabBarIcon: ({ color, size }) => <IconCalendarEvent   size={size} color={color} /> }} />
+      <Tabs.Screen name="kpis"      options={{ title: 'المؤشرات',      tabBarIcon: ({ color, size }) => <IconTarget          size={size} color={color} /> }} />
+      <Tabs.Screen name="reports"   options={{ title: 'التقارير',      tabBarIcon: ({ color, size }) => <IconChartBar        size={size} color={color} /> }} />
+      {/* Opens the sheet instead of navigating to the (empty) more route. */}
+      <Tabs.Screen
+        name="more"
+        options={{ title: 'المزيد', tabBarIcon: ({ color, size }) => <IconDots size={size} color={color} />, tabBarButton: MoreTabButton }}
+      />
+      {/* Reachable from the "المزيد" sheet only. */}
+      <Tabs.Screen name="register"       options={{ href: null, title: 'تسجيل طالب' }} />
+      <Tabs.Screen name="teachers"       options={{ href: null, title: 'المعلمون' }} />
+      <Tabs.Screen name="masajid"        options={{ href: null, title: 'المساجد' }} />
+      <Tabs.Screen name="track-detail" options={{ href: null, title: 'تفاصيل المسار' }} />
+      <Tabs.Screen name="parents" options={{ href: null, title: 'أولياء الأمور' }} />
+      {/* Add/edit forms are full pages, not modals: their <FormSelect> pickers are
+          bottom sheets from the app-root host, which an RN Modal would cover. */}
+      <Tabs.Screen name="masjid-form"  options={{ href: null, title: 'بيانات المسجد' }} />
+      <Tabs.Screen name="teacher-form" options={{ href: null, title: 'بيانات المعلم' }} />
+      <Tabs.Screen name="student-form" options={{ href: null, title: 'بيانات الطالب' }} />
+      {/* Pushed from the track drill-down's plan tab (تعديل الخطة / إنشاء خطة جديدة).
+          Must live in this navigator — see the note in admin/plan-form.tsx. */}
+      <Tabs.Screen name="plan-form"    options={{ href: null, title: 'خطة الحفظ' }} />
+```
+
+Also replace the icon import line (line 3-5) — `IconSchool` is dropped (no longer used, `halqat` tab is gone), `IconCalendarEvent` added for the promoted `tracks` tab:
+
+```tsx
+import {
+  IconLayoutDashboard, IconUsers, IconCalendarEvent, IconTarget, IconChartBar, IconDots,
+} from '@tabler/icons-react-native';
+```
+
+- [ ] **Step 3: `teacher/_layout.tsx` — remove `myhalqa` tab, promote `tracks` into its visible slot**
+
+Replace lines 3-5 (icon imports) — `IconSchool` dropped, kept as `IconCalendarEvent` for the promoted tab:
+
+```tsx
+import {
+  IconLayoutDashboard, IconCalendarEvent, IconUsers, IconCalendarCheck, IconMicrophone, IconDots,
+} from '@tabler/icons-react-native';
+```
+
+Replace lines 14-16 (`MORE_IDS`):
+
+```tsx
+const MORE_IDS = [
+  'evaluate', 'recordlesson', 'grouphomework', 'plans', 'reports', 'settings',
+];
+```
+
+Replace lines 39-59 (the `Tabs.Screen` list) — `myhalqa` removed, `tracks` promoted into its slot (`title: 'حلقاتي'` → `'مساراتي'`):
+
+```tsx
+      <Tabs.Screen name="dashboard"  options={{ title: 'لوحة التحكم', tabBarIcon: ({ color, size }) => <IconLayoutDashboard size={size} color={color} /> }} />
+      <Tabs.Screen name="tracks"     options={{ title: 'مساراتي',      tabBarIcon: ({ color, size }) => <IconCalendarEvent    size={size} color={color} /> }} />
+      <Tabs.Screen name="students"   options={{ title: 'طلابي',         tabBarIcon: ({ color, size }) => <IconUsers            size={size} color={color} /> }} />
+      <Tabs.Screen name="attendance" options={{ title: 'الحضور',        tabBarIcon: ({ color, size }) => <IconCalendarCheck    size={size} color={color} />, tabBarBadge: '!' }} />
+      <Tabs.Screen name="homework"   options={{ title: 'الواجبات',      tabBarIcon: ({ color, size }) => <IconMicrophone       size={size} color={color} />, tabBarBadge: '3' }} />
+      {/* Opens the sheet instead of navigating to the (empty) more route. */}
+      <Tabs.Screen
+        name="more"
+        options={{ title: 'المزيد', tabBarIcon: ({ color, size }) => <IconDots size={size} color={color} />, tabBarButton: MoreTabButton }}
+      />
+      {/* Reachable from the "المزيد" sheet only. */}
+      <Tabs.Screen name="plans"         options={{ href: null, title: 'الخطط' }} />
+      <Tabs.Screen name="plan-form"     options={{ href: null, title: 'خطة حفظ' }} />
+      <Tabs.Screen name="plan-detail"   options={{ href: null, title: 'تفاصيل الخطة' }} />
+      <Tabs.Screen name="reports"       options={{ href: null, title: 'التقارير' }} />
+      <Tabs.Screen name="evaluate"      options={{ href: null, title: 'تقييم الجلسة' }} />
+      <Tabs.Screen name="recordlesson"  options={{ href: null, title: 'تسجيل الدرس' }} />
+      <Tabs.Screen name="grouphomework" options={{ href: null, title: 'واجب جماعي' }} />
+      <Tabs.Screen name="track-detail"  options={{ href: null, title: 'تفاصيل المسار' }} />
+      <Tabs.Screen name="settings" options={{ href: null, title: 'الملف الشخصي' }} />
+```
+
+Note this dashboard/tracks/students/attendance/homework ordering keeps five visible tabs (unchanged count) with `tracks` occupying exactly the slot `myhalqa` held (position 2).
+
+- [ ] **Step 4: `student/_layout.tsx` — rename `special_tracks`→`tracks` only (stays in "المزيد")**
+
+Replace line 14 (`MORE_IDS`):
+
+```tsx
+const MORE_IDS = ['schedule', 'tracks', 'points', 'store', 'settings'];
+```
+
+Replace line 51:
+
+```tsx
+      <Tabs.Screen name="tracks" options={{ href: null, title: 'مساري' }} />
+```
+
+- [ ] **Step 5: Grep sweep for any remaining string literals**
+
+```bash
+cd quran-hifz-mobile && grep -rn "special_tracks\|\bhalqat\b\|myhalqa\|halqaToContext\|useHalqat\|useSpecialTracks" app lib components
+```
+
+Expected: zero results. Any hit is a scope gap — go fix the file it's in before proceeding to Task 29.
+
+- [ ] **Step 6: Typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: this is the task that resolves every error left dangling by every prior task in this plan (the dangling `admin/dashboard.tsx` `HalqaCard` import from Task 11 is fixed by Task 15, which runs before this task — so by this point the count should already be zero even before this task's own edits land; this task's own edits should introduce none).
+
+- [ ] **Step 7: Manual verification against the real dev server**
+
+Log in as admin, teacher, and student in turn: confirm the bottom tab bar shows "المسارات"/"مساراتي"/(student: unchanged bar, "مساري" reachable from "المزيد") with no broken nav items, confirm every renamed route (`tracks`, `track-detail`) loads its component, confirm the "المزيد" sheet lists exactly the expected items for each portal, and confirm no console errors reference a missing `halqat`/`myhalqa`/`special_tracks` file.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add quran-hifz-mobile/lib/constants/portals.ts quran-hifz-mobile/app/\(portal\)/admin/_layout.tsx quran-hifz-mobile/app/\(portal\)/teacher/_layout.tsx quran-hifz-mobile/app/\(portal\)/student/_layout.tsx
+git commit -m "feat(mobile): nav config — delete halqat/myhalqa tabs, rename+promote tracks tab"
+```
+
+---
+
+### Task 29: Final verification — full typecheck, grep sweep, manual golden-path pass
+
+**Files:** None modified — this task is pure verification, mirroring Phase 2's final task.
+
+**Interfaces:** None.
+
+- [ ] **Step 1: Full typecheck**
+
+```bash
+cd quran-hifz-mobile && npx tsc --noEmit
+```
+
+Expected: **zero errors**.
+
+- [ ] **Step 2: Run the existing test suite**
+
+```bash
+cd quran-hifz-mobile && npx jest
+```
+
+Expected: `quranRange.test.ts` (the app's only test file) passes unchanged — this restructure does not touch `lib/quranRange.ts` or the same-day multi-segment scheduling internals.
+
+- [ ] **Step 3: Final project-wide grep sweep**
+
+```bash
+cd quran-hifz-mobile && grep -rn "halqa\|Halqa\|specialTrack\|SpecialTrack\|special_track" app lib components
+```
+
+Expected: zero results. (This is a broader sweep than Task 28's — it also catches stray lowercase `halqa`/`specialTrack` identifiers in code, not just the specific route-literal strings Task 28 targeted.) Confirm any hit against the design doc's confirmed-out-of-scope list before treating it as a gap — the only two intentional survivors in the whole tree are `lib/constants/masarMap.ts`'s `MasarInfo.halqa` field (cosmetic placeholder suggested-name values, e.g. `"حلقة أبي بكر الصديق"` — confirmed out of scope, see Task 13's finding) and this plan document's own prose.
+
+- [ ] **Step 4: Manual golden-path click-through against the live dev server + the real (already Phase 1/2-migrated) Atlas dev database**
+
+Per portal, matching the design doc's Testing section:
+- **Admin:** create a masjid with a gender and a track under it; register a student directly onto a track; transfer a student between tracks via the track's "الطلاب" panel.
+- **Teacher:** take attendance, record an evaluation, post a group homework, and record a lesson for a track via the single-kind context card; view/edit/create a plan targeting a track.
+- **Student:** see their own track, schedule, and homework.
+- **Parent:** see their child's track on the dashboard.
+
+- [ ] **Step 5: Report**
+
+Summarize the outcome: confirm zero `tsc` errors, confirm the test suite passes, confirm the grep sweep found only the two expected survivors, and list anything from the manual click-through that needs follow-up (there should be nothing, if every prior task's own manual-verification step passed).
+
+---
+
+## Out of scope
+
+- The same-day multi-segment scheduling internals (`PlanSegment`, `segmentReversed`, `todayAssignments`, etc.) — untouched.
+- `IndividualPlan`, `HifzEntry`, `Message`, `KPI`, `ParentStudent`, `User` models/queries beyond updating any `halqa`/`specialTrack` references they hold to the new `track` shape.
+- Any new feature or UX behavior beyond removing the halqa/specialTrack duality, except the two confirmed mobile-specific calls in the design doc (tab-bar slot promotion in Task 28; single-track registration picker in Task 13) — both are minimal adaptations of existing UI, not new features.
+- Standardizing `Track.daysPerWeek`'s string format (preset descriptive labels vs. comma-separated day lists) so `student/schedule.tsx`'s weekly grid always lights up correctly — a pre-existing quirk carried over unchanged from `Halqa.days`, flagged in Task 26, not part of this restructure.
+- `lib/queries/adminParents.ts` and its consumers (`admin/students.tsx`'s/`admin/student-form.tsx`'s parent-linking UI) — unrelated to the halqa/track duality, untouched beyond the track-field edits this plan already makes to those same files.
