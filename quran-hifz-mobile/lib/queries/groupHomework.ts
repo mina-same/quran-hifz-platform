@@ -3,8 +3,7 @@ import { get, post, del } from '@/lib/api';
 
 export type GroupHomework = {
   _id: string;
-  halqa?: { _id: string; name: string } | string;
-  specialTrack?: { _id: string; title: string } | string;
+  track?: { _id: string; title: string } | string;
   teacher: { _id: string; name: string } | string;
   title: string;
   description: string;
@@ -12,10 +11,7 @@ export type GroupHomework = {
   dueDate: string;
 };
 
-export type GroupHomeworkFilters = {
-  halqa?: string;
-  specialTrack?: string;
-};
+export type GroupHomeworkFilters = { track?: string };
 
 type ListResponse = { success: boolean; count: number; data: GroupHomework[] };
 type SingleResponse = { success: boolean; data: GroupHomework };
@@ -23,8 +19,7 @@ type SingleResponse = { success: boolean; data: GroupHomework };
 function buildQuery(filters?: GroupHomeworkFilters) {
   if (!filters) return '';
   const params = new URLSearchParams();
-  if (filters.halqa) params.set('halqa', filters.halqa);
-  if (filters.specialTrack) params.set('specialTrack', filters.specialTrack);
+  if (filters.track) params.set('track', filters.track);
   const q = params.toString();
   return q ? `?${q}` : '';
 }
