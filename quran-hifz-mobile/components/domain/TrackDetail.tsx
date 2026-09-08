@@ -15,10 +15,13 @@ import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
 import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet';
 import IndividualPlanPanel from '@/components/domain/IndividualPlanPanel';
 import EvaluationRoster from '@/components/domain/EvaluationRoster';
+import TrackStudentsPanel from '@/components/domain/TrackStudentsPanel';
 import DaySlider, { useDaySchedule } from '@/components/domain/DaySlider';
+import FormSelect from '@/components/forms/FormSelect';
 import {
-  useTracks, type Track, type TrackTeacher,
+  useTracks, useAddTeacherToTrack, type Track, type TrackTeacher,
 } from '@/lib/queries/tracks';
+import { useTeachers } from '@/lib/queries/teachers';
 import { useStudents } from '@/lib/queries/students';
 import {
   useQuranPlans, useUpdateQuranPlan, segmentReversed, type QuranPlan,
@@ -27,12 +30,13 @@ import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
-import { IconCalendarEvent, IconCalendarOff, IconClock, IconVideo } from '@tabler/icons-react-native';
+import { IconCalendarEvent, IconCalendarOff, IconClock, IconUserPlus, IconVideo } from '@tabler/icons-react-native';
 import { AR_LOCALE, fmtDayLabel } from '@/lib/date';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
 function getTeacherName(v: TrackTeacher | string) { return typeof v === 'object' ? v.name : v; }
+function getTeacherId(v: TrackTeacher | string) { return typeof v === 'object' ? v._id : v; }
 function fmtDate(d: string) { return new Date(d).toLocaleDateString(AR_LOCALE, { year: 'numeric', month: 'short', day: 'numeric' }); }
 
 /** First letter of the first two words — the same initials the web chips show. */
@@ -87,6 +91,10 @@ export default function TrackDetail({ trackId, role }: Props) {
   const teacherScope = role === 'teacher' ? profileId : undefined;
   const { data: tracks = [], isLoading: loadingTrack } = useTracks(undefined, teacherScope);
   const track = tracks.find((t) => t._id === trackId);
+
+  const { data: allTeachers = [] } = useTeachers();
+  const addTeacherToTrack = useAddTeacherToTrack();
+  const [addTeacherId, setAddTeacherId] = useState('');
 
   // `Student.track` is now the sole membership mechanism — the roster is a
   // direct query, no more halqa-mediated derivation.
@@ -230,13 +238,41 @@ export default function TrackDetail({ trackId, role }: Props) {
               })}
             </View>
           )}
-          {/* Only a teacher is being told to ask someone else — the admin *is*
-              الإدارة, and manages the track's teachers from the tracks list. */}
-          {role === 'teacher' && (
-            <Text style={[s.muted, { marginTop: 12, textAlign: 'right' }]}>
-              لإضافة أو إزالة معلم من هذا المسار، تواصل مع الإدارة.
-            </Text>
-          )}
+          {(() => {
+            const availableTeachers = allTeachers.filter(
+              (t) => !track.teachers.some((tc) => getTeacherId(tc) === t._id),
+            );
+            return (
+              <View style={s.addTeacherBox}>
+                <View style={s.iconLabel}>
+                  <IconUserPlus size={14} color={theme.green} />
+                  <Text style={s.addTeacherLabel}>إضافة معلم إلى هذا المسار</Text>
+                </View>
+                <View style={s.row}>
+                  <View style={s.flex1}>
+                    <FormSelect
+                      value={addTeacherId}
+                      onChange={setAddTeacherId}
+                      options={availableTeachers.map((t) => ({ value: t._id, label: t.name }))}
+                      placeholder="اختر معلماً"
+                    />
+                  </View>
+                  <Button
+                    label="إضافة"
+                    onPress={() => {
+                      if (!addTeacherId) return;
+                      addTeacherToTrack.mutate({ id: track._id, teacherId: addTeacherId });
+                      setAddTeacherId('');
+                    }}
+                    disabled={!addTeacherId || addTeacherToTrack.isPending}
+                  />
+                </View>
+                {availableTeachers.length === 0 && (
+                  <Text style={s.muted}>كل المعلمين المسجّلين مُسنَدون بالفعل لهذا المسار.</Text>
+                )}
+              </View>
+            );
+          })()}
         </Card>
       )}
 
@@ -302,11 +338,10 @@ export default function TrackDetail({ trackId, role }: Props) {
             </View>
           </Card>
 
-          {role === 'teacher' && (
-            <Text style={[s.muted, { textAlign: 'right' }]}>
-              لإضافة أو إزالة طالب من هذا المسار، تواصل مع الإدارة.
-            </Text>
-          )}
+          <Card>
+            <CardHeader title="إدارة طلاب المسار" />
+            <TrackStudentsPanel track={track} />
+          </Card>
         </>
       )}
 
@@ -452,5 +487,12 @@ function createS(theme: AppTheme) {
     chipAvatarText: { fontSize: 10, fontFamily: theme.fontCairoBold, color: theme.white },
     chipName: { fontSize: 12, fontFamily: theme.fontCairoBold },
     chipCount: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
+    row: { flexDirection: 'row', gap: 12, marginTop: 10, alignItems: 'center' },
+    flex1: { flex: 1 },
+    iconLabel: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+    addTeacherBox: {
+      marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: theme.border,
+    },
+    addTeacherLabel: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.textMuted },
   });
 }
