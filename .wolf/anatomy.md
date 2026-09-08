@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T21:28:57.168Z
-> Files: 671 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T21:40:20.333Z
+> Files: 676 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -259,12 +259,18 @@
 
 ## .claude/worktrees/agent-ab3e361eb27628a77/.superpowers/sdd/2026-09-06-halqa-track-restructure-phase3-mobile/
 
-- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-06-halqa-track-restructure-phase3-mobile.md (~938 tok)
+- `progress.md` — SDD ledger — plan: docs/superpowers/plans/2026-09-06-halqa-track-restructure-phase3-mobile.md (~1513 tok)
 - `task-17-report.md` — Task 17 Report: `teacher/special_tracks.tsx` → `teacher/tracks.tsx` (~702 tok)
 - `task-18-report.md` — Task 18: Teacher Dashboard & Students — Implementation Report (~753 tok)
 - `task-19-report.md` — Task 19 Report: `teacher/attendance.tsx` single-kind context collapse (~894 tok)
 - `task-20-report.md` — Task 20 Report: evaluate.tsx + grouphomework.tsx + recordlesson.tsx — dual-kind collapse (~942 tok)
 - `task-21-report.md` — Task 21 Implementation Report: Teacher Portal Display Fixes (~629 tok)
+- `task-22-report.md` — Task 22 Report: teacher/plan-form.tsx — form.halqa → form.track (~1159 tok)
+- `task-23-report.md` — Task 23 Report: `teacher/reports.tsx` — `useTracks` replaces `useHalqat` (~542 tok)
+
+## .claude/worktrees/agent-ab3e361eb27628a77/.wolf/
+
+- `memory.md` — Memory (~84166 tok)
 
 ## .claude/worktrees/agent-ab3e361eb27628a77/quran-hifz-mobile/app/(portal)/teacher/
 
@@ -274,8 +280,10 @@
 - `grouphomework.tsx` — DAYS (~2691 tok)
 - `homework.tsx` — getName — renders form (~1276 tok)
 - `plan-detail.tsx` — STATUS_VARIANT (~3382 tok)
+- `plan-form.tsx` — Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local (~10534 tok)
 - `plans.tsx` — One label/value line in the plan card's detail grid. (~3509 tok)
 - `recordlesson.tsx` — LESSON_TYPES (~2987 tok)
+- `reports.tsx` — TeacherReports (~571 tok)
 - `students.tsx` — hwVariant (~1763 tok)
 - `tracks.tsx` — getTeacherName (~2129 tok)
 
