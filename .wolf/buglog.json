@@ -6802,13 +6802,14 @@
     "error_message": "User: admin's #students page doesn't show all students -- ACCOUNTS.md says 74",
     "file": "quran-hifz-server (data, not code) -- Student/Track collections on the shared Atlas cluster",
     "root_cause": "Not a UI/query bug -- verified AdminStudents.tsx and GET /students apply no default filter or limit that would hide rows. Queried the live DB directly (read-only): only 10 Student documents and 7 Track documents actually exist, all 10 students correctly have a track. ACCOUNTS.md's claim of 74 students is stale. Found the cause: an uncommitted file at .claude/worktrees/phase3-mobile/quran-hifz-server/src/seeds/restore-login-accounts.ts, whose own header comment says the database was reseeded with generic mock data (wiping the real 74-student dataset) and the original source JSON (all_6_halaqat_complete_data.json) was not available on that machine to do a full structural restore. That script only recreates login-only User documents (name/email, matching ACCOUNTS.md) for teachers/students/parents -- explicitly NOT the Teacher/Student PROFILE documents, Track assignments, or parent-child links. So most of the 74 people in ACCOUNTS.md may now only exist as a User login record with no backing Student document, which is why GET /students (which queries the Student collection) only returns 10.",
-    "fix": "NOT fixed -- this is data loss on the shared Atlas cluster (quaran-hifz.otnbdaz.mongodb.net/quran-hifz), not a code bug, and per the 2026-07-03 Do-Not-Repeat entry (never run a reseed/wipe against this shared DB without asking first) a restore was deliberately NOT attempted. Reported to the user with the full diagnosis; needs their decision on how to proceed (whether the original all_6_halaqat_complete_data.json exists anywhere, or another recovery path).",
+    "fix": "User confirmed no backup of the original data exists and chose to reconstruct: created a real Student document for each of the 74 @tahfeez.com people in ACCOUNTS.md (name + track only, everything else defaults — the real level/progress/attendance history is gone for good) and linked each to its existing login User via profileId (all 74 were login-only with no profileId before this). Distributed across the 7 existing tracks respecting maxStudents, with female-named students filling the one female-only track (مسار الطالبات لحفظ القرآن) up to its capacity, overflow spread round-robin. Ran via a throwaway additive-only script (deleted after, no data was deleted/modified for the pre-existing 10 mock students or 7 tracks). Verified after: 84 total students, 0 orphaned student Users, every track within capacity.",
     "tags": [
       "data-loss",
       "shared-database",
       "seed",
       "students",
-      "unresolved"
+      "unresolved",
+      "resolved"
     ],
     "related_bugs": [],
     "occurrences": 1,

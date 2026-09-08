@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-08T07:50:14.298Z
-> Files: 680 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-08T07:52:29.196Z
+> Files: 681 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -666,6 +666,7 @@
 
 ## quran-hifz-server/src/
 
+- `_add_students.ts` — One-time reconstruction: create real Student documents (+ link the (~2459 tok)
 - `_check_links.ts` — Declares main (~279 tok)
 - `_check_users.ts` — Declares main (~282 tok)
 - `_verify_cleanup.ts` — Declares main (~124 tok)
