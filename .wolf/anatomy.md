@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-06T21:40:20.333Z
-> Files: 676 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-08T07:50:14.298Z
+> Files: 680 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -47,6 +47,7 @@
 
 - `fix_buglog.py` — Declares the (~579 tok)
 - `fix_buglog2.py` (~1130 tok)
+- `fix_buglog3.py` (~762 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/444e5ae5-663a-4c25-a500-20d8479831d8/scratchpad/pw/
 
@@ -665,6 +666,8 @@
 
 ## quran-hifz-server/src/
 
+- `_check_links.ts` — Declares main (~279 tok)
+- `_check_users.ts` — Declares main (~282 tok)
 - `_verify_cleanup.ts` — Declares main (~124 tok)
 - `_verify_cleanup2.ts` — Declares main (~124 tok)
 - `_verify_cleanup3.ts` — Declares main (~124 tok)
@@ -672,6 +675,7 @@
 - `_verify_juz.ts` — Plan: Al-Baqarah 1:1 through Al-Baqarah 2:286 (juz 1-3), daily, 10 active days, started 5 days ago. (~358 tok)
 - `_verify_reverse.ts` — Declares show (~422 tok)
 - `_verify_schedule_data.ts` — Declares main (~342 tok)
+- `_verify_students_count.ts` — Declares main (~258 tok)
 - `_verify_teacher_profileid.ts` — Declares run (~332 tok)
 - `app.ts` — API routes: GET (1 endpoints) (~850 tok)
 - `server.ts` — Declares bootstrap (~198 tok)
@@ -702,7 +706,7 @@
 - `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~4651 tok)
 - `student.controller.ts` — Empty string is normalised to undefined so a blank field clears rather (~2010 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1390 tok)
-- `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~1707 tok)
+- `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~2230 tok)
 
 ## quran-hifz-server/src/data/
 
@@ -765,7 +769,7 @@
 - `stats.routes.ts` — API routes: GET (1 endpoints) (~79 tok)
 - `student.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~173 tok)
 - `teacher.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~166 tok)
-- `track.routes.ts` — API routes: GET, POST, PUT, DELETE (6 endpoints) (~196 tok)
+- `track.routes.ts` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~220 tok)
 
 ## quran-hifz-server/src/seeds/
 
@@ -911,7 +915,7 @@
 - `student-plan-progress.ts` — False when the student has no individual overlay yet — `effectiveSchedule` (~1673 tok)
 - `students.ts` — Saudi national ID — 10 digits, leading 1 (مواطن) or 2 (مقيم). (~834 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~504 tok)
-- `tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~1058 tok)
+- `tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~1192 tok)
 
 ## quran-hifz/src/quran/components/
 
@@ -1033,7 +1037,7 @@
 - `TeacherSpecialTracks.tsx` — surahName (~2892 tok)
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~1543 tok)
-- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~24803 tok)
+- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~25262 tok)
 - `TeacherTracks.tsx` — surahName (~2808 tok)
 
 ## quran-hifz/src/quran/router/

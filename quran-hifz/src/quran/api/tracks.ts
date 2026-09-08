@@ -99,3 +99,14 @@ export function useAssignStudent() {
     },
   });
 }
+
+/** Adds a co-teacher to a track — add-only (no remove), and the server only
+ * allows a teacher caller to do this for a track they are already on. */
+export function useAddTeacherToTrack() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, teacherId }: { id: string; teacherId: string }) =>
+      post<SingleResponse>(`/tracks/${id}/teachers`, { teacherId }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tracks"] }),
+  });
+}

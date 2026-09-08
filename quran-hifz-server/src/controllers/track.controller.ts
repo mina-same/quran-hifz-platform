@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { Track } from '../models/Track.model';
 import { Student } from '../models/Student.model';
+import { Teacher } from '../models/Teacher.model';
+import { User } from '../models/User.model';
 import { Attendance } from '../models/Attendance.model';
 import { Evaluation } from '../models/Evaluation.model';
 import { Homework } from '../models/Homework.model';
@@ -108,6 +110,45 @@ export async function assignStudent(req: Request, res: Response, next: NextFunct
     if (!student) throw new AppError('الطالب غير موجود', 404);
 
     res.json({ success: true, data: student });
+  } catch (err) {
+    next(err);
+  }
+}
+
+const addTeacherSchema = z.object({ teacherId: z.string().min(1) });
+
+/** Adds a co-teacher to a track. Admins may do this for any track; a teacher
+ * may only do it for a track they are already teaching on (add-only — they
+ * cannot remove a teacher or edit anything else about the track, which stays
+ * behind the full `updateTrack`/admin-only path). */
+export async function addTeacher(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { teacherId } = addTeacherSchema.parse(req.body);
+    const track = await Track.findById(req.params.id);
+    if (!track) throw new AppError('المسار غير موجود', 404);
+
+    if (req.user!.role === 'teacher') {
+      const requester = await User.findById(req.user!.id).select('profileId');
+      const isOnTrack = !!requester?.profileId
+        && track.teachers.some((t) => t.toString() === requester.profileId!.toString());
+      if (!isOnTrack) throw new AppError('لا يمكنك إضافة معلم إلى مسار لست من معلميه', 403);
+    }
+
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) throw new AppError('المعلم غير موجود', 404);
+
+    if (!track.teachers.some((t) => t.toString() === teacherId)) {
+      // `teachers` is typed `Schema.Types.ObjectId[]` (the schema-definition
+      // type, not the runtime one) — same pre-existing declaration quirk as
+      // `masjid` on this model; cast, matching how mongoose casts a raw id.
+      track.teachers.push(teacher._id as never);
+      await track.save();
+    }
+
+    const populated = await Track.findById(track._id)
+      .populate('teachers', 'name specialty')
+      .populate('masjid', 'name location gender');
+    res.json({ success: true, data: populated });
   } catch (err) {
     next(err);
   }

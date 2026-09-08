@@ -9,10 +9,12 @@ import { ScopeTabs } from "../../components/common/ScopeTabs";
 import { SkeletonCard } from "../../components/common/Skeleton";
 import {
   useTracks,
+  useAddTeacherToTrack,
   TRACK_DETAIL_ID_KEY,
   type Track,
   type TrackTeacher,
 } from "../../api/tracks";
+import { useTeachers } from "../../api/teachers";
 import { useStudents, type Student } from "../../api/students";
 import {
   useQuranPlans,
@@ -36,6 +38,7 @@ import {
   IndividualPlanPanel,
   planCoversStudent,
 } from "../../components/common/IndividualPlanPanel";
+import { TrackStudentsPanel } from "../../components/common/TrackStudentsPanel";
 import {
   MAX_SCORES, TOTAL_MAX, legacyScoresOf, manualCriteria, totalMaxOf,
   DEFAULT_GRADE_RUBRIC, type GradeCriterion,
@@ -152,6 +155,9 @@ function surahName(n: number) {
 }
 function getTeacherName(v: TrackTeacher | string) {
   return typeof v === "object" ? v.name : v;
+}
+function getTeacherId(v: TrackTeacher | string) {
+  return typeof v === "object" ? v._id : v;
 }
 function fmtTrackDate(d: string) {
   return new Date(d).toLocaleDateString(AR_LOCALE, {
@@ -343,10 +349,7 @@ function LinkPlanPanel({
 }
 
 export function TeacherTrackDetail() {
-  const { user, showPage, portal } = usePortal();
-  // Admin reuses this whole page (see pageRegistry.ts), so anything that
-  // tells the reader to go ask الإدارة is teacher-only copy.
-  const isTeacherPortal = portal === "teacher";
+  const { user, showPage } = usePortal();
   const teacherId = user?.profileId as string | undefined;
   const [trackId] = useState(() => sessionStorage.getItem(TRACK_DETAIL_ID_KEY));
 
@@ -354,6 +357,9 @@ export function TeacherTrackDetail() {
   // the Tracks page already fetches (small list, cheap) and find this one
   // client-side, exactly as before.
   const { data: tracks = [], isLoading: loadingTracks } = useTracks(undefined, teacherId);
+  const { data: allTeachers = [] } = useTeachers();
+  const addTeacherToTrack = useAddTeacherToTrack();
+  const [addTeacherId, setAddTeacherId] = useState("");
   const track = tracks.find((t) => t._id === trackId);
 
   // `Student.track` is now the sole membership mechanism — the roster is a
@@ -1068,12 +1074,56 @@ export function TeacherTrackDetail() {
               })}
             </div>
           )}
-          {isTeacherPortal && (
-            <p style={{ margin: "14px 0 0", fontSize: 11, color: "var(--text3)" }}>
-              <i className="ti ti-info-circle" style={{ marginLeft: 4 }} />
-              لإضافة أو إزالة معلم من هذا المسار، تواصل مع الإدارة.
-            </p>
-          )}
+          {(() => {
+            const availableTeachers = allTeachers.filter(
+              (t) => !track.teachers.some((tc) => getTeacherId(tc) === t._id),
+            );
+            return (
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
+                <p style={{ margin: "0 0 8px", fontSize: 12, fontWeight: 700, color: "var(--text2)" }}>
+                  <i className="ti ti-user-plus" style={{ marginLeft: 5, color: "var(--green)" }} />
+                  إضافة معلم إلى هذا المسار
+                </p>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <select
+                    className="form-input"
+                    style={{ flex: 1, fontSize: 13 }}
+                    value={addTeacherId}
+                    onChange={(e) => setAddTeacherId(e.target.value)}
+                  >
+                    <option value="">— اختر معلماً —</option>
+                    {availableTeachers.map((t) => (
+                      <option key={t._id} value={t._id}>{t.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    className="topbar-btn btn-primary"
+                    style={{ padding: "0 16px", whiteSpace: "nowrap", fontSize: 13 }}
+                    disabled={!addTeacherId || addTeacherToTrack.isPending}
+                    onClick={async () => {
+                      if (!addTeacherId) return;
+                      try {
+                        await addTeacherToTrack.mutateAsync({ id: track._id, teacherId: addTeacherId });
+                        setAddTeacherId("");
+                        toast.success("تمت إضافة المعلم");
+                      } catch (e) {
+                        toast.error((e as Error).message);
+                      }
+                    }}
+                  >
+                    {addTeacherToTrack.isPending
+                      ? <i className="ti ti-loader-2" style={{ animation: "spin 1s linear infinite" }} />
+                      : <><i className="ti ti-plus" /> إضافة</>}
+                  </button>
+                </div>
+                {availableTeachers.length === 0 && (
+                  <p style={{ margin: "8px 0 0", fontSize: 11, color: "var(--text3)" }}>
+                    كل المعلمين المسجّلين مُسنَدون بالفعل لهذا المسار.
+                  </p>
+                )}
+              </div>
+            );
+          })()}
         </Card>
       )}
 
@@ -1088,30 +1138,7 @@ export function TeacherTrackDetail() {
               </span>
             }
           >
-            <div
-              style={{
-                height: 6,
-                background: "var(--border)",
-                borderRadius: 99,
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  height: "100%",
-                  width: `${pct}%`,
-                  background: barClr,
-                  borderRadius: 99,
-                  transition: "width .4s",
-                }}
-              />
-            </div>
-            {isTeacherPortal && (
-              <p style={{ margin: "12px 0 0", fontSize: 11, color: "var(--text3)" }}>
-                <i className="ti ti-info-circle" style={{ marginLeft: 4 }} />
-                لإضافة أو إزالة طالب من هذا المسار، تواصل مع الإدارة.
-              </p>
-            )}
+            <TrackStudentsPanel track={track} />
           </Card>
 
           {scheduledSorted.length > 0 && (
