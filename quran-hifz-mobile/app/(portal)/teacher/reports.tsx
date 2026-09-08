@@ -3,8 +3,7 @@ import { ScrollView, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ReportsScreen from '@/components/domain/ReportsScreen';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { useHalqat } from '@/lib/queries/halqat';
-import { useSpecialTracks } from '@/lib/queries/specialTracks';
+import { useTracks } from '@/lib/queries/tracks';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import type { StudentFilters } from '@/lib/queries/students';
 
@@ -17,20 +16,18 @@ export default function TeacherReports() {
     page: { padding: theme.pagePadding, gap: 14 },
   }), [theme]);
 
-  // Same halqat-scoping source as myhalqa.tsx: every halqa taught by this teacher.
-  const { data: halqat = [], refetch: refetchHalqat, isRefetching: refetchingHalqat } = useHalqat({ teacher: profileId });
-  const { data: tracks = [], refetch: refetchTracks, isRefetching: refetchingTracks } = useSpecialTracks(undefined, profileId);
-  const isRefreshing = refetchingHalqat || refetchingTracks;
+  // Same tracks-scoping source as teacher/tracks.tsx: every track taught by this teacher.
+  const { data: tracks = [], refetch: refetchTracks, isRefetching: refetchingTracks } = useTracks(undefined, profileId);
+  const isRefreshing = refetchingTracks;
   const onRefresh = () => {
-    refetchHalqat();
     refetchTracks();
   };
 
-  // Server's GET /students supports a comma-separated `halqa` list ($in). When the
-  // teacher has no halqat yet, use a sentinel id that matches nothing rather than
+  // Server's GET /students supports a comma-separated `track` list ($in). When the
+  // teacher has no tracks yet, use a sentinel id that matches nothing rather than
   // an empty filter (which the query layer would treat as "no filter" = every student).
-  const myHalqaIds = halqat.map((h) => h._id);
-  const baseFilter: StudentFilters = { halqa: myHalqaIds.length > 0 ? myHalqaIds.join(',') : '__none__' };
+  const myTrackIds = tracks.map((t) => t._id);
+  const baseFilter: StudentFilters = { track: myTrackIds.length > 0 ? myTrackIds.join(',') : '__none__' };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -41,9 +38,8 @@ export default function TeacherReports() {
       >
         <ReportsScreen
           baseFilter={baseFilter}
-          halqat={halqat}
           tracks={tracks}
-          scopeAllLabel="كل حلقاتي"
+          scopeAllLabel="كل مساراتي"
         />
       </ScrollView>
     </SafeAreaView>

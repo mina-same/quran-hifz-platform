@@ -10,9 +10,8 @@ import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import FormTextarea from '@/components/forms/FormTextarea';
-import ContextCard, { halqaToContext, trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
-import { useHalqat } from '@/lib/queries/halqat';
-import { useSpecialTracks } from '@/lib/queries/specialTracks';
+import ContextCard, { trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
+import { useTracks } from '@/lib/queries/tracks';
 import { useStudents } from '@/lib/queries/students';
 import { useEvaluations, useRubric, useBulkEvaluate, type BulkEvaluateRecord } from '@/lib/queries/evaluations';
 import {
@@ -45,12 +44,9 @@ export default function TeacherEvaluate() {
   const [overrides, setOverrides] = useState<Record<string, StudentEval>>({});
   const [saved, setSaved] = useState(false);
 
-  const { data: halqat = [], isLoading: loadingHalqat, refetch: refetchHalqat, isRefetching: refetchingHalqat } = useHalqat({ teacher: profileId });
-  const { data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useSpecialTracks(undefined, profileId);
+  const { data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useTracks(undefined, profileId);
 
-  const contextFilter = selected
-    ? selected.kind === 'halqa' ? { halqa: selected.id } : { specialTrack: selected.id }
-    : undefined;
+  const contextFilter = selected ? { track: selected.id } : undefined;
 
   const { data: students = [], isLoading: loadingStudents, refetch: refetchStudents, isRefetching: refetchingStudents } = useStudents(contextFilter);
 
@@ -85,8 +81,8 @@ export default function TeacherEvaluate() {
     setOverrides((p) => ({ ...p, [studentId]: { ...evalFor(studentId), note } }));
   }
 
-  // Grading split comes from the plan governing this halqa/track; the server
-  // falls back to the historical default when no single plan resolves.
+  // Grading split comes from the plan governing this track; the server falls
+  // back to the historical default when no single plan resolves.
   const { data: rubricData } = useRubric(contextFilter);
   const rubric = rubricData?.rubric ?? DEFAULT_GRADE_RUBRIC;
   const rubricTotalMax = totalMaxOf(rubric);
@@ -107,7 +103,7 @@ export default function TeacherEvaluate() {
     bulkEvaluate.mutate(
       {
         teacher: profileId!,
-        ...(selected.kind === 'halqa' ? { halqa: selected.id } : { specialTrack: selected.id }),
+        track: selected.id,
         date: today,
         records,
       },
@@ -122,10 +118,9 @@ export default function TeacherEvaluate() {
     );
   }
 
-  const isLoading = loadingHalqat || loadingTracks;
-  const isRefreshing = refetchingHalqat || refetchingTracks || refetchingStudents || refetchingEvaluations;
+  const isLoading = loadingTracks;
+  const isRefreshing = refetchingTracks || refetchingStudents || refetchingEvaluations;
   function handleRefresh() {
-    refetchHalqat();
     refetchTracks();
     refetchStudents();
     refetchEvaluations();
@@ -178,14 +173,9 @@ export default function TeacherEvaluate() {
           refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
         >
           {isLoading && <SkeletonRows count={4} rowHeight={72} />}
-          {!isLoading && halqat.length === 0 && tracks.length === 0 && (
-            <Text style={styles.muted}>لا توجد حلقات أو مسارات مسندة إليك</Text>
+          {!isLoading && tracks.length === 0 && (
+            <Text style={styles.muted}>لا توجد مسارات مسندة إليك</Text>
           )}
-          {halqat.map((h) => (
-            <Pressable key={h._id} onPress={() => setSelected(halqaToContext(h))}>
-              <ContextCard context={halqaToContext(h)} />
-            </Pressable>
-          ))}
           {tracks.map((t) => (
             <Pressable key={t._id} onPress={() => setSelected(trackToContext(t))}>
               <ContextCard context={trackToContext(t)} />
@@ -220,7 +210,7 @@ export default function TeacherEvaluate() {
         )}
 
         <Pressable onPress={() => { setSelected(null); setOverrides({}); }}>
-          <Text style={styles.backLink}>‹ رجوع لاختيار الحلقة/المسار</Text>
+          <Text style={styles.backLink}>‹ رجوع لاختيار المسار</Text>
         </Pressable>
 
         <Card>

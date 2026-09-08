@@ -73,7 +73,7 @@ export default function TeacherHomework() {
                   <Text style={styles.infoItem}>·</Text>
                   <Text style={styles.infoItem}>{h.segment}</Text>
                   <Text style={styles.infoItem}>·</Text>
-                  <Text style={styles.infoItem}>{h.specialTrack ? `مسار: ${getTitle(h.specialTrack)}` : getName(h.halqa)}</Text>
+                  <Text style={styles.infoItem}>{`المسار: ${getTitle(h.track)}`}</Text>
                   <Text style={styles.infoItem}>·</Text>
                   <Text style={styles.infoItem}>{h.dueDate ? new Date(h.dueDate).toLocaleDateString(AR_LOCALE) : '—'}</Text>
                 </View>
