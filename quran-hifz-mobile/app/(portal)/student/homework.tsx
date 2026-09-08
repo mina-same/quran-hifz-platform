@@ -56,7 +56,7 @@ export default function StudentHomework() {
               </View>
               <View style={styles.gridItem}>
                 <Text style={styles.gridLabel}>المصدر</Text>
-                <Text style={styles.gridValue}>{today.specialTrack ? `مسار: ${getTitle(today.specialTrack)}` : 'الحلقة'}</Text>
+                <Text style={styles.gridValue}>{`مسار: ${getTitle(today.track)}`}</Text>
               </View>
               <View style={styles.gridItem}>
                 <Text style={styles.gridLabel}>الموعد النهائي</Text>
