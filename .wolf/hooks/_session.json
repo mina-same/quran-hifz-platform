@@ -101,6 +101,16 @@
       "count": 1,
       "tokens": 112,
       "first_read": "2026-09-08T08:18:20.193Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/ParentStudent.model.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-09-08T09:02:24.889Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/seeds/create-parent-accounts.ts": {
+      "count": 1,
+      "tokens": 786,
+      "first_read": "2026-09-08T09:02:24.982Z"
     }
   },
   "files_written": [
@@ -419,9 +429,9 @@
     "quran-hifz-mobile/lib/evaluationRubric.ts": 2,
     "quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx": 1
   },
-  "anatomy_hits": 18,
+  "anatomy_hits": 19,
   "anatomy_misses": 2,
   "repeated_reads_warned": 18,
   "cerebrum_warnings": 0,
-  "stop_count": 8
+  "stop_count": 9
 }
