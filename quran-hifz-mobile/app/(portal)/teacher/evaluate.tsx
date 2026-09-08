@@ -16,7 +16,7 @@ import { useSpecialTracks } from '@/lib/queries/specialTracks';
 import { useStudents } from '@/lib/queries/students';
 import { useEvaluations, useRubric, useBulkEvaluate, type BulkEvaluateRecord } from '@/lib/queries/evaluations';
 import {
-  MAX_SCORES, TOTAL_MAX, manualCriteria, totalMaxOf, DEFAULT_GRADE_RUBRIC,
+  MAX_SCORES, TOTAL_MAX, totalMaxOf, DEFAULT_GRADE_RUBRIC,
   type GradeCriterion,
 } from '@/lib/evaluationRubric';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -27,15 +27,23 @@ import { success, error } from '@/lib/haptics';
  * at compile time any more. */
 type StudentEval = { attendanceStatus: 'حاضر' | 'غائب'; scores: Record<string, number>; note: string };
 
-/** Scores start at 0 so the teacher consciously awards points rather than
- * every student defaulting to full marks. */
-function blankEval(): StudentEval {
-  return { attendanceStatus: 'حاضر', scores: {}, note: '' };
+/** Manual scores start at 0 so the teacher consciously awards points rather
+ * than every student defaulting to full marks. `auto` criteria (حضور) start
+ * at full marks — same starting point as the old forced-max behavior — but
+ * the teacher can lower it like any other chip; it's just a default now,
+ * not enforced. */
+function blankEval(rubric: GradeCriterion[]): StudentEval {
+  return {
+    attendanceStatus: 'حاضر',
+    scores: Object.fromEntries(rubric.filter((c) => c.auto).map((c) => [c.key, c.max])),
+    note: '',
+  };
 }
-/** Absent → 0. `auto` criteria (حضور) are awarded in full on presence. */
+/** Absent → 0. Present: every criterion (`auto` included) takes whatever the
+ * teacher entered, mirroring the server's bulkEvaluate. */
 function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
   if (e.attendanceStatus === 'غائب') return 0;
-  return rubric.reduce((a, c) => a + (c.auto ? c.max : Math.min(e.scores[c.key] ?? 0, c.max)), 0);
+  return rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0);
 }
 
 export default function TeacherEvaluate() {
@@ -71,7 +79,7 @@ export default function TeacherEvaluate() {
   }
   const alreadySubmitted = savedToday.length > 0;
 
-  const evalFor = (studentId: string): StudentEval => overrides[studentId] ?? savedById[studentId] ?? blankEval();
+  const evalFor = (studentId: string): StudentEval => overrides[studentId] ?? savedById[studentId] ?? blankEval(rubric);
   function setAttendance(studentId: string, status: 'حاضر' | 'غائب') {
     setOverrides((p) => ({ ...p, [studentId]: { ...evalFor(studentId), attendanceStatus: status } }));
   }
@@ -260,7 +268,7 @@ export default function TeacherEvaluate() {
 
                 {!isAbsent && (
                   <>
-                    {manualCriteria(rubric).map((cat) => (
+                    {rubric.map((cat) => (
                       <View key={cat.key} style={styles.categoryBlock}>
                         <Text style={styles.categoryLabel}>{cat.label} (٠-{cat.max})</Text>
                         <View style={styles.chipRow}>

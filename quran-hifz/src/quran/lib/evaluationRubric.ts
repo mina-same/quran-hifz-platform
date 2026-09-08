@@ -11,7 +11,10 @@ export type GradeCriterion = {
   key: string;
   label: string;
   max: number;
-  /** Awarded in full on presence rather than typed by the teacher (حضور). */
+  /** Rubric-builder hint that this criterion (حضور) is attendance-linked —
+   * still typed by the teacher like any other criterion (0..max), defaults to
+   * full marks on presence, forced to 0 when absent (same as every other
+   * criterion). Purely a label/default-seeding flag now, not enforced. */
   auto: boolean;
 };
 
@@ -31,11 +34,6 @@ export const TOTAL_MAX = 10;
 
 export function totalMaxOf(rubric: GradeCriterion[]): number {
   return rubric.reduce((a, c) => a + c.max, 0);
-}
-
-/** Criteria the teacher actually types a number for (everything but `auto`). */
-export function manualCriteria(rubric: GradeCriterion[]): GradeCriterion[] {
-  return rubric.filter((c) => !c.auto);
 }
 
 /** Slug for a teacher-authored criterion. Arabic labels are kept verbatim —

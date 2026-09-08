@@ -16,7 +16,7 @@ import {
   useStudentPlanProgressList, useRecordStudentOccurrence, segmentReversed, type QuranPlan,
 } from '@/lib/queries/quranPlan';
 import {
-  MAX_SCORES, TOTAL_MAX, legacyScoresOf, manualCriteria, totalMaxOf,
+  MAX_SCORES, TOTAL_MAX, legacyScoresOf, totalMaxOf,
   DEFAULT_GRADE_RUBRIC, type GradeCriterion,
 } from '@/lib/evaluationRubric';
 import {
@@ -35,14 +35,21 @@ function avatarInitials(name: string): string {
 
 /** Scores are keyed by the active plan's rubric — not known at compile time. */
 export type StudentEval = { attendanceStatus: 'حاضر' | 'غائب'; scores: Record<string, number> };
-/** Scores start at 0 so the teacher consciously awards points. */
-function blankEval(): StudentEval {
-  return { attendanceStatus: 'حاضر', scores: {} };
+/** Manual scores start at 0 so the teacher consciously awards points. `auto`
+ * criteria (حضور) start at full marks — same starting point as the old
+ * forced-max behavior — but the teacher can lower it like any other chip;
+ * it's just a default now, not enforced. */
+function blankEval(rubric: GradeCriterion[]): StudentEval {
+  return {
+    attendanceStatus: 'حاضر',
+    scores: Object.fromEntries(rubric.filter((c) => c.auto).map((c) => [c.key, c.max])),
+  };
 }
-/** Absent → 0. `auto` criteria (حضور) are awarded in full on presence. */
+/** Absent → 0. Present: every criterion (`auto` included) takes whatever the
+ * teacher entered, mirroring the server's bulkEvaluate. */
 function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
   if (e.attendanceStatus === 'غائب') return 0;
-  return rubric.reduce((a, c) => a + (c.auto ? c.max : Math.min(e.scores[c.key] ?? 0, c.max)), 0);
+  return rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0);
 }
 
 export interface RosterContext {
@@ -177,7 +184,7 @@ export default function EvaluationRoster({
   }
 
   const evalFor = (studentId: string): StudentEval =>
-    overrides[studentId] ?? savedById[studentId] ?? blankEval();
+    overrides[studentId] ?? savedById[studentId] ?? blankEval(rubric);
 
   function setAttendance(studentId: string, status: 'حاضر' | 'غائب') {
     setOverrides((prev) => ({ ...prev, [studentId]: { ...evalFor(studentId), attendanceStatus: status } }));
@@ -525,7 +532,7 @@ export default function EvaluationRoster({
                   );
                 })}
 
-                {manualCriteria(rubric).map((cat) => (
+                {rubric.map((cat) => (
                   <View key={cat.key}>
                     <Text style={styles.catLabel}>{cat.label} (0-{cat.max})</Text>
                     <View style={styles.scoreChipRow}>

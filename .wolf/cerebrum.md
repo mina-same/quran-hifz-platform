@@ -38,8 +38,15 @@ duplicated across server/web/mobile. It is now `QuranPlan.gradeRubric` —
 reproduces the old split, so behaviour is unchanged unless a teacher edits it.
 
 Key facts for future work:
-- `auto: true` (حضور) is awarded in FULL on presence, never typed. Absent ⇒ every
-  criterion is forced to 0 server-side; the client is never trusted.
+- **[SUPERSEDED 2026-09-08, see [[bug-403]]]** `auto: true` (حضور) used to be
+  awarded in FULL on presence, never typed — that's no longer true. The user
+  asked to be able to grade attendance itself (e.g. "1 out of 2" for a late
+  arrival), so `auto` now only means "starts at full marks by default, and is
+  the rubric-builder's attendance-linked criterion" — it's typed/adjustable by
+  the teacher exactly like حفظ/تجويد/تلاوة (0..max, `manualCriteria()` filter
+  removed, deleted from both evaluationRubric.ts files). Absent ⇒ every
+  criterion (auto included) is STILL forced to 0 server-side; the client is
+  never trusted for that part.
 - `Evaluation.criteria[]` is a SNAPSHOT ({key,label,max,value}) plus `totalMax`.
   Editing a plan's rubric must never retroactively rewrite old records — that is
   why label/max are copied, not referenced.

@@ -40,7 +40,6 @@ import {
   MAX_SCORES,
   TOTAL_MAX,
   legacyScoresOf,
-  manualCriteria,
   totalMaxOf,
   DEFAULT_GRADE_RUBRIC,
   type GradeCriterion,
@@ -208,17 +207,23 @@ type StudentEval = {
   scores: Record<string, number>;
 };
 
-/** Default eval for a present student — scores start at 0 so the teacher
- *  consciously awards points rather than every student defaulting to full marks. */
-function blankEval(): StudentEval {
-  return { attendanceStatus: "حاضر", scores: {} };
+/** Default eval for a present student — manual scores start at 0 so the
+ *  teacher consciously awards points rather than every student defaulting to
+ *  full marks. `auto` criteria (حضور) start at full marks — same starting
+ *  point as the old forced-max behavior — but the teacher can lower it like
+ *  any other chip; it's just a default now, not enforced. */
+function blankEval(rubric: GradeCriterion[]): StudentEval {
+  return {
+    attendanceStatus: "حاضر",
+    scores: Object.fromEntries(rubric.filter((c) => c.auto).map((c) => [c.key, c.max])),
+  };
 }
 
-/** Absent → 0 across the board. `auto` criteria (حضور) are awarded in full on
- *  presence rather than typed, mirroring the server's own calculation. */
+/** Absent → 0 across the board. Present: every criterion (`auto` included)
+ *  takes whatever the teacher entered, mirroring the server's bulkEvaluate. */
 function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
   if (e.attendanceStatus === "غائب") return 0;
-  return rubric.reduce((a, c) => a + (c.auto ? c.max : Math.min(e.scores[c.key] ?? 0, c.max)), 0);
+  return rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0);
 }
 
 export function TeacherAttendance() {
@@ -467,7 +472,7 @@ export function TeacherAttendance() {
   const [lastSavedId, setLastSavedId] = useState<string | null>(null);
 
   const evalFor = (studentId: string): StudentEval =>
-    overrides[studentId] ?? savedById[studentId] ?? blankEval();
+    overrides[studentId] ?? savedById[studentId] ?? blankEval(rubric);
 
   function setAttendance(studentId: string, status: "حاضر" | "غائب") {
     setOverrides((prev) => ({
@@ -1099,7 +1104,7 @@ export function TeacherAttendance() {
                           })}
 
                         <div className="eval-scores">
-                          {manualCriteria(rubric).map((cat) => (
+                          {rubric.map((cat) => (
                             <div key={cat.key} className="eval-cat">
                               <span className="eval-cat-label">{cat.label}</span>
                               <div className="eval-chip-group">

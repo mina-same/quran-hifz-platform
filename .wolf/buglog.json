@@ -6814,5 +6814,41 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-09-08T00:00:00"
+  },
+  {
+    "id": "bug-402",
+    "timestamp": "2026-09-08T00:00:00",
+    "error_message": "User: I changed the grading rubric on a plan and it did not show up on the track detail page",
+    "file": "quran-hifz/src/quran/api/quran-plans.ts, quran-hifz-mobile/lib/queries/quranPlan.ts",
+    "root_cause": "useRubric() (api/evaluations.ts, lib/queries/evaluations.ts on mobile) is a separate React Query cache entry keyed [\"evaluation-rubric\", ctx] from the plan itself ([\"quran-plans\", ...]). useCreateQuranPlan/useUpdateQuranPlan/useDeleteQuranPlan only ever invalidated [\"quran-plans\"] on success, so after editing a plan's gradeRubric (or its track/status, either of which changes what server-side resolveRubric() resolves to for that track) the grading screen kept showing whatever rubric it had already cached, until a full page reload wiped the whole query cache. Same gap existed identically in both the web and mobile query hooks (independent implementations, same bug).",
+    "fix": "All three mutations (create/update/delete plan) now also invalidateQueries([\"evaluation-rubric\"]) alongside [\"quran-plans\"], in both quran-hifz/src/quran/api/quran-plans.ts and quran-hifz-mobile/lib/queries/quranPlan.ts. useGenerateSchedule/useUpdateScheduleEntry were left untouched -- they only change schedule data, never gradeRubric/track/status, so they cannot affect what resolveRubric() returns.",
+    "tags": [
+      "react-query",
+      "cache-invalidation",
+      "grading-rubric",
+      "quran-plan"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-09-08T00:00:00"
+  },
+  {
+    "id": "bug-403",
+    "timestamp": "2026-09-08T00:00:00",
+    "error_message": "User: on the trackdetail grading roster, حضور (attendance) does not show as a gradeable criterion at all; then explicitly asked to be able to grade attendance itself, e.g. 1 out of 2 for a late arrival",
+    "file": "quran-hifz-server/src/controllers/evaluation.controller.ts, quran-hifz/src/quran/lib/evaluationRubric.ts, quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx, quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx, quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx, quran-hifz-mobile/lib/evaluationRubric.ts, quran-hifz-mobile/components/domain/EvaluationRoster.tsx, quran-hifz-mobile/app/(portal)/teacher/evaluate.tsx",
+    "root_cause": "Deliberate original design (2026-09-04): a rubric criterion with auto:true (حضور) was always awarded its full max on presence and forced to 0 when absent, never typed by the teacher. Every roster screen rendered only manualCriteria(rubric) = rubric.filter(c => !c.auto), so an auto criterion never got a chip row -- invisible by design, and looked broken with a degenerate single-criterion rubric (see bug-402).",
+    "fix": "auto changed from an enforced behavior to a rubric-builder default hint only. Server (bulkEvaluate): present-student criteria, auto included, take whatever was submitted, bounded by max, instead of auto forcing max; absent still forces everything to 0. Client: every roster screen renders the full rubric as gradeable chips (dropped manualCriteria() at 4 render sites), with a rubric-aware blankEval(rubric) seeding only auto criteria to max as the default so a never-touched row still reads full attendance credit, manual criteria still start at 0. manualCriteria() deleted from both evaluationRubric.ts (now unused). Updated the auto doc comment and the rubric-builder tooltip in TeacherPlanForm.tsx.",
+    "tags": [
+      "evaluation-rubric",
+      "grading",
+      "attendance",
+      "behavior-change"
+    ],
+    "related_bugs": [
+      "bug-402"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-09-08T00:00:00"
   }
 ]

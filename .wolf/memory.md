@@ -3758,3 +3758,38 @@
 | 10:50 | Created quran-hifz-server/src/_check_links.ts | — | ~279 |
 | 10:52 | Created quran-hifz-server/src/_add_students.ts | — | ~2459 |
 | 10:54 | Session end: 19 writes across 9 files (TeacherTrackDetail.tsx, track.controller.ts, track.routes.ts, tracks.ts, _verify_students_count.ts) | 13 reads | ~44245 tok |
+| 10:57 | Session end: 19 writes across 9 files (TeacherTrackDetail.tsx, track.controller.ts, track.routes.ts, tracks.ts, _verify_students_count.ts) | 14 reads | ~46732 tok |
+| 11:00 | Session end: 19 writes across 9 files (TeacherTrackDetail.tsx, track.controller.ts, track.routes.ts, tracks.ts, _verify_students_count.ts) | 14 reads | ~46732 tok |
+| 11:01 | Session end: 19 writes across 9 files (TeacherTrackDetail.tsx, track.controller.ts, track.routes.ts, tracks.ts, _verify_students_count.ts) | 14 reads | ~46732 tok |
+| 11:04 | Edited quran-hifz/src/quran/api/quran-plans.ts | modified useCreateQuranPlan() | ~352 |
+| 11:04 | Edited quran-hifz/src/quran/api/quran-plans.ts | modified useDeleteQuranPlan() | ~90 |
+| 11:04 | Edited quran-hifz-mobile/lib/queries/quranPlan.ts | modified useCreateQuranPlan() | ~161 |
+| 11:04 | Edited quran-hifz-mobile/lib/queries/quranPlan.ts | modified useUpdateQuranPlan() | ~175 |
+| 11:04 | Edited quran-hifz-mobile/lib/queries/quranPlan.ts | modified useDeleteQuranPlan() | ~90 |
+| 11:05 | Session end: 24 writes across 11 files (TeacherTrackDetail.tsx, track.controller.ts, track.routes.ts, tracks.ts, _verify_students_count.ts) | 15 reads | ~49435 tok |
+| 11:09 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | 11→13 lines | ~194 |
+| 11:10 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | criteria() → criterion() | ~99 |
+| 11:10 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | CSS: rubric | ~122 |
+| 11:10 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | 2→2 lines | ~36 |
+| 11:11 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | inline fix | ~15 |
+| 11:11 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | inline fix | ~15 |
+| 11:11 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | expanded (+7 lines) | ~188 |
+| 11:11 | Edited quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx | reduced (-7 lines) | ~78 |
+| 11:12 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | CSS: Present | ~262 |
+| 11:16 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 2→2 lines | ~36 |
+| 11:16 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | inline fix | ~14 |
+| 11:16 | Edited quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx | 5→4 lines | ~17 |
+| 11:16 | Edited quran-hifz-mobile/components/domain/EvaluationRoster.tsx | CSS: Present | ~280 |
+| 11:16 | Edited quran-hifz-mobile/components/domain/EvaluationRoster.tsx | 2→2 lines | ~36 |
+| 11:16 | Edited quran-hifz-mobile/components/domain/EvaluationRoster.tsx | inline fix | ~11 |
+| 11:17 | Edited quran-hifz-mobile/components/domain/EvaluationRoster.tsx | 4→4 lines | ~40 |
+| 11:17 | Edited quran-hifz-mobile/app/(portal)/teacher/evaluate.tsx | CSS: Present | ~249 |
+| 11:17 | Edited quran-hifz-mobile/app/(portal)/teacher/evaluate.tsx | inline fix | ~35 |
+| 11:17 | Edited quran-hifz-mobile/app/(portal)/teacher/evaluate.tsx | inline fix | ~12 |
+| 11:17 | Edited quran-hifz-mobile/app/(portal)/teacher/evaluate.tsx | inline fix | ~17 |
+| 11:18 | Edited quran-hifz/src/quran/lib/evaluationRubric.ts | — | ~0 |
+| 11:18 | Edited quran-hifz/src/quran/lib/evaluationRubric.ts | 4→7 lines | ~97 |
+| 11:18 | Edited quran-hifz-mobile/lib/evaluationRubric.ts | 4→7 lines | ~97 |
+| 11:18 | Edited quran-hifz-mobile/lib/evaluationRubric.ts | — | ~0 |
+| 11:23 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | 3→3 lines | ~49 |
+| 11:35 | Session end: 49 writes across 17 files (TeacherTrackDetail.tsx, track.controller.ts, track.routes.ts, tracks.ts, _verify_students_count.ts) | 20 reads | ~82339 tok |

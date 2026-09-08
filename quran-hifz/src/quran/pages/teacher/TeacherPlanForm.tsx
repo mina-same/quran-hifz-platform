@@ -785,8 +785,8 @@ export function TeacherPlanForm() {
                 aria-checked={c.auto}
                 aria-label={`احتساب بند ${c.label || i + 1} تلقائياً`}
                 title={c.auto
-                  ? "يُحتسب كاملاً عند الحضور — لا يُدخله المعلم"
-                  : "يُدخله المعلم يدوياً لكل طالب"}
+                  ? "يبدأ كاملاً عند الحضور — يمكن للمعلم تعديله لكل طالب"
+                  : "يبدأ من صفر — يُدخله المعلم يدوياً لكل طالب"}
                 onClick={() => {
                   const next = [...form.gradeRubric];
                   next[i] = { ...next[i], auto: !next[i].auto };

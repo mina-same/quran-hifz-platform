@@ -147,15 +147,17 @@ export async function bulkEvaluate(req: Request, res: Response, next: NextFuncti
     }
 
     // Server never trusts client-computed scores for an absent student — every
-    // criterion is forced to zero. `auto` criteria (حضور) are awarded in full
-    // on presence rather than typed by the teacher.
+    // criterion (`auto` included) is forced to zero. Present: every criterion,
+    // `auto` included, takes whatever the teacher typed (bounded by its max) —
+    // `auto` no longer means "always full marks", it's just a rubric-builder
+    // hint that a criterion is attendance-linked.
     const scored = records.map((r) => {
       const isPresent = r.attendanceStatus === 'حاضر';
       const criteria: IEvaluationCriterion[] = rubric.map((c) => ({
         key: c.key,
         label: c.label,
         max: c.max,
-        value: !isPresent ? 0 : c.auto ? c.max : Math.min(r.scores?.[c.key] ?? 0, c.max),
+        value: !isPresent ? 0 : Math.min(r.scores?.[c.key] ?? 0, c.max),
       }));
       const total = criteria.reduce((a, c) => a + c.value, 0);
 

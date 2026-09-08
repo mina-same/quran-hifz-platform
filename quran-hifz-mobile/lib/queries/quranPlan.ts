@@ -133,7 +133,13 @@ export function useCreateQuranPlan() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: Record<string, unknown>) => post<SingleResponse>('/quran-plans', body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['quran-plans'] }),
+    // useRubric() (lib/queries/evaluations.ts) is keyed under
+    // 'evaluation-rubric', a separate query from 'quran-plans' — a new plan
+    // can change which plan resolveRubric() resolves to for its context.
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['quran-plans'] });
+      qc.invalidateQueries({ queryKey: ['evaluation-rubric'] });
+    },
   });
 }
 
@@ -142,7 +148,13 @@ export function useUpdateQuranPlan() {
   return useMutation({
     mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) =>
       put<SingleResponse>(`/quran-plans/${id}`, body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['quran-plans'] }),
+    // Editing gradeRubric (or the track/status, which changes what
+    // resolveRubric() picks) must invalidate 'evaluation-rubric' too, or the
+    // grading screen keeps the stale rubric until the app is fully reloaded.
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['quran-plans'] });
+      qc.invalidateQueries({ queryKey: ['evaluation-rubric'] });
+    },
   });
 }
 
@@ -172,7 +184,10 @@ export function useDeleteQuranPlan() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => del(`/quran-plans/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['quran-plans'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['quran-plans'] });
+      qc.invalidateQueries({ queryKey: ['evaluation-rubric'] });
+    },
   });
 }
 

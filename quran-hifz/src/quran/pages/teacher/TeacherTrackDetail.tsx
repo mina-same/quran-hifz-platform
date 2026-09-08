@@ -40,7 +40,7 @@ import {
 } from "../../components/common/IndividualPlanPanel";
 import { TrackStudentsPanel } from "../../components/common/TrackStudentsPanel";
 import {
-  MAX_SCORES, TOTAL_MAX, legacyScoresOf, manualCriteria, totalMaxOf,
+  MAX_SCORES, TOTAL_MAX, legacyScoresOf, totalMaxOf,
   DEFAULT_GRADE_RUBRIC, type GradeCriterion,
 } from "../../lib/evaluationRubric";
 import { SURAHS } from "../../data/surahs";
@@ -227,16 +227,20 @@ type StudentEval = {
   attendanceStatus: "حاضر" | "غائب";
   scores: Record<string, number>;
 };
-function blankEval(): StudentEval {
-  return { attendanceStatus: "حاضر", scores: {} };
+/** A never-touched row starts at full marks for `auto` criteria (حضور) — same
+ * default as the old forced-max behavior — but the teacher can still lower it
+ * like any other chip; it's just a starting point now, not enforced. */
+function blankEval(rubric: GradeCriterion[]): StudentEval {
+  return {
+    attendanceStatus: "حاضر",
+    scores: Object.fromEntries(rubric.filter((c) => c.auto).map((c) => [c.key, c.max])),
+  };
 }
-/** Absent → 0. `auto` criteria (حضور) are awarded in full on presence. */
+/** Absent → 0. Every criterion (`auto` included) takes whatever the teacher
+ * entered, bounded by its max — mirrors the server's bulkEvaluate. */
 function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
   if (e.attendanceStatus === "غائب") return 0;
-  return rubric.reduce(
-    (a, c) => a + (c.auto ? c.max : Math.min(e.scores[c.key] ?? 0, c.max)),
-    0,
-  );
+  return rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0);
 }
 
 type TabKey = "teachers" | "students" | "plan";
@@ -628,7 +632,7 @@ export function TeacherTrackDetail() {
   const isFutureDay = effectiveDate > today;
 
   const evalFor = (studentId: string): StudentEval =>
-    overrides[studentId] ?? savedById[studentId] ?? blankEval();
+    overrides[studentId] ?? savedById[studentId] ?? blankEval(rubric);
   function setAttendance(studentId: string, status: "حاضر" | "غائب") {
     setOverrides((prev) => ({
       ...prev,
@@ -1500,7 +1504,7 @@ export function TeacherTrackDetail() {
                             })}
 
                           <div className="eval-scores">
-                            {manualCriteria(rubric).map((cat) => (
+                            {rubric.map((cat) => (
                               <div key={cat.key} className="eval-cat">
                                 <span className="eval-cat-label">{cat.label}</span>
                                 <div className="eval-chip-group">
