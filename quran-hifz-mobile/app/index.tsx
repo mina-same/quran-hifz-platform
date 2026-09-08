@@ -23,8 +23,8 @@ import { success, error } from '@/lib/haptics';
 
 type FormData = { email: string; password: string };
 
-function getHalqaName(h: ParentChild['halqa']): string {
-  return typeof h === 'object' && h ? h.name : '';
+function getTrackName(t: ParentChild['track']): string {
+  return typeof t === 'object' && t ? t.title : '';
 }
 
 export default function LoginScreen() {
@@ -295,7 +295,7 @@ export default function LoginScreen() {
                   <Text style={styles.cardTitle}>{child.name}</Text>
                   <Text style={styles.cardDesc}>{child.path}</Text>
                   <Text style={[styles.cardDesc, { color: 'rgba(255,255,255,0.9)' }]}>
-                    {getHalqaName(child.halqa)}
+                    {getTrackName(child.track)}
                   </Text>
                 </Pressable>
               ))}

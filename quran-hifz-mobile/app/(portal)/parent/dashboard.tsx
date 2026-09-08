@@ -46,7 +46,7 @@ export default function ParentDashboard() {
   const progressPct = child?.progressPct ?? 0;
   const progressPages = child?.progressPages ?? 0;
   const attendancePct = child?.attendancePct ?? 0;
-  const halqaName = child ? (typeof child.halqa === 'object' ? child.halqa.name : child.halqa) : '—';
+  const trackName = child ? (typeof child.track === 'object' ? child.track.title : child.track) : '—';
   const totalJuz = hifzEntries ? Math.floor(progressPages / 20) : Math.round((progressPct / 100) * 30);
   const level = progressPct >= 80 ? 'نجم ⭐' : progressPct >= 50 ? 'متميز' : 'ناشط';
 
@@ -105,7 +105,7 @@ export default function ParentDashboard() {
               <View style={s.juzBadgeWrap}>
                 <Badge label={`${totalJuz} جزء من ٣٠`} variant="green" />
               </View>
-              {[['الحلقة', halqaName], ['الجلسة القادمة', 'الثلاثاء بعد الفجر']].map(([k, v]) => (
+              {[['المسار', trackName], ['الجلسة القادمة', 'الثلاثاء بعد الفجر']].map(([k, v]) => (
                 <View key={k} style={s.row}>
                   <Text style={s.key}>{k}</Text>
                   <Text style={s.val}>{v}</Text>
