@@ -5,7 +5,7 @@ export const PORTALS: Record<string, PortalConfig> = {
     badge: "بوابة الطالب",
     user: {
       name: "عبدالله الحميداني",
-      role: "طالب — مسار عمر بن الخطاب",
+      role: "طالب — مسار الإتقان",
       initials: "عح",
     },
     nav: [
@@ -51,8 +51,8 @@ export const PORTALS: Record<string, PortalConfig> = {
           {
             id: "tracks",
             icon: "calendar-event",
-            label: "مساراتي",
-            desc: "المسارات المسجَّل بها",
+            label: "مساري",
+            desc: "المسار المسجَّل به",
           },
         ],
       },
@@ -96,7 +96,7 @@ export const PORTALS: Record<string, PortalConfig> = {
     badge: "بوابة المعلم",
     user: {
       name: "ناصر الحميداني",
-      role: "معلم — مسار عمر بن الخطاب",
+      role: "معلم — مسار الإتقان",
       initials: "نح",
     },
     nav: [
@@ -112,14 +112,8 @@ export const PORTALS: Record<string, PortalConfig> = {
         ],
       },
       {
-        group: "المسارات",
+        group: "طلابي والحضور",
         items: [
-          {
-            id: "tracks",
-            icon: "school",
-            label: "مساراتي",
-            desc: "إدارة مساراتك ومواعيدها",
-          },
           {
             id: "students",
             icon: "users",
@@ -174,6 +168,17 @@ export const PORTALS: Record<string, PortalConfig> = {
             icon: "chart-bar",
             label: "تقارير الطلاب",
             desc: "عرض أداء الطلاب",
+          },
+        ],
+      },
+      {
+        group: "المسارات",
+        items: [
+          {
+            id: "tracks",
+            icon: "calendar-event",
+            label: "مساراتي",
+            desc: "المسارات المسجَّل بها",
           },
         ],
       },
@@ -235,14 +240,8 @@ export const PORTALS: Record<string, PortalConfig> = {
         ],
       },
       {
-        group: "المسارات والمساجد",
+        group: "المساجد",
         items: [
-          {
-            id: "tracks",
-            icon: "school",
-            label: "المسارات",
-            desc: "إدارة المسارات ومواعيدها",
-          },
           {
             id: "masajid",
             icon: "building-arch",
@@ -265,6 +264,13 @@ export const PORTALS: Record<string, PortalConfig> = {
             icon: "chart-bar",
             label: "التقارير",
             desc: "تقارير الحفظ والحضور",
+          },
+          {
+            id: "tracks",
+            icon: "calendar-event",
+            label: "المسارات",
+            desc: "إدارة المسارات",
+            dot: true,
           },
         ],
       },

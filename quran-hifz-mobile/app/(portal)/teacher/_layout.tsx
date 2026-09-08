@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Tabs } from 'expo-router';
 import {
-  IconLayoutDashboard, IconSchool, IconUsers, IconCalendarCheck, IconMicrophone, IconDots,
+  IconLayoutDashboard, IconCalendarEvent, IconUsers, IconCalendarCheck, IconMicrophone, IconDots,
 } from '@tabler/icons-react-native';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -37,7 +37,7 @@ export default function TeacherTabLayout() {
       }}
     >
       <Tabs.Screen name="dashboard"  options={{ title: 'لوحة التحكم', tabBarIcon: ({ color, size }) => <IconLayoutDashboard size={size} color={color} /> }} />
-      <Tabs.Screen name="tracks"     options={{ title: 'مساراتي',      tabBarIcon: ({ color, size }) => <IconSchool           size={size} color={color} /> }} />
+      <Tabs.Screen name="tracks"     options={{ title: 'مساراتي',      tabBarIcon: ({ color, size }) => <IconCalendarEvent    size={size} color={color} /> }} />
       <Tabs.Screen name="students"   options={{ title: 'طلابي',         tabBarIcon: ({ color, size }) => <IconUsers            size={size} color={color} /> }} />
       <Tabs.Screen name="attendance" options={{ title: 'الحضور',        tabBarIcon: ({ color, size }) => <IconCalendarCheck    size={size} color={color} />, tabBarBadge: '!' }} />
       <Tabs.Screen name="homework"   options={{ title: 'الواجبات',      tabBarIcon: ({ color, size }) => <IconMicrophone       size={size} color={color} />, tabBarBadge: '3' }} />

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Tabs } from 'expo-router';
 import {
-  IconLayoutDashboard, IconUsers, IconSchool, IconTarget, IconChartBar, IconDots,
+  IconLayoutDashboard, IconUsers, IconCalendarEvent, IconTarget, IconChartBar, IconDots,
 } from '@tabler/icons-react-native';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -36,7 +36,7 @@ export default function AdminTabLayout() {
     >
       <Tabs.Screen name="dashboard" options={{ title: 'لوحة التحكم', tabBarIcon: ({ color, size }) => <IconLayoutDashboard size={size} color={color} /> }} />
       <Tabs.Screen name="students"  options={{ title: 'الطلاب',       tabBarIcon: ({ color, size }) => <IconUsers           size={size} color={color} /> }} />
-      <Tabs.Screen name="tracks"    options={{ title: 'المسارات',      tabBarIcon: ({ color, size }) => <IconSchool          size={size} color={color} /> }} />
+      <Tabs.Screen name="tracks"    options={{ title: 'المسارات',      tabBarIcon: ({ color, size }) => <IconCalendarEvent   size={size} color={color} /> }} />
       <Tabs.Screen name="kpis"      options={{ title: 'المؤشرات',      tabBarIcon: ({ color, size }) => <IconTarget          size={size} color={color} /> }} />
       <Tabs.Screen name="reports"   options={{ title: 'التقارير',      tabBarIcon: ({ color, size }) => <IconChartBar        size={size} color={color} /> }} />
       {/* Opens the sheet instead of navigating to the (empty) more route. */}
