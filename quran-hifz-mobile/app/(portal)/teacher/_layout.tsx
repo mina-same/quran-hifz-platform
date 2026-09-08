@@ -12,7 +12,7 @@ import { createMoreTabButton } from '@/components/layout/MoreTabButton';
 
 // Nav items that have no tab of their own — the "المزيد" sheet lists exactly these.
 const MORE_IDS = [
-  'evaluate', 'recordlesson', 'grouphomework', 'plans', 'reports', 'special_tracks', 'settings',
+  'evaluate', 'recordlesson', 'grouphomework', 'plans', 'reports', 'settings',
 ];
 
 export default function TeacherTabLayout() {
@@ -37,7 +37,7 @@ export default function TeacherTabLayout() {
       }}
     >
       <Tabs.Screen name="dashboard"  options={{ title: 'لوحة التحكم', tabBarIcon: ({ color, size }) => <IconLayoutDashboard size={size} color={color} /> }} />
-      <Tabs.Screen name="myhalqa"    options={{ title: 'حلقاتي',       tabBarIcon: ({ color, size }) => <IconSchool           size={size} color={color} /> }} />
+      <Tabs.Screen name="tracks"     options={{ title: 'مساراتي',      tabBarIcon: ({ color, size }) => <IconSchool           size={size} color={color} /> }} />
       <Tabs.Screen name="students"   options={{ title: 'طلابي',         tabBarIcon: ({ color, size }) => <IconUsers            size={size} color={color} /> }} />
       <Tabs.Screen name="attendance" options={{ title: 'الحضور',        tabBarIcon: ({ color, size }) => <IconCalendarCheck    size={size} color={color} />, tabBarBadge: '!' }} />
       <Tabs.Screen name="homework"   options={{ title: 'الواجبات',      tabBarIcon: ({ color, size }) => <IconMicrophone       size={size} color={color} />, tabBarBadge: '3' }} />
@@ -54,7 +54,6 @@ export default function TeacherTabLayout() {
       <Tabs.Screen name="evaluate"      options={{ href: null, title: 'تقييم الجلسة' }} />
       <Tabs.Screen name="recordlesson"  options={{ href: null, title: 'تسجيل الدرس' }} />
       <Tabs.Screen name="grouphomework" options={{ href: null, title: 'واجب جماعي' }} />
-      <Tabs.Screen name="special_tracks" options={{ href: null, title: 'المسارات' }} />
       <Tabs.Screen name="track-detail"  options={{ href: null, title: 'تفاصيل المسار' }} />
       <Tabs.Screen name="settings" options={{ href: null, title: 'الملف الشخصي' }} />
     </Tabs>

@@ -11,7 +11,7 @@ import MoreSheet from '@/components/layout/MoreSheet';
 import { createMoreTabButton } from '@/components/layout/MoreTabButton';
 
 // Nav items with no tab of their own — the "المزيد" sheet lists exactly these.
-const MORE_IDS = ['schedule', 'special_tracks', 'points', 'store', 'settings'];
+const MORE_IDS = ['schedule', 'tracks', 'points', 'store', 'settings'];
 
 export default function StudentTabLayout() {
   const theme = useAppTheme();
@@ -48,7 +48,7 @@ export default function StudentTabLayout() {
       <Tabs.Screen name="schedule" options={{ href: null, title: 'المواعيد' }} />
       <Tabs.Screen name="points"   options={{ href: null, title: 'نقاطي' }} />
       <Tabs.Screen name="store"    options={{ href: null, title: 'المكافآت' }} />
-      <Tabs.Screen name="special_tracks" options={{ href: null, title: 'المسارات' }} />
+      <Tabs.Screen name="tracks" options={{ href: null, title: 'المسارات' }} />
       <Tabs.Screen name="settings" options={{ href: null, title: 'الملف الشخصي' }} />
     </Tabs>
 

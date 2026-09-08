@@ -5,7 +5,7 @@ export const PORTALS: Record<string, PortalConfig> = {
     badge: "بوابة الطالب",
     user: {
       name: "عبدالله الحميداني",
-      role: "طالب — حلقة عمر بن الخطاب",
+      role: "طالب — مسار عمر بن الخطاب",
       initials: "عح",
     },
     nav: [
@@ -40,16 +40,16 @@ export const PORTALS: Record<string, PortalConfig> = {
             id: "attendance",
             icon: "calendar-check",
             label: "الحضور والغياب",
-            desc: "سجل حضورك في الحلقة",
+            desc: "سجل حضورك في المسار",
           },
           {
             id: "schedule",
             icon: "clock",
-            label: "مواعيد حلقتي",
-            desc: "أوقات حلقتك الأسبوعية",
+            label: "مواعيد مساري",
+            desc: "أوقات مسارك الأسبوعية",
           },
           {
-            id: "special_tracks",
+            id: "tracks",
             icon: "calendar-event",
             label: "مساراتي",
             desc: "المسارات المسجَّل بها",
@@ -96,7 +96,7 @@ export const PORTALS: Record<string, PortalConfig> = {
     badge: "بوابة المعلم",
     user: {
       name: "ناصر الحميداني",
-      role: "معلم — حلقة عمر بن الخطاب",
+      role: "معلم — مسار عمر بن الخطاب",
       initials: "نح",
     },
     nav: [
@@ -107,24 +107,24 @@ export const PORTALS: Record<string, PortalConfig> = {
             id: "dashboard",
             icon: "layout-dashboard",
             label: "لوحة التحكم",
-            desc: "نظرة عامة على حلقاتك",
+            desc: "نظرة عامة على مساراتك",
           },
         ],
       },
       {
-        group: "الحلقات",
+        group: "المسارات",
         items: [
           {
-            id: "myhalqa",
+            id: "tracks",
             icon: "school",
-            label: "حلقاتي",
-            desc: "إدارة حلقاتك ومواعيدها",
+            label: "مساراتي",
+            desc: "إدارة مساراتك ومواعيدها",
           },
           {
             id: "students",
             icon: "users",
             label: "طلابي",
-            desc: "متابعة طلاب حلقاتك",
+            desc: "متابعة طلاب مساراتك",
           },
           {
             id: "attendance",
@@ -178,17 +178,6 @@ export const PORTALS: Record<string, PortalConfig> = {
         ],
       },
       {
-        group: "المسارات",
-        items: [
-          {
-            id: "special_tracks",
-            icon: "calendar-event",
-            label: "مساراتي",
-            desc: "المسارات المسجَّل بها",
-          },
-        ],
-      },
-      {
         group: "الحساب",
         items: [
           {
@@ -223,19 +212,19 @@ export const PORTALS: Record<string, PortalConfig> = {
             id: "students",
             icon: "users",
             label: "إدارة الطلاب",
-            desc: "بيانات الطلاب وحلقاتهم",
+            desc: "بيانات الطلاب ومساراتهم",
           },
           {
             id: "register",
             icon: "user-plus",
             label: "تسجيل طالب جديد",
-            desc: "إضافة طالب إلى حلقة",
+            desc: "إضافة طالب إلى مسار",
           },
           {
             id: "teachers",
             icon: "chalkboard",
             label: "المعلمون",
-            desc: "بيانات المعلمين وحلقاتهم",
+            desc: "بيانات المعلمين ومساراتهم",
           },
           {
             id: "parents",
@@ -246,13 +235,13 @@ export const PORTALS: Record<string, PortalConfig> = {
         ],
       },
       {
-        group: "الحلقات والمساجد",
+        group: "المسارات والمساجد",
         items: [
           {
-            id: "halqat",
+            id: "tracks",
             icon: "school",
-            label: "الحلقات",
-            desc: "إدارة الحلقات ومواعيدها",
+            label: "المسارات",
+            desc: "إدارة المسارات ومواعيدها",
           },
           {
             id: "masajid",
@@ -276,13 +265,6 @@ export const PORTALS: Record<string, PortalConfig> = {
             icon: "chart-bar",
             label: "التقارير",
             desc: "تقارير الحفظ والحضور",
-          },
-          {
-            id: "special_tracks",
-            icon: "calendar-event",
-            label: "المسارات",
-            desc: "إدارة المسارات وحلقاتها",
-            dot: true,
           },
         ],
       },
