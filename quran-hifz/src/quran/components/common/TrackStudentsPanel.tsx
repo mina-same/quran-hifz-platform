@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { useAssignStudent, type Track } from "../../api/tracks";
 import { useStudents } from "../../api/students";
 
@@ -68,8 +69,12 @@ export function TrackStudentsPanel({ track }: { track: Track }) {
               disabled={!addStudentId || assignStudent.isPending}
               onClick={async () => {
                 if (!addStudentId) return;
-                await assignStudent.mutateAsync({ id: track._id, studentId: addStudentId });
-                setAddStudentId("");
+                try {
+                  await assignStudent.mutateAsync({ id: track._id, studentId: addStudentId });
+                  setAddStudentId("");
+                } catch (e) {
+                  toast.error((e as Error).message);
+                }
               }}
             >
               {assignStudent.isPending

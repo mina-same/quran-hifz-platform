@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
@@ -70,7 +71,7 @@ export function TeacherHomework() {
                           value={hw.rating ?? ""}
                           onChange={(e) => {
                             if (!e.target.value) return;
-                            gradeHW.mutate({ id: hw._id, rating: e.target.value, status: "مراجع" });
+                            gradeHW.mutate({ id: hw._id, rating: e.target.value, status: "مراجع" }, { onError: (err) => toast.error((err as Error).message) });
                           }}
                         >
                           <option value="">اختر التقييم</option>
@@ -119,7 +120,7 @@ export function TeacherHomework() {
                       value={hw.rating ?? ""}
                       onChange={(e) => {
                         if (!e.target.value) return;
-                        gradeHW.mutate({ id: hw._id, rating: e.target.value, status: "مراجع" });
+                        gradeHW.mutate({ id: hw._id, rating: e.target.value, status: "مراجع" }, { onError: (err) => toast.error((err as Error).message) });
                       }}
                     >
                       <option value="">اختر التقييم</option>

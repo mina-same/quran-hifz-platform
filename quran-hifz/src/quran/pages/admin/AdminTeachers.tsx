@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
@@ -116,8 +117,12 @@ export function AdminTeachers() {
 
   async function handleDelete() {
     if (!deleteId) return;
-    try { await deleteTeacher.mutateAsync(deleteId); }
-    finally { setDeleteId(null); }
+    try {
+      await deleteTeacher.mutateAsync(deleteId);
+      setDeleteId(null);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   }
 
   useTopbar(

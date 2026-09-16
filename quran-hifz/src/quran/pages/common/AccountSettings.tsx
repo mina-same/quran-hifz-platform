@@ -63,19 +63,27 @@ export function AccountSettings() {
 
   async function onProfileSubmit(data: ProfileForm) {
     setProfileSaved(false);
-    const res = await updateProfile.mutateAsync(data.name);
-    updateUser({ name: res.user.name });
-    setProfileSaved(true);
+    try {
+      const res = await updateProfile.mutateAsync(data.name);
+      updateUser({ name: res.user.name });
+      setProfileSaved(true);
+    } catch {
+      // surfaced below via updateProfile.error
+    }
   }
 
   async function onPasswordSubmit(data: PasswordForm) {
     setPasswordSaved(false);
-    await changePassword.mutateAsync({
-      currentPassword: data.currentPassword,
-      newPassword: data.newPassword,
-    });
-    resetPassword();
-    setPasswordSaved(true);
+    try {
+      await changePassword.mutateAsync({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+      resetPassword();
+      setPasswordSaved(true);
+    } catch {
+      // surfaced below via changePassword.error
+    }
   }
 
   if (isLoading) {

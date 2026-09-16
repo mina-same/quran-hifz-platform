@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -87,9 +88,13 @@ export function AdminRegister() {
     if (data.email?.trim()) body.email    = data.email.trim();
     if (data.password)      body.password = data.password;
 
-    const res = await createStudent.mutateAsync(body);
-    reset();
-    if (res.credentials) setCredentials(res.credentials);
+    try {
+      const res = await createStudent.mutateAsync(body);
+      reset();
+      if (res.credentials) setCredentials(res.credentials);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   }
 
   return (

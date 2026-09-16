@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from "react";
+import { toast } from "sonner";
 import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
 import {
@@ -135,7 +136,14 @@ export function TeacherPlans() {
               <button
                 className="topbar-btn btn-primary"
                 style={{ flex: 1, justifyContent: "center", background: "#ef4444", borderColor: "#ef4444", padding: 11 }}
-                onClick={async () => { await deletePlan.mutateAsync(deleteId); setDeleteId(null); }}
+                onClick={async () => {
+                  try {
+                    await deletePlan.mutateAsync(deleteId);
+                    setDeleteId(null);
+                  } catch (e) {
+                    toast.error((e as Error).message);
+                  }
+                }}
                 disabled={deletePlan.isPending}
               >
                 <i className="ti ti-trash" />

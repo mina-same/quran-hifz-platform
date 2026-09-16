@@ -2,6 +2,7 @@
 
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
+| 2026-09-16 | User reported DELETE /api/tracks/... 400 surfaced only as an uncaught console error, no UI feedback. Fixed AdminTracks.tsx's delete button (no try/catch around mutateAsync) and, per user's ask to check for "other places," audited every mutateAsync/mutate call site in quran-hifz/src/quran: found and fixed the same unguarded pattern in TeacherPlans (delete plan), TeacherPlanDetail (confirmDeletePlan), AdminParents (handleUnlink), TrackStudentsPanel (assignStudent), TeacherGroupHomework (create+delete homework), AdminRegister (whole registration form had zero error feedback), AccountSettings (profile/password); fixed AdminTeachers.tsx's try/finally-no-catch and AdminMasajid.tsx's silently-swallowed catch (both hid failures); added onError toasts to bare .mutate() calls in IndividualPlanPanel (reflow), TeacherHomework (grade), TeacherTrackDetail (generateSchedule x2). All use the existing `toast.error((e as Error).message)` (sonner) convention already established in TeacherAttendance/TeacherTrackDetail/AdminTrackForm/TeacherPlanForm. tsc clean; eslint showed only pre-existing prettier drift (698 style-only, unrelated) + 1 pre-existing exhaustive-deps warning, neither touched. Logged as bug-405. | quran-hifz/src/quran/pages/admin/{AdminTracks,AdminMasajid,AdminTeachers,AdminParents,AdminRegister}.tsx, pages/common/AccountSettings.tsx, pages/teacher/{TeacherPlans,TeacherPlanDetail,TeacherGroupHomework,TeacherHomework,TeacherTrackDetail}.tsx, components/common/{TrackStudentsPanel,IndividualPlanPanel}.tsx | complete | ~35000 |
 | 2026-09-16 | User: admin #parents page stuck loading. Root cause: deleteStudent never cleaned up the matching ParentStudent link or the orphaned student User (dangling profileId), so after enough students had been deleted every ParentStudent link pointed at a missing Student — getParents populated `student` to null for every child, and AdminParents.tsx crashed rendering ChildChip name={c.name} on null (confirmed via browser console TypeError). Fixed: getParents filters null children; deleteStudent now always removes the ParentStudent link + orphaned student User, and deletes the linked parent User too when called with ?withParent=true and that parent has no other children; AdminStudents.tsx delete dialog now shows the linked parent name and offers "delete student only" vs "delete student and parent together" (per user request — "next time tell them to delete the parent first or add a button to delete both"). One-time cleanup (throwaway script): removed the 77 now-orphaned ParentStudent links and 76 parent accounts left with zero children. tsc --noEmit clean on both server and web. Logged as bug-404. Not done: the 75 dangling student-role Users (real ACCOUNTS.md accounts with no backing Student doc) were left untouched — would need the same reconstruction as bug-401 if the user wants those restored; mobile app's useDeleteStudent untouched (still backward compatible, no withParent UI there). | quran-hifz-server/src/controllers/admin.controller.ts, controllers/student.controller.ts, quran-hifz/src/quran/pages/admin/AdminStudents.tsx, api/students.ts | complete | ~55000 |
 | 2026-09-06 | Task 14: IndividualPlanPanel.tsx comment fix (Phase 2 web). Updated JSDoc comment (lines 67-70) from "halqa/specialTrack-targeted plans" to "track-targeted plans". Comment-only change, no code logic. tsc --noEmit: no new errors (pre-existing errors unchanged). Committed d258a4a. | quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | complete | ~600 |
 | 2026-09-05 | Task 7: AdminMasajid.tsx — gender field + tracks list (Phase 2 web). Updated Masjid type: added gender:"male"|"female" field, replaced halqat with tracks array (title/daysPerWeek/timeSlot/maxStudents/status). AdminMasajid.tsx: added gender state + UI (2-button toggle), seeded on add (default "male") and edit (from item.gender), included in create/update mutations. Replaced "حلقات" badge with "مسارات", replaced nested halqat list with tracks showing status badges (نشط/قادم/منتهي) instead of enrollment ratio (API doesn't provide per-track counts). Updated topbar title "المساجد والحلقات" → "المساجد والمسارات". tsc --noEmit: no errors in modified files. Committed dccc82d. | quran-hifz/src/quran/api/masajid.ts, quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | complete | ~2500 |
@@ -3927,3 +3928,57 @@
 |------|--------|---------|---------|--------|
 | 23:51 | Edited quran-hifz-mobile/app/(portal)/admin/register.tsx | 9→4 lines | ~40 |
 | 23:51 | Edited quran-hifz/src/quran/components/common/TrackStudentsPanel.tsx | added 1 import(s) | ~52 |
+| 23:52 | Edited quran-hifz/src/quran/components/common/TrackStudentsPanel.tsx | added error handling | ~101 |
+| 23:52 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | added 1 import(s) | ~34 |
+| 23:52 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | added error handling | ~60 |
+| 23:52 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx | added 1 import(s) | ~35 |
+| 23:52 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanDetail.tsx | added error handling | ~61 |
+| 23:52 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | added 1 import(s) | ~34 |
+| 23:52 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | added error handling | ~159 |
+| 23:52 | Edited quran-hifz/src/quran/pages/teacher/TeacherGroupHomework.tsx | inline fix | ~32 |
+| 23:53 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | added 1 import(s) | ~41 |
+| 23:53 | Created quran-hifz-mobile/lib/constants/genderScope.ts | — | ~442 |
+| 23:53 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlans.tsx | added error handling | ~82 |
+| 23:53 | Edited quran-hifz-mobile/lib/store/portalStore.ts | added 1 import(s) | ~152 |
+| 23:53 | Edited quran-hifz-mobile/lib/store/portalStore.ts | 5→7 lines | ~101 |
+| 23:53 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | added 1 import(s) | ~34 |
+| 23:53 | Edited quran-hifz-mobile/lib/store/portalStore.ts | 3→4 lines | ~56 |
+| 23:53 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | added error handling | ~61 |
+| 23:53 | Edited quran-hifz-mobile/lib/store/portalStore.ts | 3→4 lines | ~24 |
+| 23:53 | Edited quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | added 1 import(s) | ~34 |
+| 23:53 | Edited quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | modified catch() | ~44 |
+| 23:53 | Edited quran-hifz-mobile/lib/store/portalStore.ts | modified if() | ~648 |
+| 23:53 | Edited quran-hifz-mobile/lib/store/portalStore.ts | 6→11 lines | ~126 |
+| 23:53 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | added 1 import(s) | ~34 |
+| 23:53 | Edited quran-hifz-mobile/components/layout/MoreSheet.tsx | expanded (+8 lines) | ~115 |
+| 23:53 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | added error handling | ~60 |
+| 23:53 | Edited quran-hifz-mobile/components/layout/MoreSheet.tsx | 2→2 lines | ~39 |
+| 23:54 | Edited quran-hifz-mobile/components/layout/MoreSheet.tsx | expanded (+11 lines) | ~121 |
+| 23:54 | Edited quran-hifz-mobile/components/layout/MoreSheet.tsx | CSS: genderScope, paddingHorizontal, paddingTop | ~32 |
+| 23:54 | Edited quran-hifz-mobile/app/(portal)/admin/masajid.tsx | CSS: allMasajid | ~184 |
+| 23:54 | Edited quran-hifz/src/quran/pages/common/AccountSettings.tsx | added error handling | ~188 |
+| 23:54 | Edited quran-hifz-mobile/app/(portal)/admin/tracks.tsx | added 2 import(s) | ~64 |
+| 23:54 | Edited quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | added 1 import(s) | ~28 |
+| 23:54 | Edited quran-hifz-mobile/app/(portal)/admin/tracks.tsx | 1→3 lines | ~66 |
+| 23:54 | Edited quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | inline fix | ~34 |
+| 23:54 | Edited quran-hifz-mobile/app/(portal)/admin/students.tsx | added 2 import(s) | ~51 |
+| 23:54 | Edited quran-hifz/src/quran/pages/teacher/TeacherHomework.tsx | added 1 import(s) | ~41 |
+| 23:54 | Edited quran-hifz-mobile/app/(portal)/admin/students.tsx | CSS: undefined | ~102 |
+| 23:54 | Edited quran-hifz-mobile/app/(portal)/admin/teachers.tsx | added 3 import(s) | ~86 |
+| 23:55 | Edited quran-hifz-mobile/app/(portal)/admin/teachers.tsx | CSS: allTeachers | ~109 |
+| 23:55 | Edited quran-hifz-mobile/lib/queries/stats.ts | added nullish coalescing | ~214 |
+| 23:55 | Edited quran-hifz-mobile/app/(portal)/admin/dashboard.tsx | added 2 import(s) | ~98 |
+| 23:55 | Edited quran-hifz-mobile/app/(portal)/admin/dashboard.tsx | CSS: undefined | ~208 |
+| 23:55 | Edited quran-hifz-mobile/components/domain/ReportsScreen.tsx | added 1 import(s) | ~52 |
+| 23:55 | Edited quran-hifz-mobile/components/domain/ReportsScreen.tsx | modified ReportsScreen() | ~124 |
+| 23:55 | Edited quran-hifz-mobile/components/domain/ReportsScreen.tsx | CSS: undefined | ~427 |
+| 23:56 | Edited quran-hifz-mobile/components/domain/ReportsScreen.tsx | inline fix | ~27 |
+| 23:56 | Edited quran-hifz-mobile/components/domain/ReportsScreen.tsx | 2→2 lines | ~24 |
+| 23:56 | Edited quran-hifz-mobile/components/domain/ReportsScreen.tsx | 10→11 lines | ~132 |
+| 23:56 | Edited quran-hifz-mobile/components/domain/ReportsScreen.tsx | inline fix | ~25 |
+| 23:56 | Edited quran-hifz-mobile/app/(portal)/admin/reports.tsx | added 1 import(s) | ~86 |
+| 23:56 | Edited quran-hifz-mobile/app/(portal)/admin/reports.tsx | 8→9 lines | ~66 |
+| 23:58 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/b9799155-a8b0-4166-8993-e6f0a4d10143/scratchpad/add_bug405.py | — | ~1092 |
+| 23:58 | Session end: 53 writes across 24 files (register.tsx, TrackStudentsPanel.tsx, AdminParents.tsx, TeacherPlanDetail.tsx, TeacherGroupHomework.tsx) | 13 reads | ~36108 tok |
+| 23:58 | Session end: 53 writes across 24 files (register.tsx, TrackStudentsPanel.tsx, AdminParents.tsx, TeacherPlanDetail.tsx, TeacherGroupHomework.tsx) | 13 reads | ~36108 tok |
+| 00:00 | Session end: 53 writes across 24 files (register.tsx, TrackStudentsPanel.tsx, AdminParents.tsx, TeacherPlanDetail.tsx, TeacherGroupHomework.tsx) | 13 reads | ~36108 tok |

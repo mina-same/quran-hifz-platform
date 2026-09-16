@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "./Badge";
 import { Alert } from "./Alert";
 import { SkeletonCard } from "./Skeleton";
@@ -201,7 +202,7 @@ export function IndividualPlanPanel({
         <button
           className="topbar-btn btn-ghost"
           style={{ fontSize: 11 }}
-          onClick={() => reflow.mutate({ planId, studentId })}
+          onClick={() => reflow.mutate({ planId, studentId }, { onError: (e) => toast.error((e as Error).message) })}
           disabled={reflow.isPending}
         >
           {reflow.isPending

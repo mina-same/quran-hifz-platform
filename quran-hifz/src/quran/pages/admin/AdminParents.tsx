@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
@@ -113,7 +114,11 @@ export function AdminParents() {
   }
 
   async function handleUnlink(parentId: string, studentId: string) {
-    await unlinkChild.mutateAsync({ parentId, studentId });
+    try {
+      await unlinkChild.mutateAsync({ parentId, studentId });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   }
 
   const linkedStudentIds   = new Set(linkParent?.children.map((c) => c._id) ?? []);

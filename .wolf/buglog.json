@@ -6871,5 +6871,25 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-09-16T00:00:00"
+  },
+  {
+    "id": "bug-405",
+    "timestamp": "2026-09-16T01:00:00",
+    "error_message": "User: DELETE /api/tracks/... 400 (لا يمكن حذف مسار به سجلات تاريخية مرتبطة به) showed up only as an uncaught console error (Uncaught (in promise) ApiError) with no visible feedback in the UI",
+    "file": "quran-hifz/src/quran/pages/admin/{AdminTracks,AdminMasajid,AdminTeachers,AdminParents,AdminRegister}.tsx, pages/common/AccountSettings.tsx, pages/teacher/{TeacherPlans,TeacherPlanDetail,TeacherGroupHomework,TeacherHomework,TeacherTrackDetail}.tsx, components/common/{TrackStudentsPanel,IndividualPlanPanel}.tsx",
+    "root_cause": "AdminTracks.tsx delete-track button did onClick={async () => { await deleteTrack.mutateAsync(deleteId); setDeleteId(null); }} with no try/catch, so a rejected mutateAsync (any 4xx from the server, e.g. the deleteTrack historical-records guard) became an unhandled promise rejection -- console-only, invisible in the UI. Audited every other .mutateAsync(/.mutate( call site across the web app (quran-hifz/src/quran) for the same shape: found the identical unguarded pattern in TeacherPlans.tsx (delete plan), TeacherPlanDetail.tsx (confirmDeletePlan), AdminParents.tsx (handleUnlink), TrackStudentsPanel.tsx (assignStudent), TeacherGroupHomework.tsx (handleAdd + delete homework .mutate), AdminRegister.tsx (createStudent, whole registration form had zero error feedback), AccountSettings.tsx (profile/password, though these were already partly covered by an inline <Alert> reading mutation.error -- just also silently unhandled-rejected); AdminTeachers.tsx handleDelete used try/finally with NO catch (same unhandled-rejection bug, plus finally always closed the dialog as if it succeeded); AdminMasajid.tsx handleDelete had a catch block that swallowed the error entirely (catch { setDeleteId(null) }) with zero feedback -- silent failure, worse than uncaught since it looks like success; IndividualPlanPanel.tsx (reflow.mutate), TeacherHomework.tsx (gradeHW.mutate x2), TeacherTrackDetail.tsx (generateSchedule.mutate x2) were fire-and-forget .mutate() calls with no onError.",
+    "fix": "Added a sonner toast import + try/catch (or onError option for bare .mutate() calls) to every unguarded site listed above, using the same toast.error((e as Error).message) convention already established in TeacherAttendance.tsx/TeacherTrackDetail.tsx/AdminTrackForm.tsx/TeacherPlanForm.tsx. AdminMasajid.tsx no longer swallows the error silently. AdminTeachers.tsx now uses try/catch instead of try/finally so a failed delete surfaces a toast instead of just closing the dialog. Left as-is (judged low-stakes, not silent-failure-risk): StudentMessages.tsx markRead.mutate (marking a message read failing has no real consequence). tsc --noEmit clean; eslint showed only pre-existing prettier formatting drift (698 auto-fixable style nits untouched by this change, one pre-existing react-hooks/exhaustive-deps warning in TeacherTrackDetail.tsx unrelated to the edited lines) -- not touched, out of scope.",
+    "tags": [
+      "error-handling",
+      "toast",
+      "unhandled-rejection",
+      "ux",
+      "sonner"
+    ],
+    "related_bugs": [
+      "bug-404"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-09-16T01:00:00"
   }
 ]

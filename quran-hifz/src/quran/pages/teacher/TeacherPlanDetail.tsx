@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
 import {
@@ -58,8 +59,12 @@ export function TeacherPlanDetail() {
   }
   async function confirmDeletePlan() {
     if (!plan) return;
-    await deletePlan.mutateAsync(plan._id);
-    showPage("plans");
+    try {
+      await deletePlan.mutateAsync(plan._id);
+      showPage("plans");
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   }
 
   if (!planId) {

@@ -471,7 +471,7 @@ export function TeacherTrackDetail() {
     setOpenPlanSection(opening ? "schedule" : null);
     setEditingDay(null);
     if (opening && linkedPlan && !linkedPlan.scheduleIsPersisted) {
-      generateSchedule.mutate(linkedPlan._id);
+      generateSchedule.mutate(linkedPlan._id, { onError: (e) => toast.error((e as Error).message) });
     }
   }
 
@@ -490,7 +490,7 @@ export function TeacherTrackDetail() {
   function handleRegenerateSchedule() {
     if (!linkedPlan || !guardDiscardDayEdit()) return;
     setEditingDay(null);
-    generateSchedule.mutate(linkedPlan._id);
+    generateSchedule.mutate(linkedPlan._id, { onError: (e) => toast.error((e as Error).message) });
   }
 
   async function saveEditDay() {

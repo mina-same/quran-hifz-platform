@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { useTopbar } from "../../context/useTopbar";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonList } from "../../components/common/Skeleton";
@@ -89,8 +90,8 @@ export function AdminMasajid() {
     try {
       await deleteMasjid.mutateAsync(deleteId);
       setDeleteId(null);
-    } catch {
-      setDeleteId(null);
+    } catch (e) {
+      toast.error((e as Error).message);
     }
   }
 

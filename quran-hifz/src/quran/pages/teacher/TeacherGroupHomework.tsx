@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import { useGroupHomework, useCreateGroupHomework, useDeleteGroupHomework } from "../../api/group-homework";
@@ -123,17 +124,21 @@ export function TeacherGroupHomework() {
 
   async function handleAdd() {
     if (!selected || !form.title.trim() || !form.desc.trim()) return;
-    await createHW.mutateAsync({
-      track:       selected.id,
-      title:       form.title,
-      description: form.desc,
-      dueDay:      form.dueDay,
-      dueDate:     new Date().toISOString(),
-    });
-    setForm({ title: "", desc: "", dueDay: DAYS[0] });
-    setShowForm(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      await createHW.mutateAsync({
+        track:       selected.id,
+        title:       form.title,
+        description: form.desc,
+        dueDay:      form.dueDay,
+        dueDate:     new Date().toISOString(),
+      });
+      setForm({ title: "", desc: "", dueDay: DAYS[0] });
+      setShowForm(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   }
 
   // ── View 1: context selector ──────────────────────────────────────
@@ -208,7 +213,7 @@ export function TeacherGroupHomework() {
               <button
                 className="topbar-btn btn-danger"
                 style={{ padding: "5px 10px", fontSize: 12 }}
-                onClick={() => deleteHW.mutate(hw._id)}
+                onClick={() => deleteHW.mutate(hw._id, { onError: (e) => toast.error((e as Error).message) })}
                 disabled={deleteHW.isPending}
               >
                 <i className="ti ti-trash" />
