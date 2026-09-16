@@ -17,7 +17,6 @@ const schema = z.object({
     .optional()
     .or(z.literal(""))
     .refine((v) => !v || /^[12]\d{9}$/.test(v), "رقم الهوية ١٠ أرقام ويبدأ بـ ١ أو ٢"),
-  age: z.string().min(1, "العمر مطلوب").refine((v) => Number(v) >= 4 && Number(v) <= 80, "العمر بين ٤ و٨٠"),
   guardianPhone: z
     .string()
     .min(1, "جوال ولي الأمر مطلوب")
@@ -69,10 +68,9 @@ export function AdminRegister() {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const level = watch("level");
-  const age = watch("age");
   const masar = useMemo(
-    () => pickMasar(level, age ? parseInt(age) : undefined),
-    [level, age],
+    () => pickMasar(level, undefined),
+    [level],
   );
 
   async function onSubmit(data: FormData) {
@@ -119,11 +117,6 @@ export function AdminRegister() {
               <small style={{ fontSize: 11, color: "var(--text3)" }}>
                 هوية وطنية (تبدأ بـ ١) أو إقامة (تبدأ بـ ٢)
               </small>
-            </div>
-            <div className="form-group">
-              <label className="form-label">العمر <span>*</span></label>
-              <input className="form-input" type="number" placeholder="بالسنوات" min={4} max={80} {...register("age")} />
-              <FieldError msg={errors.age?.message} />
             </div>
             <div className="form-group">
               <label className="form-label">جوال ولي الأمر <span>*</span></label>

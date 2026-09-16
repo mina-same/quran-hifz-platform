@@ -19,13 +19,13 @@ import { useAppTheme } from '@/lib/hooks/useAppTheme';
 type AppTheme = ReturnType<typeof useAppTheme>;
 
 type Fields = {
-  name: string; age: string; guardianPhone: string; nationalId: string;
+  name: string; guardianPhone: string; nationalId: string;
   level: string; studentLevel: string;
   masjid: string; halqa: string;
   email: string; password: string;
 };
 const EMPTY: Fields = {
-  name: '', age: '', guardianPhone: '', nationalId: '', level: '', studentLevel: '',
+  name: '', guardianPhone: '', nationalId: '', level: '', studentLevel: '',
   masjid: '', halqa: '', email: '', password: '',
 };
 
@@ -33,8 +33,6 @@ const EMPTY: Fields = {
  *  message a user sees matches between the two clients. */
 function validate(f: Fields): string | null {
   if (f.name.trim().length < 2) return 'الاسم مطلوب (٢ أحرف على الأقل)';
-  if (!f.age.trim()) return 'العمر مطلوب';
-  if (Number(f.age) < 4 || Number(f.age) > 80) return 'العمر بين ٤ و٨٠';
   if (!f.guardianPhone.trim()) return 'جوال ولي الأمر مطلوب';
   if (!/^05\d{8}$/.test(f.guardianPhone.trim())) return 'صيغة الجوال: 05XXXXXXXX';
   // Optional, but must be well-formed when provided.
@@ -64,10 +62,10 @@ export default function AdminRegister() {
     setForm((f) => ({ ...f, [k]: v }));
   }
 
-  // The programme is derived from the reading level + age, never picked by hand.
+  // The programme is derived from the reading level, never picked by hand.
   const masar = useMemo(
-    () => pickMasar(form.level, form.age ? parseInt(form.age, 10) : undefined),
-    [form.level, form.age],
+    () => pickMasar(form.level, undefined),
+    [form.level],
   );
 
   async function handleSubmit() {
@@ -112,9 +110,6 @@ export default function AdminRegister() {
             <View style={s.formCol}>
               <FormGroup label="الاسم الكامل" required>
                 <FormInput placeholder="اسم الطالب رباعياً" value={form.name} onChangeText={(v) => sf('name', v)} />
-              </FormGroup>
-              <FormGroup label="العمر" required>
-                <FormInput placeholder="بالسنوات" keyboardType="number-pad" value={form.age} onChangeText={(v) => sf('age', v)} />
               </FormGroup>
               <FormGroup label="رقم الهوية">
                 <FormInput
