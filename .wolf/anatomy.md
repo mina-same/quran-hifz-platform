@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-16T20:49:55.963Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-16T20:51:59.900Z
 > Files: 697 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
@@ -522,7 +522,7 @@
 - `kpis.tsx` — ratingVariant (~1020 tok)
 - `masajid.tsx` — masjidIdOf (~692 tok)
 - `parents.tsx` — EMPTY_ADD — renders form (~4595 tok)
-- `register.tsx` — Same rules as the web's zod schema — kept in the same order so the first (~2904 tok)
+- `register.tsx` — EMPTY — renders form (~2708 tok)
 - `reports.tsx` — AdminReports (~562 tok)
 - `special_tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~12026 tok)
 - `students.tsx` — المسار: real track lives one hop away via halqa.specialTrack, not the unused legacy `path` enum. (~1577 tok)
@@ -988,7 +988,7 @@
 - `StatsRow.tsx` — StatsRow (~146 tok)
 - `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from a student's plans — no dedicated (~5066 tok)
 - `SurahRangePicker.tsx` — SurahPointFields (~439 tok)
-- `TrackStudentsPanel.tsx` — Track roster management — transfer-only, since a student's track is (~1958 tok)
+- `TrackStudentsPanel.tsx` — Track roster management — transfer-only, since a student's track is (~1967 tok)
 
 ## quran-hifz/src/quran/config/
 
