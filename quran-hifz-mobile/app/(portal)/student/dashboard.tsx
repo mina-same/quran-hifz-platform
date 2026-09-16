@@ -23,6 +23,10 @@ function getName(v: unknown): string {
   if (v && typeof v === 'object' && 'name' in v) return (v as { name: string }).name;
   return '—';
 }
+function getTrackName(v: unknown): string {
+  if (v && typeof v === 'object' && 'title' in v) return (v as { title: string }).title;
+  return '—';
+}
 
 export default function StudentDashboard() {
   const theme = useAppTheme();
@@ -65,8 +69,8 @@ export default function StudentDashboard() {
   const juz = Math.round((student.progressPct / 100) * 30);
   // Same badge the web shows: strong attendance AND real progress.
   const isTopStudent = student.attendancePct >= 90 && student.progressPct >= 60;
-  const halqaObj = typeof student.halqa === 'object' ? student.halqa : null;
-  const halqaSchedule = halqaObj?.days && halqaObj?.time ? `${halqaObj.days} | ${halqaObj.time}` : null;
+  const trackObj = typeof student.track === 'object' ? student.track : null;
+  const trackSchedule = trackObj?.daysPerWeek && trackObj?.timeSlot ? `${trackObj.daysPerWeek} | ${trackObj.timeSlot}` : null;
 
   const STATS = [
     { label: 'جزءاً محفوظاً', value: juz, color: theme.green },
@@ -118,26 +122,26 @@ export default function StudentDashboard() {
             )}
           </Card>
 
-          {/* Halqa info */}
+          {/* Track info */}
           <Card>
-            <CardHeader title="معلومات حلقتي" />
+            <CardHeader title="معلومات مساري" />
             <View style={styles.infoRow}>
-              <Text style={styles.infoKey}>الحلقة</Text>
-              <Text style={[styles.infoVal, { color: theme.green }]}>{getName(student.halqa)}</Text>
+              <Text style={styles.infoKey}>المسار</Text>
+              <Text style={[styles.infoVal, { color: theme.green }]}>{getTrackName(student.track)}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoKey}>المسجد</Text>
-              <Text style={styles.infoVal}>{getName(student.masjid)}</Text>
+              <Text style={styles.infoVal}>{getName(trackObj?.masjid)}</Text>
             </View>
-            {!!halqaSchedule && (
+            {!!trackSchedule && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoKey}>المواعيد</Text>
-                <Text style={styles.infoVal}>{halqaSchedule}</Text>
+                <Text style={styles.infoVal}>{trackSchedule}</Text>
               </View>
             )}
             {isTopStudent && (
               <View style={styles.topAlert}>
-                <Alert variant="success">أنت من أفضل طلاب الحلقة هذا الأسبوع!</Alert>
+                <Alert variant="success">أنت من أفضل طلاب المسار هذا الأسبوع!</Alert>
               </View>
             )}
           </Card>

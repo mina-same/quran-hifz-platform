@@ -8,7 +8,7 @@ import Alert from "@/components/ui/Alert";
 import { SkeletonRows } from "@/components/ui/Skeleton";
 import { usePortalStore } from "@/lib/store/portalStore";
 import { useStudent } from "@/lib/queries/students";
-import { useHalqa } from "@/lib/queries/halqat";
+import { useTrack, type TrackTeacher } from "@/lib/queries/tracks";
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
@@ -34,6 +34,9 @@ function getName(v: unknown): string {
     return (v as { name: string }).name;
   return "—";
 }
+function getTeacherNames(teachers: (TrackTeacher | string)[]): string {
+  return teachers.map((t) => (typeof t === "object" ? t.name : t)).join("، ") || "—";
+}
 
 export default function StudentSchedule() {
   const theme = useAppTheme();
@@ -48,20 +51,20 @@ export default function StudentSchedule() {
     isRefetching: studentRefetching,
     refetch: refetchStudent,
   } = useStudent(studentId);
-  const halqaId = student ? getId(student.halqa) : undefined;
+  const trackId = student ? getId(student.track) : undefined;
   const {
-    data: halqa,
-    isLoading: halqaLoading,
-    isError: halqaError,
-    isRefetching: halqaRefetching,
-    refetch: refetchHalqa,
-  } = useHalqa(halqaId);
+    data: track,
+    isLoading: trackLoading,
+    isError: trackError,
+    isRefetching: trackRefetching,
+    refetch: refetchTrack,
+  } = useTrack(trackId);
 
-  const isLoading = studentLoading || (!!halqaId && halqaLoading);
-  const isRefetching = studentRefetching || (!!halqaId && halqaRefetching);
+  const isLoading = studentLoading || (!!trackId && trackLoading);
+  const isRefetching = studentRefetching || (!!trackId && trackRefetching);
   const onRefresh = () => {
     refetchStudent();
-    if (halqaId) refetchHalqa();
+    if (trackId) refetchTrack();
   };
 
   if (isLoading) {
@@ -74,18 +77,18 @@ export default function StudentSchedule() {
     );
   }
 
-  if (studentError || halqaError) {
+  if (studentError || trackError) {
     return (
       <SafeAreaView style={styles.safe} edges={["bottom"]}>
         <View style={styles.page}>
-          <Alert variant="error">تعذر تحميل مواعيد الحلقة</Alert>
+          <Alert variant="error">تعذر تحميل مواعيد المسار</Alert>
         </View>
       </SafeAreaView>
     );
   }
 
   const sessionDays = new Set(
-    (halqa?.days ?? "")
+    (track?.daysPerWeek ?? "")
       .split(/[،,]/)
       .map((d) => d.trim())
       .filter(Boolean),
@@ -105,21 +108,21 @@ export default function StudentSchedule() {
           />
         }
       >
-        {!halqa ? (
+        {!track ? (
           <Card>
-            <Text style={styles.emptyText}>لا توجد حلقة مسجلة بعد</Text>
+            <Text style={styles.emptyText}>لا يوجد مسار مسجل بعد</Text>
           </Card>
         ) : (
           <>
-            {/* Halqa info */}
+            {/* Track info */}
             <Card>
-              <CardHeader title="تفاصيل الحلقة" />
+              <CardHeader title="تفاصيل المسار" />
               <View style={styles.grid}>
                 {[
-                  ["الحلقة", halqa.name],
-                  ["المعلم", getName(halqa.teacher)],
-                  ["المسجد", getName(halqa.masjid)],
-                  ["الوقت", halqa.time || "—"],
+                  ["المسار", track.title],
+                  ["المعلمون", getTeacherNames(track.teachers)],
+                  ["المسجد", getName(track.masjid)],
+                  ["الوقت", track.timeSlot || "—"],
                 ].map(([k, v]) => (
                   <View key={k} style={styles.gridItem}>
                     <Text style={styles.gridLabel}>{k}</Text>
@@ -155,7 +158,7 @@ export default function StudentSchedule() {
                       </Text>
                       {isSession ? (
                         <Text style={styles.sessionTime}>
-                          {halqa.time || "—"}
+                          {track.timeSlot || "—"}
                         </Text>
                       ) : (
                         <Text style={styles.dash}>—</Text>
@@ -169,7 +172,7 @@ export default function StudentSchedule() {
                   <View
                     style={[styles.legendDot, { backgroundColor: theme.greenAccent }]}
                   />
-                  <Text style={styles.legendText}>يوم حلقة</Text>
+                  <Text style={styles.legendText}>يوم مسار</Text>
                 </View>
                 <View style={styles.legendItem}>
                   <View

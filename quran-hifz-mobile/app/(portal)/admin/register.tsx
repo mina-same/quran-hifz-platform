@@ -11,8 +11,7 @@ import FormGroup from '@/components/forms/FormGroup';
 import FormInput from '@/components/forms/FormInput';
 import FormSelect from '@/components/forms/FormSelect';
 import { useCreateStudent } from '@/lib/queries/students';
-import { useMasajid } from '@/lib/queries/masajid';
-import { useHalqat } from '@/lib/queries/halqat';
+import { useTracks } from '@/lib/queries/tracks';
 import { pickMasar, READING_LEVELS } from '@/lib/constants/masarMap';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -21,16 +20,14 @@ type AppTheme = ReturnType<typeof useAppTheme>;
 type Fields = {
   name: string; guardianPhone: string; nationalId: string;
   level: string; studentLevel: string;
-  masjid: string; halqa: string;
+  track: string;
   email: string; password: string;
 };
 const EMPTY: Fields = {
   name: '', guardianPhone: '', nationalId: '', level: '', studentLevel: '',
-  masjid: '', halqa: '', email: '', password: '',
+  track: '', email: '', password: '',
 };
 
-/** Same rules as the web's zod schema — kept in the same order so the first
- *  message a user sees matches between the two clients. */
 function validate(f: Fields): string | null {
   if (f.name.trim().length < 2) return 'الاسم مطلوب (٢ أحرف على الأقل)';
   if (!f.guardianPhone.trim()) return 'جوال ولي الأمر مطلوب';
@@ -39,8 +36,7 @@ function validate(f: Fields): string | null {
   if (f.nationalId.trim() && !/^[12]\d{9}$/.test(f.nationalId.trim())) return 'رقم الهوية ١٠ أرقام ويبدأ بـ ١ أو ٢';
   if (!f.level) return 'يرجى اختيار مستوى القراءة';
   if (f.studentLevel.trim() && (Number(f.studentLevel) < 1 || Number(f.studentLevel) > 10)) return 'المستوى بين ١ و١٠';
-  if (!f.masjid) return 'يرجى اختيار المسجد';
-  if (!f.halqa) return 'يرجى اختيار الحلقة';
+  if (!f.track) return 'يرجى اختيار المسار';
   if (f.email.trim() && !/^\S+@\S+\.\S+$/.test(f.email.trim())) return 'البريد الإلكتروني غير صحيح';
   return null;
 }
@@ -49,8 +45,7 @@ export default function AdminRegister() {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
 
-  const { data: masajid = [] } = useMasajid();
-  const { data: halqat = [] } = useHalqat();
+  const { data: tracks = [] } = useTracks();
   const createStudent = useCreateStudent();
 
   const [form, setForm] = useState<Fields>(EMPTY);
@@ -77,8 +72,7 @@ export default function AdminRegister() {
       guardian: '',
       guardianPhone: form.guardianPhone.trim(),
       nationalId: form.nationalId.trim() || undefined,
-      halqa: form.halqa,
-      masjid: form.masjid,
+      track: form.track,
       path: masar?.path ?? 'حفظ كامل',
       status: 'new',
     };
@@ -154,28 +148,20 @@ export default function AdminRegister() {
                 <Text style={s.masarLabel}>المسار المقترح تلقائياً</Text>
                 <Text style={s.masarName}>{masar.name}</Text>
                 <Text style={s.masarDesc}>{masar.desc}</Text>
-                <Text style={s.masarHalqa}>الحلقة المقترحة: {masar.halqa}</Text>
+                <Text style={s.masarHalqa}>المسار المقترح: {masar.halqa}</Text>
               </View>
             )}
           </Card>
 
           <Card>
-            <CardHeader title="المسجد والحلقة" />
+            <CardHeader title="المسار" />
             <View style={s.formCol}>
-              <FormGroup label="المسجد" required>
+              <FormGroup label="المسار" required>
                 <FormSelect
-                  value={form.masjid}
-                  onChange={(v) => sf('masjid', v)}
-                  options={masajid.map((m) => ({ value: m._id, label: m.name }))}
-                  placeholder="اختر المسجد"
-                />
-              </FormGroup>
-              <FormGroup label="الحلقة" required>
-                <FormSelect
-                  value={form.halqa}
-                  onChange={(v) => sf('halqa', v)}
-                  options={halqat.map((h) => ({ value: h._id, label: h.name }))}
-                  placeholder="اختر الحلقة"
+                  value={form.track}
+                  onChange={(v) => sf('track', v)}
+                  options={tracks.map((t) => ({ value: t._id, label: t.title }))}
+                  placeholder="اختر المسار"
                 />
               </FormGroup>
             </View>

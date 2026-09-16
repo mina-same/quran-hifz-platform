@@ -29,7 +29,7 @@ interface Props {
   planId: string;
   studentId: string;
   studentName: string;
-  /** The shared halqa/track plan this student's overlay hangs off — used as the
+  /** The shared track plan this student's overlay hangs off — used as the
    * default custom-range seed and the direction fallback before the student has
    * any occurrences of their own. */
   basePlan: QuranPlan;

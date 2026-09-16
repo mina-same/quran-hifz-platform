@@ -5,7 +5,7 @@ import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-  IconPlus, IconPencil, IconCopy, IconTrash, IconSchool, IconCalendarEvent,
+  IconPlus, IconPencil, IconCopy, IconTrash, IconCalendarEvent,
   IconUsers, IconCalendarWeek, IconBook, IconBook2, IconFiles, IconCalendarDue,
   IconProgress, IconCalendarStar,
 } from '@tabler/icons-react-native';
@@ -31,11 +31,8 @@ const STATUS_VARIANT: Record<QuranPlan['status'], 'green' | 'gold' | 'gray'> = {
 };
 
 function targetLabel(plan: QuranPlan): string {
-  if (plan.targetType === 'halqa') {
-    return typeof plan.halqa === 'object' ? plan.halqa?.name ?? '—' : '—';
-  }
-  if (plan.targetType === 'specialTrack') {
-    return typeof plan.specialTrack === 'object' ? plan.specialTrack?.title ?? '—' : '—';
+  if (plan.targetType === 'track') {
+    return typeof plan.track === 'object' ? plan.track?.title ?? '—' : '—';
   }
   return `${plan.students?.length ?? 0} طالب محدد`;
 }
@@ -80,11 +77,9 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
     ? `${plan.juzProgress.completed} / ${plan.juzProgress.total} جزء`
     : `${plan.progress?.percent ?? 0}%`;
 
-  const targetIcon = plan.targetType === 'halqa'
-    ? <IconSchool size={15} color={theme.textMuted} />
-    : plan.targetType === 'specialTrack'
-      ? <IconCalendarEvent size={15} color={theme.textMuted} />
-      : <IconUsers size={15} color={theme.textMuted} />;
+  const targetIcon = plan.targetType === 'track'
+    ? <IconCalendarEvent size={15} color={theme.textMuted} />
+    : <IconUsers size={15} color={theme.textMuted} />;
 
 
   return (

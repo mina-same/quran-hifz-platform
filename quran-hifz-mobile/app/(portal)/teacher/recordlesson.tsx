@@ -16,9 +16,8 @@ import CardHeader from '@/components/ui/CardHeader';
 import Alert from '@/components/ui/Alert';
 import Badge from '@/components/ui/Badge';
 import { SkeletonRows } from '@/components/ui/Skeleton';
-import ContextCard, { halqaToContext, trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
-import { useHalqat } from '@/lib/queries/halqat';
-import { useSpecialTracks } from '@/lib/queries/specialTracks';
+import ContextCard, { trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
+import { useTracks } from '@/lib/queries/tracks';
 import { useStudents, type Student } from '@/lib/queries/students';
 import { useCreateRecording } from '@/lib/queries/lessonRecordings';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -59,7 +58,7 @@ function StudentRecorderCard({ student, context, onSent }: { student: Student; c
     try {
       await createRecording.mutateAsync({
         student: student._id,
-        ...(context.kind === 'halqa' ? { halqa: context.id } : { specialTrack: context.id }),
+        track: context.id,
         type,
         segment,
         points: Number(points) || 0,
@@ -138,21 +137,15 @@ export default function TeacherRecordLesson() {
   const [selected, setSelected] = useState<TeachingContext | null>(null);
   const [, forceRerender] = useState(0);
 
-  const { data: halqat = [], isLoading: loadingHalqat, refetch: refetchHalqat, isRefetching: refetchingHalqat } = useHalqat({ teacher: profileId });
-  const { data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useSpecialTracks(undefined, profileId);
+  const { data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useTracks(undefined, profileId);
 
   const { data: students = [], isLoading: loadingStudents, refetch: refetchStudents, isRefetching: refetchingStudents } = useStudents(
-    selected
-      ? selected.kind === 'halqa'
-        ? { halqa: selected.id }
-        : { specialTrack: selected.id }
-      : undefined,
+    selected ? { track: selected.id } : undefined,
   );
 
-  const isLoading = loadingHalqat || loadingTracks;
-  const isRefreshing = refetchingHalqat || refetchingTracks || refetchingStudents;
+  const isLoading = loadingTracks;
+  const isRefreshing = refetchingTracks || refetchingStudents;
   function handleRefresh() {
-    refetchHalqat();
     refetchTracks();
     refetchStudents();
   }
@@ -166,14 +159,9 @@ export default function TeacherRecordLesson() {
           refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
         >
           {isLoading && <SkeletonRows count={4} rowHeight={72} />}
-          {!isLoading && halqat.length === 0 && tracks.length === 0 && (
-            <Text style={s.muted}>لا توجد حلقات أو مسارات مسندة إليك</Text>
+          {!isLoading && tracks.length === 0 && (
+            <Text style={s.muted}>لا توجد مسارات مسندة إليك</Text>
           )}
-          {halqat.map((h) => (
-            <Pressable key={h._id} onPress={() => setSelected(halqaToContext(h))}>
-              <ContextCard context={halqaToContext(h)} />
-            </Pressable>
-          ))}
           {tracks.map((t) => (
             <Pressable key={t._id} onPress={() => setSelected(trackToContext(t))}>
               <ContextCard context={trackToContext(t)} />
@@ -194,7 +182,7 @@ export default function TeacherRecordLesson() {
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         <Pressable onPress={() => setSelected(null)}>
-          <Text style={s.backLink}>‹ رجوع لاختيار الحلقة/المسار</Text>
+          <Text style={s.backLink}>‹ رجوع لاختيار المسار</Text>
         </Pressable>
 
         <Alert variant="info">سجّل واجب كل طالب صوتياً — يُرسل تلقائياً للطالب وولي أمره فور الانتهاء.</Alert>

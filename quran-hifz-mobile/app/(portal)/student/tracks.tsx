@@ -6,7 +6,8 @@ import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
-import { useSpecialTracks, type SpecialTrack, type TrackTeacher } from '@/lib/queries/specialTracks';
+import { useTracks, type Track, type TrackTeacher } from '@/lib/queries/tracks';
+import { useStudent } from '@/lib/queries/students';
 import { useQuranPlans, segmentReversed } from '@/lib/queries/quranPlan';
 import { SURAHS } from '@/lib/data/surahs';
 import { orientSlice } from '@/lib/quranRange';
@@ -16,6 +17,10 @@ import { AR_LOCALE } from '@/lib/date';
 
 function getTeacherName(v: TrackTeacher | string) {
   return typeof v === 'object' ? v.name : v;
+}
+function getMasjidName(v: unknown): string {
+  if (v && typeof v === 'object' && 'name' in v) return (v as { name: string }).name;
+  return typeof v === 'string' ? v : '—';
 }
 function surahName(n: number) {
   return SURAHS.find((su) => su.number === n)?.name ?? '';
@@ -27,15 +32,15 @@ function daysLeft(endDate: string): number {
   return Math.max(0, Math.ceil((new Date(endDate).getTime() - Date.now()) / 86400000));
 }
 
-const STATUS_LABEL: Record<SpecialTrack['status'], string> = { active: 'نشط الآن', upcoming: 'قادم', ended: 'منتهي' };
-const STATUS_VARIANT: Record<SpecialTrack['status'], 'green' | 'gold' | 'red'> = { active: 'green', upcoming: 'gold', ended: 'red' };
+const STATUS_LABEL: Record<Track['status'], string> = { active: 'نشط الآن', upcoming: 'قادم', ended: 'منتهي' };
+const STATUS_VARIANT: Record<Track['status'], 'green' | 'gold' | 'red'> = { active: 'green', upcoming: 'gold', ended: 'red' };
 
-function TrackCard({ track }: { track: SpecialTrack }) {
+function TrackCard({ track }: { track: Track }) {
   const theme = useAppTheme();
   const remaining = daysLeft(track.endDate);
   const [planOpen, setPlanOpen] = useState(false);
   // The track's own Quran plan — where "مقرَّر اليوم" comes from.
-  const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: track._id });
+  const { data: linkedPlans = [] } = useQuranPlans({ track: track._id });
   const linkedPlan = linkedPlans[0];
 
   const todayText = (() => {
@@ -107,7 +112,7 @@ function TrackCard({ track }: { track: SpecialTrack }) {
         </View>
         <View style={s.infoItem}>
           <Text style={s.infoLabel}>المكان</Text>
-          <Text style={s.infoValue}>{track.isOnline ? 'أونلاين' : track.location}</Text>
+          <Text style={s.infoValue}>{track.isOnline ? 'أونلاين' : getMasjidName(track.masjid)}</Text>
         </View>
       </View>
 
@@ -170,10 +175,14 @@ function TrackCard({ track }: { track: SpecialTrack }) {
   );
 }
 
-export default function StudentSpecialTracks() {
+export default function StudentTracks() {
   const theme = useAppTheme();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
-  const { data: tracks = [], isLoading, isRefetching, refetch } = useSpecialTracks(undefined, undefined, profileId);
+  const { data: student } = useStudent(profileId);
+  const studentTrackId = typeof student?.track === 'object' ? student.track._id : student?.track;
+
+  const { data: allTracks = [], isLoading, isRefetching, refetch } = useTracks();
+  const tracks = allTracks.filter((t) => t._id === studentTrackId);
 
   const s = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },

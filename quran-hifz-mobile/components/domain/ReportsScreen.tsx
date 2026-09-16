@@ -20,8 +20,7 @@ import { useStudents, type StudentFilters } from '@/lib/queries/students';
 import StudentReportPanel from '@/components/domain/StudentReportPanel';
 import { shareCsv } from '@/lib/csv';
 import { useEvaluations, type EvaluationRecord, type EvaluationScores } from '@/lib/queries/evaluations';
-import type { Halqa } from '@/lib/queries/halqat';
-import type { SpecialTrack } from '@/lib/queries/specialTracks';
+import type { Track } from '@/lib/queries/tracks';
 import type { KPI } from '@/lib/queries/kpis';
 import type { Teacher } from '@/lib/queries/teachers';
 import { MAX_SCORES, TOTAL_MAX, legacyScoresOf } from '@/lib/evaluationRubric';
@@ -34,11 +33,11 @@ function studentIdOf(e: EvaluationRecord): string {
 function studentNameOf(e: EvaluationRecord): string {
   return typeof e.student === 'string' ? e.student : e.student.name;
 }
-function evalHalqaId(e: EvaluationRecord): string {
-  return typeof e.halqa === 'object' ? (e.halqa?._id ?? '') : (e.halqa ?? '');
+function evalTrackId(e: EvaluationRecord): string {
+  return typeof e.track === 'object' ? (e.track?._id ?? '') : (e.track ?? '');
 }
-function evalHalqaName(e: EvaluationRecord): string {
-  return typeof e.halqa === 'object' ? (e.halqa?.name ?? '') : '';
+function evalTrackTitle(e: EvaluationRecord): string {
+  return typeof e.track === 'object' ? (e.track?.title ?? '') : '';
 }
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
@@ -95,11 +94,10 @@ function Sparkline({ values, height, color }: { values: number[]; height: number
 }
 
 interface Props {
-  /** Scopes every widget to this cohort by default (admin: {} for school-wide; teacher: {halqa: '<id1>,<id2>,...'}). */
+  /** Scopes every widget to this cohort by default (admin: {} for school-wide; teacher: {track: '<id1>,<id2>,...'}). */
   baseFilter: StudentFilters;
-  halqat: Halqa[];
-  tracks: SpecialTrack[];
-  /** Label for the "no scope selected" tab, e.g. "كل المدرسة" / "كل حلقاتي". */
+  tracks: Track[];
+  /** Label for the "no scope selected" tab, e.g. "كل المدرسة" / "كل مساراتي". */
   scopeAllLabel: string;
   showAdmin?: boolean;
   kpis?: KPI[];
@@ -108,7 +106,7 @@ interface Props {
 
 /** Shared reports engine driving both admin/reports.tsx and teacher/reports.tsx — mobile
  * adaptation of the web's bento-grid ReportsDashboard.tsx into a vertical stat-card stack. */
-export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabel, showAdmin = false, kpis = [], teachers = [] }: Props) {
+export default function ReportsScreen({ baseFilter, tracks, scopeAllLabel, showAdmin = false, kpis = [], teachers = [] }: Props) {
   const theme = useAppTheme();
   const [scope, setScope] = useState('');
 
@@ -146,17 +144,15 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
   /* ── scope ─────────────────────────────────────────────────────────── */
   const scopedFilter: StudentFilters = useMemo(() => {
     if (scope === '') return baseFilter;
-    if (scope.startsWith('halqa:')) return { halqa: scope.slice(6) };
-    if (scope.startsWith('track:')) return { specialTrack: scope.slice(6) };
+    if (scope.startsWith('track:')) return { track: scope.slice(6) };
     return baseFilter;
   }, [scope, baseFilter]);
 
   const scopeOptions: ScopeOption[] = useMemo(() => {
     const opts: ScopeOption[] = [{ value: '', label: scopeAllLabel, kind: 'all' }];
-    halqat.forEach((h) => opts.push({ value: `halqa:${h._id}`, label: h.name, kind: 'halqa' }));
     tracks.forEach((t) => opts.push({ value: `track:${t._id}`, label: t.title, kind: 'track' }));
     return opts;
-  }, [halqat, tracks, scopeAllLabel]);
+  }, [tracks, scopeAllLabel]);
 
   const { data: students = [], isLoading: studentsLoading } = useStudents(scopedFilter);
   const { data: evaluations = [], isLoading: evalLoading } = useEvaluations(scopedFilter);
@@ -229,13 +225,13 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
     return round1(avg(second.map((e) => e.total)) - avg(first.map((e) => e.total)));
   }, [evaluations]);
 
-  /* ── halqa comparison (only meaningful with >1 halqa in scope) ───────── */
-  const halqaEvalStats = useMemo(() => {
+  /* ── track comparison (only meaningful with >1 track in scope) ───────── */
+  const trackEvalStats = useMemo(() => {
     const map = new Map<string, { name: string; sums: EvaluationScores & { total: number }; count: number }>();
     for (const e of evaluations) {
-      const id = evalHalqaId(e);
+      const id = evalTrackId(e);
       if (!id) continue;
-      const name = evalHalqaName(e) || halqat.find((h) => h._id === id)?.name || '—';
+      const name = evalTrackTitle(e) || tracks.find((t) => t._id === id)?.title || '—';
       const entry = map.get(id) ?? { name, sums: { attendance: 0, hifz: 0, tajweed: 0, talawah: 0, total: 0 }, count: 0 };
       entry.sums.attendance += legacyScoresOf(e).attendance;
       entry.sums.hifz += legacyScoresOf(e).hifz;
@@ -256,7 +252,7 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
         count: e.count,
       }))
       .sort((a, b) => b.avgTotal - a.avgTotal);
-  }, [evaluations, halqat]);
+  }, [evaluations, tracks]);
 
   /* ── per-student evaluation leaderboards ─────────────────────────────── */
   const studentEvalStats = useMemo(() => {
@@ -323,13 +319,13 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
       ),
     },
     {
-      label: 'مقارنة الحلقات (تقييم)',
-      disabled: halqaEvalStats.length === 0,
+      label: 'مقارنة المسارات (تقييم)',
+      disabled: trackEvalStats.length === 0,
       run: () => shareCsv(
-        'تقرير الحلقات - تقييم',
-        ['الحلقة', 'متوسط الحضور', 'متوسط الحفظ', 'متوسط التجويد', 'متوسط التلاوة', 'المتوسط الكلي', 'عدد الجلسات'],
-        halqaEvalStats.map((h) => [
-          h.name, `${h.avgAttendance}%`, `${h.avgHifz}%`, `${h.avgTajweed}%`, `${h.avgTalawah}%`, h.avgTotal, h.count,
+        'تقرير المسارات - تقييم',
+        ['المسار', 'متوسط الحضور', 'متوسط الحفظ', 'متوسط التجويد', 'متوسط التلاوة', 'المتوسط الكلي', 'عدد الجلسات'],
+        trackEvalStats.map((t) => [
+          t.name, `${t.avgAttendance}%`, `${t.avgHifz}%`, `${t.avgTajweed}%`, `${t.avgTalawah}%`, t.avgTotal, t.count,
         ]),
       ),
     },
@@ -338,10 +334,10 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
       disabled: m.atRisk.length === 0,
       run: () => shareCsv(
         'تقرير الطلاب ذوي المتابعة',
-        ['الطالب', 'الحلقة', 'نسبة الحضور', 'نسبة الإنجاز'],
+        ['الطالب', 'المسار', 'نسبة الحضور', 'نسبة الإنجاز'],
         m.atRisk.map((st) => [
           st.name,
-          typeof st.halqa === 'object' && st.halqa ? st.halqa.name : '—',
+          typeof st.track === 'object' && st.track ? st.track.title : '—',
           `${st.attendancePct}%`,
           `${st.progressPct}%`,
         ]),
@@ -349,15 +345,12 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
     },
   ];
 
-  const selectedHalqaForTitle = halqat.find((h) => `halqa:${h._id}` === scope);
   const selectedTrackForTitle = tracks.find((t) => `track:${t._id}` === scope);
-  const aggregateTitle = selectedHalqaForTitle
-    ? `مقارنة طلاب ${selectedHalqaForTitle.name}`
-    : selectedTrackForTitle
-      ? `مقارنة طلاب ${selectedTrackForTitle.title}`
-      : showAdmin
-        ? 'متوسط الدرجات لكل طلاب المدرسة'
-        : 'متوسط الدرجات لطلابك';
+  const aggregateTitle = selectedTrackForTitle
+    ? `مقارنة طلاب ${selectedTrackForTitle.title}`
+    : showAdmin
+      ? 'متوسط الدرجات لكل طلاب المدرسة'
+      : 'متوسط الدرجات لطلابك';
 
   return (
     <>
@@ -459,20 +452,20 @@ export default function ReportsScreen({ baseFilter, halqat, tracks, scopeAllLabe
                 )}
               </Card>
 
-              {/* Halqa comparison — only when more than one halqa has eval data in scope */}
-              {halqaEvalStats.length > 1 && (
+              {/* Track comparison — only when more than one track has eval data in scope */}
+              {trackEvalStats.length > 1 && (
                 <Card>
-                  <CardHeader title="مقارنة الحلقات في التقييم" subtitle={`${halqaEvalStats.length} حلقة`} />
+                  <CardHeader title="مقارنة المسارات في التقييم" subtitle={`${trackEvalStats.length} مسار`} />
                   <View style={styles.section}>
-                    {halqaEvalStats.map((h) => (
-                      <View key={h.name} style={styles.halqaRow}>
+                    {trackEvalStats.map((t) => (
+                      <View key={t.name} style={styles.halqaRow}>
                         <View style={styles.rowBetween}>
-                          <Text style={styles.bold} numberOfLines={1}>{h.name}</Text>
-                          <Text style={[styles.bold, { color: theme.green }]}>{h.avgTotal}/{TOTAL_MAX}</Text>
+                          <Text style={styles.bold} numberOfLines={1}>{t.name}</Text>
+                          <Text style={[styles.bold, { color: theme.green }]}>{t.avgTotal}/{TOTAL_MAX}</Text>
                         </View>
-                        <ProgressBar value={h.avgTotal} max={TOTAL_MAX} color={theme.green} showPercent={false} />
+                        <ProgressBar value={t.avgTotal} max={TOTAL_MAX} color={theme.green} showPercent={false} />
                         <Text style={styles.mutedSmall}>
-                          حضور {h.avgAttendance}٪ · حفظ {h.avgHifz}٪ · تجويد {h.avgTajweed}٪ · تلاوة {h.avgTalawah}٪ · {h.count} جلسة
+                          حضور {t.avgAttendance}٪ · حفظ {t.avgHifz}٪ · تجويد {t.avgTajweed}٪ · تلاوة {t.avgTalawah}٪ · {t.count} جلسة
                         </Text>
                       </View>
                     ))}

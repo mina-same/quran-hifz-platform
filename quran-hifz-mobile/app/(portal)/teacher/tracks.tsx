@@ -1,18 +1,18 @@
 import { useMemo } from 'react';
+import { useRouter } from 'expo-router';
 import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
 import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import ProgressBar from '@/components/ui/ProgressBar';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import {
-  useSpecialTracks,
-  type SpecialTrack,
+  useTracks,
+  type Track,
   type TrackTeacher,
-} from '@/lib/queries/specialTracks';
+} from '@/lib/queries/tracks';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -23,17 +23,21 @@ type AppTheme = ReturnType<typeof useAppTheme>;
 function getTeacherName(v: TrackTeacher | string) {
   return typeof v === 'object' ? v.name : v;
 }
+function getMasjidName(v: unknown): string {
+  if (v && typeof v === 'object' && 'name' in v) return (v as { name: string }).name;
+  return typeof v === 'string' ? v : '—';
+}
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString(AR_LOCALE, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-const STATUS_LABEL: Record<SpecialTrack['status'], string> = { active: 'نشط', upcoming: 'قادم', ended: 'منتهي' };
-const STATUS_VARIANT: Record<SpecialTrack['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
+const STATUS_LABEL: Record<Track['status'], string> = { active: 'نشط', upcoming: 'قادم', ended: 'منتهي' };
+const STATUS_VARIANT: Record<Track['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
 
-function TrackCard({ track, onOpenDetail }: { track: SpecialTrack; onOpenDetail: () => void }) {
+function TrackCard({ track, onOpenDetail }: { track: Track; onOpenDetail: () => void }) {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
-  const enrolled = track.enrolledStudents.length;
+  const enrolled = track.studentCount ?? 0;
   const pct = track.maxStudents > 0 ? Math.min(100, Math.round((enrolled / track.maxStudents) * 100)) : 0;
 
   return (
@@ -66,7 +70,7 @@ function TrackCard({ track, onOpenDetail }: { track: SpecialTrack; onOpenDetail:
       </View>
 
       <Text style={s.infoLabel}>المكان</Text>
-      <Text style={[s.infoValue, { marginBottom: 10 }]}>{track.isOnline ? 'أونلاين' : track.location}</Text>
+      <Text style={[s.infoValue, { marginBottom: 10 }]}>{track.isOnline ? 'أونلاين' : getMasjidName(track.masjid)}</Text>
 
       {track.teachers.length > 0 && (
         <>
@@ -92,12 +96,12 @@ function TrackCard({ track, onOpenDetail }: { track: SpecialTrack; onOpenDetail:
   );
 }
 
-export default function TeacherSpecialTracks() {
+export default function TeacherTracks() {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
-  const { data: tracks = [], isLoading, refetch, isRefetching } = useSpecialTracks(undefined, profileId);
+  const { data: tracks = [], isLoading, refetch, isRefetching } = useTracks(undefined, profileId);
 
   const active = tracks.filter((t) => t.status === 'active');
   const upcoming = tracks.filter((t) => t.status === 'upcoming');

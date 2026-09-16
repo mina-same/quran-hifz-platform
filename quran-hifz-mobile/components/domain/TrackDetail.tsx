@@ -15,11 +15,13 @@ import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
 import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet';
 import IndividualPlanPanel from '@/components/domain/IndividualPlanPanel';
 import EvaluationRoster from '@/components/domain/EvaluationRoster';
+import TrackStudentsPanel from '@/components/domain/TrackStudentsPanel';
 import DaySlider, { useDaySchedule } from '@/components/domain/DaySlider';
+import FormSelect from '@/components/forms/FormSelect';
 import {
-  useSpecialTracks, type SpecialTrack, type EnrolledStudent, type TrackTeacher,
-} from '@/lib/queries/specialTracks';
-import { useHalqat } from '@/lib/queries/halqat';
+  useTracks, useAddTeacherToTrack, type Track, type TrackTeacher,
+} from '@/lib/queries/tracks';
+import { useTeachers } from '@/lib/queries/teachers';
 import { useStudents } from '@/lib/queries/students';
 import {
   useQuranPlans, useUpdateQuranPlan, segmentReversed, type QuranPlan,
@@ -28,14 +30,13 @@ import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
-import { IconCalendarEvent, IconCalendarOff, IconClock, IconVideo } from '@tabler/icons-react-native';
+import { IconCalendarEvent, IconCalendarOff, IconClock, IconUserPlus, IconVideo } from '@tabler/icons-react-native';
 import { AR_LOCALE, fmtDayLabel } from '@/lib/date';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
-function getEnrolledId(v: EnrolledStudent | string) { return typeof v === 'object' ? v._id : v; }
-function getEnrolledName(v: EnrolledStudent | string) { return typeof v === 'object' ? v.name : v; }
 function getTeacherName(v: TrackTeacher | string) { return typeof v === 'object' ? v.name : v; }
+function getTeacherId(v: TrackTeacher | string) { return typeof v === 'object' ? v._id : v; }
 function fmtDate(d: string) { return new Date(d).toLocaleDateString(AR_LOCALE, { year: 'numeric', month: 'short', day: 'numeric' }); }
 
 /** First letter of the first two words — the same initials the web chips show. */
@@ -48,11 +49,11 @@ function avatarTone(theme: AppTheme, i: number) {
   return theme.tone[order[i % order.length]];
 }
 
-const STATUS_LABEL: Record<SpecialTrack['status'], string> = { active: 'نشط', upcoming: 'قادم', ended: 'منتهي' };
-const STATUS_VARIANT: Record<SpecialTrack['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
+const STATUS_LABEL: Record<Track['status'], string> = { active: 'نشط', upcoming: 'قادم', ended: 'منتهي' };
+const STATUS_VARIANT: Record<Track['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
 
 function planTargetsTrack(plan: QuranPlan, trackId: string): boolean {
-  const ref = plan.specialTrack;
+  const ref = plan.track;
   const id = typeof ref === 'object' ? ref?._id : ref;
   return id === trackId;
 }
@@ -88,35 +89,27 @@ export default function TrackDetail({ trackId, role }: Props) {
   // resolves out of the same react-query cache instead of refetching: a
   // teacher only ever sees their own tracks, an admin sees all of them.
   const teacherScope = role === 'teacher' ? profileId : undefined;
-  const { data: tracks = [], isLoading: loadingTrack } = useSpecialTracks(undefined, teacherScope);
+  const { data: tracks = [], isLoading: loadingTrack } = useTracks(undefined, teacherScope);
   const track = tracks.find((t) => t._id === trackId);
 
-  // This track's real roster lives on its halaqat, not on `enrolledStudents`
-  // (that field is only for tracks with no halqa layer — direct enrollment).
-  // Scope the halaqat to just the ones *this* teacher teaches within the
-  // track, so a teacher sees their own students and not every halqa's; an
-  // admin gets every halqa in the track.
-  const { data: halqat = [] } = useHalqat(role === 'teacher' ? { teacher: profileId } : undefined);
-  const halqaIdsInTrack = useMemo(
-    () => halqat
-      .filter((h) => {
-        const ref = h.specialTrack;
-        return (typeof ref === 'object' ? ref?._id : ref) === trackId;
-      })
-      .map((h) => h._id),
-    [halqat, trackId],
-  );
-  const { data: halqaStudents = [] } = useStudents(
-    { halqa: halqaIdsInTrack.join(',') },
-    { enabled: halqaIdsInTrack.length > 0 },
+  const { data: allTeachers = [] } = useTeachers();
+  const addTeacherToTrack = useAddTeacherToTrack();
+  const [addTeacherId, setAddTeacherId] = useState('');
+
+  // `Student.track` is now the sole membership mechanism — the roster is a
+  // direct query, no more halqa-mediated derivation.
+  const { data: trackStudents = [] } = useStudents(
+    { track: trackId },
+    { enabled: !!track },
   );
 
-  const { data: linkedPlans = [] } = useQuranPlans({ specialTrack: trackId });
-  // A plan can carry a stale `specialTrack` field left over from before its
-  // targetType was switched to "students", so this filter can return several
-  // plans for one track — prefer the one actually targeting the whole track
-  // over a narrower students-only plan that merely still points at it.
-  const linkedPlan = linkedPlans.find((p) => p.targetType === 'specialTrack') ?? linkedPlans[0];
+  const { data: linkedPlans = [] } = useQuranPlans({ track: trackId });
+  // A plan can carry a stale `track` field left over from before its
+  // targetType was switched to "students" (see planCoversStudent above), so
+  // useQuranPlans({track}) can return several plans for this track — prefer
+  // the one actually targeting the whole track over a narrower students-only
+  // plan that merely still points at it.
+  const linkedPlan = linkedPlans.find((p) => p.targetType === 'track') ?? linkedPlans[0];
 
   // Only the teacher-only "link another plan" panel reads this. An admin has no
   // profileId, so an ungated call would drop the `teacher` filter and pull every
@@ -154,18 +147,10 @@ export default function TrackDetail({ trackId, role }: Props) {
   const daySchedule = useDaySchedule(scheduleEntries, selectedDate);
   const { scheduledSorted, effectiveDate, isFutureDay } = daySchedule;
 
-  const roster = useMemo(() => {
-    if (!track) return [];
-    const map = new Map<string, { _id: string; name: string }>();
-    // Directly-enrolled students first (tracks with no halqa layer), then the
-    // students reached through this track's halaqat.
-    track.enrolledStudents.forEach((es) => {
-      const id = getEnrolledId(es);
-      map.set(id, { _id: id, name: getEnrolledName(es) });
-    });
-    halqaStudents.forEach((st) => map.set(st._id, { _id: st._id, name: st.name }));
-    return Array.from(map.values());
-  }, [track, halqaStudents]);
+  const roster = useMemo(
+    () => trackStudents.map((st) => ({ _id: st._id, name: st.name })),
+    [trackStudents],
+  );
 
   const scheduleRows = useMemo(
     () => (linkedPlan ? scheduleItems(linkedPlan.schedule, (e) => segmentReversed(linkedPlan, e.type)) : []),
@@ -182,7 +167,7 @@ export default function TrackDetail({ trackId, role }: Props) {
     return <Alert variant="error">هذا المسار غير موجود أو لم تعد مُسنَداً إليه.</Alert>;
   }
 
-  const enrolledCount = track.enrolledStudents.length;
+  const enrolledCount = roster.length;
   const capacityPct = track.maxStudents > 0 ? Math.min(100, Math.round((enrolledCount / track.maxStudents) * 100)) : 0;
 
   return (
@@ -204,7 +189,7 @@ export default function TrackDetail({ trackId, role }: Props) {
         </View>
 
         <Text style={s.infoLabel}>المكان</Text>
-        <Text style={[s.infoValue, { marginBottom: 10 }]}>{track.isOnline ? 'أونلاين' : track.location}</Text>
+        <Text style={[s.infoValue, { marginBottom: 10 }]}>{track.isOnline ? 'أونلاين' : (typeof track.masjid === 'object' ? track.masjid.name : track.masjid)}</Text>
 
         {track.isOnline && !!track.meetLink && (
           <Pressable
@@ -249,13 +234,41 @@ export default function TrackDetail({ trackId, role }: Props) {
               })}
             </View>
           )}
-          {/* Only a teacher is being told to ask someone else — the admin *is*
-              الإدارة, and manages the track's teachers from the tracks list. */}
-          {role === 'teacher' && (
-            <Text style={[s.muted, { marginTop: 12, textAlign: 'right' }]}>
-              لإضافة أو إزالة معلم من هذا المسار، تواصل مع الإدارة.
-            </Text>
-          )}
+          {(() => {
+            const availableTeachers = allTeachers.filter(
+              (t) => !track.teachers.some((tc) => getTeacherId(tc) === t._id),
+            );
+            return (
+              <View style={s.addTeacherBox}>
+                <View style={s.iconLabel}>
+                  <IconUserPlus size={14} color={theme.green} />
+                  <Text style={s.addTeacherLabel}>إضافة معلم إلى هذا المسار</Text>
+                </View>
+                <View style={s.row}>
+                  <View style={s.flex1}>
+                    <FormSelect
+                      value={addTeacherId}
+                      onChange={setAddTeacherId}
+                      options={availableTeachers.map((t) => ({ value: t._id, label: t.name }))}
+                      placeholder="اختر معلماً"
+                    />
+                  </View>
+                  <Button
+                    label="إضافة"
+                    onPress={() => {
+                      if (!addTeacherId) return;
+                      addTeacherToTrack.mutate({ id: track._id, teacherId: addTeacherId });
+                      setAddTeacherId('');
+                    }}
+                    disabled={!addTeacherId || addTeacherToTrack.isPending}
+                  />
+                </View>
+                {availableTeachers.length === 0 && (
+                  <Text style={s.muted}>كل المعلمين المسجّلين مُسنَدون بالفعل لهذا المسار.</Text>
+                )}
+              </View>
+            );
+          })()}
         </Card>
       )}
 
@@ -294,7 +307,7 @@ export default function TrackDetail({ trackId, role }: Props) {
             <View style={{ paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}>
               <EvaluationRoster
                 students={roster}
-                context={{ kind: 'specialTrack', id: trackId }}
+                context={{ id: trackId }}
                 teacherId={evaluatingTeacherId}
                 linkedPlan={linkedPlan}
                 daySchedule={daySchedule}
@@ -331,11 +344,10 @@ export default function TrackDetail({ trackId, role }: Props) {
             </View>
           </Card>
 
-          {role === 'teacher' && (
-            <Text style={[s.muted, { textAlign: 'right' }]}>
-              لإضافة أو إزالة طالب من هذا المسار، تواصل مع الإدارة.
-            </Text>
-          )}
+          <Card>
+            <CardHeader title="إدارة طلاب المسار" />
+            <TrackStudentsPanel track={track} />
+          </Card>
         </>
       )}
 
@@ -413,7 +425,7 @@ export default function TrackDetail({ trackId, role }: Props) {
                     <Button
                       label="ربط"
                       onPress={() => updatePlan.mutate(
-                        { id: p._id, targetType: 'specialTrack', specialTrack: trackId },
+                        { id: p._id, targetType: 'track', track: trackId },
                         { onSuccess: () => setShowLinkPanel(false) },
                       )}
                       disabled={updatePlan.isPending}
@@ -481,5 +493,12 @@ function createS(theme: AppTheme) {
     chipAvatarText: { fontSize: 10, fontFamily: theme.fontCairoBold, color: theme.white },
     chipName: { fontSize: 12, fontFamily: theme.fontCairoBold },
     chipCount: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
+    row: { flexDirection: 'row', gap: 12, marginTop: 10, alignItems: 'center' },
+    flex1: { flex: 1 },
+    iconLabel: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+    addTeacherBox: {
+      marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: theme.border,
+    },
+    addTeacherLabel: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.textMuted },
   });
 }

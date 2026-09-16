@@ -6,8 +6,7 @@ import FormPage, { useFormPageStyles } from '@/components/ui/FormPage';
 import FormInput from '@/components/forms/FormInput';
 import FormSelect from '@/components/forms/FormSelect';
 import { useStudents, useUpdateStudent, type Student } from '@/lib/queries/students';
-import { useHalqat } from '@/lib/queries/halqat';
-import { useMasajid } from '@/lib/queries/masajid';
+import { useTracks } from '@/lib/queries/tracks';
 import { useAdminParents, useStudentParent, useSetStudentParent } from '@/lib/queries/adminParents';
 import { SERVER_PATHS } from '@/lib/constants/masarMap';
 
@@ -26,8 +25,7 @@ export default function AdminStudentForm() {
   const { id } = useLocalSearchParams<{ id?: string }>();
 
   const { data: students = [] } = useStudents();
-  const { data: halqat = [] } = useHalqat();
-  const { data: masajid = [] } = useMasajid();
+  const { data: tracks = [] } = useTracks();
   const { data: parents = [] } = useAdminParents();
   const { data: currentParent } = useStudentParent(id ?? null);
 
@@ -37,8 +35,7 @@ export default function AdminStudentForm() {
   const [name, setName] = useState('');
   const [path, setPath] = useState('');
   const [level, setLevel] = useState('');
-  const [halqa, setHalqa] = useState('');
-  const [masjid, setMasjid] = useState('');
+  const [track, setTrack] = useState('');
   const [guardianPhone, setGuardianPhone] = useState('');
   const [nationalId, setNationalId] = useState('');
   const [status, setStatus] = useState<Student['status']>('active');
@@ -53,8 +50,7 @@ export default function AdminStudentForm() {
     setName(existing.name);
     setPath(existing.path);
     setLevel(existing.level != null ? String(existing.level) : '');
-    setHalqa(getId(existing.halqa));
-    setMasjid(getId(existing.masjid));
+    setTrack(getId(existing.track));
     setGuardianPhone(existing.guardianPhone ?? '');
     setNationalId(existing.nationalId ?? '');
     setStatus(existing.status);
@@ -74,8 +70,7 @@ export default function AdminStudentForm() {
         id,
         name: name.trim(),
         path,
-        halqa: halqa || undefined,
-        masjid: masjid || undefined,
+        track: track || undefined,
         guardianPhone: guardianPhone.trim(),
         nationalId: nationalId.trim() || undefined,
         status,
@@ -119,22 +114,13 @@ export default function AdminStudentForm() {
       <Text style={s.label}>المستوى (رقم من ١ إلى ١٠)</Text>
       <FormInput placeholder="مثال: ٣" keyboardType="number-pad" value={level} onChangeText={setLevel} />
 
-      <Text style={s.label}>الحلقة</Text>
+      <Text style={s.label}>المسار</Text>
       <FormSelect
-        value={halqa}
-        onChange={setHalqa}
-        options={halqat.map((h) => ({ value: h._id, label: h.name }))}
-        placeholder="اختر الحلقة"
-        title="الحلقة"
-      />
-
-      <Text style={s.label}>المسجد</Text>
-      <FormSelect
-        value={masjid}
-        onChange={setMasjid}
-        options={masajid.map((m) => ({ value: m._id, label: m.name }))}
-        placeholder="اختر المسجد"
-        title="المسجد"
+        value={track}
+        onChange={setTrack}
+        options={tracks.map((t) => ({ value: t._id, label: t.title }))}
+        placeholder="اختر المسار"
+        title="المسار"
       />
 
       <Text style={s.label}>جوال ولي الأمر</Text>

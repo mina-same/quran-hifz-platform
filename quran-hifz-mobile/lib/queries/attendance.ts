@@ -4,8 +4,7 @@ import { get, post } from '@/lib/api';
 export type AttendanceRecord = {
   _id: string;
   student: { _id: string; name: string } | string;
-  halqa?: { _id: string; name: string } | string;
-  specialTrack?: { _id: string; title: string } | string;
+  track?: { _id: string; title: string } | string;
   date: string;
   day: string;
   time: string;
@@ -14,8 +13,7 @@ export type AttendanceRecord = {
 
 export type AttendanceFilters = {
   student?: string;
-  halqa?: string;
-  specialTrack?: string;
+  track?: string;
   from?: string;
   to?: string;
 };
@@ -26,8 +24,7 @@ function buildQuery(filters?: AttendanceFilters) {
   if (!filters) return '';
   const params = new URLSearchParams();
   if (filters.student) params.set('student', filters.student);
-  if (filters.halqa) params.set('halqa', filters.halqa);
-  if (filters.specialTrack) params.set('specialTrack', filters.specialTrack);
+  if (filters.track) params.set('track', filters.track);
   if (filters.from) params.set('from', filters.from);
   if (filters.to) params.set('to', filters.to);
   const q = params.toString();
@@ -38,7 +35,7 @@ export function useAttendance(filters?: AttendanceFilters) {
   return useQuery({
     queryKey: ['attendance', filters],
     queryFn: () => get<ListResponse>(`/attendance${buildQuery(filters)}`).then((r) => r.data),
-    enabled: !!(filters?.student || filters?.halqa || filters?.specialTrack),
+    enabled: !!(filters?.student || filters?.track),
   });
 }
 
@@ -47,8 +44,7 @@ export function useRecordAttendance() {
   return useMutation({
     mutationFn: (body: {
       student: string;
-      halqa?: string;
-      specialTrack?: string;
+      track?: string;
       date: string;
       status: string;
     }) => post('/attendance', body),
@@ -70,8 +66,7 @@ export function useBulkAttendance() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: {
-      halqa?: string;
-      specialTrack?: string;
+      track?: string;
       date: string;
       records: { student: string; status: string }[];
     }) => post<BulkAttendanceResponse>('/attendance/bulk', body),

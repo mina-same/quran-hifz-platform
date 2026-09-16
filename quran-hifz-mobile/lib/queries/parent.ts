@@ -5,7 +5,7 @@ export type ParentChild = {
   _id: string;
   name: string;
   path: string;
-  halqa: { _id: string; name: string } | string;
+  track: { _id: string; title: string } | string;
   attendancePct: number;
   progressPct: number;
   progressPages: number;

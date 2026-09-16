@@ -5,7 +5,7 @@ export const PORTALS: Record<string, PortalConfig> = {
     badge: "بوابة الطالب",
     user: {
       name: "عبدالله الحميداني",
-      role: "طالب — حلقة عمر بن الخطاب",
+      role: "طالب — مسار الإتقان",
       initials: "عح",
     },
     nav: [
@@ -40,19 +40,19 @@ export const PORTALS: Record<string, PortalConfig> = {
             id: "attendance",
             icon: "calendar-check",
             label: "الحضور والغياب",
-            desc: "سجل حضورك في الحلقة",
+            desc: "سجل حضورك في المسار",
           },
           {
             id: "schedule",
             icon: "clock",
-            label: "مواعيد حلقتي",
-            desc: "أوقات حلقتك الأسبوعية",
+            label: "مواعيد مساري",
+            desc: "أوقات مسارك الأسبوعية",
           },
           {
-            id: "special_tracks",
+            id: "tracks",
             icon: "calendar-event",
-            label: "مساراتي",
-            desc: "المسارات المسجَّل بها",
+            label: "مساري",
+            desc: "المسار المسجَّل به",
           },
         ],
       },
@@ -96,7 +96,7 @@ export const PORTALS: Record<string, PortalConfig> = {
     badge: "بوابة المعلم",
     user: {
       name: "ناصر الحميداني",
-      role: "معلم — حلقة عمر بن الخطاب",
+      role: "معلم — مسار الإتقان",
       initials: "نح",
     },
     nav: [
@@ -107,24 +107,18 @@ export const PORTALS: Record<string, PortalConfig> = {
             id: "dashboard",
             icon: "layout-dashboard",
             label: "لوحة التحكم",
-            desc: "نظرة عامة على حلقاتك",
+            desc: "نظرة عامة على مساراتك",
           },
         ],
       },
       {
-        group: "الحلقات",
+        group: "طلابي والحضور",
         items: [
-          {
-            id: "myhalqa",
-            icon: "school",
-            label: "حلقاتي",
-            desc: "إدارة حلقاتك ومواعيدها",
-          },
           {
             id: "students",
             icon: "users",
             label: "طلابي",
-            desc: "متابعة طلاب حلقاتك",
+            desc: "متابعة طلاب مساراتك",
           },
           {
             id: "attendance",
@@ -181,7 +175,7 @@ export const PORTALS: Record<string, PortalConfig> = {
         group: "المسارات",
         items: [
           {
-            id: "special_tracks",
+            id: "tracks",
             icon: "calendar-event",
             label: "مساراتي",
             desc: "المسارات المسجَّل بها",
@@ -223,19 +217,19 @@ export const PORTALS: Record<string, PortalConfig> = {
             id: "students",
             icon: "users",
             label: "إدارة الطلاب",
-            desc: "بيانات الطلاب وحلقاتهم",
+            desc: "بيانات الطلاب ومساراتهم",
           },
           {
             id: "register",
             icon: "user-plus",
             label: "تسجيل طالب جديد",
-            desc: "إضافة طالب إلى حلقة",
+            desc: "إضافة طالب إلى مسار",
           },
           {
             id: "teachers",
             icon: "chalkboard",
             label: "المعلمون",
-            desc: "بيانات المعلمين وحلقاتهم",
+            desc: "بيانات المعلمين ومساراتهم",
           },
           {
             id: "parents",
@@ -246,14 +240,8 @@ export const PORTALS: Record<string, PortalConfig> = {
         ],
       },
       {
-        group: "الحلقات والمساجد",
+        group: "المساجد",
         items: [
-          {
-            id: "halqat",
-            icon: "school",
-            label: "الحلقات",
-            desc: "إدارة الحلقات ومواعيدها",
-          },
           {
             id: "masajid",
             icon: "building-arch",
@@ -278,10 +266,10 @@ export const PORTALS: Record<string, PortalConfig> = {
             desc: "تقارير الحفظ والحضور",
           },
           {
-            id: "special_tracks",
+            id: "tracks",
             icon: "calendar-event",
             label: "المسارات",
-            desc: "إدارة المسارات وحلقاتها",
+            desc: "إدارة المسارات",
             dot: true,
           },
         ],

@@ -8,7 +8,7 @@ export type Teacher = {
   phone?: string;
   rating: string;
   status: 'active' | 'inactive';
-  halqatCount?: number;
+  tracksCount?: number;
   studentCount?: number;
   /** null when the teacher has no login account yet. */
   email?: string | null;

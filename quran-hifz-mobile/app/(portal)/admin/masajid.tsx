@@ -12,31 +12,19 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import MasjidAccordion from '@/components/domain/MasjidAccordion';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useMasajid, useDeleteMasjid } from '@/lib/queries/masajid';
-import { useHalqat } from '@/lib/queries/halqat';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
-function masjidIdOf(v: { _id: string } | string | undefined): string | undefined {
-  if (v && typeof v === 'object') return v._id;
-  if (typeof v === 'string') return v;
-  return undefined;
-}
-
 export default function AdminMasajid() {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
-  const { data: masajid = [], isLoading: loadingMasajid, isError, isRefetching: refetchingMasajid, refetch: refetchMasajid } = useMasajid();
-  const { data: halqat = [], isLoading: loadingHalqat, isRefetching: refetchingHalqat, refetch: refetchHalqat } = useHalqat();
+  const { data: masajid = [], isLoading, isError, isRefetching: isRefreshing, refetch: onRefresh } = useMasajid();
 
   const deleteMasjid = useDeleteMasjid();
   const router = useRouter();
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  const isLoading = loadingMasajid || loadingHalqat;
-  const isRefreshing = refetchingMasajid || refetchingHalqat;
-  const onRefresh = () => { refetchMasajid(); refetchHalqat(); };
 
   async function handleDelete() {
     if (!deleteId) return;
@@ -74,7 +62,6 @@ export default function AdminMasajid() {
             <MasjidAccordion
               key={masjid._id}
               masjid={masjid}
-              halqat={halqat.filter((h) => masjidIdOf(h.masjid) === masjid._id)}
               actions={
                 <>
                   <IconButton accessibilityLabel="تعديل" onPress={() => router.push({ pathname: '/(portal)/admin/masjid-form', params: { id: masjid._id } } as any)}>

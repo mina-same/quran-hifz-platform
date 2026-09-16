@@ -61,7 +61,7 @@ function computeJuzRows(plans: { segments?: PlanSegment[] }[]) {
 
 interface Props {
   students: ReportStudent[];
-  aggregateFilter: { halqa?: string; specialTrack?: string };
+  aggregateFilter: { track?: string };
   aggregateTitle?: string;
 }
 

@@ -12,7 +12,7 @@ import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import { usePortalStore } from '@/lib/store/portalStore';
-import { useHalqat } from '@/lib/queries/halqat';
+import { useTracks } from '@/lib/queries/tracks';
 import { useHomework } from '@/lib/queries/homework';
 import { useStats } from '@/lib/queries/stats';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -30,12 +30,12 @@ export default function TeacherDashboard() {
 
   const { data: stats, refetch: refetchStats, isRefetching: statsRefetching } = useStats();
   const {
-    data: halqat = [],
-    isLoading: halqatLoading,
-    isError: halqatError,
-    refetch: refetchHalqat,
-    isRefetching: halqatRefetching,
-  } = useHalqat({ teacher: authUser?.profileId });
+    data: tracks = [],
+    isLoading: tracksLoading,
+    isError: tracksError,
+    refetch: refetchTracks,
+    isRefetching: tracksRefetching,
+  } = useTracks(undefined, authUser?.profileId);
   const {
     data: pendingHW = [],
     isLoading: hwLoading,
@@ -44,19 +44,19 @@ export default function TeacherDashboard() {
     isRefetching: hwRefetching,
   } = useHomework({ teacher: authUser?.profileId, status: 'معلق' });
 
-  const isError = halqatError || hwError;
-  const isRefreshing = statsRefetching || halqatRefetching || hwRefetching;
+  const isError = tracksError || hwError;
+  const isRefreshing = statsRefetching || tracksRefetching || hwRefetching;
   const onRefresh = () => {
     refetchStats();
-    refetchHalqat();
+    refetchTracks();
     refetchHW();
   };
 
-  const totalStudents = halqat.reduce((sum, h) => sum + (h.studentCount ?? 0), 0);
+  const totalStudents = tracks.reduce((sum, t) => sum + (t.studentCount ?? 0), 0);
 
   const STATS = [
     { label: 'طلابي الكلي', value: totalStudents, color: theme.green },
-    { label: 'حلقاتي', value: halqat.length, color: theme.gold },
+    { label: 'مساراتي', value: tracks.length, color: theme.gold },
     { label: 'متوسط الحضور', value: `${stats?.avgAttendancePct ?? 0}٪`, color: theme.blue },
     { label: 'واجبات معلقة', value: pendingHW.length, color: theme.red },
   ];
@@ -89,21 +89,21 @@ export default function TeacherDashboard() {
 
         {isError && <Alert variant="error">تعذر تحميل بيانات لوحة التحكم</Alert>}
 
-        {/* My halqat */}
+        {/* My tracks */}
         <Card>
-          <CardHeader title="حلقاتي" />
-          {halqatLoading ? (
+          <CardHeader title="مساراتي" />
+          {tracksLoading ? (
             <SkeletonRows count={2} rowHeight={40} />
-          ) : halqat.length === 0 ? (
-            <Text style={styles.muted}>لا توجد حلقات مسجلة</Text>
+          ) : tracks.length === 0 ? (
+            <Text style={styles.muted}>لا توجد مسارات مسجلة</Text>
           ) : (
             <View style={{ gap: 10 }}>
-              {halqat.map((h) => (
-                <View key={h._id} style={styles.halqaRow}>
-                  <Text style={styles.bold}>{h.name}</Text>
-                  <Badge label={getName(h.masjid) || '—'} variant="gold" />
-                  <Text style={styles.muted}>{h.time}</Text>
-                  <Text style={styles.muted}>{h.studentCount ?? 0} طالب</Text>
+              {tracks.map((t) => (
+                <View key={t._id} style={styles.halqaRow}>
+                  <Text style={styles.bold}>{t.title}</Text>
+                  <Badge label={getName(t.masjid) || '—'} variant="gold" />
+                  <Text style={styles.muted}>{t.timeSlot}</Text>
+                  <Text style={styles.muted}>{t.studentCount ?? 0} طالب</Text>
                 </View>
               ))}
             </View>

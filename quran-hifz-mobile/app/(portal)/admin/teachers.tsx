@@ -65,7 +65,7 @@ export default function AdminTeachers() {
 
                 <View style={s.chips}>
                   <View style={s.chip}><Text style={s.chipText} numberOfLines={1}>التخصص: {t.specialty || '—'}</Text></View>
-                  <View style={s.chip}><Text style={s.chipText}>الحلقات: {t.halqatCount ?? 0}</Text></View>
+                  <View style={s.chip}><Text style={s.chipText}>المسارات: {t.tracksCount ?? 0}</Text></View>
                   <View style={s.chip}><Text style={s.chipText}>الطلاب: {t.studentCount ?? 0}</Text></View>
                 </View>
 

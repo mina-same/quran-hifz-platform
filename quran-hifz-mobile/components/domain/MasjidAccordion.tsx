@@ -6,7 +6,6 @@ import {
   IconBuildingArch, IconChevronDown, IconChevronUp, IconUsers,
 } from '@tabler/icons-react-native';
 import type { Masjid } from '@/lib/queries/masajid';
-import type { Halqa } from '@/lib/queries/halqat';
 import Badge from '@/components/ui/Badge';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -22,15 +21,13 @@ interface Props {
   masjid: Masjid;
   /** Admin edit/delete buttons — rendered in the header, beside the count badge. */
   actions?: React.ReactNode;
-  /** This masjid's own halqat — the real /masajid endpoint doesn't nest them,
-   * so the caller resolves them from a separate useHalqat() list. */
-  halqat: Halqa[];
 }
 
-export default function MasjidAccordion({ masjid, halqat, actions }: Props) {
+export default function MasjidAccordion({ masjid, actions }: Props) {
   const theme = useAppTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [open, setOpen] = useState(false);
+  const tracks = masjid.tracks ?? [];
 
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -57,23 +54,25 @@ export default function MasjidAccordion({ masjid, halqat, actions }: Props) {
       {/* Count + admin actions on their own row, so nothing competes with the
           title for width and the buttons keep a full-size touch target. */}
       <View style={styles.metaRow}>
-        <Badge label={`${halqat.length} حلقات`} variant="green" />
+        <Badge label={`${tracks.length} مسارات`} variant="green" />
         {!!actions && <View style={styles.actions}>{actions}</View>}
       </View>
 
       {open && (
         <View style={styles.content}>
-          {halqat.length === 0 && <Text style={styles.halqaMeta}>لا توجد حلقات في هذا المسجد</Text>}
-          {halqat.map((halqa) => (
-            <View key={halqa._id} style={styles.halqaRow}>
-              <Text style={styles.halqaName}>{halqa.name}</Text>
-              <Text style={styles.halqaMeta}>{nameOf(halqa.teacher)} • {halqa.time}</Text>
-              <View style={styles.halqaBottom}>
+          {tracks.length === 0 && <Text style={styles.trackMeta}>لا توجد مسارات في هذا المسجد</Text>}
+          {tracks.map((track) => (
+            <View key={track._id} style={styles.trackRow}>
+              <Text style={styles.trackName}>{track.title}</Text>
+              <Text style={styles.trackMeta}>
+                {track.teachers.map(nameOf).join('، ') || '—'} • {track.timeSlot}
+              </Text>
+              <View style={styles.trackBottom}>
                 <View style={styles.countRow}>
                   <IconUsers size={12} color={theme.textMuted} />
-                  <Text style={styles.countText}>{halqa.studentCount ?? 0}/{halqa.capacity}</Text>
+                  <Text style={styles.countText}>حتى {track.maxStudents} طالب</Text>
                 </View>
-                <Badge label={`${halqa.attendancePct}٪ حضور`} variant="green" />
+                <Badge label={track.status === 'active' ? 'نشط' : track.status === 'upcoming' ? 'قادم' : 'منتهي'} variant={track.status === 'active' ? 'green' : track.status === 'upcoming' ? 'gold' : 'gray'} />
               </View>
             </View>
           ))}
@@ -140,23 +139,23 @@ function createStyles(theme: AppTheme) {
       padding: 12,
       gap: 8,
     },
-    halqaRow: {
+    trackRow: {
       backgroundColor: theme.cardAlt,
       borderRadius: theme.radiusSm,
       padding: 10,
       gap: 4,
     },
-    halqaName: {
+    trackName: {
       fontSize: 13,
       fontFamily: theme.fontCairoBold,
       color: theme.green,
     },
-    halqaMeta: {
+    trackMeta: {
       fontSize: 11,
       fontFamily: theme.fontCairo,
       color: theme.textMuted,
     },
-    halqaBottom: {
+    trackBottom: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',

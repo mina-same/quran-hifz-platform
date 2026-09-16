@@ -8,9 +8,8 @@ export type PlanType = 'حفظ' | 'مراجعة';
 export type GradeCriterion = { key: string; label: string; max: number; auto: boolean };
 export type PointRule = { label: string; amount: number; kind: 'خصم' | 'زيادة' };
 export type PlanTeacher = { _id: string; name: string };
-export type PlanHalqa = { _id: string; name: string };
 export type PlanStudent = { _id: string; name: string };
-export type PlanSpecialTrack = { _id: string; title: string };
+export type PlanTrack = { _id: string; title: string };
 export type TodayAssignment = { surahStart: number; ayahStart: number; surahEnd: number; ayahEnd: number; pageStart: number; pageEnd: number };
 export type PlanProgress = { completed: number; total: number; percent: number };
 export type JuzProgress = { completed: number; total: number };
@@ -47,10 +46,9 @@ export type QuranPlan = {
   type: PlanType;
   teacher: PlanTeacher | string;
 
-  targetType: 'halqa' | 'students' | 'specialTrack';
-  halqa?: PlanHalqa | string;
+  targetType: 'track' | 'students';
+  track?: PlanTrack | string;
   students?: (PlanStudent | string)[];
-  specialTrack?: PlanSpecialTrack | string;
 
   /** Rollup — every segment's days merged. Scheduling reads `segments`. */
   days: string[];
@@ -105,17 +103,16 @@ type ListResponse = { success: boolean; count: number; data: QuranPlan[] };
 type SingleResponse = { success: boolean; data: QuranPlan };
 
 export function useQuranPlans(
-  filters?: { teacher?: string; halqa?: string; student?: string; specialTrack?: string },
+  filters?: { teacher?: string; track?: string; student?: string },
   opts?: { enabled?: boolean },
 ) {
   const params = new URLSearchParams();
   if (filters?.teacher) params.set('teacher', filters.teacher);
-  if (filters?.halqa) params.set('halqa', filters.halqa);
+  if (filters?.track) params.set('track', filters.track);
   if (filters?.student) params.set('student', filters.student);
-  if (filters?.specialTrack) params.set('specialTrack', filters.specialTrack);
   const qs = params.toString() ? `?${params.toString()}` : '';
   return useQuery({
-    queryKey: ['quran-plans', filters?.teacher ?? '', filters?.halqa ?? '', filters?.student ?? '', filters?.specialTrack ?? ''],
+    queryKey: ['quran-plans', filters?.teacher ?? '', filters?.track ?? '', filters?.student ?? ''],
     queryFn: () => get<ListResponse>(`/quran-plans${qs}`).then((r) => r.data),
     enabled: opts?.enabled,
   });

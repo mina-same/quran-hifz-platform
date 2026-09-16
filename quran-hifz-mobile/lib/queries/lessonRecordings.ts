@@ -5,8 +5,7 @@ export type LessonRecording = {
   _id: string;
   student: { _id: string; name: string } | string;
   teacher: { _id: string; name: string } | string;
-  halqa?: { _id: string; name: string } | string;
-  specialTrack?: { _id: string; title: string } | string;
+  track?: { _id: string; title: string } | string;
   type: string;
   segment: string;
   points: number;
@@ -18,8 +17,7 @@ export type LessonRecording = {
 export type LessonRecordingFilters = {
   student?: string;
   teacher?: string;
-  halqa?: string;
-  specialTrack?: string;
+  track?: string;
 };
 
 type ListResponse = { success: boolean; count: number; data: LessonRecording[] };
@@ -29,8 +27,7 @@ function buildQuery(filters: LessonRecordingFilters) {
   const params = new URLSearchParams();
   if (filters.student) params.set('student', filters.student);
   if (filters.teacher) params.set('teacher', filters.teacher);
-  if (filters.halqa) params.set('halqa', filters.halqa);
-  if (filters.specialTrack) params.set('specialTrack', filters.specialTrack);
+  if (filters.track) params.set('track', filters.track);
   const q = params.toString();
   return q ? `?${q}` : '';
 }

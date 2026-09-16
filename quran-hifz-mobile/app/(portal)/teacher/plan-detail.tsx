@@ -28,8 +28,7 @@ const STATUS_VARIANT: Record<QuranPlan['status'], 'green' | 'gold' | 'gray'> = {
 };
 
 function targetLabel(plan: QuranPlan): string {
-  if (plan.targetType === 'halqa') return typeof plan.halqa === 'object' ? plan.halqa?.name ?? '—' : '—';
-  if (plan.targetType === 'specialTrack') return typeof plan.specialTrack === 'object' ? plan.specialTrack?.title ?? '—' : '—';
+  if (plan.targetType === 'track') return typeof plan.track === 'object' ? plan.track?.title ?? '—' : '—';
   return `${plan.students?.length ?? 0} طالب محدد`;
 }
 
