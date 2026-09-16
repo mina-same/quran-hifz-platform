@@ -87,7 +87,11 @@ export function useUpdateStudent() {
 export function useDeleteStudent() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => del(`/students/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["students"] }),
+    mutationFn: ({ id, withParent }: { id: string; withParent?: boolean }) =>
+      del(`/students/${id}${withParent ? "?withParent=true" : ""}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["students"] });
+      qc.invalidateQueries({ queryKey: ["admin-parents"] });
+    },
   });
 }

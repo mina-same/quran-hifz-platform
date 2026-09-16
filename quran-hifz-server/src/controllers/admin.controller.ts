@@ -29,7 +29,10 @@ export async function getParents(req: Request, res: Response, next: NextFunction
           name:     p.name,
           email:    p.email,
           isActive: p.isActive,
-          children: links.map((l) => l.student),
+          // `student` populates to null when the link is stale (its Student was
+          // deleted without cleaning up ParentStudent) — drop those rather than
+          // sending null into a list the client renders `.name` off of.
+          children: links.map((l) => l.student).filter(Boolean),
         };
       }),
     );

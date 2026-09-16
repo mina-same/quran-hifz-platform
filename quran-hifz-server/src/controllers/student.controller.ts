@@ -152,8 +152,28 @@ export async function updateStudent(req: Request, res: Response, next: NextFunct
 
 export async function deleteStudent(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const student = await Student.findByIdAndDelete(req.params.id);
+    const studentId = req.params.id;
+    const links = await ParentStudent.find({ student: studentId });
+
+    const student = await Student.findByIdAndDelete(studentId);
     if (!student) throw new AppError('الطالب غير موجود', 404);
+
+    // The student's own login and any ParentStudent link are always cleaned up —
+    // leaving either behind orphans a User with a dead profileId, or a link whose
+    // populated `student` silently comes back null wherever it's read.
+    await User.findOneAndDelete({ role: 'student', profileId: studentId });
+    await ParentStudent.deleteMany({ student: studentId });
+
+    // Deleting the parent account itself is opt-in (?withParent=true): a parent
+    // can have other children, and removing their login is not implied by
+    // removing one student.
+    if (req.query.withParent === 'true') {
+      for (const link of links) {
+        const remaining = await ParentStudent.countDocuments({ parent: link.parent });
+        if (remaining === 0) await User.findOneAndDelete({ _id: link.parent, role: 'parent' });
+      }
+    }
+
     res.json({ success: true, message: 'تم حذف الطالب بنجاح' });
   } catch (err) {
     next(err);
