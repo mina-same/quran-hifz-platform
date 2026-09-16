@@ -1,6 +1,7 @@
 import { usePortal } from "../context/PortalContext";
 import { PORTALS } from "../config/portals";
 import { useTheme } from "../context/ThemeContext";
+import type { GenderScope } from "../lib/genderScope";
 
 const LOGO_SRC = "/quran/logo.png";
 
@@ -14,7 +15,7 @@ function getInitials(name: string): string {
 }
 
 export function Sidebar() {
-  const { portal, page, user, showPage, logout, closeSidebar } = usePortal();
+  const { portal, page, user, showPage, logout, closeSidebar, genderScope, setGenderScope } = usePortal();
   const { theme, toggleTheme } = useTheme();
   if (!portal) return null;
   const cfg = PORTALS[portal];
@@ -32,6 +33,21 @@ export function Sidebar() {
         <div className="sidebar-name">جمعية تحفيظ القرآن الكريم بالعماير</div>
         <span className="sidebar-portal-badge">{cfg.badge}</span>
       </div>
+      {portal === "admin" && (
+        <div className="sidebar-gender-scope">
+          <label htmlFor="sidebar-gender-scope-select" className="sidebar-gender-scope-label">النطاق</label>
+          <select
+            id="sidebar-gender-scope-select"
+            className="sidebar-gender-scope-select"
+            value={genderScope}
+            onChange={(e) => setGenderScope(e.target.value as GenderScope)}
+          >
+            <option value="all">الكل</option>
+            <option value="male">بنين</option>
+            <option value="female">بنات</option>
+          </select>
+        </div>
+      )}
       <nav className="sidebar-nav">
         {cfg.nav.map((g) => (
           <div key={g.group}>

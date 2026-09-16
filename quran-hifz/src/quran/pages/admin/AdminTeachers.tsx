@@ -4,7 +4,10 @@ import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonTable } from "../../components/common/Skeleton";
 import { useTeachers, useCreateTeacher, useUpdateTeacher, useDeleteTeacher, type Teacher } from "../../api/teachers";
+import { useTracks } from "../../api/tracks";
 import { toAr } from "../../../lib/format";
+import { usePortal } from "../../context/PortalContext";
+import { teacherIdsInScope } from "../../lib/genderScope";
 
 type ModalState = null | { mode: "add" } | { mode: "edit"; item: Teacher };
 
@@ -34,7 +37,13 @@ const DIALOG: React.CSSProperties = {
 };
 
 export function AdminTeachers() {
-  const { data: teachers = [], isLoading, error } = useTeachers();
+  const { genderScope } = usePortal();
+  const { data: allTeachers = [], isLoading, error } = useTeachers();
+  const { data: tracks = [] } = useTracks();
+  const scopedTeacherIds = teacherIdsInScope(tracks, genderScope);
+  const teachers = genderScope === "all"
+    ? allTeachers
+    : allTeachers.filter((t) => scopedTeacherIds.has(t._id));
   const createTeacher = useCreateTeacher();
   const updateTeacher = useUpdateTeacher();
   const deleteTeacher = useDeleteTeacher();

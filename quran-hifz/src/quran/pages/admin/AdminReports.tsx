@@ -3,10 +3,12 @@ import { useTeachers } from "../../api/teachers";
 import { useKpis } from "../../api/kpis";
 import { useTracks } from "../../api/tracks";
 import { ReportsDashboard } from "../../components/common/ReportsDashboard";
+import { usePortal } from "../../context/PortalContext";
 
 /** Admin reports — full school cohort. KPIs + teachers are org-wide widgets
  *  surfaced in addition to the student analytics. */
 export function AdminReports() {
+  const { genderScope } = usePortal();
   const { data: teachers = [] } = useTeachers();
   const { data: kpis = [] } = useKpis();
   const { data: tracks = [] } = useTracks();
@@ -24,6 +26,7 @@ export function AdminReports() {
       teachers={teachers}
       showAdmin
       scopeAllLabel="كل طلاب المدرسة"
+      genderScope={genderScope}
     />
   );
 }

@@ -4,6 +4,7 @@ import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 import { downloadCsv } from "../../../lib/csv";
 import { useStudents, type Student, type StudentFilters } from "../../api/students";
 import { useEvaluations, type EvaluationRecord } from "../../api/evaluations";
+import { matchesGenderScope, teacherIdsInScope, type GenderScope } from "../../lib/genderScope";
 import { MAX_SCORES, TOTAL_MAX, legacyScoresOf } from "../../lib/evaluationRubric";
 import type { Kpi } from "../../api/kpis";
 import type { Teacher } from "../../api/teachers";
@@ -108,6 +109,7 @@ export function ReportsDashboard({
   teachers,
   showAdmin = false,
   scopeAllLabel,
+  genderScope = "all",
 }: {
   topbarIcon: string;
   topbarTitle: string;
@@ -117,6 +119,7 @@ export function ReportsDashboard({
   teachers?: Teacher[];
   showAdmin?: boolean;
   scopeAllLabel: string;
+  genderScope?: GenderScope;
 }) {
   const [scope, setScope] = useState("");
   const scopedFilter: StudentFilters = useMemo(() => {
@@ -125,8 +128,28 @@ export function ReportsDashboard({
     return baseFilter;
   }, [scope, baseFilter]);
 
-  const { data: students = [], isLoading } = useStudents(scopedFilter);
-  const { data: evaluations = [] } = useEvaluations(scopedFilter);
+  // Tracks under a masjid outside the active gender scope — every list/stat
+  // below is scoped through this, the same join key AdminTeachers uses.
+  const scopedTracks = useMemo(
+    () => tracks.filter((t) => matchesGenderScope(t.masjid, genderScope)),
+    [tracks, genderScope],
+  );
+  const scopedTrackIds = useMemo(() => new Set(scopedTracks.map((t) => t._id)), [scopedTracks]);
+  const scopedTeacherIds = useMemo(() => teacherIdsInScope(tracks, genderScope), [tracks, genderScope]);
+
+  const { data: rawStudents = [], isLoading } = useStudents(scopedFilter);
+  const { data: rawEvaluations = [] } = useEvaluations(scopedFilter);
+  const students = useMemo(
+    () => rawStudents.filter((s) => matchesGenderScope(typeof s.track === "string" ? undefined : s.track.masjid, genderScope)),
+    [rawStudents, genderScope],
+  );
+  const evaluations = useMemo(() => {
+    if (genderScope === "all") return rawEvaluations;
+    return rawEvaluations.filter((e) => {
+      const id = evalTrackId(e);
+      return !id || scopedTrackIds.has(id);
+    });
+  }, [rawEvaluations, genderScope, scopedTrackIds]);
 
   /* ── cohort overview (attendance/progress, still useful independent of evaluations) ── */
   const m = useMemo(() => {
@@ -212,7 +235,7 @@ export function ReportsDashboard({
     for (const e of evaluations) {
       const id = evalTrackId(e);
       if (!id) continue;
-      const name = evalTrackName(e) || tracks.find((t) => t._id === id)?.title || "—";
+      const name = evalTrackName(e) || scopedTracks.find((t) => t._id === id)?.title || "—";
       const entry = map.get(id) ?? {
         name,
         sums: { attendance: 0, hifz: 0, tajweed: 0, talawah: 0, total: 0 },
@@ -237,7 +260,7 @@ export function ReportsDashboard({
         count: e.count,
       }))
       .sort((a, b) => b.avgTotal - a.avgTotal);
-  }, [evaluations, tracks]);
+  }, [evaluations, scopedTracks]);
 
   /* ── per-student evaluation leaderboard (honor board top-3 + needs-attention) ── */
   const studentEvalStats = useMemo(() => {
@@ -334,11 +357,12 @@ export function ReportsDashboard({
   const teacherRows = useMemo(
     () =>
       (teachers ?? [])
+        .filter((t) => genderScope === "all" || scopedTeacherIds.has(t._id))
         .slice()
         .sort((a, b) => (b.studentCount ?? 0) - (a.studentCount ?? 0))
         .slice(0, 10)
         .map((t) => ({ name: t.name, count: t.studentCount ?? 0 })),
-    [teachers],
+    [teachers, genderScope, scopedTeacherIds],
   );
   const maxTeacherCount = useMemo(() => teacherRows.reduce((mx, r) => Math.max(mx, r.count), 0) || 1, [teacherRows]);
 
@@ -412,11 +436,11 @@ export function ReportsDashboard({
   /* ── scope options ────────────────────────────────────────────────── */
   const scopeOptions = useMemo(() => {
     const opts: { value: string; label: string; icon?: string }[] = [{ value: "", label: scopeAllLabel, icon: "ti-users" }];
-    tracks.forEach((t) => opts.push({ value: `track:${t._id}`, label: t.title, icon: "ti-route" }));
+    scopedTracks.forEach((t) => opts.push({ value: `track:${t._id}`, label: t.title, icon: "ti-route" }));
     return opts;
-  }, [tracks, scopeAllLabel]);
+  }, [scopedTracks, scopeAllLabel]);
 
-  const selectedTrack = tracks.find((t) => `track:${t._id}` === scope);
+  const selectedTrack = scopedTracks.find((t) => `track:${t._id}` === scope);
   const aggregateTitle = selectedTrack
     ? `مقارنة طلاب ${selectedTrack.title}`
     : showAdmin

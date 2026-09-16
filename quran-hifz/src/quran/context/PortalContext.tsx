@@ -4,6 +4,7 @@ import {
 } from "react";
 import type { PortalKey } from "../config/portals";
 import { useAuth, type AuthUser } from "./AuthContext";
+import { type GenderScope, readStoredGenderScope, storeGenderScope } from "../lib/genderScope";
 
 export type TopbarConfig = {
   icon: string;
@@ -21,6 +22,8 @@ type PortalContextValue = {
   showPage: (id: string) => void;
   toggleSidebar: () => void;
   closeSidebar: () => void;
+  genderScope: GenderScope;
+  setGenderScope: (scope: GenderScope) => void;
 };
 
 // Split out from PortalContextValue on purpose: `topbar` changes on every
@@ -63,6 +66,7 @@ export function PortalProvider({ children }: { children: ReactNode }) {
   const [page,   setPage]   = useState<string>(readHash);
   const [topbar, setTopbarState] = useState<TopbarConfig>({ icon: "ti-home", title: "لوحة التحكم" });
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [genderScope, setGenderScopeState] = useState<GenderScope>(readStoredGenderScope);
 
   // Keep hash in sync whenever page changes
   useEffect(() => { writeHash(page); }, [page]);
@@ -101,11 +105,16 @@ export function PortalProvider({ children }: { children: ReactNode }) {
   const setTopbar = useCallback((cfg: TopbarConfig) => setTopbarState(cfg), []);
   const toggleSidebar = useCallback(() => setSidebarOpen((v) => !v), []);
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+  const setGenderScope = useCallback((scope: GenderScope) => {
+    setGenderScopeState(scope);
+    storeGenderScope(scope);
+  }, []);
 
   const portalValue = useMemo<PortalContextValue>(() => ({
     portal, page, user, isSidebarOpen,
     enterPortal, logout, showPage, toggleSidebar, closeSidebar,
-  }), [portal, page, user, isSidebarOpen, enterPortal, logout, showPage, toggleSidebar, closeSidebar]);
+    genderScope, setGenderScope,
+  }), [portal, page, user, isSidebarOpen, enterPortal, logout, showPage, toggleSidebar, closeSidebar, genderScope, setGenderScope]);
 
   return (
     <PortalContext.Provider value={portalValue}>

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { get } from "../../lib/api";
+import type { GenderScope } from "../lib/genderScope";
 
 export type DashboardStats = {
   totalStudents: number;
@@ -15,9 +16,10 @@ export type DashboardStats = {
 
 type StatsResponse = { success: boolean; data: DashboardStats };
 
-export function useStats() {
+export function useStats(gender?: GenderScope) {
+  const q = gender && gender !== "all" ? `?gender=${gender}` : "";
   return useQuery({
-    queryKey: ["stats"],
-    queryFn: () => get<StatsResponse>("/stats/dashboard").then((r) => r.data),
+    queryKey: ["stats", gender ?? "all"],
+    queryFn: () => get<StatsResponse>(`/stats/dashboard${q}`).then((r) => r.data),
   });
 }

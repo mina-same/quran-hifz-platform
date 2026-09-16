@@ -10,6 +10,7 @@ import {
   type Masjid,
 } from "../../api/masajid";
 import { toAr } from "../../../lib/format";
+import { usePortal } from "../../context/PortalContext";
 
 type ModalState = null | { mode: "add" } | { mode: "edit"; item: Masjid };
 
@@ -34,7 +35,9 @@ const DIALOG: React.CSSProperties = {
 };
 
 export function AdminMasajid() {
-  const { data: masajid = [], isLoading, error } = useMasajid();
+  const { genderScope } = usePortal();
+  const { data: allMasajid = [], isLoading, error } = useMasajid();
+  const masajid = genderScope === "all" ? allMasajid : allMasajid.filter((m) => m.gender === genderScope);
   const createMasjid = useCreateMasjid();
   const updateMasjid = useUpdateMasjid();
   const deleteMasjid = useDeleteMasjid();

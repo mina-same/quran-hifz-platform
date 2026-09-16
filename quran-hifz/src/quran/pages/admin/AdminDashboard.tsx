@@ -10,6 +10,7 @@ import { useStats } from "../../api/stats";
 import { useStudents } from "../../api/students";
 import { useKpis } from "../../api/kpis";
 import { toAr, pct } from "../../../lib/format";
+import { matchesGenderScope } from "../../lib/genderScope";
 
 function PageLoading() {
   return (
@@ -25,10 +26,13 @@ function PageLoading() {
 }
 
 export function AdminDashboard() {
-  const { showPage } = usePortal();
-  const { data: stats, isLoading: statsLoading } = useStats();
+  const { showPage, genderScope } = usePortal();
+  const { data: stats, isLoading: statsLoading } = useStats(genderScope);
   const { data: students } = useStudents();
   const { data: kpis } = useKpis();
+  const scopedStudents = (students ?? []).filter((s) =>
+    matchesGenderScope(typeof s.track === "string" ? undefined : s.track.masjid, genderScope),
+  );
 
   useTopbar(
     "ti-layout-dashboard",
@@ -47,10 +51,10 @@ export function AdminDashboard() {
 
   // Group students by path for masar distribution
   const masarCounts: Record<string, number> = {};
-  (students ?? []).forEach((s) => {
+  scopedStudents.forEach((s) => {
     masarCounts[s.path] = (masarCounts[s.path] ?? 0) + 1;
   });
-  const total = students?.length || 1;
+  const total = scopedStudents.length || 1;
   const masarRows = Object.entries(masarCounts).map(([name, count]) => ({
     name,
     count,

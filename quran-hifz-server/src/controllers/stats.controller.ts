@@ -1,13 +1,42 @@
 import { Request, Response, NextFunction } from 'express';
+import { Types } from 'mongoose';
 import { Student } from '../models/Student.model';
 import { Teacher } from '../models/Teacher.model';
-import { Masjid } from '../models/Masjid.model';
+import { Masjid, type MasjidGender } from '../models/Masjid.model';
 import { Attendance } from '../models/Attendance.model';
 import { Homework } from '../models/Homework.model';
 import { Track } from '../models/Track.model';
 
-export async function getDashboardStats(_req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function getDashboardStats(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    const genderParam = req.query.gender;
+    const gender: MasjidGender | undefined =
+      genderParam === 'male' || genderParam === 'female' ? genderParam : undefined;
+
+    // When a gender scope is active, resolve it down to the set of tracks
+    // under masajid of that gender — every other count/aggregate below is
+    // then scoped to those tracks. No gender param = identical to the
+    // unscoped behaviour this endpoint always had.
+    let trackIds: Types.ObjectId[] | undefined;
+    let teacherIds: Types.ObjectId[] | undefined;
+    let masjidCountFilter: Record<string, unknown> = {};
+    if (gender) {
+      const masajidInScope = await Masjid.find({ gender }).select('_id').lean();
+      const masjidIds = masajidInScope.map((m) => m._id);
+      masjidCountFilter = { gender };
+      const tracksInScope = await Track.find({ masjid: { $in: masjidIds } }).select('teachers').lean();
+      trackIds = tracksInScope.map((t) => t._id);
+      const teacherIdSet = new Set(
+        tracksInScope.flatMap((t) => t.teachers.map((id) => id.toString())),
+      );
+      teacherIds = Array.from(teacherIdSet).map((id) => new Types.ObjectId(id));
+    }
+
+    const studentFilter = trackIds ? { track: { $in: trackIds } } : {};
+    const trackFilter = trackIds ? { _id: { $in: trackIds } } : {};
+    const teacherFilter = teacherIds ? { _id: { $in: teacherIds }, status: 'active' } : { status: 'active' };
+    const homeworkFilter = (status: string) => (trackIds ? { track: { $in: trackIds }, status } : { status });
+
     const [
       totalStudents,
       activeStudents,
@@ -17,25 +46,28 @@ export async function getDashboardStats(_req: Request, res: Response, next: Next
       pendingHomework,
       lateHomework,
     ] = await Promise.all([
-      Student.countDocuments(),
-      Student.countDocuments({ status: 'active' }),
-      Teacher.countDocuments({ status: 'active' }),
-      Track.countDocuments(),
-      Masjid.countDocuments(),
-      Homework.countDocuments({ status: 'معلق' }),
-      Homework.countDocuments({ status: 'متأخر' }),
+      Student.countDocuments(studentFilter),
+      Student.countDocuments({ ...studentFilter, status: 'active' }),
+      Teacher.countDocuments(teacherFilter),
+      Track.countDocuments(trackFilter),
+      Masjid.countDocuments(masjidCountFilter),
+      Homework.countDocuments(homeworkFilter('معلق')),
+      Homework.countDocuments(homeworkFilter('متأخر')),
     ]);
 
-    // Average attendance across all students
+    // Average attendance, scoped to tracks in scope when a gender filter is active
+    const attendanceMatch = trackIds ? { track: { $in: trackIds } } : {};
     const attendanceAgg = await Attendance.aggregate([
+      { $match: attendanceMatch },
       { $group: { _id: null, avg: { $avg: { $cond: [{ $eq: ['$status', 'حاضر'] }, 1, 0] } } } },
     ]);
     const avgAttendancePct = attendanceAgg[0]
       ? Math.round(attendanceAgg[0].avg * 100)
       : 0;
 
-    // Average hifz progress
+    // Average hifz progress, same scoping
     const progressAgg = await Student.aggregate([
+      { $match: studentFilter },
       { $group: { _id: null, avg: { $avg: '$progressPct' } } },
     ]);
     const avgProgressPct = progressAgg[0] ? Math.round(progressAgg[0].avg) : 0;

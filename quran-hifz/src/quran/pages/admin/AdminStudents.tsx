@@ -8,6 +8,7 @@ import { useStudents, useUpdateStudent, useDeleteStudent, type Student } from ".
 import { useTracks } from "../../api/tracks";
 import { useAdminParents, useStudentParent, useSetStudentParent } from "../../api/admin-parents";
 import { toAr } from "../../../lib/format";
+import { matchesGenderScope } from "../../lib/genderScope";
 
 const PATH_TONE: Record<string, BadgeTone> = {
   "حفظ كامل": "gold",
@@ -58,8 +59,11 @@ const DIALOG: React.CSSProperties = {
 };
 
 export function AdminStudents() {
-  const { showPage } = usePortal();
-  const { data: students = [], isLoading, error } = useStudents();
+  const { showPage, genderScope } = usePortal();
+  const { data: allStudents = [], isLoading, error } = useStudents();
+  const students = allStudents.filter((s) =>
+    matchesGenderScope(typeof s.track === "string" ? undefined : s.track.masjid, genderScope),
+  );
   const { data: tracks = [] } = useTracks();
   const { data: parents = [] } = useAdminParents();
   const updateStudent    = useUpdateStudent();
@@ -130,9 +134,9 @@ export function AdminStudents() {
     }
   }
 
-  async function handleDelete() {
+  async function handleDelete(withParent: boolean) {
     if (!deleteId) return;
-    try { await deleteStudent.mutateAsync(deleteId); }
+    try { await deleteStudent.mutateAsync({ id: deleteId, withParent }); }
     finally { setDeleteId(null); }
   }
 
@@ -430,33 +434,53 @@ export function AdminStudents() {
       )}
 
       {/* Delete Confirmation */}
-      {deleteId && (
-        <div style={OVERLAY} onClick={() => setDeleteId(null)}>
-          <div style={{ ...DIALOG, maxWidth: 360 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ textAlign: "center", marginBottom: 20 }}>
-              <i className="ti ti-alert-triangle" style={{ fontSize: 40, color: "#ef4444", display: "block" }} />
-              <h3 style={{ margin: "12px 0 6px", fontSize: 16 }}>حذف الطالب</h3>
-              <p style={{ margin: 0, fontSize: 13, color: "var(--text2)" }}>
-                سيتم حذف الطالب نهائياً. هذا الإجراء لا يمكن التراجع عنه.
-              </p>
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button
-                className="topbar-btn btn-primary"
-                style={{ flex: 1, justifyContent: "center", background: "#ef4444", padding: 10 }}
-                onClick={handleDelete}
-                disabled={deleteStudent.isPending}
-              >
-                <i className="ti ti-trash" />
-                {deleteStudent.isPending ? "جارٍ الحذف..." : "حذف نهائياً"}
-              </button>
-              <button className="topbar-btn btn-ghost" style={{ padding: "10px 20px" }} onClick={() => setDeleteId(null)}>
-                إلغاء
-              </button>
+      {deleteId && (() => {
+        const target = students.find((s) => s._id === deleteId);
+        const linkedParent = target?.parentName;
+        return (
+          <div style={OVERLAY} onClick={() => setDeleteId(null)}>
+            <div style={{ ...DIALOG, maxWidth: 380 }} onClick={(e) => e.stopPropagation()}>
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <i className="ti ti-alert-triangle" style={{ fontSize: 40, color: "#ef4444", display: "block" }} />
+                <h3 style={{ margin: "12px 0 6px", fontSize: 16 }}>حذف الطالب</h3>
+                <p style={{ margin: 0, fontSize: 13, color: "var(--text2)" }}>
+                  سيتم حذف الطالب نهائياً. هذا الإجراء لا يمكن التراجع عنه.
+                </p>
+                {linkedParent && (
+                  <p style={{ margin: "10px 0 0", fontSize: 12, color: "#b45309", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 8, padding: "8px 10px" }}>
+                    لهذا الطالب ولي أمر مرتبط ({linkedParent}). اختر هل تريد حذف حساب ولي الأمر معه أم الإبقاء عليه.
+                  </p>
+                )}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <button
+                  className="topbar-btn btn-primary"
+                  style={{ justifyContent: "center", background: "#ef4444", padding: 10 }}
+                  onClick={() => handleDelete(false)}
+                  disabled={deleteStudent.isPending}
+                >
+                  <i className="ti ti-trash" />
+                  {deleteStudent.isPending ? "جارٍ الحذف..." : linkedParent ? "حذف الطالب فقط (الإبقاء على ولي الأمر)" : "حذف نهائياً"}
+                </button>
+                {linkedParent && (
+                  <button
+                    className="topbar-btn btn-primary"
+                    style={{ justifyContent: "center", background: "#b91c1c", padding: 10 }}
+                    onClick={() => handleDelete(true)}
+                    disabled={deleteStudent.isPending}
+                  >
+                    <i className="ti ti-trash" />
+                    حذف الطالب وولي أمره معاً
+                  </button>
+                )}
+                <button className="topbar-btn btn-ghost" style={{ padding: "10px 20px" }} onClick={() => setDeleteId(null)}>
+                  إلغاء
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </>
   );
 }

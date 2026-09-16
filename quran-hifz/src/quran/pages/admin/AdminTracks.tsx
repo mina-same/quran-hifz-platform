@@ -9,10 +9,12 @@ import {
 import { useQuranPlans, segmentReversed } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
+import { matchesGenderScope } from "../../lib/genderScope";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { TrackStudentsPanel } from "../../components/common/TrackStudentsPanel";
 import { AR_LOCALE } from "@/lib/format";
+import { toast } from "sonner";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -58,10 +60,11 @@ const STATUS_CFG = {
 };
 /* ════════════════════════════════════════════════════════════ */
 export function AdminTracks() {
-  const { data: tracks = [], isLoading } = useTracks();
+  const { data: allTracks = [], isLoading } = useTracks();
+  const { showPage, genderScope } = usePortal();
+  const tracks = allTracks.filter((t) => matchesGenderScope(t.masjid, genderScope));
 
   const deleteTrack    = useDeleteTrack();
-  const { showPage }   = usePortal();
 
   function openDetail(track: Track) {
     sessionStorage.setItem(TRACK_DETAIL_ID_KEY, track._id);
@@ -215,7 +218,14 @@ export function AdminTracks() {
               <button
                 className="topbar-btn btn-primary"
                 style={{ flex: 1, justifyContent: "center", background: "#ef4444", borderColor: "#ef4444", padding: 11 }}
-                onClick={async () => { await deleteTrack.mutateAsync(deleteId); setDeleteId(null); }}
+                onClick={async () => {
+                  try {
+                    await deleteTrack.mutateAsync(deleteId);
+                    setDeleteId(null);
+                  } catch (e) {
+                    toast.error((e as Error).message);
+                  }
+                }}
                 disabled={deleteTrack.isPending}
               >
                 <i className="ti ti-trash" />

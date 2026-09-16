@@ -569,6 +569,33 @@ body {
   padding: 2px 10px;
   border-radius: 20px;
 }
+.sidebar-gender-scope {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.sidebar-gender-scope-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.sidebar-gender-scope-select {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.sidebar-gender-scope-select option {
+  color: var(--ink, #1a1a1a);
+}
 .sidebar-nav {
   flex: 1;
   padding: 12px 0;
