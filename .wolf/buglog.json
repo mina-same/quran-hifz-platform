@@ -6850,5 +6850,26 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-09-08T00:00:00"
+  },
+  {
+    "id": "bug-404",
+    "timestamp": "2026-09-16T00:00:00",
+    "error_message": "User: admin #parents page (/#parents) keeps loading / not working; browser console showed TypeError: Cannot read properties of null (reading name) at AdminParents.tsx:187",
+    "file": "quran-hifz-server/src/controllers/student.controller.ts, quran-hifz-server/src/controllers/admin.controller.ts, quran-hifz/src/quran/pages/admin/AdminStudents.tsx, quran-hifz/src/quran/api/students.ts",
+    "root_cause": "deleteStudent only ever did Student.findByIdAndDelete -- it never removed the matching ParentStudent link or the orphaned student-role User (profileId pointing at the now-deleted Student). After all real students had been deleted this way over time, every ParentStudent link in the DB pointed at a nonexistent Student, so getParents ParentStudent.find(...).populate(\"student\") populated to null for every child. AdminParents.tsx never null-checked before rendering ChildChip name={c.name}, so the page crashed on first render right after the data loaded, which is what looked like an infinite loading state (the crash happened after the skeleton, so nothing ever replaced it visibly). Verified against the live Atlas DB: Student collection was 0 documents, 75 student-role Users had a dangling profileId, all 77 ParentStudent links referenced missing students, and Teacher had a matching partial version of the same gap (6 docs vs 14 teacher Users with profileId set). This looked identical to the bug-401 reseed data-loss incident at first, but the ParentStudent links surviving (a reseed wipes those too) pointed to the real cause being the missing cascade in deleteStudent, not a reseed.",
+    "fix": "getParents (admin.controller.ts) now filters null children after populate so a stale link can never crash a renderer again, regardless of data cleanliness. deleteStudent (student.controller.ts) now always deletes the matching ParentStudent link(s) and the orphaned student-role User alongside the Student, and additionally deletes the linked parent User when called with ?withParent=true and that parent has no other children left. useDeleteStudent (web) now takes {id, withParent} instead of a bare id and also invalidates [\"admin-parents\"]. AdminStudents.tsx delete dialog now shows the linked parent name (already available as student.parentName from getStudents) and offers two buttons when a parent is linked: delete student only, or delete student and parent together. One-time data cleanup (throwaway script, deleted after): removed all 77 now-orphaned ParentStudent links and the 76 parent Users left with zero children as a result -- per user request (\"clear the parent also\"). The 75 dangling student-role Users (real accounts from ACCOUNTS.md with no backing Student doc) were deliberately left untouched -- out of scope for this fix and would need the same Student-doc reconstruction as bug-401 if the user wants those restored. Mobile (quran-hifz-mobile) useDeleteStudent was not touched -- it still calls DELETE /students/:id with no flag, which is backward compatible (cascade cleanup always runs; withParent is opt-in).",
+    "tags": [
+      "admin-parents",
+      "delete-student",
+      "cascade-delete",
+      "orphaned-references",
+      "null-crash",
+      "data-integrity"
+    ],
+    "related_bugs": [
+      "bug-401"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-09-16T00:00:00"
   }
 ]

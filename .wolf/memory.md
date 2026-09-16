@@ -2,6 +2,7 @@
 
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
+| 2026-09-16 | User: admin #parents page stuck loading. Root cause: deleteStudent never cleaned up the matching ParentStudent link or the orphaned student User (dangling profileId), so after enough students had been deleted every ParentStudent link pointed at a missing Student — getParents populated `student` to null for every child, and AdminParents.tsx crashed rendering ChildChip name={c.name} on null (confirmed via browser console TypeError). Fixed: getParents filters null children; deleteStudent now always removes the ParentStudent link + orphaned student User, and deletes the linked parent User too when called with ?withParent=true and that parent has no other children; AdminStudents.tsx delete dialog now shows the linked parent name and offers "delete student only" vs "delete student and parent together" (per user request — "next time tell them to delete the parent first or add a button to delete both"). One-time cleanup (throwaway script): removed the 77 now-orphaned ParentStudent links and 76 parent accounts left with zero children. tsc --noEmit clean on both server and web. Logged as bug-404. Not done: the 75 dangling student-role Users (real ACCOUNTS.md accounts with no backing Student doc) were left untouched — would need the same reconstruction as bug-401 if the user wants those restored; mobile app's useDeleteStudent untouched (still backward compatible, no withParent UI there). | quran-hifz-server/src/controllers/admin.controller.ts, controllers/student.controller.ts, quran-hifz/src/quran/pages/admin/AdminStudents.tsx, api/students.ts | complete | ~55000 |
 | 2026-09-06 | Task 14: IndividualPlanPanel.tsx comment fix (Phase 2 web). Updated JSDoc comment (lines 67-70) from "halqa/specialTrack-targeted plans" to "track-targeted plans". Comment-only change, no code logic. tsc --noEmit: no new errors (pre-existing errors unchanged). Committed d258a4a. | quran-hifz/src/quran/components/common/IndividualPlanPanel.tsx | complete | ~600 |
 | 2026-09-05 | Task 7: AdminMasajid.tsx — gender field + tracks list (Phase 2 web). Updated Masjid type: added gender:"male"|"female" field, replaced halqat with tracks array (title/daysPerWeek/timeSlot/maxStudents/status). AdminMasajid.tsx: added gender state + UI (2-button toggle), seeded on add (default "male") and edit (from item.gender), included in create/update mutations. Replaced "حلقات" badge with "مسارات", replaced nested halqat list with tracks showing status badges (نشط/قادم/منتهي) instead of enrollment ratio (API doesn't provide per-track counts). Updated topbar title "المساجد والحلقات" → "المساجد والمسارات". tsc --noEmit: no errors in modified files. Committed dccc82d. | quran-hifz/src/quran/api/masajid.ts, quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | complete | ~2500 |
 | 2026-09-05 | Task 1: Halqa→Track API migration (Phase 2 web) — deleted halqat.ts + special-tracks.ts, created tracks.ts with new unified Track types/hooks (useTracks, useTrack, useCreateTrack, useUpdateTrack, useDeleteTrack, useAssignStudent). Updated quran-plans.ts: PlanFormHandoff now trackId-only, removed PlanHalqa/PlanSpecialTrack, added PlanTrack, targetType="track"|"students", useQuranPlans filters={teacher,track,student}. tsc --noEmit: 118 expected errors in 22 files (all importing deleted modules or using old fields/comparisons). Committed 0d14116. No unrelated breakage. | quran-hifz/src/quran/api/tracks.ts (new), api/quran-plans.ts, api/halqat.ts (deleted), api/special-tracks.ts (deleted) | complete | ~6000 |
@@ -3801,6 +3802,126 @@
 |------|--------|---------|---------|--------|
 
 ## Session: 2026-09-08 23:02
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 23:58 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/queries/tracks.ts | modified useAssignStudent() | ~242 |
+| 23:59 | Edited .claude/worktrees/phase3-mobile/quran-hifz-server/src/controllers/track.controller.ts | added 2 import(s) | ~96 |
+| 23:59 | Edited .claude/worktrees/phase3-mobile/quran-hifz-server/src/controllers/track.controller.ts | added error handling | ~525 |
+| 23:59 | Edited .claude/worktrees/phase3-mobile/quran-hifz-server/src/routes/track.routes.ts | 3→3 lines | ~40 |
+| 23:59 | Edited .claude/worktrees/phase3-mobile/quran-hifz-server/src/routes/track.routes.ts | 2→3 lines | ~61 |
+| 00:00 | Created .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/domain/TrackStudentsPanel.tsx | — | ~2169 |
+| 00:01 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/domain/TrackDetail.tsx | added 3 import(s) | ~319 |
+| 00:01 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/domain/TrackDetail.tsx | CSS: _id | ~55 |
+| 00:01 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/domain/TrackDetail.tsx | 3→7 lines | ~108 |
+| 00:01 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/domain/TrackDetail.tsx | added 1 condition(s) | ~435 |
+| 00:01 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/domain/TrackDetail.tsx | expanded (+7 lines) | ~137 |
+| 00:02 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/domain/TrackDetail.tsx | 7→6 lines | ~45 |
+| 00:02 | Session end: 12 writes across 5 files (tracks.ts, track.controller.ts, track.routes.ts, TrackStudentsPanel.tsx, TrackDetail.tsx) | 5 reads | ~34445 tok |
+| 00:06 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/admin/_layout.tsx | 2→2 lines | ~42 |
+| 00:06 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/admin/_layout.tsx | "halqat" → "tracks" | ~46 |
+| 00:06 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/admin/_layout.tsx | 9→7 lines | ~175 |
+| 00:06 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/teacher/_layout.tsx | 3→3 lines | ~29 |
+| 00:06 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/teacher/_layout.tsx | "myhalqa" → "tracks" | ~46 |
+| 00:06 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/teacher/_layout.tsx | 3→2 lines | ~52 |
+| 00:07 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/student/_layout.tsx | inline fix | ~21 |
+| 00:07 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/student/_layout.tsx | "special_tracks" → "tracks" | ~23 |
+| 00:07 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/constants/portals.ts | 5→5 lines | ~33 |
+| 00:08 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/constants/portals.ts | 18→18 lines | ~139 |
+| 00:08 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/constants/portals.ts | 26→26 lines | ~163 |
+| 00:08 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/constants/portals.ts | reduced (-11 lines) | ~74 |
+| 00:08 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/constants/portals.ts | 18→18 lines | ~139 |
+| 00:08 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/constants/portals.ts | reduced (-7 lines) | ~225 |
+| 00:08 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/constants/portals.ts | "متابعة طلاب حلقاتك" → "متابعة طلاب مساراتك" | ~12 |
+| 00:09 | Session end: 27 writes across 7 files (tracks.ts, track.controller.ts, track.routes.ts, TrackStudentsPanel.tsx, TrackDetail.tsx) | 11 reads | ~39212 tok |
+| 00:13 | Created .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/constants/portals.ts | — | ~2299 |
+| 00:13 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/admin/_layout.tsx | 3→3 lines | ~39 |
+| 00:14 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/admin/_layout.tsx | inline fix | ~46 |
+| 00:14 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/teacher/_layout.tsx | 3→3 lines | ~41 |
+| 00:14 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/teacher/_layout.tsx | inline fix | ~46 |
+| 00:14 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/student/_layout.tsx | inline fix | ~22 |
+| 00:15 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/student/dashboard.tsx | CSS: title | ~83 |
+| 00:15 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/student/dashboard.tsx | CSS: track | ~58 |
+| 00:15 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/student/dashboard.tsx | added optional chaining | ~280 |
+| 00:15 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/student/homework.tsx | "مسار: ${getTitle(today.sp" → "مسار: ${getTitle(today.tr" | ~26 |
+| 00:16 | Created .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/student/schedule.tsx | — | ~2280 |
+| 00:16 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/parent/dashboard.tsx | inline fix | ~30 |
+| 00:16 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/parent/dashboard.tsx | "الحلقة" → "المسار" | ~28 |
+| 00:17 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/index.tsx | getHalqaName() → getTrackName() | ~32 |
+| 00:17 | Edited .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/index.tsx | inline fix | ~14 |
+| 00:18 | Session end: 42 writes across 11 files (tracks.ts, track.controller.ts, track.routes.ts, TrackStudentsPanel.tsx, TrackDetail.tsx) | 17 reads | ~118772 tok |
+| 00:19 | Session end: 42 writes across 11 files (tracks.ts, track.controller.ts, track.routes.ts, TrackStudentsPanel.tsx, TrackDetail.tsx) | 17 reads | ~118772 tok |
+
+## Session: 2026-09-16 23:24
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-16 23:24
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-16 23:31
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 23:35 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/b9799155-a8b0-4166-8993-e6f0a4d10143/scratchpad/diagnose_orphans.ts | — | ~627 |
+| 23:35 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/b9799155-a8b0-4166-8993-e6f0a4d10143/scratchpad/diagnose_orphans.ts | — | ~578 |
+| 23:36 | Created quran-hifz-server/src/_check_counts.ts | — | ~307 |
+| 23:40 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | removed 2 lines | ~6 |
+| 23:40 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | 6→5 lines | ~33 |
+| 23:40 | Edited quran-hifz/src/quran/pages/admin/AdminRegister.tsx | 7→2 lines | ~35 |
+| 23:40 | Edited quran-hifz-mobile/app/(portal)/admin/register.tsx | 10→10 lines | ~97 |
+| 23:40 | Edited quran-hifz-mobile/app/(portal)/admin/register.tsx | 4→2 lines | ~39 |
+| 23:40 | Edited quran-hifz-mobile/app/(portal)/admin/register.tsx | 5→5 lines | ~48 |
+| 23:40 | Edited quran-hifz-mobile/app/(portal)/admin/register.tsx | removed 4 lines | ~13 |
+| 23:40 | Removed العمر (age) field from student register form — never saved to backend, only biased masar auto-suggestion; بالغ already selectable via level dropdown | quran-hifz/src/quran/pages/admin/AdminRegister.tsx, quran-hifz-mobile/app/(portal)/admin/register.tsx | done | ~400 |
+| 23:41 | Session end: 10 writes across 4 files (diagnose_orphans.ts, _check_counts.ts, AdminRegister.tsx, register.tsx) | 14 reads | ~25252 tok |
+| 23:41 | Edited quran-hifz-server/src/controllers/admin.controller.ts | 8→11 lines | ~156 |
+| 23:41 | Edited quran-hifz-server/src/controllers/student.controller.ts | added 2 condition(s) | ~366 |
+| 23:41 | Edited quran-hifz/src/quran/api/students.ts | modified useDeleteStudent() | ~112 |
+| 23:42 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | CSS: withParent, id | ~56 |
+| 23:42 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | added optional chaining | ~716 |
+| 23:42 | Created quran-hifz-server/src/_cleanup_orphans.ts | — | ~418 |
+| 23:43 | Edited quran-hifz-server/src/controllers/stats.controller.ts | added 1 condition(s) | ~1054 |
+| 23:43 | Edited quran-hifz-server/src/controllers/stats.controller.ts | added 1 import(s) | ~120 |
+| 23:43 | Edited quran-hifz-server/src/controllers/stats.controller.ts | modified if() | ~204 |
+| 23:44 | Created quran-hifz/src/quran/lib/genderScope.ts | — | ~523 |
+| 23:44 | Edited quran-hifz/src/quran/context/PortalContext.tsx | added 1 import(s) | ~58 |
+| 23:44 | Edited quran-hifz/src/quran/context/PortalContext.tsx | CSS: genderScope, setGenderScope, scope | ~93 |
+| 23:44 | Edited quran-hifz/src/quran/context/PortalContext.tsx | 2→3 lines | ~72 |
+| 23:44 | Edited quran-hifz/src/quran/context/PortalContext.tsx | CSS: scope | ~196 |
+| 23:44 | Edited quran-hifz/src/quran/components/Sidebar.tsx | added 1 import(s) | ~59 |
+| 23:44 | Edited quran-hifz/src/quran/components/Sidebar.tsx | modified Sidebar() | ~68 |
+| 23:44 | Edited quran-hifz/src/quran/components/Sidebar.tsx | expanded (+15 lines) | ~207 |
+| 23:45 | Edited quran-hifz/src/quran/quran.css | expanded (+27 lines) | ~200 |
+| 23:45 | Edited quran-hifz/src/quran/api/stats.ts | added nullish coalescing | ~212 |
+| 23:45 | Edited quran-hifz/src/quran/pages/admin/AdminDashboard.tsx | added 1 import(s) | ~70 |
+| 23:45 | Edited quran-hifz/src/quran/pages/admin/AdminDashboard.tsx | added nullish coalescing | ~113 |
+| 23:45 | Edited quran-hifz/src/quran/pages/admin/AdminDashboard.tsx | 6→6 lines | ~70 |
+| 23:45 | Edited quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | added 1 import(s) | ~123 |
+| 23:45 | Edited quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | CSS: allMasajid | ~83 |
+| 23:45 | Edited quran-hifz/src/quran/pages/admin/AdminTracks.tsx | added 1 import(s) | ~37 |
+| 23:45 | Edited quran-hifz/src/quran/pages/admin/AdminTracks.tsx | modified AdminTracks() | ~77 |
+| 23:45 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | added 1 import(s) | ~58 |
+| 23:46 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | CSS: undefined | ~85 |
+| 23:46 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | added 3 import(s) | ~93 |
+| 23:46 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | CSS: allTeachers | ~107 |
+| 23:46 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | 4→5 lines | ~67 |
+| 23:46 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | added 1 import(s) | ~75 |
+| 23:47 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | CSS: undefined | ~496 |
+| 23:47 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | 7→7 lines | ~110 |
+| 23:47 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | inline fix | ~27 |
+| 23:47 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | 2→2 lines | ~24 |
+| 23:47 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | 10→11 lines | ~132 |
+| 23:47 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | 7→7 lines | ~116 |
+| 23:47 | Edited quran-hifz/src/quran/pages/admin/AdminReports.tsx | modified AdminReports() | ~322 |
+| 23:47 | Session end: 49 writes across 21 files (diagnose_orphans.ts, _check_counts.ts, AdminRegister.tsx, register.tsx, admin.controller.ts) | 19 reads | ~85369 tok |
+| 23:49 | Edited quran-hifz/src/quran/pages/admin/AdminTracks.tsx | added 1 import(s) | ~44 |
+| 23:49 | Edited quran-hifz/src/quran/pages/admin/AdminTracks.tsx | added error handling | ~83 |
+
+## Session: 2026-09-16 23:50
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|

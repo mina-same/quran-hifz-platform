@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-08T08:23:38.339Z
-> Files: 681 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-16T20:49:55.963Z
+> Files: 697 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -98,6 +98,10 @@
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/acf85922-ed88-4311-85f5-cdc043cf61d7/scratchpad/
 
 - `driver.mjs` — Declares BASE (~816 tok)
+
+## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/b9799155-a8b0-4166-8993-e6f0a4d10143/scratchpad/
+
+- `diagnose_orphans.ts` — Declares main (~578 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/bbd609da-d480-4381-aa1d-3b8d4fbbf3f3/scratchpad/
 
@@ -312,8 +316,13 @@
 - `anatomy.md` — anatomy.md (~13287 tok)
 - `memory.md` — Memory (~84369 tok)
 
+## .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/
+
+- `index.tsx` — getTrackName — renders form, modal (~3637 tok)
+
 ## .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/admin/
 
+- `_layout.tsx` — MORE_IDS — renders form (~1134 tok)
 - `dashboard.tsx` — المسار: real track lives one hop away via `Student.track` — same fallback chain as admin/students.ts (~2260 tok)
 - `masajid.tsx` — AdminMasajid (~1179 tok)
 - `masjid-form.tsx` — AdminMasjidForm — renders form (~738 tok)
@@ -324,6 +333,21 @@
 - `teachers.tsx` — ratingVariant (~1722 tok)
 - `tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~11665 tok)
 
+## .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/parent/
+
+- `dashboard.tsx` — ParentDashboard (~1712 tok)
+
+## .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/student/
+
+- `_layout.tsx` — MORE_IDS (~922 tok)
+- `dashboard.tsx` — getName (~2404 tok)
+- `homework.tsx` — getTitle (~1112 tok)
+- `schedule.tsx` — DAYS (~2280 tok)
+
+## .claude/worktrees/phase3-mobile/quran-hifz-mobile/app/(portal)/teacher/
+
+- `_layout.tsx` — MORE_IDS (~1065 tok)
+
 ## .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/domain/
 
 - `ContextCard.tsx` — Normalized shape for anything a teacher/student/admin can act on — always a (~1375 tok)
@@ -332,11 +356,16 @@
 - `MasjidAccordion.tsx` — Admin edit/delete buttons — rendered in the header, beside the count badge. (~1554 tok)
 - `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~6708 tok)
 - `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from the student's plans — the same (~4284 tok)
-- `TrackDetail.tsx` — First letter of the first two words — the same initials the web chips show. (~6183 tok)
+- `TrackDetail.tsx` — First letter of the first two words — the same initials the web chips show. (~6732 tok)
+- `TrackStudentsPanel.tsx` — Track roster management — transfer-only, since a student's track is (~2169 tok)
 
 ## .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/ui/
 
 - `ScopeTabs.tsx` — Drives the chip's icon: the "all" tab or a track. (~1276 tok)
+
+## .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/constants/
+
+- `portals.ts` — Exports PORTALS, PORTAL_ROUTES (~2299 tok)
 
 ## .claude/worktrees/phase3-mobile/quran-hifz-mobile/lib/queries/
 
@@ -351,11 +380,19 @@
 - `stats.ts` — Exports DashboardStats, useStats (~165 tok)
 - `students.ts` — Populated as `{title, daysPerWeek?, timeSlot?, masjid}` by the server — (~920 tok)
 - `teachers.ts` — null when the teacher has no login account yet. (~545 tok)
-- `tracks.ts` — Computed server-side (`Student.countDocuments({track})`) — present on (~1000 tok)
+- `tracks.ts` — Computed server-side (`Student.countDocuments({track})`) — present on (~1134 tok)
 
 ## .claude/worktrees/phase3-mobile/quran-hifz-server/src/
 
 - `_verify_accounts.ts` — Declares main (~284 tok)
+
+## .claude/worktrees/phase3-mobile/quran-hifz-server/src/controllers/
+
+- `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~2230 tok)
+
+## .claude/worktrees/phase3-mobile/quran-hifz-server/src/routes/
+
+- `track.routes.ts` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~220 tok)
 
 ## .claude/worktrees/phase3-mobile/quran-hifz-server/src/seeds/
 
@@ -485,7 +522,7 @@
 - `kpis.tsx` — ratingVariant (~1020 tok)
 - `masajid.tsx` — masjidIdOf (~692 tok)
 - `parents.tsx` — EMPTY_ADD — renders form (~4595 tok)
-- `register.tsx` — PATHS — renders form (~1824 tok)
+- `register.tsx` — Same rules as the web's zod schema — kept in the same order so the first (~2904 tok)
 - `reports.tsx` — AdminReports (~562 tok)
 - `special_tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~12026 tok)
 - `students.tsx` — المسار: real track lives one hop away via halqa.specialTrack, not the unused legacy `path` enum. (~1577 tok)
@@ -667,8 +704,10 @@
 ## quran-hifz-server/src/
 
 - `_add_students.ts` — One-time reconstruction: create real Student documents (+ link the (~2459 tok)
+- `_check_counts.ts` — Declares main (~307 tok)
 - `_check_links.ts` — Declares main (~279 tok)
 - `_check_users.ts` — Declares main (~282 tok)
+- `_cleanup_orphans.ts` — Declares main (~418 tok)
 - `_verify_cleanup.ts` — Declares main (~124 tok)
 - `_verify_cleanup2.ts` — Declares main (~124 tok)
 - `_verify_cleanup3.ts` — Declares main (~124 tok)
@@ -688,7 +727,7 @@
 
 ## quran-hifz-server/src/controllers/
 
-- `admin.controller.ts` — Zod schemas: updateParentSchema, createParentSchema (~1450 tok)
+- `admin.controller.ts` — Zod schemas: updateParentSchema, createParentSchema. getParents drops null (deleted-student) children (~1530 tok)
 - `attendance.controller.ts` — Upserts one Attendance doc per {student, date} and recalculates each (~1412 tok)
 - `auth.controller.ts` — Zod schemas: loginSchema, updateProfileSchema, changePasswordSchema, pushTokenSchema (~1176 tok)
 - `evaluation.controller.ts` — The rubric is no longer platform-wide — each plan carries its own (~2527 tok)
@@ -703,9 +742,9 @@
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
 - `quran-plan.controller.ts` — One line of the plan's daily grading rubric: a label and its degrees. (~6217 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
-- `stats.controller.ts` — Exports getDashboardStats (~525 tok)
+- `stats.controller.ts` — Exports getDashboardStats (~1047 tok)
 - `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~4651 tok)
-- `student.controller.ts` — Empty string is normalised to undefined so a blank field clears rather (~2010 tok)
+- `student.controller.ts` — Empty string is normalised to undefined so a blank field clears rather. deleteStudent cascades ParentStudent link + orphaned User; ?withParent=true also drops the parent User (~2320 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1390 tok)
 - `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~2230 tok)
 
@@ -893,7 +932,7 @@
 
 ## quran-hifz/src/quran/
 
-- `quran.css` — Styles: 71 rules, 18 vars (~25107 tok)
+- `quran.css` — Styles: 70 rules, 18 vars (~26080 tok)
 - `QuranApp.tsx` — Quran Hifz platform — React entry. (~880 tok)
 
 ## quran-hifz/src/quran/api/
@@ -912,9 +951,9 @@
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
 - `quran-plans.ts` — sessionStorage key used to hand off "open the plan form" from wherever a (~2623 tok)
-- `stats.ts` — Exports DashboardStats, useStats (~166 tok)
+- `stats.ts` — Exports DashboardStats, useStats (~212 tok)
 - `student-plan-progress.ts` — False when the student has no individual overlay yet — `effectiveSchedule` (~1673 tok)
-- `students.ts` — Saudi national ID — 10 digits, leading 1 (مواطن) or 2 (مقيم). (~834 tok)
+- `students.ts` — Saudi national ID — 10 digits, leading 1 (مواطن) or 2 (مقيم). useDeleteStudent takes {id, withParent?} (~890 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~504 tok)
 - `tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~1192 tok)
 
@@ -923,7 +962,7 @@
 - `ChildSelector.tsx` — LOGO_SRC (~1453 tok)
 - `PageOutlet.tsx` — PageOutlet (~131 tok)
 - `PortalScreen.tsx` — LOGO_SRC (~516 tok)
-- `Sidebar.tsx` — LOGO_SRC (~694 tok)
+- `Sidebar.tsx` — LOGO_SRC (~892 tok)
 - `Topbar.tsx` — Topbar (~170 tok)
 
 ## quran-hifz/src/quran/components/common/
@@ -943,7 +982,7 @@
 - `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
-- `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~8273 tok)
+- `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~8630 tok)
 - `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)
 - `Skeleton.tsx` — Skeleton — renders table (~816 tok)
 - `StatsRow.tsx` — StatsRow (~146 tok)
@@ -960,7 +999,7 @@
 
 - `AuthContext.tsx` — AuthContext (~780 tok)
 - `ParentContext.tsx` — ParentContext (~206 tok)
-- `PortalContext.tsx` — TopbarValueContext (~1272 tok)
+- `PortalContext.tsx` — TopbarValueContext (~1403 tok)
 - `ThemeContext.tsx` — ThemeContext (~323 tok)
 - `useTopbar.ts` — Declarative topbar setter for a page component. (~107 tok)
 
@@ -972,6 +1011,7 @@
 ## quran-hifz/src/quran/lib/
 
 - `evaluationRubric.ts` — The daily grading split is per plan now (`QuranPlan.gradeRubric`), not a (~817 tok)
+- `genderScope.ts` — Admin-wide "which masajid gender am I looking at" filter, selected from (~523 tok)
 - `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~6229 tok)
 
 ## quran-hifz/src/quran/pages/
@@ -982,18 +1022,18 @@
 
 ## quran-hifz/src/quran/pages/admin/
 
-- `AdminDashboard.tsx` — PageLoading (~1289 tok)
+- `AdminDashboard.tsx` — PageLoading (~1359 tok)
 - `AdminHalqat.tsx` — OVERLAY — renders modal (~3688 tok)
 - `AdminKpis.tsx` — RATING_TONE — renders table (~743 tok)
-- `AdminMasajid.tsx` — OVERLAY — renders modal (~3106 tok)
+- `AdminMasajid.tsx` — OVERLAY — renders modal (~3165 tok)
 - `AdminParents.tsx` — EMPTY_ADD, ChildChip — renders table, modal, search bar, avatars (~5900 tok)
-- `AdminRegister.tsx` — schema — renders form (~3130 tok)
-- `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~286 tok)
+- `AdminRegister.tsx` — schema — renders form (~2995 tok)
+- `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~322 tok)
 - `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13551 tok)
-- `AdminStudents.tsx` — PATH_TONE — renders table (~5640 tok)
-- `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4598 tok)
+- `AdminStudents.tsx` — PATH_TONE — renders table. Delete dialog offers student-only vs student+parent when parentName is linked (~6040 tok)
+- `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4723 tok)
 - `AdminTrackForm.tsx` — Full-page create/edit form for a track (was a popup modal) — lets the (~4822 tok)
-- `AdminTracks.tsx` — surahName — renders form, modal (~11858 tok)
+- `AdminTracks.tsx` — surahName — renders modal (~6365 tok)
 
 ## quran-hifz/src/quran/pages/common/
 

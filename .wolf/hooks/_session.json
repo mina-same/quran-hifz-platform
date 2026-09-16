@@ -1,16 +1,10 @@
 {
-  "session_id": "session-2026-09-08-2302",
-  "started": "2026-09-08T20:02:11.806Z",
-  "files_read": {
-    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/EvaluationRoster.tsx": {
-      "count": 1,
-      "tokens": 9349,
-      "first_read": "2026-09-08T20:03:43.692Z"
-    }
-  },
+  "session_id": "session-2026-09-16-2350",
+  "started": "2026-09-16T20:50:09.867Z",
+  "files_read": {},
   "files_written": [],
   "edit_counts": {},
-  "anatomy_hits": 1,
+  "anatomy_hits": 0,
   "anatomy_misses": 0,
   "repeated_reads_warned": 0,
   "cerebrum_warnings": 0,
