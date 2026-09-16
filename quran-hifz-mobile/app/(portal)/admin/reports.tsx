@@ -6,9 +6,11 @@ import { useTracks } from '@/lib/queries/tracks';
 import { useKpis } from '@/lib/queries/kpis';
 import { useTeachers } from '@/lib/queries/teachers';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { usePortalStore } from '@/lib/store/portalStore';
 
 export default function AdminReports() {
   const theme = useAppTheme();
+  const genderScope = usePortalStore((st) => st.genderScope);
   const styles = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },
     page: { padding: theme.pagePadding, gap: 14 },
@@ -39,6 +41,7 @@ export default function AdminReports() {
           showAdmin
           kpis={kpis}
           teachers={teachers}
+          genderScope={genderScope}
         />
       </ScrollView>
     </SafeAreaView>

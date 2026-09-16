@@ -13,13 +13,16 @@ import MasjidAccordion from '@/components/domain/MasjidAccordion';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useMasajid, useDeleteMasjid } from '@/lib/queries/masajid';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { usePortalStore } from '@/lib/store/portalStore';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
 export default function AdminMasajid() {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
-  const { data: masajid = [], isLoading, isError, isRefetching: isRefreshing, refetch: onRefresh } = useMasajid();
+  const genderScope = usePortalStore((st) => st.genderScope);
+  const { data: allMasajid = [], isLoading, isError, isRefetching: isRefreshing, refetch: onRefresh } = useMasajid();
+  const masajid = genderScope === 'all' ? allMasajid : allMasajid.filter((m) => m.gender === genderScope);
 
   const deleteMasjid = useDeleteMasjid();
   const router = useRouter();

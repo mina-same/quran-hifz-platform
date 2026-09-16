@@ -6,11 +6,13 @@ import { PORTALS } from '@/lib/constants/portals';
 import { get as apiGet, post as apiPost, setUnauthorizedHandler, NetworkError } from '@/lib/api';
 import { getToken, setToken, clearToken } from '@/lib/auth-storage';
 import { setHapticsEnabled as applyHapticsEnabled } from '@/lib/haptics';
+import type { GenderScope } from '@/lib/constants/genderScope';
 
 const THEME_MODE_KEY = 'qh_theme_mode';
 const ONBOARDED_KEY = 'qh_onboarded';
 const BIOMETRIC_ENABLED_KEY = 'qh_biometric_enabled';
 const HAPTICS_ENABLED_KEY = 'qh_haptics_enabled';
+const GENDER_SCOPE_KEY = 'qh_gender_scope';
 
 interface TopbarState {
   icon: string;
@@ -79,6 +81,8 @@ interface PortalStore {
   /** True right after a token-based (re)hydrate when biometricEnabled is on — gates the
    * app behind a lock screen until unlock() succeeds, even though authUser is already set. */
   isLocked: boolean;
+  /** Admin-only masjid-gender filter, mirrors the web Sidebar's selector. Persisted. */
+  genderScope: GenderScope;
 
   portal: PortalType | null;
   user: PortalUser | null;
@@ -95,6 +99,7 @@ interface PortalStore {
   updateUserName: (name: string) => void;
   setBiometricEnabled: (enabled: boolean) => Promise<void>;
   setHapticsEnabled: (enabled: boolean) => Promise<void>;
+  setGenderScope: (scope: GenderScope) => Promise<void>;
   unlock: () => void;
   /** Drops the session after a 401. Token is already cleared by the API layer. */
   handleUnauthorized: () => void;
@@ -111,28 +116,31 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
   hasOnboarded: false,
   sessionExpired: false,
   isLocked: false,
+  genderScope: 'all',
   portal: null,
   user: null,
   navGroups: [],
   topbar: { icon: 'home', title: 'لوحة التحكم', actionsKey: '' },
 
   hydrate: async () => {
-    const [token, storedMode, storedBiometric, storedOnboarded, storedHaptics] = await Promise.all([
+    const [token, storedMode, storedBiometric, storedOnboarded, storedHaptics, storedGenderScope] = await Promise.all([
       getToken().catch(() => null),
       AsyncStorage.getItem(THEME_MODE_KEY).catch(() => null),
       AsyncStorage.getItem(BIOMETRIC_ENABLED_KEY).catch(() => null),
       AsyncStorage.getItem(ONBOARDED_KEY).catch(() => null),
       AsyncStorage.getItem(HAPTICS_ENABLED_KEY).catch(() => null),
+      AsyncStorage.getItem(GENDER_SCOPE_KEY).catch(() => null),
     ]);
     const themeMode: ThemeMode = storedMode === 'dark' ? 'dark' : 'light';
     const biometricEnabled = storedBiometric === '1';
     const hasOnboarded = storedOnboarded === '1';
     // Opt-out, not opt-in: only an explicit '0' turns haptics off.
     const hapticsEnabled = storedHaptics !== '0';
+    const genderScope: GenderScope = storedGenderScope === 'male' || storedGenderScope === 'female' ? storedGenderScope : 'all';
     applyHapticsEnabled(hapticsEnabled);
 
     if (!token) {
-      set({ isHydrating: false, themeMode, biometricEnabled, hapticsEnabled, hasOnboarded });
+      set({ isHydrating: false, themeMode, biometricEnabled, hapticsEnabled, hasOnboarded, genderScope });
       return;
     }
     try {
@@ -146,7 +154,7 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
       // A stored session resuming silently is exactly what biometric lock guards against —
       // gate behind isLocked so the lock screen must clear before any portal screen renders.
       set({
-        authUser, isHydrating: false, themeMode, biometricEnabled, hapticsEnabled, hasOnboarded,
+        authUser, isHydrating: false, themeMode, biometricEnabled, hapticsEnabled, hasOnboarded, genderScope,
         isLocked: biometricEnabled,
         ...enterPortal(authUser.role, authUser),
       });
@@ -156,7 +164,7 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
       // and throwing away a still-valid session for that would force a re-login
       // every time the API is briefly unreachable.
       if (!(err instanceof NetworkError)) await clearToken();
-      set({ authUser: null, isHydrating: false, themeMode, biometricEnabled, hapticsEnabled, hasOnboarded });
+      set({ authUser: null, isHydrating: false, themeMode, biometricEnabled, hapticsEnabled, hasOnboarded, genderScope });
     }
   },
 
@@ -204,6 +212,11 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
     applyHapticsEnabled(enabled);
     await AsyncStorage.setItem(HAPTICS_ENABLED_KEY, enabled ? '1' : '0').catch(() => {});
     set({ hapticsEnabled: enabled });
+  },
+
+  setGenderScope: async (scope) => {
+    set({ genderScope: scope });
+    await AsyncStorage.setItem(GENDER_SCOPE_KEY, scope).catch(() => {});
   },
 
   unlock: () => set({ isLocked: false }),

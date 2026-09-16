@@ -16,6 +16,14 @@ import type { PortalType, NavGroup } from '@/lib/types/portal';
 import { ICON_MAP } from './iconMap';
 import BottomSheet from '@/components/ui/BottomSheet';
 import Pressable from '@/components/ui/Pressable';
+import ScopeTabs from '@/components/ui/ScopeTabs';
+import type { GenderScope } from '@/lib/constants/genderScope';
+
+const GENDER_SCOPE_OPTIONS = [
+  { value: 'all', label: 'الكل' },
+  { value: 'male', label: 'بنين' },
+  { value: 'female', label: 'بنات' },
+];
 
 interface Props {
   visible: boolean;
@@ -59,7 +67,7 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
   const theme = useAppTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
-  const { user, logout, themeMode, toggleTheme } = usePortalStore();
+  const { user, logout, themeMode, toggleTheme, genderScope, setGenderScope } = usePortalStore();
 
   // Icon washes sit on the row surface, so dark mode needs a stronger alpha than
   // light to read as a tint rather than as dirt.
@@ -127,6 +135,17 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
           </Pressable>
         </View>
         <View style={styles.headerRule} />
+
+        {portal === 'admin' && (
+          <View style={styles.genderScope}>
+            <Text style={styles.groupLabel}>النطاق</Text>
+            <ScopeTabs
+              options={GENDER_SCOPE_OPTIONS}
+              value={genderScope}
+              onChange={(v) => setGenderScope(v as GenderScope)}
+            />
+          </View>
+        )}
 
         <BottomSheetScrollView
           style={styles.list}
@@ -221,6 +240,10 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
       height: StyleSheet.hairlineWidth,
       backgroundColor: theme.border,
       marginHorizontal: 22,
+    },
+    genderScope: {
+      paddingHorizontal: 22,
+      paddingTop: 14,
     },
     list: {
       flex: 1,

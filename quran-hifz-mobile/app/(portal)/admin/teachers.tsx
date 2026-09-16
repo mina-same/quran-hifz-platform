@@ -12,7 +12,10 @@ import IconButton from '@/components/ui/IconButton';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useTeachers, useDeleteTeacher } from '@/lib/queries/teachers';
+import { useTracks } from '@/lib/queries/tracks';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { teacherIdsInScope } from '@/lib/constants/genderScope';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
@@ -22,7 +25,11 @@ const ratingVariant = (r: string) =>
 export default function AdminTeachers() {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
-  const { data: teachers = [], isLoading, isError, isRefetching, refetch } = useTeachers();
+  const genderScope = usePortalStore((st) => st.genderScope);
+  const { data: allTeachers = [], isLoading, isError, isRefetching, refetch } = useTeachers();
+  const { data: tracks = [] } = useTracks();
+  const scopedTeacherIds = teacherIdsInScope(tracks, genderScope);
+  const teachers = genderScope === 'all' ? allTeachers : allTeachers.filter((t) => scopedTeacherIds.has(t._id));
 
   const deleteTeacher = useDeleteTeacher();
   const router = useRouter();

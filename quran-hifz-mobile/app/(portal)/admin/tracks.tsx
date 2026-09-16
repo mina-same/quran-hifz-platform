@@ -37,6 +37,8 @@ import { SURAHS } from '@/lib/data/surahs';
 import { orientSlice } from '@/lib/quranRange';
 import { fmtDateShort } from '@/lib/date';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { matchesGenderScope } from '@/lib/constants/genderScope';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 type Styles = ReturnType<typeof createS>;
@@ -108,7 +110,9 @@ export default function AdminTracks() {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
-  const { data: tracks = [], isLoading, isRefetching, refetch } = useTracks();
+  const genderScope = usePortalStore((st) => st.genderScope);
+  const { data: allTracks = [], isLoading, isRefetching, refetch } = useTracks();
+  const tracks = allTracks.filter((t) => matchesGenderScope(t.masjid, genderScope));
   const { data: teachers = [], isRefetching: teachersRefetching, refetch: refetchTeachers } = useTeachers();
   const { data: allStudents = [], isRefetching: studentsRefetching, refetch: refetchStudents } = useStudents();
   const { data: masajid = [] } = useMasajid();

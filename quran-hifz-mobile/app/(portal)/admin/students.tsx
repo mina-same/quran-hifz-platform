@@ -20,6 +20,8 @@ import { useStudents, useDeleteStudent, type Student } from '@/lib/queries/stude
 import { useAdminParents } from '@/lib/queries/adminParents';
 import { SERVER_PATHS } from '@/lib/constants/masarMap';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { matchesGenderScope } from '@/lib/constants/genderScope';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
@@ -56,7 +58,11 @@ export default function AdminStudents() {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
-  const { data: students = [], isLoading, isError, isRefetching, refetch } = useStudents();
+  const genderScope = usePortalStore((st) => st.genderScope);
+  const { data: allStudents = [], isLoading, isError, isRefetching, refetch } = useStudents();
+  const students = allStudents.filter((st) =>
+    matchesGenderScope(typeof st.track === 'string' ? undefined : st.track.masjid, genderScope),
+  );
   const { data: parents = [] } = useAdminParents();
 
   const deleteStudent = useDeleteStudent();

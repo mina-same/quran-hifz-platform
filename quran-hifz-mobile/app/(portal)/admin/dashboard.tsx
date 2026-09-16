@@ -15,6 +15,8 @@ import { useStats } from '@/lib/queries/stats';
 import { useKpis } from '@/lib/queries/kpis';
 import { useStudents, type Student } from '@/lib/queries/students';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { usePortalStore } from '@/lib/store/portalStore';
+import { matchesGenderScope } from '@/lib/constants/genderScope';
 
 const kpiVariant = (r: string) =>
   r === 'ممتاز' ? 'green' : r === 'جيد' ? 'gold' : r === 'مقبول' ? 'blue' : 'red';
@@ -30,7 +32,8 @@ function trackLabel(s: Student): string | null {
 export default function AdminDashboard() {
   const theme = useAppTheme();
   const router = useRouter();
-  const stats = useStats();
+  const genderScope = usePortalStore((st) => st.genderScope);
+  const stats = useStats(genderScope);
   const kpisQuery = useKpis();
   const studentsQuery = useStudents();
 
@@ -43,7 +46,9 @@ export default function AdminDashboard() {
   };
 
   const kpis = kpisQuery.data ?? [];
-  const students = studentsQuery.data ?? [];
+  const students = (studentsQuery.data ?? []).filter((st) =>
+    matchesGenderScope(typeof st.track === 'string' ? undefined : st.track.masjid, genderScope),
+  );
 
   const styles = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },
