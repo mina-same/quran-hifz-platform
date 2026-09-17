@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-06-27T12:42:49.696Z",
   "lifetime": {
-    "total_tokens_estimated": 23944621,
-    "total_reads": 8124,
+    "total_tokens_estimated": 23946445,
+    "total_reads": 8130,
     "total_writes": 10922,
     "total_sessions": 146,
-    "anatomy_hits": 6329,
-    "anatomy_misses": 1622,
+    "anatomy_hits": 6333,
+    "anatomy_misses": 1624,
     "repeated_reads_blocked": 6999,
-    "estimated_savings_vs_bare_cli": 52082321
+    "estimated_savings_vs_bare_cli": 52083121
   },
   "sessions": [
     {
@@ -108740,6 +108740,106 @@
         "input_tokens_estimated": 456,
         "output_tokens_estimated": 0,
         "reads_count": 1,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-17-1142",
+      "started": "2026-09-17T08:42:34.444Z",
+      "ended": "2026-09-17T08:55:32.780Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/api.ts",
+          "tokens_estimated": 456,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 456,
+        "output_tokens_estimated": 0,
+        "reads_count": 1,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-17-1142",
+      "started": "2026-09-17T08:42:34.444Z",
+      "ended": "2026-09-17T08:55:55.431Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/api.ts",
+          "tokens_estimated": 456,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 456,
+        "output_tokens_estimated": 0,
+        "reads_count": 1,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-17-1142",
+      "started": "2026-09-17T08:42:34.444Z",
+      "ended": "2026-09-17T09:14:35.811Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/api.ts",
+          "tokens_estimated": 456,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/a1385579-0ff5-4f8c-a1ce-14a5f73337d2/tasks/b5gtkisng.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 456,
+        "output_tokens_estimated": 0,
+        "reads_count": 2,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-17-1142",
+      "started": "2026-09-17T08:42:34.444Z",
+      "ended": "2026-09-17T09:20:02.819Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/api.ts",
+          "tokens_estimated": 456,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/a1385579-0ff5-4f8c-a1ce-14a5f73337d2/tasks/b5gtkisng.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 456,
+        "output_tokens_estimated": 0,
+        "reads_count": 2,
         "writes_count": 0,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 1

@@ -4022,3 +4022,4 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 11:49 | Fixed stale LAN IP in mobile .env.local causing long splash + silent login failure on physical iOS device | quran-hifz-mobile/.env.local | fixed, logged as bug-406 | ~1500 |
+| 12:14 | Built signed Android release APK (arm64-v8a) after LAN-IP env fix, verified release-keystore signature | quran-hifz-mobile/android/app/build/outputs/apk/release/app-release.apk | success, 16m24s build | ~800 |
