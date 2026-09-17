@@ -4016,3 +4016,9 @@
 | 00:12 | Edited quran-hifz-mobile/lib/quranRange.test.ts | expanded (+6 lines) | ~94 |
 | 00:12 | Edited quran-hifz-mobile/lib/quranRange.test.ts | expanded (+9 lines) | ~148 |
 | 00:14 | Session end: 83 writes across 39 files (register.tsx, TrackStudentsPanel.tsx, AdminParents.tsx, TeacherPlanDetail.tsx, TeacherGroupHomework.tsx) | 26 reads | ~94440 tok |
+
+## Session: 2026-09-17 11:42
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:49 | Fixed stale LAN IP in mobile .env.local causing long splash + silent login failure on physical iOS device | quran-hifz-mobile/.env.local | fixed, logged as bug-406 | ~1500 |

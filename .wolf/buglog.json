@@ -6891,5 +6891,30 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-09-16T01:00:00"
+  },
+  {
+    "id": "bug-406",
+    "timestamp": "2026-09-17T00:00:00Z",
+    "error_message": "iOS app stuck on splash screen too long, then reaches login, then login fails with no console logs",
+    "file": "quran-hifz-mobile/.env.local",
+    "root_cause": "EXPO_PUBLIC_API_URL was pinned to a stale LAN IP (192.168.100.37) left over from a previous Wi-Fi network; the Mac's current LAN IP is 192.168.0.77. Same class of bug as bug-346 (stale/wrong LAN IP for physical-device testing). hydrate() in portalStore.ts awaits /auth/me before hiding the splash and only gives up after the 12s REQUEST_TIMEOUT_MS in lib/api.ts, explaining the long splash. The login fetch hits the same dead IP and throws NetworkError, which app/index.tsx displays as a generic message but never console.error's, explaining the 'no logs' symptom.",
+    "fix": "Updated quran-hifz-mobile/.env.local EXPO_PUBLIC_API_URL to the current LAN IP (192.168.0.77, via `ipconfig getifaddr en0`). EXPO_PUBLIC_* is inlined by Metro at bundle time, so a Metro restart (not a native rebuild) applies it. Confirmed the backend was already listening on :5001; only the mobile app's target address was wrong.",
+    "tags": [
+      "expo",
+      "env",
+      "physical-device",
+      "networking",
+      "localhost",
+      "EXPO_PUBLIC",
+      "splash-screen",
+      "login",
+      "silent-failure",
+      "dhcp"
+    ],
+    "related_bugs": [
+      "bug-346"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-09-17T00:00:00Z"
   }
 ]
