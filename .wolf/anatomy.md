@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-16T20:58:03.268Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-16T21:12:39.945Z
 > Files: 700 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
@@ -565,7 +565,7 @@
 - `homework.tsx` — getName — renders form (~1264 tok)
 - `myhalqa.tsx` — TeacherHalqa (~1077 tok)
 - `plan-detail.tsx` — STATUS_VARIANT (~3418 tok)
-- `plan-form.tsx` — Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local (~10560 tok)
+- `plan-form.tsx` — Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local (~10644 tok)
 - `plans.tsx` — One label/value line in the plan card's detail grid. (~3580 tok)
 - `recordlesson.tsx` — LESSON_TYPES (~3004 tok)
 - `reports.tsx` — TeacherReports (~642 tok)
@@ -643,8 +643,8 @@
 - `auth-storage.ts` — Exports getToken, setToken, clearToken (~229 tok)
 - `evaluationRubric.ts` — The daily grading split is per plan now (`QuranPlan.gradeRubric`), not a (~861 tok)
 - `haptics.ts` — App-wide haptic taxonomy over expo-haptics: tap/select/medium/success/warning/error + setHapticsEnabled. Native only, Android uses performAndroidHapticsAsync, every call fire-and-forget (~560 tok)
-- `quranRange.test.ts` — / <reference types="jest" /> (~6746 tok)
-- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~6206 tok)
+- `quranRange.test.ts` — / <reference types="jest" /> (~6882 tok)
+- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~6244 tok)
 - `theme.ts` — Exports ThemeMode, buildTheme(mode), Theme, textStart/textEnd. Mode-independent `base` (brand/status ink, shape, spacing, fonts, shadow) merged with light/darkSurfaces (bg, card, cardAlt, inputBg, overlay, text*, border, greenAccent, the pastel tints, and the `tone` bg/border/text map). Deliberately exports NO frozen `theme` object — read colours via useAppTheme() (~1050 tok)
 
 ## quran-hifz-mobile/lib/constants/
@@ -675,7 +675,7 @@
 - `masajid.ts` — Exports Masjid, useMasajid, useMasjid (~189 tok)
 - `messages.ts` — Exports Message, useMessages (~154 tok)
 - `parent.ts` — Exports ParentChild, ChildHifzEntry, ChildAttendanceRecord, ChildHomework + 9 more (~896 tok)
-- `quranPlan.ts` — One line of a plan's daily grading rubric — what is graded, out of how many. (~3819 tok)
+- `quranPlan.ts` — One line of a plan's daily grading rubric — what is graded, out of how many. (~3749 tok)
 - `specialTracks.ts` — Exports EnrolledStudent, TrackTeacher, SpecialTrack, useSpecialTracks + 5 more (~801 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~214 tok)
 - `students.ts` — Legacy fields — real guardian identity comes from parentName/parentEmail below. (~845 tok)
@@ -740,16 +740,16 @@
 - `homework.controller.ts` — Zod schemas: homeworkSchema, reviewSchema (~769 tok)
 - `kpi.controller.ts` — Zod schemas: kpiSchema (~389 tok)
 - `lesson-recording.controller.ts` — Zod schemas: recordingSchema (~574 tok)
-- `masjid.controller.ts` — Zod schemas: masjidSchema (~789 tok)
+- `masjid.controller.ts` — Zod schemas: masjidSchema (~799 tok)
 - `message.controller.ts` — Zod schemas: messageSchema (~568 tok)
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
 - `quran-plan.controller.ts` — One line of the plan's daily grading rubric: a label and its degrees. (~6217 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
-- `stats.controller.ts` — Exports getDashboardStats (~1047 tok)
+- `stats.controller.ts` — Exports getDashboardStats (~1057 tok)
 - `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~4651 tok)
-- `student.controller.ts` — Empty string is normalised to undefined so a blank field clears rather. deleteStudent cascades ParentStudent link + orphaned User; ?withParent=true also drops the parent User (~2320 tok)
-- `teacher.controller.ts` — Zod schemas: teacherSchema (~1390 tok)
-- `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~2230 tok)
+- `student.controller.ts` — Empty string is normalised to undefined so a blank field clears rather (~2282 tok)
+- `teacher.controller.ts` — Zod schemas: teacherSchema (~1400 tok)
+- `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~2395 tok)
 
 ## quran-hifz-server/src/data/
 
@@ -761,7 +761,7 @@
 - `notify.ts` — Builds one Message per student (skipping students with no linked parent (~655 tok)
 - `planStudents.ts` — Resolves which students are covered by a plan, branching on `targetType`: (~315 tok)
 - `push.ts` — Best-effort Expo push notification send — looks up each recipient's stored (~389 tok)
-- `quranRange.ts` — Standard 604-page Madani mushaf boundary table (surah:ayah each page starts at). (~6514 tok)
+- `quranRange.ts` — Standard 604-page Madani mushaf boundary table (surah:ayah each page starts at). (~6552 tok)
 - `studentPlanReflow.ts` — Per-student plan overlay: builds the occurrence array, then redistributes what's still owed (cursor → pinned finish line) whenever a day is absent, short, or over-recited; flags `noWard` days (~3376 tok)
 
 ## quran-hifz-server/src/middleware/
@@ -784,12 +784,12 @@
 - `Masjid.model.ts` — Drives the جامع (male) / دار (female) display label on the client — (~204 tok)
 - `Message.model.ts` — Exports IMessage, Message (~334 tok)
 - `ParentStudent.model.ts` — Exports IParentStudent, ParentStudent (~172 tok)
-- `QuranPlan.model.ts` — One line of a plan's daily grading rubric: what is graded and out of how (~2382 tok)
+- `QuranPlan.model.ts` — One line of a plan's daily grading rubric: what is graded and out of how (~2386 tok)
 - `SpecialTrack.model.ts` — Exports ISpecialTrack, SpecialTrack (~429 tok)
 - `Student.model.ts` — Saudi national ID (رقم الهوية الوطنية): exactly 10 digits from الأحوال المدنية. (~704 tok)
 - `StudentPlanProgress.model.ts` — Exports StudentOccurrenceStatus, IStudentOccurrence, IStudentPlanProgress, StudentPlanProgress (~994 tok)
 - `Teacher.model.ts` — Exports ITeacher, Teacher (~216 tok)
-- `Track.model.ts` — Exports ITrack, Track (~404 tok)
+- `Track.model.ts` — Soft-delete marker. Set instead of removing the document when the track (~531 tok)
 - `User.model.ts` — Exports UserRole, IUser, User (~442 tok)
 
 ## quran-hifz-server/src/routes/
@@ -953,12 +953,12 @@
 - `masajid.ts` — The server's `getMasajid`/`getMasjid` select this exact field set — no (~561 tok)
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
-- `quran-plans.ts` — sessionStorage key used to hand off "open the plan form" from wherever a (~2623 tok)
+- `quran-plans.ts` — sessionStorage key used to hand off "open the plan form" from wherever a (~2626 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~212 tok)
 - `student-plan-progress.ts` — False when the student has no individual overlay yet — `effectiveSchedule` (~1673 tok)
 - `students.ts` — Saudi national ID — 10 digits, leading 1 (مواطن) or 2 (مقيم). useDeleteStudent takes {id, withParent?} (~890 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~504 tok)
-- `tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~1192 tok)
+- `tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~1214 tok)
 
 ## quran-hifz/src/quran/components/
 
@@ -1015,7 +1015,7 @@
 
 - `evaluationRubric.ts` — The daily grading split is per plan now (`QuranPlan.gradeRubric`), not a (~817 tok)
 - `genderScope.ts` — Admin-wide "which masajid gender am I looking at" filter, selected from (~523 tok)
-- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~6229 tok)
+- `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~6267 tok)
 
 ## quran-hifz/src/quran/pages/
 
@@ -1036,7 +1036,7 @@
 - `AdminStudents.tsx` — PATH_TONE — renders table. Delete dialog offers student-only vs student+parent when parentName is linked (~6040 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4749 tok)
 - `AdminTrackForm.tsx` — Full-page create/edit form for a track (was a popup modal) — lets the (~4822 tok)
-- `AdminTracks.tsx` — surahName — renders modal (~6365 tok)
+- `AdminTracks.tsx` — surahName — renders modal (~7402 tok)
 
 ## quran-hifz/src/quran/pages/common/
 
@@ -1074,8 +1074,8 @@
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1668 tok)
 - `TeacherPlanDetail.tsx` — surahName — renders table (~3919 tok)
-- `TeacherPlanForm.tsx` — One type's track in the form: its own days and its own range. The plan's (~14212 tok)
-- `TeacherPlans.tsx` — surahName (~4522 tok)
+- `TeacherPlanForm.tsx` — One type's track in the form: its own days and its own range. The plan's (~14352 tok)
+- `TeacherPlans.tsx` — surahName (~4553 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the tracks the teacher teaches. (~268 tok)
 - `TeacherSpecialTracks.tsx` — surahName (~2892 tok)

@@ -34,7 +34,7 @@ import { AR_LOCALE, expandDateRange } from '@/lib/date';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
-const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة'];
+const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة', 'ختمة'];
 
 function todayISO(): string {
   const d = new Date();
@@ -179,13 +179,19 @@ export default function TeacherPlanForm() {
   const [holidayTo, setHolidayTo] = useState('');
 
   /** Adds or removes a whole type. Removing one frees its days for the others. */
+  /** "ختمة" can't be combined with any other type — selecting it drops
+   * whatever else was selected, and selecting حفظ/مراجعة while ختمة is
+   * active drops ختمة. validateSegmentDays enforces this server-side too. */
   function toggleType(type: PlanType) {
-    setForm((f) => ({
-      ...f,
-      segments: f.segments.some((sg) => sg.type === type)
-        ? f.segments.filter((sg) => sg.type !== type)
-        : [...f.segments, emptySegment(type)],
-    }));
+    setForm((f) => {
+      if (f.segments.some((sg) => sg.type === type)) {
+        return { ...f, segments: f.segments.filter((sg) => sg.type !== type) };
+      }
+      const segments = type === 'ختمة'
+        ? [emptySegment(type)]
+        : [...f.segments.filter((sg) => sg.type !== 'ختمة'), emptySegment(type)];
+      return { ...f, segments };
+    });
   }
 
   function updateSegment(type: PlanType, patch: Partial<FormSegment>) {

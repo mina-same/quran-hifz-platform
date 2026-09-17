@@ -389,8 +389,8 @@ export function computeJuzProgress(plan: PlanScheduleInput, dayProgress: PlanPro
  * counts and tracks independently even when sharing a calendar day.
  */
 
-export type PlanType = 'حفظ' | 'مراجعة';
-export const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة'];
+export type PlanType = 'حفظ' | 'مراجعة' | 'ختمة';
+export const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة', 'ختمة'];
 
 export type PlanSegmentInput = {
   type: PlanType;
@@ -548,6 +548,9 @@ export function validateSegmentDays(segments: PlanSegmentInput[]): string | null
     seenTypes.add(seg.type);
 
     if (seg.days.length === 0) return `اختر أيام "${seg.type}"`;
+  }
+  if (seenTypes.has('ختمة') && seenTypes.size > 1) {
+    return 'لا يمكن دمج "ختمة" مع نوع آخر في نفس الخطة';
   }
   return null;
 }

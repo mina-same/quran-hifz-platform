@@ -31,7 +31,7 @@ const trackSchema = z.object({
 export async function getTracks(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { status, teacher, masjid } = req.query;
-    const filter: Record<string, unknown> = {};
+    const filter: Record<string, unknown> = { deletedAt: null };
     if (status)  filter.status   = status;
     if (teacher) filter.teachers = teacher;          // element-in-array match
     if (masjid)  filter.masjid   = masjid;
@@ -170,8 +170,18 @@ export async function deleteTrack(req: Request, res: Response, next: NextFunctio
       LessonRecording.countDocuments({ track: req.params.id }),
       QuranPlan.countDocuments({ track: req.params.id }),
     ]);
-    if (attendance + evaluations + homework + groupHomework + recordings + plans > 0) {
+    const hasHistory = attendance + evaluations + homework + groupHomework + recordings + plans > 0;
+    if (hasHistory && req.query.archive !== 'true') {
       throw new AppError('لا يمكن حذف مسار به سجلات تاريخية مرتبطة به', 400);
+    }
+    if (hasHistory) {
+      // Can't actually delete without orphaning the history above, so hide it
+      // instead: every listing query excludes deletedAt, but a direct lookup
+      // by id (an old attendance/plan record's populate) still resolves.
+      const track = await Track.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+      if (!track) throw new AppError('المسار غير موجود', 404);
+      res.json({ success: true, message: 'تمت أرشفة المسار' });
+      return;
     }
     const track = await Track.findByIdAndDelete(req.params.id);
     if (!track) throw new AppError('المسار غير موجود', 404);

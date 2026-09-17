@@ -2,7 +2,7 @@ import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/rea
 import { get, post, put, del } from '@/lib/api';
 import { isReversedRange, type RangePoint, type ScheduleEntry } from '@/lib/quranRange';
 
-export type PlanType = 'حفظ' | 'مراجعة';
+export type PlanType = 'حفظ' | 'مراجعة' | 'ختمة';
 
 /** One line of a plan's daily grading rubric — what is graded, out of how many. */
 export type GradeCriterion = { key: string; label: string; max: number; auto: boolean };

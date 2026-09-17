@@ -16,7 +16,7 @@ export async function getMasajid(_req: Request, res: Response, next: NextFunctio
 
     const enriched = await Promise.all(
       masajid.map(async (m) => {
-        const tracks = await Track.find({ masjid: m._id })
+        const tracks = await Track.find({ masjid: m._id, deletedAt: null })
           .populate('teachers', 'name')
           .select('title daysPerWeek timeSlot maxStudents status');
         return { ...m.toObject(), tracks };
@@ -34,7 +34,7 @@ export async function getMasjid(req: Request, res: Response, next: NextFunction)
     const masjid = await Masjid.findById(req.params.id);
     if (!masjid) throw new AppError('المسجد غير موجود', 404);
 
-    const tracks = await Track.find({ masjid: masjid._id }).populate('teachers', 'name specialty');
+    const tracks = await Track.find({ masjid: masjid._id, deletedAt: null }).populate('teachers', 'name specialty');
     res.json({ success: true, data: { ...masjid.toObject(), tracks } });
   } catch (err) {
     next(err);

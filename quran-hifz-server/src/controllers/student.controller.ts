@@ -41,7 +41,7 @@ export async function getStudents(req: Request, res: Response, next: NextFunctio
     // `masjid` filters by the student's track's masjid — Student itself no
     // longer stores masjid directly, so this needs a two-step resolve.
     if (masjid) {
-      const tracksAtMasjid = await Track.find({ masjid }).select('_id');
+      const tracksAtMasjid = await Track.find({ masjid, deletedAt: null }).select('_id');
       const masjidTrackIds = tracksAtMasjid.map((t) => String(t._id));
       if (filter.track) {
         const requestedIds = typeof filter.track === 'string'

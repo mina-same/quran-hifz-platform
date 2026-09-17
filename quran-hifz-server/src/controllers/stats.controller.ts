@@ -24,7 +24,7 @@ export async function getDashboardStats(req: Request, res: Response, next: NextF
       const masajidInScope = await Masjid.find({ gender }).select('_id').lean();
       const masjidIds = masajidInScope.map((m) => m._id);
       masjidCountFilter = { gender };
-      const tracksInScope = await Track.find({ masjid: { $in: masjidIds } }).select('teachers').lean();
+      const tracksInScope = await Track.find({ masjid: { $in: masjidIds }, deletedAt: null }).select('teachers').lean();
       trackIds = tracksInScope.map((t) => t._id);
       const teacherIdSet = new Set(
         tracksInScope.flatMap((t) => t.teachers.map((id) => id.toString())),
@@ -33,7 +33,7 @@ export async function getDashboardStats(req: Request, res: Response, next: NextF
     }
 
     const studentFilter = trackIds ? { track: { $in: trackIds } } : {};
-    const trackFilter = trackIds ? { _id: { $in: trackIds } } : {};
+    const trackFilter = trackIds ? { _id: { $in: trackIds } } : { deletedAt: null };
     const teacherFilter = teacherIds ? { _id: { $in: teacherIds }, status: 'active' } : { status: 'active' };
     const homeworkFilter = (status: string) => (trackIds ? { track: { $in: trackIds }, status } : { status });
 

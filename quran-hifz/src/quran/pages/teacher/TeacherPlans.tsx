@@ -29,8 +29,9 @@ function fmtDate(d: string) {
 }
 
 const PLAN_TYPES: { value: PlanType; label: string; icon: string; fg: string; bg: string }[] = [
-  { value: "حفظ",    label: "حفظ",    icon: "ti-book-2",    fg: "var(--green)", bg: "var(--green-pale)" },
-  { value: "مراجعة", label: "مراجعة", icon: "ti-refresh",   fg: "#1d4ed8",      bg: "#eff6ff" },
+  { value: "حفظ",    label: "حفظ",    icon: "ti-book-2",     fg: "var(--green)", bg: "var(--green-pale)" },
+  { value: "مراجعة", label: "مراجعة", icon: "ti-refresh",    fg: "#1d4ed8",      bg: "#eff6ff" },
+  { value: "ختمة",   label: "ختمة",   icon: "ti-certificate", fg: "var(--gold)",  bg: "var(--gold-pale)" },
 ];
 
 /* ─── overlay / dialog styles (matches AdminSpecialTracks) ──── */

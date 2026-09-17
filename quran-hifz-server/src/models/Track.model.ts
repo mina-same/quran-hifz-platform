@@ -14,6 +14,12 @@ export interface ITrack extends Document {
   teachers: Schema.Types.ObjectId[];
   maxStudents: number;
   notes?: string;
+  /** Soft-delete marker. Set instead of removing the document when the track
+   * has historical records (attendance/evaluations/homework/...) that still
+   * need a real Track to point at — see deleteTrack. Never set otherwise;
+   * every listing query must exclude it, but a direct findById (reached from
+   * an old historical record) must NOT filter on it. */
+  deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +39,7 @@ const trackSchema = new Schema<ITrack>(
     teachers:         [{ type: Schema.Types.ObjectId, ref: 'Teacher' }],
     maxStudents:      { type: Number, required: true },
     notes:            { type: String },
+    deletedAt:        { type: Date, default: null },
   },
   { timestamps: true },
 );

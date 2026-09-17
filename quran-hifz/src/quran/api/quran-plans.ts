@@ -15,7 +15,7 @@ export type PlanFormHandoff =
   | { mode: "create"; trackId?: string }
   | { mode: "edit" | "duplicate"; plan: QuranPlan };
 
-export type PlanType = "حفظ" | "مراجعة";
+export type PlanType = "حفظ" | "مراجعة" | "ختمة";
 
 /** One line of a plan's daily grading rubric — what is graded, out of how many. */
 export type GradeCriterion = { key: string; label: string; max: number; auto: boolean };

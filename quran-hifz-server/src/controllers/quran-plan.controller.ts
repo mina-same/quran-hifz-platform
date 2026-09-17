@@ -45,7 +45,7 @@ const rangePointSchema = z.object({
 });
 
 const planSegmentSchema = z.object({
-  type:       z.enum(['حفظ', 'مراجعة']),
+  type:       z.enum(['حفظ', 'مراجعة', 'ختمة']),
   days:       z.array(z.enum(WEEK_DAYS)).min(1),
   rangeStart: rangePointSchema,
   rangeEnd:   rangePointSchema,
@@ -414,7 +414,7 @@ const scheduleEntryUpdateSchema = z.object({
   /** Which segment the day belongs to. `occurrenceIndex` is 1-based within a
    * segment, so it no longer identifies a day on its own. Optional only so a
    * single-segment plan can keep working with older clients. */
-  type:      z.enum(['حفظ', 'مراجعة']).optional(),
+  type:      z.enum(['حفظ', 'مراجعة', 'ختمة']).optional(),
 });
 
 /** Hand-edits one day's assigned range within an already-persisted schedule

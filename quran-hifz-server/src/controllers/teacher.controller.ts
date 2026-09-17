@@ -23,7 +23,7 @@ export async function getTeachers(req: Request, res: Response, next: NextFunctio
 
     const enriched = await Promise.all(
       teachers.map(async (t) => {
-        const trackIds     = await Track.find({ teachers: t._id }).select('_id');
+        const trackIds     = await Track.find({ teachers: t._id, deletedAt: null }).select('_id');
         const tracksCount  = trackIds.length;
         const studentCount = await Student.countDocuments({ track: { $in: trackIds.map((tr) => tr._id) } });
         const userDoc      = await User.findOne({ role: 'teacher', profileId: t._id }).select('email');
@@ -42,7 +42,7 @@ export async function getTeacher(req: Request, res: Response, next: NextFunction
     const teacher = await Teacher.findById(req.params.id);
     if (!teacher) throw new AppError('المعلم غير موجود', 404);
 
-    const tracks = await Track.find({ teachers: teacher._id }).populate('masjid', 'name');
+    const tracks = await Track.find({ teachers: teacher._id, deletedAt: null }).populate('masjid', 'name');
     res.json({ success: true, data: { ...teacher.toObject(), tracks } });
   } catch (err) {
     next(err);

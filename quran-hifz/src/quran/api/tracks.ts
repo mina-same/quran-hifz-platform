@@ -80,7 +80,8 @@ export function useUpdateTrack() {
 export function useDeleteTrack() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => del(`/tracks/${id}`),
+    mutationFn: ({ id, archive }: { id: string; archive?: boolean }) =>
+      del(`/tracks/${id}${archive ? "?archive=true" : ""}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tracks"] }),
   });
 }

@@ -1,7 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
-export type PlanType = 'حفظ' | 'مراجعة';
-export const PLAN_TYPE_VALUES: PlanType[] = ['حفظ', 'مراجعة'];
+export type PlanType = 'حفظ' | 'مراجعة' | 'ختمة';
+export const PLAN_TYPE_VALUES: PlanType[] = ['حفظ', 'مراجعة', 'ختمة'];
 
 export interface IPointRule {
   label: string;

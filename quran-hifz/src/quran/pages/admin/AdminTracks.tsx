@@ -71,8 +71,16 @@ export function AdminTracks() {
     showPage("trackdetail");
   }
 
-  const [modal,    setModal]    = useState<Modal>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [modal,        setModal]        = useState<Modal>(null);
+  const [deleteId,     setDeleteId]     = useState<string | null>(null);
+  const [needsArchive, setNeedsArchive] = useState(false);
+  const [archiveConfirmText, setArchiveConfirmText] = useState("");
+
+  function closeDeleteDialog() {
+    setDeleteId(null);
+    setNeedsArchive(false);
+    setArchiveConfirmText("");
+  }
 
   /* ── open helpers ── */
   function openAdd() {
@@ -199,43 +207,102 @@ export function AdminTracks() {
       })()}
 
       {/* ════════ DELETE CONFIRM ════════ */}
-      {deleteId && (
-        <div style={OVERLAY} onClick={() => setDeleteId(null)}>
-          <div style={{ ...DIALOG, maxWidth: 360, padding: "28px 24px" }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ textAlign: "center", marginBottom: 22 }}>
-              <div style={{
-                width: 56, height: 56, borderRadius: 14,
-                background: "#fef2f2", color: "#ef4444",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 26, margin: "0 auto 14px",
-              }}>
-                <i className="ti ti-trash" />
-              </div>
-              <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 800, color: "var(--text)" }}>حذف المسار</h3>
-              <p style={{ margin: 0, fontSize: 13, color: "var(--text2)" }}>سيُحذف المسار نهائياً ولا يمكن التراجع.</p>
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button
-                className="topbar-btn btn-primary"
-                style={{ flex: 1, justifyContent: "center", background: "#ef4444", borderColor: "#ef4444", padding: 11 }}
-                onClick={async () => {
-                  try {
-                    await deleteTrack.mutateAsync(deleteId);
-                    setDeleteId(null);
-                  } catch (e) {
-                    toast.error((e as Error).message);
-                  }
-                }}
-                disabled={deleteTrack.isPending}
-              >
-                <i className="ti ti-trash" />
-                {deleteTrack.isPending ? "جارٍ الحذف..." : "حذف"}
-              </button>
-              <button className="topbar-btn btn-ghost" style={{ padding: "11px 20px" }} onClick={() => setDeleteId(null)}>إلغاء</button>
+      {deleteId && (() => {
+        const target = tracks.find((t) => t._id === deleteId);
+        const confirmMatches = archiveConfirmText.trim() === (target?.title ?? "").trim() && !!target?.title;
+        return (
+          <div style={OVERLAY} onClick={closeDeleteDialog}>
+            <div style={{ ...DIALOG, maxWidth: 380, padding: "28px 24px" }} onClick={(e) => e.stopPropagation()}>
+              {!needsArchive ? (
+                <>
+                  <div style={{ textAlign: "center", marginBottom: 22 }}>
+                    <div style={{
+                      width: 56, height: 56, borderRadius: 14,
+                      background: "#fef2f2", color: "#ef4444",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 26, margin: "0 auto 14px",
+                    }}>
+                      <i className="ti ti-trash" />
+                    </div>
+                    <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 800, color: "var(--text)" }}>حذف المسار</h3>
+                    <p style={{ margin: 0, fontSize: 13, color: "var(--text2)" }}>سيُحذف المسار نهائياً ولا يمكن التراجع.</p>
+                  </div>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button
+                      className="topbar-btn btn-primary"
+                      style={{ flex: 1, justifyContent: "center", background: "#ef4444", borderColor: "#ef4444", padding: 11 }}
+                      onClick={async () => {
+                        try {
+                          await deleteTrack.mutateAsync({ id: deleteId });
+                          closeDeleteDialog();
+                        } catch (e) {
+                          const message = (e as Error).message;
+                          if (message === "لا يمكن حذف مسار به سجلات تاريخية مرتبطة به") {
+                            setNeedsArchive(true);
+                          } else {
+                            toast.error(message);
+                          }
+                        }
+                      }}
+                      disabled={deleteTrack.isPending}
+                    >
+                      <i className="ti ti-trash" />
+                      {deleteTrack.isPending ? "جارٍ الحذف..." : "حذف"}
+                    </button>
+                    <button className="topbar-btn btn-ghost" style={{ padding: "11px 20px" }} onClick={closeDeleteDialog}>إلغاء</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ textAlign: "center", marginBottom: 18 }}>
+                    <div style={{
+                      width: 56, height: 56, borderRadius: 14,
+                      background: "#fffbeb", color: "#b45309",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 26, margin: "0 auto 14px",
+                    }}>
+                      <i className="ti ti-archive" />
+                    </div>
+                    <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 800, color: "var(--text)" }}>لا يمكن حذف هذا المسار نهائياً</h3>
+                    <p style={{ margin: "0 0 10px", fontSize: 13, color: "var(--text2)" }}>
+                      يوجد سجلات تاريخية مرتبطة به (حضور، تقييمات، واجبات...). يمكنك بدلاً من ذلك <b>أرشفته</b>: يختفي من كل مكان في التطبيق نهائياً، لكن سجلاته التاريخية تبقى محفوظة. لا يمكن التراجع عن هذا الإجراء.
+                    </p>
+                    <p style={{ margin: 0, fontSize: 12.5, color: "var(--text2)" }}>
+                      للتأكيد، اكتب اسم المسار: <b>{target?.title}</b>
+                    </p>
+                  </div>
+                  <input
+                    className="form-input"
+                    style={{ marginBottom: 14, textAlign: "center" }}
+                    value={archiveConfirmText}
+                    onChange={(e) => setArchiveConfirmText(e.target.value)}
+                    placeholder={target?.title}
+                  />
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button
+                      className="topbar-btn btn-primary"
+                      style={{ flex: 1, justifyContent: "center", background: "#b45309", borderColor: "#b45309", padding: 11 }}
+                      onClick={async () => {
+                        try {
+                          await deleteTrack.mutateAsync({ id: deleteId, archive: true });
+                          closeDeleteDialog();
+                        } catch (e) {
+                          toast.error((e as Error).message);
+                        }
+                      }}
+                      disabled={!confirmMatches || deleteTrack.isPending}
+                    >
+                      <i className="ti ti-archive" />
+                      {deleteTrack.isPending ? "جارٍ الأرشفة..." : "أرشفة نهائياً"}
+                    </button>
+                    <button className="topbar-btn btn-ghost" style={{ padding: "11px 20px" }} onClick={closeDeleteDialog}>إلغاء</button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </>
   );
 }

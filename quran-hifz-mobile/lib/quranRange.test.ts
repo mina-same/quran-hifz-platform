@@ -421,6 +421,12 @@ const MURAJAA: PlanSegmentInput = {
   rangeStart: { surahNumber: 1, ayah: 1 },
   rangeEnd:   { surahNumber: 9, ayah: 129 },
 };
+const KHATMA: PlanSegmentInput = {
+  type: 'ختمة',
+  days: ['الجمعة'],
+  rangeStart: { surahNumber: 1, ayah: 1 },
+  rangeEnd:   { surahNumber: 114, ayah: 6 },
+};
 // 2026-08-01 is a Saturday.
 const START = new Date(2026, 7, 1);
 
@@ -444,6 +450,15 @@ describe('validateSegmentDays', () => {
   it('accepts two types sharing a weekday', () => {
     const shared: PlanSegmentInput = { ...MURAJAA, days: ['الخميس', 'السبت'] };
     expect(validateSegmentDays([HIFZ, shared])).toBeNull();
+  });
+
+  it('accepts ختمة on its own', () => {
+    expect(validateSegmentDays([KHATMA])).toBeNull();
+  });
+
+  it('rejects ختمة combined with another type', () => {
+    expect(validateSegmentDays([HIFZ, KHATMA])).toMatch(/لا يمكن دمج/);
+    expect(validateSegmentDays([HIFZ, MURAJAA, KHATMA])).toMatch(/لا يمكن دمج/);
   });
 });
 
