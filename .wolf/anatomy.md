@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-20T17:42:44.534Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-20T17:55:09.904Z
 > Files: 714 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
@@ -525,7 +525,7 @@
 ## quran-hifz-mobile/app/(portal)/admin/
 
 - `_layout.tsx` — ADMIN_MORE_IDS — renders form (~1286 tok)
-- `dashboard.tsx` — المسار: real track lives one hop away via `Student.track` — same fallback chain as admin/students.ts (~2350 tok)
+- `dashboard.tsx` — المسار: real track lives one hop away via `Student.track` — same fallback chain as admin/students.ts (~2378 tok)
 - `halqat.tsx` — AdminHalqat (~423 tok)
 - `kpis.tsx` — ratingVariant (~1020 tok)
 - `masajid.tsx` — AdminMasajid (~1280 tok)

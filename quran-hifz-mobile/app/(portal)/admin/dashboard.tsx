@@ -33,6 +33,7 @@ export default function AdminDashboard() {
   const theme = useAppTheme();
   const router = useRouter();
   const genderScope = usePortalStore((st) => st.genderScope);
+  const readOnly = usePortalStore((st) => st.readOnly);
   const stats = useStats(genderScope);
   const kpisQuery = useKpis();
   const studentsQuery = useStudents();
@@ -102,9 +103,11 @@ export default function AdminDashboard() {
         <AyahBar />
         {isLoading ? <SkeletonRows count={1} rowHeight={70} /> : <StatsRow stats={STATS} />}
 
-        <Pressable style={styles.addBtn} onPress={() => router.push('/(portal)/admin/register' as any)}>
-          <Text style={styles.addBtnText}>+ طالب جديد</Text>
-        </Pressable>
+        {!readOnly && (
+          <Pressable style={styles.addBtn} onPress={() => router.push('/(portal)/admin/register' as any)}>
+            <Text style={styles.addBtnText}>+ طالب جديد</Text>
+          </Pressable>
+        )}
 
         {/* Programme distribution */}
         <Card>
