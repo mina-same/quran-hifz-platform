@@ -312,6 +312,7 @@ export default function TrackDetail({ trackId, role }: Props) {
                 students={roster}
                 context={{ id: trackId }}
                 teacherId={evaluatingTeacherId}
+                readOnly={readOnly}
                 linkedPlan={linkedPlan}
                 daySchedule={daySchedule}
                 emptyLabel="لا يوجد طلاب مسجّلون بعد"
@@ -330,6 +331,7 @@ export default function TrackDetail({ trackId, role }: Props) {
                                 studentName={student.name}
                                 basePlan={linkedPlan}
                                 type={seg.type}
+                                readOnly={readOnly}
                               />
                             ))
                           : (
@@ -338,6 +340,7 @@ export default function TrackDetail({ trackId, role }: Props) {
                               studentId={student._id}
                               studentName={student.name}
                               basePlan={linkedPlan}
+                              readOnly={readOnly}
                             />
                           ))}
                       </>

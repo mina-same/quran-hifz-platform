@@ -250,7 +250,7 @@ export default function EvaluationRoster({
   }
 
   function saveStudent(studentId: string, studentName: string) {
-    if (isFutureDay || !teacherId) return;
+    if (isFutureDay || !teacherId || readOnly) return;
     const e = evalFor(studentId);
     const records: BulkEvaluateRecord[] = [{
       student: studentId,
@@ -367,7 +367,11 @@ export default function EvaluationRoster({
       {saveErrors.map((er, i) => (
         <Alert key={`error-${i}`} variant="error">{er.type ? `${er.type} — ` : ''}{er.text}</Alert>
       ))}
-      {!teacherId && (
+      {readOnly ? (
+        <Alert variant="warning">
+          العرض للاطلاع فقط — لا يمكن للمشرف تسجيل الحضور أو التقييم.
+        </Alert>
+      ) : !teacherId && (
         <Alert variant="warning">
           لا يمكن تسجيل الحضور والتقييم — لا يوجد معلم مُسنَد لهذا السياق.
         </Alert>
@@ -380,7 +384,7 @@ export default function EvaluationRoster({
         const isExpanded = expandedStudentId === st._id;
         const hasSaved = !!savedById[st._id];
         const isUnlocked = unlockedIds.has(st._id);
-        const locked = isFutureDay || !teacherId || (hasSaved && !isUnlocked);
+        const locked = isFutureDay || !teacherId || readOnly || (hasSaved && !isUnlocked);
         const assignments = planCoversStudent(st._id) ? assignmentsForStudent(st._id) : [];
         const savingThis = bulkEvaluate.isPending && lastSavedId === st._id;
 
@@ -566,6 +570,8 @@ export default function EvaluationRoster({
 
                 {isFutureDay ? (
                   <Button label="اليوم لم يحن بعد" variant="ghost" disabled fullWidth />
+                ) : readOnly ? (
+                  <Button label="عرض فقط" variant="ghost" disabled fullWidth />
                 ) : hasSaved && !isUnlocked ? (
                   <Button
                     label="تعديل"

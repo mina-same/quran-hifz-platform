@@ -38,6 +38,9 @@ interface Props {
    * plan the caller must say which. Falls back to the only segment when the
    * plan has just one. */
   type?: PlanType;
+  /** Supervisor viewing this track — hides "إنشاء الخطة الفردية" /
+   * "إعادة حساب التوزيع" (both mutations); the schedule view stays visible. */
+  readOnly?: boolean;
 }
 
 /** Per-student "individual plan" overlay: shows the student's own effective
@@ -46,7 +49,7 @@ interface Props {
  * redistribution algorithm. Direction (reversed) is inferred from the
  * student's own occurrences first, falling back to the base plan's direction —
  * a custom-range overlay can run opposite to the plan it hangs off. */
-export default function IndividualPlanPanel({ planId, studentId, studentName, basePlan, type }: Props) {
+export default function IndividualPlanPanel({ planId, studentId, studentName, basePlan, type, readOnly }: Props) {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
   const { data: progress, isLoading } = useStudentPlanProgress(planId, studentId);
@@ -90,18 +93,22 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
           <Text style={s.boxTitle}>لا توجد خطة فردية لـ{studentName} بعد</Text>
           {segType && <Badge label={segType} variant={segType === 'حفظ' ? 'green' : 'gold'} />}
         </View>
-        <Text style={s.label}>نطاق مخصص (اختياري — افتراضيًا نفس نطاق الخطة)</Text>
-        <View style={{ gap: 10 }}>
-          <SurahAyahPicker value={customStart} onChange={setCustomStart} />
-          <SurahAyahPicker value={customEnd} onChange={setCustomEnd} />
-        </View>
-        <Button
-          label={initProgress.isPending ? 'جارٍ الإنشاء...' : 'إنشاء الخطة الفردية'}
-          onPress={() => initProgress.mutate({ planId, studentId, type: segType, rangeStart: customStart, rangeEnd: customEnd })}
-          disabled={initProgress.isPending}
-          style={{ marginTop: 10 }}
-          fullWidth
-        />
+        {!readOnly && (
+          <>
+            <Text style={s.label}>نطاق مخصص (اختياري — افتراضيًا نفس نطاق الخطة)</Text>
+            <View style={{ gap: 10 }}>
+              <SurahAyahPicker value={customStart} onChange={setCustomStart} />
+              <SurahAyahPicker value={customEnd} onChange={setCustomEnd} />
+            </View>
+            <Button
+              label={initProgress.isPending ? 'جارٍ الإنشاء...' : 'إنشاء الخطة الفردية'}
+              onPress={() => initProgress.mutate({ planId, studentId, type: segType, rangeStart: customStart, rangeEnd: customEnd })}
+              disabled={initProgress.isPending}
+              style={{ marginTop: 10 }}
+              fullWidth
+            />
+          </>
+        )}
       </View>
     );
   }
@@ -144,12 +151,14 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
           <Badge label="توزيع فردي محفوظ" variant="green" />
           {segType && <Badge label={segType} variant={segType === 'حفظ' ? 'green' : 'gold'} />}
         </View>
-        <Button
-          label={reflow.isPending ? '...' : 'إعادة حساب التوزيع'}
-          variant="ghost"
-          onPress={() => reflow.mutate({ planId, studentId })}
-          disabled={reflow.isPending}
-        />
+        {!readOnly && (
+          <Button
+            label={reflow.isPending ? '...' : 'إعادة حساب التوزيع'}
+            variant="ghost"
+            onPress={() => reflow.mutate({ planId, studentId })}
+            disabled={reflow.isPending}
+          />
+        )}
       </View>
 
       {progress.overflowPages > 0 && (

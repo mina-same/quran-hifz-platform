@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-20T12:41:21.245Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-20T12:51:46.094Z
 > Files: 707 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
@@ -586,14 +586,14 @@
 - `BiometricLockScreen.tsx` — Shown after a stored session resumes silently, when the user has opted into (~1123 tok)
 - `ContextCard.tsx` — Normalized TeachingContext (halqa|specialTrack) card + halqaToContext/trackToContext mappers (~950 tok)
 - `DaySlider.tsx` — A schedule day, carrying the segment it belongs to when the plan has more (~2042 tok)
-- `EvaluationRoster.tsx` — Scores are keyed by the active plan's rubric — not known at compile time. (~9387 tok)
+- `EvaluationRoster.tsx` — Scores are keyed by the active plan's rubric — not known at compile time. (~9467 tok)
 - `HalqaCard.tsx` — nameOf (~816 tok)
-- `IndividualPlanPanel.tsx` — The shared halqa/track plan this student's overlay hangs off — used as the (~2304 tok)
+- `IndividualPlanPanel.tsx` — The shared track plan this student's overlay hangs off — used as the (~2398 tok)
 - `MasjidAccordion.tsx` — This masjid's own halqat — the real /masajid endpoint doesn't nest them, (~1180 tok)
 - `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~7068 tok)
 - `ScheduleSheet.tsx` — Day-by-day plan breakdown as a bottom sheet of compact cards (replaced the 6-column ScheduleTable). Exports scheduleItems()/fmtShortDate()/fmtPages() + the ScheduleItem shape. (~1700 tok)
 - `SurahAyahPicker.tsx` — When given, restricts BOTH pickers to only the surahs/ayat that fall inside (~828 tok)
-- `TrackDetail.tsx` — First letter of the first two words — the same initials the web chips show. (~6810 tok)
+- `TrackDetail.tsx` — First letter of the first two words — the same initials the web chips show. (~6849 tok)
 - `TrackStudentsPanel.tsx` — Track roster management — transfer-only, since a student's track is (~2206 tok)
 
 ## quran-hifz-mobile/components/forms/

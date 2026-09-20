@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-06-27T12:42:49.696Z",
   "lifetime": {
-    "total_tokens_estimated": 23977722,
-    "total_reads": 8169,
-    "total_writes": 10953,
-    "total_sessions": 150,
-    "anatomy_hits": 6370,
+    "total_tokens_estimated": 23990245,
+    "total_reads": 8173,
+    "total_writes": 10958,
+    "total_sessions": 152,
+    "anatomy_hits": 6374,
     "anatomy_misses": 1624,
     "repeated_reads_blocked": 7002,
-    "estimated_savings_vs_bare_cli": 52093273
+    "estimated_savings_vs_bare_cli": 52094073
   },
   "sessions": [
     {
@@ -109265,6 +109265,88 @@
         "writes_count": 31,
         "repeated_reads_blocked": 3,
         "anatomy_lookups": 28
+      }
+    },
+    {
+      "id": "session-2026-09-20-1546",
+      "started": "2026-09-20T12:46:18.470Z",
+      "ended": "2026-09-20T12:50:41.472Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/IndividualPlanPanel.tsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 0,
+        "reads_count": 1,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-20-1546",
+      "started": "2026-09-20T12:46:18.470Z",
+      "ended": "2026-09-20T12:54:32.320Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/IndividualPlanPanel.tsx",
+          "tokens_estimated": 2304,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/TrackDetail.tsx",
+          "tokens_estimated": 6820,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/index.tsx",
+          "tokens_estimated": 2600,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/IndividualPlanPanel.tsx",
+          "tokens_estimated": 130,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/IndividualPlanPanel.tsx",
+          "tokens_estimated": 33,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/IndividualPlanPanel.tsx",
+          "tokens_estimated": 304,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/IndividualPlanPanel.tsx",
+          "tokens_estimated": 76,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/components/domain/TrackDetail.tsx",
+          "tokens_estimated": 256,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 11724,
+        "output_tokens_estimated": 799,
+        "reads_count": 3,
+        "writes_count": 5,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 3
       }
     }
   ],
