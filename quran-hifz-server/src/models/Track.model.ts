@@ -5,9 +5,12 @@ export interface ITrack extends Document {
   title: string;
   type: string;
   status: 'active' | 'upcoming' | 'ended';
-  startDate: Date;
-  endDate: Date;
-  daysPerWeek: string;
+  /** No longer collected at creation — a track's actual schedule comes from
+   * its linked QuranPlan(s). Kept optional for backward compatibility with
+   * tracks created before this change. */
+  startDate?: Date;
+  endDate?: Date;
+  daysPerWeek?: string;
   timeSlot: string;
   isOnline: boolean;
   meetLink?: string;
@@ -30,9 +33,9 @@ const trackSchema = new Schema<ITrack>(
     title:            { type: String, required: true, trim: true },
     type:             { type: String, required: true },
     status:           { type: String, enum: ['active', 'upcoming', 'ended'], default: 'upcoming' },
-    startDate:        { type: Date, required: true },
-    endDate:          { type: Date, required: true },
-    daysPerWeek:      { type: String, required: true },
+    startDate:        { type: Date },
+    endDate:          { type: Date },
+    daysPerWeek:      { type: String },
     timeSlot:         { type: String, required: true },
     isOnline:         { type: Boolean, default: false },
     meetLink:         { type: String },

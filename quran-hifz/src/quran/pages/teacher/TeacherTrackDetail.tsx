@@ -27,6 +27,7 @@ import {
   type ScheduleEntry,
   type PlanType,
   segmentReversed,
+  planScheduleRangeLabel,
 } from "../../api/quran-plans";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
 import { useEvaluations, useRubric, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
@@ -958,9 +959,8 @@ export function TeacherTrackDetail() {
         >
           {[
             { icon: "ti-clock", label: "الوقت", val: track.timeSlot },
-            { icon: "ti-calendar-repeat", label: "الأيام", val: track.daysPerWeek },
-            { icon: "ti-calendar", label: "البداية", val: fmtTrackDate(track.startDate) },
-            { icon: "ti-calendar-off", label: "النهاية", val: fmtTrackDate(track.endDate) },
+            { icon: "ti-calendar-repeat", label: "الأيام", val: linkedPlan ? (linkedPlan.days.join("، ") || "—") : "لم تُحدَّد خطة بعد" },
+            { icon: "ti-calendar", label: "مدة الخطة", val: linkedPlan ? planScheduleRangeLabel(linkedPlan, fmtTrackDate) : "لم تُحدَّد خطة بعد" },
           ].map(({ icon, label, val }) => (
             <div key={label} style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
               <i

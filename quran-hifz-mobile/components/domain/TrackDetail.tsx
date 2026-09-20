@@ -26,6 +26,7 @@ import { useStudents } from '@/lib/queries/students';
 import {
   useQuranPlans, useUpdateQuranPlan, segmentReversed, type QuranPlan,
 } from '@/lib/queries/quranPlan';
+import { planScheduleDays, planScheduleRange, resolveLinkedPlan, NO_PLAN_SCHEDULE_TEXT } from '@/lib/trackSchedule';
 import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -112,7 +113,7 @@ export default function TrackDetail({ trackId, role }: Props) {
   // useQuranPlans({track}) can return several plans for this track — prefer
   // the one actually targeting the whole track over a narrower students-only
   // plan that merely still points at it.
-  const linkedPlan = linkedPlans.find((p) => p.targetType === 'track') ?? linkedPlans[0];
+  const linkedPlan = resolveLinkedPlan(linkedPlans);
 
   // Only the teacher-only "link another plan" panel reads this. An admin has no
   // profileId, so an ungated call would drop the `teacher` filter and pull every
@@ -186,9 +187,20 @@ export default function TrackDetail({ trackId, role }: Props) {
 
         <View style={s.infoGrid}>
           <View style={s.infoItem}><Text style={s.infoLabel}>الوقت</Text><Text style={s.infoValue}>{track.timeSlot}</Text></View>
-          <View style={s.infoItem}><Text style={s.infoLabel}>الأيام</Text><Text style={s.infoValue}>{track.daysPerWeek}</Text></View>
-          <View style={s.infoItem}><Text style={s.infoLabel}>البداية</Text><Text style={s.infoValue}>{fmtDate(track.startDate)}</Text></View>
-          <View style={s.infoItem}><Text style={s.infoLabel}>النهاية</Text><Text style={s.infoValue}>{fmtDate(track.endDate)}</Text></View>
+          <View style={s.infoItem}>
+            <Text style={s.infoLabel}>الأيام</Text>
+            <Text style={s.infoValue}>{linkedPlan ? (planScheduleDays(linkedPlan).join('، ') || '—') : NO_PLAN_SCHEDULE_TEXT}</Text>
+          </View>
+          <View style={[s.infoItem, { width: '100%' }]}>
+            <Text style={s.infoLabel}>الفترة</Text>
+            <Text style={s.infoValue}>{(() => {
+              const range = planScheduleRange(linkedPlan);
+              if (!range) return NO_PLAN_SCHEDULE_TEXT;
+              return range.endType === 'date'
+                ? `${fmtDate(range.startDate)} – ${fmtDate(range.endDate)}`
+                : `من ${fmtDate(range.startDate)} · ${range.activeDaysCount} يوم نشط`;
+            })()}</Text>
+          </View>
         </View>
 
         <Text style={s.infoLabel}>المكان</Text>

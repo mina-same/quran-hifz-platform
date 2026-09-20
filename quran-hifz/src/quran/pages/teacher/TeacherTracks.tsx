@@ -87,7 +87,9 @@ function TrackCard({ track, onOpen }: { track: Track; onOpen: (t: Track) => void
             <i className="ti ti-calendar-repeat" style={{ color: "var(--green)", marginTop: 1, flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>الأيام</div>
-              <div style={{ fontWeight: 600, color: "var(--text)", marginTop: 1 }}>{track.daysPerWeek}</div>
+              <div style={{ fontWeight: 600, color: "var(--text)", marginTop: 1 }}>
+                {linkedPlan ? (linkedPlan.days.join("، ") || "—") : "لم تُحدَّد خطة بعد"}
+              </div>
             </div>
           </div>
         </div>

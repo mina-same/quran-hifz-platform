@@ -9,6 +9,7 @@ import Badge from '@/components/ui/Badge';
 import { useTracks, type Track, type TrackTeacher } from '@/lib/queries/tracks';
 import { useStudent } from '@/lib/queries/students';
 import { useQuranPlans, segmentReversed } from '@/lib/queries/quranPlan';
+import { planScheduleDays, planScheduleRange, resolveLinkedPlan, NO_PLAN_SCHEDULE_TEXT } from '@/lib/trackSchedule';
 import { SURAHS } from '@/lib/data/surahs';
 import { orientSlice } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -37,11 +38,14 @@ const STATUS_VARIANT: Record<Track['status'], 'green' | 'gold' | 'red'> = { acti
 
 function TrackCard({ track }: { track: Track }) {
   const theme = useAppTheme();
-  const remaining = daysLeft(track.endDate);
   const [planOpen, setPlanOpen] = useState(false);
-  // The track's own Quran plan — where "مقرَّر اليوم" comes from.
+  // The track's own Quran plan — where "مقرَّر اليوم" AND the real schedule
+  // (days/date range) come from now; the track's own daysPerWeek/startDate/
+  // endDate fields are vestigial (see lib/trackSchedule.ts).
   const { data: linkedPlans = [] } = useQuranPlans({ track: track._id });
-  const linkedPlan = linkedPlans[0];
+  const linkedPlan = resolveLinkedPlan(linkedPlans);
+  const scheduleRange = planScheduleRange(linkedPlan);
+  const remaining = scheduleRange?.endType === 'date' ? daysLeft(scheduleRange.endDate) : null;
 
   const todayText = (() => {
     const list = linkedPlan?.todayAssignments ?? [];
@@ -108,7 +112,7 @@ function TrackCard({ track }: { track: Track }) {
         </View>
         <View style={s.infoItem}>
           <Text style={s.infoLabel}>الجدول</Text>
-          <Text style={s.infoValue}>{track.daysPerWeek}</Text>
+          <Text style={s.infoValue}>{linkedPlan ? (planScheduleDays(linkedPlan).join('، ') || '—') : NO_PLAN_SCHEDULE_TEXT}</Text>
         </View>
         <View style={s.infoItem}>
           <Text style={s.infoLabel}>المكان</Text>
@@ -117,8 +121,14 @@ function TrackCard({ track }: { track: Track }) {
       </View>
 
       <View style={s.dateBox}>
-        <Text style={s.dateText}>{fmtDate(track.startDate)} — {fmtDate(track.endDate)}</Text>
-        {track.status !== 'ended' && (
+        <Text style={s.dateText}>
+          {scheduleRange
+            ? scheduleRange.endType === 'date'
+              ? `${fmtDate(scheduleRange.startDate)} — ${fmtDate(scheduleRange.endDate)}`
+              : `من ${fmtDate(scheduleRange.startDate)} · ${scheduleRange.activeDaysCount} يوم نشط`
+            : NO_PLAN_SCHEDULE_TEXT}
+        </Text>
+        {track.status !== 'ended' && remaining !== null && (
           <Text style={[s.dateRemaining, remaining <= 7 && { color: theme.red }]}>
             {remaining > 0 ? `${remaining} يوم متبقي` : 'ينتهي اليوم'}
           </Text>

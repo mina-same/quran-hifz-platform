@@ -13,6 +13,8 @@ import {
   type Track,
   type TrackTeacher,
 } from '@/lib/queries/tracks';
+import { useQuranPlans } from '@/lib/queries/quranPlan';
+import { planScheduleDays, planScheduleRange, resolveLinkedPlan, NO_PLAN_SCHEDULE_TEXT } from '@/lib/trackSchedule';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -39,6 +41,14 @@ function TrackCard({ track, onOpenDetail }: { track: Track; onOpenDetail: () => 
   const s = useMemo(() => createS(theme), [theme]);
   const enrolled = track.studentCount ?? 0;
   const pct = track.maxStudents > 0 ? Math.min(100, Math.round((enrolled / track.maxStudents) * 100)) : 0;
+  const { data: linkedPlans = [] } = useQuranPlans({ track: track._id });
+  const linkedPlan = resolveLinkedPlan(linkedPlans);
+  const scheduleRange = planScheduleRange(linkedPlan);
+  const scheduleRangeLabel = scheduleRange
+    ? scheduleRange.endType === 'date'
+      ? `${fmtDate(scheduleRange.startDate)} – ${fmtDate(scheduleRange.endDate)}`
+      : `من ${fmtDate(scheduleRange.startDate)} · ${scheduleRange.activeDaysCount} يوم نشط`
+    : NO_PLAN_SCHEDULE_TEXT;
 
   return (
     <Card>
@@ -57,15 +67,11 @@ function TrackCard({ track, onOpenDetail }: { track: Track; onOpenDetail: () => 
         </View>
         <View style={s.infoItem}>
           <Text style={s.infoLabel}>الأيام</Text>
-          <Text style={s.infoValue}>{track.daysPerWeek}</Text>
+          <Text style={s.infoValue}>{linkedPlan ? (planScheduleDays(linkedPlan).join('، ') || '—') : NO_PLAN_SCHEDULE_TEXT}</Text>
         </View>
-        <View style={s.infoItem}>
-          <Text style={s.infoLabel}>البداية</Text>
-          <Text style={s.infoValue}>{fmtDate(track.startDate)}</Text>
-        </View>
-        <View style={s.infoItem}>
-          <Text style={s.infoLabel}>النهاية</Text>
-          <Text style={s.infoValue}>{fmtDate(track.endDate)}</Text>
+        <View style={[s.infoItem, { width: '100%' }]}>
+          <Text style={s.infoLabel}>الفترة</Text>
+          <Text style={s.infoValue}>{scheduleRangeLabel}</Text>
         </View>
       </View>
 

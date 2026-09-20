@@ -24,9 +24,13 @@ export type Track = {
   title: string;
   type: string;
   status: "active" | "upcoming" | "ended";
-  startDate: string;
-  endDate: string;
-  daysPerWeek: string;
+  /** Vestigial — the track's own schedule fields are no longer collected on
+   * the create/edit form. A track's real schedule (days, date range) lives on
+   * its linked `QuranPlan` instead; these only remain for backward
+   * compatibility with old data sent by the API. */
+  startDate?: string;
+  endDate?: string;
+  daysPerWeek?: string;
   timeSlot: string;
   isOnline: boolean;
   meetLink?: string;

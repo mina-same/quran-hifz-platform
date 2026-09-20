@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-20T13:14:54.180Z
-> Files: 708 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-20T17:42:44.534Z
+> Files: 714 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -94,6 +94,8 @@
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/7b0b1177-4742-46a1-9e0b-8c8c221d7b23/scratchpad/pw/
 
 - `driver.mjs` — BASE: login, logout, createSupervisor, checkSupervisorPortal (~1243 tok)
+- `track-verify.mjs` — BASE: login (~1022 tok)
+- `verify-linked.mjs` — Declares BASE (~400 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/9cdca122-7784-410a-bdd8-e96747e16c60/scratchpad/pw/
 
@@ -534,7 +536,7 @@
 - `students.tsx` — المسار: real track lives one hop away via `Student.track`, not the unused legacy `path` enum. (~3454 tok)
 - `teachers.tsx` — ratingVariant (~1903 tok)
 - `track-detail.tsx` — AdminTrackDetailRoute (~474 tok)
-- `tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~11851 tok)
+- `tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~11292 tok)
 
 ## quran-hifz-mobile/app/(portal)/parent/
 
@@ -550,15 +552,16 @@
 
 - `_layout.tsx` — StudentTabLayout (~528 tok)
 - `attendance.tsx` — StudentAttendance (~1082 tok)
-- `dashboard.tsx` — getName (~2009 tok)
+- `dashboard.tsx` — getName (~2591 tok)
 - `homework.tsx` — getTitle (~970 tok)
 - `messages.tsx` — StudentMessages (~1185 tok)
 - `myhifz.tsx` — StudentHifz (~1688 tok)
 - `points.tsx` — MY_PTS (~989 tok)
-- `schedule.tsx` — DAYS (~1854 tok)
+- `schedule.tsx` — DAYS (~2369 tok)
 - `settings.tsx` — StudentSettings (~47 tok)
 - `special_tracks.tsx` — getTeacherName (~3229 tok)
 - `store.tsx` — MY_PTS (~1012 tok)
+- `tracks.tsx` — getTeacherName (~3543 tok)
 
 ## quran-hifz-mobile/app/(portal)/teacher/
 
@@ -578,13 +581,14 @@
 - `special_tracks.tsx` — getTeacherName (~1976 tok)
 - `students.tsx` — hwVariant (~1434 tok)
 - `track-detail.tsx` — TeacherTrackDetailRoute (~475 tok)
+- `tracks.tsx` — getTeacherName (~2287 tok)
 
 ## quran-hifz-mobile/components/domain/
 
 - `AccountSettingsScreen.tsx` — Shared "الملف الشخصي" screen for student + teacher portals (admin/parent (~2117 tok)
 - `AudioRecorder.tsx` — AudioRecorder — uses useState, useEffect (~1336 tok)
 - `BiometricLockScreen.tsx` — Shown after a stored session resumes silently, when the user has opted into (~1123 tok)
-- `ContextCard.tsx` — Normalized TeachingContext (halqa|specialTrack) card + halqaToContext/trackToContext mappers (~950 tok)
+- `ContextCard.tsx` — Normalized shape for anything a teacher/student/admin can act on — always a (~1559 tok)
 - `DaySlider.tsx` — A schedule day, carrying the segment it belongs to when the plan has more (~2042 tok)
 - `EvaluationRoster.tsx` — Scores are keyed by the active plan's rubric — not known at compile time. (~9467 tok)
 - `HalqaCard.tsx` — nameOf (~816 tok)
@@ -593,7 +597,7 @@
 - `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~7068 tok)
 - `ScheduleSheet.tsx` — Day-by-day plan breakdown as a bottom sheet of compact cards (replaced the 6-column ScheduleTable). Exports scheduleItems()/fmtShortDate()/fmtPages() + the ScheduleItem shape. (~1700 tok)
 - `SurahAyahPicker.tsx` — When given, restricts BOTH pickers to only the surahs/ayat that fall inside (~828 tok)
-- `TrackDetail.tsx` — First letter of the first two words — the same initials the web chips show. (~6849 tok)
+- `TrackDetail.tsx` — First letter of the first two words — the same initials the web chips show. (~6971 tok)
 - `TrackStudentsPanel.tsx` — Track roster management — transfer-only, since a student's track is (~2206 tok)
 
 ## quran-hifz-mobile/components/forms/
@@ -652,6 +656,7 @@
 - `quranRange.test.ts` — / <reference types="jest" /> (~6882 tok)
 - `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~6244 tok)
 - `theme.ts` — Exports ThemeMode, buildTheme(mode), Theme, textStart/textEnd. Mode-independent `base` (brand/status ink, shape, spacing, fonts, shadow) merged with light/darkSurfaces (bg, card, cardAlt, inputBg, overlay, text*, border, greenAccent, the pastel tints, and the `tone` bg/border/text map). Deliberately exports NO frozen `theme` object — read colours via useAppTheme() (~1050 tok)
+- `trackSchedule.ts` — A track's own `daysPerWeek`/`startDate`/`endDate` are now vestigial — the (~553 tok)
 
 ## quran-hifz-mobile/lib/constants/
 
@@ -687,6 +692,7 @@
 - `stats.ts` — Exports DashboardStats, useStats (~214 tok)
 - `students.ts` — Legacy fields — real guardian identity comes from parentName/parentEmail below. (~845 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher (~225 tok)
+- `tracks.ts` — No longer collected on the track form — a track's real schedule comes (~1199 tok)
 
 ## quran-hifz-mobile/lib/store/
 
@@ -756,7 +762,7 @@
 - `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~4651 tok)
 - `student.controller.ts` — Empty string is normalised to undefined so a blank field clears rather (~2456 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1693 tok)
-- `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~2560 tok)
+- `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~2628 tok)
 
 ## quran-hifz-server/src/data/
 
@@ -797,7 +803,7 @@
 - `Student.model.ts` — Saudi national ID (رقم الهوية الوطنية): exactly 10 digits from الأحوال المدنية. (~704 tok)
 - `StudentPlanProgress.model.ts` — Exports StudentOccurrenceStatus, IStudentOccurrence, IStudentPlanProgress, StudentPlanProgress (~994 tok)
 - `Teacher.model.ts` — Exports ITeacher, Teacher (~216 tok)
-- `Track.model.ts` — Soft-delete marker. Set instead of removing the document when the track (~531 tok)
+- `Track.model.ts` — No longer collected at creation — a track's actual schedule comes from (~574 tok)
 - `User.model.ts` — Fixed at creation by the admin; only set for role === 'supervisor'. A (~545 tok)
 
 ## quran-hifz-server/src/routes/
@@ -963,12 +969,12 @@
 - `masajid.ts` — The server's `getMasajid`/`getMasjid` select this exact field set — no (~561 tok)
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
-- `quran-plans.ts` — sessionStorage key used to hand off "open the plan form" from wherever a (~2626 tok)
+- `quran-plans.ts` — sessionStorage key used to hand off "open the plan form" from wherever a (~2839 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~212 tok)
 - `student-plan-progress.ts` — False when the student has no individual overlay yet — `effectiveSchedule` (~1673 tok)
 - `students.ts` — Saudi national ID — 10 digits, leading 1 (مواطن) or 2 (مقيم). useDeleteStudent takes {id, withParent?} (~890 tok)
 - `teachers.ts` — Exports Teacher, useTeachers, useTeacher, useCreateTeacher + 2 more (~504 tok)
-- `tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~1214 tok)
+- `tracks.ts` — sessionStorage key used to hand off "open this track's detail page" from the (~1294 tok)
 
 ## quran-hifz/src/quran/components/
 
@@ -1046,8 +1052,8 @@
 - `AdminStudents.tsx` — PATH_TONE — renders table (~6081 tok)
 - `AdminSupervisors.tsx` — EMPTY_ADD — renders table, modal (~2875 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4789 tok)
-- `AdminTrackForm.tsx` — Full-page create/edit form for a track (was a popup modal) — lets the (~4822 tok)
-- `AdminTracks.tsx` — surahName — renders modal (~7478 tok)
+- `AdminTrackForm.tsx` — Full-page create/edit form for a track (was a popup modal) — lets the (~4273 tok)
+- `AdminTracks.tsx` — surahName — renders modal (~7495 tok)
 
 ## quran-hifz/src/quran/pages/common/
 
@@ -1066,15 +1072,15 @@
 ## quran-hifz/src/quran/pages/student/
 
 - `StudentAttendance.tsx` — STATUS_TONE — renders table (~1101 tok)
-- `StudentDashboard.tsx` — getField (~1763 tok)
+- `StudentDashboard.tsx` — getField (~1869 tok)
 - `StudentHifz.tsx` — tone — renders table (~1058 tok)
 - `StudentHomework.tsx` — AR_DIGITS — uses useState, useEffect (~1000 tok)
 - `StudentMessages.tsx` — StudentMessages (~768 tok)
 - `StudentPoints.tsx` — MY_POINTS (~1322 tok)
-- `StudentSchedule.tsx` — getId (~916 tok)
+- `StudentSchedule.tsx` — getId (~954 tok)
 - `StudentSpecialTracks.tsx` — surahName (~4412 tok)
 - `StudentStore.tsx` — MY_POINTS (~882 tok)
-- `StudentTracks.tsx` — surahName (~4511 tok)
+- `StudentTracks.tsx` — surahName (~4549 tok)
 
 ## quran-hifz/src/quran/pages/teacher/
 
@@ -1092,8 +1098,8 @@
 - `TeacherSpecialTracks.tsx` — surahName (~2892 tok)
 - `TeacherStudentPlanDetail.tsx` — Compact surah+ayah picker for the inline row edit — mirrors (~3764 tok)
 - `TeacherStudents.tsx` — HW_TONE — renders table (~1543 tok)
-- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~25363 tok)
-- `TeacherTracks.tsx` — surahName (~2808 tok)
+- `TeacherTrackDetail.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~25407 tok)
+- `TeacherTracks.tsx` — surahName (~2832 tok)
 
 ## quran-hifz/src/quran/router/
 

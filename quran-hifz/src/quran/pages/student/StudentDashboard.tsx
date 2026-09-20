@@ -9,11 +9,16 @@ import { HalqaRow } from "../../components/common/HalqaRow";
 import { SkeletonStatsRow, SkeletonCard } from "../../components/common/Skeleton";
 import { useStudent } from "../../api/students";
 import { useHomework } from "../../api/homework";
+import { useQuranPlans } from "../../api/quran-plans";
 import { toAr, pct } from "../../../lib/format";
 
 function getField(v: unknown, field: string): string {
   if (v && typeof v === "object" && field in v) return String((v as Record<string, unknown>)[field]);
   return "—";
+}
+function getId(v: unknown): string | undefined {
+  if (v && typeof v === "object" && "_id" in v) return (v as { _id: string })._id;
+  return typeof v === "string" ? v : undefined;
 }
 function getTrackMasjidName(track: unknown): string {
   if (!track || typeof track !== "object") return "—";
@@ -33,6 +38,8 @@ export function StudentDashboard() {
   const { user } = usePortal();
   const { data: student, isLoading } = useStudent(user?.profileId);
   const { data: homework = [] } = useHomework({ student: user?.profileId });
+  const trackId = getId(student?.track);
+  const { data: linkedPlans = [] } = useQuranPlans(trackId ? { track: trackId } : undefined);
 
   useTopbar("ti-home", "لوحتي");
 
@@ -53,7 +60,7 @@ export function StudentDashboard() {
   const juz = student ? Math.round((student.progressPct / 100) * 30) : 0;
   const trackName = getField(student?.track, "title");
   const masjidName = getTrackMasjidName(student?.track);
-  const trackDays = getField(student?.track, "daysPerWeek");
+  const trackDays = linkedPlans[0]?.days.join("، ") ?? "—";
   const trackTime = getField(student?.track, "timeSlot");
   const isTopStudent = (student?.attendancePct ?? 0) >= 90 && (student?.progressPct ?? 0) >= 60;
 

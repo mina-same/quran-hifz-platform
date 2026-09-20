@@ -4,7 +4,7 @@ import {
   ScrollView, View, StyleSheet, RefreshControl, KeyboardAvoidingView, Platform, Modal, Linking,
 } from 'react-native';
 import {
-  IconAlertCircle, IconBuildingArch, IconCalendar, IconCalendarEvent, IconCalendarOff,
+  IconAlertCircle, IconBuildingArch, IconCalendar, IconCalendarEvent,
   IconCalendarRepeat, IconChevronDown, IconChevronUp, IconClock, IconMapPin, IconPencil,
   IconTarget, IconTrash, IconUserCheck, IconUserOff, IconUsers, IconVideo, IconWifi,
 } from '@tabler/icons-react-native';
@@ -18,7 +18,6 @@ import Button from '@/components/ui/Button';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import FormInput from '@/components/forms/FormInput';
 import FormSelect from '@/components/forms/FormSelect';
-import FormDatePicker from '@/components/forms/FormDatePicker';
 import {
   useTracks,
   useCreateTrack,
@@ -33,6 +32,7 @@ import { useStudents } from '@/lib/queries/students';
 import type { Student } from '@/lib/queries/students';
 import { useMasajid } from '@/lib/queries/masajid';
 import { useQuranPlans, segmentReversed } from '@/lib/queries/quranPlan';
+import { planScheduleDays, planScheduleRange, resolveLinkedPlan, NO_PLAN_SCHEDULE_TEXT } from '@/lib/trackSchedule';
 import { SURAHS } from '@/lib/data/surahs';
 import { orientSlice } from '@/lib/quranRange';
 import { fmtDateShort } from '@/lib/date';
@@ -61,16 +61,6 @@ const STATUS_LABEL: Record<Track['status'], string> = { active: 'نشط', upcomi
 const STATUS_VARIANT: Record<Track['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
 
 const TYPE_OPTS = ['مراجعة مكثّفة', 'تجويد', 'إجازة', 'ختمة مسرّعة', 'برنامج رمضاني', 'تحضير مسابقة', 'أخرى'];
-const DAYS_OPTS = [
-  'يومياً',
-  'السبت والثلاثاء',
-  'السبت والاثنين والأربعاء',
-  'عطلة نهاية الأسبوع',
-  'ثلاث مرات أسبوعياً',
-  'مرتين أسبوعياً',
-];
-/** Sentinel for the "أخرى (أدخل يدوياً)" option, mirroring the web selects. */
-const CUSTOM = '__custom__';
 
 /** Rotating chip tones for teacher/student avatars — theme.tone so dark mode holds. */
 function avatarTone(theme: AppTheme, i: number) {
@@ -94,15 +84,12 @@ type FormFields = {
   meetLink: string;
   teachers: string[];
   maxStudents: string;
-  startDate: string;
-  endDate: string;
-  daysPerWeek: string;
   status: Track['status'];
   notes: string;
 };
 const EMPTY: FormFields = {
   title: '', type: '', timeSlot: '', masjid: '', isOnline: false, meetLink: '',
-  teachers: [], maxStudents: '30', startDate: '', endDate: '', daysPerWeek: '',
+  teachers: [], maxStudents: '30',
   status: 'upcoming', notes: '',
 };
 
@@ -139,9 +126,6 @@ export default function AdminTracks() {
   const [addStudentId, setAddStudentId] = useState('');
   const [studentsSearch, setStudentsSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  // Free-text fallback: the days picker lists preset patterns and can drop to
-  // a manual entry the way the web select does.
-  const [customDays, setCustomDays] = useState(false);
 
   function sf<K extends keyof FormFields>(k: K, v: FormFields[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -158,12 +142,10 @@ export default function AdminTracks() {
     setForm(EMPTY);
     setFormError('');
     setEditId(null);
-    setCustomDays(false);
     setShowForm(true);
   }
 
   function openEdit(t: Track) {
-    const d = (v: string) => (v ? new Date(v).toISOString().split('T')[0] : '');
     setForm({
       title: t.title,
       type: t.type,
@@ -173,13 +155,9 @@ export default function AdminTracks() {
       meetLink: t.meetLink ?? '',
       teachers: t.teachers.map(getTeacherId),
       maxStudents: String(t.maxStudents),
-      startDate: d(t.startDate),
-      endDate: d(t.endDate),
-      daysPerWeek: t.daysPerWeek,
       status: t.status,
       notes: t.notes ?? '',
     });
-    setCustomDays(!!t.daysPerWeek && !DAYS_OPTS.includes(t.daysPerWeek));
     setFormError('');
     setEditId(t._id);
     setShowForm(true);
@@ -190,8 +168,6 @@ export default function AdminTracks() {
     if (!form.type.trim()) { setFormError('نوع المسار مطلوب'); return; }
     if (form.teachers.length === 0) { setFormError('يرجى اختيار معلم واحد على الأقل'); return; }
     if (!form.timeSlot.trim()) { setFormError('وقت الجلسة مطلوب'); return; }
-    if (!form.daysPerWeek.trim()) { setFormError('الأيام مطلوبة'); return; }
-    if (!form.startDate || !form.endDate) { setFormError('التواريخ مطلوبة'); return; }
     if (form.isOnline && !form.meetLink.trim()) { setFormError('رابط الجلسة مطلوب'); return; }
     if (!form.masjid) { setFormError('يرجى اختيار المسجد'); return; }
 
@@ -205,9 +181,6 @@ export default function AdminTracks() {
       meetLink: form.isOnline ? form.meetLink.trim() : '',
       teachers: form.teachers,
       maxStudents: Number(form.maxStudents) || 30,
-      startDate: form.startDate,
-      endDate: form.endDate,
-      daysPerWeek: form.daysPerWeek.trim(),
       notes: form.notes.trim(),
     };
 
@@ -467,31 +440,6 @@ export default function AdminTracks() {
             <Text style={s.label}>الوقت</Text>
             <FormInput placeholder="بعد الفجر | ٦:١٠ – ٧:٣٠" value={form.timeSlot} onChangeText={(v) => sf('timeSlot', v)} />
 
-            <Text style={s.label}>الأيام</Text>
-            <FormSelect
-              value={customDays ? CUSTOM : form.daysPerWeek}
-              onChange={(v) => {
-                if (v === CUSTOM) { setCustomDays(true); sf('daysPerWeek', ''); }
-                else { setCustomDays(false); sf('daysPerWeek', v); }
-              }}
-              options={[
-                ...DAYS_OPTS.map((o) => ({ value: o, label: o })),
-                { value: CUSTOM, label: 'أخرى (أدخل يدوياً)' },
-              ]}
-              placeholder="اختر الأيام"
-            />
-            {customDays && (
-              <View style={{ marginTop: 6 }}>
-                <FormInput placeholder="مثال: السبت والثلاثاء والخميس" value={form.daysPerWeek} onChangeText={(v) => sf('daysPerWeek', v)} />
-              </View>
-            )}
-
-            <Text style={s.label}>تاريخ البداية</Text>
-            <FormDatePicker value={form.startDate} onChange={(v) => sf('startDate', v)} />
-
-            <Text style={s.label}>تاريخ النهاية</Text>
-            <FormDatePicker value={form.endDate} onChange={(v) => sf('endDate', v)} minimumDate={form.startDate ? new Date(form.startDate) : undefined} />
-
             <Text style={s.label}>الحد الأقصى للطلاب</Text>
             <FormInput placeholder="30" keyboardType="number-pad" value={form.maxStudents} onChangeText={(v) => sf('maxStudents', v)} />
 
@@ -583,7 +531,14 @@ function TrackCard({
   // "students", so this filter can return several plans for one track. Prefer
   // the one actually targeting the whole track, or this card's "مقرَّر اليوم"
   // disagrees with the track-detail screen for the same track.
-  const linkedPlan = linkedPlans.find((p) => p.targetType === 'track') ?? linkedPlans[0];
+  const linkedPlan = resolveLinkedPlan(linkedPlans);
+  const scheduleDays = planScheduleDays(linkedPlan);
+  const scheduleRange = planScheduleRange(linkedPlan);
+  const scheduleRangeLabel = scheduleRange
+    ? scheduleRange.endType === 'date'
+      ? `${fmtDateShort(scheduleRange.startDate)} – ${fmtDateShort(scheduleRange.endDate)}`
+      : `من ${fmtDateShort(scheduleRange.startDate)} · ${scheduleRange.activeDaysCount} يوم نشط`
+    : NO_PLAN_SCHEDULE_TEXT;
 
   const enrolled = t.studentCount ?? 0;
   const pct = Math.min(100, Math.round((enrolled / t.maxStudents) * 100));
@@ -634,9 +589,8 @@ function TrackCard({
         {/* info grid — two columns that collapse to one on a narrow screen */}
         <View style={s.infoGrid}>
           <InfoItem s={s} icon={<IconClock size={15} color={theme.green} />} label="الوقت" val={t.timeSlot} />
-          <InfoItem s={s} icon={<IconCalendarRepeat size={15} color={theme.green} />} label="الأيام" val={t.daysPerWeek} />
-          <InfoItem s={s} icon={<IconCalendar size={15} color={theme.green} />} label="البداية" val={fmtDateShort(t.startDate)} />
-          <InfoItem s={s} icon={<IconCalendarOff size={15} color={theme.green} />} label="النهاية" val={fmtDateShort(t.endDate)} />
+          <InfoItem s={s} icon={<IconCalendarRepeat size={15} color={theme.green} />} label="الأيام" val={linkedPlan ? scheduleDays.join('، ') : NO_PLAN_SCHEDULE_TEXT} />
+          <InfoItem s={s} icon={<IconCalendar size={15} color={theme.green} />} label="الفترة" val={scheduleRangeLabel} span />
           <InfoItem
             s={s}
             icon={t.isOnline ? <IconVideo size={15} color={theme.green} /> : <IconMapPin size={15} color={theme.green} />}

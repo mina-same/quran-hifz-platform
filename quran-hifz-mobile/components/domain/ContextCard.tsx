@@ -5,6 +5,8 @@ import Badge from '@/components/ui/Badge';
 import ProgressBar from '@/components/ui/ProgressBar';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import type { Track } from '@/lib/queries/tracks';
+import type { QuranPlan } from '@/lib/queries/quranPlan';
+import { planScheduleDays } from '@/lib/trackSchedule';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
@@ -28,12 +30,21 @@ function getName(v: unknown): string {
   return typeof v === 'string' ? v : '';
 }
 
-export function trackToContext(t: Track): TeachingContext {
+/**
+ * `linkedPlan` is optional because most call sites map over a track list to
+ * build picker cards and don't fetch a per-track plan there (that would be an
+ * N+1 `useQuranPlans` per row) — when omitted, `scheduleLabel` falls back to
+ * just the track's own `timeSlot`, never the vestigial `daysPerWeek`/date
+ * fields. Pass it when the caller already has the resolved linked plan (see
+ * lib/trackSchedule.ts's `resolveLinkedPlan`) for the real days.
+ */
+export function trackToContext(t: Track, linkedPlan?: QuranPlan): TeachingContext {
+  const days = planScheduleDays(linkedPlan).join('، ');
   return {
     id: t._id,
     title: t.title,
     subtitle: t.isOnline ? 'أونلاين' : getName(t.masjid),
-    scheduleLabel: [t.daysPerWeek, t.timeSlot].filter(Boolean).join(' | '),
+    scheduleLabel: [days, t.timeSlot].filter(Boolean).join(' | '),
     studentCount: t.studentCount,
     capacity: t.maxStudents,
     status: t.status,

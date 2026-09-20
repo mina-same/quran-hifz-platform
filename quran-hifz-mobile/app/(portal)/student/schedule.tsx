@@ -9,6 +9,8 @@ import { SkeletonRows } from "@/components/ui/Skeleton";
 import { usePortalStore } from "@/lib/store/portalStore";
 import { useStudent } from "@/lib/queries/students";
 import { useTrack, type TrackTeacher } from "@/lib/queries/tracks";
+import { useQuranPlans } from "@/lib/queries/quranPlan";
+import { planScheduleDays, resolveLinkedPlan, NO_PLAN_SCHEDULE_TEXT } from "@/lib/trackSchedule";
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
@@ -60,6 +62,9 @@ export default function StudentSchedule() {
     refetch: refetchTrack,
   } = useTrack(trackId);
 
+  const { data: linkedPlans = [] } = useQuranPlans({ track: trackId }, { enabled: !!trackId });
+  const linkedPlan = resolveLinkedPlan(linkedPlans);
+
   const isLoading = studentLoading || (!!trackId && trackLoading);
   const isRefetching = studentRefetching || (!!trackId && trackRefetching);
   const onRefresh = () => {
@@ -87,12 +92,7 @@ export default function StudentSchedule() {
     );
   }
 
-  const sessionDays = new Set(
-    (track?.daysPerWeek ?? "")
-      .split(/[،,]/)
-      .map((d) => d.trim())
-      .filter(Boolean),
-  );
+  const sessionDays = new Set(planScheduleDays(linkedPlan));
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
@@ -135,6 +135,7 @@ export default function StudentSchedule() {
             {/* Weekly grid */}
             <Card>
               <CardHeader title="الجدول الأسبوعي" />
+              {!linkedPlan && <Alert variant="info">{NO_PLAN_SCHEDULE_TEXT}</Alert>}
               <View style={styles.weekGrid}>
                 {DAYS.map((day) => {
                   const isSession = sessionDays.has(day);

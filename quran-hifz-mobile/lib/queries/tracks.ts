@@ -10,9 +10,12 @@ export type Track = {
   title: string;
   type: string;
   status: 'active' | 'upcoming' | 'ended';
-  startDate: string;
-  endDate: string;
-  daysPerWeek: string;
+  /** No longer collected on the track form — a track's real schedule comes
+   * from its linked QuranPlan. Kept optional for backward compat with tracks
+   * created before this change; the API still accepts them if sent. */
+  startDate?: string;
+  endDate?: string;
+  daysPerWeek?: string;
   timeSlot: string;
   isOnline: boolean;
   meetLink?: string;

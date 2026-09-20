@@ -18,9 +18,11 @@ const trackSchema = z.object({
   title:       z.string().min(1),
   type:        z.string().min(1),
   status:      z.enum(['active', 'upcoming', 'ended']).optional(),
-  startDate:   z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
-  endDate:     z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
-  daysPerWeek: z.string().min(1),
+  // No longer collected at creation — the track's actual schedule comes from
+  // its linked QuranPlan(s). Kept optional so old clients/edits still work.
+  startDate:   z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح').optional(),
+  endDate:     z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح').optional(),
+  daysPerWeek: z.string().optional(),
   timeSlot:    z.string().min(1),
   isOnline:    z.boolean().optional(),
   meetLink:    z.string().url('رابط غير صالح').optional().or(z.literal('')),
@@ -45,7 +47,7 @@ export async function getTracks(req: Request, res: Response, next: NextFunction)
     const tracks = await Track.find(filter)
       .populate('teachers', 'name')
       .populate('masjid', 'name location gender')
-      .sort({ startDate: -1 });
+      .sort({ createdAt: -1 });
 
     const enriched = await Promise.all(
       tracks.map(async (t) => {
@@ -85,8 +87,8 @@ export async function createTrack(req: Request, res: Response, next: NextFunctio
     const data = trackSchema.parse(req.body);
     const track = await Track.create({
       ...data,
-      startDate: new Date(data.startDate),
-      endDate:   new Date(data.endDate),
+      startDate: data.startDate ? new Date(data.startDate) : undefined,
+      endDate:   data.endDate ? new Date(data.endDate) : undefined,
     });
     res.status(201).json({ success: true, data: track });
   } catch (err) {

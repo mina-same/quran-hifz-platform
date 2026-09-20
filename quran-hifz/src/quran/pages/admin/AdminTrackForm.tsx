@@ -24,8 +24,6 @@ type FormFields = {
   isOnline: boolean; meetLink: string;
   teachers: string[];
   maxStudents: string;
-  startDate: string; endDate: string;
-  daysPerWeek: string;
   status: Track["status"];
   notes: string;
 };
@@ -34,22 +32,18 @@ const EMPTY: FormFields = {
   masjid: "",
   isOnline: false, meetLink: "",
   teachers: [], maxStudents: "30",
-  startDate: "", endDate: "",
-  daysPerWeek: "", status: "upcoming", notes: "",
+  status: "upcoming", notes: "",
 };
 const TYPE_OPTS = ["مراجعة مكثّفة","تجويد","إجازة","ختمة مسرّعة","برنامج رمضاني","تحضير مسابقة","أخرى"];
-const DAYS_OPTS = ["يومياً","السبت والثلاثاء","السبت والاثنين والأربعاء","عطلة نهاية الأسبوع","ثلاث مرات أسبوعياً","مرتين أسبوعياً"];
 
 function fieldsFromTrack(t: Track): FormFields {
-  const d = (s: string) => s ? new Date(s).toISOString().split("T")[0] : "";
   return {
     title: t.title, type: t.type, timeSlot: t.timeSlot,
     masjid: typeof t.masjid === "object" ? t.masjid._id : t.masjid,
     isOnline: t.isOnline ?? false, meetLink: t.meetLink ?? "",
     teachers: t.teachers.map(getTeacherId),
     maxStudents: String(t.maxStudents),
-    startDate: d(t.startDate), endDate: d(t.endDate),
-    daysPerWeek: t.daysPerWeek, status: t.status, notes: t.notes ?? "",
+    status: t.status, notes: t.notes ?? "",
   };
 }
 
@@ -97,14 +91,12 @@ export function AdminTrackForm() {
 
   async function handleSubmit() {
     const { title, type, timeSlot, isOnline, masjid,
-            meetLink, teachers: tids, maxStudents, startDate, endDate, daysPerWeek } = form;
+            meetLink, teachers: tids, maxStudents } = form;
 
     if (!title.trim())        { setFormError("اسم المسار مطلوب"); return; }
     if (!type.trim())         { setFormError("نوع المسار مطلوب"); return; }
     if (tids.length === 0)    { setFormError("يرجى اختيار معلم واحد على الأقل"); return; }
     if (!timeSlot.trim())     { setFormError("وقت الجلسة مطلوب"); return; }
-    if (!daysPerWeek.trim())  { setFormError("الأيام مطلوبة"); return; }
-    if (!startDate || !endDate) { setFormError("التواريخ مطلوبة"); return; }
     if (isOnline && !meetLink.trim()) { setFormError("رابط الجلسة مطلوب"); return; }
     if (!masjid) { setFormError("يرجى اختيار المسجد"); return; }
 
@@ -114,7 +106,6 @@ export function AdminTrackForm() {
       timeSlot: timeSlot.trim(), masjid, isOnline,
       meetLink: isOnline ? meetLink.trim() : "",
       teachers: tids, maxStudents: Number(maxStudents) || 30,
-      startDate, endDate, daysPerWeek: daysPerWeek.trim(),
       notes: form.notes.trim(),
     };
     try {
@@ -325,25 +316,6 @@ export function AdminTrackForm() {
             <div className="form-group">
               <label className="form-label">الوقت <span>*</span></label>
               <input className="form-input" placeholder="بعد الفجر | ٦:١٠ – ٧:٣٠" value={form.timeSlot} onChange={(e) => sf("timeSlot", e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">الأيام <span>*</span></label>
-              <select className="form-input" value={form.daysPerWeek} onChange={(e) => sf("daysPerWeek", e.target.value)}>
-                <option value="">— اختر —</option>
-                {DAYS_OPTS.map((o) => <option key={o} value={o}>{o}</option>)}
-                <option value="custom">أخرى (أدخل يدوياً)</option>
-              </select>
-              {form.daysPerWeek === "custom" && (
-                <input className="form-input" style={{ marginTop: 6 }} placeholder="مثال: السبت والثلاثاء والخميس" onChange={(e) => sf("daysPerWeek", e.target.value)} />
-              )}
-            </div>
-            <div className="form-group">
-              <label className="form-label">تاريخ البداية <span>*</span></label>
-              <input className="form-input" type="date" dir="ltr" value={form.startDate} onChange={(e) => sf("startDate", e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">تاريخ النهاية <span>*</span></label>
-              <input className="form-input" type="date" dir="ltr" value={form.endDate} onChange={(e) => sf("endDate", e.target.value)} />
             </div>
             {form.isOnline && (
               <div className="form-group" style={{ gridColumn: "1 / -1" }}>

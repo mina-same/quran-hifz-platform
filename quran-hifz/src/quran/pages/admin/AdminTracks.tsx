@@ -6,7 +6,7 @@ import {
   TRACK_DETAIL_ID_KEY, TRACK_FORM_HANDOFF_KEY,
   type Track, type TrackTeacher, type TrackFormHandoff,
 } from "../../api/tracks";
-import { useQuranPlans, segmentReversed } from "../../api/quran-plans";
+import { useQuranPlans, segmentReversed, planScheduleRangeLabel } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { matchesGenderScope } from "../../lib/genderScope";
@@ -396,9 +396,8 @@ function TrackCard({
 
         <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12, color: "var(--text2)", marginBottom: 12 }}>
           <InfoRow icon="ti-clock"    label="الوقت"    val={t.timeSlot} />
-          <InfoRow icon="ti-calendar-repeat" label="الأيام" val={t.daysPerWeek} />
-          <InfoRow icon="ti-calendar" label="البداية"  val={fmtDate(t.startDate)} />
-          <InfoRow icon="ti-calendar-off" label="النهاية" val={fmtDate(t.endDate)} />
+          <InfoRow icon="ti-calendar-repeat" label="الأيام" val={linkedPlan ? (linkedPlan.days.join("، ") || "—") : "لم تُحدَّد خطة بعد"} />
+          <InfoRow icon="ti-calendar" label="مدة الخطة" val={linkedPlan ? planScheduleRangeLabel(linkedPlan, fmtDate) : "لم تُحدَّد خطة بعد"} span />
           <InfoRow
             icon={t.isOnline ? "ti-video" : "ti-map-pin"}
             label="المسجد"

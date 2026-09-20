@@ -6,7 +6,7 @@ import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { useTracks, type Track, type TrackTeacher } from "../../api/tracks";
 import { useStudent } from "../../api/students";
-import { useQuranPlans, segmentReversed } from "../../api/quran-plans";
+import { useQuranPlans, segmentReversed, planScheduleRangeLabel } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { AR_LOCALE } from "@/lib/format";
@@ -31,12 +31,6 @@ const TYPE_LABEL: Record<string, string> = {
   "إجازة": "إجازة", "ختمة مسرّعة": "ختمة مسرّعة",
   "برنامج رمضاني": "برنامج رمضاني", "تحضير مسابقة": "تحضير مسابقة", "أخرى": "أخرى",
 };
-const DAYS_LABEL: Record<string, string> = {
-  "يومياً": "يومياً", "مرتين أسبوعياً": "مرتين أسبوعياً",
-  "ثلاث مرات أسبوعياً": "ثلاث مرات أسبوعياً",
-  "عطلة نهاية الأسبوع": "عطلة نهاية الأسبوع",
-};
-
 function teacherName(t: TrackTeacher | string): string {
   return typeof t === "object" ? t.name : t;
 }
@@ -52,10 +46,14 @@ function getName(v: unknown): string {
 }
 
 function TrackCard({ track }: { track: Track }) {
-  const days = daysLeft(track.endDate);
   const { data: linkedPlans = [] } = useQuranPlans({ track: track._id });
   const linkedPlan = linkedPlans[0];
   const [planOpen, setPlanOpen] = useState(false);
+  // Only a fixed end date gives a meaningful countdown — an activeDays plan
+  // has no fixed end date to count down to.
+  const days = linkedPlan && linkedPlan.endType === "date" && linkedPlan.endDate
+    ? daysLeft(linkedPlan.endDate)
+    : null;
 
   return (
     <div className="track-card">
@@ -139,7 +137,9 @@ function TrackCard({ track }: { track: Track }) {
             </span>
             <div>
               <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1 }}>الجدول</div>
-              <div style={{ fontWeight: 600 }}>{DAYS_LABEL[track.daysPerWeek] ?? track.daysPerWeek}</div>
+              <div style={{ fontWeight: 600 }}>
+                {linkedPlan ? (linkedPlan.days.join("، ") || "—") : "لم تُحدَّد خطة بعد"}
+              </div>
             </div>
           </div>
 
@@ -168,9 +168,9 @@ function TrackCard({ track }: { track: Track }) {
         }}>
           <span>
             <i className="ti ti-calendar-event" style={{ marginLeft: 4, color: "var(--green)" }} />
-            {fmtDate(track.startDate)} — {fmtDate(track.endDate)}
+            {linkedPlan ? planScheduleRangeLabel(linkedPlan, fmtDate) : "لم تُحدَّد خطة بعد"}
           </span>
-          {track.status !== "ended" && (
+          {track.status !== "ended" && days !== null && (
             <span style={{ fontWeight: 700, color: days <= 7 ? "#ef4444" : "var(--text2)" }}>
               {days > 0 ? `${days} يوم متبقي` : "ينتهي اليوم"}
             </span>

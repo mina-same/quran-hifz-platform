@@ -6,6 +6,7 @@ import { HalqaRow } from "../../components/common/HalqaRow";
 import { SkeletonCard } from "../../components/common/Skeleton";
 import { useStudent } from "../../api/students";
 import { useTrack, type TrackTeacher } from "../../api/tracks";
+import { useQuranPlans } from "../../api/quran-plans";
 
 function getId(v: unknown): string {
   if (v && typeof v === "object" && "_id" in v) return (v as { _id: string })._id;
@@ -26,6 +27,8 @@ export function StudentSchedule() {
   const { data: student } = useStudent(user?.profileId);
   const trackId = student ? getId(student.track) : undefined;
   const { data: track, isLoading } = useTrack(trackId);
+  const { data: linkedPlans = [] } = useQuranPlans(trackId ? { track: trackId } : undefined);
+  const linkedPlan = linkedPlans[0];
 
   useTopbar("ti-clock", "مواعيد مساري");
 
@@ -33,7 +36,7 @@ export function StudentSchedule() {
     return <SkeletonCard lines={4} />;
   }
 
-  const days = track?.daysPerWeek?.split(/[،,]/).map((d) => d.trim()).filter(Boolean) ?? [];
+  const days = linkedPlan?.days ?? [];
 
   return (
     <>

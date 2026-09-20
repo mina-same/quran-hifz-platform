@@ -13,6 +13,8 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useStudent } from '@/lib/queries/students';
 import { useHomework } from '@/lib/queries/homework';
+import { useQuranPlans } from '@/lib/queries/quranPlan';
+import { planScheduleDays, resolveLinkedPlan } from '@/lib/trackSchedule';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 import { AR_LOCALE } from '@/lib/date';
@@ -36,6 +38,14 @@ export default function StudentDashboard() {
 
   const { data: student, isLoading: studentLoading, isError: studentError, isRefetching: studentRefetching, refetch: refetchStudent } = useStudent(studentId);
   const { data: homework = [], isLoading: hwLoading, isRefetching: hwRefetching, refetch: refetchHw } = useHomework({ student: studentId });
+
+  // Must be called unconditionally (before the early returns below) per the
+  // rules of hooks — track id is undefined until `student` resolves, which
+  // `enabled` already guards against.
+  const trackObj = student && typeof student.track === 'object' ? student.track : null;
+  const trackId = trackObj?._id ?? (student && typeof student.track === 'string' ? student.track : undefined);
+  const { data: linkedPlans = [] } = useQuranPlans({ track: trackId }, { enabled: !!trackId });
+  const linkedPlan = resolveLinkedPlan(linkedPlans);
 
   const isLoading = studentLoading || hwLoading;
   const isRefetching = studentRefetching || hwRefetching;
@@ -69,8 +79,8 @@ export default function StudentDashboard() {
   const juz = Math.round((student.progressPct / 100) * 30);
   // Same badge the web shows: strong attendance AND real progress.
   const isTopStudent = student.attendancePct >= 90 && student.progressPct >= 60;
-  const trackObj = typeof student.track === 'object' ? student.track : null;
-  const trackSchedule = trackObj?.daysPerWeek && trackObj?.timeSlot ? `${trackObj.daysPerWeek} | ${trackObj.timeSlot}` : null;
+  const planDays = planScheduleDays(linkedPlan).join('، ');
+  const trackSchedule = planDays && trackObj?.timeSlot ? `${planDays} | ${trackObj.timeSlot}` : trackObj?.timeSlot || null;
 
   const STATS = [
     { label: 'جزءاً محفوظاً', value: juz, color: theme.green },

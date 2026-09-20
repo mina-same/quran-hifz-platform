@@ -118,6 +118,19 @@ export function segmentReversed(plan: QuranPlan | undefined, type?: PlanType): b
   return seg ? isReversedRange(seg.rangeStart, seg.rangeEnd) : false;
 }
 
+/** Human-readable label for a plan's schedule window — used wherever a
+ * Track's own (now-vestigial) startDate/endDate used to be shown, since the
+ * real schedule now lives on the linked plan. Fixed-date plans show the full
+ * range; `activeDays` plans have no fixed end date, so they show the start
+ * plus the active-day count instead. Takes the caller's own date formatter so
+ * each screen keeps its existing date-format convention. */
+export function planScheduleRangeLabel(plan: QuranPlan, fmtDate: (d: string) => string): string {
+  if (plan.endType === "date" && plan.endDate) {
+    return `${fmtDate(plan.startDate)} — ${fmtDate(plan.endDate)}`;
+  }
+  return `من ${fmtDate(plan.startDate)} · ${plan.activeDaysCount ?? 0} يوم نشط`;
+}
+
 type ListResponse   = { success: boolean; count: number; data: QuranPlan[] };
 type SingleResponse = { success: boolean; data: QuranPlan };
 
