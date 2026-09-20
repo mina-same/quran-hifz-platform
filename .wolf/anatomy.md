@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-20T12:51:46.094Z
-> Files: 707 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-20T13:14:54.180Z
+> Files: 708 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -703,7 +703,7 @@
 
 - `.gitignore` — Git ignore rules (~10 tok)
 - `package-lock.json` — npm lock file (~23821 tok)
-- `package.json` — Node.js package manifest (~404 tok)
+- `package.json` — Node.js package manifest (~452 tok)
 - `tsconfig.json` — TypeScript configuration (~128 tok)
 - `vercel.json` (~54 tok)
 
@@ -826,6 +826,7 @@
 
 - `backfillPlans.ts` — Additive-only script — for every Track that has no QuranPlan producing a (~1046 tok)
 - `create-parent-accounts.ts` — Additive, idempotent: create one parent account per student and link it. (~786 tok)
+- `create-supervisor-accounts.ts` — Additive, idempotent: create the two standing supervisor accounts (one (~399 tok)
 - `ensure-admin.ts` — Idempotent admin bootstrap. Run:  npm run ensure-admin (~421 tok)
 - `import-real-halaqat.ts` — One-time import of real track/teacher/student data. (~1655 tok)
 - `list-users.ts` — Default seed passwords by role (import-real-halaqat.ts + ensure-admin.ts). (~540 tok)

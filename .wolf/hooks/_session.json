@@ -16,6 +16,21 @@
       "count": 1,
       "tokens": 2600,
       "first_read": "2026-09-20T12:52:50.943Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/seeds/list-users.ts": {
+      "count": 1,
+      "tokens": 540,
+      "first_read": "2026-09-20T13:13:34.196Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/seeds/create-parent-accounts.ts": {
+      "count": 1,
+      "tokens": 786,
+      "first_read": "2026-09-20T13:13:50.855Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/package.json": {
+      "count": 1,
+      "tokens": 404,
+      "first_read": "2026-09-20T13:14:51.087Z"
     }
   },
   "files_written": [
@@ -48,15 +63,29 @@
       "action": "edit",
       "tokens": 256,
       "at": "2026-09-20T12:51:46.178Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/seeds/create-supervisor-accounts.ts",
+      "action": "create",
+      "tokens": 399,
+      "at": "2026-09-20T13:14:44.936Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/package.json",
+      "action": "edit",
+      "tokens": 46,
+      "at": "2026-09-20T13:14:54.225Z"
     }
   ],
   "edit_counts": {
     "quran-hifz-mobile/components/domain/IndividualPlanPanel.tsx": 4,
-    "quran-hifz-mobile/components/domain/TrackDetail.tsx": 1
+    "quran-hifz-mobile/components/domain/TrackDetail.tsx": 1,
+    "quran-hifz-server/src/seeds/create-supervisor-accounts.ts": 1,
+    "quran-hifz-server/package.json": 1
   },
-  "anatomy_hits": 3,
+  "anatomy_hits": 6,
   "anatomy_misses": 0,
   "repeated_reads_warned": 0,
   "cerebrum_warnings": 0,
-  "stop_count": 3
+  "stop_count": 4
 }

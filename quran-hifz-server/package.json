@@ -12,6 +12,7 @@
     "rename-email-domain": "ts-node src/seeds/rename-email-domain.ts",
     "regenerate-emails": "ts-node src/seeds/regenerate-emails-from-names.ts",
     "create-parent-accounts": "ts-node src/seeds/create-parent-accounts.ts",
+    "create-supervisor-accounts": "ts-node src/seeds/create-supervisor-accounts.ts",
     "list-users": "ts-node src/seeds/list-users.ts",
     "backfill-plans": "ts-node src/seeds/backfillPlans.ts",
     "backfill-evaluation-rubric": "ts-node src/seeds/backfillEvaluationRubric.ts",
