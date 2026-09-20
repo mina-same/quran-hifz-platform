@@ -6,8 +6,9 @@ const isBrowser = typeof window !== "undefined";
 export type StoredUser = {
   id: string;
   name: string;
-  role: "admin" | "teacher" | "student" | "parent";
+  role: "admin" | "teacher" | "student" | "parent" | "supervisor";
   profileId?: string;
+  supervisorGender?: "male" | "female";
 };
 
 export function getToken(): string | null {

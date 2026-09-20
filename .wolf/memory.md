@@ -4023,3 +4023,165 @@
 |------|--------|---------|---------|--------|
 | 11:49 | Fixed stale LAN IP in mobile .env.local causing long splash + silent login failure on physical iOS device | quran-hifz-mobile/.env.local | fixed, logged as bug-406 | ~1500 |
 | 12:14 | Built signed Android release APK (arm64-v8a) after LAN-IP env fix, verified release-keystore signature | quran-hifz-mobile/android/app/build/outputs/apk/release/app-release.apk | success, 16m24s build | ~800 |
+
+## Session: 2026-09-20 08:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-20 08:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-20 08:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-20 08:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-20 15:09
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-20 15:09
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-20 15:09
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-20 15:09
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:10 | Created docs/superpowers/specs/2026-09-20-supervisor-role-design.md | — | ~1859 |
+| 15:15 | Edited quran-hifz-server/src/types/express.d.ts | 5→7 lines | ~62 |
+| 15:15 | Edited quran-hifz-server/src/models/User.model.ts | 9→13 lines | ~158 |
+| 15:15 | Edited quran-hifz-server/src/models/User.model.ts | 3→4 lines | ~85 |
+| 15:15 | Edited quran-hifz-server/src/middleware/auth.ts | 5→6 lines | ~32 |
+| 15:15 | Edited quran-hifz-server/src/middleware/auth.ts | 1→6 lines | ~45 |
+| 15:15 | Edited quran-hifz-server/src/controllers/auth.controller.ts | modified signToken() | ~68 |
+| 15:15 | Edited quran-hifz-server/src/controllers/auth.controller.ts | 7→10 lines | ~93 |
+| 15:15 | Created quran-hifz-server/src/lib/supervisorScope.ts | — | ~502 |
+| 15:15 | Edited quran-hifz-server/src/controllers/student.controller.ts | added 1 import(s) | ~61 |
+| 15:15 | Edited quran-hifz-server/src/controllers/student.controller.ts | added 1 condition(s) | ~90 |
+| 15:16 | Edited quran-hifz-server/src/controllers/student.controller.ts | added optional chaining | ~145 |
+| 15:16 | Edited quran-hifz-server/src/controllers/track.controller.ts | added 1 import(s) | ~48 |
+| 15:16 | Edited quran-hifz-server/src/controllers/track.controller.ts | added 1 condition(s) | ~78 |
+| 15:16 | Edited quran-hifz-server/src/controllers/track.controller.ts | added optional chaining | ~119 |
+| 15:16 | Edited quran-hifz-server/src/controllers/masjid.controller.ts | added 1 import(s) | ~37 |
+| 15:16 | Edited quran-hifz-server/src/controllers/masjid.controller.ts | modified getMasajid() | ~78 |
+| 15:16 | Edited quran-hifz-server/src/controllers/masjid.controller.ts | added 1 condition(s) | ~119 |
+| 15:16 | Edited quran-hifz-server/src/controllers/teacher.controller.ts | added 1 import(s) | ~43 |
+| 15:16 | Edited quran-hifz-server/src/controllers/teacher.controller.ts | added 2 condition(s) | ~421 |
+| 15:17 | Edited quran-hifz-server/src/controllers/teacher.controller.ts | added optional chaining | ~150 |
+| 15:17 | Edited quran-hifz-server/src/controllers/attendance.controller.ts | added 1 import(s) | ~56 |
+| 15:17 | Edited quran-hifz-server/src/controllers/attendance.controller.ts | added 1 condition(s) | ~132 |
+| 15:17 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | added 1 import(s) | ~67 |
+| 15:17 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | added 1 condition(s) | ~132 |
+| 15:17 | Edited quran-hifz-server/src/controllers/stats.controller.ts | added nullish coalescing | ~179 |
+| 15:17 | Edited quran-hifz-server/src/controllers/admin.controller.ts | expanded (+7 lines) | ~162 |
+| 15:17 | Edited quran-hifz-server/src/controllers/admin.controller.ts | added error handling | ~474 |
+| 15:18 | Edited quran-hifz-server/src/routes/admin.routes.ts | 4→5 lines | ~60 |
+| 15:18 | Edited quran-hifz-server/src/routes/admin.routes.ts | 4→8 lines | ~98 |
+| 15:18 | Edited docs/superpowers/specs/2026-09-20-supervisor-role-design.md | modified set() | ~673 |
+| 15:19 | Session end: 31 writes across 15 files (2026-09-20-supervisor-role-design.md, express.d.ts, User.model.ts, auth.ts, auth.controller.ts) | 30 reads | ~26869 tok |
+| 15:20 | Edited quran-hifz/src/lib/auth-storage.ts | 6→7 lines | ~54 |
+| 15:20 | Edited quran-hifz/src/quran/context/AuthContext.tsx | 10→10 lines | ~108 |
+| 15:20 | Edited quran-hifz/src/quran/context/AuthContext.tsx | CSS: supervisorGender | ~78 |
+| 15:20 | Edited quran-hifz/src/quran/context/AuthContext.tsx | CSS: supervisorGender | ~79 |
+| 15:20 | Edited quran-hifz/src/quran/config/portals.ts | inline fix | ~24 |
+| 15:21 | Edited quran-hifz/src/quran/config/portals.ts | 6→7 lines | ~127 |
+| 15:21 | Edited quran-hifz/src/quran/config/portals.ts | expanded (+22 lines) | ~278 |
+| 15:21 | Edited quran-hifz/src/quran/router/pageRegistry.ts | expanded (+13 lines) | ~130 |
+| 15:21 | Edited quran-hifz/src/quran/context/PortalContext.tsx | CSS: role, readOnly | ~88 |
+| 15:22 | Edited quran-hifz/src/quran/context/PortalContext.tsx | added optional chaining | ~132 |
+| 15:22 | Edited quran-hifz/src/quran/context/PortalContext.tsx | added 1 condition(s) | ~190 |
+| 15:23 | Edited quran-hifz-mobile/lib/types/portal.ts | inline fix | ~24 |
+| 15:23 | Edited quran-hifz-mobile/lib/queries/auth.ts | 7→9 lines | ~66 |
+| 15:23 | Edited quran-hifz-mobile/lib/store/portalStore.ts | 13→16 lines | ~107 |
+| 15:23 | Edited quran-hifz-mobile/lib/store/portalStore.ts | modified enterPortal() | ~198 |
+| 15:23 | Edited quran-hifz-mobile/lib/store/portalStore.ts | expanded (+7 lines) | ~188 |
+| 15:23 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | inline fix | ~17 |
+| 15:23 | Edited quran-hifz-mobile/lib/store/portalStore.ts | 3→4 lines | ~22 |
+| 15:23 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | 12→14 lines | ~106 |
+| 15:23 | Edited quran-hifz-mobile/lib/store/portalStore.ts | added nullish coalescing | ~282 |
+| 15:23 | Edited quran-hifz/src/quran/pages/admin/AdminStudents.tsx | 20→22 lines | ~299 |
+| 15:24 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | inline fix | ~14 |
+| 15:24 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | 7→9 lines | ~61 |
+| 15:25 | Edited quran-hifz/src/quran/pages/admin/AdminTeachers.tsx | 20→22 lines | ~299 |
+| 15:25 | Edited quran-hifz-mobile/lib/store/portalStore.ts | added nullish coalescing | ~188 |
+| 15:25 | Edited quran-hifz-mobile/components/layout/MoreSheet.tsx | inline fix | ~31 |
+| 15:25 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | added 1 import(s) | ~32 |
+| 15:25 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | modified AdminParents() | ~40 |
+| 15:25 | Edited quran-hifz-mobile/components/layout/MoreSheet.tsx | 1→3 lines | ~59 |
+| 15:25 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | 7→9 lines | ~80 |
+| 15:25 | Edited quran-hifz-mobile/lib/constants/portals.ts | expanded (+6 lines) | ~112 |
+| 15:25 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | modified ChildChip() | ~124 |
+| 15:25 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | CSS: undefined | ~462 |
+| 15:25 | Edited quran-hifz-mobile/lib/constants/portals.ts | expanded (+16 lines) | ~305 |
+| 15:25 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | CSS: undefined | ~307 |
+| 15:25 | Edited quran-hifz-mobile/components/layout/iconMap.ts | 2→2 lines | ~25 |
+| 15:25 | Edited quran-hifz-mobile/components/layout/iconMap.ts | 2→3 lines | ~23 |
+| 15:26 | Edited quran-hifz-mobile/components/layout/MoreSheet.tsx | 1→2 lines | ~14 |
+| 15:26 | Edited quran-hifz-mobile/app/(portal)/_layout.tsx | 9→12 lines | ~216 |
+| 15:26 | Edited quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | inline fix | ~14 |
+| 15:26 | Edited quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | 7→9 lines | ~64 |
+| 15:26 | Edited quran-hifz-mobile/app/(portal)/admin/_layout.tsx | added optional chaining | ~350 |
+| 15:26 | Edited quran-hifz/src/quran/pages/admin/AdminMasajid.tsx | 18→22 lines | ~270 |
+| 15:26 | Edited quran-hifz-mobile/app/(portal)/admin/_layout.tsx | 1→2 lines | ~49 |
+| 15:26 | Edited quran-hifz-mobile/app/(portal)/admin/_layout.tsx | 6→6 lines | ~39 |
+| 15:27 | Created quran-hifz-mobile/lib/queries/adminSupervisors.ts | — | ~376 |
+| 15:29 | Edited quran-hifz/src/quran/pages/admin/AdminTracks.tsx | 2→2 lines | ~34 |
+| 15:29 | Created quran-hifz-mobile/app/(portal)/admin/supervisors.tsx | — | ~2907 |
+| 15:29 | Edited quran-hifz/src/quran/pages/admin/AdminTracks.tsx | 5→7 lines | ~59 |
+| 15:29 | Edited quran-hifz/src/quran/pages/admin/AdminTracks.tsx | 7→9 lines | ~130 |
+| 15:29 | Edited quran-hifz-mobile/app/(portal)/admin/students.tsx | 2→3 lines | ~42 |
+| 15:29 | Edited quran-hifz-mobile/app/(portal)/admin/students.tsx | 3→5 lines | ~64 |
+| 15:29 | Edited quran-hifz/src/quran/pages/admin/AdminTracks.tsx | modified TrackCard() | ~74 |
+| 15:30 | Edited quran-hifz-mobile/app/(portal)/admin/students.tsx | 14→16 lines | ~279 |
+| 15:30 | Edited quran-hifz/src/quran/pages/admin/AdminTracks.tsx | 24→26 lines | ~381 |
+| 15:31 | Edited quran-hifz-mobile/app/(portal)/admin/teachers.tsx | 1→2 lines | ~34 |
+| 15:31 | Edited quran-hifz-mobile/app/(portal)/admin/teachers.tsx | 3→5 lines | ~64 |
+| 15:31 | Edited quran-hifz-mobile/app/(portal)/admin/teachers.tsx | 9→11 lines | ~202 |
+| 15:31 | Edited quran-hifz/src/quran/pages/admin/AdminDashboard.tsx | inline fix | ~17 |
+| 15:31 | Edited quran-hifz-mobile/app/(portal)/admin/masajid.tsx | 1→2 lines | ~34 |
+| 15:31 | Edited quran-hifz/src/quran/pages/admin/AdminDashboard.tsx | 8→10 lines | ~93 |
+| 15:31 | Edited quran-hifz-mobile/app/(portal)/admin/masajid.tsx | 3→5 lines | ~63 |
+| 15:31 | Edited quran-hifz-mobile/app/(portal)/admin/masajid.tsx | CSS: undefined | ~173 |
+| 15:31 | Created quran-hifz/src/quran/api/admin-supervisors.ts | — | ~377 |
+| 15:31 | Edited quran-hifz-mobile/app/(portal)/admin/parents.tsx | added 1 import(s) | ~45 |
+| 15:31 | Edited quran-hifz-mobile/app/(portal)/admin/parents.tsx | modified ChildChip() | ~181 |
+| 15:31 | Edited quran-hifz-mobile/app/(portal)/admin/parents.tsx | 2→3 lines | ~52 |
+| 15:31 | Edited quran-hifz-mobile/app/(portal)/admin/parents.tsx | 3→5 lines | ~67 |
+| 15:31 | Edited quran-hifz-mobile/app/(portal)/admin/parents.tsx | CSS: undefined | ~192 |
+| 15:34 | Created quran-hifz/src/quran/pages/admin/AdminSupervisors.tsx | — | ~2875 |
+| 15:34 | Edited quran-hifz-mobile/app/(portal)/admin/parents.tsx | CSS: undefined | ~62 |
+| 15:34 | Edited quran-hifz-mobile/app/(portal)/admin/tracks.tsx | 2→3 lines | ~57 |
+| 15:34 | Edited quran-hifz/src/quran/router/pageRegistry.ts | added 1 import(s) | ~39 |
+| 15:34 | Edited quran-hifz/src/quran/router/pageRegistry.ts | 2→3 lines | ~42 |
+| 15:34 | Edited quran-hifz-mobile/app/(portal)/admin/tracks.tsx | 3→3 lines | ~43 |
+| 15:34 | Edited quran-hifz-mobile/app/(portal)/admin/tracks.tsx | 15→16 lines | ~175 |
+| 15:34 | Edited quran-hifz-mobile/app/(portal)/admin/tracks.tsx | 7→9 lines | ~81 |
+| 15:36 | Edited quran-hifz-mobile/app/(portal)/admin/tracks.tsx | 5→9 lines | ~85 |
+| 15:36 | Edited quran-hifz-mobile/app/(portal)/admin/tracks.tsx | CSS: readOnly | ~87 |
+| 15:36 | Edited quran-hifz-mobile/app/(portal)/admin/tracks.tsx | 9→13 lines | ~169 |
+| 15:38 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/7b0b1177-4742-46a1-9e0b-8c8c221d7b23/scratchpad/pw/driver.mjs | — | ~1226 |
+| 15:38 | Edited quran-hifz-mobile/components/domain/TrackDetail.tsx | 8→11 lines | ~182 |
+| 15:38 | Edited quran-hifz-mobile/components/domain/TrackDetail.tsx | 5→5 lines | ~59 |
+| 15:38 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/7b0b1177-4742-46a1-9e0b-8c8c221d7b23/scratchpad/pw/driver.mjs | "playwright" → "/Users/xontel/.npm/_npx/9" | ~28 |
+| 15:38 | Edited quran-hifz-mobile/components/domain/TrackStudentsPanel.tsx | added 1 import(s) | ~72 |
+| 15:38 | Edited quran-hifz-mobile/components/domain/TrackStudentsPanel.tsx | 3→4 lines | ~55 |
+| 15:38 | Edited quran-hifz-mobile/components/domain/TrackStudentsPanel.tsx | 2→2 lines | ~21 |
+| 15:40 | Edited ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/7b0b1177-4742-46a1-9e0b-8c8c221d7b23/scratchpad/pw/driver.mjs | "/Users/xontel/.npm/_npx/9" → "/Users/xontel/.npm/_npx/e" | ~28 |
+| 15:41 | Edited quran-hifz-mobile/components/domain/EvaluationRoster.tsx | 1→5 lines | ~72 |
+| 15:41 | Edited quran-hifz-mobile/components/domain/EvaluationRoster.tsx | 2→2 lines | ~30 |

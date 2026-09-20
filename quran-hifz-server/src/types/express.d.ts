@@ -7,6 +7,8 @@ declare global {
         id: string;
         role: UserRole;
         name: string;
+        /** Fixed at account creation; only set when role === 'supervisor'. */
+        supervisorGender?: 'male' | 'female';
       };
     }
   }

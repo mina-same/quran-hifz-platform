@@ -61,7 +61,7 @@ const STATUS_CFG = {
 /* ════════════════════════════════════════════════════════════ */
 export function AdminTracks() {
   const { data: allTracks = [], isLoading } = useTracks();
-  const { showPage, genderScope } = usePortal();
+  const { showPage, genderScope, readOnly } = usePortal();
   const tracks = allTracks.filter((t) => matchesGenderScope(t.masjid, genderScope));
 
   const deleteTrack    = useDeleteTrack();
@@ -98,9 +98,11 @@ export function AdminTracks() {
   }
 
   useTopbar("ti-calendar-event", "المسارات",
-    <button className="topbar-btn btn-primary" onClick={openAdd}>
-      <i className="ti ti-plus" /> مسار جديد
-    </button>,
+    !readOnly && (
+      <button className="topbar-btn btn-primary" onClick={openAdd}>
+        <i className="ti ti-plus" /> مسار جديد
+      </button>
+    ),
   );
 
   /* ── group by status ── */
@@ -125,9 +127,11 @@ export function AdminTracks() {
           </div>
           <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--text)" }}>لا توجد مسارات بعد</p>
           <p style={{ margin: "6px 0 20px", fontSize: 13, color: "var(--text3)" }}>أضف أول مسار</p>
-          <button className="topbar-btn btn-primary" style={{ padding: "10px 24px" }} onClick={openAdd}>
-            <i className="ti ti-plus" /> مسار جديد
-          </button>
+          {!readOnly && (
+            <button className="topbar-btn btn-primary" style={{ padding: "10px 24px" }} onClick={openAdd}>
+              <i className="ti ti-plus" /> مسار جديد
+            </button>
+          )}
         </div>
       )}
 
@@ -138,7 +142,7 @@ export function AdminTracks() {
               <SectionHeader label="المسارات النشطة" count={active.length} color="var(--green)" />
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14 }}>
                 {active.map((t) => (
-                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} onOpen={openDetail} />
+                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} onOpen={openDetail} readOnly={readOnly} />
                 ))}
               </div>
             </section>
@@ -148,7 +152,7 @@ export function AdminTracks() {
               <SectionHeader label="المسارات القادمة" count={upcoming.length} color="#d97706" />
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14 }}>
                 {upcoming.map((t) => (
-                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} onOpen={openDetail} />
+                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} onOpen={openDetail} readOnly={readOnly} />
                 ))}
               </div>
             </section>
@@ -158,7 +162,7 @@ export function AdminTracks() {
               <SectionHeader label="المسارات المنتهية" count={ended.length} color="var(--text3)" />
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14, opacity: 0.75 }}>
                 {ended.map((t) => (
-                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} onOpen={openDetail} />
+                  <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} onOpen={openDetail} readOnly={readOnly} />
                 ))}
               </div>
             </section>
@@ -309,13 +313,14 @@ export function AdminTracks() {
 
 /* ── track card ── */
 function TrackCard({
-  t, onManageStudents, onEdit, onDelete, onOpen,
+  t, onManageStudents, onEdit, onDelete, onOpen, readOnly,
 }: {
   t: Track;
   onManageStudents: (t: Track) => void;
   onEdit: (t: Track) => void;
   onDelete: (id: string) => void;
   onOpen: (t: Track) => void;
+  readOnly?: boolean;
 }) {
   const cfg      = STATUS_CFG[t.status];
   const enrolled = t.studentCount ?? 0;
@@ -359,30 +364,32 @@ function TrackCard({
                 </span>
             }
           </div>
-          <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-            <button
-              className="topbar-btn btn-ghost"
-              style={{ padding: "5px 11px", fontSize: 12, color: "var(--green)", borderColor: "rgba(26,92,42,0.25)" }}
-              onClick={(e) => { e.stopPropagation(); onManageStudents(t); }}
-            >
-              <i className="ti ti-users" />
-              {enrolled > 0 && (
-                <span style={{ background: "var(--green)", color: "#fff", borderRadius: 99, fontSize: 10, fontWeight: 700, padding: "1px 6px", marginRight: 4 }}>
-                  {enrolled}
-                </span>
-              )}
-            </button>
-            <button className="topbar-btn btn-ghost" style={{ padding: "5px 11px", fontSize: 12 }} onClick={(e) => { e.stopPropagation(); onEdit(t); }}>
-              <i className="ti ti-pencil" />
-            </button>
-            <button
-              className="topbar-btn btn-ghost"
-              style={{ padding: "5px 11px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.25)" }}
-              onClick={(e) => { e.stopPropagation(); onDelete(t._id); }}
-            >
-              <i className="ti ti-trash" />
-            </button>
-          </div>
+          {!readOnly && (
+            <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+              <button
+                className="topbar-btn btn-ghost"
+                style={{ padding: "5px 11px", fontSize: 12, color: "var(--green)", borderColor: "rgba(26,92,42,0.25)" }}
+                onClick={(e) => { e.stopPropagation(); onManageStudents(t); }}
+              >
+                <i className="ti ti-users" />
+                {enrolled > 0 && (
+                  <span style={{ background: "var(--green)", color: "#fff", borderRadius: 99, fontSize: 10, fontWeight: 700, padding: "1px 6px", marginRight: 4 }}>
+                    {enrolled}
+                  </span>
+                )}
+              </button>
+              <button className="topbar-btn btn-ghost" style={{ padding: "5px 11px", fontSize: 12 }} onClick={(e) => { e.stopPropagation(); onEdit(t); }}>
+                <i className="ti ti-pencil" />
+              </button>
+              <button
+                className="topbar-btn btn-ghost"
+                style={{ padding: "5px 11px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.25)" }}
+                onClick={(e) => { e.stopPropagation(); onDelete(t._id); }}
+              >
+                <i className="ti ti-trash" />
+              </button>
+            </div>
+          )}
         </div>
 
         <h3 style={{ margin: "10px 0 12px", fontSize: 15, fontWeight: 800, color: "var(--text)" }}>{t.title}</h3>

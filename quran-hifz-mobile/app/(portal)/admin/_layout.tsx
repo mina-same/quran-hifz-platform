@@ -4,6 +4,7 @@ import {
   IconLayoutDashboard, IconUsers, IconCalendarEvent, IconTarget, IconChartBar, IconDots,
 } from '@tabler/icons-react-native';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { usePortalStore } from '@/lib/store/portalStore';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 import { tap } from '@/lib/haptics';
@@ -11,11 +12,16 @@ import MoreSheet from '@/components/layout/MoreSheet';
 import { createMoreTabButton } from '@/components/layout/MoreTabButton';
 
 // Nav items with no tab of their own — the "المزيد" sheet lists exactly these.
-const MORE_IDS = ['register', 'teachers', 'parents', 'masajid'];
+// A supervisor (who reuses this same tab layout) never sees "register" (a
+// pure-create page, gated by readOnly anyway) or "supervisors" (admin-only).
+const ADMIN_MORE_IDS = ['register', 'teachers', 'parents', 'masajid', 'supervisors'];
+const SUPERVISOR_MORE_IDS = ['teachers', 'parents', 'masajid'];
 
 export default function AdminTabLayout() {
   const theme = useAppTheme();
   const [moreOpen, setMoreOpen] = useState(false);
+  const isSupervisor = usePortalStore((s) => s.authUser?.role === 'supervisor');
+  const moreIds = isSupervisor ? SUPERVISOR_MORE_IDS : ADMIN_MORE_IDS;
   // Memoised so the tab button keeps its identity across renders — an inline
   // component would be a new type every render and remount the tab.
   const MoreTabButton = useMemo(() => createMoreTabButton(() => setMoreOpen(true)), []);
@@ -50,6 +56,7 @@ export default function AdminTabLayout() {
       <Tabs.Screen name="masajid"        options={{ href: null, title: 'المساجد' }} />
       <Tabs.Screen name="track-detail" options={{ href: null, title: 'تفاصيل المسار' }} />
       <Tabs.Screen name="parents" options={{ href: null, title: 'أولياء الأمور' }} />
+      <Tabs.Screen name="supervisors" options={{ href: null, title: 'المشرفون' }} />
       {/* Add/edit forms are full pages, not modals: their <FormSelect> pickers are
           bottom sheets from the app-root host, which an RN Modal would cover. */}
       <Tabs.Screen name="masjid-form"  options={{ href: null, title: 'بيانات المسجد' }} />
@@ -64,7 +71,7 @@ export default function AdminTabLayout() {
       visible={moreOpen}
       onClose={() => setMoreOpen(false)}
       portal="admin"
-      hiddenIds={MORE_IDS}
+      hiddenIds={moreIds}
     />
     </>
   );

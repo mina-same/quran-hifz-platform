@@ -59,6 +59,7 @@ export default function AdminStudents() {
   const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
   const genderScope = usePortalStore((st) => st.genderScope);
+  const readOnly = usePortalStore((st) => st.readOnly);
   const { data: allStudents = [], isLoading, isError, isRefetching, refetch } = useStudents();
   const students = allStudents.filter((st) =>
     matchesGenderScope(typeof st.track === 'string' ? undefined : st.track.masjid, genderScope),
@@ -110,9 +111,11 @@ export default function AdminStudents() {
 
         {!isLoading && <StatsRow stats={STATS} />}
 
-        <Pressable style={s.addBtn} onPress={() => router.push('/(portal)/admin/register' as any)}>
-          <Text style={s.addBtnText}>+ تسجيل طالب جديد</Text>
-        </Pressable>
+        {!readOnly && (
+          <Pressable style={s.addBtn} onPress={() => router.push('/(portal)/admin/register' as any)}>
+            <Text style={s.addBtnText}>+ تسجيل طالب جديد</Text>
+          </Pressable>
+        )}
 
         {/* Search + path filter, stacked so neither field gets squeezed on a phone. */}
         <Card>
@@ -178,20 +181,22 @@ export default function AdminStudents() {
                     <ProgressBar value={st.progressPct} showPercent={false} />
                   </View>
 
-                  <View style={s.actions}>
-                    <IconButton accessibilityLabel="تعديل" style={s.flex1} onPress={() => router.push({ pathname: '/(portal)/admin/student-form', params: { id: st._id } } as any)}>
-                      <View style={s.actionInner}>
-                        <IconPencil size={15} color={theme.textMuted} />
-                        <Text style={s.actionText}>تعديل</Text>
-                      </View>
-                    </IconButton>
-                    <IconButton accessibilityLabel="حذف" tone="danger" style={s.flex1} onPress={() => setDeleteId(st._id)}>
-                      <View style={s.actionInner}>
-                        <IconTrash size={15} color={theme.red} />
-                        <Text style={[s.actionText, { color: theme.red }]}>حذف</Text>
-                      </View>
-                    </IconButton>
-                  </View>
+                  {!readOnly && (
+                    <View style={s.actions}>
+                      <IconButton accessibilityLabel="تعديل" style={s.flex1} onPress={() => router.push({ pathname: '/(portal)/admin/student-form', params: { id: st._id } } as any)}>
+                        <View style={s.actionInner}>
+                          <IconPencil size={15} color={theme.textMuted} />
+                          <Text style={s.actionText}>تعديل</Text>
+                        </View>
+                      </IconButton>
+                      <IconButton accessibilityLabel="حذف" tone="danger" style={s.flex1} onPress={() => setDeleteId(st._id)}>
+                        <View style={s.actionInner}>
+                          <IconTrash size={15} color={theme.red} />
+                          <Text style={[s.actionText, { color: theme.red }]}>حذف</Text>
+                        </View>
+                      </IconButton>
+                    </View>
+                  )}
                 </View>
               );
             })}

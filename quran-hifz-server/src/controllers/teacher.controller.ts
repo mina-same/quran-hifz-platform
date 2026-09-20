@@ -5,6 +5,7 @@ import { Track } from '../models/Track.model';
 import { Student } from '../models/Student.model';
 import { User } from '../models/User.model';
 import { AppError } from '../middleware/error';
+import { supervisorGenderOf, trackIdsForGender } from '../lib/supervisorScope';
 
 const teacherSchema = z.object({
   name:        z.string().min(2, 'الاسم مطلوب'),
@@ -19,11 +20,21 @@ const teacherSchema = z.object({
 
 export async function getTeachers(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const teachers = await Teacher.find({ status: 'active' }).sort({ name: 1 });
+    const supervisorGender = supervisorGenderOf(req);
+    let allowedTrackIdSet: Set<string> | null = null;
+    const teacherFilter: Record<string, unknown> = { status: 'active' };
+    if (supervisorGender) {
+      const allowedTrackIds = await trackIdsForGender(supervisorGender);
+      allowedTrackIdSet = new Set(allowedTrackIds.map(String));
+      const tracksWithTeachers = await Track.find({ _id: { $in: allowedTrackIds } }).select('teachers').lean();
+      teacherFilter._id = { $in: [...new Set(tracksWithTeachers.flatMap((t) => t.teachers.map(String)))] };
+    }
+    const teachers = await Teacher.find(teacherFilter).sort({ name: 1 });
 
     const enriched = await Promise.all(
       teachers.map(async (t) => {
-        const trackIds     = await Track.find({ teachers: t._id, deletedAt: null }).select('_id');
+        let trackIds = await Track.find({ teachers: t._id, deletedAt: null }).select('_id');
+        if (allowedTrackIdSet) trackIds = trackIds.filter((tr) => allowedTrackIdSet!.has(String(tr._id)));
         const tracksCount  = trackIds.length;
         const studentCount = await Student.countDocuments({ track: { $in: trackIds.map((tr) => tr._id) } });
         const userDoc      = await User.findOne({ role: 'teacher', profileId: t._id }).select('email');
@@ -42,7 +53,14 @@ export async function getTeacher(req: Request, res: Response, next: NextFunction
     const teacher = await Teacher.findById(req.params.id);
     if (!teacher) throw new AppError('المعلم غير موجود', 404);
 
-    const tracks = await Track.find({ teachers: teacher._id, deletedAt: null }).populate('masjid', 'name');
+    const tracks = await Track.find({ teachers: teacher._id, deletedAt: null }).populate('masjid', 'name gender');
+
+    const supervisorGender = supervisorGenderOf(req);
+    if (supervisorGender) {
+      const inScope = tracks.some((t) => (t.masjid as unknown as { gender?: string })?.gender === supervisorGender);
+      if (!inScope) throw new AppError('المعلم غير موجود', 404);
+    }
+
     res.json({ success: true, data: { ...teacher.toObject(), tracks } });
   } catch (err) {
     next(err);

@@ -18,6 +18,13 @@ const createParentSchema = z.object({
   phone:    z.string().optional(),
 });
 
+const createSupervisorSchema = z.object({
+  name:     z.string().min(2, 'الاسم مطلوب'),
+  email:    z.string().email('البريد الإلكتروني غير صحيح'),
+  password: z.string().min(6, 'كلمة المرور 6 أحرف على الأقل'),
+  gender:   z.enum(['male', 'female'], { errorMap: () => ({ message: 'يجب تحديد الفئة (بنين/بنات)' }) }),
+});
+
 export async function getParents(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const parents = await User.find({ role: 'parent' }).sort({ name: 1 });
@@ -53,6 +60,50 @@ export async function createParent(req: Request, res: Response, next: NextFuncti
       data: { _id: parent._id, name: parent.name, email: parent.email },
       credentials: { email: data.email, password: data.password },
     });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getSupervisors(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const supervisors = await User.find({ role: 'supervisor' }).sort({ name: 1 });
+    res.json({
+      success: true,
+      count: supervisors.length,
+      data: supervisors.map((s) => ({
+        _id: s._id, name: s.name, email: s.email, isActive: s.isActive, gender: s.supervisorGender,
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function createSupervisor(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = createSupervisorSchema.parse(req.body);
+    const existing = await User.findOne({ email: data.email });
+    if (existing) throw new AppError('البريد الإلكتروني مستخدم بالفعل', 400);
+    const supervisor = await User.create({
+      name: data.name, email: data.email, password: data.password,
+      role: 'supervisor', supervisorGender: data.gender,
+    });
+    res.status(201).json({
+      success: true,
+      data: { _id: supervisor._id, name: supervisor.name, email: supervisor.email, gender: supervisor.supervisorGender },
+      credentials: { email: data.email, password: data.password },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteSupervisor(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const supervisor = await User.findOneAndDelete({ _id: req.params.supervisorId, role: 'supervisor' });
+    if (!supervisor) throw new AppError('المشرف غير موجود', 404);
+    res.json({ success: true, message: 'تم حذف حساب المشرف بنجاح' });
   } catch (err) {
     next(err);
   }

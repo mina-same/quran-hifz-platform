@@ -4,7 +4,7 @@ import {
   IconUsers, IconChalkboard, IconTarget, IconChartBar,
   IconUserPlus, IconBuildingArch, IconCalendarEvent, IconStar,
   IconVideo, IconListCheck, IconGift, IconTimeline,
-  IconUserCircle, IconUserHeart,
+  IconUserCircle, IconUserHeart, IconShieldCheck,
 } from '@tabler/icons-react-native';
 
 export const ICON_MAP: Record<string, React.ComponentType<{ size: number; color: string }>> = {
@@ -30,4 +30,5 @@ export const ICON_MAP: Record<string, React.ComponentType<{ size: number; color:
   timeline:           IconTimeline,
   'user-circle':      IconUserCircle,
   'user-heart':       IconUserHeart,
+  'shield-check':     IconShieldCheck,
 };

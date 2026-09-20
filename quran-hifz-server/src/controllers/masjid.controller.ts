@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { Masjid } from '../models/Masjid.model';
 import { Track } from '../models/Track.model';
 import { AppError } from '../middleware/error';
+import { supervisorGenderOf } from '../lib/supervisorScope';
 
 const masjidSchema = z.object({
   name:     z.string().min(2, 'اسم المسجد مطلوب'),
@@ -10,9 +11,10 @@ const masjidSchema = z.object({
   gender:   z.enum(['male', 'female'], { errorMap: () => ({ message: 'يجب تحديد جنس المسجد' }) }),
 });
 
-export async function getMasajid(_req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function getMasajid(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const masajid = await Masjid.find().sort({ name: 1 });
+    const supervisorGender = supervisorGenderOf(req);
+    const masajid = await Masjid.find(supervisorGender ? { gender: supervisorGender } : {}).sort({ name: 1 });
 
     const enriched = await Promise.all(
       masajid.map(async (m) => {
@@ -33,6 +35,11 @@ export async function getMasjid(req: Request, res: Response, next: NextFunction)
   try {
     const masjid = await Masjid.findById(req.params.id);
     if (!masjid) throw new AppError('المسجد غير موجود', 404);
+
+    const supervisorGender = supervisorGenderOf(req);
+    if (supervisorGender && masjid.gender !== supervisorGender) {
+      throw new AppError('المسجد غير موجود', 404);
+    }
 
     const tracks = await Track.find({ masjid: masjid._id, deletedAt: null }).populate('teachers', 'name specialty');
     res.json({ success: true, data: { ...masjid.toObject(), tracks } });

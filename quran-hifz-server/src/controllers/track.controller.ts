@@ -11,6 +11,7 @@ import { GroupHomework } from '../models/GroupHomework.model';
 import { LessonRecording } from '../models/LessonRecording.model';
 import { QuranPlan } from '../models/QuranPlan.model';
 import { AppError } from '../middleware/error';
+import { supervisorGenderOf, trackIdsForGender, restrictTrackFilter } from '../lib/supervisorScope';
 
 const trackSchema = z.object({
   masjid:      z.string().min(1, 'المسجد مطلوب'),
@@ -35,6 +36,12 @@ export async function getTracks(req: Request, res: Response, next: NextFunction)
     if (status)  filter.status   = status;
     if (teacher) filter.teachers = teacher;          // element-in-array match
     if (masjid)  filter.masjid   = masjid;
+
+    const supervisorGender = supervisorGenderOf(req);
+    if (supervisorGender) {
+      filter._id = restrictTrackFilter(filter._id, await trackIdsForGender(supervisorGender));
+    }
+
     const tracks = await Track.find(filter)
       .populate('teachers', 'name')
       .populate('masjid', 'name location gender')
@@ -59,6 +66,12 @@ export async function getTrack(req: Request, res: Response, next: NextFunction):
       .populate('teachers', 'name specialty')
       .populate('masjid', 'name location gender');
     if (!track) throw new AppError('المسار غير موجود', 404);
+
+    const supervisorGender = supervisorGenderOf(req);
+    const trackMasjidGender = (track.masjid as unknown as { gender?: string })?.gender;
+    if (supervisorGender && trackMasjidGender && trackMasjidGender !== supervisorGender) {
+      throw new AppError('المسار غير موجود', 404);
+    }
 
     const students = await Student.find({ track: track._id }).select('name status progressPct attendancePct');
     res.json({ success: true, data: { ...track.toObject(), students } });

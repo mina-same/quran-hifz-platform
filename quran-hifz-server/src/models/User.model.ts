@@ -1,7 +1,7 @@
 import { Schema, model, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-export type UserRole = 'admin' | 'teacher' | 'student' | 'parent';
+export type UserRole = 'admin' | 'teacher' | 'student' | 'parent' | 'supervisor';
 
 export interface IUser extends Document {
   name: string;
@@ -9,6 +9,10 @@ export interface IUser extends Document {
   password: string;
   role: UserRole;
   profileId?: Schema.Types.ObjectId;  // ref to Student / Teacher doc
+  /** Fixed at creation by the admin; only set for role === 'supervisor'. A
+   *  supervisor's view of the platform is permanently restricted to masajid
+   *  of this gender — never editable by the supervisor themselves. */
+  supervisorGender?: 'male' | 'female';
   isActive: boolean;
   mustChangePassword: boolean;
   pushToken?: string; // Expo push token for the mobile app, registered post-login
@@ -22,8 +26,9 @@ const userSchema = new Schema<IUser>(
     name:      { type: String, required: true, trim: true },
     email:     { type: String, required: true, unique: true, lowercase: true, trim: true },
     password:  { type: String, required: true, minlength: 6, select: false },
-    role:      { type: String, enum: ['admin', 'teacher', 'student', 'parent'], required: true },
+    role:      { type: String, enum: ['admin', 'teacher', 'student', 'parent', 'supervisor'], required: true },
     profileId: { type: Schema.Types.ObjectId, refPath: 'roleModel' },
+    supervisorGender: { type: String, enum: ['male', 'female'] },
     isActive:  { type: Boolean, default: true },
     mustChangePassword: { type: Boolean, default: false },
     pushToken: { type: String },

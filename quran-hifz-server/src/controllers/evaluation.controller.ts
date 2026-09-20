@@ -5,6 +5,7 @@ import { Evaluation, type IEvaluationCriterion } from '../models/Evaluation.mode
 import { QuranPlan, DEFAULT_GRADE_RUBRIC, type IGradeCriterion } from '../models/QuranPlan.model';
 import { notifyParents } from '../lib/notify';
 import { deriveDayAndTime, upsertAttendanceRecords } from './attendance.controller';
+import { supervisorGenderOf, trackIdsForGender, restrictTrackFilter } from '../lib/supervisorScope';
 
 /**
  * The rubric is no longer platform-wide — each plan carries its own
@@ -104,6 +105,11 @@ export async function getEvaluations(req: Request, res: Response, next: NextFunc
       filter.date = {};
       if (from) (filter.date as Record<string, Date>).$gte = new Date(from as string);
       if (to)   (filter.date as Record<string, Date>).$lte = new Date(to as string);
+    }
+
+    const supervisorGender = supervisorGenderOf(req);
+    if (supervisorGender) {
+      filter.track = restrictTrackFilter(filter.track, await trackIdsForGender(supervisorGender));
     }
 
     const records = await Evaluation.find(filter)

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   getParents, createParent, updateParent, linkChild, unlinkChild,
   getStudentParent, setStudentParent,
+  getSupervisors, createSupervisor, deleteSupervisor,
 } from '../controllers/admin.controller';
 import { authenticate } from '../middleware/auth';
 import { authorize } from '../middleware/role';
@@ -18,5 +19,9 @@ router.delete('/parents/:parentId/children/:studentId', unlinkChild);
 
 router.get('/students/:studentId/parent',  getStudentParent);
 router.put('/students/:studentId/parent',  setStudentParent);
+
+router.get('/supervisors',                    getSupervisors);
+router.post('/supervisors',                   createSupervisor);
+router.delete('/supervisors/:supervisorId',   deleteSupervisor);
 
 export default router;

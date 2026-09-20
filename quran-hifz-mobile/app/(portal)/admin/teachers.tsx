@@ -26,6 +26,7 @@ export default function AdminTeachers() {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
   const genderScope = usePortalStore((st) => st.genderScope);
+  const readOnly = usePortalStore((st) => st.readOnly);
   const { data: allTeachers = [], isLoading, isError, isRefetching, refetch } = useTeachers();
   const { data: tracks = [] } = useTracks();
   const scopedTeacherIds = teacherIdsInScope(tracks, genderScope);
@@ -52,9 +53,11 @@ export default function AdminTeachers() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
-        <Pressable style={s.addBtn} onPress={() => router.push('/(portal)/admin/teacher-form' as any)}>
-          <Text style={s.addBtnText}>+ إضافة معلم</Text>
-        </Pressable>
+        {!readOnly && (
+          <Pressable style={s.addBtn} onPress={() => router.push('/(portal)/admin/teacher-form' as any)}>
+            <Text style={s.addBtnText}>+ إضافة معلم</Text>
+          </Pressable>
+        )}
 
         <Card noPadding>
           <CardHeader title={`المعلمون (${teachers.length})`} style={{ padding: 16, paddingBottom: 8 }} />
@@ -83,14 +86,16 @@ export default function AdminTeachers() {
 
                 <View style={s.rowFoot}>
                   <Badge label={t.rating || '—'} variant={ratingVariant(t.rating) as any} />
-                  <View style={s.actions}>
-                    <IconButton accessibilityLabel="تعديل" onPress={() => router.push({ pathname: '/(portal)/admin/teacher-form', params: { id: t._id } } as any)}>
-                      <IconPencil size={15} color={theme.textMuted} />
-                    </IconButton>
-                    <IconButton accessibilityLabel="حذف" tone="danger" onPress={() => setDeleteId(t._id)}>
-                      <IconTrash size={15} color={theme.red} />
-                    </IconButton>
-                  </View>
+                  {!readOnly && (
+                    <View style={s.actions}>
+                      <IconButton accessibilityLabel="تعديل" onPress={() => router.push({ pathname: '/(portal)/admin/teacher-form', params: { id: t._id } } as any)}>
+                        <IconPencil size={15} color={theme.textMuted} />
+                      </IconButton>
+                      <IconButton accessibilityLabel="حذف" tone="danger" onPress={() => setDeleteId(t._id)}>
+                        <IconTrash size={15} color={theme.red} />
+                      </IconButton>
+                    </View>
+                  )}
                 </View>
               </View>
             ))}

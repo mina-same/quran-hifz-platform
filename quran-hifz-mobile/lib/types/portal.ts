@@ -1,4 +1,4 @@
-export type PortalType = 'student' | 'teacher' | 'admin' | 'parent';
+export type PortalType = 'student' | 'teacher' | 'admin' | 'parent' | 'supervisor';
 
 export interface NavItem {
   id: string;

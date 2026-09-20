@@ -24,6 +24,10 @@ type PortalContextValue = {
   closeSidebar: () => void;
   genderScope: GenderScope;
   setGenderScope: (scope: GenderScope) => void;
+  /** True for the read-only `supervisor` role: reused admin pages hide their
+   *  create/edit/delete affordances and the gender-scope switcher is locked
+   *  to the supervisor's own `supervisorGender`. */
+  readOnly: boolean;
 };
 
 // Split out from PortalContextValue on purpose: `topbar` changes on every
@@ -66,7 +70,13 @@ export function PortalProvider({ children }: { children: ReactNode }) {
   const [page,   setPage]   = useState<string>(readHash);
   const [topbar, setTopbarState] = useState<TopbarConfig>({ icon: "ti-home", title: "لوحة التحكم" });
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [genderScope, setGenderScopeState] = useState<GenderScope>(readStoredGenderScope);
+  const readOnly = user?.role === "supervisor";
+  // A supervisor's scope is fixed to their own gender at account creation and
+  // is never read from/written to localStorage — everyone else keeps the
+  // stored, switchable scope.
+  const [genderScope, setGenderScopeState] = useState<GenderScope>(() =>
+    user?.role === "supervisor" ? (user.supervisorGender ?? "all") : readStoredGenderScope(),
+  );
 
   // Keep hash in sync whenever page changes
   useEffect(() => { writeHash(page); }, [page]);
@@ -106,15 +116,18 @@ export function PortalProvider({ children }: { children: ReactNode }) {
   const toggleSidebar = useCallback(() => setSidebarOpen((v) => !v), []);
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const setGenderScope = useCallback((scope: GenderScope) => {
+    // Supervisors' scope is fixed at account creation — never switchable,
+    // regardless of what calls this (the switcher UI is already hidden).
+    if (readOnly) return;
     setGenderScopeState(scope);
     storeGenderScope(scope);
-  }, []);
+  }, [readOnly]);
 
   const portalValue = useMemo<PortalContextValue>(() => ({
     portal, page, user, isSidebarOpen,
     enterPortal, logout, showPage, toggleSidebar, closeSidebar,
-    genderScope, setGenderScope,
-  }), [portal, page, user, isSidebarOpen, enterPortal, logout, showPage, toggleSidebar, closeSidebar, genderScope, setGenderScope]);
+    genderScope, setGenderScope, readOnly,
+  }), [portal, page, user, isSidebarOpen, enterPortal, logout, showPage, toggleSidebar, closeSidebar, genderScope, setGenderScope, readOnly]);
 
   return (
     <PortalContext.Provider value={portalValue}>

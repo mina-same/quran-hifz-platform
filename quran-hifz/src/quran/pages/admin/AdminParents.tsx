@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useTopbar } from "../../context/useTopbar";
+import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonTable } from "../../components/common/Skeleton";
@@ -18,24 +19,27 @@ const EMPTY_ADD: AddForm = { name: "", email: "", password: "" };
 type EditForm = { name: string; email: string; newPassword: string };
 type CreatedCredentials = { email: string; password: string };
 
-function ChildChip({ name, onRemove }: { name: string; onRemove: () => void }) {
+function ChildChip({ name, onRemove }: { name: string; onRemove?: () => void }) {
   return (
     <span className="child-chip">
       {name}
-      <button
-        type="button"
-        className="child-chip-remove"
-        title="إلغاء الربط"
-        aria-label={`إلغاء ربط ${name}`}
-        onClick={onRemove}
-      >
-        <i className="ti ti-x" />
-      </button>
+      {onRemove && (
+        <button
+          type="button"
+          className="child-chip-remove"
+          title="إلغاء الربط"
+          aria-label={`إلغاء ربط ${name}`}
+          onClick={onRemove}
+        >
+          <i className="ti ti-x" />
+        </button>
+      )}
     </span>
   );
 }
 
 export function AdminParents() {
+  const { readOnly } = usePortal();
   const { data: parents = [], isLoading, error } = useAdminParents();
   const { data: students = [] } = useStudents();
   const createParent = useCreateParent();
@@ -133,9 +137,11 @@ export function AdminParents() {
   useTopbar(
     "ti-user-heart",
     "أولياء الأمور",
-    <button className="topbar-btn btn-primary" onClick={() => { setAddForm(EMPTY_ADD); setAddError(""); setShowAdd(true); }}>
-      <i className="ti ti-plus" /> إضافة ولي أمر
-    </button>,
+    !readOnly && (
+      <button className="topbar-btn btn-primary" onClick={() => { setAddForm(EMPTY_ADD); setAddError(""); setShowAdd(true); }}>
+        <i className="ti ti-plus" /> إضافة ولي أمر
+      </button>
+    ),
   );
 
   return (
@@ -189,7 +195,7 @@ export function AdminParents() {
                             <span style={{ fontSize: 12, color: "var(--text3)" }}>لا يوجد أبناء</span>
                           )}
                           {p.children.map((c) => (
-                            <ChildChip key={c._id} name={c.name} onRemove={() => handleUnlink(p._id, c._id)} />
+                            <ChildChip key={c._id} name={c.name} onRemove={readOnly ? undefined : () => handleUnlink(p._id, c._id)} />
                           ))}
                         </div>
                       </td>
@@ -199,25 +205,27 @@ export function AdminParents() {
                         </Badge>
                       </td>
                       <td>
-                        <div style={{ display: "flex", gap: 6 }}>
-                          <button
-                            className="topbar-btn btn-ghost"
-                            style={{ padding: "3px 9px", fontSize: 12 }}
-                            onClick={() => openEdit(p)}
-                            title="تعديل"
-                            aria-label="تعديل"
-                          >
-                            <i className="ti ti-pencil" />
-                          </button>
-                          <button
-                            className="topbar-btn btn-ghost"
-                            style={{ padding: "3px 9px", fontSize: 12 }}
-                            onClick={() => { setLinkParent(p); setSelectedStudent(""); }}
-                            title="ربط ابن"
-                          >
-                            <i className="ti ti-user-plus" /> ربط
-                          </button>
-                        </div>
+                        {!readOnly && (
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <button
+                              className="topbar-btn btn-ghost"
+                              style={{ padding: "3px 9px", fontSize: 12 }}
+                              onClick={() => openEdit(p)}
+                              title="تعديل"
+                              aria-label="تعديل"
+                            >
+                              <i className="ti ti-pencil" />
+                            </button>
+                            <button
+                              className="topbar-btn btn-ghost"
+                              style={{ padding: "3px 9px", fontSize: 12 }}
+                              onClick={() => { setLinkParent(p); setSelectedStudent(""); }}
+                              title="ربط ابن"
+                            >
+                              <i className="ti ti-user-plus" /> ربط
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -260,26 +268,28 @@ export function AdminParents() {
                         <span style={{ fontSize: 12, color: "var(--text3)" }}>لا يوجد أبناء</span>
                       )}
                       {p.children.map((c) => (
-                        <ChildChip key={c._id} name={c.name} onRemove={() => handleUnlink(p._id, c._id)} />
+                        <ChildChip key={c._id} name={c.name} onRemove={readOnly ? undefined : () => handleUnlink(p._id, c._id)} />
                       ))}
                     </div>
                   </div>
-                  <div className="rc-actions">
-                    <button
-                      className="topbar-btn btn-ghost"
-                      style={{ flex: 1, justifyContent: "center" }}
-                      onClick={() => openEdit(p)}
-                    >
-                      <i className="ti ti-pencil" /> تعديل
-                    </button>
-                    <button
-                      className="topbar-btn btn-ghost"
-                      style={{ flex: 1, justifyContent: "center" }}
-                      onClick={() => { setLinkParent(p); setSelectedStudent(""); }}
-                    >
-                      <i className="ti ti-user-plus" /> ربط
-                    </button>
-                  </div>
+                  {!readOnly && (
+                    <div className="rc-actions">
+                      <button
+                        className="topbar-btn btn-ghost"
+                        style={{ flex: 1, justifyContent: "center" }}
+                        onClick={() => openEdit(p)}
+                      >
+                        <i className="ti ti-pencil" /> تعديل
+                      </button>
+                      <button
+                        className="topbar-btn btn-ghost"
+                        style={{ flex: 1, justifyContent: "center" }}
+                        onClick={() => { setLinkParent(p); setSelectedStudent(""); }}
+                      >
+                        <i className="ti ti-user-plus" /> ربط
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
               {parents.length === 0 && (

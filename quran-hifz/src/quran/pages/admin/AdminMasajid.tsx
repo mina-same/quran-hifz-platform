@@ -36,7 +36,7 @@ const DIALOG: React.CSSProperties = {
 };
 
 export function AdminMasajid() {
-  const { genderScope } = usePortal();
+  const { genderScope, readOnly } = usePortal();
   const { data: allMasajid = [], isLoading, error } = useMasajid();
   const masajid = genderScope === "all" ? allMasajid : allMasajid.filter((m) => m.gender === genderScope);
   const createMasjid = useCreateMasjid();
@@ -107,9 +107,11 @@ export function AdminMasajid() {
   useTopbar(
     "ti-building-arch",
     "المساجد والمسارات",
-    <button className="topbar-btn btn-primary" onClick={openAdd}>
-      <i className="ti ti-plus" /> مسجد جديد
-    </button>,
+    !readOnly && (
+      <button className="topbar-btn btn-primary" onClick={openAdd}>
+        <i className="ti ti-plus" /> مسجد جديد
+      </button>
+    ),
   );
 
   if (isLoading) {
@@ -135,22 +137,26 @@ export function AdminMasajid() {
             </span>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <Badge tone="green">{toAr(m.tracks?.length ?? 0)} مسارات</Badge>
-              <button
-                className="topbar-btn btn-ghost"
-                style={{ padding: "3px 9px", fontSize: 12 }}
-                onClick={(e) => { e.stopPropagation(); openEdit(m); }}
-                title="تعديل"
-              >
-                <i className="ti ti-pencil" />
-              </button>
-              <button
-                className="topbar-btn btn-ghost"
-                style={{ padding: "3px 9px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}
-                onClick={(e) => { e.stopPropagation(); setDeleteId(m._id); }}
-                title="حذف"
-              >
-                <i className="ti ti-trash" />
-              </button>
+              {!readOnly && (
+                <>
+                  <button
+                    className="topbar-btn btn-ghost"
+                    style={{ padding: "3px 9px", fontSize: 12 }}
+                    onClick={(e) => { e.stopPropagation(); openEdit(m); }}
+                    title="تعديل"
+                  >
+                    <i className="ti ti-pencil" />
+                  </button>
+                  <button
+                    className="topbar-btn btn-ghost"
+                    style={{ padding: "3px 9px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}
+                    onClick={(e) => { e.stopPropagation(); setDeleteId(m._id); }}
+                    title="حذف"
+                  >
+                    <i className="ti ti-trash" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
           <div className={`masjid-body${open.has(m._id) ? " open" : ""}`}>

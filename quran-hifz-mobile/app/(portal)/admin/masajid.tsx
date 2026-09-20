@@ -21,6 +21,7 @@ export default function AdminMasajid() {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
   const genderScope = usePortalStore((st) => st.genderScope);
+  const readOnly = usePortalStore((st) => st.readOnly);
   const { data: allMasajid = [], isLoading, isError, isRefetching: isRefreshing, refetch: onRefresh } = useMasajid();
   const masajid = genderScope === 'all' ? allMasajid : allMasajid.filter((m) => m.gender === genderScope);
 
@@ -45,9 +46,11 @@ export default function AdminMasajid() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
-        <Pressable style={s.addBtn} onPress={() => router.push('/(portal)/admin/masjid-form' as any)}>
-          <Text style={s.addBtnText}>+ مسجد جديد</Text>
-        </Pressable>
+        {!readOnly && (
+          <Pressable style={s.addBtn} onPress={() => router.push('/(portal)/admin/masjid-form' as any)}>
+            <Text style={s.addBtnText}>+ مسجد جديد</Text>
+          </Pressable>
+        )}
 
         <Card>
           <CardHeader title="المساجد والحلقات" />
@@ -65,7 +68,7 @@ export default function AdminMasajid() {
             <MasjidAccordion
               key={masjid._id}
               masjid={masjid}
-              actions={
+              actions={readOnly ? undefined : (
                 <>
                   <IconButton accessibilityLabel="تعديل" onPress={() => router.push({ pathname: '/(portal)/admin/masjid-form', params: { id: masjid._id } } as any)}>
                     <IconPencil size={15} color={theme.textMuted} />
@@ -74,7 +77,7 @@ export default function AdminMasajid() {
                     <IconTrash size={15} color={theme.red} />
                   </IconButton>
                 </>
-              }
+              )}
             />
           ))}
         </Card>

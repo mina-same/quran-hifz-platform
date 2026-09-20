@@ -20,6 +20,7 @@ import {
 } from '@/lib/queries/adminParents';
 import { useStudents } from '@/lib/queries/students';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { usePortalStore } from '@/lib/store/portalStore';
 import type { ApiError } from '@/lib/api';
 
 type AddForm = { name: string; email: string; password: string };
@@ -28,7 +29,7 @@ const EMPTY_ADD: AddForm = { name: '', email: '', password: '' };
 type EditForm = { name: string; email: string; newPassword: string };
 type Credentials = { email: string; password: string };
 
-function ChildChip({ name, onRemove, theme }: { name: string; onRemove: () => void; theme: ReturnType<typeof useAppTheme> }) {
+function ChildChip({ name, onRemove, theme }: { name: string; onRemove?: () => void; theme: ReturnType<typeof useAppTheme> }) {
   return (
     <View style={{
       flexDirection: 'row', alignItems: 'center', gap: 4,
@@ -36,15 +37,18 @@ function ChildChip({ name, onRemove, theme }: { name: string; onRemove: () => vo
       paddingHorizontal: 10, paddingVertical: 4,
     }}>
       <Text style={{ fontSize: 12, fontFamily: theme.fontCairo, color: theme.green }}>{name}</Text>
-      <Pressable haptic="medium" onPress={onRemove} hitSlop={6}>
-        <IconX size={13} color={theme.green} />
-      </Pressable>
+      {!!onRemove && (
+        <Pressable haptic="medium" onPress={onRemove} hitSlop={6}>
+          <IconX size={13} color={theme.green} />
+        </Pressable>
+      )}
     </View>
   );
 }
 
 export default function AdminParents() {
   const theme = useAppTheme();
+  const readOnly = usePortalStore((st) => st.readOnly);
   const { data: parents = [], isLoading, isError, isRefetching, refetch } = useAdminParents();
   const { data: students = [], isRefetching: studentsRefetching, refetch: refetchStudents } = useStudents();
 
@@ -203,9 +207,11 @@ export default function AdminParents() {
           {!isLoading && !isError && (
             <Text style={styles.countText}>{filtered.length} من {parents.length} ولي أمر</Text>
           )}
-          <View style={{ marginTop: 12 }}>
-            <Button label="إضافة ولي أمر" icon={<IconUserPlus size={16} color={theme.white} />} onPress={openAdd} fullWidth />
-          </View>
+          {!readOnly && (
+            <View style={{ marginTop: 12 }}>
+              <Button label="إضافة ولي أمر" icon={<IconUserPlus size={16} color={theme.white} />} onPress={openAdd} fullWidth />
+            </View>
+          )}
         </Card>
 
         <Card noPadding>
@@ -237,15 +243,17 @@ export default function AdminParents() {
                   <View style={styles.childrenWrap}>
                     {p.children.length === 0 && <Text style={styles.childLabel}>لا يوجد أبناء</Text>}
                     {p.children.map((c) => (
-                      <ChildChip key={c._id} name={c.name} theme={theme} onRemove={() => handleUnlink(p._id, c._id)} />
+                      <ChildChip key={c._id} name={c.name} theme={theme} onRemove={readOnly ? undefined : () => handleUnlink(p._id, c._id)} />
                     ))}
                   </View>
                 </View>
 
-                <View style={styles.actionsRow}>
-                  <Button label="تعديل" variant="ghost" icon={<IconPencil size={14} color={theme.green} />} onPress={() => openEdit(p)} />
-                  <Button label="ربط ابن" variant="ghost" icon={<IconLink size={14} color={theme.green} />} onPress={() => openLink(p)} />
-                </View>
+                {!readOnly && (
+                  <View style={styles.actionsRow}>
+                    <Button label="تعديل" variant="ghost" icon={<IconPencil size={14} color={theme.green} />} onPress={() => openEdit(p)} />
+                    <Button label="ربط ابن" variant="ghost" icon={<IconLink size={14} color={theme.green} />} onPress={() => openLink(p)} />
+                  </View>
+                )}
               </View>
             ))}
           </View>
@@ -333,7 +341,7 @@ export default function AdminParents() {
               <Text style={styles.childLabel}>الأبناء الحاليون</Text>
               <View style={styles.childrenWrap}>
                 {linkParent.children.map((c) => (
-                  <ChildChip key={c._id} name={c.name} theme={theme} onRemove={() => handleUnlink(linkParent._id, c._id)} />
+                  <ChildChip key={c._id} name={c.name} theme={theme} onRemove={readOnly ? undefined : () => handleUnlink(linkParent._id, c._id)} />
                 ))}
               </View>
             </View>

@@ -50,6 +50,7 @@ const ACCENT_BY_ICON: Record<string, keyof ReturnType<typeof useAppTheme> & stri
   'user-plus': 'blue',
   chalkboard: 'brown',
   'user-heart': 'red',
+  'shield-check': 'blue',
   'building-arch': 'gold',
   microphone: 'red',
   message: 'blue',
@@ -67,7 +68,7 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
   const theme = useAppTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
-  const { user, logout, themeMode, toggleTheme, genderScope, setGenderScope } = usePortalStore();
+  const { user, logout, themeMode, toggleTheme, genderScope, setGenderScope, readOnly } = usePortalStore();
 
   // Icon washes sit on the row surface, so dark mode needs a stronger alpha than
   // light to read as a tint rather than as dirt.
@@ -136,7 +137,9 @@ export default function MoreSheet({ visible, onClose, portal, hiddenIds }: Props
         </View>
         <View style={styles.headerRule} />
 
-        {portal === 'admin' && (
+        {/* A supervisor's gender scope is fixed at account creation — there is
+            nothing to switch, so the control is hidden entirely (readOnly). */}
+        {portal === 'admin' && !readOnly && (
           <View style={styles.genderScope}>
             <Text style={styles.groupLabel}>النطاق</Text>
             <ScopeTabs

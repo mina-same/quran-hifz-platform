@@ -5,6 +5,7 @@ import { Attendance } from '../models/Attendance.model';
 import { Student } from '../models/Student.model';
 import { AppError } from '../middleware/error';
 import { notifyParents } from '../lib/notify';
+import { supervisorGenderOf, trackIdsForGender, restrictTrackFilter } from '../lib/supervisorScope';
 
 const recordSchema = z.object({
   student: z.string().min(1),
@@ -70,6 +71,11 @@ export async function getAttendance(req: Request, res: Response, next: NextFunct
       filter.date = {};
       if (from) (filter.date as Record<string, Date>).$gte = new Date(from as string);
       if (to)   (filter.date as Record<string, Date>).$lte = new Date(to as string);
+    }
+
+    const supervisorGender = supervisorGenderOf(req);
+    if (supervisorGender) {
+      filter.track = restrictTrackFilter(filter.track, await trackIdsForGender(supervisorGender));
     }
 
     const records = await Attendance.find(filter)

@@ -38,7 +38,7 @@ const DIALOG: React.CSSProperties = {
 };
 
 export function AdminTeachers() {
-  const { genderScope } = usePortal();
+  const { genderScope, readOnly } = usePortal();
   const { data: allTeachers = [], isLoading, error } = useTeachers();
   const { data: tracks = [] } = useTracks();
   const scopedTeacherIds = teacherIdsInScope(tracks, genderScope);
@@ -128,9 +128,11 @@ export function AdminTeachers() {
   useTopbar(
     "ti-chalkboard",
     "المعلمون",
-    <button className="topbar-btn btn-primary" onClick={openAdd}>
-      <i className="ti ti-plus" /> إضافة معلم
-    </button>,
+    !readOnly && (
+      <button className="topbar-btn btn-primary" onClick={openAdd}>
+        <i className="ti ti-plus" /> إضافة معلم
+      </button>
+    ),
   );
 
   const isPending = createTeacher.isPending || updateTeacher.isPending;
@@ -172,24 +174,26 @@ export function AdminTeachers() {
                       </Badge>
                     </td>
                     <td>
-                      <div style={{ display: "flex", gap: 6 }}>
-                        <button
-                          className="topbar-btn btn-ghost"
-                          style={{ padding: "3px 9px", fontSize: 12 }}
-                          onClick={() => openEdit(t)}
-                          title="تعديل"
-                        >
-                          <i className="ti ti-pencil" />
-                        </button>
-                        <button
-                          className="topbar-btn btn-ghost"
-                          style={{ padding: "3px 9px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}
-                          onClick={() => setDeleteId(t._id)}
-                          title="حذف"
-                        >
-                          <i className="ti ti-trash" />
-                        </button>
-                      </div>
+                      {!readOnly && (
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button
+                            className="topbar-btn btn-ghost"
+                            style={{ padding: "3px 9px", fontSize: 12 }}
+                            onClick={() => openEdit(t)}
+                            title="تعديل"
+                          >
+                            <i className="ti ti-pencil" />
+                          </button>
+                          <button
+                            className="topbar-btn btn-ghost"
+                            style={{ padding: "3px 9px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}
+                            onClick={() => setDeleteId(t._id)}
+                            title="حذف"
+                          >
+                            <i className="ti ti-trash" />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

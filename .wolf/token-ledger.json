@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-06-27T12:42:49.696Z",
   "lifetime": {
-    "total_tokens_estimated": 23946445,
-    "total_reads": 8130,
-    "total_writes": 10922,
-    "total_sessions": 146,
-    "anatomy_hits": 6333,
+    "total_tokens_estimated": 23977722,
+    "total_reads": 8169,
+    "total_writes": 10953,
+    "total_sessions": 150,
+    "anatomy_hits": 6370,
     "anatomy_misses": 1624,
-    "repeated_reads_blocked": 6999,
-    "estimated_savings_vs_bare_cli": 52083121
+    "repeated_reads_blocked": 7002,
+    "estimated_savings_vs_bare_cli": 52093273
   },
   "sessions": [
     {
@@ -108843,6 +108843,428 @@
         "writes_count": 0,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-20-0854",
+      "started": "2026-09-20T05:54:14.845Z",
+      "ended": "2026-09-20T06:05:25.112Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/User.model.ts",
+          "tokens_estimated": 442,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/middleware/role.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/middleware/auth.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Masjid.model.ts",
+          "tokens_estimated": 204,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/constants/genderScope.ts",
+          "tokens_estimated": 442,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/lib/genderScope.ts",
+          "tokens_estimated": 523,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/config/portals.ts",
+          "tokens_estimated": 1267,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/lib/constants/portals.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/admin.controller.ts",
+          "tokens_estimated": 1530,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 4408,
+        "output_tokens_estimated": 0,
+        "reads_count": 9,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 9
+      }
+    },
+    {
+      "id": "session-2026-09-20-1509",
+      "started": "2026-09-20T12:09:03.425Z",
+      "ended": "2026-09-20T12:19:47.327Z",
+      "reads": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/admin.controller.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/middleware/role.ts",
+          "tokens_estimated": 121,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/User.model.ts",
+          "tokens_estimated": 442,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/admin.routes.ts",
+          "tokens_estimated": 246,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/lib/genderScope.ts",
+          "tokens_estimated": 523,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Masjid.model.ts",
+          "tokens_estimated": 204,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/student.controller.ts",
+          "tokens_estimated": 2282,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/track.controller.ts",
+          "tokens_estimated": 2395,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/teacher.controller.ts",
+          "tokens_estimated": 1423,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/attendance.controller.ts",
+          "tokens_estimated": 1412,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/evaluation.controller.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/kpi.controller.ts",
+          "tokens_estimated": 389,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/auth.controller.ts",
+          "tokens_estimated": 1176,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/middleware/auth.ts",
+          "tokens_estimated": 234,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/app.ts",
+          "tokens_estimated": 850,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/track.routes.ts",
+          "tokens_estimated": 220,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/student.routes.ts",
+          "tokens_estimated": 173,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/teacher.routes.ts",
+          "tokens_estimated": 166,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/masjid.routes.ts",
+          "tokens_estimated": 161,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/kpi.routes.ts",
+          "tokens_estimated": 122,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/stats.routes.ts",
+          "tokens_estimated": 79,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/attendance.routes.ts",
+          "tokens_estimated": 142,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/evaluation.routes.ts",
+          "tokens_estimated": 115,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+          "tokens_estimated": 799,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/stats.controller.ts",
+          "tokens_estimated": 1057,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/Track.model.ts",
+          "tokens_estimated": 531,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/types/express.d.ts",
+          "tokens_estimated": 62,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/config/portals.ts",
+          "tokens_estimated": 1267,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/specs/2026-09-20-supervisor-role-design.md",
+          "tokens_estimated": 2368,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/context/PortalContext.tsx",
+          "tokens_estimated": 1403,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/specs/2026-09-20-supervisor-role-design.md",
+          "tokens_estimated": 1992,
+          "action": "create"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/types/express.d.ts",
+          "tokens_estimated": 62,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/User.model.ts",
+          "tokens_estimated": 158,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/models/User.model.ts",
+          "tokens_estimated": 85,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/middleware/auth.ts",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/middleware/auth.ts",
+          "tokens_estimated": 45,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/auth.controller.ts",
+          "tokens_estimated": 68,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/auth.controller.ts",
+          "tokens_estimated": 93,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/lib/supervisorScope.ts",
+          "tokens_estimated": 502,
+          "action": "create"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/student.controller.ts",
+          "tokens_estimated": 61,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/student.controller.ts",
+          "tokens_estimated": 90,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/student.controller.ts",
+          "tokens_estimated": 145,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/track.controller.ts",
+          "tokens_estimated": 48,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/track.controller.ts",
+          "tokens_estimated": 78,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/track.controller.ts",
+          "tokens_estimated": 119,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+          "tokens_estimated": 78,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/masjid.controller.ts",
+          "tokens_estimated": 119,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/teacher.controller.ts",
+          "tokens_estimated": 43,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/teacher.controller.ts",
+          "tokens_estimated": 421,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/teacher.controller.ts",
+          "tokens_estimated": 150,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/attendance.controller.ts",
+          "tokens_estimated": 56,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/attendance.controller.ts",
+          "tokens_estimated": 132,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/evaluation.controller.ts",
+          "tokens_estimated": 67,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/evaluation.controller.ts",
+          "tokens_estimated": 132,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/stats.controller.ts",
+          "tokens_estimated": 179,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/admin.controller.ts",
+          "tokens_estimated": 162,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/controllers/admin.controller.ts",
+          "tokens_estimated": 474,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/admin.routes.ts",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-server/src/routes/admin.routes.ts",
+          "tokens_estimated": 98,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/docs/superpowers/specs/2026-09-20-supervisor-role-design.md",
+          "tokens_estimated": 721,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 20362,
+        "output_tokens_estimated": 6507,
+        "reads_count": 30,
+        "writes_count": 31,
+        "repeated_reads_blocked": 3,
+        "anatomy_lookups": 28
       }
     }
   ],

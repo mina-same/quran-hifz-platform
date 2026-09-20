@@ -8,6 +8,8 @@ export type MeUser = {
   email: string;
   role: PortalType;
   profileId?: string;
+  /** Fixed at creation for a 'supervisor' user, undefined otherwise. */
+  supervisorGender?: 'male' | 'female';
 };
 
 type MeResponse = { success: boolean; user: MeUser };

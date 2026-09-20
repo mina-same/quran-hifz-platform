@@ -26,7 +26,7 @@ function PageLoading() {
 }
 
 export function AdminDashboard() {
-  const { showPage, genderScope } = usePortal();
+  const { showPage, genderScope, readOnly } = usePortal();
   const { data: stats, isLoading: statsLoading } = useStats(genderScope);
   const { data: students } = useStudents();
   const { data: kpis } = useKpis();
@@ -41,9 +41,11 @@ export function AdminDashboard() {
       <button className="topbar-btn btn-ghost">
         <i className="ti ti-download" /> تصدير تقرير
       </button>
-      <button className="topbar-btn btn-primary" onClick={() => showPage("register")}>
-        <i className="ti ti-user-plus" /> طالب جديد
-      </button>
+      {!readOnly && (
+        <button className="topbar-btn btn-primary" onClick={() => showPage("register")}>
+          <i className="ti ti-user-plus" /> طالب جديد
+        </button>
+      )}
     </>,
   );
 

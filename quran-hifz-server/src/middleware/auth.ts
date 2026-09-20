@@ -6,6 +6,7 @@ interface JwtPayload {
   id: string;
   role: string;
   name: string;
+  supervisorGender?: 'male' | 'female';
 }
 
 export function authenticate(req: Request, res: Response, next: NextFunction): void {
@@ -19,7 +20,12 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
 
   try {
     const payload = jwt.verify(token, ENV.JWT_SECRET) as JwtPayload;
-    req.user = { id: payload.id, role: payload.role as never, name: payload.name };
+    req.user = {
+      id: payload.id,
+      role: payload.role as never,
+      name: payload.name,
+      supervisorGender: payload.supervisorGender,
+    };
     next();
   } catch {
     res.status(401).json({ success: false, message: 'رمز التحقق غير صالح أو منتهي الصلاحية' });

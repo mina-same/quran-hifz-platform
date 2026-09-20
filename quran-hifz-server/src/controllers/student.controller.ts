@@ -5,6 +5,7 @@ import { User } from '../models/User.model';
 import { Track } from '../models/Track.model';
 import { ParentStudent } from '../models/ParentStudent.model';
 import { AppError } from '../middleware/error';
+import { supervisorGenderOf, trackIdsForGender, restrictTrackFilter } from '../lib/supervisorScope';
 
 const studentSchema = z.object({
   name:             z.string().min(2, 'الاسم مطلوب'),
@@ -53,6 +54,11 @@ export async function getStudents(req: Request, res: Response, next: NextFunctio
       }
     }
 
+    const supervisorGender = supervisorGenderOf(req);
+    if (supervisorGender) {
+      filter.track = restrictTrackFilter(filter.track, await trackIdsForGender(supervisorGender));
+    }
+
     const students = await Student.find(filter)
       .populate({ path: 'track', select: 'title masjid', populate: { path: 'masjid', select: 'name location gender' } })
       .sort({ createdAt: -1 });
@@ -92,6 +98,13 @@ export async function getStudent(req: Request, res: Response, next: NextFunction
       .populate({ path: 'track', select: 'title daysPerWeek timeSlot masjid', populate: { path: 'masjid', select: 'name location gender' } });
 
     if (!student) throw new AppError('الطالب غير موجود', 404);
+
+    const supervisorGender = supervisorGenderOf(req);
+    const studentMasjidGender = (student.track as unknown as { masjid?: { gender?: string } })?.masjid?.gender;
+    if (supervisorGender && studentMasjidGender && studentMasjidGender !== supervisorGender) {
+      throw new AppError('الطالب غير موجود', 404);
+    }
+
     res.json({ success: true, data: student });
   } catch (err) {
     next(err);

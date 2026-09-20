@@ -1,4 +1,4 @@
-export type PortalKey = "student" | "teacher" | "admin" | "parent";
+export type PortalKey = "student" | "teacher" | "admin" | "parent" | "supervisor";
 
 export type NavItem = {
   id: string;
@@ -76,14 +76,37 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "dashboard", icon: "ti-layout-dashboard", label: "لوحة التحكم" },
       ]},
       { group: "الطلاب والمعلمون", items: [
+        { id: "students",    icon: "ti-users",        label: "إدارة الطلاب" },
+        { id: "register",    icon: "ti-user-plus",    label: "تسجيل طالب جديد" },
+        { id: "teachers",    icon: "ti-chalkboard",   label: "المعلمون" },
+        { id: "parents",     icon: "ti-user-heart",   label: "أولياء الأمور" },
+        { id: "supervisors", icon: "ti-eye-check",    label: "المشرفون" },
+      ]},
+      { group: "المساجد والمسارات", items: [
+        { id: "masajid", icon: "ti-building-arch",   label: "المساجد" },
+        { id: "tracks",  icon: "ti-calendar-event",  label: "المسارات", dot: true },
+      ]},
+      { group: "التقارير", items: [
+        { id: "kpis",    icon: "ti-target",    label: "مؤشرات الأداء" },
+        { id: "reports", icon: "ti-chart-bar", label: "التقارير" },
+      ]},
+    ],
+  },
+  supervisor: {
+    badge: "بوابة الإشراف",
+    user: { name: "مشرف", role: "مشرف — اطلاع فقط", initials: "مش" },
+    nav: [
+      { group: "الرئيسية", items: [
+        { id: "dashboard", icon: "ti-layout-dashboard", label: "لوحة التحكم" },
+      ]},
+      { group: "الطلاب والمعلمون", items: [
         { id: "students", icon: "ti-users",        label: "إدارة الطلاب" },
-        { id: "register", icon: "ti-user-plus",    label: "تسجيل طالب جديد" },
         { id: "teachers", icon: "ti-chalkboard",   label: "المعلمون" },
         { id: "parents",  icon: "ti-user-heart",   label: "أولياء الأمور" },
       ]},
       { group: "المساجد والمسارات", items: [
         { id: "masajid", icon: "ti-building-arch",   label: "المساجد" },
-        { id: "tracks",  icon: "ti-calendar-event",  label: "المسارات", dot: true },
+        { id: "tracks",  icon: "ti-calendar-event",  label: "المسارات" },
       ]},
       { group: "التقارير", items: [
         { id: "kpis",    icon: "ti-target",    label: "مؤشرات الأداء" },

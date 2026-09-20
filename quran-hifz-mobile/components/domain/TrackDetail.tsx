@@ -80,10 +80,13 @@ export default function TrackDetail({ trackId, role }: Props) {
   const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
+  const readOnly = usePortalStore((s) => s.readOnly);
   // Admin manages plans too: they own halqat/tracks/teachers and the web's
   // admin #trackdetail has always rendered these controls. The matching
   // server routes must accept 'admin' — see the note in the handoff.
-  const canManagePlan = true;
+  // A supervisor (reusing this same screen) never manages plans — every
+  // mutating route already 403s them server-side; this just hides the UI.
+  const canManagePlan = !readOnly;
 
   // Scope the list exactly the way the calling list screen does, so this
   // resolves out of the same react-query cache instead of refetching: a
@@ -234,7 +237,7 @@ export default function TrackDetail({ trackId, role }: Props) {
               })}
             </View>
           )}
-          {(() => {
+          {!readOnly && (() => {
             const availableTeachers = allTeachers.filter(
               (t) => !track.teachers.some((tc) => getTeacherId(tc) === t._id),
             );

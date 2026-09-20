@@ -25,6 +25,8 @@ export interface AuthUser {
   name: string;
   role: PortalType;
   profileId?: string;
+  /** Fixed at creation for a 'supervisor' user, undefined otherwise. */
+  supervisorGender?: 'male' | 'female';
 }
 
 const ROLE_LABELS: Record<PortalType, string> = {
@@ -32,6 +34,7 @@ const ROLE_LABELS: Record<PortalType, string> = {
   teacher: 'معلم',
   admin: 'مدير النظام',
   parent: 'ولي أمر',
+  supervisor: 'مشرف',
 };
 
 function initialsOf(name: string): string {
@@ -50,18 +53,18 @@ function enterPortal(role: PortalType, authUser: AuthUser) {
     role: ROLE_LABELS[role],
     initials: initialsOf(authUser.name),
   };
-  return { portal: role, user: displayUser, navGroups: cfg.nav };
+  return { portal: role, user: displayUser, navGroups: cfg.nav, readOnly: role === 'supervisor' };
 }
 
 type LoginResponse = {
   success: boolean;
   token: string;
-  user: { id: string; name: string; email: string; role: PortalType; profileId?: string };
+  user: { id: string; name: string; email: string; role: PortalType; profileId?: string; supervisorGender?: 'male' | 'female' };
 };
 
 type MeResponse = {
   success: boolean;
-  user: { _id: string; name: string; email: string; role: PortalType; profileId?: string };
+  user: { _id: string; name: string; email: string; role: PortalType; profileId?: string; supervisorGender?: 'male' | 'female' };
 };
 
 interface PortalStore {
@@ -81,8 +84,15 @@ interface PortalStore {
   /** True right after a token-based (re)hydrate when biometricEnabled is on — gates the
    * app behind a lock screen until unlock() succeeds, even though authUser is already set. */
   isLocked: boolean;
-  /** Admin-only masjid-gender filter, mirrors the web Sidebar's selector. Persisted. */
+  /** Admin-only masjid-gender filter, mirrors the web Sidebar's selector. Persisted.
+   * For a 'supervisor' user this is fixed from `authUser.supervisorGender` at
+   * hydrate/login time instead of the stored preference, and is not switchable. */
   genderScope: GenderScope;
+  /** True for role 'supervisor' — every reused admin screen hides its
+   * create/edit/delete affordances when this is true. The real security
+   * boundary is server-side (every mutating route already 403s a supervisor);
+   * this only drives the UI. */
+  readOnly: boolean;
 
   portal: PortalType | null;
   user: PortalUser | null;
@@ -117,6 +127,7 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
   sessionExpired: false,
   isLocked: false,
   genderScope: 'all',
+  readOnly: false,
   portal: null,
   user: null,
   navGroups: [],
@@ -150,11 +161,16 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
         name: res.user.name,
         role: res.user.role,
         profileId: res.user.profileId,
+        supervisorGender: res.user.supervisorGender,
       };
+      // A supervisor's gender scope is fixed by the account, not the stored
+      // preference — it is not switchable, so it must win over `genderScope`.
+      const effectiveGenderScope = authUser.role === 'supervisor' ? (authUser.supervisorGender ?? 'all') : genderScope;
       // A stored session resuming silently is exactly what biometric lock guards against —
       // gate behind isLocked so the lock screen must clear before any portal screen renders.
       set({
-        authUser, isHydrating: false, themeMode, biometricEnabled, hapticsEnabled, hasOnboarded, genderScope,
+        authUser, isHydrating: false, themeMode, biometricEnabled, hapticsEnabled, hasOnboarded,
+        genderScope: effectiveGenderScope,
         isLocked: biometricEnabled,
         ...enterPortal(authUser.role, authUser),
       });
@@ -176,10 +192,12 @@ export const usePortalStore = create<PortalStore>()((set, get) => ({
       name: res.user.name,
       role: res.user.role,
       profileId: res.user.profileId,
+      supervisorGender: res.user.supervisorGender,
     };
     await setToken(res.token).catch(() => {});
+    const effectiveGenderScope = authUser.role === 'supervisor' ? (authUser.supervisorGender ?? 'all') : get().genderScope;
     // A fresh password login already proves identity — no extra lock screen needed.
-    set({ authUser, isLocked: false, ...enterPortal(authUser.role, authUser) });
+    set({ authUser, isLocked: false, genderScope: effectiveGenderScope, ...enterPortal(authUser.role, authUser) });
   },
 
   logout: async () => {

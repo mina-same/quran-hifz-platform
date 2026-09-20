@@ -237,6 +237,12 @@ export const PORTALS: Record<string, PortalConfig> = {
             label: "أولياء الأمور",
             desc: "حسابات أولياء الأمور وربطها",
           },
+          {
+            id: "supervisors",
+            icon: "shield-check",
+            label: "المشرفون",
+            desc: "حسابات المشرفين وصلاحياتهم",
+          },
         ],
       },
       {
@@ -341,9 +347,25 @@ export const PORTALS: Record<string, PortalConfig> = {
   },
 };
 
+// Supervisor reuses admin's own screens (see app/(portal)/_layout.tsx), so its
+// nav mirrors admin's nav minus the two admin-only items: "register" (a
+// pure-create page with no read-only view of itself) and "supervisors"
+// (managing other supervisors is admin-only, out of scope for a supervisor).
+const SUPERVISOR_EXCLUDED_NAV_IDS = new Set(["register", "supervisors"]);
+PORTALS.supervisor = {
+  badge: "بوابة المشرف",
+  user: { name: "مشرف الجمعية", role: "مشرف", initials: "مش" },
+  nav: PORTALS.admin.nav
+    .map((g) => ({ ...g, items: g.items.filter((i) => !SUPERVISOR_EXCLUDED_NAV_IDS.has(i.id)) }))
+    .filter((g) => g.items.length > 0),
+};
+
 export const PORTAL_ROUTES: Record<string, string> = {
   student: "/(portal)/student/dashboard",
   teacher: "/(portal)/teacher/dashboard",
   admin: "/(portal)/admin/dashboard",
   parent: "/(portal)/parent/dashboard",
+  // Reuses the admin path group's screens (same route, same tab layout) — see
+  // app/(portal)/_layout.tsx's role→path-group mapping.
+  supervisor: "/(portal)/admin/dashboard",
 };

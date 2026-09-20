@@ -25,8 +25,8 @@ const pushTokenSchema = z.object({
   token: z.string().min(1, 'رمز الإشعارات مطلوب'),
 });
 
-function signToken(id: string, role: string, name: string): string {
-  return jwt.sign({ id, role, name }, ENV.JWT_SECRET, { expiresIn: ENV.JWT_EXPIRES_IN } as jwt.SignOptions);
+function signToken(id: string, role: string, name: string, supervisorGender?: 'male' | 'female'): string {
+  return jwt.sign({ id, role, name, supervisorGender }, ENV.JWT_SECRET, { expiresIn: ENV.JWT_EXPIRES_IN } as jwt.SignOptions);
 }
 
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -38,12 +38,15 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
       throw new AppError('البريد الإلكتروني أو كلمة المرور غير صحيحة', 401);
     }
 
-    const token = signToken(String(user._id), user.role, user.name);
+    const token = signToken(String(user._id), user.role, user.name, user.supervisorGender);
 
     res.json({
       success: true,
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, profileId: user.profileId },
+      user: {
+        id: user._id, name: user.name, email: user.email, role: user.role, profileId: user.profileId,
+        supervisorGender: user.supervisorGender,
+      },
     });
   } catch (err) {
     next(err);

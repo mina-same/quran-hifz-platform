@@ -15,12 +15,12 @@ export type AuthUser = StoredUser;
 type LoginResponse = {
   success: boolean;
   token: string;
-  user: { id: string; name: string; email: string; role: AuthUser["role"]; profileId?: string };
+  user: { id: string; name: string; email: string; role: AuthUser["role"]; profileId?: string; supervisorGender?: "male" | "female" };
 };
 
 type MeResponse = {
   success: boolean;
-  user: { _id: string; name: string; email: string; role: AuthUser["role"]; profileId?: string };
+  user: { _id: string; name: string; email: string; role: AuthUser["role"]; profileId?: string; supervisorGender?: "male" | "female" };
 };
 
 type AuthContextValue = {
@@ -51,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: res.user.name,
           role: res.user.role,
           profileId: res.user.profileId,
+          supervisorGender: res.user.supervisorGender,
         };
         setUser(u);
         setStoredUser(u);
@@ -70,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       name: res.user.name,
       role: res.user.role,
       profileId: res.user.profileId,
+      supervisorGender: res.user.supervisorGender,
     };
     setToken(res.token);
     setStoredUser(u);

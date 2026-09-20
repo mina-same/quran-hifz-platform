@@ -6,12 +6,17 @@ import { Masjid, type MasjidGender } from '../models/Masjid.model';
 import { Attendance } from '../models/Attendance.model';
 import { Homework } from '../models/Homework.model';
 import { Track } from '../models/Track.model';
+import { supervisorGenderOf } from '../lib/supervisorScope';
 
 export async function getDashboardStats(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    const supervisorGender = supervisorGenderOf(req);
     const genderParam = req.query.gender;
-    const gender: MasjidGender | undefined =
-      genderParam === 'male' || genderParam === 'female' ? genderParam : undefined;
+    // A supervisor's gender is fixed server-side and overrides whatever the
+    // client asks for; every other role keeps the optional query param.
+    const gender: MasjidGender | undefined = supervisorGender ?? (
+      genderParam === 'male' || genderParam === 'female' ? genderParam : undefined
+    );
 
     // When a gender scope is active, resolve it down to the set of tracks
     // under masajid of that gender — every other count/aggregate below is

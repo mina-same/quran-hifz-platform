@@ -64,6 +64,10 @@ interface Props {
    * requires one, so a screen with no teacher in hand (the admin drill-down)
    * must pass the context's own teacher rather than the signed-in user. */
   teacherId?: string;
+  /** Supervisor viewing this track — locks the roster exactly like "no teacher
+   * assigned" does (score chips, save/edit buttons), just with an accurate
+   * message instead of the no-teacher warning. */
+  readOnly?: boolean;
   /** The plan the day's ward comes from, if the context has one linked. */
   linkedPlan?: QuranPlan;
   /** The day being recorded, from `useDaySchedule`. */
@@ -88,7 +92,7 @@ interface Props {
  * screen and the track drill-down can drop it in unchanged.
  */
 export default function EvaluationRoster({
-  students, context, teacherId, linkedPlan, daySchedule, emptyLabel, renderExtra,
+  students, context, teacherId, linkedPlan, daySchedule, emptyLabel, renderExtra, readOnly,
 }: Props) {
   const theme = useAppTheme();
   const styles = useMemo(() => createS(theme), [theme]);

@@ -59,7 +59,7 @@ const DIALOG: React.CSSProperties = {
 };
 
 export function AdminStudents() {
-  const { showPage, genderScope } = usePortal();
+  const { showPage, genderScope, readOnly } = usePortal();
   const { data: allStudents = [], isLoading, error } = useStudents();
   const students = allStudents.filter((s) =>
     matchesGenderScope(typeof s.track === "string" ? undefined : s.track.masjid, genderScope),
@@ -147,9 +147,11 @@ export function AdminStudents() {
       <button className="topbar-btn btn-ghost">
         <i className="ti ti-filter" /> تصفية
       </button>
-      <button className="topbar-btn btn-primary" onClick={() => showPage("register")}>
-        <i className="ti ti-user-plus" /> تسجيل جديد
-      </button>
+      {!readOnly && (
+        <button className="topbar-btn btn-primary" onClick={() => showPage("register")}>
+          <i className="ti ti-user-plus" /> تسجيل جديد
+        </button>
+      )}
     </>,
   );
 
@@ -238,24 +240,26 @@ export function AdminStudents() {
                       </Badge>
                     </td>
                     <td>
-                      <div style={{ display: "flex", gap: 5 }}>
-                        <button
-                          className="topbar-btn btn-ghost"
-                          style={{ padding: "3px 8px", fontSize: 12 }}
-                          onClick={() => openEdit(s)}
-                          title="تعديل"
-                        >
-                          <i className="ti ti-pencil" />
-                        </button>
-                        <button
-                          className="topbar-btn btn-ghost"
-                          style={{ padding: "3px 8px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}
-                          onClick={() => setDeleteId(s._id)}
-                          title="حذف"
-                        >
-                          <i className="ti ti-trash" />
-                        </button>
-                      </div>
+                      {!readOnly && (
+                        <div style={{ display: "flex", gap: 5 }}>
+                          <button
+                            className="topbar-btn btn-ghost"
+                            style={{ padding: "3px 8px", fontSize: 12 }}
+                            onClick={() => openEdit(s)}
+                            title="تعديل"
+                          >
+                            <i className="ti ti-pencil" />
+                          </button>
+                          <button
+                            className="topbar-btn btn-ghost"
+                            style={{ padding: "3px 8px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}
+                            onClick={() => setDeleteId(s._id)}
+                            title="حذف"
+                          >
+                            <i className="ti ti-trash" />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

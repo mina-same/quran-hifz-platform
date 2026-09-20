@@ -111,6 +111,7 @@ export default function AdminTracks() {
   const s = useMemo(() => createS(theme), [theme]);
   const router = useRouter();
   const genderScope = usePortalStore((st) => st.genderScope);
+  const readOnly = usePortalStore((st) => st.readOnly);
   const { data: allTracks = [], isLoading, isRefetching, refetch } = useTracks();
   const tracks = allTracks.filter((t) => matchesGenderScope(t.masjid, genderScope));
   const { data: teachers = [], isRefetching: teachersRefetching, refetch: refetchTeachers } = useTeachers();
@@ -273,7 +274,7 @@ export default function AdminTracks() {
           )}
         </View>
 
-        {!isFull && (
+        {!isFull && !readOnly && (
           <View style={s.addStudentBox}>
             <Text style={s.addStudentLabel}>نقل طالب إلى هذا المسار</Text>
             <View style={s.row}>
@@ -356,6 +357,7 @@ export default function AdminTracks() {
               t={t}
               theme={theme}
               s={s}
+              readOnly={readOnly}
               onOpen={() => router.push({ pathname: '/(portal)/admin/track-detail', params: { id: t._id } } as any)}
               onManageStudents={() => {
                 setStudentsPanelId((cur) => (cur === t._id ? null : t._id));
@@ -384,11 +386,13 @@ export default function AdminTracks() {
       >
         {saved && <Text style={s.successBanner}>تم حفظ المسار ✓</Text>}
 
-        <Pressable style={s.addBtn} onPress={openAdd}>
-          <Text style={s.addBtnText}>+ مسار جديد</Text>
-        </Pressable>
+        {!readOnly && (
+          <Pressable style={s.addBtn} onPress={openAdd}>
+            <Text style={s.addBtnText}>+ مسار جديد</Text>
+          </Pressable>
+        )}
 
-        {showForm && (
+        {!readOnly && showForm && (
           <Card>
             <CardHeader title={editId ? 'تعديل المسار' : 'إضافة مسار جديد'} />
             {!!formError && <Text style={s.errorText}>{formError}</Text>}
@@ -509,8 +513,12 @@ export default function AdminTracks() {
               <IconCalendarEvent size={30} color={theme.mode === 'dark' ? theme.greenLight : theme.green} />
             </View>
             <Text style={s.emptyTitle}>لا توجد مسارات بعد</Text>
-            <Text style={s.emptySub}>أضف أول مسار</Text>
-            <Button label="+ مسار جديد" onPress={openAdd} />
+            {!readOnly && (
+              <>
+                <Text style={s.emptySub}>أضف أول مسار</Text>
+                <Button label="+ مسار جديد" onPress={openAdd} />
+              </>
+            )}
           </View>
         )}
 
@@ -557,11 +565,12 @@ export default function AdminTracks() {
  * Its own component so each card can run the `useQuranPlans` lookup for the
  * plan linked to that track — the same per-card query the web page makes.  */
 function TrackCard({
-  t, theme, s, onOpen, onManageStudents, onEdit, onDelete, children,
+  t, theme, s, readOnly, onOpen, onManageStudents, onEdit, onDelete, children,
 }: {
   t: Track;
   theme: AppTheme;
   s: Styles;
+  readOnly: boolean;
   onOpen: () => void;
   onManageStudents: () => void;
   onEdit: () => void;
@@ -728,14 +737,18 @@ function TrackCard({
               <View style={s.countPill}><Text style={s.countPillText}>{enrolled}</Text></View>
             )}
           </Pressable>
-          <Pressable style={s.actionBtn} onPress={onEdit}>
-            <IconPencil size={15} color={theme.textMuted} />
-            <Text style={[s.actionText, { color: theme.textMuted }]}>تعديل</Text>
-          </Pressable>
-          <Pressable haptic="medium" style={[s.actionBtn, s.actionBtnDanger]} onPress={onDelete}>
-            <IconTrash size={15} color={theme.red} />
-            <Text style={[s.actionText, { color: theme.red }]}>حذف</Text>
-          </Pressable>
+          {!readOnly && (
+            <>
+              <Pressable style={s.actionBtn} onPress={onEdit}>
+                <IconPencil size={15} color={theme.textMuted} />
+                <Text style={[s.actionText, { color: theme.textMuted }]}>تعديل</Text>
+              </Pressable>
+              <Pressable haptic="medium" style={[s.actionBtn, s.actionBtnDanger]} onPress={onDelete}>
+                <IconTrash size={15} color={theme.red} />
+                <Text style={[s.actionText, { color: theme.red }]}>حذف</Text>
+              </Pressable>
+            </>
+          )}
         </View>
 
       </Pressable>

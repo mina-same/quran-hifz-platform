@@ -25,9 +25,12 @@ export default function PortalLayout() {
   // A teacher then landed on the student portal, whose screens fetch
   // /students/<their teacher profileId> and 404. Send every role to its own portal
   // (this also blocks a deep link into someone else's portal).
+  // 'supervisor' has no route group of its own — it reuses the admin screens
+  // (same Stack.Screen below, same tab layout) rather than a parallel tree.
   const role = authUser?.role;
-  if (role && !pathname.startsWith(`/${role}`)) {
-    return <Redirect href={PORTAL_ROUTES[role] as never} />;
+  const pathGroup = role === 'supervisor' ? 'admin' : role;
+  if (pathGroup && !pathname.startsWith(`/${pathGroup}`)) {
+    return <Redirect href={PORTAL_ROUTES[role!] as never} />;
   }
 
   return (

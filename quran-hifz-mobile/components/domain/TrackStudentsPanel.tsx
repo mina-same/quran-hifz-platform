@@ -8,6 +8,7 @@ import FormSelect from '@/components/forms/FormSelect';
 import { useAssignStudent, type Track } from '@/lib/queries/tracks';
 import { useStudents, type Student } from '@/lib/queries/students';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { usePortalStore } from '@/lib/store/portalStore';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
@@ -36,6 +37,7 @@ function trackIdOf(v: Student['track']): string {
 export default function TrackStudentsPanel({ track }: { track: Track }) {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
+  const readOnly = usePortalStore((st) => st.readOnly);
   const { data: allStudents = [] } = useStudents();
   const assignStudent = useAssignStudent();
   const [addStudentId, setAddStudentId] = useState('');
@@ -71,7 +73,7 @@ export default function TrackStudentsPanel({ track }: { track: Track }) {
         )}
       </View>
 
-      {!isFull && (
+      {!isFull && !readOnly && (
         <View style={s.addStudentBox}>
           <Text style={s.addStudentLabel}>نقل طالب إلى هذا المسار</Text>
           <View style={s.row}>
