@@ -4327,3 +4327,4 @@
 | 21:37 | Edited quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | added nullish coalescing | ~12 |
 | 18:39 | Fixed admin create-plan 400 (missing teacher): added teacher select for admin, seeded from track.teachers | quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx | fixed, tsc clean | ~2400 |
 | 21:39 | Session end: 9 writes across 1 files (TeacherPlanForm.tsx) | 4 reads | ~24169 tok |
+| 21:44 | Session end: 9 writes across 1 files (TeacherPlanForm.tsx) | 6 reads | ~27063 tok |
