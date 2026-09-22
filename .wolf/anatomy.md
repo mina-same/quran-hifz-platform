@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-20T17:55:09.904Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-22T18:37:51.025Z
 > Files: 714 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
@@ -1091,7 +1091,7 @@
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1668 tok)
 - `TeacherPlanDetail.tsx` — surahName — renders table (~3919 tok)
-- `TeacherPlanForm.tsx` — One type's track in the form: its own days and its own range. The plan's (~14352 tok)
+- `TeacherPlanForm.tsx` — Shared plan-create/edit form (admin's `planform` route reuses it too). Teacher user: `teacher` = own `user.profileId`, hidden. Admin (no `profileId`): shows a required "المعلم" select, seeded from the picked track's `teachers`, else full `useTeachers()` list. (~15100 tok)
 - `TeacherPlans.tsx` — surahName (~4553 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the tracks the teacher teaches. (~268 tok)

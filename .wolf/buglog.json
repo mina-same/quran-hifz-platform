@@ -6916,5 +6916,23 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-09-17T00:00:00Z"
+  },
+  {
+    "id": "bug-407",
+    "timestamp": "2026-09-22T18:39:02.000Z",
+    "error_message": "POST /api/quran-plans -> 400 بيانات غير صالحة, errors: [{path: \"teacher\", message: \"Required\"}]",
+    "file": "quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx",
+    "root_cause": "Admin portal reuses TeacherPlanForm (pageRegistry.ts planform: TeacherPlanForm for both admin and teacher). Form hardcoded teacher: teacherId where teacherId = user?.profileId - undefined for an admin account (admins have no teacher profile), so JSON.stringify dropped the key entirely and the server's required teacher field failed validation.",
+    "fix": "Added a teacher field to FormFields. When teacherId exists (real teacher user) it is used as before, hidden. When absent (admin), a required \"المعلم\" select is shown, seeded from the picked track's teachers (falls back to full useTeachers() list), with validation requiring it before submit. Body now sends teacher: teacherId ?? form.teacher.",
+    "tags": [
+      "auto-detected",
+      "validation",
+      "admin-portal",
+      "shared-component",
+      "quran-plan"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-09-22T18:39:02.000Z"
   }
 ]

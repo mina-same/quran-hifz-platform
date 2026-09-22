@@ -14,6 +14,15 @@
 
 ## Key Learnings
 
+### `pageRegistry.ts` shares pages across portals — check both call sites before assuming "current user = teacher" (2026-09-22)
+`admin.planform` and `teacher.planform` both point at the same `TeacherPlanForm`
+component (pageRegistry.ts:63,73). Any code in a shared page that reads
+`user?.profileId` assuming a teacher is logged in will silently get `undefined`
+when an admin opens it. Same risk applies to `admin.trackdetail` / `admin.attendance`,
+which also reuse teacher pages. When editing a page listed under more than one
+portal key in PAGE_REGISTRY, check what `usePortal().user` looks like for every
+portal that renders it, not just the one you're testing from.
+
 ### Rubric total is LOCKED to 10 (2026-09-04)
 A plan's `gradeRubric` degrees must sum to exactly `RUBRIC_TOTAL_DEGREES = 10`.
 Enforced in three places, all of which must stay in sync:

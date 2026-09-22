@@ -11,6 +11,7 @@ import {
   type PlanFormHandoff, type PlanType, type RangePoint, type QuranPlan,
 } from "../../api/quran-plans";
 import { useTracks } from "../../api/tracks";
+import { useTeachers } from "../../api/teachers";
 import { useStudents } from "../../api/students";
 import { useStudentPlanProgressList } from "../../api/student-plan-progress";
 import { toAr, AR_LOCALE } from "../../../lib/format";
@@ -61,6 +62,9 @@ type FormFields = {
   /** One per selected type, max four. Their days must not overlap. */
   segments: FormSegment[];
   targetType: "track" | "students";
+  /** Only editable from the admin portal (no `teacherId` of their own) — a
+   * logged-in teacher always creates plans under their own id, set below. */
+  teacher: string;
   track: string;
   students: string[];
   holidays: string[];
@@ -86,7 +90,7 @@ const RUBRIC_BAR_COLORS = ["var(--green)", "#1d4ed8", "#c2410c", "#7c3aed", "#08
 const EMPTY: FormFields = {
   name: "", description: "",
   segments: [emptySegment("حفظ")],
-  targetType: "track", track: "", students: [],
+  targetType: "track", teacher: "", track: "", students: [],
   holidays: [],
   startDate: todayISO(),
   endType: "activeDays",
@@ -106,6 +110,7 @@ function fieldsFromPlan(plan: QuranPlan, nameSuffix = ""): FormFields {
       type: seg.type, days: seg.days, rangeStart: seg.rangeStart, rangeEnd: seg.rangeEnd,
     })),
     targetType: plan.targetType,
+    teacher: plan.teacher ? getId(plan.teacher) : "",
     track: plan.track ? getId(plan.track) : "",
     students: (plan.students ?? []).map(getId),
     holidays: plan.holidays ?? [],
@@ -136,6 +141,9 @@ export function TeacherPlanForm() {
 
   const { data: tracks = [] } = useTracks(undefined, teacherId);
   const { data: allStudents = [] } = useStudents();
+  // Only the admin portal needs this — a logged-in teacher already has a
+  // fixed `teacherId` and never sees the teacher picker below.
+  const { data: allTeachers = [] } = useTeachers();
 
   const createPlan = useCreateQuranPlan();
   const updatePlan = useUpdateQuranPlan();
@@ -147,9 +155,9 @@ export function TeacherPlanForm() {
     if (handoff?.mode === "edit") return fieldsFromPlan(handoff.plan);
     if (handoff?.mode === "duplicate") return fieldsFromPlan(handoff.plan, " (نسخة)");
     if (handoff?.mode === "create" && handoff.trackId) {
-      return { ...EMPTY, targetType: "track", track: handoff.trackId };
+      return { ...EMPTY, targetType: "track", track: handoff.trackId, teacher: teacherId ?? "" };
     }
-    return EMPTY;
+    return { ...EMPTY, teacher: teacherId ?? "" };
   });
   const [formError, setFormError] = useState("");
   // Holidays are only meaningful inside the plan's own window, so both
@@ -241,6 +249,7 @@ export function TeacherPlanForm() {
     if (segmentError) { setFormError(segmentError); return; }
     if (form.targetType === "track" && !form.track) { setFormError("يرجى اختيار مسار"); return; }
     if (form.targetType === "students" && form.students.length === 0) { setFormError("يرجى اختيار طالب واحد على الأقل"); return; }
+    if (!teacherId && !form.teacher) { setFormError("يرجى اختيار معلم"); return; }
     if (!form.startDate) { setFormError("يرجى تحديد تاريخ البداية"); return; }
     if (form.endType === "activeDays" && !form.activeDaysCount) { setFormError("يرجى تحديد عدد الأيام النشطة"); return; }
     if (form.endType === "date" && !form.endDate) { setFormError("يرجى تحديد تاريخ الانتهاء"); return; }
@@ -260,7 +269,7 @@ export function TeacherPlanForm() {
     const body: Record<string, unknown> = {
       name: form.name.trim(), description: form.description.trim() || undefined,
       segments: form.segments,
-      teacher: teacherId,
+      teacher: teacherId ?? form.teacher,
       targetType: form.targetType,
       track: form.targetType === "track" ? form.track : undefined,
       students: form.targetType === "students" ? form.students : undefined,
@@ -474,9 +483,35 @@ export function TeacherPlanForm() {
         {form.targetType === "track" && (
           <div className="form-group">
             <label className="form-label">المسار <span>*</span></label>
-            <select className="form-input" value={form.track} onChange={(e) => sf("track", e.target.value)}>
+            <select
+              className="form-input"
+              value={form.track}
+              onChange={(e) => {
+                const trackId = e.target.value;
+                // A track picked from the admin portal seeds the teacher
+                // picker below when the track has exactly one teacher —
+                // a teacher user already has their own fixed `teacherId`.
+                const picked = tracks.find((t) => t._id === trackId);
+                const soleTeacher = picked?.teachers.length === 1 ? getId(picked.teachers[0]) : "";
+                setForm((p) => ({ ...p, track: trackId, teacher: teacherId ? p.teacher : (soleTeacher || p.teacher) }));
+              }}
+            >
               <option value="">— اختر مساراً —</option>
               {tracks.map((t) => <option key={t._id} value={t._id}>{t.title}</option>)}
+            </select>
+          </div>
+        )}
+        {!teacherId && (
+          <div className="form-group">
+            <label className="form-label">المعلم <span>*</span></label>
+            <select className="form-input" value={form.teacher} onChange={(e) => sf("teacher", e.target.value)}>
+              <option value="">— اختر معلماً —</option>
+              {(() => {
+                const picked = form.targetType === "track" ? tracks.find((t) => t._id === form.track) : undefined;
+                const trackTeachers = picked?.teachers.map((tc) => (typeof tc === "object" ? tc : allTeachers.find((at) => at._id === tc))).filter((tc): tc is { _id: string; name: string } => !!tc);
+                const options = trackTeachers && trackTeachers.length > 0 ? trackTeachers : allTeachers;
+                return options.map((t) => <option key={t._id} value={t._id}>{t.name}</option>);
+              })()}
             </select>
           </div>
         )}
