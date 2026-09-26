@@ -16,14 +16,14 @@ import FormSelect from '@/components/forms/FormSelect';
 import FormDatePicker from '@/components/forms/FormDatePicker';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
-import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet';
+import ScheduleSheet, { scheduleItems, fmtShortDate } from '@/components/domain/ScheduleSheet';
 import { useTracks } from '@/lib/queries/tracks';
 import { useQuranPlan, useCreateQuranPlan, useUpdateQuranPlan } from '@/lib/queries/quranPlan';
 import {
   DEFAULT_GRADE_RUBRIC, RUBRIC_TOTAL_DEGREES, totalMaxOf, criterionKey, type GradeCriterion,
 } from '@/lib/evaluationRubric';
 import {
-  computeMultiScheduleBreakdown, isReversedRange, validateSegmentDays, WEEK_DAYS,
+  computeMultiScheduleBreakdown, computeOpenScheduleDates, isReversedRange, validateSegmentDays, WEEK_DAYS,
   type PlanType, type RangePoint,
 } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -70,6 +70,9 @@ type FormFields = {
   endDate: string;
   /** Daily grading split for this plan. Seeded from DEFAULT_GRADE_RUBRIC. */
   gradeRubric: GradeCriterion[];
+  /** «بدون مقطع محدد» — no range; the teacher records each day what the
+   * student memorized. Fixed once the plan exists. */
+  openWard: boolean;
 };
 
 function emptySegment(type: PlanType): FormSegment {
@@ -90,6 +93,7 @@ const EMPTY: FormFields = {
   holidays: [], startDate: todayISO(),
   endType: 'activeDays', activeDaysCount: '', endDate: '',
   gradeRubric: DEFAULT_GRADE_RUBRIC.map((c) => ({ ...c })),
+  openWard: false,
 };
 
 export default function TeacherPlanForm() {
@@ -134,10 +138,14 @@ export default function TeacherPlanForm() {
           : '',
         // The server always returns segments, migrating a legacy single-type
         // plan into a one-element array, so there is no old shape to handle.
+        // An open-ward plan's segments carry no range — the defaults are never
+        // sent (see handleSubmit), they only keep FormSegment's shape total.
         segments: existingPlan.segments.map((seg) => ({
           type: seg.type, days: seg.days,
-          rangeStart: seg.rangeStart, rangeEnd: seg.rangeEnd,
+          rangeStart: seg.rangeStart ?? { surahNumber: 1, ayah: 1 },
+          rangeEnd: seg.rangeEnd ?? { surahNumber: 1, ayah: 1 },
         })),
+        openWard: Boolean(existingPlan.openWard),
         holidays: existingPlan.holidays ?? [],
         startDate: existingPlan.startDate ? existingPlan.startDate.split('T')[0] : todayISO(),
         endType: existingPlan.endType,
@@ -244,12 +252,31 @@ export default function TeacherPlanForm() {
     }
   }, [form.segments, form.holidays, form.startDate, form.endType, form.activeDaysCount, form.endDate]);
 
+  // Open-ward preview: just which types fall on which days — no slice.
+  const openPreview = useMemo(() => {
+    if (!form.openWard) return [];
+    if (form.segments.every((sg) => sg.days.length === 0)) return [];
+    if (form.endType === 'activeDays' && !form.activeDaysCount) return [];
+    if (form.endType === 'date' && !form.endDate) return [];
+    if (!form.startDate) return [];
+    return computeOpenScheduleDates({
+      holidays: form.holidays,
+      startDate: new Date(`${form.startDate}T00:00:00`),
+      endType: form.endType,
+      activeDaysCount: form.endType === 'activeDays' ? Number(form.activeDaysCount) : undefined,
+      endDate: form.endType === 'date' && form.endDate ? new Date(`${form.endDate}T00:00:00`) : undefined,
+      segments: form.segments.filter((sg) => sg.days.length > 0).map((sg) => ({ type: sg.type, days: sg.days })),
+    });
+  }, [form.openWard, form.segments, form.holidays, form.startDate, form.endType, form.activeDaysCount, form.endDate]);
+
   const requestedOccurrences = form.endType === 'activeDays' ? Number(form.activeDaysCount || 0) : schedulePreview.length;
-  const previewShortfall = requestedOccurrences > 0 && schedulePreview.length < requestedOccurrences;
+  // An open plan has no pages to run out of.
+  const previewShortfall = !form.openWard && requestedOccurrences > 0 && schedulePreview.length < requestedOccurrences;
   // `schedulePreview` now holds one row per segment per day (both types'
   // entries merged), so counting rows double-counts any day حفظ and مراجعة
   // share — count distinct calendar days instead.
-  const previewDayCount = new Set(schedulePreview.map((s) => s.date)).size;
+  const previewDayCount = new Set((form.openWard ? openPreview : schedulePreview).map((s) => s.date)).size;
+  const previewCount = form.openWard ? openPreview.length : schedulePreview.length;
 
   async function handleSubmit() {
     if (!form.name.trim()) return setFormError('اسم الخطة مطلوب');
@@ -270,7 +297,11 @@ export default function TeacherPlanForm() {
     const body: Record<string, unknown> = {
       name: form.name.trim(),
       description: form.description.trim() || undefined,
-      segments: form.segments,
+      segments: form.openWard
+        ? form.segments.map((sg) => ({ type: sg.type, days: sg.days }))
+        : form.segments,
+      // Immutable server-side — only sent on create (and duplicate).
+      openWard: isEdit ? undefined : form.openWard,
       holidays: form.holidays,
       startDate: form.startDate,
       endType: form.endType,
@@ -331,6 +362,27 @@ export default function TeacherPlanForm() {
           </FormGroup>
 
           <View style={{ height: 12 }} />
+          <Pressable
+            haptic="select"
+            disabled={isEdit}
+            onPress={() => sf('openWard', !form.openWard)}
+            style={[s.openToggle, form.openWard && s.openToggleOn, isEdit && { opacity: 0.7 }]}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: form.openWard, disabled: isEdit }}
+          >
+            <View style={[s.openBox, form.openWard && s.openBoxOn]}>
+              {form.openWard && <Text style={s.openTick}>✓</Text>}
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.openTitle}>بدون مقطع محدد</Text>
+              <Text style={s.typeHint}>
+                لا يُحدَّد ورد مسبقاً؛ يُسجِّل المعلم في كل حلقة ما حفظه الطالب من أين إلى أين، ثم يقيّمه.
+                {isEdit ? ' (لا يمكن تغيير هذا الخيار بعد إنشاء الخطة)' : ''}
+              </Text>
+            </View>
+          </Pressable>
+
+          <View style={{ height: 12 }} />
           {/* A plan can carry several types at once. Each gets its own card
               below with its own days and range; the plan's duration is shared. */}
           <FormGroup label="أنواع الخطة" required>
@@ -344,7 +396,11 @@ export default function TeacherPlanForm() {
                 );
               })}
             </View>
-            <Text style={s.typeHint}>اختر نوعاً أو أكثر — لكل نوع أيامه ونطاقه، والمدة واحدة للجميع.</Text>
+            <Text style={s.typeHint}>
+              {form.openWard
+                ? 'اختر نوعاً أو أكثر — لكل نوع أيامه، والمدة واحدة للجميع.'
+                : 'اختر نوعاً أو أكثر — لكل نوع أيامه ونطاقه، والمدة واحدة للجميع.'}
+            </Text>
           </FormGroup>
 
           <View style={{ height: 12 }} />
@@ -396,6 +452,7 @@ export default function TeacherPlanForm() {
                 </View>
               </FormGroup>
 
+              {!form.openWard && (<>
               <View style={{ height: 12 }} />
               <FormGroup label="من">
                 <SurahAyahPicker
@@ -413,6 +470,7 @@ export default function TeacherPlanForm() {
               {segReversed && (
                 <Text style={s.reverseHint}>⟲ هذا النطاق بالعكس (من نهاية المصحف نحو البداية) — سيُعرض كل يوم بترتيبه الصحيح.</Text>
               )}
+              </>)}
             </Card>
           );
         })}
@@ -706,7 +764,7 @@ export default function TeacherPlanForm() {
           </View>
         </Card>
 
-        {schedulePreview.length > 0 && (
+        {previewCount > 0 && (
           <Card>
             <CardHeader title="التقسيمة اليومية (معاينة)" />
             {previewShortfall && (
@@ -728,10 +786,20 @@ export default function TeacherPlanForm() {
           onClose={() => setShowSchedule(false)}
           title="التقسيمة اليومية (معاينة)"
           // Direction is a property of the segment, so resolve it per row.
-          items={scheduleItems(schedulePreview, (e) => {
-            const seg = form.segments.find((sg) => sg.type === e.type);
-            return seg ? isReversedRange(seg.rangeStart, seg.rangeEnd) : false;
-          })}
+          items={form.openWard
+            ? openPreview.map((e) => ({
+                key: `${e.type}-${e.occurrenceIndex}`,
+                index: e.occurrenceIndex,
+                type: e.type,
+                // Local-calendar parse — the entry's UTC suffix is only a carrier.
+                date: fmtShortDate(`${e.date.slice(0, 10)}T00:00:00`),
+                range: 'يُسجَّل ما يحفظه الطالب في الحلقة',
+                pages: '',
+              }))
+            : scheduleItems(schedulePreview, (e) => {
+                const seg = form.segments.find((sg) => sg.type === e.type);
+                return seg ? isReversedRange(seg.rangeStart, seg.rangeEnd) : false;
+              })}
         />
 
         <Button
@@ -761,6 +829,18 @@ function createS(theme: AppTheme) {
     holidayRangeRow: { flexDirection: 'row', gap: 10 },
     flex1: { flex: 1 },
     chip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+    openToggle: {
+      flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+      padding: 12, borderRadius: 12, borderWidth: 1.5, borderColor: theme.border,
+    },
+    openToggleOn: { borderColor: theme.green, backgroundColor: theme.greenPale },
+    openBox: {
+      width: 20, height: 20, borderRadius: 6, borderWidth: 1.5, borderColor: theme.border,
+      alignItems: 'center', justifyContent: 'center', marginTop: 2,
+    },
+    openBoxOn: { borderColor: theme.green, backgroundColor: theme.green },
+    openTick: { color: '#fff', fontSize: 13, lineHeight: 16, fontFamily: theme.fontCairoBold },
+    openTitle: { fontSize: 14, color: theme.text, fontFamily: theme.fontCairoBold },
     typeHint: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 8, lineHeight: 18 },
     chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
     chipText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
