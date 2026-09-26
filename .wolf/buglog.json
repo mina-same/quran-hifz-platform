@@ -6954,5 +6954,55 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-09-26T06:49:02.000Z"
+  },
+  {
+    "id": "bug-409",
+    "timestamp": "2026-09-26T12:00:00Z",
+    "error_message": "Open-ward: saving a student absent after first saving them present left the day's OpenWardEntry, still shown in logs and counted in juz coverage",
+    "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx, TeacherTrackDetail.tsx, quran-hifz-mobile/components/domain/EvaluationRoster.tsx",
+    "root_cause": "Absent branch of the open-ward save returned early without touching entries already saved for that day",
+    "fix": "savedOpenWardTypes() (lib/openWard.ts, web+mobile) + useDeleteOpenWard for each saved type in the absent branch",
+    "tags": [
+      "open-ward",
+      "attendance",
+      "absent",
+      "stale-data"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-09-26T12:00:00Z"
+  },
+  {
+    "id": "bug-410",
+    "timestamp": "2026-09-26T12:00:00Z",
+    "error_message": "Mobile bulk «التقييم» screen saved grades for open-ward tracks with no memorized range, bypassing the mandatory-ward rule",
+    "file": "quran-hifz-mobile/app/(portal)/teacher/evaluate.tsx",
+    "root_cause": "evaluate.tsx is a second grading entry point that knows nothing of the linked plan",
+    "fix": "Resolve the track's linked plan; when isOpenPlan, show a warning and disable save, pointing to «الحضور والتقييم»",
+    "tags": [
+      "open-ward",
+      "mobile",
+      "evaluate",
+      "validation"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-09-26T12:00:00Z"
+  },
+  {
+    "id": "bug-411",
+    "timestamp": "2026-09-26T12:00:00Z",
+    "error_message": "Student report showed no open-ward coverage for track-targeted open plans",
+    "file": "quran-hifz/src/quran/components/common/StudentReportPanel.tsx, quran-hifz-mobile/components/domain/StudentReportPanel.tsx",
+    "root_cause": "useQuranPlans({student}) maps to filter.students=student server-side, which only matches targetType:\"students\" plans (pre-existing gap)",
+    "fix": "Also fetch the track's plans; openPlanIdsForReport() merges+dedupes open plans from both lists",
+    "tags": [
+      "open-ward",
+      "report",
+      "quran-plans-filter"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-09-26T12:00:00Z"
   }
 ]
