@@ -113,7 +113,7 @@ function dayLabel(d: Date): string {
 
 /** Local calendar key (YYYY-MM-DD) for a date — the same shape holidays are
  * stored in, compared on local calendar fields like dateOnly/dayLabel do. */
-function dateKey(d: Date): string {
+export function dateKey(d: Date): string {
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${d.getFullYear()}-${month}-${day}`;
@@ -395,8 +395,9 @@ export const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة', 'ختمة'];
 export type PlanSegmentInput = {
   type: PlanType;
   days: string[];
-  rangeStart: RangePoint;
-  rangeEnd: RangePoint;
+  /** Absent on an open-ward plan (`QuranPlan.openWard`). */
+  rangeStart?: RangePoint;
+  rangeEnd?: RangePoint;
 };
 
 /** The plan-level window every segment shares. */
@@ -475,8 +476,8 @@ function segmentAsScheduleInput(
     holidays: plan.holidays,
     endType: 'activeDays',
     activeDaysCount: occurrenceCount,
-    rangeStart: seg.rangeStart,
-    rangeEnd: seg.rangeEnd,
+    rangeStart: seg.rangeStart!,
+    rangeEnd: seg.rangeEnd!,
   };
 }
 
@@ -493,6 +494,7 @@ export function computeMultiScheduleBreakdown(plan: MultiPlanInput): SegmentSche
   const counts = segmentOccurrenceCounts(plan);
   const out: SegmentScheduleEntry[] = [];
   for (const seg of plan.segments) {
+    if (!seg.rangeStart || !seg.rangeEnd) continue;
     const count = counts.get(seg.type) ?? 0;
     if (count <= 0) continue;
     for (const entry of computeScheduleBreakdown(segmentAsScheduleInput(plan, seg, count))) {
@@ -524,6 +526,7 @@ export function computeMultiTodayAssignments(
   const counts = segmentOccurrenceCounts(plan);
   const out: (TodayAssignment & { type: PlanType })[] = [];
   for (const seg of segs) {
+    if (!seg.rangeStart || !seg.rangeEnd) continue;
     const count = counts.get(seg.type) ?? 0;
     if (count <= 0) continue;
     const slice = computeTodayAssignment(segmentAsScheduleInput(plan, seg, count), today);
@@ -553,4 +556,36 @@ export function validateSegmentDays(segments: PlanSegmentInput[]): string | null
     return 'لا يمكن دمج "ختمة" مع نوع آخر في نفس الخطة';
   }
   return null;
+}
+
+export type OpenScheduleEntry = { occurrenceIndex: number; date: string; type: PlanType; open: true };
+
+/**
+ * An open-ward plan's calendar: which types are due on which days, with no
+ * slice. Uses the same shared window and weekday/holiday rules as
+ * computeMultiScheduleBreakdown, so day progress counts identically.
+ *
+ * `date` is the LOCAL calendar key suffixed with a UTC midnight, never
+ * `toISOString()` of local midnight — that shifts a day back on any UTC+ host,
+ * and every client reads the day as `date.slice(0, 10)`.
+ */
+export function computeOpenScheduleDates(plan: MultiPlanInput): OpenScheduleEntry[] {
+  const counts = segmentOccurrenceCounts(plan);
+  const holidays = plan.holidays && plan.holidays.length > 0 ? new Set(plan.holidays) : NO_HOLIDAYS;
+  const out: OpenScheduleEntry[] = [];
+  for (const seg of plan.segments) {
+    const target = counts.get(seg.type) ?? 0;
+    const cursor = dateOnly(plan.startDate);
+    let n = 0;
+    let walked = 0;
+    while (n < target && walked < SCHEDULE_WALK_LIMIT_DAYS) {
+      if (isOccurrenceDay(cursor, seg.days, holidays)) {
+        n++;
+        out.push({ occurrenceIndex: n, date: `${dateKey(cursor)}T00:00:00.000Z`, type: seg.type, open: true });
+      }
+      cursor.setDate(cursor.getDate() + 1);
+      walked++;
+    }
+  }
+  return out.sort((a, b) => a.date.localeCompare(b.date) || a.type.localeCompare(b.type));
 }
