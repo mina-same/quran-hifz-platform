@@ -8,9 +8,10 @@ import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
 import ScheduleSheet, { fmtShortDate, fmtPages, type ScheduleItem } from '@/components/domain/ScheduleSheet';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import {
-  useStudentPlanProgress, useInitStudentPlanProgress, useReflowStudentPlan, planSegment,
+  useStudentPlanProgress, useInitStudentPlanProgress, useReflowStudentPlan, planSegment, isOpenPlan,
   type QuranPlan, type StudentOccurrenceStatus,
 } from '@/lib/queries/quranPlan';
+import OpenWardLogSheet from '@/components/domain/OpenWardLogSheet';
 import type { PlanType } from '@/lib/quranRange';
 import { IconCalendarEvent } from '@tabler/icons-react-native';
 import { isReversedRange, isReversedSchedule, orientSlice, surahName, type RangePoint } from '@/lib/quranRange';
@@ -78,9 +79,22 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
 
   const reversed = useMemo(
     () => isReversedSchedule(ownSchedule)
-      ?? (segment ? isReversedRange(segment.rangeStart, segment.rangeEnd) : false),
+      ?? (segment?.rangeStart && segment.rangeEnd ? isReversedRange(segment.rangeStart, segment.rangeEnd) : false),
     [ownSchedule, segment],
   );
+
+  // An open-ward plan has no per-student schedule to reshape — show what the
+  // student actually recorded instead. Callers render one panel per segment,
+  // so only the first segment's panel draws the (type-mixed) log.
+  if (isOpenPlan(basePlan)) {
+    if (type && type !== basePlan.segments[0]?.type) return null;
+    return (
+      <View style={{ gap: 6 }}>
+        <Text style={s.muted}>خطة بدون مقطع محدد — هذا سجل ما حفظه {studentName}.</Text>
+        <OpenWardLogSheet planId={planId} studentId={studentId} label="سجل ورد الطالب" />
+      </View>
+    );
+  }
 
   if (isLoading) {
     return <Text style={s.muted}>جارٍ التحميل...</Text>;

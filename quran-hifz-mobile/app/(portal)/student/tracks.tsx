@@ -8,7 +8,7 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { useTracks, type Track, type TrackTeacher } from '@/lib/queries/tracks';
 import { useStudent } from '@/lib/queries/students';
-import { useQuranPlans, segmentReversed } from '@/lib/queries/quranPlan';
+import { useQuranPlans, segmentReversed, isSlice } from '@/lib/queries/quranPlan';
 import { planScheduleDays, planScheduleRange, resolveLinkedPlan, NO_PLAN_SCHEDULE_TEXT } from '@/lib/trackSchedule';
 import { SURAHS } from '@/lib/data/surahs';
 import { orientSlice } from '@/lib/quranRange';
@@ -53,6 +53,9 @@ function TrackCard({ track }: { track: Track }) {
     const multi = list.length > 1;
     // Direction is per segment — read it from the type that is actually due.
     return list.map((entry) => {
+      if (!isSlice(entry)) {
+        return `${multi ? `مقرَّر اليوم (${entry.type})` : 'مقرَّر اليوم'}: ورد حر — يُسجَّل في الحلقة`;
+      }
       const a = orientSlice(entry, segmentReversed(linkedPlan!, entry.type));
       const pages = a.pageEnd !== a.pageStart ? `${a.pageStart} - ${a.pageEnd}` : `${a.pageStart}`;
       const label = multi ? `مقرَّر اليوم (${entry.type})` : 'مقرَّر اليوم';

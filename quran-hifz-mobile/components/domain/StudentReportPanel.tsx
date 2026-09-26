@@ -6,10 +6,11 @@ import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import ProgressBar from '@/components/ui/ProgressBar';
 import FormSelect from '@/components/forms/FormSelect';
-import { useQuranPlans, type PlanSegment } from '@/lib/queries/quranPlan';
+import { useQueries } from '@tanstack/react-query';
+import { useQuranPlans, isOpenPlan, openWardQueryOptions, type PlanSegment } from '@/lib/queries/quranPlan';
 import { useEvaluations, type EvaluationRecord } from '@/lib/queries/evaluations';
 import { MAX_SCORES, legacyScoresOf } from '@/lib/evaluationRubric';
-import { toFlatIndex, fromFlatIndex, juzFlatRange } from '@/lib/quranRange';
+import { toFlatIndex, fromFlatIndex, juzFlatRange, coveredFlatRanges } from '@/lib/quranRange';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { AR_LOCALE } from '@/lib/date';
 
@@ -36,14 +37,20 @@ function studentNameOf(e: EvaluationRecord): string {
  * segment carries its own range and its own progress — حفظ and مراجعة cover
  * different stretches of the mushaf and advance at different rates, so they
  * contribute independently rather than being averaged into one plan range. */
-function computeJuzRows(plans: { segments?: PlanSegment[] }[]) {
-  const ranges = plans
-    .flatMap((p) => p.segments ?? [])
-    .map((seg) => ({
-      start: toFlatIndex(seg.rangeStart),
-      end: toFlatIndex(seg.rangeEnd),
-      percent: seg.progress?.percent ?? 0,
-    }));
+function computeJuzRows(plans: { segments?: PlanSegment[] }[], openSpans: [number, number][] = []) {
+  // Open-ward plans have no segment range — what the student actually
+  // recorded counts instead, and a recorded span is memorized by definition.
+  const ranges = [
+    ...plans
+      .flatMap((p) => p.segments ?? [])
+      .filter((seg) => seg.rangeStart && seg.rangeEnd)
+      .map((seg) => ({
+        start: toFlatIndex(seg.rangeStart!),
+        end: toFlatIndex(seg.rangeEnd!),
+        percent: seg.progress?.percent ?? 0,
+      })),
+    ...openSpans.map(([start, end]) => ({ start, end, percent: 100 })),
+  ];
 
   return Array.from({ length: 30 }, (_, i) => {
     const juz = i + 1;
@@ -84,7 +91,21 @@ export default function StudentReportPanel({ students, aggregateFilter, aggregat
   const { data: studentEvals = [] } = useEvaluations(selectedId ? { student: selectedId } : { student: '__none__' });
   const { data: allEvals = [] } = useEvaluations(aggregateFilter);
 
-  const juzRows = useMemo(() => computeJuzRows(plans), [plans]);
+  // What the student recorded on each open-ward plan (حفظ only — مراجعة
+  // revisits already-memorized text and must not inflate coverage).
+  const openWardResults = useQueries({
+    queries: plans
+      .filter((p) => isOpenPlan(p))
+      .map((p) => openWardQueryOptions(p._id, selectedId ? { student: selectedId } : undefined)),
+  });
+  const openSpansKey = openWardResults.map((r) => r.dataUpdatedAt).join(',');
+  const openSpans = useMemo(
+    () => coveredFlatRanges(openWardResults.flatMap((r) => r.data ?? []).filter((e) => e.type === 'حفظ')),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [openSpansKey],
+  );
+
+  const juzRows = useMemo(() => computeJuzRows(plans, openSpans), [plans, openSpans]);
   const juzSummary = useMemo(() => {
     const done = juzRows.filter((r) => r.status === 'مكتمل').length;
     const inProgress = juzRows.filter((r) => r.status === 'قيد الحفظ').length;
