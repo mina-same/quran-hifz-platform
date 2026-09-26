@@ -587,6 +587,8 @@
 
 ## quran-hifz-mobile/components/domain/
 
+- `OpenWardLogSheet.tsx` — «سجل الورد» for open-ward plans: SheetTriggerRow + ScheduleSheet of compact cards; exports openWardItems() (~650 tok)
+- `OpenWardPicker.tsx` — RN «ماذا حفظ الطالب اليوم؟» من/إلى + «لم يُسمِّع اليوم» chip; exports OpenWardValue, openWardComplete (~1000 tok)
 - `AccountSettingsScreen.tsx` — Shared "الملف الشخصي" screen for student + teacher portals (admin/parent (~2117 tok)
 - `AudioRecorder.tsx` — AudioRecorder — uses useState, useEffect (~1336 tok)
 - `BiometricLockScreen.tsx` — Shown after a stored session resumes silently, when the user has opted into (~1123 tok)
@@ -745,6 +747,7 @@
 
 ## quran-hifz-server/src/controllers/
 
+- `open-ward.controller.ts` — Open-ward daily records: validateOpenWardBody (pure), upsertOpenWard (+overlapWarning), listOpenWard, deleteOpenWard (~1500 tok)
 - `admin.controller.ts` — Zod schemas: updateParentSchema, createParentSchema, createSupervisorSchema. getParents() is gender-scoped for supervisor via supervisorGenderOf/trackIdsForGender (parents of children in the supervisor's masajid gender only). (~2360 tok)
 - `attendance.controller.ts` — Upserts one Attendance doc per {student, date} and recalculates each (~1495 tok)
 - `auth.controller.ts` — Zod schemas: loginSchema, updateProfileSchema, changePasswordSchema, pushTokenSchema (~1216 tok)
@@ -788,6 +791,7 @@
 
 ## quran-hifz-server/src/models/
 
+- `OpenWardEntry.model.ts` — What a student memorized on one day of an open-ward plan; unique (plan,student,type,date); status recorded|none (~550 tok)
 - `Attendance.model.ts` — Exports IAttendance, Attendance (~263 tok)
 - `Evaluation.model.ts` — Legacy fixed-shape scores. Still written whenever the plan's rubric uses (~927 tok)
 - `GroupHomework.model.ts` — Exports IGroupHomework, GroupHomework (~258 tok)
@@ -957,6 +961,7 @@
 
 ## quran-hifz/src/quran/api/
 
+- `open-ward.ts` — OpenWardEntry type, openWardQueryOptions, useOpenWardEntries/useUpsertOpenWard/useDeleteOpenWard, entryStudentId (~700 tok)
 - `account.ts` — Exports MeUser, useMe, useUpdateProfile, useChangePassword (~258 tok)
 - `account.ts` — Exports MeUser, useMe (GET /auth/me), useUpdateProfile (PUT /auth/profile), useChangePassword (PUT /auth/change-password) (~150 tok)
 - `admin-parents.ts` — Exports ParentUser, useAdminParents, useCreateParent, useLinkChild + 4 more (~787 tok)
@@ -988,6 +993,8 @@
 
 ## quran-hifz/src/quran/components/common/
 
+- `OpenWardLog.tsx` — Log table of an open-ward plan's recorded days (optionally one student) (~700 tok)
+- `OpenWardPicker.tsx` — «ماذا حفظ الطالب اليوم؟» من/إلى + «لم يُسمِّع اليوم»; SurahAyah control injected; exports OpenWardValue, openWardComplete (~1000 tok)
 - `Alert.tsx` — ICONS — now supports `danger` tone (~165 tok)
 - `AyahBar.tsx` — AyahBar (~40 tok)
 - `Badge.tsx` — Badge (~104 tok)

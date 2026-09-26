@@ -586,6 +586,3 @@ export async function deletePlan(req: Request, res: Response, next: NextFunction
     next(err);
   }
 }
-
-/** Temporary — for src/_verify_open_ward.ts only; removed before merge. */
-export const __test_createSchema = quranPlanCreateSchema;
