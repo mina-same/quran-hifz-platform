@@ -23,7 +23,8 @@ function scheduleInputOf(plan: IQuranPlan, seg: IPlanSegment, occurrenceCount: n
   return {
     days: seg.days, startDate: plan.startDate, holidays: plan.holidays,
     endType: 'activeDays', activeDaysCount: occurrenceCount,
-    rangeStart: seg.rangeStart, rangeEnd: seg.rangeEnd,
+    // Open-ward plans never reach reflow — student-plan-progress refuses them.
+    rangeStart: seg.rangeStart!, rangeEnd: seg.rangeEnd!,
   };
 }
 

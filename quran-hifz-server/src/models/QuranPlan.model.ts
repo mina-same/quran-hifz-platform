@@ -70,8 +70,9 @@ export interface IScheduleEntry {
 export interface IPlanSegment {
   type: PlanType;
   days: string[];
-  rangeStart: IRangePoint;
-  rangeEnd: IRangePoint;
+  /** Absent on an open-ward plan (`IQuranPlan.openWard`). */
+  rangeStart?: IRangePoint;
+  rangeEnd?: IRangePoint;
   schedule: IScheduleEntry[];
 }
 
@@ -83,6 +84,10 @@ export interface IQuranPlan extends Document {
    * document is normalized into a one-element array by `normalizePlan()` in
    * quran-plan.controller.ts, so nothing downstream sees the old shape. */
   segments: IPlanSegment[];
+
+  /** No fixed range: the teacher records each day what the student actually
+   * memorized (OpenWardEntry). Immutable after creation. */
+  openWard: boolean;
 
   /* ── legacy single-track fields ──────────────────────────────────────────
    * Pre-segments documents still carry these and are migrated on read, never
@@ -174,8 +179,9 @@ const planSegmentSchema = new Schema<IPlanSegment>(
       required: true,
       validate: [(v: string[]) => v.length > 0, 'يجب اختيار يوم واحد على الأقل'],
     },
-    rangeStart: { type: rangePointSchema, required: true },
-    rangeEnd:   { type: rangePointSchema, required: true },
+    // Required unless the plan is openWard — enforced in quran-plan.controller.ts.
+    rangeStart: { type: rangePointSchema, required: false },
+    rangeEnd:   { type: rangePointSchema, required: false },
     // Frozen day-by-day breakdown for THIS type — normally computed live (see
     // computeMultiScheduleBreakdown), so it starts empty. Freezing it
     // (POST /quran-plans/:id/schedule/generate) lets a teacher hand-edit
@@ -198,6 +204,8 @@ const quranPlanSchema = new Schema<IQuranPlan>(
       // controller via validateSegmentDays, which also enforces the
       // one-type-per-day partition that a mongoose validator cannot express.
     },
+
+    openWard: { type: Boolean, default: false },
 
     // ── legacy single-track fields — read-only, migrated on read ──
     type:        { type: String, enum: PLAN_TYPE_VALUES },

@@ -176,7 +176,7 @@ function withPlanComputed(plan: InstanceType<typeof QuranPlan>) {
       days: seg.days, startDate: plan.startDate, holidays: plan.holidays,
       endType: 'activeDays' as const,
       activeDaysCount: counts.get(seg.type) ?? 0,
-      rangeStart: seg.rangeStart, rangeEnd: seg.rangeEnd,
+      rangeStart: seg.rangeStart!, rangeEnd: seg.rangeEnd!,
     };
     const progress = computePlanProgress(scheduleInput);
     // A frozen schedule wins over live recomputation — that's the point of
@@ -197,7 +197,7 @@ function withPlanComputed(plan: InstanceType<typeof QuranPlan>) {
       })(),
       progress,
       juzProgress: computeJuzProgress(scheduleInput, progress),
-      pageRange:   pageRangeOfAyahRange(seg.rangeStart, seg.rangeEnd),
+      pageRange:   pageRangeOfAyahRange(seg.rangeStart!, seg.rangeEnd!),
       schedule,
       scheduleIsPersisted: persisted,
     };
@@ -381,7 +381,7 @@ export async function generateSchedule(req: Request, res: Response, next: NextFu
       schedule: computeScheduleBreakdown({
         days: seg.days, startDate: plan.startDate, holidays: plan.holidays,
         endType: 'activeDays', activeDaysCount: counts.get(seg.type) ?? 0,
-        rangeStart: seg.rangeStart, rangeEnd: seg.rangeEnd,
+        rangeStart: seg.rangeStart!, rangeEnd: seg.rangeEnd!,
       }).map((s) => ({ ...s, date: new Date(s.date) })),
     }));
     // The legacy top-level copy would otherwise shadow the segments on a later

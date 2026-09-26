@@ -3,6 +3,7 @@ import { getPlans, getPlan, createPlan, updatePlan, deletePlan, generateSchedule
 import {
   getStudentProgress, recordOccurrence, updateStudentScheduleEntry, reflowNow, initStudentProgress,
 } from '../controllers/student-plan-progress.controller';
+import { upsertOpenWard, listOpenWard, deleteOpenWard } from '../controllers/open-ward.controller';
 import { authenticate } from '../middleware/auth';
 import { authorize } from '../middleware/role';
 
@@ -33,5 +34,10 @@ router.post('/:id/students/:studentId/progress/record',         authorize('teach
 router.put('/:id/students/:studentId/schedule/:occurrenceIndex', authorize('teacher', 'admin'), updateStudentScheduleEntry);
 router.post('/:id/students/:studentId/progress/reflow',         authorize('teacher', 'admin'), reflowNow);
 router.post('/:id/students/:studentId/progress/init',           authorize('teacher', 'admin'), initStudentProgress);
+
+// Open-ward plans (plan.openWard): what each student actually memorized per day.
+router.get('/:id/open-ward',                        listOpenWard);
+router.put('/:id/students/:studentId/open-ward',    authorize('teacher', 'admin'), upsertOpenWard);
+router.delete('/:id/students/:studentId/open-ward', authorize('teacher', 'admin'), deleteOpenWard);
 
 export default router;
