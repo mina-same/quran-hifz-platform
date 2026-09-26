@@ -10,6 +10,15 @@ import { toFlatIndex, pageOfFlatIndex, juzOfFlatIndex } from '../lib/quranRange'
 
 const SURAH_BY_NUMBER = new Map(SURAHS.map((s) => [s.number, s]));
 
+const OPEN_WARD_REFUSAL = 'الخطة بدون مقطع محدد — سجّل ما حفظه الطالب من شاشة الحضور';
+
+/** Per-student overlays, reflow and hand-edits all slice a fixed range — an
+ * open-ward plan has none, so every write path refuses it up front (before
+ * getOrInitProgress, which would otherwise slice a missing range). */
+export function assertFixedPlan(plan: { openWard?: boolean }): void {
+  if (plan.openWard) throw new AppError(OPEN_WARD_REFUSAL, 400);
+}
+
 async function loadPlanAndValidateStudent(planId: string, studentId: string) {
   const plan = await QuranPlan.findById(planId);
   if (!plan) throw new AppError('الخطة غير موجودة', 404);
@@ -49,6 +58,10 @@ export async function getStudentProgress(req: Request, res: Response, next: Next
   try {
     const { id: planId, studentId } = req.params;
     const plan = await loadPlanAndValidateStudent(planId, studentId);
+    if (plan.openWard) {
+      res.json({ success: true, data: { effectiveSchedule: [], progressIsPersisted: false, overflowPages: 0, openWard: true } });
+      return;
+    }
 
     const doc = await StudentPlanProgress.findOne({ plan: planId, student: studentId });
     if (!doc) {
@@ -98,6 +111,7 @@ export async function recordOccurrence(req: Request, res: Response, next: NextFu
     const data = recordOccurrenceSchema.parse(req.body);
 
     const plan = await loadPlanAndValidateStudent(planId, studentId);
+    assertFixedPlan(plan);
     const doc = await getOrInitProgress(planId, studentId, plan);
 
     // Backfill: overlays written before segments existed carry no type.
@@ -194,6 +208,7 @@ export async function updateStudentScheduleEntry(req: Request, res: Response, ne
     }
 
     const plan = await loadPlanAndValidateStudent(planId, studentId);
+    assertFixedPlan(plan);
     const doc = await getOrInitProgress(planId, studentId, plan);
 
     const entry = doc.occurrences.find((o) => o.occurrenceIndex === occurrenceIndex);
@@ -267,6 +282,7 @@ export async function initStudentProgress(req: Request, res: Response, next: Nex
     const { id: planId, studentId } = req.params;
     const data = initStudentProgressSchema.parse(req.body);
     const plan = await loadPlanAndValidateStudent(planId, studentId);
+    assertFixedPlan(plan);
 
     let doc;
     if (data.rangeStart && data.rangeEnd) {
@@ -319,6 +335,7 @@ export async function reflowNow(req: Request, res: Response, next: NextFunction)
   try {
     const { id: planId, studentId } = req.params;
     const plan = await loadPlanAndValidateStudent(planId, studentId);
+    assertFixedPlan(plan);
     const doc = await getOrInitProgress(planId, studentId, plan);
 
     reflowAll(doc);
