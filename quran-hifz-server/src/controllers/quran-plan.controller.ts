@@ -7,9 +7,11 @@ import {
   WEEK_DAYS, computeTodayAssignment, computePlanProgress, computeJuzProgress, computeScheduleBreakdown,
   pageRangeOfAyahRange, toFlatIndex, pageOfFlatIndex, juzOfFlatIndex,
   PLAN_TYPES, validateSegmentDays, segmentOccurrenceCounts, unionDays,
+  computeOpenScheduleDates, dateKey,
   type PlanSegmentInput, type PlanType, type MultiPlanInput,
 } from '../lib/quranRange';
 import type { IPlanSegment, IQuranPlan } from '../models/QuranPlan.model';
+import { OpenWardEntry } from '../models/OpenWardEntry.model';
 
 const SURAH_BY_NUMBER = new Map(SURAHS.map((s) => [s.number, s]));
 
@@ -47,8 +49,9 @@ const rangePointSchema = z.object({
 const planSegmentSchema = z.object({
   type:       z.enum(['حفظ', 'مراجعة', 'ختمة']),
   days:       z.array(z.enum(WEEK_DAYS)).min(1),
-  rangeStart: rangePointSchema,
-  rangeEnd:   rangePointSchema,
+  // Required unless the plan is openWard — enforced by checkSegmentRanges().
+  rangeStart: rangePointSchema.optional(),
+  rangeEnd:   rangePointSchema.optional(),
 });
 
 const quranPlanSchema = z.object({
@@ -63,6 +66,8 @@ const quranPlanSchema = z.object({
   /** One track per type. Max two (one per type), and their days must not
    * overlap — both enforced by validateSegmentDays in the refine below. */
   segments: z.array(planSegmentSchema).min(1).max(PLAN_TYPES.length),
+  /** No fixed range — the daily ward is recorded as OpenWardEntry. */
+  openWard: z.boolean().optional(),
 
   startDate: z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح').optional(),
   holidays:  z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'تاريخ عطلة غير صالح')).optional(),
@@ -76,6 +81,21 @@ const quranPlanSchema = z.object({
   activeDaysCount: z.number().int().min(1).optional(),
   endDate:         z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح').optional(),
 });
+
+type SegmentBody = z.infer<typeof planSegmentSchema>;
+
+/** Open plans carry no range and no ختمة; fixed plans need both points. */
+function checkSegmentRanges(segments: SegmentBody[], openWard: boolean): string | null {
+  for (const seg of segments) {
+    if (openWard) {
+      if (seg.type === 'ختمة') return 'لا يمكن استخدام "ختمة" في خطة بدون مقطع محدد';
+      if (seg.rangeStart || seg.rangeEnd) return 'الخطة بدون مقطع محدد لا تحتوي على بداية أو نهاية';
+    } else if (!seg.rangeStart || !seg.rangeEnd) {
+      return `حدد من أين وإلى أين لنوع "${seg.type}"`;
+    }
+  }
+  return null;
+}
 
 // `.superRefine` returns a ZodEffects, which has no `.partial()` — kept as a separate
 // schema (used only for create) so `updatePlan` can still call `quranPlanSchema.partial()`,
@@ -101,12 +121,18 @@ const quranPlanCreateSchema = quranPlanSchema.superRefine((data, ctx) => {
     ctx.addIssue({ code: 'custom', message: segmentError, path: ['segments'] });
   }
 
+  const rangeError = checkSegmentRanges(data.segments, data.openWard === true);
+  if (rangeError) {
+    ctx.addIssue({ code: 'custom', message: rangeError, path: ['segments'] });
+  }
+
   // rangeStart is deliberately allowed to sit after rangeEnd in mushaf order —
   // a reverse-direction plan (e.g. starting at An-Nas and working backward
   // toward Al-Fatiha), handled by sliceForOccurrence/computeScheduleBreakdown.
 
   data.segments.forEach((seg, i) => {
     for (const [key, point] of [['rangeStart', seg.rangeStart], ['rangeEnd', seg.rangeEnd]] as const) {
+      if (!point) continue;
       const surah = SURAH_BY_NUMBER.get(point.surahNumber);
       if (surah && point.ayah > surah.ayahCount) {
         ctx.addIssue({
@@ -164,6 +190,55 @@ function withPlanComputed(plan: InstanceType<typeof QuranPlan>) {
     activeDaysCount: plan.activeDaysCount,
     endDate:         plan.endDate,
   };
+
+  // Open-ward plan: no range, no slice — just which types are due on which
+  // days. Range-derived fields are null so no client can mistake them for a
+  // real ward; what was actually memorized lives in OpenWardEntry.
+  if (obj.openWard) {
+    const openInputs: PlanSegmentInput[] = segments.map((s) => ({ type: s.type, days: s.days }));
+    const openSchedule = computeOpenScheduleDates({ ...window, segments: openInputs });
+    const todayKey = dateKey(new Date());
+    const shaped = segments.map((seg) => {
+      const schedule = openSchedule.filter((e) => e.type === seg.type);
+      const done = schedule.filter((e) => e.date.slice(0, 10) <= todayKey).length;
+      return {
+        type: seg.type,
+        days: seg.days,
+        rangeStart: null,
+        rangeEnd: null,
+        todayAssignment: schedule.some((e) => e.date.slice(0, 10) === todayKey)
+          ? { type: seg.type, open: true as const } : null,
+        progress: schedule.length > 0
+          ? { completed: done, total: schedule.length, percent: Math.round((done / schedule.length) * 100) }
+          : null,
+        juzProgress: null,
+        pageRange: null,
+        schedule,
+        scheduleIsPersisted: false,
+      };
+    });
+    const todayAssignments = shaped.map((s) => s.todayAssignment).filter((a): a is NonNullable<typeof a> => a != null);
+    const dates = Array.from(new Set(openSchedule.map((e) => e.date))).sort();
+    const completedDays = dates.filter((d) => d.slice(0, 10) <= todayKey).length;
+    return {
+      ...obj,
+      openWard: true,
+      segments: shaped,
+      types: shaped.map((s) => s.type),
+      type: todayAssignments[0]?.type ?? shaped[0]?.type ?? plan.type,
+      days: unionDays(openInputs),
+      todayAssignment: todayAssignments[0] ?? null,
+      todayAssignments,
+      progress: dates.length > 0
+        ? { completed: completedDays, total: dates.length, percent: Math.round((completedDays / dates.length) * 100) }
+        : null,
+      juzProgress: null,
+      pageRange: null,
+      schedule: openSchedule,
+      scheduleIsPersisted: false,
+    };
+  }
+
   const segmentInputs: PlanSegmentInput[] = segments.map((s) => ({
     type: s.type, days: s.days, rangeStart: s.rangeStart, rangeEnd: s.rangeEnd,
   }));
@@ -236,6 +311,7 @@ function withPlanComputed(plan: InstanceType<typeof QuranPlan>) {
 
   return {
     ...obj,
+    openWard: false,
     segments: shaped,
 
     // ── rollups, so display-only screens keep working ──
@@ -322,6 +398,14 @@ export async function updatePlan(req: Request, res: Response, next: NextFunction
     // consistency the create schema enforces.
     const existing = await QuranPlan.findById(req.params.id);
     if (!existing) throw new AppError('الخطة غير موجودة', 404);
+    if (data.openWard !== undefined && data.openWard !== Boolean(existing.openWard)) {
+      throw new AppError('لا يمكن تغيير نوع الخطة (بمقطع / بدون مقطع) بعد إنشائها', 400);
+    }
+    if (data.segments) {
+      const rangeError = checkSegmentRanges(data.segments, Boolean(existing.openWard));
+      if (rangeError) throw new AppError(rangeError, 400);
+    }
+    delete (data as { openWard?: boolean }).openWard;
     const targetType = data.targetType ?? existing.targetType;
     const track    = data.track !== undefined ? data.track : existing.track;
     const students = data.students !== undefined ? data.students : existing.students;
@@ -358,6 +442,7 @@ export async function generateSchedule(req: Request, res: Response, next: NextFu
   try {
     const plan = await QuranPlan.findById(req.params.id);
     if (!plan) throw new AppError('الخطة غير موجودة', 404);
+    if (plan.openWard) throw new AppError('الخطة بدون مقطع محدد لا تحتوي على تقسيمة يومية', 400);
 
     // Freeze every segment. A legacy document is normalized into segments
     // first, so this is also what migrates it in place on first generate.
@@ -444,6 +529,7 @@ export async function updateScheduleEntry(req: Request, res: Response, next: Nex
 
     const plan = await QuranPlan.findById(req.params.id);
     if (!plan) throw new AppError('الخطة غير موجودة', 404);
+    if (plan.openWard) throw new AppError('الخطة بدون مقطع محدد لا تحتوي على تقسيمة يومية', 400);
 
     if (!plan.segments || plan.segments.length === 0) {
       throw new AppError('يجب حفظ توزيع الأيام أولاً', 404);
@@ -494,8 +580,12 @@ export async function deletePlan(req: Request, res: Response, next: NextFunction
   try {
     const plan = await QuranPlan.findByIdAndDelete(req.params.id);
     if (!plan) throw new AppError('الخطة غير موجودة', 404);
+    await OpenWardEntry.deleteMany({ plan: req.params.id });
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
     next(err);
   }
 }
+
+/** Temporary — for src/_verify_open_ward.ts only; removed before merge. */
+export const __test_createSchema = quranPlanCreateSchema;
