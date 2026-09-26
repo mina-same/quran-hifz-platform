@@ -6,7 +6,7 @@ import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { useTracks, type Track, type TrackTeacher } from "../../api/tracks";
 import { useStudent } from "../../api/students";
-import { useQuranPlans, segmentReversed, planScheduleRangeLabel } from "../../api/quran-plans";
+import { useQuranPlans, segmentReversed, planScheduleRangeLabel, isSlice } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { AR_LOCALE } from "@/lib/format";
@@ -215,6 +215,13 @@ function TrackCard({ track }: { track: Track }) {
                 )}
                 <div style={{ fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
                   {linkedPlan.todayAssignments.length > 0 ? linkedPlan.todayAssignments.map((entry, idx) => {
+                    if (!isSlice(entry)) {
+                      return (
+                        <div key={idx} style={{ marginTop: idx > 0 ? 4 : 0 }}>
+                          مقرَّر اليوم{linkedPlan.todayAssignments.length > 1 ? ` (${entry.type})` : ""}: ورد حر — يُسجَّل في الحلقة
+                        </div>
+                      );
+                    }
                     const a = orientSlice(entry, segmentReversed(linkedPlan, entry.type));
                     return (
                     <div key={idx} style={{ marginTop: idx > 0 ? 4 : 0 }}>

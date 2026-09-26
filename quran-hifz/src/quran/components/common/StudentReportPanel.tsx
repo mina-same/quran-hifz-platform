@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useQueries } from "@tanstack/react-query";
 import {
   ResponsiveContainer,
   RadarChart,
@@ -20,10 +21,11 @@ import { Card } from "./Card";
 import { Badge, type BadgeTone } from "./Badge";
 import { SkeletonCard } from "./Skeleton";
 import { StatsRow } from "./StatsRow";
-import { useQuranPlans, type PlanSegment } from "../../api/quran-plans";
+import { useQuranPlans, isOpenPlan, type PlanSegment } from "../../api/quran-plans";
+import { openWardQueryOptions } from "../../api/open-ward";
 import { useEvaluations } from "../../api/evaluations";
 import { MAX_SCORES, legacyScoresOf } from "../../lib/evaluationRubric";
-import { toFlatIndex, fromFlatIndex, juzFlatRange } from "../../lib/quranRange";
+import { toFlatIndex, fromFlatIndex, juzFlatRange, coveredFlatRanges } from "../../lib/quranRange";
 import { SURAHS } from "../../data/surahs";
 import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 
@@ -45,18 +47,24 @@ const JUZ_TONE: Record<JuzStatus, BadgeTone> = {
  * rangeStart/rangeEnd + progress.percent, so we just check, for every juz' 1-30,
  * whether any plan's ayah range overlaps it (and whether a fully-covering plan
  * is 100% complete). */
-function computeJuzRows(plans: { segments?: PlanSegment[] }[]) {
+function computeJuzRows(plans: { segments?: PlanSegment[] }[], openSpans: [number, number][] = []) {
   // A juz' is covered when ANY segment spans it. Each segment carries its own
   // range and its own progress — حفظ and مراجعة cover different stretches of
   // the mushaf and advance at different rates, so they contribute
   // independently rather than being averaged into one plan-wide range.
-  const planRanges = plans
-    .flatMap((p) => p.segments ?? [])
-    .map((seg) => ({
-      start: toFlatIndex(seg.rangeStart),
-      end: toFlatIndex(seg.rangeEnd),
-      percent: seg.progress?.percent ?? 0,
-    }));
+  // Open-ward plans have no segment range — what the student actually
+  // recorded counts instead, and a recorded span is memorized by definition.
+  const planRanges = [
+    ...plans
+      .flatMap((p) => p.segments ?? [])
+      .filter((seg) => seg.rangeStart && seg.rangeEnd)
+      .map((seg) => ({
+        start: toFlatIndex(seg.rangeStart!),
+        end: toFlatIndex(seg.rangeEnd!),
+        percent: seg.progress?.percent ?? 0,
+      })),
+    ...openSpans.map(([start, end]) => ({ start, end, percent: 100 })),
+  ];
 
   return Array.from({ length: 30 }, (_, i) => {
     const juz = i + 1;
@@ -102,7 +110,20 @@ export function StudentReportPanel({
   );
   const { data: allEvals = [] } = useEvaluations(aggregateFilter);
 
-  const juzRows = useMemo(() => computeJuzRows(plans), [plans]);
+  // What the student recorded on each open-ward plan (حفظ only — مراجعة
+  // revisits already-memorized text and must not inflate coverage).
+  const openWardResults = useQueries({
+    queries: plans
+      .filter((p) => isOpenPlan(p))
+      .map((p) => openWardQueryOptions(p._id, selectedId ? { student: selectedId } : undefined)),
+  });
+  const openSpans = useMemo(
+    () => coveredFlatRanges(openWardResults.flatMap((r) => r.data ?? []).filter((e) => e.type === "حفظ")),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [openWardResults.map((r) => r.dataUpdatedAt).join(",")],
+  );
+
+  const juzRows = useMemo(() => computeJuzRows(plans, openSpans), [plans, openSpans]);
   const juzSummary = useMemo(() => {
     const done = juzRows.filter((r) => r.status === "مكتمل").length;
     const inProgress = juzRows.filter((r) => r.status === "قيد الحفظ").length;

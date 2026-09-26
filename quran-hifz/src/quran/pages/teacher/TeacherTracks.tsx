@@ -3,7 +3,7 @@ import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { useTracks, TRACK_DETAIL_ID_KEY, type Track } from "../../api/tracks";
-import { useQuranPlans, segmentReversed } from "../../api/quran-plans";
+import { useQuranPlans, segmentReversed, isSlice } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
@@ -112,6 +112,16 @@ function TrackCard({ track, onOpen }: { track: Track; onOpen: (t: Track) => void
               <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />الجزء المطلوب اليوم
             </div>
             {linkedPlan.todayAssignments.map((entry, idx) => {
+              if (!isSlice(entry)) {
+                return (
+                  <div key={idx} style={{ fontSize: 12, color: "var(--text)", fontWeight: 600, marginTop: idx > 0 ? 3 : 0 }}>
+                    {linkedPlan.todayAssignments.length > 1 && (
+                      <span style={{ fontWeight: 400, color: "var(--text2)" }}>{entry.type} · </span>
+                    )}
+                    ورد حر — يُسجَّل في الحلقة
+                  </div>
+                );
+              }
               const a = orientSlice(entry, segmentReversed(linkedPlan, entry.type));
               return (
                 <div key={idx} style={{ fontSize: 12, color: "var(--text)", fontWeight: 600, marginTop: idx > 0 ? 3 : 0 }}>

@@ -33,18 +33,24 @@ export function entryStudentId(e: OpenWardEntry): string {
   return typeof e.student === "string" ? e.student : e.student._id;
 }
 
-/** Sorted newest first (server-side). */
-export function useOpenWardEntries(planId?: string, filters?: Filters) {
+/** Query options for one plan's entries — shared by useOpenWardEntries and
+ * callers that fetch several plans at once via useQueries. */
+export function openWardQueryOptions(planId?: string, filters?: Filters) {
   const params = new URLSearchParams();
   if (filters?.student) params.set("student", filters.student);
   if (filters?.from) params.set("from", filters.from);
   if (filters?.to) params.set("to", filters.to);
   const qs = params.toString() ? `?${params.toString()}` : "";
-  return useQuery({
+  return {
     queryKey: ["open-ward", planId ?? "", filters?.student ?? "", filters?.from ?? "", filters?.to ?? ""],
     queryFn: () => get<ListResponse>(`/quran-plans/${planId}/open-ward${qs}`).then((r) => r.data),
     enabled: Boolean(planId),
-  });
+  };
+}
+
+/** Sorted newest first (server-side). */
+export function useOpenWardEntries(planId?: string, filters?: Filters) {
+  return useQuery(openWardQueryOptions(planId, filters));
 }
 
 export function useUpsertOpenWard() {

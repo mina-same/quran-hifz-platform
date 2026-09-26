@@ -9,7 +9,8 @@ import {
   useUpdateStudentScheduleEntry, useReflowStudentPlan,
   type StudentOccurrence,
 } from "../../api/student-plan-progress";
-import { planSegment, type RangePoint, type QuranPlan, type PlanType } from "../../api/quran-plans";
+import { planSegment, isOpenPlan, type RangePoint, type QuranPlan, type PlanType } from "../../api/quran-plans";
+import { OpenWardLog } from "./OpenWardLog";
 import { fractionalPage, isReversedRange, isReversedSchedule } from "../../lib/quranRange";
 import { SURAHS } from "../../data/surahs";
 import { toAr, AR_LOCALE } from "../../../lib/format";
@@ -115,6 +116,21 @@ export function IndividualPlanPanel({
   const [juz, setJuz] = useState(1);
   const [error, setError] = useState("");
 
+  // An open-ward plan has no per-student schedule to reshape — show what the
+  // student actually recorded instead. Callers render one panel per segment,
+  // so only the first segment's panel draws the (type-mixed) log.
+  if (isOpenPlan(basePlan)) {
+    if (type && type !== basePlan.segments[0]?.type) return null;
+    return (
+      <div style={{ marginTop: 8 }}>
+        <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 6 }}>
+          خطة بدون مقطع محدد — هذا سجل ما حفظه {studentName}.
+        </div>
+        <OpenWardLog planId={planId} studentId={studentId} />
+      </div>
+    );
+  }
+
   if (isLoading || !progress) return <SkeletonCard lines={3} />;
 
   // Reverse schedule → display "من—إلى" in its own direction. This student's
@@ -125,7 +141,7 @@ export function IndividualPlanPanel({
   // schedule and infer the wrong direction.
   const ownSchedule = progress.effectiveSchedule.filter((o) => !segType || o.type === segType);
   const reversed = isReversedSchedule(ownSchedule)
-    ?? (segment ? isReversedRange(segment.rangeStart, segment.rangeEnd) : false);
+    ?? (segment?.rangeStart && segment.rangeEnd ? isReversedRange(segment.rangeStart, segment.rangeEnd) : false);
 
   function startEdit(entry: StudentOccurrence) {
     setEditingIndex(entry.occurrenceIndex);
