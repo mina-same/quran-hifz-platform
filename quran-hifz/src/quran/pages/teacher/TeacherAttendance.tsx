@@ -27,7 +27,8 @@ import {
   isOpenPlan,
   type PlanType,
 } from "../../api/quran-plans";
-import { useOpenWardEntries, useUpsertOpenWard, entryStudentId, type OpenWardType } from "../../api/open-ward";
+import { useOpenWardEntries, useUpsertOpenWard, useDeleteOpenWard, entryStudentId, type OpenWardType } from "../../api/open-ward";
+import { savedOpenWardTypes } from "../../lib/openWard";
 import { OpenWardPicker, openWardComplete, type OpenWardValue } from "../../components/common/OpenWardPicker";
 import { OpenWardLog } from "../../components/common/OpenWardLog";
 import {
@@ -348,6 +349,7 @@ export function TeacherAttendance() {
   const openTypes = openPlan ? dayAssignments.map((a) => a.type as OpenWardType) : [];
   const { data: openEntries = [] } = useOpenWardEntries(openPlan ? linkedPlan?._id : undefined);
   const upsertOpenWard = useUpsertOpenWard();
+  const deleteOpenWard = useDeleteOpenWard();
   // Unsaved per-student edits, keyed `${studentId}::${type}`.
   const [openWardEdits, setOpenWardEdits] = useState<Record<string, OpenWardValue>>({});
 
@@ -631,7 +633,24 @@ export function TeacherAttendance() {
       {
         onSuccess: () => {
           if (openPlan && linkedPlan) {
-            // An absent student has nothing to record — the evaluation holds the absence.
+            // An absent student has no ward record — the evaluation holds the
+            // absence. A day first saved as present and then switched to absent
+            // still carries its entries, so those are removed here.
+            if (e.attendanceStatus === "غائب" && planCoversStudent(linkedPlan, studentId)) {
+              const stale = savedOpenWardTypes(openEntries, studentId, effectiveDate);
+              (async () => {
+                for (const t of stale) {
+                  try {
+                    await deleteOpenWard.mutateAsync({ planId: linkedPlan._id, studentId, type: t, date: effectiveDate });
+                  } catch (err) {
+                    toast.error(`${t} — ${studentName}: ${(err as Error).message}`, { id: toastId });
+                    return;
+                  }
+                }
+                toast.success("تم الحفظ بنجاح", { id: toastId });
+              })();
+              return;
+            }
             if (e.attendanceStatus === "غائب" || openTypes.length === 0 || !planCoversStudent(linkedPlan, studentId)) {
               toast.success("تم الحفظ بنجاح", { id: toastId });
               return;
