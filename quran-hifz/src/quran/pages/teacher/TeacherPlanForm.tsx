@@ -26,10 +26,12 @@ function fmtDate(d: string) {
   return new Date(d).toLocaleDateString(AR_LOCALE, { year: "numeric", month: "short", day: "numeric" });
 }
 
+// "ختمة" is deliberately not offered here — a plan is حفظ, مراجعة, or both.
+// A pre-existing ختمة plan can still be opened for edit (its card renders off
+// `seg.type` directly, not this list); it just can't be (re-)selected here.
 const PLAN_TYPES: { value: PlanType; label: string; icon: string; fg: string; bg: string }[] = [
-  { value: "حفظ",    label: "حفظ",    icon: "ti-book-2",     fg: "var(--green)", bg: "var(--green-pale)" },
-  { value: "مراجعة", label: "مراجعة", icon: "ti-refresh",    fg: "#1d4ed8",      bg: "#eff6ff" },
-  { value: "ختمة",   label: "ختمة",   icon: "ti-certificate", fg: "var(--gold)",  bg: "var(--gold-pale)" },
+  { value: "حفظ",    label: "حفظ",    icon: "ti-book-2",  fg: "var(--green)", bg: "var(--green-pale)" },
+  { value: "مراجعة", label: "مراجعة", icon: "ti-refresh", fg: "#1d4ed8",      bg: "#eff6ff" },
 ];
 
 // Plans are track-based only. "طلاب محددون" is intentionally the only other

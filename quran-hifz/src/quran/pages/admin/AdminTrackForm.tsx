@@ -34,7 +34,7 @@ const EMPTY: FormFields = {
   teachers: [], maxStudents: "30",
   status: "upcoming", notes: "",
 };
-const TYPE_OPTS = ["مراجعة مكثّفة","تجويد","إجازة","ختمة مسرّعة","برنامج رمضاني","تحضير مسابقة","أخرى"];
+const TYPE_OPTS = ["حفظ","مراجعة","حفظ و مراجعة","ختمة","دورة مكثفة"];
 
 function fieldsFromTrack(t: Track): FormFields {
   return {

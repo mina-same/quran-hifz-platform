@@ -14,6 +14,20 @@
 
 ## Key Learnings
 
+### `admin.routes.ts` used to blanket-gate the whole router to role='admin' — reads must allow 'supervisor' too (2026-09-26)
+Every other admin-ish resource (student/teacher/track/masjid/attendance/evaluation
+controllers) follows the same shape: GET is open to any authenticated role and
+scoped server-side via `supervisorGenderOf(req)` + `trackIdsForGender()` from
+`lib/supervisorScope.ts`; only POST/PUT/DELETE are `authorize('admin')`-gated
+per-route. `admin.routes.ts` was the one outlier — `router.use(authenticate,
+authorize('admin'))` at the top blocked supervisors from every route on it,
+including reads the frontend already builds read-only UI for (see the linked
+learning on `pageRegistry.ts`). Fixed for `/parents` (see bug-408 in buglog.json).
+If another admin.routes.ts endpoint 403s for a supervisor, apply the same
+per-route `authorize('admin', 'supervisor')` split plus gender-scoping in the
+controller, don't just add 'supervisor' to the router-wide `authorize()`
+(that would also open the write endpoints).
+
 ### `pageRegistry.ts` shares pages across portals — check both call sites before assuming "current user = teacher" (2026-09-22)
 `admin.planform` and `teacher.planform` both point at the same `TeacherPlanForm`
 component (pageRegistry.ts:63,73). Any code in a shared page that reads

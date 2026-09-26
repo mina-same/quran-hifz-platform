@@ -9,19 +9,22 @@ import { authorize } from '../middleware/role';
 
 const router = Router();
 
-router.use(authenticate, authorize('admin'));
+router.use(authenticate);
 
-router.get('/parents',                                  getParents);
-router.post('/parents',                                 createParent);
-router.put('/parents/:parentId',                        updateParent);
-router.post('/parents/:parentId/children/:studentId',   linkChild);
-router.delete('/parents/:parentId/children/:studentId', unlinkChild);
+// A supervisor's portal reuses AdminParents/AdminStudents in read-only mode
+// (see PortalContext's `readOnly = role === 'supervisor'`) — reads are open
+// to both roles, writes stay admin-only.
+router.get('/parents',                                  authorize('admin', 'supervisor'), getParents);
+router.post('/parents',                                 authorize('admin'), createParent);
+router.put('/parents/:parentId',                        authorize('admin'), updateParent);
+router.post('/parents/:parentId/children/:studentId',   authorize('admin'), linkChild);
+router.delete('/parents/:parentId/children/:studentId', authorize('admin'), unlinkChild);
 
-router.get('/students/:studentId/parent',  getStudentParent);
-router.put('/students/:studentId/parent',  setStudentParent);
+router.get('/students/:studentId/parent',  authorize('admin', 'supervisor'), getStudentParent);
+router.put('/students/:studentId/parent',  authorize('admin'), setStudentParent);
 
-router.get('/supervisors',                    getSupervisors);
-router.post('/supervisors',                   createSupervisor);
-router.delete('/supervisors/:supervisorId',   deleteSupervisor);
+router.get('/supervisors',                    authorize('admin'), getSupervisors);
+router.post('/supervisors',                   authorize('admin'), createSupervisor);
+router.delete('/supervisors/:supervisorId',   authorize('admin'), deleteSupervisor);
 
 export default router;

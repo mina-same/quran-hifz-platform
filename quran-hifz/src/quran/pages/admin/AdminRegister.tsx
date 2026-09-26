@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,7 +6,6 @@ import { z } from "zod";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
 import { Alert } from "../../components/common/Alert";
-import { pickMasar } from "../../config/masarMap";
 import { useCreateStudent } from "../../api/students";
 import { useTracks } from "../../api/tracks";
 
@@ -22,7 +21,6 @@ const schema = z.object({
     .string()
     .min(1, "جوال ولي الأمر مطلوب")
     .regex(/^05\d{8}$/, "صيغة الجوال: 05XXXXXXXX"),
-  level: z.string().min(1, "يرجى اختيار مستوى القراءة"),
   studentLevel: z
     .string()
     .optional()
@@ -63,16 +61,9 @@ export function AdminRegister() {
   const {
     register,
     handleSubmit,
-    watch,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
-
-  const level = watch("level");
-  const masar = useMemo(
-    () => pickMasar(level, undefined),
-    [level],
-  );
 
   async function onSubmit(data: FormData) {
     const body: Record<string, unknown> = {
@@ -81,7 +72,7 @@ export function AdminRegister() {
       guardianPhone: data.guardianPhone,
       nationalId: data.nationalId?.trim() || undefined,
       track:         data.track,
-      path:          masar?.path ?? "حفظ كامل",
+      path:          "حفظ كامل",
       status:        "new",
     };
     if (data.studentLevel)  body.level    = Number(data.studentLevel);
@@ -133,35 +124,10 @@ export function AdminRegister() {
           <hr className="divider" />
 
           <div className="form-group" style={{ marginBottom: 14 }}>
-            <label className="form-label">مستوى القراءة الحالي <span>*</span></label>
-            <select className="form-input" {...register("level")}>
-              <option value="">اختر المستوى</option>
-              <option value="لم">لم يتعلم الحروف بعد</option>
-              <option value="صعوبة">يعرف الحروف لكن يقرأ بصعوبة</option>
-              <option value="مقبول">يقرأ بشكل مقبول مع أخطاء تجويدية</option>
-              <option value="طلاقة">يقرأ بطلاقة ويرغب بالحفظ</option>
-              <option value="حافظ">حافظ لأجزاء ويريد الختم</option>
-              <option value="بالغ">بالغ ويريد التصحيح</option>
-            </select>
-            <FieldError msg={errors.level?.message} />
-          </div>
-
-          <div className="form-group" style={{ marginBottom: 14 }}>
             <label className="form-label">المستوى (رقم من ١ إلى ١٠)</label>
             <input className="form-input" type="number" min={1} max={10} placeholder="مثال: ٣" {...register("studentLevel")} />
             <FieldError msg={errors.studentLevel?.message} />
           </div>
-
-          {masar && (
-            <div className="masar-result">
-              <div style={{ fontSize: 11, color: "var(--text2)", marginBottom: 4 }}>المسار المقترح تلقائياً</div>
-              <div style={{ fontSize: 17, fontWeight: 700, color: "var(--green)" }}>{masar.name}</div>
-              <div style={{ fontSize: 12, color: "var(--text2)", marginTop: 3 }}>{masar.desc}</div>
-              <div style={{ fontSize: 12, color: "var(--green)", marginTop: 8, fontWeight: 600 }}>
-                🕌 الحلقة المقترحة: {masar.halqa}
-              </div>
-            </div>
-          )}
 
           <hr className="divider" />
 

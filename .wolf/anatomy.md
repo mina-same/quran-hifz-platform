@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-22T18:37:51.025Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-26T06:48:07.649Z
 > Files: 714 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
@@ -536,7 +536,7 @@
 - `students.tsx` — المسار: real track lives one hop away via `Student.track`, not the unused legacy `path` enum. (~3454 tok)
 - `teachers.tsx` — ratingVariant (~1903 tok)
 - `track-detail.tsx` — AdminTrackDetailRoute (~474 tok)
-- `tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~11292 tok)
+- `tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~11281 tok)
 
 ## quran-hifz-mobile/app/(portal)/parent/
 
@@ -573,7 +573,7 @@
 - `homework.tsx` — getName — renders form (~1264 tok)
 - `myhalqa.tsx` — TeacherHalqa (~1077 tok)
 - `plan-detail.tsx` — STATUS_VARIANT (~3418 tok)
-- `plan-form.tsx` — Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local (~10644 tok)
+- `plan-form.tsx` — Human-readable Arabic label for a bare `YYYY-MM-DD` date — parsed at local (~10664 tok)
 - `plans.tsx` — One label/value line in the plan card's detail grid. (~3580 tok)
 - `recordlesson.tsx` — LESSON_TYPES (~3004 tok)
 - `reports.tsx` — TeacherReports (~642 tok)
@@ -743,7 +743,7 @@
 
 ## quran-hifz-server/src/controllers/
 
-- `admin.controller.ts` — Zod schemas: updateParentSchema, createParentSchema, createSupervisorSchema (~2079 tok)
+- `admin.controller.ts` — Zod schemas: updateParentSchema, createParentSchema, createSupervisorSchema. getParents() is gender-scoped for supervisor via supervisorGenderOf/trackIdsForGender (parents of children in the supervisor's masajid gender only). (~2360 tok)
 - `attendance.controller.ts` — Upserts one Attendance doc per {student, date} and recalculates each (~1495 tok)
 - `auth.controller.ts` — Zod schemas: loginSchema, updateProfileSchema, changePasswordSchema, pushTokenSchema (~1216 tok)
 - `evaluation.controller.ts` — The rubric is no longer platform-wide — each plan carries its own (~2609 tok)
@@ -808,7 +808,7 @@
 
 ## quran-hifz-server/src/routes/
 
-- `admin.routes.ts` — API routes: GET, POST, PUT, DELETE (10 endpoints) (~317 tok)
+- `admin.routes.ts` — API routes: GET, POST, PUT, DELETE (10 endpoints). Per-route authorize(), not router-wide: GET /parents and GET /students/:id/parent allow ('admin','supervisor'); every write stays ('admin') only. (~460 tok)
 - `attendance.routes.ts` — API routes: GET, POST (3 endpoints) (~142 tok)
 - `auth.routes.ts` — API routes: POST, GET, PUT (6 endpoints) (~169 tok)
 - `evaluation.routes.ts` — API routes: GET, POST (2 endpoints) (~115 tok)
@@ -1046,13 +1046,13 @@
 - `AdminKpis.tsx` — RATING_TONE — renders table (~743 tok)
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~3234 tok)
 - `AdminParents.tsx` — EMPTY_ADD — renders table (~5605 tok)
-- `AdminRegister.tsx` — schema — renders form (~3004 tok)
+- `AdminRegister.tsx` — Create-student form. No reading-level select or auto-suggested track/masar block (removed 2026-09-26) — `path` always defaults to "حفظ كامل". (~2450 tok)
 - `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~322 tok)
 - `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13551 tok)
 - `AdminStudents.tsx` — PATH_TONE — renders table (~6081 tok)
 - `AdminSupervisors.tsx` — EMPTY_ADD — renders table, modal (~2875 tok)
 - `AdminTeachers.tsx` — EMPTY_FORM — renders form, table, modal (~4789 tok)
-- `AdminTrackForm.tsx` — Full-page create/edit form for a track (was a popup modal) — lets the (~4273 tok)
+- `AdminTrackForm.tsx` — TYPE_OPTS = ["حفظ","مراجعة","حفظ و مراجعة","ختمة","دورة مكثفة"] (2026-09-26). Full-page create/edit form for a track (was a popup modal) — lets the (~4264 tok)
 - `AdminTracks.tsx` — surahName — renders modal (~7495 tok)
 
 ## quran-hifz/src/quran/pages/common/
@@ -1091,7 +1091,7 @@
 - `TeacherHalqa.tsx` — trackTitle — renders table (~1056 tok)
 - `TeacherHomework.tsx` — getName — renders table (~1668 tok)
 - `TeacherPlanDetail.tsx` — surahName — renders table (~3919 tok)
-- `TeacherPlanForm.tsx` — Shared plan-create/edit form (admin's `planform` route reuses it too). Teacher user: `teacher` = own `user.profileId`, hidden. Admin (no `profileId`): shows a required "المعلم" select, seeded from the picked track's `teachers`, else full `useTeachers()` list. (~15100 tok)
+- `TeacherPlanForm.tsx` — One type's track in the form: its own days and its own range. The plan's (~15002 tok)
 - `TeacherPlans.tsx` — surahName (~4553 tok)
 - `TeacherRecordLesson.tsx` — TeacherRecordLesson (~228 tok)
 - `TeacherReports.tsx` — Teacher reports — scoped to the tracks the teacher teaches. (~268 tok)

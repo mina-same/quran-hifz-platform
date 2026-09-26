@@ -4,6 +4,7 @@ import { User } from '../models/User.model';
 import { Student } from '../models/Student.model';
 import { ParentStudent } from '../models/ParentStudent.model';
 import { AppError } from '../middleware/error';
+import { supervisorGenderOf, trackIdsForGender } from '../lib/supervisorScope';
 
 const updateParentSchema = z.object({
   name:        z.string().min(2, 'الاسم مطلوب').optional(),
@@ -27,7 +28,19 @@ const createSupervisorSchema = z.object({
 
 export async function getParents(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const parents = await User.find({ role: 'parent' }).sort({ name: 1 });
+    // A supervisor is scoped to one gender's masajid — restrict to parents
+    // with at least one child in a track under that scope, same boundary
+    // student.controller.ts/track.controller.ts already enforce.
+    const parentFilter: Record<string, unknown> = { role: 'parent' };
+    const supervisorGender = supervisorGenderOf(req);
+    if (supervisorGender) {
+      const allowedTrackIds = await trackIdsForGender(supervisorGender);
+      const scopedStudentIds = await Student.find({ track: { $in: allowedTrackIds } }).select('_id');
+      const scopedParentIds = await ParentStudent.find({ student: { $in: scopedStudentIds.map((s) => s._id) } }).distinct('parent');
+      parentFilter._id = { $in: scopedParentIds };
+    }
+
+    const parents = await User.find(parentFilter).sort({ name: 1 });
     const enriched = await Promise.all(
       parents.map(async (p) => {
         const links = await ParentStudent.find({ parent: p._id }).populate('student', 'name path');

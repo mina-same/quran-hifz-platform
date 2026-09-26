@@ -34,7 +34,8 @@ import { AR_LOCALE, expandDateRange } from '@/lib/date';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
-const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة', 'ختمة'];
+// "ختمة" is deliberately not offered here — a plan is حفظ, مراجعة, or both.
+const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة'];
 
 function todayISO(): string {
   const d = new Date();

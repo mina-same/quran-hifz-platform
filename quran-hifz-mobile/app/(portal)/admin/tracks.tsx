@@ -60,7 +60,7 @@ function avatarInitials(name: string) {
 const STATUS_LABEL: Record<Track['status'], string> = { active: 'نشط', upcoming: 'قادم', ended: 'منتهي' };
 const STATUS_VARIANT: Record<Track['status'], 'green' | 'gold' | 'gray'> = { active: 'green', upcoming: 'gold', ended: 'gray' };
 
-const TYPE_OPTS = ['مراجعة مكثّفة', 'تجويد', 'إجازة', 'ختمة مسرّعة', 'برنامج رمضاني', 'تحضير مسابقة', 'أخرى'];
+const TYPE_OPTS = ['حفظ', 'مراجعة', 'حفظ و مراجعة', 'ختمة', 'دورة مكثفة'];
 
 /** Rotating chip tones for teacher/student avatars — theme.tone so dark mode holds. */
 function avatarTone(theme: AppTheme, i: number) {

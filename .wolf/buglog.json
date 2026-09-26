@@ -6934,5 +6934,25 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-09-22T18:39:02.000Z"
+  },
+  {
+    "id": "bug-408",
+    "timestamp": "2026-09-26T06:49:02.000Z",
+    "error_message": "GET /api/admin/parents -> 403 Forbidden, infinite spinner on supervisor portal parents tab, toast: تعذّر تحميل بيانات أولياء الأمور",
+    "file": "quran-hifz-server/src/routes/admin.routes.ts",
+    "root_cause": "admin.routes.ts applied router.use(authenticate, authorize(\"admin\")) blanket-wide, so every route on the router (including reads) 403'd for role=supervisor. But the frontend already builds a read-only supervisor view for this exact page (PortalContext readOnly = role===\"supervisor\"; pageRegistry.ts supervisor.parents = AdminParents) and every other admin-reused resource (students/teachers/tracks/masajid) already lets supervisor GET while restricting writes to admin, scoped by supervisorGenderOf(). admin.controller.ts getParents had never been updated to follow that pattern.",
+    "fix": "Split admin.routes.ts per-route instead of one blanket authorize(\"admin\"): GET /parents and GET /students/:studentId/parent now authorize(\"admin\",\"supervisor\"); all writes (POST/PUT/DELETE on parents, supervisors) stay authorize(\"admin\") only. Added gender scoping to admin.controller.ts getParents via supervisorGenderOf/trackIdsForGender (same helper student.controller.ts/track.controller.ts/teacher.controller.ts use), restricting a supervisor to parents of children in tracks under masajid of their own gender.",
+    "tags": [
+      "auto-detected",
+      "authorization",
+      "403",
+      "supervisor-portal",
+      "admin-routes"
+    ],
+    "related_bugs": [
+      "bug-407"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-09-26T06:49:02.000Z"
   }
 ]
