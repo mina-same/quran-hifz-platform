@@ -18,7 +18,7 @@ export function resolveLinkedPlan<T extends { targetType: string }>(plans: T[]):
  * merged `days` rollup when segments is empty/absent. */
 export function planScheduleDays(plan: QuranPlan | undefined): string[] {
   if (!plan) return [];
-  if (plan.segments?.length) return unionDays(plan.segments);
+  if (plan.segments?.length) return unionDays(plan.segments.map((seg) => ({ type: seg.type, days: seg.days })));
   return plan.days ?? [];
 }
 

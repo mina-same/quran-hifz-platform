@@ -24,8 +24,9 @@ import {
 import { useTeachers } from '@/lib/queries/teachers';
 import { useStudents } from '@/lib/queries/students';
 import {
-  useQuranPlans, useUpdateQuranPlan, segmentReversed, type QuranPlan,
+  useQuranPlans, useUpdateQuranPlan, segmentReversed, isOpenPlan, isSlice, type QuranPlan,
 } from '@/lib/queries/quranPlan';
+import OpenWardLogSheet from '@/components/domain/OpenWardLogSheet';
 import { planScheduleDays, planScheduleRange, resolveLinkedPlan, NO_PLAN_SCHEDULE_TEXT } from '@/lib/trackSchedule';
 import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -384,6 +385,13 @@ export default function TrackDetail({ trackId, role }: Props) {
               </View>
               <View style={[s.assignmentBox, { backgroundColor: linkedPlan.todayAssignments.length > 0 ? theme.greenPale : theme.cream }]}>
                 {linkedPlan.todayAssignments.length > 0 ? linkedPlan.todayAssignments.map((entry, idx) => {
+                  if (!isSlice(entry)) {
+                    return (
+                      <Text key={entry.type} style={[s.assignmentText, idx > 0 && { marginTop: 4 }]}>
+                        {linkedPlan.todayAssignments.length > 1 ? `${entry.type} · ` : ''}ورد حر — يُسجَّل في الحلقة
+                      </Text>
+                    );
+                  }
                   // Direction is per segment — each type may span a different,
                   // independently-reversed range.
                   const reversed = segmentReversed(linkedPlan, entry.type);
@@ -412,7 +420,12 @@ export default function TrackDetail({ trackId, role }: Props) {
                   <Button label="ربط خطة أخرى" variant="ghost" style={{ flex: 1 }} onPress={() => setShowLinkPanel((v) => !v)} />
                 )}
               </View>
-              {linkedPlan.schedule.length > 0 && (
+              {isOpenPlan(linkedPlan) && (
+                <View style={{ marginTop: 12 }}>
+                  <OpenWardLogSheet planId={linkedPlan._id} />
+                </View>
+              )}
+              {!isOpenPlan(linkedPlan) && linkedPlan.schedule.length > 0 && (
                 <SheetTriggerRow
                   label="توزيع الأيام والصفحات"
                   value={`${linkedPlan.schedule.length} يوم`}

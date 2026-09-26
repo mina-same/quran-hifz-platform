@@ -14,14 +14,16 @@ import type { DaySchedule } from '@/components/domain/DaySlider';
 import { useEvaluations, useRubric, useBulkEvaluate, type BulkEvaluateRecord } from '@/lib/queries/evaluations';
 import {
   useStudentPlanProgressList, useRecordStudentOccurrence, segmentReversed, type QuranPlan,
+  isOpenPlan, useOpenWardEntries, useUpsertOpenWard, entryStudentId, type OpenWardType,
 } from '@/lib/queries/quranPlan';
+import OpenWardPicker, { openWardComplete, type OpenWardValue } from '@/components/domain/OpenWardPicker';
 import {
   MAX_SCORES, TOTAL_MAX, legacyScoresOf, totalMaxOf,
   DEFAULT_GRADE_RUBRIC, type GradeCriterion,
 } from '@/lib/evaluationRubric';
 import {
   dayFinishPoint, dayDeltaAyahs, planFinishPoint, toFlatIndex, fromFlatIndex,
-  isReversedSchedule, surahName, type PlanType, type RangePoint, type ScheduleEntry,
+  isReversedSchedule, surahName, nextPointAfter, type PlanType, type RangePoint, type ScheduleEntry,
 } from '@/lib/quranRange';
 import { toDateOnly } from '@/lib/date';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -123,6 +125,38 @@ export default function EvaluationRoster({
   );
   const progressByStudentId = useStudentPlanProgressList(linkedPlan?._id, coveredStudentIds);
 
+  // ── Open-ward plan (no fixed range) ──────────────────────────────────
+  // The day's entries carry only a type; for each present student and each
+  // type due, the teacher records what was actually memorized.
+  const openPlan = isOpenPlan(linkedPlan);
+  const openTypes: OpenWardType[] = openPlan ? dayAssignments.map((a) => a.type as OpenWardType) : [];
+  const { data: openEntries = [] } = useOpenWardEntries(openPlan ? linkedPlan?._id : undefined);
+  const upsertOpenWard = useUpsertOpenWard();
+  // Unsaved per-student edits, keyed `${studentId}::${type}`.
+  const [openWardEdits, setOpenWardEdits] = useState<Record<string, OpenWardValue>>({});
+
+  /** The teacher's unsaved edit, else what was already saved for this day. */
+  function openWardFor(studentId: string, type: OpenWardType): OpenWardValue | undefined {
+    const edit = openWardEdits[`${studentId}::${type}`];
+    if (edit) return edit;
+    const saved = openEntries.find(
+      (e) => entryStudentId(e) === studentId && e.type === type && e.date === effectiveDate,
+    );
+    if (!saved) return undefined;
+    return saved.status === 'none' || !saved.from || !saved.to
+      ? { status: 'none' }
+      : { status: 'recorded', from: saved.from, to: saved.to };
+  }
+
+  /** Continue from where this student last stopped for this type. Entries
+   * arrive newest first, so the first earlier recorded one is the latest. */
+  function suggestedFromFor(studentId: string, type: OpenWardType): RangePoint {
+    const last = openEntries.find(
+      (e) => entryStudentId(e) === studentId && e.type === type && e.status === 'recorded' && e.date < effectiveDate,
+    );
+    return last?.to ? nextPointAfter(last.to) : { surahNumber: 1, ayah: 1 };
+  }
+
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
   const [overrides, setOverrides] = useState<Record<string, StudentEval>>({});
   const [completionOverrides, setCompletionOverrides] = useState<Record<string, RangePoint>>({});
@@ -150,6 +184,7 @@ export default function EvaluationRoster({
   useEffect(() => {
     setOverrides({});
     setCompletionOverrides({});
+    setOpenWardEdits({});
     setUnlockedIds(new Set());
     setExpandedStudentId(null);
   }, [effectiveDate]);
@@ -252,6 +287,17 @@ export default function EvaluationRoster({
   function saveStudent(studentId: string, studentName: string) {
     if (isFutureDay || !teacherId || readOnly) return;
     const e = evalFor(studentId);
+    // Open-ward plan: a present student's day can't be saved until every type
+    // due has a range or an explicit «لم يُسمِّع اليوم».
+    if (openPlan && e.attendanceStatus !== 'غائب' && planCoversStudent(studentId)) {
+      const missing = openTypes.filter((t) => !openWardComplete(openWardFor(studentId, t)));
+      if (missing.length > 0) {
+        error();
+        setSaveNotices([]);
+        setSaveErrors([{ text: `حدّد ما حفظه ${studentName} (${missing.join('، ')}) أو اختر «لم يُسمِّع اليوم»` }]);
+        return;
+      }
+    }
     const records: BulkEvaluateRecord[] = [{
       student: studentId,
       attendanceStatus: e.attendanceStatus,
@@ -267,6 +313,46 @@ export default function EvaluationRoster({
         onSuccess: (res) => {
           success();
           setUnnotified(res.unnotified);
+          if (openPlan && linkedPlan) {
+            // An absent student has nothing to record — the evaluation holds the absence.
+            if (e.attendanceStatus === 'غائب' || openTypes.length === 0 || !planCoversStudent(studentId)) {
+              setSaveNotices([{ tone: 'success', text: `تم حفظ حضور وتقييم ${studentName}` }]);
+              return;
+            }
+            (async () => {
+              for (const t of openTypes) {
+                const v = openWardFor(studentId, t)!;
+                const outcomeType = openTypes.length > 1 ? t : undefined;
+                try {
+                  const r = await upsertOpenWard.mutateAsync({
+                    planId: linkedPlan._id, studentId, type: t, date: effectiveDate, status: v.status,
+                    ...(v.status === 'recorded' ? { from: v.from, to: v.to } : {}),
+                  });
+                  if (r.overlapWarning) {
+                    warning();
+                    setSaveNotices((prev) => [...prev, {
+                      type: outcomeType, tone: 'warning',
+                      text: `تم الحفظ — هذا المقطع أو جزء منه مسجَّل من قبل لـ ${studentName}`,
+                    }]);
+                  } else {
+                    setSaveNotices((prev) => [...prev, {
+                      type: outcomeType, tone: 'success', text: `تم حفظ حضور وتقييم وورد ${studentName}`,
+                    }]);
+                  }
+                  setOpenWardEdits((prev) => {
+                    const next = { ...prev };
+                    delete next[`${studentId}::${t}`];
+                    return next;
+                  });
+                } catch (err) {
+                  // Leave the edit in place so the teacher can retry.
+                  error();
+                  setSaveErrors((prev) => [...prev, { type: outcomeType, text: (err as Error).message }]);
+                }
+              }
+            })();
+            return;
+          }
           // Feed the day's outcome into each of the student's individual plan
           // overlays so an absence or a partial completion gets redistributed
           // across their remaining days — one `record` call per ward due
@@ -412,7 +498,13 @@ export default function EvaluationRoster({
 
             {isExpanded && (
               <View style={styles.body}>
-                {assignments.length > 0 ? assignments.map((assignment) => {
+                {openPlan ? (
+                  <Text style={styles.sub}>
+                    {openTypes.length > 0 && planCoversStudent(st._id)
+                      ? `خطة بدون مقطع محدد — سجّل ما حفظه الطالب اليوم (${openTypes.join('، ')})`
+                      : 'لا يوجد ورد لهذا اليوم'}
+                  </Text>
+                ) : assignments.length > 0 ? assignments.map((assignment) => {
                   // Swap the displayed endpoints for a reverse plan so the
                   // banner reads in the plan's own direction (back→front).
                   const reversed = reversedForStudent(st._id, assignment.type);
@@ -489,7 +581,19 @@ export default function EvaluationRoster({
                   </Pressable>
                 </View>
 
-                {!isAbsent && assignments.map((assignment) => {
+                {openPlan && !isAbsent && planCoversStudent(st._id) && openTypes.map((t) => (
+                  <OpenWardPicker
+                    key={t}
+                    type={t}
+                    showType={openTypes.length > 1}
+                    value={openWardFor(st._id, t)}
+                    suggestedFrom={suggestedFromFor(st._id, t)}
+                    disabled={locked}
+                    onChange={(v) => setOpenWardEdits((prev) => ({ ...prev, [`${st._id}::${t}`]: v }))}
+                  />
+                ))}
+
+                {!openPlan && !isAbsent && assignments.map((assignment) => {
                   // "وصل إلى" and the leftover are both measured in the plan's
                   // own direction: a reverse day is worked from its high end
                   // down, so it's complete once the student reaches its low end.
