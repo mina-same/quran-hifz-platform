@@ -5,9 +5,10 @@ import { useTopbar } from "../../context/useTopbar";
 import {
   useQuranPlan, useDeleteQuranPlan,
   PLAN_DETAIL_ID_KEY, PLAN_FORM_HANDOFF_KEY,
-  segmentReversed,
+  segmentReversed, isOpenPlan, isSlice,
   type RangePoint,
 } from "../../api/quran-plans";
+import { OpenWardLog } from "../../components/common/OpenWardLog";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { Card } from "../../components/common/Card";
@@ -109,6 +110,7 @@ export function TeacherPlanDetail() {
                 <span style={{ fontSize: 11, background: typeCfg.bg, color: typeCfg.fg, borderRadius: 6, padding: "2px 9px", fontWeight: 600 }}>
                   {plan.type}
                 </span>
+                {isOpenPlan(plan) && <Badge tone="gold">ورد حر</Badge>}
               </div>
             </div>
           </div>
@@ -154,15 +156,21 @@ export function TeacherPlanDetail() {
               style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "14px 20px" }}
             >
               <InfoRow icon="ti-calendar-week" label="الأيام" val={seg.days.join("، ")} />
-              <InfoRow icon="ti-book" label="من" val={pointLabel(seg.rangeStart)} />
-              <InfoRow icon="ti-book-2" label="إلى" val={pointLabel(seg.rangeEnd)} />
-              <InfoRow
-                icon="ti-files"
-                label="عدد الصفحات"
-                val={seg.pageRange.pageCount === 1
-                  ? `صفحة ${seg.pageRange.pageStart}`
-                  : `${seg.pageRange.pageCount} (${seg.pageRange.pageStart}-${seg.pageRange.pageEnd})`}
-              />
+              {seg.rangeStart && seg.rangeEnd && seg.pageRange ? (
+                <>
+                  <InfoRow icon="ti-book" label="من" val={pointLabel(seg.rangeStart)} />
+                  <InfoRow icon="ti-book-2" label="إلى" val={pointLabel(seg.rangeEnd)} />
+                  <InfoRow
+                    icon="ti-files"
+                    label="عدد الصفحات"
+                    val={seg.pageRange.pageCount === 1
+                      ? `صفحة ${seg.pageRange.pageStart}`
+                      : `${seg.pageRange.pageCount} (${seg.pageRange.pageStart}-${seg.pageRange.pageEnd})`}
+                  />
+                </>
+              ) : (
+                <InfoRow icon="ti-book" label="الورد" val="بدون مقطع محدد — يُسجَّل ما حفظه الطالب في الحلقة" />
+              )}
             </div>
           </div>
         ))}
@@ -194,6 +202,14 @@ export function TeacherPlanDetail() {
             <i className="ti ti-calendar-star" style={{ marginLeft: 4 }} />الجزء المطلوب اليوم
           </div>
           {plan.todayAssignments.length > 0 ? plan.todayAssignments.map((entry, idx) => {
+            if (!isSlice(entry)) {
+              return (
+                <div key={idx} style={{ fontSize: 13, color: "var(--text)", fontWeight: 600, marginTop: idx > 0 ? 6 : 0 }}>
+                  <span style={{ fontWeight: 400, color: "var(--text2)" }}>{entry.type} · </span>
+                  ورد حر — يُسجَّل في الحلقة
+                </div>
+              );
+            }
             // Direction is per segment — orient by the type actually due today.
             const a = orientSlice(entry, segmentReversed(plan, entry.type));
             return (
@@ -214,7 +230,12 @@ export function TeacherPlanDetail() {
         </div>
       </Card>
 
-      {/* ── Schedule breakdown ── */}
+      {/* ── Schedule breakdown — or, for an open-ward plan, what was recorded ── */}
+      {isOpenPlan(plan) ? (
+      <Card icon="ti-notebook" title="سجل الورد">
+        <OpenWardLog planId={plan._id} />
+      </Card>
+      ) : (
       <Card icon="ti-calendar-stats" title="تقسيم الأجزاء على الأيام">
         {plan.schedule.length === 0 ? (
           <p style={{ margin: "20px 0", fontSize: 13, color: "var(--text3)", textAlign: "center" }}>
@@ -254,6 +275,7 @@ export function TeacherPlanDetail() {
           </div>
         )}
       </Card>
+      )}
 
       {/* ── Delete confirm ── */}
       {confirmDelete && (

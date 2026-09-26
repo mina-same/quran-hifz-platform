@@ -6,7 +6,7 @@ import {
   useQuranPlans, useDeleteQuranPlan,
   PLAN_FORM_HANDOFF_KEY, PLAN_DETAIL_ID_KEY,
   type QuranPlan, type PlanType, type RangePoint,
-  segmentReversed,
+  segmentReversed, isOpenPlan, isSlice,
 } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
@@ -213,6 +213,7 @@ function PlanCard({
                 }}>
                   {typeCfg.label}
                 </span>
+                {isOpenPlan(plan) && <Badge tone="gold">ورد حر</Badge>}
               </div>
             </div>
           </div>
@@ -261,16 +262,22 @@ function PlanCard({
             <div style={{ fontSize: 11, fontWeight: 700, color: "var(--green)", marginBottom: 8 }}>{seg.type}</div>
             <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12, color: "var(--text2)" }}>
               <InfoRow icon="ti-calendar-week" label="الأيام" val={seg.days.join("، ")} span />
-              <InfoRow icon="ti-book" label="من" val={pointLabel(seg.rangeStart)} />
-              <InfoRow icon="ti-book-2" label="إلى" val={pointLabel(seg.rangeEnd)} />
-              <InfoRow
-                icon="ti-files"
-                label="عدد الصفحات"
-                val={seg.pageRange.pageCount === 1
-                  ? `صفحة ${seg.pageRange.pageStart}`
-                  : `${seg.pageRange.pageCount} (${seg.pageRange.pageStart}-${seg.pageRange.pageEnd})`}
-                span
-              />
+              {seg.rangeStart && seg.rangeEnd && seg.pageRange ? (
+                <>
+                  <InfoRow icon="ti-book" label="من" val={pointLabel(seg.rangeStart)} />
+                  <InfoRow icon="ti-book-2" label="إلى" val={pointLabel(seg.rangeEnd)} />
+                  <InfoRow
+                    icon="ti-files"
+                    label="عدد الصفحات"
+                    val={seg.pageRange.pageCount === 1
+                      ? `صفحة ${seg.pageRange.pageStart}`
+                      : `${seg.pageRange.pageCount} (${seg.pageRange.pageStart}-${seg.pageRange.pageEnd})`}
+                    span
+                  />
+                </>
+              ) : (
+                <InfoRow icon="ti-book" label="الورد" val="يُسجَّل ما حفظه الطالب في الحلقة" span />
+              )}
             </div>
           </div>
         ))}
@@ -303,6 +310,14 @@ function PlanCard({
             الجزء المطلوب اليوم
           </div>
           {plan.todayAssignments.length > 0 ? plan.todayAssignments.map((entry, idx) => {
+            if (!isSlice(entry)) {
+              return (
+                <div key={idx} style={{ fontSize: 12, color: "var(--text)", fontWeight: 600, marginTop: idx > 0 ? 4 : 0 }}>
+                  <span style={{ fontWeight: 400, color: "var(--text2)" }}>{entry.type} · </span>
+                  ورد حر — يُسجَّل في الحلقة
+                </div>
+              );
+            }
             // Direction is per segment — orient by the type actually due today.
             const a = orientSlice(entry, segmentReversed(plan, entry.type));
             return (
