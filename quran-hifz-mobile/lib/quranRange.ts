@@ -387,8 +387,9 @@ export const PLAN_TYPES: PlanType[] = ['حفظ', 'مراجعة', 'ختمة'];
 export type PlanSegmentInput = {
   type: PlanType;
   days: string[];
-  rangeStart: RangePoint;
-  rangeEnd: RangePoint;
+  /** Absent on an open-ward plan (`QuranPlan.openWard`). */
+  rangeStart?: RangePoint;
+  rangeEnd?: RangePoint;
 };
 
 /** The plan-level window every segment shares. */
@@ -467,8 +468,8 @@ function segmentAsScheduleInput(
     holidays: plan.holidays,
     endType: 'activeDays',
     activeDaysCount: occurrenceCount,
-    rangeStart: seg.rangeStart,
-    rangeEnd: seg.rangeEnd,
+    rangeStart: seg.rangeStart!,
+    rangeEnd: seg.rangeEnd!,
   };
 }
 
@@ -485,6 +486,7 @@ export function computeMultiScheduleBreakdown(plan: MultiPlanInput): SegmentSche
   const counts = segmentOccurrenceCounts(plan);
   const out: SegmentScheduleEntry[] = [];
   for (const seg of plan.segments) {
+    if (!seg.rangeStart || !seg.rangeEnd) continue;
     const count = counts.get(seg.type) ?? 0;
     if (count <= 0) continue;
     for (const entry of computeScheduleBreakdown(segmentAsScheduleInput(plan, seg, count))) {
@@ -526,4 +528,61 @@ export function validateSegmentDays(segments: PlanSegmentInput[]): string | null
     return 'لا يمكن دمج "ختمة" مع نوع آخر في نفس الخطة';
   }
   return null;
+}
+
+export type OpenScheduleEntry = { occurrenceIndex: number; date: string; type: PlanType; open: true };
+
+/**
+ * An open-ward plan's calendar — mirrors the server's computeOpenScheduleDates
+ * (quran-hifz-server/src/lib/quranRange.ts); keep the two in sync. Which types
+ * are due on which days, with no slice. `date` is the LOCAL calendar key
+ * suffixed with a UTC midnight, so `date.slice(0, 10)` is always the right day.
+ */
+export function computeOpenScheduleDates(plan: MultiPlanInput): OpenScheduleEntry[] {
+  const counts = segmentOccurrenceCounts(plan);
+  const holidays = plan.holidays && plan.holidays.length > 0 ? new Set(plan.holidays) : NO_HOLIDAYS;
+  const out: OpenScheduleEntry[] = [];
+  for (const seg of plan.segments) {
+    const target = counts.get(seg.type) ?? 0;
+    const cursor = dateOnly(plan.startDate);
+    let n = 0;
+    let walked = 0;
+    while (n < target && walked < SCHEDULE_WALK_LIMIT_DAYS) {
+      if (isOccurrenceDay(cursor, seg.days, holidays)) {
+        n++;
+        out.push({ occurrenceIndex: n, date: `${dateKey(cursor)}T00:00:00.000Z`, type: seg.type, open: true });
+      }
+      cursor.setDate(cursor.getDate() + 1);
+      walked++;
+    }
+  }
+  return out.sort((a, b) => a.date.localeCompare(b.date) || a.type.localeCompare(b.type));
+}
+
+/** Types due on a calendar day, read from a plan's (open or fixed) schedule. */
+export function typesDueOn(schedule: { date: string; type: PlanType }[], dateKey: string): PlanType[] {
+  return Array.from(new Set(schedule.filter((e) => String(e.date).slice(0, 10) === dateKey).map((e) => e.type)));
+}
+
+/** Union of recorded open-ward ranges as merged inclusive flat-index spans. */
+export function coveredFlatRanges(
+  entries: { status: string; from?: RangePoint; to?: RangePoint }[],
+): [number, number][] {
+  const spans = entries
+    .filter((e) => e.status === 'recorded' && e.from && e.to)
+    .map((e) => [toFlatIndex(e.from!), toFlatIndex(e.to!)] as [number, number])
+    .sort((a, b) => a[0] - b[0]);
+  const out: [number, number][] = [];
+  for (const [lo, hi] of spans) {
+    const last = out[out.length - 1];
+    if (last && lo <= last[1] + 1) last[1] = Math.max(last[1], hi);
+    else out.push([lo, hi]);
+  }
+  return out;
+}
+
+/** The ayah right after `p` — the natural "من" for the next open-ward day. */
+export function nextPointAfter(p: RangePoint): RangePoint {
+  const last = toFlatIndex({ surahNumber: 114, ayah: 6 });
+  return fromFlatIndex(Math.min(last, toFlatIndex(p) + 1));
 }

@@ -14,6 +14,9 @@ export type TodayAssignment = { surahStart: number; ayahStart: number; surahEnd:
 export type PlanProgress = { completed: number; total: number; percent: number };
 export type JuzProgress = { completed: number; total: number };
 export type PageRange = { pageStart: number; pageEnd: number; pageCount: number };
+/** Today's ward on an open-ward plan: due, but with no fixed slice. */
+export type OpenAssignment = { type: PlanType; open: true };
+export type PlanAssignment = (TodayAssignment & { type: PlanType; open?: undefined }) | OpenAssignment;
 
 /** One type's track inside a plan: its own weekdays, its own stretch of the
  * mushaf, and its own schedule. `occurrenceIndex` inside `schedule` is 1-based
@@ -21,12 +24,13 @@ export type PageRange = { pageStart: number; pageEnd: number; pageCount: number 
 export type PlanSegment = {
   type: PlanType;
   days: string[];
-  rangeStart: RangePoint;
-  rangeEnd: RangePoint;
-  todayAssignment: (TodayAssignment & { type: PlanType }) | null;
+  /** null on an open-ward plan. */
+  rangeStart: RangePoint | null;
+  rangeEnd: RangePoint | null;
+  todayAssignment: PlanAssignment | null;
   progress: PlanProgress | null;
   juzProgress: JuzProgress | null;
-  pageRange: PageRange;
+  pageRange: PageRange | null;
   schedule: (ScheduleEntry & { type: PlanType })[];
   scheduleIsPersisted: boolean;
 };
@@ -39,6 +43,9 @@ export type QuranPlan = {
   /** One track per type — the real scheduling data. Always present: the server
    * migrates a legacy single-type plan into a one-element array on read. */
   segments: PlanSegment[];
+  /** No fixed range: the teacher records what was memorized each day
+   * (useOpenWardEntries below). Immutable after creation. */
+  openWard: boolean;
   /** Every type in the plan, in segment order. */
   types: PlanType[];
   /** Rollup — the type due today, else the first segment's. Kept so screens
@@ -74,8 +81,8 @@ export type QuranPlan = {
    * entry of `todayAssignments`, or null), kept only for callers that still
    * assume a single value. `schedule` is every segment's days merged and
    * date-sorted, each entry carrying its own `type`. */
-  todayAssignment: (TodayAssignment & { type: PlanType }) | null;
-  todayAssignments: (TodayAssignment & { type: PlanType })[];
+  todayAssignment: PlanAssignment | null;
+  todayAssignments: PlanAssignment[];
   progress: PlanProgress | null;
   juzProgress: JuzProgress | null;
   pageRange: PageRange | null;
@@ -96,7 +103,16 @@ export function planSegment(plan: QuranPlan | undefined, type?: PlanType): PlanS
  * حفظ runs backward, so this must never be read off the plan as a whole. */
 export function segmentReversed(plan: QuranPlan | undefined, type?: PlanType): boolean {
   const seg = planSegment(plan, type);
-  return seg ? isReversedRange(seg.rangeStart, seg.rangeEnd) : false;
+  return seg?.rangeStart && seg.rangeEnd ? isReversedRange(seg.rangeStart, seg.rangeEnd) : false;
+}
+
+export function isOpenPlan(plan?: QuranPlan | null): boolean {
+  return Boolean(plan?.openWard);
+}
+
+/** Narrows a today-assignment to a real slice (false for an open-ward day). */
+export function isSlice(a: PlanAssignment | null | undefined): a is TodayAssignment & { type: PlanType; open?: undefined } {
+  return Boolean(a) && !(a as PlanAssignment).open;
 }
 
 type ListResponse = { success: boolean; count: number; data: QuranPlan[] };
@@ -302,5 +318,78 @@ export function useReflowStudentPlan() {
     mutationFn: ({ planId, studentId }: { planId: string; studentId: string }) =>
       post<ProgressSingleResponse>(`/quran-plans/${planId}/students/${studentId}/progress/reflow`, {}),
     onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: progressKey(vars.planId, vars.studentId) }),
+  });
+}
+
+/* ── Open-ward plans (QuranPlan.openWard) ──────────────────────────────── */
+
+/** What a student actually memorized on one day of an open-ward plan.
+ * `status: 'none'` is the teacher's explicit «لم يُسمِّع اليوم»; no entry at
+ * all means the day wasn't recorded. */
+export type OpenWardStatus = 'recorded' | 'none';
+export type OpenWardType = Exclude<PlanType, 'ختمة'>;
+export type OpenWardEntry = {
+  _id: string;
+  plan: string;
+  student: { _id: string; name: string } | string;
+  type: OpenWardType;
+  /** Calendar day YYYY-MM-DD. */
+  date: string;
+  status: OpenWardStatus;
+  from?: RangePoint;
+  to?: RangePoint;
+  pageStart?: number;
+  pageEnd?: number;
+  pages?: number;
+  ayahs?: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type OpenWardListResponse = { success: boolean; count: number; data: OpenWardEntry[] };
+type OpenWardUpsertResponse = { success: boolean; data: OpenWardEntry; overlapWarning: boolean };
+type OpenWardFilters = { student?: string; from?: string; to?: string };
+
+export function entryStudentId(e: OpenWardEntry): string {
+  return typeof e.student === 'string' ? e.student : e.student._id;
+}
+
+/** Query options for one plan's entries — shared by useOpenWardEntries and
+ * callers that fetch several plans at once via useQueries. */
+export function openWardQueryOptions(planId?: string, filters?: OpenWardFilters) {
+  const params = new URLSearchParams();
+  if (filters?.student) params.set('student', filters.student);
+  if (filters?.from) params.set('from', filters.from);
+  if (filters?.to) params.set('to', filters.to);
+  const qs = params.toString() ? `?${params.toString()}` : '';
+  return {
+    queryKey: ['open-ward', planId ?? '', filters?.student ?? '', filters?.from ?? '', filters?.to ?? ''],
+    queryFn: () => get<OpenWardListResponse>(`/quran-plans/${planId}/open-ward${qs}`).then((r) => r.data),
+    enabled: Boolean(planId),
+  };
+}
+
+/** Sorted newest first (server-side). */
+export function useOpenWardEntries(planId?: string, filters?: OpenWardFilters) {
+  return useQuery(openWardQueryOptions(planId, filters));
+}
+
+export function useUpsertOpenWard() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ planId, studentId, ...body }: {
+      planId: string; studentId: string; type: OpenWardType; date: string;
+      status: OpenWardStatus; from?: RangePoint; to?: RangePoint;
+    }) => put<OpenWardUpsertResponse>(`/quran-plans/${planId}/students/${studentId}/open-ward`, body),
+    onSuccess: (_d, v) => qc.invalidateQueries({ queryKey: ['open-ward', v.planId] }),
+  });
+}
+
+export function useDeleteOpenWard() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ planId, studentId, type, date }: { planId: string; studentId: string; type: OpenWardType; date: string }) =>
+      del(`/quran-plans/${planId}/students/${studentId}/open-ward?type=${encodeURIComponent(type)}&date=${date}`),
+    onSuccess: (_d, v) => qc.invalidateQueries({ queryKey: ['open-ward', v.planId] }),
   });
 }

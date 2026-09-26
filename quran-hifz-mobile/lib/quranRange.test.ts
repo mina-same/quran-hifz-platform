@@ -18,6 +18,10 @@ import {
   countOccurrences,
   computeScheduleBreakdown,
   WEEK_DAYS,
+  typesDueOn,
+  coveredFlatRanges,
+  nextPointAfter,
+  computeOpenScheduleDates,
   type RangePoint,
 } from './quranRange';
 
@@ -609,5 +613,42 @@ describe('unionDays', () => {
     expect(unionDays([HIFZ, MURAJAA]).sort()).toEqual(
       ['الأربعاء', 'الاثنين', 'الخميس', 'السبت'].sort(),
     );
+  });
+});
+
+describe('open-ward helpers', () => {
+  it('typesDueOn picks every type scheduled on that calendar day', () => {
+    const schedule = [
+      { date: '2026-09-28T00:00:00.000Z', type: 'حفظ' as const },
+      { date: '2026-09-28T00:00:00.000Z', type: 'مراجعة' as const },
+      { date: '2026-09-26T00:00:00.000Z', type: 'حفظ' as const },
+    ];
+    expect(typesDueOn(schedule, '2026-09-28')).toEqual(['حفظ', 'مراجعة']);
+    expect(typesDueOn(schedule, '2026-09-27')).toEqual([]);
+  });
+
+  it('coveredFlatRanges merges overlapping and adjacent spans and ignores "none"', () => {
+    const e = (s: number, a: number, s2: number, a2: number) =>
+      ({ status: 'recorded', from: { surahNumber: s, ayah: a }, to: { surahNumber: s2, ayah: a2 } });
+    const spans = coveredFlatRanges([e(2, 1, 2, 10), e(2, 11, 2, 20), e(2, 5, 2, 8), { status: 'none' }, e(3, 1, 3, 2)]);
+    expect(spans).toEqual([
+      [toFlatIndex({ surahNumber: 2, ayah: 1 }), toFlatIndex({ surahNumber: 2, ayah: 20 })],
+      [toFlatIndex({ surahNumber: 3, ayah: 1 }), toFlatIndex({ surahNumber: 3, ayah: 2 })],
+    ]);
+  });
+
+  it('nextPointAfter crosses surah boundaries and clamps at the end', () => {
+    expect(nextPointAfter({ surahNumber: 1, ayah: 7 })).toEqual({ surahNumber: 2, ayah: 1 });
+    expect(nextPointAfter({ surahNumber: 114, ayah: 6 })).toEqual({ surahNumber: 114, ayah: 6 });
+  });
+
+  it('computeOpenScheduleDates walks the shared window with holidays and local calendar keys', () => {
+    const out = computeOpenScheduleDates({
+      startDate: new Date(2026, 8, 26), endType: 'activeDays', activeDaysCount: 3, holidays: ['2026-09-27'],
+      segments: [{ type: 'حفظ', days: ['السبت', 'الأحد', 'الاثنين'] }, { type: 'مراجعة', days: ['الاثنين'] }],
+    });
+    expect(out.map((x) => `${x.date.slice(0, 10)} ${x.type}`)).toEqual([
+      '2026-09-26 حفظ', '2026-09-28 حفظ', '2026-09-28 مراجعة', '2026-10-03 حفظ',
+    ]);
   });
 });
