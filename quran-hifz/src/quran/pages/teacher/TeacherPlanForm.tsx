@@ -20,7 +20,7 @@ import { Badge } from "../../components/common/Badge";
 import { DaysOfWeekPicker } from "../../components/common/DaysOfWeekPicker";
 import { SurahPointFields } from "../../components/common/SurahRangePicker";
 import { IndividualPlanPanel } from "../../components/common/IndividualPlanPanel";
-import { countRangeAyahs, pageRangeOfAyahRange, computeMultiScheduleBreakdown, surahName, WEEK_DAYS, validateSegmentDays} from "../../lib/quranRange";
+import { countRangeAyahs, pageRangeOfAyahRange, computeMultiScheduleBreakdown, computeOpenScheduleDates, surahName, WEEK_DAYS, validateSegmentDays} from "../../lib/quranRange";
 
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString(AR_LOCALE, { year: "numeric", month: "short", day: "numeric" });
@@ -76,6 +76,9 @@ type FormFields = {
   endDate: string;
   /** Daily grading split for this plan. Seeded from DEFAULT_GRADE_RUBRIC. */
   gradeRubric: GradeCriterion[];
+  /** «بدون مقطع محدد» — no range; the teacher records each day what the
+   * student memorized. Fixed once the plan exists. */
+  openWard: boolean;
 };
 
 /** Today as a local `YYYY-MM-DD` string — built from local calendar fields
@@ -99,6 +102,7 @@ const EMPTY: FormFields = {
   activeDaysCount: "10",
   endDate: "",
   gradeRubric: DEFAULT_GRADE_RUBRIC.map((c) => ({ ...c })),
+  openWard: false,
 };
 
 function getId(v: { _id: string } | string) {
@@ -108,9 +112,14 @@ function getId(v: { _id: string } | string) {
 function fieldsFromPlan(plan: QuranPlan, nameSuffix = ""): FormFields {
   return {
     name: `${plan.name}${nameSuffix}`, description: plan.description ?? "",
+    // An open-ward plan's segments carry no range — the defaults are never
+    // sent (see handleSubmit), they only keep FormSegment's shape total.
     segments: plan.segments.map((seg) => ({
-      type: seg.type, days: seg.days, rangeStart: seg.rangeStart, rangeEnd: seg.rangeEnd,
+      type: seg.type, days: seg.days,
+      rangeStart: seg.rangeStart ?? { surahNumber: 1, ayah: 1 },
+      rangeEnd: seg.rangeEnd ?? { surahNumber: 1, ayah: 1 },
     })),
+    openWard: Boolean(plan.openWard),
     targetType: plan.targetType,
     teacher: plan.teacher ? getId(plan.teacher) : "",
     track: plan.track ? getId(plan.track) : "",
@@ -219,6 +228,16 @@ export function TeacherPlanForm() {
     });
   }
 
+  /** ختمة is a fixed range by definition, so turning the plan open drops it
+   * (falling back to حفظ if it was the only type). */
+  function setOpenWard(openWard: boolean) {
+    setForm((p) => {
+      if (!openWard) return { ...p, openWard };
+      const kept = p.segments.filter((sg) => sg.type !== "ختمة");
+      return { ...p, openWard, segments: kept.length > 0 ? kept : [emptySegment("حفظ")] };
+    });
+  }
+
   function updateSegment(type: PlanType, patch: Partial<FormSegment>) {
     setForm((p) => ({
       ...p,
@@ -270,7 +289,11 @@ export function TeacherPlanForm() {
     setFormError("");
     const body: Record<string, unknown> = {
       name: form.name.trim(), description: form.description.trim() || undefined,
-      segments: form.segments,
+      segments: form.openWard
+        ? form.segments.map((sg) => ({ type: sg.type, days: sg.days }))
+        : form.segments,
+      // Immutable server-side — only sent on create.
+      openWard: planRecord ? undefined : form.openWard,
       teacher: teacherId ?? form.teacher,
       targetType: form.targetType,
       track: form.targetType === "track" ? form.track : undefined,
@@ -324,6 +347,23 @@ export function TeacherPlanForm() {
     }
   }, [form.segments, form.holidays, form.startDate, form.endType, form.activeDaysCount, form.endDate]);
 
+  // Open-ward preview: just which types fall on which days — no slice.
+  const openPreview = useMemo(() => {
+    if (!form.openWard) return [];
+    if (form.segments.every((sg) => sg.days.length === 0)) return [];
+    if (form.endType === "activeDays" && !form.activeDaysCount) return [];
+    if (form.endType === "date" && !form.endDate) return [];
+    if (!form.startDate) return [];
+    return computeOpenScheduleDates({
+      holidays: form.holidays,
+      startDate: new Date(`${form.startDate}T00:00:00`),
+      endType: form.endType,
+      activeDaysCount: form.endType === "activeDays" ? Number(form.activeDaysCount) : undefined,
+      endDate: form.endType === "date" && form.endDate ? new Date(`${form.endDate}T00:00:00`) : undefined,
+      segments: form.segments.filter((sg) => sg.days.length > 0).map((sg) => ({ type: sg.type, days: sg.days })),
+    });
+  }, [form.openWard, form.segments, form.holidays, form.startDate, form.endType, form.activeDaysCount, form.endDate]);
+
   // The header badge shows the plan's first type; the full set is listed in
   // the per-type cards below.
   const headerTypeCfg =
@@ -331,11 +371,12 @@ export function TeacherPlanForm() {
 
   const requestedOccurrences =
     form.endType === "activeDays" ? Number(form.activeDaysCount || 0) : schedulePreview.length;
-  const previewShortfall = requestedOccurrences > 0 && schedulePreview.length < requestedOccurrences;
+  // An open plan has no pages to run out of.
+  const previewShortfall = !form.openWard && requestedOccurrences > 0 && schedulePreview.length < requestedOccurrences;
   // `schedulePreview` now holds one row per segment per day (both types'
   // entries merged), so counting rows double-counts any day حفظ and مراجعة
   // share. `activeDaysCount` means distinct calendar days — count those.
-  const previewDayCount = new Set(schedulePreview.map((s) => s.date)).size;
+  const previewDayCount = new Set((form.openWard ? openPreview : schedulePreview).map((s) => s.date)).size;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -390,10 +431,33 @@ export function TeacherPlanForm() {
           </div>
         )}
 
+        <label style={{
+          marginTop: 20, padding: "12px 14px", borderRadius: 12,
+          border: `2px solid ${form.openWard ? "var(--green)" : "var(--border)"}`,
+          background: form.openWard ? "var(--cream)" : "transparent",
+          display: "flex", alignItems: "flex-start", gap: 10,
+          cursor: planRecord ? "not-allowed" : "pointer", opacity: planRecord ? 0.75 : 1,
+        }}>
+          <input
+            type="checkbox"
+            checked={form.openWard}
+            disabled={Boolean(planRecord)}
+            onChange={(e) => setOpenWard(e.target.checked)}
+            style={{ marginTop: 3 }}
+          />
+          <span style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <strong style={{ fontSize: 14, color: "var(--text)" }}>بدون مقطع محدد</strong>
+            <span style={{ fontSize: 12, color: "var(--text2)" }}>
+              لا يُحدَّد ورد مسبقاً؛ يُسجِّل المعلم في كل حلقة ما حفظه الطالب من أين إلى أين، ثم يقيّمه.
+              {planRecord && " (لا يمكن تغيير هذا الخيار بعد إنشاء الخطة)"}
+            </span>
+          </span>
+        </label>
+
         <div style={{ marginTop: 20, paddingTop: 18, borderTop: "1px solid var(--border)" }}>
           <div style={{ fontSize: 11, color: "var(--text3)", fontWeight: 700, marginBottom: 10 }}>أنواع الخطة</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {PLAN_TYPES.map((t) => {
+            {PLAN_TYPES.filter((t) => !form.openWard || t.value !== "ختمة").map((t) => {
               const active = form.segments.some((sg) => sg.type === t.value);
               return (
                 <button
@@ -417,7 +481,9 @@ export function TeacherPlanForm() {
             })}
           </div>
           <p style={{ margin: "10px 0 0", fontSize: 11, color: "var(--text3)" }}>
-            اختر نوعاً أو أكثر — لكل نوع أيامه ونطاقه، والمدة واحدة للجميع.
+            {form.openWard
+              ? "اختر نوعاً أو أكثر — لكل نوع أيامه، والمدة واحدة للجميع."
+              : "اختر نوعاً أو أكثر — لكل نوع أيامه ونطاقه، والمدة واحدة للجميع."}
           </p>
         </div>
       </Card>
@@ -438,6 +504,7 @@ export function TeacherPlanForm() {
               onChange={(days) => updateSegment(seg.type, { days })}
             />
 
+            {!form.openWard && (
             <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ fontSize: 11, color: "var(--text3)", fontWeight: 700 }}>نطاق {seg.type} (من - إلى)</div>
               <SurahPointFields label="من" value={seg.rangeStart} onChange={(v) => updateSegment(seg.type, { rangeStart: v })} />
@@ -456,6 +523,7 @@ export function TeacherPlanForm() {
                 )}
               </div>
             </div>
+            )}
           </Card>
         );
       })}
@@ -972,7 +1040,42 @@ export function TeacherPlanForm() {
 
       {/* ── Live schedule preview ── */}
       <Card icon="ti-calendar-stats" title="التقسيمة اليومية (معاينة)">
-        {schedulePreview.length === 0 ? (
+        {form.openWard ? (
+          openPreview.length === 0 ? (
+            <p style={{ margin: "16px 0", fontSize: 13, color: "var(--text3)", textAlign: "center" }}>
+              اختر الأيام وتاريخ البداية والانتهاء لعرض أيام الخطة
+            </p>
+          ) : (
+            <>
+              <div style={{
+                marginBottom: 12, padding: "10px 12px", borderRadius: 10,
+                background: "var(--cream)", fontSize: 12, color: "var(--text2)",
+                display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
+              }}>
+                <i className="ti ti-info-circle" style={{ color: "var(--green)" }} />
+                <span>عدد الأيام: <strong>{previewDayCount}</strong></span>
+                <span>· يُسجَّل ما يحفظه الطالب في كل حلقة</span>
+              </div>
+              <div className="tbl-wrap" style={{ maxHeight: 360, overflowY: "auto" }}>
+                <table className="tbl">
+                  <thead>
+                    <tr><th>#</th><th>النوع</th><th>التاريخ</th><th>الورد</th></tr>
+                  </thead>
+                  <tbody>
+                    {openPreview.map((s) => (
+                      <tr key={`${s.type}-${s.occurrenceIndex}`}>
+                        <td>{s.occurrenceIndex}</td>
+                        <td><Badge tone="gold">{s.type}</Badge></td>
+                        <td>{fmtDate(s.date)}</td>
+                        <td style={{ color: "var(--text3)" }}>يُسجَّل في الحلقة</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )
+        ) : schedulePreview.length === 0 ? (
           <p style={{ margin: "16px 0", fontSize: 13, color: "var(--text3)", textAlign: "center" }}>
             اختر النطاق والأيام وتاريخ البداية والانتهاء لعرض تقسيمة الوِرد على الأيام
           </p>
