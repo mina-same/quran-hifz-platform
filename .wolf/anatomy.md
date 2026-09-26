@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-26T06:48:07.649Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-26T07:13:04.589Z
 > Files: 714 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
@@ -530,7 +530,7 @@
 - `kpis.tsx` — ratingVariant (~1020 tok)
 - `masajid.tsx` — AdminMasajid (~1280 tok)
 - `parents.tsx` — EMPTY_ADD — renders form (~4709 tok)
-- `register.tsx` — EMPTY — renders form (~2708 tok)
+- `register.tsx` — Create-student form (mirrors web AdminRegister.tsx). No reading-level select or auto-suggested masar block (removed 2026-09-26) — `path` always "حفظ كامل". (~2100 tok)
 - `reports.tsx` — AdminReports (~540 tok)
 - `special_tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~12026 tok)
 - `students.tsx` — المسار: real track lives one hop away via `Student.track`, not the unused legacy `path` enum. (~3454 tok)

@@ -4353,3 +4353,10 @@
 | 06:49 | Replaced track type options list per user request | quran-hifz/src/quran/pages/admin/AdminTrackForm.tsx, quran-hifz-mobile/app/(portal)/admin/tracks.tsx | done, tsc clean | ~600 |
 | 06:49 | Removed ختمة as a selectable plan type (web+mobile) — plan is حفظ/مراجعة/both only | quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx, quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx | done, tsc clean | ~900 |
 | 09:50 | Session end: 10 writes across 7 files (admin.routes.ts, admin.controller.ts, AdminTrackForm.tsx, tracks.tsx, TeacherPlanForm.tsx) | 10 reads | ~41283 tok |
+| 10:12 | Edited quran-hifz-mobile/app/(portal)/admin/register.tsx | modified validate() | ~348 |
+| 10:12 | Edited quran-hifz-mobile/app/(portal)/admin/register.tsx | modified sf() | ~139 |
+| 10:12 | Edited quran-hifz-mobile/app/(portal)/admin/register.tsx | reduced (-17 lines) | ~106 |
+| 10:13 | Edited quran-hifz-mobile/app/(portal)/admin/register.tsx | removed 14 lines | ~31 |
+| 07:14 | Applied AdminRegister reading-level/masar removal to mobile too (parity request) | quran-hifz-mobile/app/(portal)/admin/register.tsx | done, tsc clean | ~900 |
+| 10:14 | Session end: 14 writes across 8 files (admin.routes.ts, admin.controller.ts, AdminTrackForm.tsx, tracks.tsx, TeacherPlanForm.tsx) | 11 reads | ~44305 tok |
+| 10:17 | Session end: 14 writes across 8 files (admin.routes.ts, admin.controller.ts, AdminTrackForm.tsx, tracks.tsx, TeacherPlanForm.tsx) | 11 reads | ~44305 tok |

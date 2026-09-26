@@ -12,19 +12,18 @@ import FormInput from '@/components/forms/FormInput';
 import FormSelect from '@/components/forms/FormSelect';
 import { useCreateStudent } from '@/lib/queries/students';
 import { useTracks } from '@/lib/queries/tracks';
-import { pickMasar, READING_LEVELS } from '@/lib/constants/masarMap';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
 type Fields = {
   name: string; guardianPhone: string; nationalId: string;
-  level: string; studentLevel: string;
+  studentLevel: string;
   track: string;
   email: string; password: string;
 };
 const EMPTY: Fields = {
-  name: '', guardianPhone: '', nationalId: '', level: '', studentLevel: '',
+  name: '', guardianPhone: '', nationalId: '', studentLevel: '',
   track: '', email: '', password: '',
 };
 
@@ -34,7 +33,6 @@ function validate(f: Fields): string | null {
   if (!/^05\d{8}$/.test(f.guardianPhone.trim())) return 'صيغة الجوال: 05XXXXXXXX';
   // Optional, but must be well-formed when provided.
   if (f.nationalId.trim() && !/^[12]\d{9}$/.test(f.nationalId.trim())) return 'رقم الهوية ١٠ أرقام ويبدأ بـ ١ أو ٢';
-  if (!f.level) return 'يرجى اختيار مستوى القراءة';
   if (f.studentLevel.trim() && (Number(f.studentLevel) < 1 || Number(f.studentLevel) > 10)) return 'المستوى بين ١ و١٠';
   if (!f.track) return 'يرجى اختيار المسار';
   if (f.email.trim() && !/^\S+@\S+\.\S+$/.test(f.email.trim())) return 'البريد الإلكتروني غير صحيح';
@@ -57,12 +55,6 @@ export default function AdminRegister() {
     setForm((f) => ({ ...f, [k]: v }));
   }
 
-  // The programme is derived from the reading level, never picked by hand.
-  const masar = useMemo(
-    () => pickMasar(form.level, undefined),
-    [form.level],
-  );
-
   async function handleSubmit() {
     const msg = validate(form);
     if (msg) { setError(msg); return; }
@@ -73,7 +65,7 @@ export default function AdminRegister() {
       guardianPhone: form.guardianPhone.trim(),
       nationalId: form.nationalId.trim() || undefined,
       track: form.track,
-      path: masar?.path ?? 'حفظ كامل',
+      path: 'حفظ كامل',
       status: 'new',
     };
     if (form.studentLevel.trim()) body.level = Number(form.studentLevel);
@@ -128,29 +120,12 @@ export default function AdminRegister() {
           </Card>
 
           <Card>
-            <CardHeader title="مستوى القراءة والمسار" />
+            <CardHeader title="المستوى" />
             <View style={s.formCol}>
-              <FormGroup label="مستوى القراءة الحالي" required>
-                <FormSelect
-                  value={form.level}
-                  onChange={(v) => sf('level', v)}
-                  options={READING_LEVELS.map((l) => ({ value: l.value, label: l.label }))}
-                  placeholder="اختر المستوى"
-                />
-              </FormGroup>
               <FormGroup label="المستوى (رقم من ١ إلى ١٠)">
                 <FormInput placeholder="مثال: ٣" keyboardType="number-pad" value={form.studentLevel} onChangeText={(v) => sf('studentLevel', v)} />
               </FormGroup>
             </View>
-
-            {masar && (
-              <View style={s.masar}>
-                <Text style={s.masarLabel}>المسار المقترح تلقائياً</Text>
-                <Text style={s.masarName}>{masar.name}</Text>
-                <Text style={s.masarDesc}>{masar.desc}</Text>
-                <Text style={s.masarHalqa}>المسار المقترح: {masar.halqa}</Text>
-              </View>
-            )}
           </Card>
 
           <Card>
@@ -228,16 +203,5 @@ function createS(theme: AppTheme) {
     actions: { flexDirection: 'row', gap: 10 },
     ltr: { textAlign: 'right', writingDirection: 'ltr' },
     note: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted, marginBottom: 10 },
-    masar: {
-      marginTop: 14,
-      backgroundColor: theme.tone.green.bg,
-      borderRadius: theme.radiusSm,
-      padding: 14,
-      gap: 3,
-    },
-    masarLabel: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.tone.green.text },
-    masarName: { fontSize: 17, fontFamily: theme.fontCairoBold, color: theme.tone.green.text },
-    masarDesc: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.tone.green.text },
-    masarHalqa: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.tone.green.text, marginTop: 6 },
   });
 }

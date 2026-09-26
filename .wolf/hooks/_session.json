@@ -51,6 +51,11 @@
       "count": 3,
       "tokens": 10644,
       "first_read": "2026-09-26T06:45:32.316Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/admin/register.tsx": {
+      "count": 2,
+      "tokens": 2398,
+      "first_read": "2026-09-26T07:11:34.582Z"
     }
   },
   "files_written": [
@@ -113,6 +118,30 @@
       "action": "edit",
       "tokens": 111,
       "at": "2026-09-26T06:48:07.676Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/admin/register.tsx",
+      "action": "edit",
+      "tokens": 348,
+      "at": "2026-09-26T07:12:34.790Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/admin/register.tsx",
+      "action": "edit",
+      "tokens": 139,
+      "at": "2026-09-26T07:12:42.583Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/admin/register.tsx",
+      "action": "edit",
+      "tokens": 106,
+      "at": "2026-09-26T07:12:51.308Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/admin/register.tsx",
+      "action": "edit",
+      "tokens": 31,
+      "at": "2026-09-26T07:13:04.601Z"
     }
   ],
   "edit_counts": {
@@ -122,11 +151,12 @@
     "quran-hifz-mobile/app/(portal)/admin/tracks.tsx": 1,
     "quran-hifz/src/quran/pages/teacher/TeacherPlanForm.tsx": 1,
     "quran-hifz-mobile/app/(portal)/teacher/plan-form.tsx": 1,
-    "quran-hifz/src/quran/pages/admin/AdminRegister.tsx": 3
+    "quran-hifz/src/quran/pages/admin/AdminRegister.tsx": 3,
+    "quran-hifz-mobile/app/(portal)/admin/register.tsx": 4
   },
-  "anatomy_hits": 10,
+  "anatomy_hits": 11,
   "anatomy_misses": 0,
-  "repeated_reads_warned": 6,
+  "repeated_reads_warned": 7,
   "cerebrum_warnings": 0,
-  "stop_count": 1
+  "stop_count": 3
 }
