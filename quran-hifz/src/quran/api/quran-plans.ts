@@ -29,7 +29,12 @@ export type TodayAssignment = { surahStart: number; ayahStart: number; surahEnd:
 export type PlanProgress = { completed: number; total: number; percent: number };
 export type JuzProgress = { completed: number; total: number };
 export type PageRange = { pageStart: number; pageEnd: number; pageCount: number };
-export type ScheduleEntry = TodayAssignment & { occurrenceIndex: number; date: string; juz: number };
+/** `open` marks an open-ward plan's date-only entry — its slice fields are
+ * absent. Screens branch on `isOpenPlan(plan)` before reading a schedule. */
+export type ScheduleEntry = TodayAssignment & { occurrenceIndex: number; date: string; juz: number; open?: true };
+/** Today's ward on an open-ward plan: due, but with no fixed slice. */
+export type OpenAssignment = { type: PlanType; open: true };
+export type PlanAssignment = (TodayAssignment & { type: PlanType; open?: undefined }) | OpenAssignment;
 
 /** One type's track inside a plan: its own weekdays, its own stretch of the
  * mushaf, and its own schedule. `occurrenceIndex` inside `schedule` is 1-based
@@ -37,12 +42,13 @@ export type ScheduleEntry = TodayAssignment & { occurrenceIndex: number; date: s
 export type PlanSegment = {
   type: PlanType;
   days: string[];
-  rangeStart: RangePoint;
-  rangeEnd: RangePoint;
-  todayAssignment: (TodayAssignment & { type: PlanType }) | null;
+  /** null on an open-ward plan. */
+  rangeStart: RangePoint | null;
+  rangeEnd: RangePoint | null;
+  todayAssignment: PlanAssignment | null;
   progress: PlanProgress | null;
   juzProgress: JuzProgress | null;
-  pageRange: PageRange;
+  pageRange: PageRange | null;
   schedule: (ScheduleEntry & { type: PlanType })[];
   scheduleIsPersisted: boolean;
 };
@@ -55,6 +61,9 @@ export type QuranPlan = {
   /** One track per type — the real scheduling data. Always present: the server
    * migrates a legacy single-type plan into a one-element array on read. */
   segments: PlanSegment[];
+  /** No fixed range: the teacher records what was memorized each day
+   * (api/open-ward.ts). Immutable after creation. */
+  openWard: boolean;
   /** Every type in the plan, in segment order. */
   types: PlanType[];
   /** Rollup — the type due today, else the first segment's. Kept so screens
@@ -91,8 +100,8 @@ export type QuranPlan = {
    * entry of `todayAssignments`, or null), kept only for callers that still
    * assume a single value. `schedule` is every segment's days merged and
    * date-sorted, each entry carrying its own `type`. */
-  todayAssignment: (TodayAssignment & { type: PlanType }) | null;
-  todayAssignments: (TodayAssignment & { type: PlanType })[];
+  todayAssignment: PlanAssignment | null;
+  todayAssignments: PlanAssignment[];
   progress: PlanProgress | null;
   juzProgress: JuzProgress | null;
   pageRange: PageRange | null;
@@ -115,7 +124,16 @@ export function planSegment(plan: QuranPlan | undefined, type?: PlanType): PlanS
  * never be read off the plan as a whole. */
 export function segmentReversed(plan: QuranPlan | undefined, type?: PlanType): boolean {
   const seg = planSegment(plan, type);
-  return seg ? isReversedRange(seg.rangeStart, seg.rangeEnd) : false;
+  return seg?.rangeStart && seg.rangeEnd ? isReversedRange(seg.rangeStart, seg.rangeEnd) : false;
+}
+
+export function isOpenPlan(plan?: QuranPlan | null): boolean {
+  return Boolean(plan?.openWard);
+}
+
+/** Narrows a today-assignment to a real slice (false for an open-ward day). */
+export function isSlice(a: PlanAssignment | null | undefined): a is TodayAssignment & { type: PlanType; open?: undefined } {
+  return Boolean(a) && !(a as PlanAssignment).open;
 }
 
 /** Human-readable label for a plan's schedule window — used wherever a
