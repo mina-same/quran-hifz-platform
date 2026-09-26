@@ -438,3 +438,5 @@ Two deeper bugs surfaced fixing this, both worth remembering for any future per-
    subdocument-spreading gotcha above) instead of rebuilding them. `overflowPages` is doc-level, not per-type
    (a pre-existing schema limitation, NOT fixed here) — preserved the existing value rather than hard-resetting
    to 0, but two segments independently overflowing will still combine into one number.
+
+- [2026-09-26] **Open-ward plans (خطة بدون مقطع محدد)** — user decisions: the option is PLAN-level (not per segment); a present student's range is MANDATORY on save, with an explicit «لم يُسمِّع اليوم» escape; only teacher/admin record (no student self-report); any range in the mushaf is allowed as long as from ≤ to. Design choices made: no ختمة on open plans, `openWard` immutable after creation, daily records in a separate `OpenWardEntry` collection (not StudentPlanProgress). Spec: docs/superpowers/specs/2026-09-26-open-ward-plans-design.md.

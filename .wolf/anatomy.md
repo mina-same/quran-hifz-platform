@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-26T07:13:04.589Z
-> Files: 714 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-26T07:38:36.788Z
+> Files: 716 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -468,6 +468,7 @@
 - `2026-09-05-halqa-track-restructure-phase1-server.md` — Halqa Elimination / Track Restructure — Phase 1 (Server) Implementation Plan (~24218 tok)
 - `2026-09-05-halqa-track-restructure-phase2-web.md` — Halqa/Track Restructure — Phase 2 (Web) Implementation Plan (~35198 tok)
 - `2026-09-06-halqa-track-restructure-phase3-mobile.md` — Halqa/Track Restructure — Phase 3 (Mobile) Implementation Plan (~62709 tok)
+- `2026-09-26-open-ward-plans.md` — Open-ward Plans (خطة بدون مقطع محدد) Implementation Plan (~16787 tok)
 
 ## docs/superpowers/specs/
 
@@ -480,6 +481,7 @@
 - `2026-09-06-halqa-track-restructure-phase3-mobile-research.md` — Phase 3 (mobile) — research handoff (~4700 tok)
 - `2026-09-06-halqa-track-restructure-phase3-mobile-research.md` — Halqa/Track Restructure — Phase 3 (Mobile) Research (~4617 tok)
 - `2026-09-20-supervisor-role-design.md` — Supervisor Role — Design (~2368 tok)
+- `2026-09-26-open-ward-plans-design.md` — Open-ward plans (خطة بدون مقطع محدد) — design (~2333 tok)
 
 ## quran-hifz-mobile/
 
