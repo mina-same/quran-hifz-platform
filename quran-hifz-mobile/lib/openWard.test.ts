@@ -19,3 +19,13 @@ describe('savedOpenWardTypes', () => {
     expect(savedOpenWardTypes([e('s2', 'حفظ', '2026-09-26')], 's1', '2026-09-26')).toEqual([]);
   });
 });
+
+import { openPlanIdsForReport } from './openWard';
+
+describe('openPlanIdsForReport', () => {
+  it('includes open plans reached via the track, not just the student filter, deduped', () => {
+    const byStudent = [{ _id: 'a', openWard: true }, { _id: 'f', openWard: false }];
+    const byTrack = [{ _id: 'a', openWard: true }, { _id: 'b', openWard: true }, { _id: 'g', openWard: false }];
+    expect(openPlanIdsForReport(byStudent, byTrack)).toEqual(['a', 'b']);
+  });
+});

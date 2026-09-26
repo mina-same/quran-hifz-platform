@@ -7,7 +7,8 @@ import Badge from '@/components/ui/Badge';
 import ProgressBar from '@/components/ui/ProgressBar';
 import FormSelect from '@/components/forms/FormSelect';
 import { useQueries } from '@tanstack/react-query';
-import { useQuranPlans, isOpenPlan, openWardQueryOptions, type PlanSegment } from '@/lib/queries/quranPlan';
+import { useQuranPlans, openWardQueryOptions, type PlanSegment } from '@/lib/queries/quranPlan';
+import { openPlanIdsForReport } from '@/lib/openWard';
 import { useEvaluations, type EvaluationRecord } from '@/lib/queries/evaluations';
 import { MAX_SCORES, legacyScoresOf } from '@/lib/evaluationRubric';
 import { toFlatIndex, fromFlatIndex, juzFlatRange, coveredFlatRanges } from '@/lib/quranRange';
@@ -93,10 +94,15 @@ export default function StudentReportPanel({ students, aggregateFilter, aggregat
 
   // What the student recorded on each open-ward plan (حفظ only — مراجعة
   // revisits already-memorized text and must not inflate coverage).
+  // `?student=` only returns plans listing the student explicitly — a
+  // track-targeted open plan comes from the track's own plans.
+  const { data: trackPlans = [] } = useQuranPlans(
+    aggregateFilter.track ? { track: aggregateFilter.track } : undefined,
+    { enabled: !!aggregateFilter.track },
+  );
   const openWardResults = useQueries({
-    queries: plans
-      .filter((p) => isOpenPlan(p))
-      .map((p) => openWardQueryOptions(p._id, selectedId ? { student: selectedId } : undefined)),
+    queries: (selectedId ? openPlanIdsForReport(plans, trackPlans) : [])
+      .map((id) => openWardQueryOptions(id, { student: selectedId })),
   });
   const openSpansKey = openWardResults.map((r) => r.dataUpdatedAt).join(',');
   const openSpans = useMemo(

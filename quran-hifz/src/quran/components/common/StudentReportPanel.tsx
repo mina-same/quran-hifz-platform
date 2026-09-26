@@ -21,7 +21,8 @@ import { Card } from "./Card";
 import { Badge, type BadgeTone } from "./Badge";
 import { SkeletonCard } from "./Skeleton";
 import { StatsRow } from "./StatsRow";
-import { useQuranPlans, isOpenPlan, type PlanSegment } from "../../api/quran-plans";
+import { useQuranPlans, type PlanSegment } from "../../api/quran-plans";
+import { openPlanIdsForReport } from "../../lib/openWard";
 import { openWardQueryOptions } from "../../api/open-ward";
 import { useEvaluations } from "../../api/evaluations";
 import { MAX_SCORES, legacyScoresOf } from "../../lib/evaluationRubric";
@@ -112,10 +113,12 @@ export function StudentReportPanel({
 
   // What the student recorded on each open-ward plan (حفظ only — مراجعة
   // revisits already-memorized text and must not inflate coverage).
+  // `?student=` only returns plans listing the student explicitly — a
+  // track-targeted open plan comes from the track's own plans.
+  const { data: trackPlans = [] } = useQuranPlans({ track: aggregateFilter.track ?? "__none__" });
   const openWardResults = useQueries({
-    queries: plans
-      .filter((p) => isOpenPlan(p))
-      .map((p) => openWardQueryOptions(p._id, selectedId ? { student: selectedId } : undefined)),
+    queries: (selectedId ? openPlanIdsForReport(plans, trackPlans) : [])
+      .map((id) => openWardQueryOptions(id, { student: selectedId })),
   });
   const openSpans = useMemo(
     () => coveredFlatRanges(openWardResults.flatMap((r) => r.data ?? []).filter((e) => e.type === "حفظ")),

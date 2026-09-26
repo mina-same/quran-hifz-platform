@@ -13,3 +13,15 @@ export function savedOpenWardTypes<T extends EntryLike>(entries: T[], studentId:
     .map((e) => e.type);
   return Array.from(new Set(types));
 }
+
+/** Open-ward plans whose records belong in a student's report. The report's
+ * `?student=` plan filter only matches plans that list the student
+ * explicitly, so a track-targeted plan — the common case — must be picked up
+ * from the track's own plans as well. Deduped, first-seen order. */
+export function openPlanIdsForReport(
+  studentPlans: { _id: string; openWard?: boolean }[],
+  trackPlans: { _id: string; openWard?: boolean }[],
+): string[] {
+  const ids = [...studentPlans, ...trackPlans].filter((p) => p.openWard).map((p) => p._id);
+  return Array.from(new Set(ids));
+}
