@@ -19,6 +19,8 @@ import {
   type GradeCriterion,
 } from '@/lib/evaluationRubric';
 import { usePortalStore } from '@/lib/store/portalStore';
+import { useQuranPlans, isOpenPlan } from '@/lib/queries/quranPlan';
+import { resolveLinkedPlan } from '@/lib/trackSchedule';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { success, error } from '@/lib/haptics';
 
@@ -97,8 +99,14 @@ export default function TeacherEvaluate() {
 
   const bulkEvaluate = useBulkEvaluate();
 
+  // An open-ward plan requires, for every present student, what they actually
+  // memorized (or «لم يُسمِّع») alongside the grade — this bulk screen has no
+  // place for that, so grading such a track happens in «الحضور والتقييم».
+  const { data: contextPlans = [] } = useQuranPlans(contextFilter, { enabled: !!contextFilter });
+  const openWardBlocked = !!selected && isOpenPlan(resolveLinkedPlan(contextPlans));
+
   function handleSave() {
-    if (!selected || alreadySubmitted) return;
+    if (!selected || alreadySubmitted || openWardBlocked) return;
     const records: BulkEvaluateRecord[] = students.map((s) => {
       const e = evalFor(s._id);
       return {
@@ -211,6 +219,11 @@ export default function TeacherEvaluate() {
         {bulkEvaluate.isError && (
           <Alert variant="error">{(bulkEvaluate.error as Error).message}</Alert>
         )}
+        {openWardBlocked && (
+          <Alert variant="warning">
+            خطة هذا المسار بدون مقطع محدد — سجّل الحضور والتقييم وما حفظه كل طالب من شاشة «الحضور والتقييم».
+          </Alert>
+        )}
         {alreadySubmitted && (
           <Alert variant="success" icon={<IconLock size={18} color={theme.green} />}>
             تم تسجيل التقييم لهذا اليوم بالفعل. اختر يومًا آخر أو راجع السجل لاحقًا للتعديل.
@@ -300,7 +313,7 @@ export default function TeacherEvaluate() {
         <Button
           label={alreadySubmitted ? 'تم الإرسال لهذا اليوم' : bulkEvaluate.isPending ? 'جارٍ الحفظ...' : 'حفظ التقييم'}
           onPress={handleSave}
-          disabled={alreadySubmitted || bulkEvaluate.isPending || students.length === 0}
+          disabled={alreadySubmitted || openWardBlocked || bulkEvaluate.isPending || students.length === 0}
           fullWidth
         />
         </ScrollView>
