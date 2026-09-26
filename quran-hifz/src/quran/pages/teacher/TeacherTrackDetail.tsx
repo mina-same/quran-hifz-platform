@@ -28,7 +28,12 @@ import {
   type PlanType,
   segmentReversed,
   planScheduleRangeLabel,
+  isOpenPlan,
+  isSlice,
 } from "../../api/quran-plans";
+import { useOpenWardEntries, useUpsertOpenWard, entryStudentId, type OpenWardType } from "../../api/open-ward";
+import { OpenWardPicker, openWardComplete, type OpenWardValue } from "../../components/common/OpenWardPicker";
+import { OpenWardLog } from "../../components/common/OpenWardLog";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
 import { useEvaluations, useRubric, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
 import {
@@ -55,6 +60,7 @@ import {
   dayFinishPoint,
   dayDeltaAyahs,
   planFinishPoint,
+  nextPointAfter,
 } from "../../lib/quranRange";
 import { toAr, AR_LOCALE } from "../../../lib/format";
 
@@ -428,6 +434,14 @@ export function TeacherTrackDetail() {
   }, [track, linkedPlan, rosterStudents]);
   const progressByStudentId = useStudentPlanProgressList(linkedPlan?._id, coveredStudentIds);
 
+  // Open-ward plan (no fixed range): the teacher records each day what the
+  // student actually memorized — see openWardFor/saveStudent below.
+  const openPlan = isOpenPlan(linkedPlan);
+  const { data: openEntries = [] } = useOpenWardEntries(openPlan ? linkedPlan?._id : undefined);
+  const upsertOpenWard = useUpsertOpenWard();
+  // Unsaved per-student edits, keyed `${studentId}::${type}`.
+  const [openWardEdits, setOpenWardEdits] = useState<Record<string, OpenWardValue>>({});
+
   const generateSchedule = useGenerateSchedule();
   const updateScheduleEntry = useUpdateScheduleEntry();
   const [editingDay, setEditingDay] = useState<ScheduleEntry | null>(null);
@@ -586,6 +600,7 @@ export function TeacherTrackDetail() {
     setOverrides({});
     setUnlockedIds(new Set());
     setCompletionOverrides({});
+    setOpenWardEdits({});
     setExpandedStudentId(null);
     setDayNotice(null);
   }, [effectiveDate]);
@@ -712,9 +727,45 @@ export function TeacherTrackDetail() {
     };
   }
 
+  // The types due on the selected day of an open-ward plan (its date-only schedule).
+  const openTypes: OpenWardType[] = openPlan
+    ? (assignmentByDate.get(effectiveDate) ?? []).map((a) => a.type as OpenWardType)
+    : [];
+
+  /** The teacher's unsaved edit, else what was already saved for this day. */
+  function openWardFor(studentId: string, type: OpenWardType): OpenWardValue | undefined {
+    const edit = openWardEdits[`${studentId}::${type}`];
+    if (edit) return edit;
+    const saved = openEntries.find(
+      (e) => entryStudentId(e) === studentId && e.type === type && e.date === effectiveDate,
+    );
+    if (!saved) return undefined;
+    return saved.status === "none" || !saved.from || !saved.to
+      ? { status: "none" }
+      : { status: "recorded", from: saved.from, to: saved.to };
+  }
+
+  /** Continue from where this student last stopped for this type. Entries
+   * arrive newest first, so the first earlier recorded one is the latest. */
+  function suggestedFromFor(studentId: string, type: OpenWardType): RangePoint {
+    const last = openEntries.find(
+      (e) => entryStudentId(e) === studentId && e.type === type && e.status === "recorded" && e.date < effectiveDate,
+    );
+    return last?.to ? nextPointAfter(last.to) : { surahNumber: 1, ayah: 1 };
+  }
+
   function saveStudent(studentId: string, studentName: string) {
     if (!track || isFutureDay) return;
     const e = evalFor(studentId);
+    // Open-ward plan: a present student's day can't be saved until every type
+    // due has a range or an explicit «لم يُسمِّع اليوم».
+    if (openPlan && e.attendanceStatus !== "غائب" && linkedPlan && planCoversStudent(linkedPlan, studentId)) {
+      const missing = openTypes.filter((t) => !openWardComplete(openWardFor(studentId, t)));
+      if (missing.length > 0) {
+        toast.error(`حدّد ما حفظه ${studentName} (${missing.join("، ")}) أو اختر «لم يُسمِّع اليوم»`);
+        return;
+      }
+    }
     const records: BulkEvaluateRecord[] = [
       {
         student: studentId,
@@ -728,6 +779,43 @@ export function TeacherTrackDetail() {
       { teacher: teacherId!, track: track._id, date: effectiveDate, records },
       {
         onSuccess: () => {
+          if (openPlan && linkedPlan) {
+            // An absent student has nothing to record — the evaluation holds the absence.
+            if (e.attendanceStatus === "غائب" || openTypes.length === 0 || !planCoversStudent(linkedPlan, studentId)) {
+              toast.success("تم الحفظ بنجاح", { id: toastId });
+              return;
+            }
+            (async () => {
+              for (const t of openTypes) {
+                const v = openWardFor(studentId, t)!;
+                try {
+                  const res = await upsertOpenWard.mutateAsync({
+                    planId: linkedPlan._id,
+                    studentId,
+                    type: t,
+                    date: effectiveDate,
+                    status: v.status,
+                    ...(v.status === "recorded" ? { from: v.from, to: v.to } : {}),
+                  });
+                  if (res.overlapWarning) {
+                    toast.warning(`${t}: هذا المقطع أو جزء منه مسجَّل من قبل لـ ${studentName}`);
+                  }
+                } catch (err) {
+                  // Leave the edits in place so the teacher can retry.
+                  toast.error(`${t} — ${studentName}: ${(err as Error).message}`, { id: toastId });
+                  return;
+                }
+              }
+              setOpenWardEdits((prev) => {
+                const next = { ...prev };
+                for (const t of openTypes) delete next[`${studentId}::${t}`];
+                return next;
+              });
+              toast.success("تم حفظ الحضور والتقييم والورد", { id: toastId });
+            })();
+            return;
+          }
+
           // Feed the day's outcome into each of the student's individual plan
           // overlays so an absence or a partial completion gets redistributed
           // across their remaining days — one `record` call per ward due today
@@ -1286,7 +1374,13 @@ export function TeacherTrackDetail() {
 
                       {isExpanded && (
                         <div style={{ padding: "10px 2px 4px" }}>
-                          {assignments.length > 0 ? (
+                          {openPlan ? (
+                            <div style={{ fontSize: 11, color: "var(--text3)", marginBottom: 10 }}>
+                              {openTypes.length > 0 && hasIndividualPlan
+                                ? <><i className="ti ti-pencil" style={{ marginLeft: 4 }} />خطة بدون مقطع محدد — سجّل ما حفظه الطالب اليوم ({openTypes.join("، ")})</>
+                                : "لا يوجد ورد لهذا اليوم"}
+                            </div>
+                          ) : assignments.length > 0 ? (
                             assignments.map((assignment) => {
                               const reversed = reversedForStudent(id, assignment.type);
                               const a = orientSlice(assignment, reversed);
@@ -1377,7 +1471,21 @@ export function TeacherTrackDetail() {
                             </button>
                           </div>
 
-                          {!isAbsent &&
+                          {openPlan && !isAbsent && hasIndividualPlan &&
+                            openTypes.map((t) => (
+                              <OpenWardPicker
+                                key={t}
+                                type={t}
+                                showType={openTypes.length > 1}
+                                value={openWardFor(id, t)}
+                                suggestedFrom={suggestedFromFor(id, t)}
+                                disabled={controlsLocked}
+                                SurahAyah={CompactSurahAyah}
+                                onChange={(v) => setOpenWardEdits((prev) => ({ ...prev, [`${id}::${t}`]: v }))}
+                              />
+                            ))}
+
+                          {!openPlan && !isAbsent &&
                             assignments.map((assignment) => {
                               // "وصل إلى" and the leftover are both measured in the plan's
                               // own direction: a reverse day is worked from its high end
@@ -1541,7 +1649,11 @@ export function TeacherTrackDetail() {
                             >
                               {planPanelStudentId === id ? (
                                 <>
-                                  <i className="ti ti-chevron-up" /> إخفاء الخطة الفردية
+                                  <i className="ti ti-chevron-up" /> {openPlan ? "إخفاء سجل الورد" : "إخفاء الخطة الفردية"}
+                                </>
+                              ) : openPlan ? (
+                                <>
+                                  <i className="ti ti-notebook" /> سجل ورد الطالب
                                 </>
                               ) : progressByStudentId[id]?.progressIsPersisted ? (
                                 <>
@@ -1556,7 +1668,9 @@ export function TeacherTrackDetail() {
                           )}
 
                           {hasIndividualPlan && linkedPlan && planPanelStudentId === id && (
-                            linkedPlan.segments.length > 1
+                            openPlan
+                              ? <OpenWardLog planId={linkedPlan._id} studentId={id} />
+                              : linkedPlan.segments.length > 1
                               ? linkedPlan.segments.map((seg) => (
                                 <IndividualPlanPanel
                                   key={seg.type}
@@ -1708,6 +1822,16 @@ export function TeacherTrackDetail() {
                 </div>
                 {linkedPlan.todayAssignments.length > 0 ? (
                   linkedPlan.todayAssignments.map((entry, idx) => {
+                    if (!isSlice(entry)) {
+                      return (
+                        <div key={idx} style={{ fontSize: 12, color: "var(--text)", fontWeight: 600, marginTop: idx > 0 ? 4 : 0 }}>
+                          {linkedPlan.todayAssignments.length > 1 && (
+                            <span style={{ fontWeight: 400, color: "var(--text2)" }}>{entry.type} · </span>
+                          )}
+                          ورد حر — يُسجَّل في الحلقة
+                        </div>
+                      );
+                    }
                     const a = orientSlice(entry, segmentReversed(linkedPlan, entry.type));
                     return (
                       <div key={idx} style={{ fontSize: 12, color: "var(--text)", fontWeight: 600, marginTop: idx > 0 ? 4 : 0 }}>
@@ -1733,7 +1857,7 @@ export function TeacherTrackDetail() {
                   <i className={`ti ${openPlanSection === "link" ? "ti-x" : "ti-refresh"}`} />{" "}
                   {openPlanSection === "link" ? "إلغاء" : "ربط خطة أخرى"}
                 </button>
-                {linkedPlan.schedule.length > 0 && (
+                {!openPlan && linkedPlan.schedule.length > 0 && (
                   <button className="topbar-btn btn-ghost" onClick={handleScheduleToggle}>
                     <i
                       className={`ti ${openPlanSection === "schedule" ? "ti-chevron-up" : "ti-calendar-stats"}`}
@@ -1745,7 +1869,16 @@ export function TeacherTrackDetail() {
                 )}
               </div>
 
-              {openPlanSection === "schedule" && (
+              {openPlan && (
+                <div style={{ marginTop: 14 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text2)", marginBottom: 8 }}>
+                    <i className="ti ti-notebook" style={{ marginLeft: 4 }} />سجل الورد
+                  </div>
+                  <OpenWardLog planId={linkedPlan._id} />
+                </div>
+              )}
+
+              {!openPlan && openPlanSection === "schedule" && (
                 <div style={{ marginTop: 14 }}>
                   <div
                     style={{
