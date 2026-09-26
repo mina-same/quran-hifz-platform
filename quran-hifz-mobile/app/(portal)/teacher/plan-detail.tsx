@@ -13,7 +13,8 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
 import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet';
-import { useQuranPlan, useDeleteQuranPlan, type QuranPlan, segmentReversed } from '@/lib/queries/quranPlan';
+import { useQuranPlan, useDeleteQuranPlan, type QuranPlan, segmentReversed, isOpenPlan, isSlice } from '@/lib/queries/quranPlan';
+import OpenWardLogSheet from '@/components/domain/OpenWardLogSheet';
 import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -69,10 +70,13 @@ export default function TeacherPlanDetail() {
 
         {plan && (() => {
           // Direction is per segment — orient today's ward by the type due.
-          const assignments = plan.todayAssignments.map((a) => ({
+          const assignments = plan.todayAssignments.filter(isSlice).map((a) => ({
             ...orientSlice(a, segmentReversed(plan, a.type)),
             type: a.type,
           }));
+          // Open-ward days: due, but nothing fixed to show.
+          const openDue = plan.todayAssignments.filter((a) => !isSlice(a)).map((a) => a.type);
+          const openPlan = isOpenPlan(plan);
           const progressPct = plan.progress?.percent ?? 0;
           const progressLabel = plan.juzProgress ? `${plan.juzProgress.completed} / ${plan.juzProgress.total} جزء` : undefined;
 
@@ -84,6 +88,7 @@ export default function TeacherPlanDetail() {
                   {plan.segments.map((seg) => (
                     <Text key={seg.type} style={s.typeTag}>{seg.type}</Text>
                   ))}
+                  {openPlan && <Badge label="ورد حر" variant="gold" />}
                 </View>
 
                 <View style={s.infoGrid}>
@@ -125,6 +130,7 @@ export default function TeacherPlanDetail() {
                         <Text style={s.infoLabel}>الأيام</Text>
                         <Text style={s.infoValue}>{seg.days.join('، ')}</Text>
                       </View>
+                      {seg.rangeStart && seg.rangeEnd && seg.pageRange ? (<>
                       <View style={s.infoItem}>
                         <Text style={s.infoLabel}>عدد الصفحات</Text>
                         <Text style={s.infoValue}>{seg.pageRange.pageCount}</Text>
@@ -137,6 +143,12 @@ export default function TeacherPlanDetail() {
                         <Text style={s.infoLabel}>إلى</Text>
                         <Text style={s.infoValue}>{surahName(seg.rangeEnd.surahNumber)}:{seg.rangeEnd.ayah}</Text>
                       </View>
+                      </>) : (
+                      <View style={s.infoItem}>
+                        <Text style={s.infoLabel}>الورد</Text>
+                        <Text style={s.infoValue}>يُسجَّل ما حفظه الطالب في الحلقة</Text>
+                      </View>
+                      )}
                     </View>
                   </View>
                 ))}
@@ -144,8 +156,12 @@ export default function TeacherPlanDetail() {
 
               <Card>
                 <CardHeader title="الورد المقرر اليوم" />
-                <View style={[s.assignmentBox, { backgroundColor: assignments.length > 0 ? theme.greenPale : theme.cream }]}>
-                  {assignments.length > 0 ? assignments.map((a, idx) => (
+                <View style={[s.assignmentBox, { backgroundColor: assignments.length + openDue.length > 0 ? theme.greenPale : theme.cream }]}>
+                  {openDue.length > 0 ? (
+                    <Text style={s.assignmentText}>
+                      {openDue.join('، ')} · ورد حر — يُسجَّل في الحلقة
+                    </Text>
+                  ) : assignments.length > 0 ? assignments.map((a, idx) => (
                     <Text key={a.type} style={[s.assignmentText, idx > 0 && { marginTop: 4 }]}>
                       {assignments.length > 1 ? `${a.type} · ` : ''}
                       {surahName(a.surahStart)}:{a.ayahStart} — {surahName(a.surahEnd)}:{a.ayahEnd}
@@ -156,6 +172,12 @@ export default function TeacherPlanDetail() {
                 </View>
               </Card>
 
+              {openPlan ? (
+              <Card>
+                <CardHeader title="سجل الورد" />
+                <OpenWardLogSheet planId={plan._id} />
+              </Card>
+              ) : (<>
               <Card>
                 <CardHeader title="تقسيم الأجزاء على الأيام" />
                 <SheetTriggerRow
@@ -173,6 +195,7 @@ export default function TeacherPlanDetail() {
                 title="تقسيم الأجزاء على الأيام"
                 items={scheduleItems(plan.schedule, (e) => segmentReversed(plan, e.type))}
               />
+              </>)}
 
               {!confirmDelete ? (
                 <View style={s.actionsRow}>

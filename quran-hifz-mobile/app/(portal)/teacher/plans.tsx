@@ -16,7 +16,7 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import IconButton from '@/components/ui/IconButton';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Alert from '@/components/ui/Alert';
-import { useQuranPlans, useDeleteQuranPlan, segmentReversed, type QuranPlan } from '@/lib/queries/quranPlan';
+import { useQuranPlans, useDeleteQuranPlan, segmentReversed, isOpenPlan, isSlice, type QuranPlan } from '@/lib/queries/quranPlan';
 import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
 import { fmtDate } from '@/lib/date';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -68,11 +68,13 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
   // Direction is per segment — today's ward is oriented by the type due today.
-  const assignments = plan.todayAssignments.map((a) => ({
+  const assignments = plan.todayAssignments.filter(isSlice).map((a) => ({
     ...orientSlice(a, segmentReversed(plan, a.type)),
     type: a.type,
     reversed: segmentReversed(plan, a.type),
   }));
+  // Open-ward days: due, but nothing fixed to show.
+  const openDue = plan.todayAssignments.filter((a) => !isSlice(a)).map((a) => a.type);
   const progressLabel = plan.juzProgress
     ? `${plan.juzProgress.completed} / ${plan.juzProgress.total} جزء`
     : `${plan.progress?.percent ?? 0}%`;
@@ -93,6 +95,7 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
             {plan.segments.map((seg) => (
               <Text key={seg.type} style={s.typeTag}>{seg.type}</Text>
             ))}
+            {isOpenPlan(plan) && <Badge label="ورد حر" variant="gold" />}
           </View>
           <View style={s.rowActions}>
             <IconButton onPress={onEdit} accessibilityLabel="تعديل الخطة">
@@ -141,6 +144,15 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
           </View>
         )}
 
+        {openDue.length > 0 ? (
+        <View style={s.assignmentBox}>
+          <View style={s.progressLabelRow}>
+            <IconCalendarStar size={14} color={theme.green} />
+            <Text style={s.assignmentLabel}>الجزء المطلوب اليوم · {openDue.join('، ')}</Text>
+          </View>
+          <Text style={s.assignmentText}>ورد حر — يُسجَّل في الحلقة</Text>
+        </View>
+        ) : (
         <View style={[s.assignmentBox, assignments.length === 0 && { backgroundColor: theme.cream }]}>
           <View style={s.progressLabelRow}>
             <IconCalendarStar size={14} color={assignments.length > 0 ? theme.green : theme.textMuted} />
@@ -158,6 +170,7 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
             <Text style={s.muted}>لا يوجد جزء مخصص لليوم</Text>
           )}
         </View>
+        )}
       </Card>
     </Pressable>
   );
