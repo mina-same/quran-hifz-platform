@@ -13,6 +13,10 @@
 <!-- How the user likes things done. Code style, tools, patterns, communication. -->
 
 ## Key Learnings
+- **Attendance status مستأذن (excused, 2026-10-02):** valid in Attendance.status and Evaluation.attendanceStatus. Rules: grades forced to 0 (server `!isPresent`), excluded from attendancePct numerator AND denominator (recalcAttendancePct, stats avg, client pct calcs) and from every score average (reports filter it out at the source), no parent notification, and treated like absent for open-ward/plan reflow (clients send occurrence status 'absent'). Client checks use `!== "حاضر"` for "not present" rather than `=== "غائب"`.
+
+### Messages: `GET /messages` returns raw Message docs; student notes go via `POST /messages/to-supervisors` (2026-10-02)
+`getMessages` used to return a formatted `{id,sender,initials,preview,time,unread}` shape that NO client read — web + mobile both read `_id/senderName/senderInitials/body/createdAt/readAt`, so every inbox rendered blank names / Invalid Date and markRead hit `/messages/undefined/read`. Now returns `.lean()` raw docs. Student→supervision notes: `sendNoteToSupervisors` (authorize('student')) resolves recipients server-side = all admins + supervisors whose `supervisorGender` == Student.track→Track.masjid→Masjid.gender; one Message per recipient with `student` set. Inbox UI: web `MessagesInbox` (exported from StudentMessages.tsx) registered as `messages` for admin+supervisor; mobile shared `components/domain/MessagesScreen.tsx`, admin route `admin/messages.tsx` reached via More sheet (supervisor reuses admin group).
 
 ### `admin.routes.ts` used to blanket-gate the whole router to role='admin' — reads must allow 'supervisor' too (2026-09-26)
 Every other admin-ish resource (student/teacher/track/masjid/attendance/evaluation
@@ -446,3 +450,6 @@ Plan-level, immutable after creation (updatePlan rejects a change). Segments car
 - Server `ts-node` scripts need `--files` to pick up the global `req.user` augmentation.
 - The server `.env` MONGO_URI is the remote Atlas cluster — run any E2E against a throwaway local `mongod` (MONGO_URI/JWT_SECRET env vars override dotenv).
 - [2026-09-26] `GET /quran-plans?student=X` only matches `targetType:'students'` plans (filter.students=X) — it never returns a track-targeted plan the student is covered by. Any per-student view (reports!) must also fetch by the student's track. Also: mobile has a SECOND grading entry point, `app/(portal)/teacher/evaluate.tsx` (bulk, no plan awareness) besides EvaluationRoster — any new per-day grading rule must be applied/blocked there too.
+
+### Key Learning — student/parent scoping for GET /evaluations (2026-10-02)
+JWT `req.user` has only id/role/name/supervisorGender. A student's Student doc is `User.profileId` (look up via `User.findById(req.user.id).select('profileId')`); a parent's children are `ParentStudent.find({ parent: req.user.id })` (parent = User id). `getEvaluations` now forces `filter.student` to those for role student/parent — follow the same pattern for any other student-data GET that is open to all authenticated roles.

@@ -29,7 +29,9 @@ export default function ParentAttendance() {
   const present = records.filter((r) => r.status === 'حاضر').length;
   const late = records.filter((r) => r.status === 'متأخر').length;
   const absent = records.filter((r) => r.status === 'غائب').length;
-  const pct = records.length > 0 ? Math.round((present / records.length) * 100) : 0;
+  // Excused (مستأذن) sessions don't count toward the attendance percentage.
+  const counted = records.filter((r) => r.status !== 'مستأذن').length;
+  const pct = counted > 0 ? Math.round((present / counted) * 100) : 0;
 
   const STATS = [
     { label: 'نسبة الحضور', value: `${pct}٪`, color: theme.green },
@@ -38,8 +40,8 @@ export default function ParentAttendance() {
     { label: 'غياب', value: absent, color: theme.red },
   ];
 
-  const statusVariant = (status: string): 'green' | 'gold' | 'red' =>
-    status === 'حاضر' ? 'green' : status === 'متأخر' ? 'gold' : 'red';
+  const statusVariant = (status: string): 'green' | 'gold' | 'red' | 'blue' =>
+    status === 'حاضر' ? 'green' : status === 'متأخر' ? 'gold' : status === 'مستأذن' ? 'blue' : 'red';
 
   const s = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },

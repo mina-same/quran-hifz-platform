@@ -209,7 +209,7 @@ function buildDayChips(minIso: string, maxIso: string, today: string): DayChip[]
 /** Scores are keyed by the active plan's rubric, so the categories are not
  *  known at compile time any more. */
 type StudentEval = {
-  attendanceStatus: "حاضر" | "غائب";
+  attendanceStatus: "حاضر" | "غائب" | "مستأذن";
   scores: Record<string, number>;
 };
 
@@ -225,10 +225,10 @@ function blankEval(rubric: GradeCriterion[]): StudentEval {
   };
 }
 
-/** Absent → 0 across the board. Present: every criterion (`auto` included)
+/** Absent / excused → 0 across the board. Present: every criterion (`auto` included)
  *  takes whatever the teacher entered, mirroring the server's bulkEvaluate. */
 function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
-  if (e.attendanceStatus === "غائب") return 0;
+  if (e.attendanceStatus !== "حاضر") return 0;
   return rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0);
 }
 
@@ -454,6 +454,8 @@ export function TeacherAttendance() {
     type Agg = { id: string; name: string; totalSum: number; sessions: number; present: number };
     const byStudent = new Map<string, Agg>();
     for (const r of history) {
+      // Excused (مستأذن) sessions don't count — no grades, not held against attendance.
+      if (r.attendanceStatus === "مستأذن") continue;
       const id = typeof r.student === "string" ? r.student : r.student._id;
       const name = typeof r.student === "string" ? r.student : r.student.name;
       const agg = byStudent.get(id) ?? { id, name, totalSum: 0, sessions: 0, present: 0 };
@@ -514,7 +516,7 @@ export function TeacherAttendance() {
   const evalFor = (studentId: string): StudentEval =>
     overrides[studentId] ?? savedById[studentId] ?? blankEval(rubric);
 
-  function setAttendance(studentId: string, status: "حاضر" | "غائب") {
+  function setAttendance(studentId: string, status: "حاضر" | "غائب" | "مستأذن") {
     setOverrides((prev) => ({
       ...prev,
       [studentId]: { ...evalFor(studentId), attendanceStatus: status },
@@ -607,7 +609,7 @@ export function TeacherAttendance() {
     const e = evalFor(studentId);
     // Open-ward plan: a present student's day can't be saved until every type
     // due has a range or an explicit «لم يُسمِّع اليوم».
-    if (openPlan && e.attendanceStatus !== "غائب" && linkedPlan && planCoversStudent(linkedPlan, studentId)) {
+    if (openPlan && e.attendanceStatus === "حاضر" && linkedPlan && planCoversStudent(linkedPlan, studentId)) {
       const missing = openTypes.filter((t) => !openWardComplete(openWardFor(studentId, t)));
       if (missing.length > 0) {
         toast.error(`حدّد ما حفظه ${studentName} (${missing.join("، ")}) أو اختر «لم يُسمِّع اليوم»`);
@@ -636,7 +638,7 @@ export function TeacherAttendance() {
             // An absent student has no ward record — the evaluation holds the
             // absence. A day first saved as present and then switched to absent
             // still carries its entries, so those are removed here.
-            if (e.attendanceStatus === "غائب" && planCoversStudent(linkedPlan, studentId)) {
+            if (e.attendanceStatus !== "حاضر" && planCoversStudent(linkedPlan, studentId)) {
               const stale = savedOpenWardTypes(openEntries, studentId, effectiveDate);
               (async () => {
                 for (const t of stale) {
@@ -651,7 +653,7 @@ export function TeacherAttendance() {
               })();
               return;
             }
-            if (e.attendanceStatus === "غائب" || openTypes.length === 0 || !planCoversStudent(linkedPlan, studentId)) {
+            if (e.attendanceStatus !== "حاضر" || openTypes.length === 0 || !planCoversStudent(linkedPlan, studentId)) {
               toast.success("تم الحفظ بنجاح", { id: toastId });
               return;
             }
@@ -723,7 +725,7 @@ export function TeacherAttendance() {
                 completedPoint,
               );
               const status =
-                e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
+                e.attendanceStatus !== "حاضر" ? "absent" : delta < 0 ? "partial" : "done";
 
               if (status === "done" && delta === 0) {
                 toast.success(`${typeLabel}تم حفظ الحضور والتقييم بنجاح`, { id: thisToastId });
@@ -925,7 +927,9 @@ export function TeacherAttendance() {
             <div className="att-list">
               {students.map((s) => {
                 const e = evalFor(s._id);
-                const isAbsent = e.attendanceStatus === "غائب";
+                // Absent and excused both mean "not present" — no grades, no ward.
+                const isAbsent = e.attendanceStatus !== "حاضر";
+                const isExcused = e.attendanceStatus === "مستأذن";
                 const total = totalOf(e, rubric);
                 const isExpanded = expandedStudentId === s._id;
                 const hasSaved = !!savedById[s._id];
@@ -1079,10 +1083,18 @@ export function TeacherAttendance() {
                           <button
                             type="button"
                             disabled={controlsLocked}
-                            className={isAbsent ? "active absent" : ""}
+                            className={isAbsent && !isExcused ? "active absent" : ""}
                             onClick={() => setAttendance(s._id, "غائب")}
                           >
                             <i className="ti ti-x" /> غائب
+                          </button>
+                          <button
+                            type="button"
+                            disabled={controlsLocked}
+                            className={isExcused ? "active excused" : ""}
+                            onClick={() => setAttendance(s._id, "مستأذن")}
+                          >
+                            <i className="ti ti-user-exclamation" /> مستأذن
                           </button>
                         </div>
 
@@ -1380,7 +1392,7 @@ export function TeacherAttendance() {
                     <td>{toAr(new Date(r.date).toLocaleDateString(AR_LOCALE))}</td>
                     <td>{typeof r.student === "string" ? r.student : r.student.name}</td>
                     <td>
-                      <Badge tone={r.attendanceStatus === "حاضر" ? "green" : "red"}>
+                      <Badge tone={r.attendanceStatus === "حاضر" ? "green" : r.attendanceStatus === "مستأذن" ? "blue" : "red"}>
                         {r.attendanceStatus}
                       </Badge>
                     </td>

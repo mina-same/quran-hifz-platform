@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-26T07:38:36.788Z
-> Files: 716 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T13:31:00.545Z
+> Files: 725 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -587,8 +587,6 @@
 
 ## quran-hifz-mobile/components/domain/
 
-- `OpenWardLogSheet.tsx` — «سجل الورد» for open-ward plans: SheetTriggerRow + ScheduleSheet of compact cards; exports openWardItems() (~650 tok)
-- `OpenWardPicker.tsx` — RN «ماذا حفظ الطالب اليوم؟» من/إلى + «لم يُسمِّع اليوم» chip; exports OpenWardValue, openWardComplete (~1000 tok)
 - `AccountSettingsScreen.tsx` — Shared "الملف الشخصي" screen for student + teacher portals (admin/parent (~2117 tok)
 - `AudioRecorder.tsx` — AudioRecorder — uses useState, useEffect (~1336 tok)
 - `BiometricLockScreen.tsx` — Shown after a stored session resumes silently, when the user has opted into (~1123 tok)
@@ -598,6 +596,8 @@
 - `HalqaCard.tsx` — nameOf (~816 tok)
 - `IndividualPlanPanel.tsx` — The shared track plan this student's overlay hangs off — used as the (~2398 tok)
 - `MasjidAccordion.tsx` — This masjid's own halqat — the real /masajid endpoint doesn't nest them, (~1180 tok)
+- `OpenWardLogSheet.tsx` — «سجل الورد» for open-ward plans: SheetTriggerRow + ScheduleSheet of compact cards; exports openWardItems() (~650 tok)
+- `OpenWardPicker.tsx` — RN «ماذا حفظ الطالب اليوم؟» من/إلى + «لم يُسمِّع اليوم» chip; exports OpenWardValue, openWardComplete (~1000 tok)
 - `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~7068 tok)
 - `ScheduleSheet.tsx` — Day-by-day plan breakdown as a bottom sheet of compact cards (replaced the 6-column ScheduleTable). Exports scheduleItems()/fmtShortDate()/fmtPages() + the ScheduleItem shape. (~1700 tok)
 - `SurahAyahPicker.tsx` — When given, restricts BOTH pickers to only the surahs/ayat that fall inside (~828 tok)
@@ -747,11 +747,10 @@
 
 ## quran-hifz-server/src/controllers/
 
-- `open-ward.controller.ts` — Open-ward daily records: validateOpenWardBody (pure), upsertOpenWard (+overlapWarning), listOpenWard, deleteOpenWard (~1500 tok)
 - `admin.controller.ts` — Zod schemas: updateParentSchema, createParentSchema, createSupervisorSchema. getParents() is gender-scoped for supervisor via supervisorGenderOf/trackIdsForGender (parents of children in the supervisor's masajid gender only). (~2360 tok)
 - `attendance.controller.ts` — Upserts one Attendance doc per {student, date} and recalculates each (~1495 tok)
 - `auth.controller.ts` — Zod schemas: loginSchema, updateProfileSchema, changePasswordSchema, pushTokenSchema (~1216 tok)
-- `evaluation.controller.ts` — The rubric is no longer platform-wide — each plan carries its own (~2609 tok)
+- `evaluation.controller.ts` — The rubric is no longer platform-wide — each plan carries its own (~2871 tok)
 - `group-homework.controller.ts` — Zod schemas: groupHomeworkSchema (~500 tok)
 - `halqa.controller.ts` — Zod schemas: halqaSchema (~904 tok)
 - `hifz.controller.ts` — Zod schemas: entrySchema (~739 tok)
@@ -760,6 +759,7 @@
 - `lesson-recording.controller.ts` — Zod schemas: recordingSchema (~574 tok)
 - `masjid.controller.ts` — Zod schemas: masjidSchema (~897 tok)
 - `message.controller.ts` — Zod schemas: messageSchema (~568 tok)
+- `open-ward.controller.ts` — Open-ward daily records: validateOpenWardBody (pure), upsertOpenWard (+overlapWarning), listOpenWard, deleteOpenWard (~1500 tok)
 - `parent.controller.ts` — Exports getChildren, getChildHifz, getChildAttendance, getChildHomework + 2 more (~959 tok)
 - `quran-plan.controller.ts` — One line of the plan's daily grading rubric: a label and its degrees. (~6217 tok)
 - `special-track.controller.ts` — Zod schemas: trackSchema (~1132 tok)
@@ -791,7 +791,6 @@
 
 ## quran-hifz-server/src/models/
 
-- `OpenWardEntry.model.ts` — What a student memorized on one day of an open-ward plan; unique (plan,student,type,date); status recorded|none (~550 tok)
 - `Attendance.model.ts` — Exports IAttendance, Attendance (~263 tok)
 - `Evaluation.model.ts` — Legacy fixed-shape scores. Still written whenever the plan's rubric uses (~927 tok)
 - `GroupHomework.model.ts` — Exports IGroupHomework, GroupHomework (~258 tok)
@@ -803,6 +802,7 @@
 - `LessonRecording.model.ts` — Exports ILessonRecording, LessonRecording (~326 tok)
 - `Masjid.model.ts` — Drives the جامع (male) / دار (female) display label on the client — (~204 tok)
 - `Message.model.ts` — Exports IMessage, Message (~334 tok)
+- `OpenWardEntry.model.ts` — What a student memorized on one day of an open-ward plan; unique (plan,student,type,date); status recorded|none (~550 tok)
 - `ParentStudent.model.ts` — Exports IParentStudent, ParentStudent (~172 tok)
 - `QuranPlan.model.ts` — One line of a plan's daily grading rubric: what is graded and out of how (~2386 tok)
 - `SpecialTrack.model.ts` — Exports ISpecialTrack, SpecialTrack (~429 tok)
@@ -961,7 +961,6 @@
 
 ## quran-hifz/src/quran/api/
 
-- `open-ward.ts` — OpenWardEntry type, openWardQueryOptions, useOpenWardEntries/useUpsertOpenWard/useDeleteOpenWard, entryStudentId (~700 tok)
 - `account.ts` — Exports MeUser, useMe, useUpdateProfile, useChangePassword (~258 tok)
 - `account.ts` — Exports MeUser, useMe (GET /auth/me), useUpdateProfile (PUT /auth/profile), useChangePassword (PUT /auth/change-password) (~150 tok)
 - `admin-parents.ts` — Exports ParentUser, useAdminParents, useCreateParent, useLinkChild + 4 more (~787 tok)
@@ -975,6 +974,7 @@
 - `lesson-recordings.ts` — Exports LessonRecording, useRecordings, useCreateRecording, useDeleteRecording (~488 tok)
 - `masajid.ts` — The server's `getMasajid`/`getMasjid` select this exact field set — no (~561 tok)
 - `messages.ts` — Exports Message, useMessages, useSendMessage, useMarkRead (~327 tok)
+- `open-ward.ts` — OpenWardEntry type, openWardQueryOptions, useOpenWardEntries/useUpsertOpenWard/useDeleteOpenWard, entryStudentId (~700 tok)
 - `parent.ts` — Exports ParentChild, ChildRecording, ChildHomework, useParentChildren + 5 more (~717 tok)
 - `quran-plans.ts` — sessionStorage key used to hand off "open the plan form" from wherever a (~2839 tok)
 - `stats.ts` — Exports DashboardStats, useStats (~212 tok)
@@ -993,8 +993,6 @@
 
 ## quran-hifz/src/quran/components/common/
 
-- `OpenWardLog.tsx` — Log table of an open-ward plan's recorded days (optionally one student) (~700 tok)
-- `OpenWardPicker.tsx` — «ماذا حفظ الطالب اليوم؟» من/إلى + «لم يُسمِّع اليوم»; SurahAyah control injected; exports OpenWardValue, openWardComplete (~1000 tok)
 - `Alert.tsx` — ICONS — now supports `danger` tone (~165 tok)
 - `AyahBar.tsx` — AyahBar (~40 tok)
 - `Badge.tsx` — Badge (~104 tok)
@@ -1009,6 +1007,8 @@
 - `IndividualPlanPanel.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~4567 tok)
 - `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
+- `OpenWardLog.tsx` — Log table of an open-ward plan's recorded days (optionally one student) (~700 tok)
+- `OpenWardPicker.tsx` — «ماذا حفظ الطالب اليوم؟» من/إلى + «لم يُسمِّع اليوم»; SurahAyah control injected; exports OpenWardValue, openWardComplete (~1000 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
 - `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~8630 tok)
 - `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)
@@ -1119,5 +1119,7 @@
 - `__root.tsx` — Root: SEO head (Arabic OG, Twitter card, JSON-LD, favicon, lang=ar dir=rtl), RootShell, error/404 components (~1611 tok)
 - `index.tsx` — Landing page route with per-page Arabic SEO head overrides (~200 tok)
 - `MoreTabButton.tsx` — Factory for the "المزيد" tab-bar button; opens the MoreSheet on press instead of navigating. (~180 tok)
+- `quran-hifz-mobile/app/(portal)/admin/messages.tsx` — Admin/supervisor inbox route (More sheet → الرسائل); renders MessagesScreen. (~60 tok)
+- `quran-hifz-mobile/components/domain/MessagesScreen.tsx` — Shared received-messages inbox screen (useMessages/useMarkRead, pull-to-refresh, optional `compose` slot). Used by student/messages.tsx (with NoteToSupervisors) and admin/messages.tsx (admin+supervisor). (~900 tok)
 - `README.md` — Project documentation (~207 tok)
 - `sitemap[.]xml.ts` — API route: serves /sitemap.xml dynamically from request origin (~159 tok)

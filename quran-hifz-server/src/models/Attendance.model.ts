@@ -6,7 +6,7 @@ export interface IAttendance extends Document {
   date: Date;
   day: string;
   time: string;
-  status: 'حاضر' | 'غائب' | 'متأخر';
+  status: 'حاضر' | 'غائب' | 'متأخر' | 'مستأذن';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,7 +18,7 @@ const attendanceSchema = new Schema<IAttendance>(
     date:    { type: Date, required: true },
     day:     { type: String, required: true },
     time:    { type: String, required: true },
-    status:  { type: String, enum: ['حاضر', 'غائب', 'متأخر'], required: true },
+    status:  { type: String, enum: ['حاضر', 'غائب', 'متأخر', 'مستأذن'], required: true },
   },
   { timestamps: true },
 );

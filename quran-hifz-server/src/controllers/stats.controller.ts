@@ -61,7 +61,10 @@ export async function getDashboardStats(req: Request, res: Response, next: NextF
     ]);
 
     // Average attendance, scoped to tracks in scope when a gender filter is active
-    const attendanceMatch = trackIds ? { track: { $in: trackIds } } : {};
+    // Excused (مستأذن) sessions are excluded entirely.
+    const attendanceMatch = trackIds
+      ? { track: { $in: trackIds }, status: { $ne: 'مستأذن' } }
+      : { status: { $ne: 'مستأذن' } };
     const attendanceAgg = await Attendance.aggregate([
       { $match: attendanceMatch },
       { $group: { _id: null, avg: { $avg: { $cond: [{ $eq: ['$status', 'حاضر'] }, 1, 0] } } } },

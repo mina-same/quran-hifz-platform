@@ -11,7 +11,7 @@ const recordSchema = z.object({
   student: z.string().min(1),
   track:   z.string().min(1),
   date:    z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
-  status:  z.enum(['حاضر', 'غائب', 'متأخر']),
+  status:  z.enum(['حاضر', 'غائب', 'متأخر', 'مستأذن']),
 });
 
 const bulkSchema = z.object({
@@ -19,7 +19,7 @@ const bulkSchema = z.object({
   date:    z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
   records: z.array(z.object({
     student: z.string().min(1),
-    status:  z.enum(['حاضر', 'غائب', 'متأخر']),
+    status:  z.enum(['حاضر', 'غائب', 'متأخر', 'مستأذن']),
   })),
 });
 
@@ -44,7 +44,7 @@ export function deriveDayAndTime(date: Date): { day: string; time: string } {
 export async function upsertAttendanceRecords(
   track: string,
   dateObj: Date,
-  records: { student: string; status: 'حاضر' | 'غائب' | 'متأخر' }[],
+  records: { student: string; status: 'حاضر' | 'غائب' | 'متأخر' | 'مستأذن' }[],
 ): Promise<void> {
   const { day, time } = deriveDayAndTime(dateObj);
   const trackId = new Types.ObjectId(track);
@@ -130,7 +130,9 @@ export async function bulkAttendance(req: Request, res: Response, next: NextFunc
 }
 
 async function recalcAttendancePct(studentId: string): Promise<void> {
-  const total   = await Attendance.countDocuments({ student: studentId });
+  // Excused (مستأذن) sessions don't count against the student — excluded from
+  // both numerator and denominator.
+  const total   = await Attendance.countDocuments({ student: studentId, status: { $ne: 'مستأذن' } });
   const present = await Attendance.countDocuments({ student: studentId, status: 'حاضر' });
   const pct = total > 0 ? Math.round((present / total) * 100) : 0;
   await Student.findByIdAndUpdate(studentId, { attendancePct: pct });

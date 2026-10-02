@@ -28,7 +28,7 @@ export interface IEvaluation extends Document {
   /** Which plan's rubric graded this record, when one could be resolved. */
   plan?: Types.ObjectId;
   date: Date;
-  attendanceStatus: 'حاضر' | 'غائب';
+  attendanceStatus: 'حاضر' | 'غائب' | 'مستأذن';
   /** Source of truth for grading. Mirrors the plan's rubric at save time. */
   criteria: IEvaluationCriterion[];
   /** Legacy mirror — present only when the rubric uses the four original keys. */
@@ -58,7 +58,7 @@ const evaluationSchema = new Schema<IEvaluation>(
     track:        { type: Schema.Types.ObjectId, ref: 'Track', required: true },
     plan:         { type: Schema.Types.ObjectId, ref: 'QuranPlan' },
     date:             { type: Date, required: true },
-    attendanceStatus: { type: String, enum: ['حاضر', 'غائب'], required: true },
+    attendanceStatus: { type: String, enum: ['حاضر', 'غائب', 'مستأذن'], required: true },
     criteria: {
       type: [criterionSchema],
       required: true,

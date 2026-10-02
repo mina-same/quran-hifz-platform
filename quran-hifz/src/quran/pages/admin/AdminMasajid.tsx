@@ -106,7 +106,7 @@ export function AdminMasajid() {
 
   useTopbar(
     "ti-building-arch",
-    "المساجد والمسارات",
+    "المساجد والدور النسائية",
     !readOnly && (
       <button className="topbar-btn btn-primary" onClick={openAdd}>
         <i className="ti ti-plus" /> مسجد جديد

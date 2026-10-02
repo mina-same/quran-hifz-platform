@@ -9,11 +9,11 @@ import { supervisorGenderOf, trackIdsForGender, restrictTrackFilter } from '../l
 
 const studentSchema = z.object({
   name:             z.string().min(2, 'الاسم مطلوب'),
-  /** Empty string is normalised to undefined so a blank field clears rather
-   *  than failing the 10-digit check. */
+  /** Required on create; `.partial()` keeps it optional on update. Empty
+   *  string is normalised to undefined so a blank field reads as missing. */
   nationalId:       z.preprocess(
     (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
-    z.string().regex(NATIONAL_ID_RE, 'رقم الهوية يجب أن يكون ١٠ أرقام ويبدأ بـ ١ أو ٢').optional(),
+    z.string({ required_error: 'رقم الهوية مطلوب' }).regex(NATIONAL_ID_RE, 'رقم الهوية يجب أن يكون ١٠ أرقام ويبدأ بـ ١ أو ٢'),
   ),
   path:             z.enum(['حفظ كامل', 'عشرون جزءاً', 'عشرة أجزاء', 'خمسة أجزاء']),
   track:            z.string().min(1, 'المسار مطلوب'),

@@ -31,7 +31,7 @@ import { StudentHifz }           from "../pages/student/StudentHifz";
 import { StudentHomework }       from "../pages/student/StudentHomework";
 import { StudentAttendance }     from "../pages/student/StudentAttendance";
 import { StudentSchedule }       from "../pages/student/StudentSchedule";
-import { StudentMessages }       from "../pages/student/StudentMessages";
+import { StudentMessages, MessagesInbox } from "../pages/student/StudentMessages";
 import { StudentPoints }         from "../pages/student/StudentPoints";
 import { StudentStore }          from "../pages/student/StudentStore";
 import { StudentTracks }         from "../pages/student/StudentTracks";
@@ -62,6 +62,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     trackdetail: TeacherTrackDetail,
     planform:    TeacherPlanForm,
     attendance:  TeacherAttendance,
+    messages:    MessagesInbox,
   },
   teacher: {
     dashboard:     TeacherDashboard,
@@ -101,6 +102,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     tracks:    AdminTracks,
     // Reused for viewing a track's detail if a supervisor drills in from AdminTracks.
     trackdetail: TeacherTrackDetail,
+    messages:  MessagesInbox,
     account:   AccountSettings,
   },
   parent: {

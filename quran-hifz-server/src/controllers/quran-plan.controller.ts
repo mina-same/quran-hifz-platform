@@ -374,9 +374,23 @@ export async function getPlan(req: Request, res: Response, next: NextFunction): 
   }
 }
 
+/** A track runs on one active plan at a time — grading resolves its rubric
+ *  from that single plan, so a second one would silently fall back to the
+ *  default rubric. */
+async function assertNoOtherActiveTrackPlan(track: unknown, excludeId?: string): Promise<void> {
+  const clash = await QuranPlan.exists({
+    track,
+    targetType: 'track',
+    status: 'نشطة',
+    ...(excludeId ? { _id: { $ne: excludeId } } : {}),
+  });
+  if (clash) throw new AppError('يوجد خطة نشطة لهذا المسار بالفعل — أوقف الخطة الحالية أو عدّلها بدلاً من إنشاء خطة جديدة', 409);
+}
+
 export async function createPlan(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const data = quranPlanCreateSchema.parse(req.body);
+    if (data.targetType === 'track') await assertNoOtherActiveTrackPlan(data.track);
     const plan = await QuranPlan.create({
       ...data,
       startDate: data.startDate ? new Date(data.startDate) : new Date(),
@@ -414,6 +428,9 @@ export async function updatePlan(req: Request, res: Response, next: NextFunction
     }
     if (targetType === 'students' && (!students || students.length === 0)) {
       throw new AppError('يجب اختيار طالب واحد على الأقل', 400);
+    }
+    if (targetType === 'track' && existing.status === 'نشطة') {
+      await assertNoOtherActiveTrackPlan(track, String(existing._id));
     }
 
     const update: Record<string, unknown> = { ...data };

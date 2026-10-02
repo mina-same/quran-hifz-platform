@@ -6,6 +6,8 @@ import { QuranPlan, DEFAULT_GRADE_RUBRIC, type IGradeCriterion } from '../models
 import { notifyParents } from '../lib/notify';
 import { deriveDayAndTime, upsertAttendanceRecords } from './attendance.controller';
 import { supervisorGenderOf, trackIdsForGender, restrictTrackFilter } from '../lib/supervisorScope';
+import { User } from '../models/User.model';
+import { ParentStudent } from '../models/ParentStudent.model';
 
 /**
  * The rubric is no longer platform-wide — each plan carries its own
@@ -50,7 +52,7 @@ export async function resolveRubric(
 
 const recordSchema = z.object({
   student:          z.string().min(1),
-  attendanceStatus: z.enum(['حاضر', 'غائب']),
+  attendanceStatus: z.enum(['حاضر', 'غائب', 'مستأذن']),
   /** Keyed by rubric criterion key. Bounds are checked against the resolved
    *  rubric in `bulkEvaluate` — they are per plan, so not expressible here. */
   scores:  z.record(z.string(), z.number().int().min(0)).optional(),
@@ -110,6 +112,18 @@ export async function getEvaluations(req: Request, res: Response, next: NextFunc
     const supervisorGender = supervisorGenderOf(req);
     if (supervisorGender) {
       filter.track = restrictTrackFilter(filter.track, await trackIdsForGender(supervisorGender));
+    }
+
+    // Students may only read their own grades; parents only their children's.
+    // The `student` query param is ignored/narrowed rather than trusted.
+    if (req.user?.role === 'student') {
+      const me = await User.findById(req.user.id).select('profileId');
+      if (!me?.profileId) { res.json({ success: true, count: 0, data: [] }); return; }
+      filter.student = me.profileId;
+    } else if (req.user?.role === 'parent') {
+      const childIds = (await ParentStudent.find({ parent: req.user.id }).distinct('student')).map(String);
+      const requested = student ? String(student) : '';
+      filter.student = childIds.includes(requested) ? requested : { $in: childIds };
     }
 
     const records = await Evaluation.find(filter)
@@ -215,8 +229,9 @@ export async function bulkEvaluate(req: Request, res: Response, next: NextFuncti
     );
 
     const scoredByStudentId = new Map(scored.map((r) => [r.student, r]));
+    // Excused (مستأذن) students get no parent notification.
     const { notified, unnotified } = await notifyParents(
-      scored.map((r) => r.student),
+      scored.filter((r) => r.attendanceStatus !== 'مستأذن').map((r) => r.student),
       (name, studentId) => {
         const r = scoredByStudentId.get(studentId)!;
         if (r.attendanceStatus === 'غائب') return `الطالب ${name} غائب اليوم (${day}، ${date}) — المجموع: ${r.total}/${r.totalMax}.`;

@@ -8,10 +8,11 @@ import { Badge } from "../../components/common/Badge";
 import { SkeletonTable } from "../../components/common/Skeleton";
 import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 
-const STATUS_TONE: Record<string, "green" | "gold" | "red"> = {
+const STATUS_TONE: Record<string, "green" | "gold" | "red" | "blue"> = {
   حاضر: "green",
   متأخر: "gold",
   غائب: "red",
+  مستأذن: "blue",
 };
 
 export function ParentAttendance() {
@@ -28,7 +29,8 @@ export function ParentAttendance() {
   const present = records?.filter((r) => r.status === "حاضر").length ?? 0;
   const late = records?.filter((r) => r.status === "متأخر").length ?? 0;
   const absent = records?.filter((r) => r.status === "غائب").length ?? 0;
-  const total = records?.length ?? 0;
+  // Excused (مستأذن) sessions don't count toward the attendance percentage.
+  const total = records?.filter((r) => r.status !== "مستأذن").length ?? 0;
   const attendPct = total ? Math.round((present / total) * 100) : (activeChild?.attendancePct ?? 0);
 
   return (

@@ -14,8 +14,8 @@ import { createMoreTabButton } from '@/components/layout/MoreTabButton';
 // Nav items with no tab of their own — the "المزيد" sheet lists exactly these.
 // A supervisor (who reuses this same tab layout) never sees "register" (a
 // pure-create page, gated by readOnly anyway) or "supervisors" (admin-only).
-const ADMIN_MORE_IDS = ['register', 'teachers', 'parents', 'masajid', 'supervisors'];
-const SUPERVISOR_MORE_IDS = ['teachers', 'parents', 'masajid'];
+const ADMIN_MORE_IDS = ['register', 'teachers', 'parents', 'masajid', 'supervisors', 'messages'];
+const SUPERVISOR_MORE_IDS = ['teachers', 'parents', 'masajid', 'messages'];
 
 export default function AdminTabLayout() {
   const theme = useAppTheme();
@@ -53,10 +53,11 @@ export default function AdminTabLayout() {
       {/* Reachable from the "المزيد" sheet only. */}
       <Tabs.Screen name="register"       options={{ href: null, title: 'تسجيل طالب' }} />
       <Tabs.Screen name="teachers"       options={{ href: null, title: 'المعلمون' }} />
-      <Tabs.Screen name="masajid"        options={{ href: null, title: 'المساجد' }} />
+      <Tabs.Screen name="masajid"        options={{ href: null, title: 'المساجد والدور النسائية' }} />
       <Tabs.Screen name="track-detail" options={{ href: null, title: 'تفاصيل المسار' }} />
       <Tabs.Screen name="parents" options={{ href: null, title: 'أولياء الأمور' }} />
       <Tabs.Screen name="supervisors" options={{ href: null, title: 'المشرفون' }} />
+      <Tabs.Screen name="messages" options={{ href: null, title: 'الرسائل' }} />
       {/* Add/edit forms are full pages, not modals: their <FormSelect> pickers are
           bottom sheets from the app-root host, which an RN Modal would cover. */}
       <Tabs.Screen name="masjid-form"  options={{ href: null, title: 'بيانات المسجد' }} />

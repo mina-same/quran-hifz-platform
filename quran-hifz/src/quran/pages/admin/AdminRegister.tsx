@@ -14,9 +14,8 @@ const schema = z.object({
   // 10 digits; the leading digit encodes citizen (1) vs resident (2).
   nationalId: z
     .string()
-    .optional()
-    .or(z.literal(""))
-    .refine((v) => !v || /^[12]\d{9}$/.test(v), "رقم الهوية ١٠ أرقام ويبدأ بـ ١ أو ٢"),
+    .min(1, "رقم الهوية مطلوب")
+    .regex(/^[12]\d{9}$/, "رقم الهوية ١٠ أرقام ويبدأ بـ ١ أو ٢"),
   guardianPhone: z
     .string()
     .min(1, "جوال ولي الأمر مطلوب")
@@ -99,7 +98,7 @@ export function AdminRegister() {
               <FieldError msg={errors.name?.message} />
             </div>
             <div className="form-group">
-              <label className="form-label">رقم الهوية</label>
+              <label className="form-label">رقم الهوية <span>*</span></label>
               <input
                 className="form-input"
                 type="text"

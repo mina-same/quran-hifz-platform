@@ -36,7 +36,9 @@ export default function StudentAttendance() {
   const late = records.filter((r) => r.status === 'متأخر').length;
   // Prefer the server's own figure (it spans the whole enrolment, not just the
   // records fetched here) and fall back to the local ratio.
-  const pct = student?.attendancePct ?? (records.length > 0 ? Math.round((present / records.length) * 100) : 0);
+  // Excused (مستأذن) sessions don't count toward the percentage.
+  const counted = records.filter((r) => r.status !== 'مستأذن').length;
+  const pct = student?.attendancePct ?? (counted > 0 ? Math.round((present / counted) * 100) : 0);
 
   const STATS = [
     { label: 'نسبة حضوري', value: `${pct}٪`, color: theme.green },
@@ -48,6 +50,7 @@ export default function StudentAttendance() {
   const statusBadge = (s: string) => {
     if (s === 'حاضر') return <Badge label={s} variant="green" />;
     if (s === 'غائب') return <Badge label={s} variant="red" />;
+    if (s === 'مستأذن') return <Badge label={s} variant="blue" />;
     return <Badge label={s} variant="gold" />;
   };
 

@@ -106,10 +106,20 @@ export function StudentReportPanel({
   const { data: plans = [] } = useQuranPlans(
     selectedId ? { student: selectedId } : { student: "__none__" },
   );
-  const { data: studentEvals = [] } = useEvaluations(
+  const { data: rawStudentEvals = [] } = useEvaluations(
     selectedId ? { student: selectedId } : { student: "__none__" },
   );
-  const { data: allEvals = [] } = useEvaluations(aggregateFilter);
+  const { data: rawAllEvals = [] } = useEvaluations(aggregateFilter);
+  // Excused (مستأذن) sessions carry no grades and don't count against the
+  // student — excluded from every average and attendance percentage.
+  const studentEvals = useMemo(
+    () => rawStudentEvals.filter((e) => e.attendanceStatus !== "مستأذن"),
+    [rawStudentEvals],
+  );
+  const allEvals = useMemo(
+    () => rawAllEvals.filter((e) => e.attendanceStatus !== "مستأذن"),
+    [rawAllEvals],
+  );
 
   // What the student recorded on each open-ward plan (حفظ only — مراجعة
   // revisits already-memorized text and must not inflate coverage).

@@ -4373,3 +4373,54 @@
 | 11:34 | implemented open-ward plans (server+web+mobile), 14 tasks, local-mongod E2E passed | quran-hifz-server, quran-hifz, quran-hifz-mobile | done on feat/open-ward-plans | ~200k |
 | 11:46 | Session end: 3 writes across 2 files (2026-09-26-open-ward-plans-design.md, 2026-09-26-open-ward-plans.md) | 3 reads | ~21872 tok |
 | 11:51 | Session end: 3 writes across 2 files (2026-09-26-open-ward-plans-design.md, 2026-09-26-open-ward-plans.md) | 3 reads | ~21872 tok |
+
+## Session: 2026-09-29 11:29
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-02 15:59
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-02 15:59
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-02 15:59
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-02 16:00
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-02 16:00
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-02 16:00
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:22 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | added optional chaining | ~242 |
+| 16:22 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | added 2 import(s) | ~60 |
+| 14:00 | Student "درجاتي" grades list + average on web & mobile dashboards; getEvaluations restricts student→own profileId, parent→ParentStudent children | evaluation.controller.ts, StudentDashboard.tsx, student/dashboard.tsx | tsc clean server+mobile; web errors only in other files | ~6k |
+| 16:24 | Session end: 2 writes across 1 files (evaluation.controller.ts) | 3 reads | ~7371 tok |
+| 16:26 | student→supervision note: POST /messages/to-supervisors (server-resolved recipients: admins + gender-matched supervisors); getMessages now returns raw docs (fixes clients' shape mismatch); web+mobile compose box; admin/supervisor inbox (web registry+nav, mobile admin/messages + shared MessagesScreen) | message.controller.ts, message.routes.ts, StudentMessages.tsx, pageRegistry.ts, portals.ts(x2), api/messages.ts, lib/queries/messages.ts, student/messages.tsx, admin/messages.tsx, MessagesScreen.tsx, admin/_layout.tsx | tsc clean (web: pre-existing sitemap only) | ~14k |
+| 16:26 | Added attendance status مستأذن (excused): server enums/pct/stats/no-notify; web+mobile toggles, badges, report averages exclude it; reflow treats as absent | Attendance/Evaluation models, attendance/evaluation/stats controllers, TeacherAttendance, TeacherTrackDetail, Student/ParentAttendance, ReportsDashboard, StudentReportPanel (web+mobile), EvaluationRoster, evaluate.tsx, mobile attendance screens, quran.css | tsc clean (web has pre-existing sitemap errors) | ~25k |
+| 16:27 | Session end: 2 writes across 1 files (evaluation.controller.ts) | 3 reads | ~7371 tok |
+| 16:27 | 5 client edits: national ID required on create, masjid label rename, excused status, student grades card, student→supervisor notes (+ admin/supervisor inbox) | server/web/mobile | tsc clean (pre-existing sitemap err only) | ~25k |
+| 16:27 | Session end: 2 writes across 1 files (evaluation.controller.ts) | 3 reads | ~7371 tok |
+| 16:30 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | added optional chaining | ~168 |
+| 16:31 | Edited quran-hifz-server/src/controllers/evaluation.controller.ts | removed 10 lines | ~26 |
+| 16:32 | Session end: 4 writes across 1 files (evaluation.controller.ts) | 3 reads | ~7565 tok |
+| 16:34 | Session end: 4 writes across 1 files (evaluation.controller.ts) | 3 reads | ~7565 tok |
+| 16:36 | Session end: 4 writes across 1 files (evaluation.controller.ts) | 3 reads | ~7565 tok |
+| 16:38 | Fixed duplicate active plans: guard in create/updatePlan (bug-413); deleted empty duplicate plan 6ab930a8 on track 6ab14a45 (user-approved) | quran-plan.controller.ts, DB | verified 1 active plan w/ custom rubric | ~8k |
+| 16:38 | Session end: 4 writes across 1 files (evaluation.controller.ts) | 3 reads | ~7565 tok |

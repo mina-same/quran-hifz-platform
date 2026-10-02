@@ -12,6 +12,7 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   حاضر: "green",
   غائب: "red",
   متأخر: "gold",
+  مستأذن: "blue",
 };
 
 export function StudentAttendance() {

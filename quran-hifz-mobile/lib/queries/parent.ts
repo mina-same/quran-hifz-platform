@@ -25,7 +25,7 @@ export type ChildAttendanceRecord = {
   date: string;
   day: string;
   time: string;
-  status: 'حاضر' | 'غائب' | 'متأخر';
+  status: 'حاضر' | 'غائب' | 'متأخر' | 'مستأذن';
 };
 
 export type ChildHomework = {

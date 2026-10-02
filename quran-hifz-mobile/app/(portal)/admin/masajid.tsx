@@ -53,7 +53,7 @@ export default function AdminMasajid() {
         )}
 
         <Card>
-          <CardHeader title="المساجد والحلقات" />
+          <CardHeader title="المساجد والدور النسائية" />
           {isLoading && <SkeletonRows count={3} rowHeight={56} />}
           {isError && <Text style={s.error}>تعذّر تحميل المساجد</Text>}
 

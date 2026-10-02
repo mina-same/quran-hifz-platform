@@ -246,13 +246,24 @@ export const PORTALS: Record<string, PortalConfig> = {
         ],
       },
       {
-        group: "المساجد",
+        group: "المساجد والدور النسائية",
         items: [
           {
             id: "masajid",
             icon: "building-arch",
-            label: "المساجد",
-            desc: "إدارة المساجد ومقارها",
+            label: "المساجد والدور النسائية",
+            desc: "إدارة المساجد والدور النسائية ومقارها",
+          },
+        ],
+      },
+      {
+        group: "التواصل",
+        items: [
+          {
+            id: "messages",
+            icon: "message",
+            label: "الرسائل",
+            desc: "ملاحظات الطلاب الواردة",
           },
         ],
       },

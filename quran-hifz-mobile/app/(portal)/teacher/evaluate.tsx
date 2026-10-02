@@ -26,7 +26,7 @@ import { success, error } from '@/lib/haptics';
 
 /** Scores are keyed by the active plan's rubric, so categories are not known
  * at compile time any more. */
-type StudentEval = { attendanceStatus: 'حاضر' | 'غائب'; scores: Record<string, number>; note: string };
+type StudentEval = { attendanceStatus: 'حاضر' | 'غائب' | 'مستأذن'; scores: Record<string, number>; note: string };
 
 /** Manual scores start at 0 so the teacher consciously awards points rather
  * than every student defaulting to full marks. `auto` criteria (حضور) start
@@ -43,7 +43,7 @@ function blankEval(rubric: GradeCriterion[]): StudentEval {
 /** Absent → 0. Present: every criterion (`auto` included) takes whatever the
  * teacher entered, mirroring the server's bulkEvaluate. */
 function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
-  if (e.attendanceStatus === 'غائب') return 0;
+  if (e.attendanceStatus !== 'حاضر') return 0;
   return rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0);
 }
 
@@ -78,7 +78,7 @@ export default function TeacherEvaluate() {
   const alreadySubmitted = savedToday.length > 0;
 
   const evalFor = (studentId: string): StudentEval => overrides[studentId] ?? savedById[studentId] ?? blankEval(rubric);
-  function setAttendance(studentId: string, status: 'حاضر' | 'غائب') {
+  function setAttendance(studentId: string, status: 'حاضر' | 'غائب' | 'مستأذن') {
     setOverrides((p) => ({ ...p, [studentId]: { ...evalFor(studentId), attendanceStatus: status } }));
   }
   function setScore(studentId: string, key: string, value: number) {
@@ -244,7 +244,9 @@ export default function TeacherEvaluate() {
 
           {students.map((st, i) => {
             const e = evalFor(st._id);
-            const isAbsent = e.attendanceStatus === 'غائب';
+            // Absent and excused both mean "not present" — no grades.
+            const isAbsent = e.attendanceStatus !== 'حاضر';
+            const isExcused = e.attendanceStatus === 'مستأذن';
             const total = totalOf(e, rubric);
             return (
               <View key={st._id} style={[styles.studentRow, i < students.length - 1 && styles.rowBorder]}>
@@ -263,9 +265,17 @@ export default function TeacherEvaluate() {
                     haptic="select"
                     disabled={alreadySubmitted}
                     onPress={() => setAttendance(st._id, 'غائب')}
-                    style={[styles.toggleBtn, isAbsent && { backgroundColor: theme.red + '20', borderColor: theme.red }]}
+                    style={[styles.toggleBtn, isAbsent && !isExcused && { backgroundColor: theme.red + '20', borderColor: theme.red }]}
                   >
-                    <Text style={[styles.toggleText, isAbsent && { color: theme.red, fontFamily: theme.fontCairoBold }]}>غائب</Text>
+                    <Text style={[styles.toggleText, isAbsent && !isExcused && { color: theme.red, fontFamily: theme.fontCairoBold }]}>غائب</Text>
+                  </Pressable>
+                  <Pressable
+                    haptic="select"
+                    disabled={alreadySubmitted}
+                    onPress={() => setAttendance(st._id, 'مستأذن')}
+                    style={[styles.toggleBtn, isExcused && { backgroundColor: theme.bluePale, borderColor: theme.blue }]}
+                  >
+                    <Text style={[styles.toggleText, isExcused && { color: theme.blue, fontFamily: theme.fontCairoBold }]}>مستأذن</Text>
                   </Pressable>
                 </View>
 

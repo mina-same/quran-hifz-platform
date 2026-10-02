@@ -1,10 +1,18 @@
+import { useState, type ReactNode } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "../../components/common/Card";
+import { Alert } from "../../components/common/Alert";
 import { SkeletonList } from "../../components/common/Skeleton";
-import { useMessages, useMarkRead } from "../../api/messages";
+import { useMessages, useMarkRead, useSendNoteToSupervisors } from "../../api/messages";
 import { AR_LOCALE } from "@/lib/format";
 
 export function StudentMessages() {
+  return <MessagesInbox compose={<NoteToSupervisors />} />;
+}
+
+/** Received-messages list keyed by recipient = current user. Reused as the
+ *  admin/supervisor inbox (no compose box there). */
+export function MessagesInbox({ compose }: { compose?: ReactNode }) {
   const { data: messages = [], isLoading } = useMessages();
   const markRead = useMarkRead();
 
@@ -12,13 +20,18 @@ export function StudentMessages() {
 
   if (isLoading) {
     return (
-      <Card>
-        <SkeletonList rows={5} avatar={true} />
-      </Card>
+      <>
+        {compose}
+        <Card>
+          <SkeletonList rows={5} avatar={true} />
+        </Card>
+      </>
     );
   }
 
   return (
+    <>
+    {compose}
     <Card>
       {messages.length === 0 && (
         <div style={{ textAlign: "center", color: "var(--text3)", padding: 32, fontSize: 14 }}>
@@ -81,6 +94,49 @@ export function StudentMessages() {
           </div>
         </div>
       ))}
+    </Card>
+    </>
+  );
+}
+
+const NOTE_MAX = 1000;
+
+function NoteToSupervisors() {
+  const [body, setBody] = useState("");
+  const [status, setStatus] = useState<{ tone: "success" | "danger"; text: string } | null>(null);
+  const send = useSendNoteToSupervisors();
+  const trimmed = body.trim();
+
+  const submit = async () => {
+    if (!trimmed || send.isPending) return;
+    setStatus(null);
+    try {
+      await send.mutateAsync(trimmed);
+      setBody("");
+      setStatus({ tone: "success", text: "تم إرسال ملاحظتك للمشرف" });
+    } catch (e) {
+      setStatus({ tone: "danger", text: (e as Error).message || "تعذر إرسال الملاحظة" });
+    }
+  };
+
+  return (
+    <Card title="إرسال ملاحظة للمشرف" icon="ti-send" style={{ marginBottom: 16 }}>
+      <textarea
+        className="form-input"
+        rows={3}
+        maxLength={NOTE_MAX}
+        placeholder="اكتب ملاحظتك هنا..."
+        value={body}
+        onChange={(e) => { setBody(e.target.value); if (status) setStatus(null); }}
+        style={{ width: "100%", resize: "vertical" }}
+      />
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 11, color: "var(--text3)" }}>{body.length}/{NOTE_MAX}</span>
+        <button className="topbar-btn btn-primary" onClick={submit} disabled={!trimmed || send.isPending}>
+          {send.isPending ? "جارٍ الإرسال..." : "إرسال"}
+        </button>
+      </div>
+      {status && <Alert tone={status.tone} style={{ marginTop: 10 }}>{status.text}</Alert>}
     </Card>
   );
 }

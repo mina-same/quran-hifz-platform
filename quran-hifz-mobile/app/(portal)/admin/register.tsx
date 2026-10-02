@@ -31,8 +31,8 @@ function validate(f: Fields): string | null {
   if (f.name.trim().length < 2) return 'الاسم مطلوب (٢ أحرف على الأقل)';
   if (!f.guardianPhone.trim()) return 'جوال ولي الأمر مطلوب';
   if (!/^05\d{8}$/.test(f.guardianPhone.trim())) return 'صيغة الجوال: 05XXXXXXXX';
-  // Optional, but must be well-formed when provided.
-  if (f.nationalId.trim() && !/^[12]\d{9}$/.test(f.nationalId.trim())) return 'رقم الهوية ١٠ أرقام ويبدأ بـ ١ أو ٢';
+  if (!f.nationalId.trim()) return 'رقم الهوية مطلوب';
+  if (!/^[12]\d{9}$/.test(f.nationalId.trim())) return 'رقم الهوية ١٠ أرقام ويبدأ بـ ١ أو ٢';
   if (f.studentLevel.trim() && (Number(f.studentLevel) < 1 || Number(f.studentLevel) > 10)) return 'المستوى بين ١ و١٠';
   if (!f.track) return 'يرجى اختيار المسار';
   if (f.email.trim() && !/^\S+@\S+\.\S+$/.test(f.email.trim())) return 'البريد الإلكتروني غير صحيح';
@@ -97,7 +97,7 @@ export default function AdminRegister() {
               <FormGroup label="الاسم الكامل" required>
                 <FormInput placeholder="اسم الطالب رباعياً" value={form.name} onChangeText={(v) => sf('name', v)} />
               </FormGroup>
-              <FormGroup label="رقم الهوية">
+              <FormGroup label="رقم الهوية" required>
                 <FormInput
                   placeholder="١٠ أرقام"
                   keyboardType="number-pad"

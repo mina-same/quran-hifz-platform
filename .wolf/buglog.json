@@ -7004,5 +7004,39 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-09-26T12:00:00Z"
+  },
+  {
+    "id": "bug-412",
+    "timestamp": "2026-10-02T16:26:33.058305",
+    "error_message": "Messages inbox shows blank sender/body, Invalid Date, mark-read PATCH /messages/undefined/read",
+    "file": "quran-hifz-server/src/controllers/message.controller.ts",
+    "root_cause": "getMessages returned a formatted shape (id/sender/initials/preview/time/unread) while web+mobile clients read raw Message fields (_id/senderName/senderInitials/body/createdAt/readAt)",
+    "fix": "getMessages returns .lean() raw docs",
+    "tags": [
+      "messages",
+      "api-shape",
+      "inbox"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-02T16:26:33.058305"
+  },
+  {
+    "id": "bug-413",
+    "timestamp": "2026-10-02T00:00:00Z",
+    "error_message": "User: track detail grading shows default rubric (حضور٣ حفظ٤ تجويد٢ تلاوة١) instead of plan's (حضور٢ حفظ٦ السلوك٢); 'he cant have two active plan how that'",
+    "file": "quran-hifz-server/src/controllers/quran-plan.controller.ts",
+    "root_cause": "createPlan/updatePlan never checked for an existing active track-targeted plan, so a track got two identical active plans ('الإتقان ب', 15 min apart). resolveRubric({track}) returns DEFAULT_GRADE_RUBRIC + ambiguous:true when >1 active plan, and TeacherTrackDetail ignores `ambiguous`, so it silently graded against the default.",
+    "fix": "Added assertNoOtherActiveTrackPlan (409) to createPlan and to updatePlan (when the plan is active and track-targeted, excluding itself). Existing duplicate data left for user decision.",
+    "tags": [
+      "quran-plan",
+      "rubric",
+      "duplicate",
+      "active-plan",
+      "validation"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-02T00:00:00Z"
   }
 ]

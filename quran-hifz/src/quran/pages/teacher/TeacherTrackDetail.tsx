@@ -232,7 +232,7 @@ function buildDayChips(minIso: string, maxIso: string, today: string): DayChip[]
 /** Scores are keyed by the active plan's rubric — categories are not known at
  *  compile time any more. */
 type StudentEval = {
-  attendanceStatus: "حاضر" | "غائب";
+  attendanceStatus: "حاضر" | "غائب" | "مستأذن";
   scores: Record<string, number>;
 };
 /** A never-touched row starts at full marks for `auto` criteria (حضور) — same
@@ -247,7 +247,7 @@ function blankEval(rubric: GradeCriterion[]): StudentEval {
 /** Absent → 0. Every criterion (`auto` included) takes whatever the teacher
  * entered, bounded by its max — mirrors the server's bulkEvaluate. */
 function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
-  if (e.attendanceStatus === "غائب") return 0;
+  if (e.attendanceStatus !== "حاضر") return 0;
   return rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0);
 }
 
@@ -651,7 +651,7 @@ export function TeacherTrackDetail() {
 
   const evalFor = (studentId: string): StudentEval =>
     overrides[studentId] ?? savedById[studentId] ?? blankEval(rubric);
-  function setAttendance(studentId: string, status: "حاضر" | "غائب") {
+  function setAttendance(studentId: string, status: "حاضر" | "غائب" | "مستأذن") {
     setOverrides((prev) => ({
       ...prev,
       [studentId]: { ...evalFor(studentId), attendanceStatus: status },
@@ -761,7 +761,7 @@ export function TeacherTrackDetail() {
     const e = evalFor(studentId);
     // Open-ward plan: a present student's day can't be saved until every type
     // due has a range or an explicit «لم يُسمِّع اليوم».
-    if (openPlan && e.attendanceStatus !== "غائب" && linkedPlan && planCoversStudent(linkedPlan, studentId)) {
+    if (openPlan && e.attendanceStatus === "حاضر" && linkedPlan && planCoversStudent(linkedPlan, studentId)) {
       const missing = openTypes.filter((t) => !openWardComplete(openWardFor(studentId, t)));
       if (missing.length > 0) {
         toast.error(`حدّد ما حفظه ${studentName} (${missing.join("، ")}) أو اختر «لم يُسمِّع اليوم»`);
@@ -785,7 +785,7 @@ export function TeacherTrackDetail() {
             // An absent student has no ward record — the evaluation holds the
             // absence. A day first saved as present and then switched to absent
             // still carries its entries, so those are removed here.
-            if (e.attendanceStatus === "غائب" && planCoversStudent(linkedPlan, studentId)) {
+            if (e.attendanceStatus !== "حاضر" && planCoversStudent(linkedPlan, studentId)) {
               const stale = savedOpenWardTypes(openEntries, studentId, effectiveDate);
               (async () => {
                 for (const t of stale) {
@@ -800,7 +800,7 @@ export function TeacherTrackDetail() {
               })();
               return;
             }
-            if (e.attendanceStatus === "غائب" || openTypes.length === 0 || !planCoversStudent(linkedPlan, studentId)) {
+            if (e.attendanceStatus !== "حاضر" || openTypes.length === 0 || !planCoversStudent(linkedPlan, studentId)) {
               toast.success("تم الحفظ بنجاح", { id: toastId });
               return;
             }
@@ -871,7 +871,7 @@ export function TeacherTrackDetail() {
                 reversedForStudent(studentId, studentAssignment.type),
                 completedPoint,
               );
-              const status = e.attendanceStatus === "غائب" ? "absent" : delta < 0 ? "partial" : "done";
+              const status = e.attendanceStatus !== "حاضر" ? "absent" : delta < 0 ? "partial" : "done";
 
               if (status === "done" && delta === 0) {
                 toast.success(`${typeLabel}تم حفظ الحضور والتقييم بنجاح`, { id: thisToastId });
@@ -1351,7 +1351,9 @@ export function TeacherTrackDetail() {
                   const name = s.name;
                   const id = s._id;
                   const e = evalFor(id);
-                  const isAbsent = e.attendanceStatus === "غائب";
+                  // Absent and excused both mean "not present" — no grades, no ward.
+                  const isAbsent = e.attendanceStatus !== "حاضر";
+                  const isExcused = e.attendanceStatus === "مستأذن";
                   const isExpanded = expandedStudentId === id;
                   const hasSaved = !!savedById[id];
                   const isUnlocked = unlockedIds.has(id);
@@ -1483,10 +1485,18 @@ export function TeacherTrackDetail() {
                             <button
                               type="button"
                               disabled={controlsLocked}
-                              className={isAbsent ? "active absent" : ""}
+                              className={isAbsent && !isExcused ? "active absent" : ""}
                               onClick={() => setAttendance(id, "غائب")}
                             >
                               <i className="ti ti-x" /> غائب
+                            </button>
+                            <button
+                              type="button"
+                              disabled={controlsLocked}
+                              className={isExcused ? "active excused" : ""}
+                              onClick={() => setAttendance(id, "مستأذن")}
+                            >
+                              <i className="ti ti-user-exclamation" /> مستأذن
                             </button>
                           </div>
 

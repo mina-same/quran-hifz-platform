@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { get, patch } from '@/lib/api';
+import { get, post, patch } from '@/lib/api';
 
 export type Message = {
   _id: string;
@@ -18,6 +18,14 @@ export function useMessages() {
   return useQuery({
     queryKey: ['messages'],
     queryFn: () => get<ListResponse>('/messages').then((r) => r.data),
+  });
+}
+
+/** Student → supervision note; the server resolves recipients itself. */
+export function useSendNoteToSupervisors() {
+  return useMutation({
+    mutationFn: (body: string) =>
+      post<{ success: boolean; data: { sent: number } }>('/messages/to-supervisors', { body }),
   });
 }
 

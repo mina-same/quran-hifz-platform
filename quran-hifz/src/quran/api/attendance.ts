@@ -13,7 +13,7 @@ export type AttendanceRecord = {
   date: string;
   day: string;
   time: string;
-  status: "حاضر" | "غائب" | "متأخر";
+  status: "حاضر" | "غائب" | "متأخر" | "مستأذن";
 };
 
 export type AttendanceFilters = {

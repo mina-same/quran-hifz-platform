@@ -1495,6 +1495,10 @@ textarea.form-input {
   background: #ef4444;
   color: white;
 }
+.att-toggle button.active.excused {
+  background: #3b82f6;
+  color: white;
+}
 .att-toggle button:not(.active):hover {
   background: var(--green-pale);
 }

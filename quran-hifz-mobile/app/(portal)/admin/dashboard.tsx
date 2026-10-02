@@ -74,7 +74,7 @@ export default function AdminDashboard() {
     { label: 'الطلاب المسجلون', value: stats.data.totalStudents, color: theme.green },
     { label: 'المعلمون',         value: stats.data.totalTeachers, color: theme.gold },
     { label: 'المسارات',         value: stats.data.totalTracks,   color: theme.blue },
-    { label: 'المساجد',          value: stats.data.totalMasajid,  color: theme.red },
+    { label: 'المساجد والدور النسائية', value: stats.data.totalMasajid,  color: theme.red },
   ] : [];
 
   // توزيع المسارات — grouped client-side from the students list, as on the web.

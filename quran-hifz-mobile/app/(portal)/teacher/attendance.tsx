@@ -85,6 +85,8 @@ export default function TeacherAttendance() {
     type Agg = { id: string; name: string; totalSum: number; sessions: number; present: number };
     const byStudent = new Map<string, Agg>();
     for (const r of history) {
+      // Excused (مستأذن) sessions don't count — no grades, not held against attendance.
+      if (r.attendanceStatus === 'مستأذن') continue;
       const id = typeof r.student === 'string' ? r.student : r.student._id;
       const name = typeof r.student === 'string' ? r.student : r.student.name;
       const agg = byStudent.get(id) ?? { id, name, totalSum: 0, sessions: 0, present: 0 };
@@ -226,7 +228,7 @@ export default function TeacherAttendance() {
                   <Text style={styles.histName}>
                     {typeof r.student === 'string' ? r.student : r.student.name}
                   </Text>
-                  <Badge label={r.attendanceStatus} variant={r.attendanceStatus === 'حاضر' ? 'green' : 'red'} />
+                  <Badge label={r.attendanceStatus} variant={r.attendanceStatus === 'حاضر' ? 'green' : r.attendanceStatus === 'مستأذن' ? 'blue' : 'red'} />
                   <Text style={styles.histDate}>{toDateOnly(r.date)}</Text>
                 </View>
                 <Text style={styles.histScores}>

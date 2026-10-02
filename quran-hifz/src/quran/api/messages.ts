@@ -32,6 +32,14 @@ export function useSendMessage() {
   });
 }
 
+/** Student → supervision note; the server resolves recipients itself. */
+export function useSendNoteToSupervisors() {
+  return useMutation({
+    mutationFn: (body: string) =>
+      post<{ success: boolean; data: { sent: number } }>("/messages/to-supervisors", { body }),
+  });
+}
+
 export function useMarkRead() {
   const qc = useQueryClient();
   return useMutation({

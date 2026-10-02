@@ -171,9 +171,11 @@ export default function ReportsScreen({ baseFilter, tracks, scopeAllLabel, showA
     () => rawStudents.filter((s) => matchesGenderScope(typeof s.track === 'string' ? undefined : s.track.masjid, genderScope)),
     [rawStudents, genderScope],
   );
+  // Excused (مستأذن) sessions carry no grades — excluded from every average.
   const evaluations = useMemo(() => {
-    if (genderScope === 'all') return rawEvaluations;
-    return rawEvaluations.filter((e) => {
+    const graded = rawEvaluations.filter((e) => e.attendanceStatus !== 'مستأذن');
+    if (genderScope === 'all') return graded;
+    return graded.filter((e) => {
       const id = evalTrackId(e);
       return !id || scopedTrackIds.has(id);
     });

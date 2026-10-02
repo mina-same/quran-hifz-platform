@@ -15,7 +15,7 @@ export type EvaluationRecord = {
   teacher?: { _id: string; name: string } | string;
   track?: { _id: string; title: string } | string;
   date: string;
-  attendanceStatus: 'حاضر' | 'غائب';
+  attendanceStatus: 'حاضر' | 'غائب' | 'مستأذن';
   criteria?: EvaluationCriterion[];
   scores?: EvaluationScores;
   totalMax?: number;
@@ -62,7 +62,7 @@ export type BulkEvaluateResponse = {
 
 export type BulkEvaluateRecord = {
   student: string;
-  attendanceStatus: 'حاضر' | 'غائب';
+  attendanceStatus: 'حاضر' | 'غائب' | 'مستأذن';
   /** Keyed by rubric criterion key; bounds enforced server-side per plan. */
   scores: Record<string, number>;
   note?: string;

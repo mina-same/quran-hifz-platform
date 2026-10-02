@@ -10,7 +10,8 @@ import { SkeletonStatsRow, SkeletonCard } from "../../components/common/Skeleton
 import { useStudent } from "../../api/students";
 import { useHomework } from "../../api/homework";
 import { useQuranPlans } from "../../api/quran-plans";
-import { toAr, pct } from "../../../lib/format";
+import { useEvaluations } from "../../api/evaluations";
+import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 
 function getField(v: unknown, field: string): string {
   if (v && typeof v === "object" && field in v) return String((v as Record<string, unknown>)[field]);
@@ -40,6 +41,7 @@ export function StudentDashboard() {
   const { data: homework = [] } = useHomework({ student: user?.profileId });
   const trackId = getId(student?.track);
   const { data: linkedPlans = [] } = useQuranPlans(trackId ? { track: trackId } : undefined);
+  const { data: evaluations = [] } = useEvaluations(user?.profileId ? { student: user.profileId } : undefined);
 
   useTopbar("ti-home", "لوحتي");
 
@@ -62,6 +64,10 @@ export function StudentDashboard() {
   const masjidName = getTrackMasjidName(student?.track);
   const trackDays = linkedPlans[0]?.days.join("، ") ?? "—";
   const trackTime = getField(student?.track, "timeSlot");
+  // Excused (مستأذن) sessions are left out of the average; absences count as 0.
+  const graded = evaluations.filter((e) => (e.attendanceStatus as string) !== "مستأذن");
+  const gradedMax = graded.reduce((a, e) => a + (e.totalMax ?? 10), 0);
+  const gradeAvg = gradedMax > 0 ? (graded.reduce((a, e) => a + e.total, 0) / gradedMax) * 100 : null;
   const isTopStudent = (student?.attendancePct ?? 0) >= 90 && (student?.progressPct ?? 0) >= 60;
 
   return (
@@ -120,6 +126,50 @@ export function StudentDashboard() {
           )}
         </Card>
       </div>
+
+      {/* درجاتي */}
+      <Card
+        icon="ti-star"
+        title="درجاتي"
+        headerExtra={gradeAvg !== null && <Badge tone="gold">المعدل العام: {pct(gradeAvg)}</Badge>}
+      >
+        {evaluations.length === 0 ? (
+          <div style={{ fontSize: 13, color: "var(--text2)", textAlign: "center", padding: "8px 0" }}>
+            لا توجد تقييمات بعد
+          </div>
+        ) : (
+          <div style={{ fontSize: 13, maxHeight: 360, overflowY: "auto" }}>
+            {evaluations.map((e, i) => {
+              const status = e.attendanceStatus as string;
+              return (
+                <div
+                  key={e._id}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 12,
+                    padding: "9px 0",
+                    borderBottom: i < evaluations.length - 1 ? "1px solid var(--border)" : "none",
+                  }}
+                >
+                  <span style={{ color: "var(--text3)", fontSize: 11, minWidth: 70, marginTop: 1 }}>
+                    {new Date(e.date).toLocaleDateString(AR_LOCALE)}
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <Badge tone={status === "حاضر" ? "green" : status === "غائب" ? "red" : "gray"}>
+                      {status === "مستأذن" ? "مستأذن (بعذر)" : status}
+                    </Badge>
+                    {e.note && <div style={{ color: "var(--text2)", fontSize: 12, marginTop: 4 }}>{e.note}</div>}
+                  </div>
+                  <span style={{ fontWeight: 700, color: "var(--green)", whiteSpace: "nowrap" }}>
+                    {status === "مستأذن" ? "—" : `${toAr(e.total)} / ${toAr(e.totalMax ?? 10)}`}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
 
       {/* آخر الأنشطة */}
       <Card icon="ti-history" title="آخر الأنشطة">

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,11 +9,13 @@ import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import ProgressBar from '@/components/ui/ProgressBar';
 import Alert from '@/components/ui/Alert';
+import Pressable from '@/components/ui/Pressable';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useStudent } from '@/lib/queries/students';
 import { useHomework } from '@/lib/queries/homework';
 import { useQuranPlans } from '@/lib/queries/quranPlan';
+import { useEvaluations } from '@/lib/queries/evaluations';
 import { planScheduleDays, resolveLinkedPlan } from '@/lib/trackSchedule';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -46,12 +48,15 @@ export default function StudentDashboard() {
   const trackId = trackObj?._id ?? (student && typeof student.track === 'string' ? student.track : undefined);
   const { data: linkedPlans = [] } = useQuranPlans({ track: trackId }, { enabled: !!trackId });
   const linkedPlan = resolveLinkedPlan(linkedPlans);
+  const { data: evaluations = [], isRefetching: evalRefetching, refetch: refetchEvals } = useEvaluations(studentId ? { student: studentId } : undefined);
+  const [showAllGrades, setShowAllGrades] = useState(false);
 
   const isLoading = studentLoading || hwLoading;
-  const isRefetching = studentRefetching || hwRefetching;
+  const isRefetching = studentRefetching || hwRefetching || evalRefetching;
   const onRefresh = () => {
     refetchStudent();
     refetchHw();
+    refetchEvals();
   };
 
   if (isLoading) {
@@ -92,6 +97,12 @@ export default function StudentDashboard() {
   const recentHomework = [...homework]
     .sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime())
     .slice(0, 5);
+
+  // Excused (مستأذن) sessions are left out of the average; absences count as 0.
+  const graded = evaluations.filter((e) => (e.attendanceStatus as string) !== 'مستأذن');
+  const gradedMax = graded.reduce((a, e) => a + (e.totalMax ?? 10), 0);
+  const gradeAvg = gradedMax > 0 ? Math.round((graded.reduce((a, e) => a + e.total, 0) / gradedMax) * 100) : null;
+  const visibleGrades = showAllGrades ? evaluations : evaluations.slice(0, 5);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -157,6 +168,44 @@ export default function StudentDashboard() {
           </Card>
         </View>
 
+        {/* My grades */}
+        <Card>
+          <CardHeader
+            title="درجاتي"
+            right={gradeAvg !== null ? <Badge label={`المعدل العام: ${gradeAvg}٪`} variant="gold" /> : undefined}
+          />
+          {evaluations.length === 0 ? (
+            <Text style={styles.emptyText}>لا توجد تقييمات بعد</Text>
+          ) : (
+            <>
+              {visibleGrades.map((e, i) => {
+                const status = e.attendanceStatus as string;
+                const excused = status === 'مستأذن';
+                return (
+                  <View key={e._id} style={[styles.gradeRow, i < visibleGrades.length - 1 && styles.hwBorder]}>
+                    <View style={styles.gradeMain}>
+                      <View style={styles.gradeTop}>
+                        <Text style={styles.hwDate}>{new Date(e.date).toLocaleDateString(AR_LOCALE)}</Text>
+                        <Badge
+                          label={excused ? 'مستأذن (بعذر)' : status}
+                          variant={status === 'حاضر' ? 'green' : status === 'غائب' ? 'red' : 'gray'}
+                        />
+                      </View>
+                      {!!e.note && <Text style={styles.gradeNote}>{e.note}</Text>}
+                    </View>
+                    <Text style={styles.gradeScore}>{excused ? '—' : `${e.total} / ${e.totalMax ?? 10}`}</Text>
+                  </View>
+                );
+              })}
+              {evaluations.length > 5 && (
+                <Pressable haptic="select" onPress={() => setShowAllGrades((v) => !v)} style={styles.showAll}>
+                  <Text style={styles.showAllText}>{showAllGrades ? 'عرض أقل' : `عرض الكل (${evaluations.length})`}</Text>
+                </Pressable>
+              )}
+            </>
+          )}
+        </Card>
+
         {/* Recent homework */}
         <Card>
           <CardHeader title="آخر الواجبات" />
@@ -207,6 +256,13 @@ function createStyles(theme: AppTheme) {
     hwSegment: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
     hwDate: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted, marginTop: 2 },
     hwBadges: { flexDirection: 'row', gap: 6 },
+    gradeRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, gap: 10 },
+    gradeMain: { flex: 1, minWidth: 0 },
+    gradeTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    gradeNote: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted, marginTop: 4 },
+    gradeScore: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.green },
+    showAll: { paddingTop: 10, alignItems: 'center' },
+    showAllText: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.green },
     emptyText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted, textAlign: 'center', paddingVertical: 20 },
   });
 }

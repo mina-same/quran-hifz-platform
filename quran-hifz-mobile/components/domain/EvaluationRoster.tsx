@@ -7,7 +7,7 @@ import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import {
   IconBook2, IconCheck, IconChevronDown, IconChevronUp, IconCircleCheck,
-  IconDeviceFloppy, IconEdit, IconLock, IconX,
+  IconDeviceFloppy, IconEdit, IconLock, IconUserExclamation, IconX,
 } from '@tabler/icons-react-native';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import type { DaySchedule } from '@/components/domain/DaySlider';
@@ -37,7 +37,7 @@ function avatarInitials(name: string): string {
 }
 
 /** Scores are keyed by the active plan's rubric — not known at compile time. */
-export type StudentEval = { attendanceStatus: 'حاضر' | 'غائب'; scores: Record<string, number> };
+export type StudentEval = { attendanceStatus: 'حاضر' | 'غائب' | 'مستأذن'; scores: Record<string, number> };
 /** Manual scores start at 0 so the teacher consciously awards points. `auto`
  * criteria (حضور) start at full marks — same starting point as the old
  * forced-max behavior — but the teacher can lower it like any other chip;
@@ -51,7 +51,7 @@ function blankEval(rubric: GradeCriterion[]): StudentEval {
 /** Absent → 0. Present: every criterion (`auto` included) takes whatever the
  * teacher entered, mirroring the server's bulkEvaluate. */
 function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
-  if (e.attendanceStatus === 'غائب') return 0;
+  if (e.attendanceStatus !== 'حاضر') return 0;
   return rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0);
 }
 
@@ -226,7 +226,7 @@ export default function EvaluationRoster({
   const evalFor = (studentId: string): StudentEval =>
     overrides[studentId] ?? savedById[studentId] ?? blankEval(rubric);
 
-  function setAttendance(studentId: string, status: 'حاضر' | 'غائب') {
+  function setAttendance(studentId: string, status: 'حاضر' | 'غائب' | 'مستأذن') {
     setOverrides((prev) => ({ ...prev, [studentId]: { ...evalFor(studentId), attendanceStatus: status } }));
   }
   function setScore(studentId: string, key: string, value: number) {
@@ -291,7 +291,7 @@ export default function EvaluationRoster({
     const e = evalFor(studentId);
     // Open-ward plan: a present student's day can't be saved until every type
     // due has a range or an explicit «لم يُسمِّع اليوم».
-    if (openPlan && e.attendanceStatus !== 'غائب' && planCoversStudent(studentId)) {
+    if (openPlan && e.attendanceStatus === 'حاضر' && planCoversStudent(studentId)) {
       const missing = openTypes.filter((t) => !openWardComplete(openWardFor(studentId, t)));
       if (missing.length > 0) {
         error();
@@ -319,7 +319,7 @@ export default function EvaluationRoster({
             // An absent student has no ward record — the evaluation holds the
             // absence. A day first saved as present and then switched to absent
             // still carries its entries, so those are removed here.
-            if (e.attendanceStatus === 'غائب' && planCoversStudent(studentId)) {
+            if (e.attendanceStatus !== 'حاضر' && planCoversStudent(studentId)) {
               const stale = savedOpenWardTypes(openEntries, studentId, effectiveDate);
               (async () => {
                 for (const t of stale) {
@@ -335,7 +335,7 @@ export default function EvaluationRoster({
               })();
               return;
             }
-            if (e.attendanceStatus === 'غائب' || openTypes.length === 0 || !planCoversStudent(studentId)) {
+            if (e.attendanceStatus !== 'حاضر' || openTypes.length === 0 || !planCoversStudent(studentId)) {
               setSaveNotices([{ tone: 'success', text: `تم حفظ حضور وتقييم ${studentName}` }]);
               return;
             }
@@ -397,7 +397,7 @@ export default function EvaluationRoster({
               // Signed in the plan's own direction: negative = fell short of the
               // day's ward, positive = recited past it.
               const delta = dayDeltaAyahs(assignment, reversedForStudent(studentId, assignment.type), completedPoint);
-              const status = e.attendanceStatus === 'غائب' ? 'absent' : delta < 0 ? 'partial' : 'done';
+              const status = e.attendanceStatus !== 'حاضر' ? 'absent' : delta < 0 ? 'partial' : 'done';
               if (status === 'done' && delta === 0) {
                 try {
                   await recordOccurrence.mutateAsync(
@@ -485,7 +485,9 @@ export default function EvaluationRoster({
 
       {students.map((st, i) => {
         const e = evalFor(st._id);
-        const isAbsent = e.attendanceStatus === 'غائب';
+        // Absent and excused both mean "not present" — no grades, no ward.
+        const isAbsent = e.attendanceStatus !== 'حاضر';
+        const isExcused = e.attendanceStatus === 'مستأذن';
         const total = totalOf(e, rubric);
         const isExpanded = expandedStudentId === st._id;
         const hasSaved = !!savedById[st._id];
@@ -592,12 +594,25 @@ export default function EvaluationRoster({
                     onPress={() => setAttendance(st._id, 'غائب')}
                     style={[
                       styles.toggle,
-                      isAbsent && { backgroundColor: theme.red + '20', borderColor: theme.red },
+                      isAbsent && !isExcused && { backgroundColor: theme.red + '20', borderColor: theme.red },
                       locked && styles.disabled,
                     ]}
                   >
-                    <IconX size={14} color={isAbsent ? theme.red : theme.textMuted} />
-                    <Text style={[styles.toggleText, isAbsent && { color: theme.red, fontFamily: theme.fontCairoBold }]}>غائب</Text>
+                    <IconX size={14} color={isAbsent && !isExcused ? theme.red : theme.textMuted} />
+                    <Text style={[styles.toggleText, isAbsent && !isExcused && { color: theme.red, fontFamily: theme.fontCairoBold }]}>غائب</Text>
+                  </Pressable>
+                  <Pressable
+                    haptic="select"
+                    disabled={locked}
+                    onPress={() => setAttendance(st._id, 'مستأذن')}
+                    style={[
+                      styles.toggle,
+                      isExcused && { backgroundColor: theme.bluePale, borderColor: theme.blue },
+                      locked && styles.disabled,
+                    ]}
+                  >
+                    <IconUserExclamation size={14} color={isExcused ? theme.blue : theme.textMuted} />
+                    <Text style={[styles.toggleText, isExcused && { color: theme.blue, fontFamily: theme.fontCairoBold }]}>مستأذن</Text>
                   </Pressable>
                 </View>
 

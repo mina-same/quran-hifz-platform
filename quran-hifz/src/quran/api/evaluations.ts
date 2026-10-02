@@ -16,7 +16,7 @@ export type EvaluationRecord = {
   teacher?: { _id: string; name: string } | string;
   track?: { _id: string; title: string } | string;
   date: string;
-  attendanceStatus: "حاضر" | "غائب";
+  attendanceStatus: "حاضر" | "غائب" | "مستأذن";
   criteria?: EvaluationCriterion[];
   /** Absent when the plan's rubric uses custom criteria. */
   scores?: EvaluationScores;
@@ -65,7 +65,7 @@ export type BulkEvaluateResponse = {
 
 export type BulkEvaluateRecord = {
   student: string;
-  attendanceStatus: "حاضر" | "غائب";
+  attendanceStatus: "حاضر" | "غائب" | "مستأذن";
   /** Keyed by rubric criterion key. Bounds are enforced server-side against
    *  the plan's own rubric, which the client cannot be trusted to know. */
   scores: Record<string, number>;

@@ -83,12 +83,15 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "supervisors", icon: "ti-eye-check",    label: "المشرفون" },
       ]},
       { group: "المساجد والمسارات", items: [
-        { id: "masajid", icon: "ti-building-arch",   label: "المساجد" },
+        { id: "masajid", icon: "ti-building-arch",   label: "المساجد والدور النسائية" },
         { id: "tracks",  icon: "ti-calendar-event",  label: "المسارات", dot: true },
       ]},
       { group: "التقارير", items: [
         { id: "kpis",    icon: "ti-target",    label: "مؤشرات الأداء" },
         { id: "reports", icon: "ti-chart-bar", label: "التقارير" },
+      ]},
+      { group: "التواصل", items: [
+        { id: "messages", icon: "ti-message", label: "الرسائل" },
       ]},
     ],
   },
@@ -105,12 +108,15 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "parents",  icon: "ti-user-heart",   label: "أولياء الأمور" },
       ]},
       { group: "المساجد والمسارات", items: [
-        { id: "masajid", icon: "ti-building-arch",   label: "المساجد" },
+        { id: "masajid", icon: "ti-building-arch",   label: "المساجد والدور النسائية" },
         { id: "tracks",  icon: "ti-calendar-event",  label: "المسارات" },
       ]},
       { group: "التقارير", items: [
         { id: "kpis",    icon: "ti-target",    label: "مؤشرات الأداء" },
         { id: "reports", icon: "ti-chart-bar", label: "التقارير" },
+      ]},
+      { group: "التواصل", items: [
+        { id: "messages", icon: "ti-message", label: "الرسائل" },
       ]},
     ],
   },
