@@ -4434,3 +4434,4 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 10:59 | Vercel web deploy blocked by vulnerable @tanstack/react-start; upgraded + fixed __root ErrorComponent type (bug-414) | quran-hifz/package*.json, __root.tsx | build ok, not pushed | ~6k |

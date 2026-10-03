@@ -7038,5 +7038,23 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-10-02T00:00:00Z"
+  },
+  {
+    "id": "bug-414",
+    "timestamp": "2026-10-03T08:00:00Z",
+    "error_message": "Vercel web build failed: Vulnerable TanStack Start package detected (@tanstack/react-start@1.168.26). Live site kept serving old build.",
+    "file": "quran-hifz/package.json",
+    "root_cause": "Vercel blocks deploys using @tanstack/react-start versions with a known XSS; lockfile pinned 1.168.26. Server project deployed fine, so only the web lagged.",
+    "fix": "npm install @tanstack/react-start@latest @tanstack/react-router@latest @tanstack/router-plugin@latest (1.168.60 / 1.170.41 / 1.168.42). Upgrade made errorComponent's error type stricter; __root.tsx ErrorComponent now typed with ErrorComponentProps.",
+    "tags": [
+      "vercel",
+      "deploy",
+      "tanstack",
+      "security",
+      "dependency"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T08:00:00Z"
   }
 ]
