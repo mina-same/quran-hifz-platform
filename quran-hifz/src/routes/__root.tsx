@@ -73,7 +73,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   );
 }
 
-const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL ?? "";
+const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL || "https://hifz-platform.vercel.app";
 const SITE_TITLE = "منصة حِفظ";
 const SITE_DESCRIPTION =
   "منصة متكاملة لإدارة حلقات تحفيظ القرآن الكريم — بوابات للطلاب والمعلمين وأولياء الأمور والإدارة";

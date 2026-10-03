@@ -6,9 +6,19 @@ export const PLATFORM_NAME = "منصة حِفظ";
 export const PLATFORM_TAGLINE = "منصة سحابية لإدارة حلقات تحفيظ القرآن الكريم";
 export const TRIAL_DAYS = 7;
 
+/** Public domain organisations' links live on (shown as "<domain>/<slug>").
+ *  Vercel's free domains are *.vercel.app — vercel.com is Vercel's own site. */
+export const PUBLIC_DOMAIN = "hifz-platform.vercel.app";
+
 /** Platform logo (۞ over an open Mushaf). PNG twin for social cards / touch icons. */
 export const PLATFORM_LOGO = "/brand/logo.svg";
 export const PLATFORM_LOGO_PNG = "/brand/logo-512.png";
+
+/** Mobile app store pages. Leave empty until the app is published — the
+ *  home page then shows the badge as "قريباً" instead of a dead link.
+ *  iOS bundle: com.mina-samy.quran-hifz-mobile · Android: com.minasamy.quranhifzmobile */
+export const APP_STORE_URL = "";
+export const PLAY_STORE_URL = "";
 
 /** Sales WhatsApp, international format without "+" (wa.me links need digits only). */
 export const SALES_WHATSAPP = "201273363970";

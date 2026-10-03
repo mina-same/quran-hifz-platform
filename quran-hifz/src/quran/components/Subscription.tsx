@@ -1,7 +1,8 @@
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { toAr } from "../../lib/format";
-import { PLATFORM_NAME, SALES_WHATSAPP_DISPLAY, salesWhatsappLink, trialDaysLeft } from "../config/saas";
+import { PLATFORM_NAME, SALES_WHATSAPP_DISPLAY, TRIAL_DAYS, salesWhatsappLink, trialDaysLeft } from "../config/saas";
 
 function dayWord(n: number): string {
   if (n === 1) return "يوم واحد";
@@ -18,6 +19,8 @@ export function TrialBanner() {
 
   const left = trialDaysLeft(tenant);
   const urgent = left <= 2;
+  // The sidebar countdown carries the trial the rest of the time.
+  if (!urgent) return null;
   const message = `السلام عليكم، أرغب في تفعيل اشتراك ${tenant.name} (/${tenant.slug}) في ${PLATFORM_NAME}`;
 
   return (
@@ -84,6 +87,61 @@ export function SubscriptionEnded() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Remaining ms until `iso`, refreshed every second (null until mounted, so
+ *  SSR and the first client render agree). */
+function useRemaining(iso: string): number | null {
+  const [left, setLeft] = useState<number | null>(null);
+  useEffect(() => {
+    const tick = () => setLeft(Math.max(0, new Date(iso).getTime() - Date.now()));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [iso]);
+  return left;
+}
+
+const pad = (n: number) => toAr(String(n).padStart(2, "0"));
+
+/** Sidebar: compact live countdown to the end of the free trial — a progress
+ *  ring with the days left, and the hours:minutes:seconds beside it. */
+export function TrialCountdown() {
+  const { tenant, user } = useAuth();
+  const left = useRemaining(tenant?.trialEndsAt ?? new Date(0).toISOString());
+  if (!tenant || tenant.status !== "trial" || left === null) return null;
+
+  const days = Math.floor(left / 86_400_000);
+  const hours = Math.floor((left % 86_400_000) / 3_600_000);
+  const minutes = Math.floor((left % 3_600_000) / 60_000);
+  const seconds = Math.floor((left % 60_000) / 1000);
+  const remaining = Math.min(1, left / (TRIAL_DAYS * 86_400_000));
+  const urgent = left <= 2 * 86_400_000;
+  const message = `السلام عليكم، أرغب في تفعيل اشتراك ${tenant.name} (/${tenant.slug}) في ${PLATFORM_NAME}`;
+
+  const R = 19;
+  const C = 2 * Math.PI * R;
+
+  return (
+    <div className={`trial-cd ${urgent ? "urgent" : ""}`} role="timer" aria-label={`متبقٍّ على الفترة التجريبية ${days} يوم و${hours} ساعة`}>
+      <div className="trial-cd-ring" aria-hidden="true">
+        <svg viewBox="0 0 44 44">
+          <circle cx="22" cy="22" r={R} className="track" />
+          <circle cx="22" cy="22" r={R} className="fill" strokeDasharray={C} strokeDashoffset={C * (1 - remaining)} />
+        </svg>
+        <span>{toAr(days)}</span>
+      </div>
+      <div className="trial-cd-text">
+        <span className="trial-cd-label">{days > 0 ? `${days === 1 ? "يوم" : days === 2 ? "يومان" : "أيام"} متبقية من التجربة` : "آخر يوم في التجربة"}</span>
+        <span className="trial-cd-time" dir="ltr">{pad(hours)}:{pad(minutes)}:{pad(seconds)}</span>
+      </div>
+      {user?.role === "admin" && (
+        <a className="trial-cd-cta" href={salesWhatsappLink(message)} target="_blank" rel="noreferrer" title="فعّل الاشتراك عبر واتساب">
+          اشترك <i className="ti ti-arrow-left" />
+        </a>
+      )}
     </div>
   );
 }

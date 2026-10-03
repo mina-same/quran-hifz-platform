@@ -10,6 +10,8 @@ import { ChildSelector } from "./components/ChildSelector";
 import { LoginPage } from "./pages/LoginPage";
 import { SaasHome } from "./pages/SaasHome";
 import { SignupPage } from "./pages/SignupPage";
+import { SignInPage } from "./pages/SignInPage";
+import { SuperAdmin } from "./pages/SuperAdmin";
 import { TrialBanner, SubscriptionEnded } from "./components/Subscription";
 import { Sidebar } from "./components/Sidebar";
 import { Topbar } from "./components/Topbar";
@@ -115,6 +117,24 @@ export function SignupApp() {
   return (
     <QuranRoot>
       <SignupPage />
+    </QuranRoot>
+  );
+}
+
+/** `/login` — sign in by email; the organisation is resolved server-side. */
+export function SignInApp() {
+  return (
+    <QuranRoot>
+      <SignInPage />
+    </QuranRoot>
+  );
+}
+
+/** `/super` — platform owner console (super admin). */
+export function SuperAdminApp() {
+  return (
+    <QuranRoot>
+      <SuperAdmin />
     </QuranRoot>
   );
 }

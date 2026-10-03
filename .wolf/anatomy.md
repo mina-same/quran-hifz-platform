@@ -1,7 +1,10 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-03T16:33:24.816Z
-> Files: 735 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-03T17:02:42.729Z
+> Files: 752 tracked | Anatomy hits: 0 | Misses: 0
+
+## (repo root, quran-hifz-sass only)
+
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -774,6 +777,10 @@
 - `tenant.controller.ts` — GET /api/tenants/check-slug/:slug — live availability for the signup form. (~1873 tok)
 - `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~2628 tok)
 
+## quran-hifz-server/src/controllers/ (SaaS additions)
+
+- `tenant.controller.ts` — signup (tenant + first admin, manual rollback), checkSlug, getBySlug (public branding), getCurrent (~1300 tok)
+
 ## quran-hifz-server/src/data/
 
 - `juz.ts` — Standard 30-juz' boundary table (surah:ayah each juz' starts at). Keep this file (~459 tok)
@@ -787,6 +794,7 @@
 - `quranRange.ts` — Standard 604-page Madani mushaf boundary table (surah:ayah each page starts at). (~6552 tok)
 - `studentPlanReflow.ts` — Per-student plan overlay: builds the occurrence array, then redistributes what's still owed (cursor → pinned finish line) whenever a day is absent, short, or over-recited; flags `noWard` days (~3376 tok)
 - `supervisorScope.ts` — The supervisor's fixed gender assignment, or null for every other role. (~502 tok)
+- `tenancy.ts` — SaaS: AsyncLocalStorage tenant context (runWithTenant/currentTenantId) + tenantPlugin that scopes every query/aggregate/save/bulkWrite (~900 tok)
 - `tenancy.ts` — Multi-tenancy (SaaS) — one shared database, every tenant-owned document (~847 tok)
 
 ## quran-hifz-server/src/middleware/
@@ -815,6 +823,7 @@
 - `Student.model.ts` — Saudi national ID (رقم الهوية الوطنية): exactly 10 digits from الأحوال المدنية. (~704 tok)
 - `StudentPlanProgress.model.ts` — Exports StudentOccurrenceStatus, IStudentOccurrence, IStudentPlanProgress, StudentPlanProgress (~994 tok)
 - `Teacher.model.ts` — Exports ITeacher, Teacher (~216 tok)
+- `Tenant.model.ts` — SaaS organisation: name/slug/orgType/owner/contact, trial|active|suspended, trialEndsAt/paidUntil, RESERVED_SLUGS, tenantHasAccess() (~700 tok)
 - `Tenant.model.ts` — Slugs that would collide with app routes (/signup, /api, …). (~690 tok)
 - `Track.model.ts` — No longer collected at creation — a track's actual schedule comes from (~574 tok)
 - `User.model.ts` — Fixed at creation by the admin; only set for role === 'supervisor'. A (~545 tok)
@@ -841,6 +850,10 @@
 - `teacher.routes.ts` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~166 tok)
 - `track.routes.ts` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~220 tok)
 
+## quran-hifz-server/src/routes/ (SaaS additions)
+
+- `tenant.routes.ts` — /api/tenants: POST signup, GET check-slug/:slug, by-slug/:slug, current (~150 tok)
+
 ## quran-hifz-server/src/seeds/
 
 - `backfillPlans.ts` — Additive-only script — for every Track that has no QuranPlan producing a (~1046 tok)
@@ -855,6 +868,10 @@
 - `rename-email-domain.ts` — One-off: rewrite every user's email domain to a new one, keeping the (~282 tok)
 - `seed.ts` — Seed script — populates MongoDB with the same mock data used in the Next.js client. (~5410 tok)
 - `wipe-all.ts` — One-time full wipe of the local dev database before importing real data. (~537 tok)
+
+## quran-hifz-server/src/seeds/ (SaaS additions)
+
+- `migrate-to-saas.ts` — one-off: create tenant for pre-SaaS data, stamp `tenant` on all docs, drop old global unique indexes (NOT yet run) (~800 tok)
 
 ## quran-hifz-server/src/types/
 
@@ -888,6 +905,9 @@
 - `robots.txt` (~31 tok)
 - `robots.txt` — SEO: allow /, disallow portal paths, Sitemap pointer (~30 tok)
 - `sitemap.xml` (~64 tok)
+
+## quran-hifz/public/brand/
+
 
 ## quran-hifz/src/
 
@@ -960,13 +980,24 @@
 - `error-page.ts` — Exports renderErrorPage (~392 tok)
 - `format.ts` — Exports toAr, pct (~67 tok)
 - `lovable-error-reporting.ts` — Exports reportLovableError (~238 tok)
-- `seo.ts` — Absolute site origin for canonical/OG URLs (set VITE_PUBLIC_URL in prod). (~580 tok)
+- `seo.ts` — Absolute site origin for canonical/OG URLs. VITE_PUBLIC_URL overrides it (~1041 tok)
 - `utils.ts` — Exports cn (~49 tok)
+
+## quran-hifz/src/lib/ (SaaS additions)
+
+- `seo.ts` — seo() per-route meta/canonical/OG/Twitter (+noindex), jsonLd(), absoluteUrl() (~450 tok)
 
 ## quran-hifz/src/quran/
 
 - `quran.css` — Styles: 70 rules, 18 vars (~26080 tok)
 - `QuranApp.tsx` — Quran Hifz platform — React entry. (~880 tok)
+
+## quran-hifz/src/quran/ (SaaS additions)
+
+- `components/SaasChrome.tsx` — SaasNav, SaasFooter, useHost (SSR-safe host) (~600 tok)
+- `components/Subscription.tsx` — TrialBanner (days left + admin subscribe CTA) and SubscriptionEnded paywall (~1000 tok)
+- `config/saas.ts` — platform name/logo/tagline, TRIAL_DAYS, sales WhatsApp + wa.me link builder, tenantHasAccess/trialDaysLeft (~450 tok)
+- `data/blog.ts` — static BLOG_POSTS (5 Arabic articles) + getPost (~3000 tok)
 
 ## quran-hifz/src/quran/api/
 
@@ -996,7 +1027,7 @@
 
 - `ChildSelector.tsx` — LOGO_SRC (~1453 tok)
 - `PageOutlet.tsx` — PageOutlet (~131 tok)
-- `PortalScreen.tsx` — LOGO_SRC (~516 tok)
+- `SaasHomeSections.tsx` — Facts about the platform itself — not customer counts we can't vouch for. (~3433 tok)
 - `Sidebar.tsx` — LOGO_SRC (~892 tok)
 - `Subscription.tsx` — Thin strip above the page content while the organisation is on trial. (~1010 tok)
 - `Topbar.tsx` — Topbar (~170 tok)
@@ -1043,7 +1074,7 @@
 
 ## quran-hifz/src/quran/data/
 
-- `blog.ts` — Blog posts — static content, no backend. To publish a post, add an entry (~2096 tok)
+- `blog.ts` — Blog posts — static content, no backend. To publish a post, add an entry (~8633 tok)
 - `juz.ts` — Exports JuzStart, JUZ_STARTS — byte-identical frontend copy of quran-hifz-server/src/data/juz.ts (~460 tok)
 - `surahs.ts` — Exports SurahMeta, SURAHS — byte-identical frontend copy of quran-hifz-server/src/data/surahs.ts (~2400 tok)
 
@@ -1055,11 +1086,14 @@
 
 ## quran-hifz/src/quran/pages/
 
-- `LandingPage.tsx` — LOGO_SRC (~4826 tok)
+- `Blog.tsx` — <img> with alt + title + intrinsic size (prevents layout shift). (~2010 tok)
 - `LoginPage.tsx` — schema — renders form. No dev-account quick-login buttons (removed for security, 2026-07-05). (~1400 tok)
 - `OnboardingPage.tsx` — First-visit intro slides — the web counterpart of the mobile app's (~1011 tok)
+- `SaasHome.tsx` — `/` marketing home: hero, features, steps, go-to-org slug box, WhatsApp sales CTA (~1500 tok)
 - `SaasHome.tsx` — LOGO_SRC — renders form (~1668 tok)
+- `SignupPage.tsx` — Lower-case, spaces → dashes, drop anything a URL slug can't hold. (~4556 tok)
 - `SignupPage.tsx` — Lower-case, spaces → dashes, drop anything a URL slug can't hold. (~2982 tok)
+- `SuperAdmin.tsx` — `/super` — the platform owner's console (super admin). Separate account, (~5397 tok)
 
 ## quran-hifz/src/quran/pages/admin/
 
@@ -1130,9 +1164,13 @@
 ## quran-hifz/src/routes/
 
 - `__root.tsx` — Root: SEO head (Arabic OG, Twitter card, JSON-LD, favicon, lang=ar dir=rtl), RootShell, error/404 components (~1611 tok)
+- `$slug.tsx` — org portal at /<slug> (QuranApp, noindex) (~200 tok)
+- `blog.$post.tsx` — /blog/$post route, loader → notFound, BlogPosting JSON-LD (~450 tok)
+- `blog.index.tsx` — /blog route, Blog JSON-LD (~350 tok)
 - `index.tsx` — Landing page route with per-page Arabic SEO head overrides (~200 tok)
 - `MoreTabButton.tsx` — Factory for the "المزيد" tab-bar button; opens the MoreSheet on press instead of navigating. (~180 tok)
 - `quran-hifz-mobile/app/(portal)/admin/messages.tsx` — Admin/supervisor inbox route (More sheet → الرسائل); renders MessagesScreen. (~60 tok)
 - `quran-hifz-mobile/components/domain/MessagesScreen.tsx` — Shared received-messages inbox screen (useMessages/useMarkRead, pull-to-refresh, optional `compose` slot). Used by student/messages.tsx (with NoteToSupervisors) and admin/messages.tsx (admin+supervisor). (~900 tok)
 - `README.md` — Project documentation (~207 tok)
+- `signup.tsx` — /signup route + SEO (~200 tok)
 - `sitemap[.]xml.ts` — API route: serves /sitemap.xml dynamically from request origin (~159 tok)

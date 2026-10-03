@@ -6,7 +6,7 @@ export type TenantStatus  = 'trial' | 'active' | 'suspended';
 /** Slugs that would collide with app routes (/signup, /api, …). */
 export const RESERVED_SLUGS = new Set([
   'api', 'admin', 'app', 'signup', 'login', 'register', 'www', 'static', 'assets',
-  'quran', 'blog', 'brand', 'sitemap.xml', 'help', 'support', 'pricing', 'about', 'contact', 'sitemap', 'robots',
+  'quran', 'blog', 'brand', 'super', 'platform', 'superadmin', 'sitemap.xml', 'help', 'support', 'pricing', 'about', 'contact', 'sitemap', 'robots',
 ]);
 
 export const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])$/;
@@ -29,6 +29,8 @@ export interface ITenant extends Document {
   trialEndsAt: Date;
   /** Only meaningful when status === 'active' — set by sales after payment. */
   paidUntil?: Date;
+  /** Internal sales notes (super admin only). */
+  notes?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,6 +49,7 @@ const tenantSchema = new Schema<ITenant>(
     status:      { type: String, enum: ['trial', 'active', 'suspended'], default: 'trial' },
     trialEndsAt: { type: Date, required: true },
     paidUntil:   { type: Date },
+    notes:       { type: String, trim: true },
   },
   { timestamps: true },
 );

@@ -25,6 +25,7 @@ import groupHomeworkRoutes   from './routes/group-homework.routes';
 import quranPlanRoutes       from './routes/quran-plan.routes';
 import adminRoutes           from './routes/admin.routes';
 import tenantRoutes          from './routes/tenant.routes';
+import platformRoutes        from './routes/platform.routes';
 
 const app = express();
 
@@ -50,6 +51,7 @@ app.get('/api/health', (_req, res) => {
 
 // ── API routes ────────────────────────────────────────────────────────────────
 app.use('/api/tenants',    tenantRoutes);
+app.use('/api/platform',   platformRoutes);
 app.use('/api/auth',       authRoutes);
 app.use('/api/students',   studentRoutes);
 app.use('/api/teachers',   teacherRoutes);

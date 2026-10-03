@@ -7,10 +7,12 @@ import { useTheme } from "../context/ThemeContext";
 import { ApiError, get } from "../../lib/api";
 import { PLATFORM_NAME, PLATFORM_LOGO } from "../config/saas";
 import { LoginIntro } from "../components/LoginIntro";
+import { LatinHint } from "../components/LatinHint";
+import { hasArabic, LATIN_ONLY_MESSAGE } from "../../lib/latin";
 
 const schema = z.object({
-  email:    z.string().email("بريد إلكتروني غير صحيح"),
-  password: z.string().min(6, "كلمة المرور 6 أحرف على الأقل"),
+  email:    z.string().refine((v) => !hasArabic(v), LATIN_ONLY_MESSAGE).pipe(z.string().email("بريد إلكتروني غير صحيح")),
+  password: z.string().refine((v) => !hasArabic(v), LATIN_ONLY_MESSAGE).pipe(z.string().min(6, "كلمة المرور 6 أحرف على الأقل")),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -35,7 +37,7 @@ export function LoginPage({ slug, onBack }: { slug: string; onBack?: () => void 
   const [serverError,  setServerError]  = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } =
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } =
     useForm<FormData>({ resolver: zodResolver(schema) });
 
   async function onSubmit(data: FormData) {
@@ -102,6 +104,7 @@ export function LoginPage({ slug, onBack }: { slug: string; onBack?: () => void 
                   {...register("email")}
                 />
               </div>
+              {!errors.email && <LatinHint value={watch("email")} />}
               {errors.email && (
                 <span className="login-field-error">
                   <i className="ti ti-alert-circle" /> {errors.email.message}
@@ -131,6 +134,7 @@ export function LoginPage({ slug, onBack }: { slug: string; onBack?: () => void 
                   <i className={`ti ${showPassword ? "ti-eye-off" : "ti-eye"}`} />
                 </button>
               </div>
+              {!errors.password && <LatinHint value={watch("password")} />}
               {errors.password && (
                 <span className="login-field-error">
                   <i className="ti ti-alert-circle" /> {errors.password.message}

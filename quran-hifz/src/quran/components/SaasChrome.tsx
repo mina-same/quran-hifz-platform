@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { toAr } from "../../lib/format";
 import { PLATFORM_LOGO, PLATFORM_NAME, SALES_WHATSAPP_DISPLAY, salesWhatsappLink } from "../config/saas";
@@ -14,11 +13,13 @@ export function SaasNav() {
       </a>
       <div style={{ flex: 1 }} />
       <a className="saas-nav-link" href="/#features">المزايا</a>
-      <a className="saas-nav-link" href="/#how">كيف تبدأ</a>
+      <a className="saas-nav-link" href="/#reports">التقارير</a>
+      <a className="saas-nav-link" href="/#mobile-app">التطبيق</a>
       <a className="saas-nav-link" href="/blog">المدونة</a>
       <button className="login-theme-btn" onClick={toggleTheme} aria-label="تبديل المظهر">
         <i className={`ti ${theme === "dark" ? "ti-sun" : "ti-moon"}`} />
       </button>
+      <a className="saas-nav-login" href="/login">تسجيل الدخول</a>
       <a className="saas-btn saas-btn-primary saas-btn-sm" href="/signup">ابدأ مجاناً</a>
     </header>
   );
@@ -31,6 +32,7 @@ export function SaasFooter() {
         <a href="/">الرئيسية</a>
         <a href="/blog">المدونة</a>
         <a href="/signup">سجّل مؤسستك</a>
+        <a href="/login">تسجيل الدخول</a>
         <a href={salesWhatsappLink()} target="_blank" rel="noreferrer">
           <i className="ti ti-brand-whatsapp" /> <span dir="ltr">{SALES_WHATSAPP_DISPLAY}</span>
         </a>
@@ -38,12 +40,4 @@ export function SaasFooter() {
       © {toAr(new Date().getFullYear())} {PLATFORM_NAME}
     </footer>
   );
-}
-
-/** The site's host for "host/<slug>" previews. Empty during SSR and the first
- *  client render so hydration matches, then filled in. */
-export function useHost(): string {
-  const [host, setHost] = useState("");
-  useEffect(() => setHost(window.location.host), []);
-  return host;
 }

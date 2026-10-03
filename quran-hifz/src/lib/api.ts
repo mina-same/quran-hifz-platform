@@ -22,7 +22,8 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  // An explicit Authorization (super-admin pages) wins over the org session.
+  if (token && !headers["Authorization"]) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
 
@@ -43,22 +44,22 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
   return res.json() as Promise<T>;
 }
 
-export function get<T>(path: string): Promise<T> {
-  return apiFetch<T>(path);
+export function get<T>(path: string, options: RequestInit = {}): Promise<T> {
+  return apiFetch<T>(path, options);
 }
 
-export function post<T>(path: string, body: unknown): Promise<T> {
-  return apiFetch<T>(path, { method: "POST", body: JSON.stringify(body) });
+export function post<T>(path: string, body: unknown, options: RequestInit = {}): Promise<T> {
+  return apiFetch<T>(path, { ...options, method: "POST", body: JSON.stringify(body) });
 }
 
-export function put<T>(path: string, body: unknown): Promise<T> {
-  return apiFetch<T>(path, { method: "PUT", body: JSON.stringify(body) });
+export function put<T>(path: string, body: unknown, options: RequestInit = {}): Promise<T> {
+  return apiFetch<T>(path, { ...options, method: "PUT", body: JSON.stringify(body) });
 }
 
-export function patch<T>(path: string, body: unknown): Promise<T> {
-  return apiFetch<T>(path, { method: "PATCH", body: JSON.stringify(body) });
+export function patch<T>(path: string, body: unknown, options: RequestInit = {}): Promise<T> {
+  return apiFetch<T>(path, { ...options, method: "PATCH", body: JSON.stringify(body) });
 }
 
-export function del<T>(path: string): Promise<T> {
-  return apiFetch<T>(path, { method: "DELETE" });
+export function del<T>(path: string, options: RequestInit = {}): Promise<T> {
+  return apiFetch<T>(path, { ...options, method: "DELETE" });
 }

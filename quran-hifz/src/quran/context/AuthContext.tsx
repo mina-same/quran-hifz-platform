@@ -46,7 +46,8 @@ type AuthContextValue = {
   isLoading: boolean;
   /** False once the organisation's trial/subscription has ended. */
   hasAccess: boolean;
-  login: (email: string, password: string, slug?: string) => Promise<void>;
+  /** Resolves with the session so callers can route to `/<tenant.slug>`. */
+  login: (email: string, password: string, slug?: string) => Promise<SessionResponse>;
   /** Adopt a session the server already issued (signup). */
   startSession: (res: SessionResponse) => void;
   logout: () => void;
@@ -118,7 +119,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string, slug?: string) => {
-      startSession(await post<SessionResponse>("/auth/login", { email, password, slug }));
+      const res = await post<SessionResponse>("/auth/login", { email, password, slug });
+      startSession(res);
+      return res;
     },
     [startSession],
   );

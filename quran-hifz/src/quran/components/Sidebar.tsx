@@ -2,6 +2,7 @@ import { usePortal } from "../context/PortalContext";
 import { PORTALS } from "../config/portals";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import { TrialCountdown } from "./Subscription";
 import { PLATFORM_LOGO } from "../config/saas";
 import type { GenderScope } from "../lib/genderScope";
 
@@ -68,6 +69,7 @@ export function Sidebar() {
           </div>
         ))}
       </nav>
+      <TrialCountdown />
       <div className="sidebar-footer">
         <div className="user-avatar">{displayInitials}</div>
         <div className="user-info">

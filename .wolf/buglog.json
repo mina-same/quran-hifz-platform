@@ -7056,5 +7056,41 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-10-03T08:00:00Z"
+  },
+  {
+    "id": "bug-415",
+    "timestamp": "2026-10-03T19:45:00Z",
+    "error_message": "Hydration failed because the server rendered text didn't match the client (SaasHome slug prefix: '+ localhost:5180 / - /')",
+    "file": "quran-hifz/src/quran/pages/SaasHome.tsx, SignupPage.tsx",
+    "root_cause": "Rendered `typeof window !== 'undefined' ? window.location.host : ''` directly — SSR renders '' and the client renders the host, so the text differs on hydration.",
+    "fix": "useHost() hook in components/SaasChrome.tsx: starts '' and sets window.location.host in useEffect, so first client render matches SSR.",
+    "tags": [
+      "ssr",
+      "hydration",
+      "tanstack-start",
+      "window",
+      "saas"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T19:45:00Z"
+  },
+  {
+    "id": "bug-416",
+    "timestamp": "2026-10-03T19:45:00Z",
+    "error_message": "src/routes/sitemap[.]xml.ts: Cannot find module '@tanstack/react-start/api' (TS2307) — /sitemap.xml never worked",
+    "file": "quran-hifz/src/routes/sitemap[.]xml.ts",
+    "root_cause": "createAPIFileRoute was removed from @tanstack/react-start (1.168.x). Server routes are now declared on a normal route.",
+    "fix": "createFileRoute('/sitemap.xml')({ server: { handlers: { GET } } }). Sitemap now lists /, /signup, /blog and every BLOG_POSTS entry (verified 8 <loc> entries).",
+    "tags": [
+      "tanstack-start",
+      "sitemap",
+      "seo",
+      "server-route",
+      "api-change"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T19:45:00Z"
   }
 ]
