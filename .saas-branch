@@ -1,0 +1,4 @@
+This file marks the quran-hifz-sass branch (multi-tenant SaaS version).
+It must NEVER exist on main. Local git hooks (.git/hooks/reference-transaction,
+pre-push) and .github/workflows/block-saas-merge.yml refuse any update that
+would bring this file into main. Do not delete it to get around the guard.

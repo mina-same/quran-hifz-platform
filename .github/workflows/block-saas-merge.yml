@@ -1,0 +1,12 @@
+name: Block SaaS merge into main
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  block:
+    runs-on: ubuntu-latest
+    steps:
+      - name: quran-hifz-sass must never be merged into main
+        run: |
+          echo "This PR brings the quran-hifz-sass (multi-tenant SaaS) branch into main, which is not allowed."
+          exit 1
