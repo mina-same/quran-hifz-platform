@@ -97,7 +97,7 @@ export default function AdminRegister() {
               <FormGroup label="الاسم الكامل" required>
                 <FormInput placeholder="اسم الطالب رباعياً" value={form.name} onChangeText={(v) => sf('name', v)} />
               </FormGroup>
-              <FormGroup label="رقم الهوية" required>
+              <FormGroup label="رقم الهوية (مهم)" required>
                 <FormInput
                   placeholder="١٠ أرقام"
                   keyboardType="number-pad"

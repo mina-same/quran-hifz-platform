@@ -98,7 +98,7 @@ export function AdminRegister() {
               <FieldError msg={errors.name?.message} />
             </div>
             <div className="form-group">
-              <label className="form-label">رقم الهوية <span>*</span></label>
+              <label className="form-label">رقم الهوية <span>* (مهم)</span></label>
               <input
                 className="form-input"
                 type="text"
