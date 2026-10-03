@@ -14,4 +14,8 @@ export const ENV = {
   JWT_SECRET:     required('JWT_SECRET'),
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN ?? '7d',
   CLIENT_URL:     process.env.CLIENT_URL ?? 'http://localhost:3000',
+  /** SaaS: length of the free trial a new organisation gets on signup. */
+  TRIAL_DAYS:     parseInt(process.env.TRIAL_DAYS ?? '7', 10),
+  /** SaaS: sales WhatsApp number (digits only, international format). */
+  SALES_WHATSAPP: process.env.SALES_WHATSAPP ?? '201273363970',
 } as const;

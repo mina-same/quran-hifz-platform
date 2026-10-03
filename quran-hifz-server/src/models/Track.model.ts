@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export interface ITrack extends Document {
   masjid: Schema.Types.ObjectId;
@@ -48,5 +49,7 @@ const trackSchema = new Schema<ITrack>(
 );
 
 trackSchema.index({ masjid: 1 });
+
+trackSchema.plugin(tenantPlugin);
 
 export const Track = model<ITrack>('Track', trackSchema);

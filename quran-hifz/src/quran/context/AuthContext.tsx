@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { get, post } from "../../lib/api";
+import { get, post, SUBSCRIPTION_REQUIRED_EVENT } from "../../lib/api";
 import {
   getToken,
   setToken,
@@ -7,82 +7,121 @@ import {
   getStoredUser,
   setStoredUser,
   clearStoredUser,
+  getStoredTenant,
+  setStoredTenant,
+  clearStoredTenant,
   type StoredUser,
+  type StoredTenant,
 } from "../../lib/auth-storage";
+import { tenantHasAccess } from "../config/saas";
 
 export type AuthUser = StoredUser;
+export type AuthTenant = StoredTenant;
 
-type LoginResponse = {
+type ApiUser = {
+  name: string;
+  email: string;
+  role: AuthUser["role"];
+  profileId?: string;
+  supervisorGender?: "male" | "female";
+};
+
+/** Shape shared by POST /auth/login and POST /tenants/signup. */
+export type SessionResponse = {
   success: boolean;
   token: string;
-  user: { id: string; name: string; email: string; role: AuthUser["role"]; profileId?: string; supervisorGender?: "male" | "female" };
+  user: ApiUser & { id: string };
+  tenant: AuthTenant;
 };
 
 type MeResponse = {
   success: boolean;
-  user: { _id: string; name: string; email: string; role: AuthUser["role"]; profileId?: string; supervisorGender?: "male" | "female" };
+  user: ApiUser & { _id: string };
+  tenant: AuthTenant | null;
 };
 
 type AuthContextValue = {
   user: AuthUser | null;
+  tenant: AuthTenant | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  /** False once the organisation's trial/subscription has ended. */
+  hasAccess: boolean;
+  login: (email: string, password: string, slug?: string) => Promise<void>;
+  /** Adopt a session the server already issued (signup). */
+  startSession: (res: SessionResponse) => void;
   logout: () => void;
   updateUser: (patch: Partial<Pick<AuthUser, "name">>) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+function toAuthUser(id: string, u: ApiUser): AuthUser {
+  return { id, name: u.name, role: u.role, profileId: u.profileId, supervisorGender: u.supervisorGender };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [tenant, setTenant] = useState<AuthTenant | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [blocked, setBlocked] = useState(false);
+
+  const clearSession = useCallback(() => {
+    clearToken();
+    clearStoredUser();
+    clearStoredTenant();
+    setUser(null);
+    setTenant(null);
+    setBlocked(false);
+  }, []);
 
   useEffect(() => {
     const token = getToken();
     if (!token) {
-      setUser(getStoredUser());
+      // A session without a token can't call the API — don't resurrect it.
+      clearStoredUser();
+      clearStoredTenant();
       setIsLoading(false);
       return;
     }
+    setUser(getStoredUser());
+    setTenant(getStoredTenant());
     get<MeResponse>("/auth/me")
       .then((res) => {
-        const u: AuthUser = {
-          id: res.user._id,
-          name: res.user.name,
-          role: res.user.role,
-          profileId: res.user.profileId,
-          supervisorGender: res.user.supervisorGender,
-        };
+        const u = toAuthUser(res.user._id, res.user);
         setUser(u);
         setStoredUser(u);
+        if (res.tenant) {
+          setTenant(res.tenant);
+          setStoredTenant(res.tenant);
+        }
       })
-      .catch(() => {
-        clearToken();
-        clearStoredUser();
-        setUser(null);
-      })
+      .catch(clearSession)
       .finally(() => setIsLoading(false));
+  }, [clearSession]);
+
+  // Any API call answered with 402 means the trial ended mid-session.
+  useEffect(() => {
+    const onBlocked = () => setBlocked(true);
+    window.addEventListener(SUBSCRIPTION_REQUIRED_EVENT, onBlocked);
+    return () => window.removeEventListener(SUBSCRIPTION_REQUIRED_EVENT, onBlocked);
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const res = await post<LoginResponse>("/auth/login", { email, password });
-    const u: AuthUser = {
-      id: res.user.id,
-      name: res.user.name,
-      role: res.user.role,
-      profileId: res.user.profileId,
-      supervisorGender: res.user.supervisorGender,
-    };
+  const startSession = useCallback((res: SessionResponse) => {
+    const u = toAuthUser(res.user.id, res.user);
     setToken(res.token);
     setStoredUser(u);
+    setStoredTenant(res.tenant);
     setUser(u);
+    setTenant(res.tenant);
+    setBlocked(false);
   }, []);
 
-  const logout = useCallback(() => {
-    clearToken();
-    clearStoredUser();
-    setUser(null);
-  }, []);
+  const login = useCallback(
+    async (email: string, password: string, slug?: string) => {
+      startSession(await post<SessionResponse>("/auth/login", { email, password, slug }));
+    },
+    [startSession],
+  );
 
   const updateUser = useCallback((patch: Partial<Pick<AuthUser, "name">>) => {
     setUser((prev) => {
@@ -93,8 +132,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const hasAccess = !blocked && (!tenant || tenantHasAccess(tenant));
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, updateUser }}>
+    <AuthContext.Provider
+      value={{ user, tenant, isLoading, hasAccess, login, startSession, logout: clearSession, updateUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export interface IIndividualPlan extends Document {
   student: Types.ObjectId;
@@ -26,5 +27,7 @@ const planSchema = new Schema<IIndividualPlan>(
 );
 
 planSchema.index({ student: 1, academicYear: 1 }, { unique: true });
+
+planSchema.plugin(tenantPlugin);
 
 export const IndividualPlan = model<IIndividualPlan>('IndividualPlan', planSchema);

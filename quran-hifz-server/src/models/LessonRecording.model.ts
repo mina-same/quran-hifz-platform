@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export interface ILessonRecording extends Document {
   student: Schema.Types.ObjectId;
@@ -30,5 +31,7 @@ const lessonRecordingSchema = new Schema<ILessonRecording>(
 );
 
 lessonRecordingSchema.index({ track: 1, recordedAt: -1 });
+
+lessonRecordingSchema.plugin(tenantPlugin);
 
 export const LessonRecording = model<ILessonRecording>('LessonRecording', lessonRecordingSchema);

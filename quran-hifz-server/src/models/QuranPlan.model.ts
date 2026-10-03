@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export type PlanType = 'حفظ' | 'مراجعة' | 'ختمة';
 export const PLAN_TYPE_VALUES: PlanType[] = ['حفظ', 'مراجعة', 'ختمة'];
@@ -247,5 +248,7 @@ const quranPlanSchema = new Schema<IQuranPlan>(
 
 quranPlanSchema.index({ teacher: 1 });
 quranPlanSchema.index({ track: 1 });
+
+quranPlanSchema.plugin(tenantPlugin);
 
 export const QuranPlan = model<IQuranPlan>('QuranPlan', quranPlanSchema);

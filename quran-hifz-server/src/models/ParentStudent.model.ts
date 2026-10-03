@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export interface IParentStudent extends Document {
   parent: Schema.Types.ObjectId;
@@ -15,5 +16,7 @@ const parentStudentSchema = new Schema<IParentStudent>(
 );
 
 parentStudentSchema.index({ parent: 1, student: 1 }, { unique: true });
+
+parentStudentSchema.plugin(tenantPlugin);
 
 export const ParentStudent = model<IParentStudent>('ParentStudent', parentStudentSchema);

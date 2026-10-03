@@ -2,6 +2,10 @@ import { getToken } from "./auth-storage";
 
 const BASE = import.meta.env.VITE_API_URL ?? "/api";
 
+/** Fired on any 402 — the organisation's trial/subscription has ended.
+ *  AuthContext listens and swaps the app for the "contact sales" screen. */
+export const SUBSCRIPTION_REQUIRED_EVENT = "qh:subscription-required";
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -23,6 +27,9 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
 
   if (!res.ok) {
+    if (res.status === 402 && typeof window !== "undefined") {
+      window.dispatchEvent(new Event(SUBSCRIPTION_REQUIRED_EVENT));
+    }
     let message = `HTTP ${res.status}`;
     try {
       const body = await res.json();

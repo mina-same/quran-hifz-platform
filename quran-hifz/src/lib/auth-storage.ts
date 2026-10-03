@@ -1,5 +1,6 @@
 const TOKEN_KEY = "qh_token";
 const USER_KEY = "qh_user";
+const TENANT_KEY = "qh_tenant";
 
 const isBrowser = typeof window !== "undefined";
 
@@ -45,4 +46,37 @@ export function setStoredUser(user: StoredUser): void {
 export function clearStoredUser(): void {
   if (!isBrowser) return;
   localStorage.removeItem(USER_KEY);
+}
+
+// ── SaaS tenant (the signed-in user's organisation) ──────────────────────────
+
+export type StoredTenant = {
+  id: string;
+  name: string;
+  slug: string;
+  status: "trial" | "active" | "suspended";
+  trialEndsAt: string;
+  paidUntil?: string;
+  salesWhatsapp?: string;
+};
+
+export function getStoredTenant(): StoredTenant | null {
+  if (!isBrowser) return null;
+  const raw = localStorage.getItem(TENANT_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as StoredTenant;
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredTenant(tenant: StoredTenant): void {
+  if (!isBrowser) return;
+  localStorage.setItem(TENANT_KEY, JSON.stringify(tenant));
+}
+
+export function clearStoredTenant(): void {
+  if (!isBrowser) return;
+  localStorage.removeItem(TENANT_KEY);
 }

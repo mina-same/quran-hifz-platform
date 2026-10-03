@@ -16,7 +16,8 @@
     "list-users": "ts-node src/seeds/list-users.ts",
     "backfill-plans": "ts-node src/seeds/backfillPlans.ts",
     "backfill-evaluation-rubric": "ts-node src/seeds/backfillEvaluationRubric.ts",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts",
+    "migrate-to-saas": "ts-node src/seeds/migrate-to-saas.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

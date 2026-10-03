@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 /**
  * Saudi national ID (رقم الهوية الوطنية): exactly 10 digits from الأحوال المدنية.
@@ -53,10 +54,16 @@ const studentSchema = new Schema<IStudent>(
   { timestamps: true },
 );
 
-// Sparse so the many students without an ID don't collide on `null`, unique so
-// the same identity can't be registered twice.
-studentSchema.index({ nationalId: 1 }, { unique: true, sparse: true });
+// Unique per organisation (tenant). Partial rather than sparse: `tenant` is
+// always set, so a sparse compound index would still make every student
+// without an ID collide on `null`.
+studentSchema.index(
+  { tenant: 1, nationalId: 1 },
+  { unique: true, partialFilterExpression: { nationalId: { $type: 'string' } } },
+);
 studentSchema.index({ track: 1 });
 studentSchema.index({ status: 1 });
+
+studentSchema.plugin(tenantPlugin);
 
 export const Student = model<IStudent>('Student', studentSchema);

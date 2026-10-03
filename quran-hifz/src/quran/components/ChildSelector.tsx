@@ -1,12 +1,14 @@
 import { useParentChildren } from "../api/parent";
 import { useParentContext } from "../context/ParentContext";
+import { useAuth } from "../context/AuthContext";
+import { PLATFORM_LOGO } from "../config/saas";
 import type { ParentChild } from "../api/parent";
 
-const LOGO_SRC = "/quran/logo.png";
 
 export function ChildSelector({ onBack }: { onBack: () => void }) {
   const { data: children, isLoading, isError } = useParentChildren();
   const { setActiveChild } = useParentContext();
+  const { tenant } = useAuth();
 
   return (
     <div
@@ -26,12 +28,12 @@ export function ChildSelector({ onBack }: { onBack: () => void }) {
     >
       <div style={{ textAlign: "center", marginBottom: 32 }}>
         <img
-          src={LOGO_SRC}
+          src={PLATFORM_LOGO}
           alt="شعار"
           style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover", marginBottom: 14 }}
         />
         <div style={{ fontSize: 22, fontWeight: 700, color: "#fff" }}>
-          الجمعية الخيرية لتحفيظ القرآن
+          {tenant?.name}
         </div>
         <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, marginTop: 6 }}>
           اختر ابنك لمتابعة أدائه

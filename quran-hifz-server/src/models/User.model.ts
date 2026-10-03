@@ -1,5 +1,6 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { tenantPlugin } from '../lib/tenancy';
 
 export type UserRole = 'admin' | 'teacher' | 'student' | 'parent' | 'supervisor';
 
@@ -15,6 +16,8 @@ export interface IUser extends Document {
   supervisorGender?: 'male' | 'female';
   isActive: boolean;
   mustChangePassword: boolean;
+  /** Owning organisation — stamped by tenantPlugin. */
+  tenant?: Types.ObjectId;
   pushToken?: string; // Expo push token for the mobile app, registered post-login
   createdAt: Date;
   updatedAt: Date;
@@ -24,7 +27,7 @@ export interface IUser extends Document {
 const userSchema = new Schema<IUser>(
   {
     name:      { type: String, required: true, trim: true },
-    email:     { type: String, required: true, unique: true, lowercase: true, trim: true },
+    email:     { type: String, required: true, lowercase: true, trim: true },
     password:  { type: String, required: true, minlength: 6, select: false },
     role:      { type: String, enum: ['admin', 'teacher', 'student', 'parent', 'supervisor'], required: true },
     profileId: { type: Schema.Types.ObjectId, refPath: 'roleModel' },
@@ -45,5 +48,9 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.comparePassword = function (candidate: string): Promise<boolean> {
   return bcrypt.compare(candidate, this.password);
 };
+
+// Email is unique per organisation (tenant), not platform-wide.
+userSchema.index({ tenant: 1, email: 1 }, { unique: true });
+userSchema.plugin(tenantPlugin);
 
 export const User = model<IUser>('User', userSchema);

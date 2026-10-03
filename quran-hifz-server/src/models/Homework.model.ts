@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export interface IHomework extends Document {
   student: Types.ObjectId;
@@ -34,5 +35,7 @@ const homeworkSchema = new Schema<IHomework>(
 homeworkSchema.index({ student: 1, dueDate: -1 });
 homeworkSchema.index({ teacher: 1, status: 1 });
 homeworkSchema.index({ track: 1, dueDate: -1 });
+
+homeworkSchema.plugin(tenantPlugin);
 
 export const Homework = model<IHomework>('Homework', homeworkSchema);

@@ -4,12 +4,17 @@ import { z } from 'zod';
 import { User } from '../models/User.model';
 import { Teacher } from '../models/Teacher.model';
 import { Student } from '../models/Student.model';
+import { Tenant, type ITenant } from '../models/Tenant.model';
 import { ENV } from '../config/env';
 import { AppError } from '../middleware/error';
 
 const loginSchema = z.object({
   email:    z.string().email('بريد إلكتروني غير صالح'),
   password: z.string().min(1, 'كلمة المرور مطلوبة'),
+  /** Organisation slug (the /<slug> the user signs in from). Optional for
+   *  older clients (mobile): the email is then resolved across tenants and
+   *  must be unambiguous. */
+  slug:     z.string().trim().toLowerCase().optional(),
 });
 
 const updateProfileSchema = z.object({
@@ -25,20 +30,53 @@ const pushTokenSchema = z.object({
   token: z.string().min(1, 'رمز الإشعارات مطلوب'),
 });
 
-function signToken(id: string, role: string, name: string, supervisorGender?: 'male' | 'female'): string {
-  return jwt.sign({ id, role, name, supervisorGender }, ENV.JWT_SECRET, { expiresIn: ENV.JWT_EXPIRES_IN } as jwt.SignOptions);
+export function signToken(
+  id: string,
+  role: string,
+  name: string,
+  tenantId: string,
+  supervisorGender?: 'male' | 'female',
+): string {
+  return jwt.sign({ id, role, name, tenantId, supervisorGender }, ENV.JWT_SECRET, { expiresIn: ENV.JWT_EXPIRES_IN } as jwt.SignOptions);
+}
+
+/** Public subscription view of a tenant, sent to the client after login. */
+export function tenantSummary(t: ITenant) {
+  return {
+    id: t._id,
+    name: t.name,
+    slug: t.slug,
+    status: t.status,
+    trialEndsAt: t.trialEndsAt,
+    paidUntil: t.paidUntil,
+    salesWhatsapp: ENV.SALES_WHATSAPP,
+  };
 }
 
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { email, password } = loginSchema.parse(req.body);
+    const { email, password, slug } = loginSchema.parse(req.body);
+    const invalid = new AppError('البريد الإلكتروني أو كلمة المرور غير صحيحة', 401);
 
-    const user = await User.findOne({ email, isActive: true }).select('+password');
-    if (!user || !(await user.comparePassword(password))) {
-      throw new AppError('البريد الإلكتروني أو كلمة المرور غير صحيحة', 401);
+    // Login runs outside any tenant context, so the tenant filter is explicit here.
+    let user;
+    if (slug) {
+      const tenant = await Tenant.findOne({ slug });
+      if (!tenant) throw new AppError('لا توجد مؤسسة بهذا الرابط', 404);
+      user = await User.findOne({ tenant: tenant._id, email, isActive: true }).select('+password');
+    } else {
+      const matches = await User.find({ email, isActive: true }).select('+password').limit(2);
+      if (matches.length > 1) {
+        throw new AppError('هذا البريد مسجَّل في أكثر من مؤسسة، يرجى الدخول من رابط مؤسستك', 409);
+      }
+      user = matches[0];
     }
+    if (!user || !user.tenant || !(await user.comparePassword(password))) throw invalid;
 
-    const token = signToken(String(user._id), user.role, user.name, user.supervisorGender);
+    const tenant = await Tenant.findById(user.tenant);
+    if (!tenant) throw invalid;
+
+    const token = signToken(String(user._id), user.role, user.name, String(tenant._id), user.supervisorGender);
 
     res.json({
       success: true,
@@ -47,6 +85,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
         id: user._id, name: user.name, email: user.email, role: user.role, profileId: user.profileId,
         supervisorGender: user.supervisorGender,
       },
+      tenant: tenantSummary(tenant),
     });
   } catch (err) {
     next(err);
@@ -57,7 +96,8 @@ export async function me(req: Request, res: Response, next: NextFunction): Promi
   try {
     const user = await User.findById(req.user!.id).select('-password');
     if (!user) throw new AppError('المستخدم غير موجود', 404);
-    res.json({ success: true, user });
+    const tenant = await Tenant.findById(req.user!.tenantId);
+    res.json({ success: true, user, tenant: tenant ? tenantSummary(tenant) : null });
   } catch (err) {
     next(err);
   }

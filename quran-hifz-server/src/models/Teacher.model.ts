@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export interface ITeacher extends Document {
   name: string;
@@ -20,5 +21,7 @@ const teacherSchema = new Schema<ITeacher>(
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
+
+teacherSchema.plugin(tenantPlugin);
 
 export const Teacher = model<ITeacher>('Teacher', teacherSchema);

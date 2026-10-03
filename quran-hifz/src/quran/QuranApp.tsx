@@ -1,13 +1,16 @@
 import "./quran.css";
-import { useEffect, useState } from "react";
+import { useEffect, type ReactNode } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { PortalProvider, usePortal } from "./context/PortalContext";
 import { ParentProvider, useParentContext } from "./context/ParentContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ChildSelector } from "./components/ChildSelector";
-import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
+import { SaasHome } from "./pages/SaasHome";
+import { SignupPage } from "./pages/SignupPage";
+import { TrialBanner, SubscriptionEnded } from "./components/Subscription";
 import { Sidebar } from "./components/Sidebar";
 import { Topbar } from "./components/Topbar";
 import { PageOutlet } from "./components/PageOutlet";
@@ -30,6 +33,7 @@ function AppShell() {
       <Sidebar />
       <div className="main">
         <Topbar />
+        <TrialBanner />
         <div className="content">
           <PageOutlet />
         </div>
@@ -38,14 +42,18 @@ function AppShell() {
   );
 }
 
-type AuthGateStep = "landing" | "login";
-
-function AuthGate() {
-  const { user, isLoading } = useAuth();
+function AuthGate({ slug }: { slug: string }) {
+  const { user, tenant, isLoading, hasAccess } = useAuth();
   const { activeChild } = useParentContext();
-  const [step, setStep] = useState<AuthGateStep>("landing");
+  const navigate = useNavigate();
 
-  if (isLoading) {
+  // Signed in to a different organisation than the URL names — go to its own.
+  const wrongTenant = !!(user && tenant && tenant.slug !== slug);
+  useEffect(() => {
+    if (wrongTenant) navigate({ to: "/$slug", params: { slug: tenant!.slug }, replace: true });
+  }, [wrongTenant, tenant, navigate]);
+
+  if (isLoading || wrongTenant) {
     return (
       <div
         style={{
@@ -64,11 +72,10 @@ function AuthGate() {
   }
 
   if (!user) {
-    if (step === "landing") {
-      return <LandingPage onLogin={() => setStep("login")} />;
-    }
-    return <LoginPage onBack={() => setStep("landing")} />;
+    return <LoginPage slug={slug} onBack={() => navigate({ to: "/" })} />;
   }
+
+  if (!hasAccess) return <SubscriptionEnded />;
 
   // Parent must select a child before entering the dashboard
   if (user.role === "parent" && !activeChild) {
@@ -82,27 +89,52 @@ function AuthGate() {
   );
 }
 
+/** Providers + RTL root shared by every SaaS route. */
+export function QuranRoot({ children }: { children: ReactNode }) {
+  return (
+    <ThemeProvider>
+      <div dir="rtl" lang="ar" className="quran-root">
+        <AuthProvider>{children}</AuthProvider>
+        <Toaster dir="rtl" position="top-center" richColors />
+      </div>
+    </ThemeProvider>
+  );
+}
+
+/** `/` — the platform's marketing home. */
+export function SaasHomeApp() {
+  return (
+    <QuranRoot>
+      <SaasHome />
+    </QuranRoot>
+  );
+}
+
+/** `/signup` — create an organisation (tenant) on a free trial. */
+export function SignupApp() {
+  return (
+    <QuranRoot>
+      <SignupPage />
+    </QuranRoot>
+  );
+}
+
 /**
- * Quran Hifz platform — React entry.
+ * `/<slug>` — one organisation's portal (login → admin/teacher/student/parent).
  *
  * Architecture:
- *  - `config/`      — static data (portals, masar mapping)
- *  - `context/`     — auth, portal/page state + topbar coordination
+ *  - `config/`      — static data (portals, masar mapping, SaaS constants)
+ *  - `context/`     — auth (+ tenant), portal/page state + topbar coordination
  *  - `components/`  — shell + reusable presentational primitives
  *  - `pages/`       — one component per page, grouped by portal
  *  - `router/`      — page registry mapping (portal, pageId) → component
  */
-export default function QuranApp() {
+export default function QuranApp({ slug }: { slug: string }) {
   return (
-    <ThemeProvider>
-      <div dir="rtl" lang="ar" className="quran-root">
-        <AuthProvider>
-          <ParentProvider>
-            <AuthGate />
-          </ParentProvider>
-        </AuthProvider>
-        <Toaster dir="rtl" position="top-center" richColors />
-      </div>
-    </ThemeProvider>
+    <QuranRoot>
+      <ParentProvider>
+        <AuthGate slug={slug.toLowerCase()} />
+      </ParentProvider>
+    </QuranRoot>
   );
 }

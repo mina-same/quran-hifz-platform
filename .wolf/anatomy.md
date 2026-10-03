@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T13:31:00.545Z
-> Files: 725 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-03T16:33:24.816Z
+> Files: 735 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -162,6 +162,10 @@
 - `partitioned-percolating-phoenix.md` — خطة قرآنية — Teacher Quran Plan Builder (~3202 tok)
 - `replicated-twirling-pearl.md` — Show the target roster in the plan form, with per-student individual-plan management (~1233 tok)
 - `snappy-jumping-kernighan.md` — Mobile Parity + Redesign: bring `quran-hifz-mobile` up to `quran-hifz` (web) + `quran-hifz-server` (~2753 tok)
+
+## ../../../.claude/projects/-Users-xontel-Downloads-mina-work-quran-hifz-platform/memory/
+
+- `saas-branch-never-merge-main.md` (~279 tok)
 
 ## ./
 
@@ -767,6 +771,7 @@
 - `student-plan-progress.controller.ts` — Returns the student's effective schedule: the shared plan's own schedule (~4651 tok)
 - `student.controller.ts` — Empty string is normalised to undefined so a blank field clears rather (~2456 tok)
 - `teacher.controller.ts` — Zod schemas: teacherSchema (~1693 tok)
+- `tenant.controller.ts` — GET /api/tenants/check-slug/:slug — live availability for the signup form. (~1873 tok)
 - `track.controller.ts` — Moves a student INTO this track — sets their `track` field, replacing (~2628 tok)
 
 ## quran-hifz-server/src/data/
@@ -782,10 +787,11 @@
 - `quranRange.ts` — Standard 604-page Madani mushaf boundary table (surah:ayah each page starts at). (~6552 tok)
 - `studentPlanReflow.ts` — Per-student plan overlay: builds the occurrence array, then redistributes what's still owed (cursor → pinned finish line) whenever a day is absent, short, or over-recited; flags `noWard` days (~3376 tok)
 - `supervisorScope.ts` — The supervisor's fixed gender assignment, or null for every other role. (~502 tok)
+- `tenancy.ts` — Multi-tenancy (SaaS) — one shared database, every tenant-owned document (~847 tok)
 
 ## quran-hifz-server/src/middleware/
 
-- `auth.ts` — Exports authenticate (~266 tok)
+- `auth.ts` — Routes that stay reachable after the trial ends, so the client can show (~866 tok)
 - `error.ts` — Exports AppError, errorHandler, notFound (~336 tok)
 - `role.ts` — Exports authorize (~121 tok)
 
@@ -809,6 +815,7 @@
 - `Student.model.ts` — Saudi national ID (رقم الهوية الوطنية): exactly 10 digits from الأحوال المدنية. (~704 tok)
 - `StudentPlanProgress.model.ts` — Exports StudentOccurrenceStatus, IStudentOccurrence, IStudentPlanProgress, StudentPlanProgress (~994 tok)
 - `Teacher.model.ts` — Exports ITeacher, Teacher (~216 tok)
+- `Tenant.model.ts` — Slugs that would collide with app routes (/signup, /api, …). (~690 tok)
 - `Track.model.ts` — No longer collected at creation — a track's actual schedule comes from (~574 tok)
 - `User.model.ts` — Fixed at creation by the admin; only set for role === 'supervisor'. A (~545 tok)
 
@@ -842,6 +849,7 @@
 - `ensure-admin.ts` — Idempotent admin bootstrap. Run:  npm run ensure-admin (~421 tok)
 - `import-real-halaqat.ts` — One-time import of real track/teacher/student data. (~1655 tok)
 - `list-users.ts` — Default seed passwords by role (import-real-halaqat.ts + ensure-admin.ts). (~540 tok)
+- `migrate-to-saas.ts` — One-off: adopt a pre-SaaS (single-organisation) database into the (~844 tok)
 - `regenerate-emails-from-names.ts` — One-off: rebuild every teacher/student email from their (Arabic) name. (~1112 tok)
 - `regenerate-emails-from-names.ts` — One-off: rebuild teacher/student emails from Arabic first name (compound عبد-names kept whole) via curated transliteration map; numeric suffix on dup; admin untouched. `npm run regenerate-emails` (~700 tok)
 - `rename-email-domain.ts` — One-off: rewrite every user's email domain to a new one, keeping the (~282 tok)
@@ -952,6 +960,7 @@
 - `error-page.ts` — Exports renderErrorPage (~392 tok)
 - `format.ts` — Exports toAr, pct (~67 tok)
 - `lovable-error-reporting.ts` — Exports reportLovableError (~238 tok)
+- `seo.ts` — Absolute site origin for canonical/OG URLs (set VITE_PUBLIC_URL in prod). (~580 tok)
 - `utils.ts` — Exports cn (~49 tok)
 
 ## quran-hifz/src/quran/
@@ -989,6 +998,7 @@
 - `PageOutlet.tsx` — PageOutlet (~131 tok)
 - `PortalScreen.tsx` — LOGO_SRC (~516 tok)
 - `Sidebar.tsx` — LOGO_SRC (~892 tok)
+- `Subscription.tsx` — Thin strip above the page content while the organisation is on trial. (~1010 tok)
 - `Topbar.tsx` — Topbar (~170 tok)
 
 ## quran-hifz/src/quran/components/common/
@@ -1025,7 +1035,7 @@
 
 ## quran-hifz/src/quran/context/
 
-- `AuthContext.tsx` — AuthContext (~832 tok)
+- `AuthContext.tsx` — Shape shared by POST /auth/login and POST /tenants/signup. (~1228 tok)
 - `ParentContext.tsx` — ParentContext (~206 tok)
 - `PortalContext.tsx` — True for the read-only `supervisor` role: reused admin pages hide their (~1616 tok)
 - `ThemeContext.tsx` — ThemeContext (~323 tok)
@@ -1033,6 +1043,7 @@
 
 ## quran-hifz/src/quran/data/
 
+- `blog.ts` — Blog posts — static content, no backend. To publish a post, add an entry (~2096 tok)
 - `juz.ts` — Exports JuzStart, JUZ_STARTS — byte-identical frontend copy of quran-hifz-server/src/data/juz.ts (~460 tok)
 - `surahs.ts` — Exports SurahMeta, SURAHS — byte-identical frontend copy of quran-hifz-server/src/data/surahs.ts (~2400 tok)
 
@@ -1047,6 +1058,8 @@
 - `LandingPage.tsx` — LOGO_SRC (~4826 tok)
 - `LoginPage.tsx` — schema — renders form. No dev-account quick-login buttons (removed for security, 2026-07-05). (~1400 tok)
 - `OnboardingPage.tsx` — First-visit intro slides — the web counterpart of the mobile app's (~1011 tok)
+- `SaasHome.tsx` — LOGO_SRC — renders form (~1668 tok)
+- `SignupPage.tsx` — Lower-case, spaces → dashes, drop anything a URL slug can't hold. (~2982 tok)
 
 ## quran-hifz/src/quran/pages/admin/
 

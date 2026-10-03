@@ -74,22 +74,12 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL ?? "";
-const SITE_TITLE = "منصة تحفيظ القرآن الكريم";
+const SITE_TITLE = "منصة حِفظ";
 const SITE_DESCRIPTION =
   "منصة متكاملة لإدارة حلقات تحفيظ القرآن الكريم — بوابات للطلاب والمعلمين وأولياء الأمور والإدارة";
 const SITE_URL = `${PUBLIC_URL}/`;
-const OG_IMAGE = `${PUBLIC_URL}/quran/logo.png`;
+const OG_IMAGE = `${PUBLIC_URL}/brand/logo-512.png`;
 
-const JSON_LD = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "EducationalOrganization",
-  name: "جمعية تحفيظ القرآن الكريم بالعماير",
-  description: SITE_DESCRIPTION,
-  url: SITE_URL,
-  logo: OG_IMAGE,
-  inLanguage: "ar",
-  knowsAbout: "تحفيظ القرآن الكريم",
-});
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
@@ -107,7 +97,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image", content: OG_IMAGE },
       { property: "og:image:width", content: "512" },
       { property: "og:image:height", content: "512" },
-      { property: "og:image:alt", content: "شعار منصة تحفيظ القرآن الكريم" },
+      { property: "og:image:alt", content: "شعار منصة حِفظ" },
       { property: "og:locale", content: "ar_SA" },
       // Twitter / X
       { name: "twitter:card", content: "summary_large_image" },
@@ -116,9 +106,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:image", content: OG_IMAGE },
     ],
     links: [
-      { rel: "icon", type: "image/png", href: "/quran/logo.png" },
-      { rel: "apple-touch-icon", href: "/quran/logo.png" },
-      { rel: "canonical", href: SITE_URL },
+      { rel: "icon", type: "image/svg+xml", href: "/brand/favicon.svg" },
+      { rel: "apple-touch-icon", href: "/brand/logo-512.png" },
       { rel: "stylesheet", href: appCss },
       {
         rel: "stylesheet",
@@ -128,9 +117,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css",
       },
-    ],
-    scripts: [
-      { type: "application/ld+json", children: JSON_LD },
     ],
   }),
   shellComponent: RootShell,

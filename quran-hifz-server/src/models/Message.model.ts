@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export interface IMessage extends Document {
   sender: Types.ObjectId;
@@ -30,5 +31,7 @@ const messageSchema = new Schema<IMessage>(
 messageSchema.index({ recipient: 1, createdAt: -1 });
 messageSchema.index({ sender: 1, createdAt: -1 });
 messageSchema.index({ student: 1, createdAt: -1 });
+
+messageSchema.plugin(tenantPlugin);
 
 export const Message = model<IMessage>('Message', messageSchema);

@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export interface IKPI extends Document {
   indicator: string;
@@ -20,5 +21,7 @@ const kpiSchema = new Schema<IKPI>(
   },
   { timestamps: true },
 );
+
+kpiSchema.plugin(tenantPlugin);
 
 export const KPI = model<IKPI>('KPI', kpiSchema);

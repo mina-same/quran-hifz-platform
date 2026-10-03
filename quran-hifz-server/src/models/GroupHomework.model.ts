@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export interface IGroupHomework extends Document {
   track: Schema.Types.ObjectId;
@@ -24,5 +25,7 @@ const groupHomeworkSchema = new Schema<IGroupHomework>(
 );
 
 groupHomeworkSchema.index({ track: 1, dueDate: -1 });
+
+groupHomeworkSchema.plugin(tenantPlugin);
 
 export const GroupHomework = model<IGroupHomework>('GroupHomework', groupHomeworkSchema);

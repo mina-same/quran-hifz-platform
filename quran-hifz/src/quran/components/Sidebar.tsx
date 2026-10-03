@@ -1,9 +1,10 @@
 import { usePortal } from "../context/PortalContext";
 import { PORTALS } from "../config/portals";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import { PLATFORM_LOGO } from "../config/saas";
 import type { GenderScope } from "../lib/genderScope";
 
-const LOGO_SRC = "/quran/logo.png";
 
 function getInitials(name: string): string {
   return name
@@ -17,6 +18,7 @@ function getInitials(name: string): string {
 export function Sidebar() {
   const { portal, page, user, showPage, logout, closeSidebar, genderScope, setGenderScope } = usePortal();
   const { theme, toggleTheme } = useTheme();
+  const { tenant } = useAuth();
   if (!portal) return null;
   const cfg = PORTALS[portal];
 
@@ -29,8 +31,8 @@ export function Sidebar() {
       <div className="sidebar-overlay" onClick={closeSidebar} />
       <div className="sidebar">
       <div className="sidebar-brand">
-        <img className="sidebar-logo" src={LOGO_SRC} alt="شعار" />
-        <div className="sidebar-name">جمعية تحفيظ القرآن الكريم بالعماير</div>
+        <img className="sidebar-logo" src={PLATFORM_LOGO} alt="شعار" />
+        <div className="sidebar-name">{tenant?.name ?? ""}</div>
         <span className="sidebar-portal-badge">{cfg.badge}</span>
       </div>
       {portal === "admin" && (

@@ -33,7 +33,8 @@ export function errorHandler(
   const code = (err as { code?: number | string }).code;
   if (code === 11000 || code === '11000') {
     // Name the offending field so the client can point at the right input.
-    const key = Object.keys((err as { keyPattern?: Record<string, unknown> }).keyPattern ?? {})[0];
+    // Tenant-scoped indexes lead with `tenant`; the field to blame is the other one.
+    const key = Object.keys((err as { keyPattern?: Record<string, unknown> }).keyPattern ?? {}).find((k) => k !== 'tenant');
     const FIELD_MESSAGES: Record<string, string> = {
       nationalId: 'رقم الهوية مسجَّل لطالب آخر',
       email:      'البريد الإلكتروني مستخدم بالفعل',

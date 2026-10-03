@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 /** Legacy fixed-shape scores. Still written whenever the plan's rubric uses
  *  the four original keys, so existing reports and CSV exports keep working. */
@@ -90,5 +91,7 @@ const evaluationSchema = new Schema<IEvaluation>(
 
 evaluationSchema.index({ student: 1, date: -1 });
 evaluationSchema.index({ track: 1, date: -1 });
+
+evaluationSchema.plugin(tenantPlugin);
 
 export const Evaluation = model<IEvaluation>('Evaluation', evaluationSchema);

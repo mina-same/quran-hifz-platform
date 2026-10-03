@@ -1,5 +1,6 @@
 import { Schema, model, Document, Types } from 'mongoose';
 import { PLAN_TYPE_VALUES, type PlanType } from './QuranPlan.model';
+import { tenantPlugin } from '../lib/tenancy';
 
 export type StudentOccurrenceStatus = 'pending' | 'done' | 'partial' | 'absent';
 
@@ -105,5 +106,7 @@ const studentPlanProgressSchema = new Schema<IStudentPlanProgress>(
 );
 
 studentPlanProgressSchema.index({ plan: 1, student: 1 }, { unique: true });
+
+studentPlanProgressSchema.plugin(tenantPlugin);
 
 export const StudentPlanProgress = model<IStudentPlanProgress>('StudentPlanProgress', studentPlanProgressSchema);

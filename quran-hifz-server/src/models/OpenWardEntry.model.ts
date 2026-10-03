@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export type OpenWardType = 'حفظ' | 'مراجعة';
 export type OpenWardStatus = 'recorded' | 'none';
@@ -57,5 +58,7 @@ const openWardEntrySchema = new Schema<IOpenWardEntry>(
 
 openWardEntrySchema.index({ plan: 1, student: 1, type: 1, date: 1 }, { unique: true });
 openWardEntrySchema.index({ student: 1, date: -1 });
+
+openWardEntrySchema.plugin(tenantPlugin);
 
 export const OpenWardEntry = model<IOpenWardEntry>('OpenWardEntry', openWardEntrySchema);

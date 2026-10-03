@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export type MasjidGender = 'male' | 'female';
 
@@ -20,5 +21,7 @@ const masjidSchema = new Schema<IMasjid>(
   },
   { timestamps: true },
 );
+
+masjidSchema.plugin(tenantPlugin);
 
 export const Masjid = model<IMasjid>('Masjid', masjidSchema);

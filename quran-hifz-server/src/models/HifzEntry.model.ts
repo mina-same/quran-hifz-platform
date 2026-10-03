@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export interface IHifzEntry extends Document {
   student: Types.ObjectId;
@@ -24,5 +25,7 @@ const hifzEntrySchema = new Schema<IHifzEntry>(
 );
 
 hifzEntrySchema.index({ student: 1, surahNumber: 1 }, { unique: true });
+
+hifzEntrySchema.plugin(tenantPlugin);
 
 export const HifzEntry = model<IHifzEntry>('HifzEntry', hifzEntrySchema);

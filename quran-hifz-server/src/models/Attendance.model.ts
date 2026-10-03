@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 export interface IAttendance extends Document {
   student: Types.ObjectId;
@@ -25,5 +26,7 @@ const attendanceSchema = new Schema<IAttendance>(
 
 attendanceSchema.index({ student: 1, date: -1 });
 attendanceSchema.index({ track: 1, date: -1 });
+
+attendanceSchema.plugin(tenantPlugin);
 
 export const Attendance = model<IAttendance>('Attendance', attendanceSchema);

@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import { ApiError } from "../../lib/api";
+import { ApiError, get } from "../../lib/api";
+import { PLATFORM_NAME, PLATFORM_LOGO } from "../config/saas";
 import { LoginIntro } from "../components/LoginIntro";
 
 const schema = z.object({
@@ -13,10 +14,23 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-const LOGO_SRC = "/quran/logo.png";
 
-export function LoginPage({ onBack }: { onBack?: () => void }) {
+type TenantBranding = { name: string; slug: string };
+
+/** Sign-in for one organisation, reached at /<slug>. */
+export function LoginPage({ slug, onBack }: { slug: string; onBack?: () => void }) {
   const { login } = useAuth();
+  const [branding, setBranding] = useState<TenantBranding | null>(null);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    setNotFound(false);
+    get<{ tenant: TenantBranding }>(`/tenants/by-slug/${encodeURIComponent(slug)}`)
+      .then((res) => setBranding(res.tenant))
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 404) setNotFound(true);
+      });
+  }, [slug]);
   const { theme, toggleTheme } = useTheme();
   const [serverError,  setServerError]  = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -27,7 +41,7 @@ export function LoginPage({ onBack }: { onBack?: () => void }) {
   async function onSubmit(data: FormData) {
     setServerError("");
     try {
-      await login(data.email, data.password);
+      await login(data.email, data.password, slug);
     } catch (err) {
       setServerError(err instanceof ApiError ? err.message : "حدث خطأ غير متوقع، حاول مرة أخرى");
     }
@@ -60,13 +74,19 @@ export function LoginPage({ onBack }: { onBack?: () => void }) {
           {/* Logo + org name */}
           <div className="login-card-header">
             <div className="login-logo-wrap">
-              <img src={LOGO_SRC} alt="شعار الجمعية" className="login-logo" />
+              <img src={PLATFORM_LOGO} alt="" className="login-logo" />
             </div>
             <div className="login-bismillah">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
-            <h2 className="login-org-name">الجمعية الخيرية لتحفيظ القرآن الكريم</h2>
-            <p className="login-org-sub">بالعماير</p>
+            <h2 className="login-org-name">{branding?.name ?? (notFound ? "رابط غير معروف" : "…")}</h2>
+            <p className="login-org-sub" dir="ltr">/{slug}</p>
           </div>
 
+          {notFound ? (
+            <div className="login-server-error" role="alert">
+              <i className="ti ti-building-off" /> لا توجد مؤسسة مسجَّلة بهذا الرابط على {PLATFORM_NAME}.
+              تأكد من الرابط أو <a href="/signup">سجّل مؤسستك الآن</a>.
+            </div>
+          ) : (
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
             {/* Email */}
             <div className="login-field">
@@ -134,6 +154,7 @@ export function LoginPage({ onBack }: { onBack?: () => void }) {
               )}
             </button>
             </form>
+          )}
           </div>
 
           <LoginIntro />

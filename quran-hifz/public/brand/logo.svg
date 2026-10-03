@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="حِفظ">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f6b32"/>
+      <stop offset="1" stop-color="#123f1d"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#g)"/>
+  <!-- Rub el Hizb (۞) -->
+  <g transform="translate(32 21)" fill="#e0b840">
+    <rect x="-8" y="-8" width="16" height="16"/>
+    <rect x="-8" y="-8" width="16" height="16" transform="rotate(45)"/>
+  </g>
+  <circle cx="32" cy="21" r="3.2" fill="#1a5c2a"/>
+  <!-- open book -->
+  <path d="M10 39c8-4.5 15-4 20.5 1v14c-5.5-4.6-12.5-5-20.5-1z" fill="#ffffff"/>
+  <path d="M54 39c-8-4.5-15-4-20.5 1v14c5.5-4.6 12.5-5 20.5-1z" fill="#ffffff" opacity="0.88"/>
+</svg>
