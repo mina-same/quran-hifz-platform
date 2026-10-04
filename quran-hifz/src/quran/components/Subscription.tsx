@@ -134,7 +134,7 @@ export function TrialCountdown() {
         <span>{toAr(days)}</span>
       </div>
       <div className="trial-cd-text">
-        <span className="trial-cd-label">{days > 0 ? `${days === 1 ? "يوم" : days === 2 ? "يومان" : "أيام"} متبقية من التجربة` : "آخر يوم في التجربة"}</span>
+        <span className="trial-cd-label">{days > 0 ? "متبقٍّ على التجربة" : "آخر يوم في التجربة"}</span>
         <span className="trial-cd-time" dir="ltr">{pad(hours)}:{pad(minutes)}:{pad(seconds)}</span>
       </div>
       {user?.role === "admin" && (

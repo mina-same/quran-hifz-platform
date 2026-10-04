@@ -7092,5 +7092,72 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-10-03T19:45:00Z"
+  },
+  {
+    "id": "bug-417",
+    "timestamp": "2026-10-03T20:10:00Z",
+    "error_message": "Home page app-download section invisible (height 0, display:none)",
+    "file": "quran-hifz/src/quran/components/SaasHomeSections.tsx",
+    "root_cause": "Section used id=\"app\"; quran.css styles #app (the portal shell) with display:none until a portal mounts.",
+    "fix": "Renamed to id=\"mobile-app\" (+ nav link). Never use id=\"app\" on public pages.",
+    "tags": [
+      "css",
+      "id-collision",
+      "saas-home"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T20:10:00Z"
+  },
+  {
+    "id": "bug-418",
+    "timestamp": "2026-10-03T20:10:00Z",
+    "error_message": "ENOSPC: no space left on device (disk 100%, ~120MB free)",
+    "file": "(machine)",
+    "root_cause": "System disk full; Xcode DerivedData held 7.7GB.",
+    "fix": "With user's OK, rm -rf ~/Library/Developer/Xcode/DerivedData/* after confirming no xcodebuild running → 8.6GB free.",
+    "tags": [
+      "disk",
+      "enospc",
+      "xcode",
+      "deriveddata"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T20:10:00Z"
+  },
+  {
+    "id": "bug-419",
+    "timestamp": "2026-10-03T20:10:00Z",
+    "error_message": "'على iPhone وAndroid' rendered scrambled as 'Androidو iPhone'",
+    "file": "quran-hifz/src/quran/components/SaasHomeSections.tsx",
+    "root_cause": "Bidi: Latin words joined to Arabic conjunction و inside RTL text reorder unpredictably.",
+    "fix": "Use Arabic spellings (آيفون وأندرويد) or wrap Latin runs in <bdi>.",
+    "tags": [
+      "rtl",
+      "bidi",
+      "arabic"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T20:10:00Z"
+  },
+  {
+    "id": "bug-420",
+    "timestamp": "2026-10-03T20:40:00Z",
+    "error_message": "quran-hifz-sass backend (user's :5001) was running against the shared Atlas production DB — created 1 tenant (al-noor) + 1 tenant admin user + tenant indexes in production",
+    "file": "quran-hifz-server/src/config/env.ts",
+    "root_cause": "The SaaS branch reused quran-hifz-server/.env whose MONGO_URI is the production single-tenant Atlas cluster; main has no tenant filter, so SaaS rows would leak into the real organisation's lists.",
+    "fix": "env.ts now loads .env.saas (git-ignored) BEFORE .env; .env.saas sets MONGO_URI=mongodb://127.0.0.1:27017/quran_hifz_saas. Verified :5001 now connects only to localhost:27017. Atlas leftovers (tenant al-noor + its admin user, platformadmins collection, tenant_* indexes) NOT deleted — awaiting user OK.",
+    "tags": [
+      "saas",
+      "database",
+      "atlas",
+      "production",
+      "env"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T20:40:00Z"
   }
 ]

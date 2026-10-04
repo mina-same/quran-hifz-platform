@@ -1,4 +1,10 @@
 import dotenv from 'dotenv';
+
+// SaaS branch: `.env.saas` is loaded FIRST so its values (a separate local
+// MONGO_URI) win — dotenv never overrides a variable that is already set. This
+// keeps the multi-tenant code from ever writing into the single-tenant
+// production database configured in `.env`.
+dotenv.config({ path: '.env.saas' });
 dotenv.config();
 
 function required(key: string): string {

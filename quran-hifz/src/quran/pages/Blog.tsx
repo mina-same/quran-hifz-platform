@@ -147,7 +147,7 @@ export function BlogPostView({ post }: { post: BlogPost }) {
             <h1>{post.title}</h1>
             <p className="blog-lead">{post.description}</p>
             <div className="blog-byline">
-              <img src={PLATFORM_LOGO} alt="" width={36} height={36} />
+              <img src={PLATFORM_LOGO} alt={`شعار ${PLATFORM_NAME}`} title={BLOG_AUTHOR} width={36} height={36} />
               <div>
                 <b>{BLOG_AUTHOR}</b>
                 <span>آخر تحديث: <time dateTime={post.updated}>{formatDate(post.updated)}</time></span>

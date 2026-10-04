@@ -225,7 +225,7 @@ export function AppDownload() {
           <span className="lnd-eyebrow saas-eyebrow-light">تطبيق الجوال</span>
           <h2>{PLATFORM_NAME} في جيبك</h2>
           <p className="saas-split-lead">
-            تطبيق للمعلم والطالب وولي الأمر على iPhone وAndroid، متصل بالبيانات نفسها لحظة بلحظة.
+            تطبيق للمعلم والطالب وولي الأمر على أجهزة آيفون وأندرويد، متصل بالبيانات نفسها لحظة بلحظة.
           </p>
           <ul className="saas-app-list">
             {APP_FEATURES.map((f) => <li key={f.text}><i className={`ti ${f.icon}`} />{f.text}</li>)}
