@@ -24,6 +24,7 @@ import lessonRecordingRoutes from './routes/lesson-recording.routes';
 import groupHomeworkRoutes   from './routes/group-homework.routes';
 import quranPlanRoutes       from './routes/quran-plan.routes';
 import adminRoutes           from './routes/admin.routes';
+import dailyReportRoutes     from './routes/daily-report.routes';
 
 const app = express();
 
@@ -65,6 +66,7 @@ app.use('/api/lesson-recordings', lessonRecordingRoutes);
 app.use('/api/group-homework',    groupHomeworkRoutes);
 app.use('/api/quran-plans',       quranPlanRoutes);
 app.use('/api/admin',            adminRoutes);
+app.use('/api/daily-reports',    dailyReportRoutes);
 
 // ── 404 & error handler ───────────────────────────────────────────────────────
 app.use(notFound);

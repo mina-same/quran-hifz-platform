@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-05T10:16:04.228Z
-> Files: 727 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-05T11:00:18.582Z
+> Files: 739 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -470,6 +470,17 @@
 - `task-8-report.md` — Task 8 Report: AdminStudents.tsx — Collapse halqa+masjid to track (~958 tok)
 - `task-9-report.md` — Task 9 Report: TeacherAttendance.tsx Consumer Update (~725 tok)
 
+## Daily halqa report (2026-10-05)
+
+- `quran-hifz-server/src/controllers/daily-report.controller.ts` — getDraft (auto-fill from attendance+evaluation), sendReport, listReports (role-scoped) (~1900 tok)
+- `quran-hifz-server/src/models/DailyReport.model.ts` — per (track,date) report: struggling/absent/excused lines (name snapshots), counts, notes (~700 tok)
+- `quran-hifz-server/src/routes/daily-report.routes.ts` — /api/daily-reports (~150 tok)
+- `quran-hifz/src/quran/api/daily-reports.ts` — useDailyReportDraft / useSendDailyReport / useDailyReports (~450 tok)
+- `quran-hifz/src/quran/components/common/DailyReportCard.tsx` — DailyReportSheet / DailyReportActions / DailyReportCard (~900 tok)
+- `quran-hifz/src/quran/lib/dailyReport.ts` — hijriDate, weekdayAr, reportText (WhatsApp), downloadReportPdf (~800 tok)
+- `quran-hifz/src/quran/pages/admin/AdminDailyReports.tsx` — admin/supervisor list by date, missing halqat, all-in-one PDF (~1300 tok)
+- `quran-hifz/src/quran/pages/teacher/TeacherDailyReport.tsx` — teacher editor + live preview + send (~2000 tok)
+
 ## docs/superpowers/plans/
 
 - `2026-09-04-same-day-multi-segment-plans.md` — Same-day حفظ + مراجعة Plan Segments Implementation Plan (~18220 tok)
@@ -758,6 +769,7 @@
 - `admin.controller.ts` — Zod schemas: updateParentSchema, createParentSchema, createSupervisorSchema. getParents() is gender-scoped for supervisor via supervisorGenderOf/trackIdsForGender (parents of children in the supervisor's masajid gender only). (~2360 tok)
 - `attendance.controller.ts` — Upserts one Attendance doc per {student, date} and recalculates each (~1495 tok)
 - `auth.controller.ts` — Zod schemas: loginSchema, updateProfileSchema, changePasswordSchema, pushTokenSchema (~1216 tok)
+- `daily-report.controller.ts` — Evaluations/attendance store the day as `new Date('YYYY-MM-DD')` (UTC midnight). (~2417 tok)
 - `evaluation.controller.ts` — The rubric is no longer platform-wide — each plan carries its own (~2871 tok)
 - `group-homework.controller.ts` — Zod schemas: groupHomeworkSchema (~500 tok)
 - `halqa.controller.ts` — Zod schemas: halqaSchema (~904 tok)
@@ -800,6 +812,7 @@
 ## quran-hifz-server/src/models/
 
 - `Attendance.model.ts` — Exports IAttendance, Attendance (~263 tok)
+- `DailyReport.model.ts` — One student line in a daily report (struggling / absent / excused). (~762 tok)
 - `Evaluation.model.ts` — Legacy fixed-shape scores. Still written whenever the plan's rubric uses (~927 tok)
 - `GroupHomework.model.ts` — Exports IGroupHomework, GroupHomework (~258 tok)
 - `Halqa.model.ts` — Exports IHalqa, Halqa (~366 tok)
@@ -1007,6 +1020,7 @@
 - `BentoTile.tsx` — Bento-grid tile: a flatter, lighter-weight alternative to `Card` — small (~313 tok)
 - `Card.tsx` — Card (~181 tok)
 - `ContextPicker.tsx` — Unified shape for "teaching context" — always a Track now that Halqa is (~1067 tok)
+- `DailyReportComposer.tsx` — The daily report editor + live preview + send button for one (track, date). (~2241 tok)
 - `DaysOfWeekPicker.tsx` — WEEK_DAYS (~481 tok)
 - `Donut.tsx` — Reusable donut chart with a centered label and optional legend. (~766 tok)
 - `FormSection.tsx` — FormSection (~195 tok)
@@ -1102,6 +1116,7 @@
 ## quran-hifz/src/quran/pages/teacher/
 
 - `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~16646 tok)
+- `TeacherDailyReport.tsx` — AREAS (~2659 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1348 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
 - `TeacherGroupHomework.tsx` — STUDENTS (~2859 tok)

@@ -37,6 +37,7 @@ import { OpenWardPicker, openWardComplete, type OpenWardValue } from "../../comp
 import { OpenWardLog } from "../../components/common/OpenWardLog";
 import { ATTENDANCE_PREFILL_TRACK_KEY } from "../../api/attendance";
 import { useEvaluations, useRubric, useBulkEvaluate, type BulkEvaluateRecord } from "../../api/evaluations";
+import { DailyReportPrompt } from "../../components/common/DailyReportPrompt";
 import {
   useRecordStudentOccurrence,
   useStudentPlanProgressList,
@@ -361,7 +362,7 @@ function LinkPlanPanel({
 }
 
 export function TeacherTrackDetail() {
-  const { user, showPage } = usePortal();
+  const { user, showPage, readOnly } = usePortal();
   const teacherId = user?.profileId as string | undefined;
   const [trackId] = useState(() => sessionStorage.getItem(TRACK_DETAIL_ID_KEY));
 
@@ -613,7 +614,7 @@ export function TeacherTrackDetail() {
     el?.scrollIntoView({ inline: "center", block: "nearest" });
   }, [effectiveDate, dayChips]);
 
-  const { data: savedForDay = [] } = useEvaluations(
+  const { data: savedForDay = [], isFetched: savedForDayReady } = useEvaluations(
     track ? { track: track._id, from: effectiveDate, to: effectiveDate } : undefined,
   );
   const savedById: Record<string, StudentEval> = {};
@@ -1331,6 +1332,17 @@ export function TeacherTrackDetail() {
             <Alert tone="warning" icon="ti-clock">
               هذا اليوم لم يحن بعد — لا يمكن تسجيل الحضور والتقييم مسبقًا لجلسة لم تُعقد.
             </Alert>
+          )}
+
+          {!readOnly && track && (
+            <DailyReportPrompt
+              trackId={track._id}
+              date={effectiveDate}
+              total={roster.length}
+              recorded={roster.filter((st) => !!savedById[st._id]).length}
+              ready={savedForDayReady}
+              disabled={isFutureDay}
+            />
           )}
 
           <Card

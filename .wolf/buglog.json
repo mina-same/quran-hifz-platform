@@ -7056,5 +7056,22 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-10-03T08:00:00Z"
+  },
+  {
+    "id": "bug-421",
+    "timestamp": "2026-10-05T14:30:00Z",
+    "error_message": "Daily report pop-up re-opened every time a finished (already sent) day was reloaded",
+    "file": "quran-hifz/src/quran/components/common/DailyReportPrompt.tsx",
+    "root_cause": "While the day's evaluations were loading, `recorded` was a placeholder 0, so loading→loaded looked like a real 'not done → all done' transition.",
+    "fix": "Prompt takes `ready` (useEvaluations isFetched) and ignores transitions until ready; it also defers opening until the draft query says whether the report was already sent.",
+    "tags": [
+      "react",
+      "loading-state",
+      "modal",
+      "daily-report"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-05T14:30:00Z"
   }
 ]
