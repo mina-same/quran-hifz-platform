@@ -4435,3 +4435,8 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 10:59 | Vercel web deploy blocked by vulnerable @tanstack/react-start; upgraded + fixed __root ErrorComponent type (bug-414) | quran-hifz/package*.json, __root.tsx | build ok, not pushed | ~6k |
+| 13:12 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/c83ccfa0-ddd0-46a8-9642-121f904eb562/scratchpad/sass-wt/quran-hifz-server/src/config/env.ts | — | ~644 |
+| 13:16 | Edited ../../../.claude/projects/-Users-xontel-Downloads-mina-work-quran-hifz-platform/memory/saas-branch-never-merge-main.md | modified separation() | ~253 |
+| 13:16 | Session end: 2 writes across 2 files (env.ts, saas-branch-never-merge-main.md) | 0 reads | ~915 tok |
+| 13:20 | Open-ward plans: allow backwards (من آخر المصحف) ranges across surahs; correct ayah/page/overlap counts; next-start continues backwards | 3x quranRange.ts, open-ward.controller.ts, 2x OpenWardPicker, TeacherAttendance, TeacherTrackDetail, EvaluationRoster | 11/11 logic checks, tsc clean | ~25k |
+| 13:20 | Session end: 2 writes across 2 files (env.ts, saas-branch-never-merge-main.md) | 0 reads | ~915 tok |

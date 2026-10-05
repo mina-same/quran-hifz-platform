@@ -587,3 +587,67 @@ export function nextPointAfter(p: RangePoint): RangePoint {
   const last = toFlatIndex({ surahNumber: 114, ayah: 6 });
   return fromFlatIndex(Math.min(last, toFlatIndex(p) + 1));
 }
+
+// ── Open-ward ranges that run BACKWARDS through the Mushaf ───────────────────
+// A student memorizing «من آخر المصحف» goes surah by surah from the end
+// (الناس، الفلق، الإخلاص…) but still reads each surah in its own ayah order.
+// So a record «من الناس ١ إلى الإخلاص ٤» means: الناس 1→end, الفلق whole,
+// الإخلاص 1→4. A backwards range is only valid ACROSS surahs; within one surah
+// the start must not come after the end. Mirrored in all three quranRange.ts.
+
+const SURAH_AYAH_COUNT = new Map(SURAHS.map((s) => [s.number, s.ayahCount]));
+
+/** True when the range moves to earlier surahs (memorizing from the end). */
+export function isReverseWard(from: RangePoint, to: RangePoint): boolean {
+  return from.surahNumber > to.surahNumber;
+}
+
+/** Valid forward range, or a backwards range across different surahs. */
+export function isValidWardRange(from: RangePoint, to: RangePoint): boolean {
+  return isReverseWard(from, to) || toFlatIndex(from) <= toFlatIndex(to);
+}
+
+/** The forward (Mushaf-order) pieces a ward range actually covers. */
+export function wardPieces(from: RangePoint, to: RangePoint): { from: RangePoint; to: RangePoint }[] {
+  if (!isReverseWard(from, to)) return [{ from, to }];
+  const pieces: { from: RangePoint; to: RangePoint }[] = [
+    { from: { surahNumber: to.surahNumber, ayah: 1 }, to },
+  ];
+  if (from.surahNumber - to.surahNumber > 1) {
+    const lastMiddle = from.surahNumber - 1;
+    pieces.push({
+      from: { surahNumber: to.surahNumber + 1, ayah: 1 },
+      to: { surahNumber: lastMiddle, ayah: SURAH_AYAH_COUNT.get(lastMiddle) ?? 1 },
+    });
+  }
+  pieces.push({ from, to: { surahNumber: from.surahNumber, ayah: SURAH_AYAH_COUNT.get(from.surahNumber) ?? from.ayah } });
+  return pieces;
+}
+
+/** Ayahs covered by a ward range (forward or backwards). */
+export function countWardAyahs(from: RangePoint, to: RangePoint): number {
+  return wardPieces(from, to).reduce((n, p) => n + countRangeAyahs(p.from, p.to), 0);
+}
+
+/** Pages covered by a ward range — gaps between backwards pieces don't count. */
+export function wardPageRange(from: RangePoint, to: RangePoint): { pageStart: number; pageEnd: number; pageCount: number } {
+  const pages = new Set<number>();
+  for (const p of wardPieces(from, to)) {
+    const r = pageRangeOfAyahRange(p.from, p.to);
+    for (let pg = r.pageStart; pg <= r.pageEnd; pg++) pages.add(pg);
+  }
+  const all = [...pages];
+  return { pageStart: Math.min(...all), pageEnd: Math.max(...all), pageCount: all.length };
+}
+
+/** Where the next ward should start: forward → the next ayah; backwards →
+ *  rest of the surah if it stopped mid-surah, else the surah BEFORE it. */
+export function nextWardStart(from: RangePoint, to: RangePoint): RangePoint {
+  if (!isReverseWard(from, to)) {
+    const last = toFlatIndex({ surahNumber: 114, ayah: 6 });
+    return fromFlatIndex(Math.min(last, toFlatIndex(to) + 1));
+  }
+  const count = SURAH_AYAH_COUNT.get(to.surahNumber) ?? to.ayah;
+  if (to.ayah < count) return { surahNumber: to.surahNumber, ayah: to.ayah + 1 };
+  return { surahNumber: Math.max(1, to.surahNumber - 1), ayah: 1 };
+}

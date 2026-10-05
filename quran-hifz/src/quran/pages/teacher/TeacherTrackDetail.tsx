@@ -61,7 +61,7 @@ import {
   dayFinishPoint,
   dayDeltaAyahs,
   planFinishPoint,
-  nextPointAfter,
+  nextWardStart,
 } from "../../lib/quranRange";
 import { toAr, AR_LOCALE } from "../../../lib/format";
 
@@ -753,7 +753,8 @@ export function TeacherTrackDetail() {
     const last = openEntries.find(
       (e) => entryStudentId(e) === studentId && e.type === type && e.status === "recorded" && e.date < effectiveDate,
     );
-    return last?.to ? nextPointAfter(last.to) : { surahNumber: 1, ayah: 1 };
+    // Continues in the last record's direction (backwards → the surah before).
+    return last?.from && last?.to ? nextWardStart(last.from, last.to) : { surahNumber: 1, ayah: 1 };
   }
 
   function saveStudent(studentId: string, studentName: string) {

@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { RangePoint } from "../../api/quran-plans";
-import { toFlatIndex } from "../../lib/quranRange";
+import { isReverseWard, isValidWardRange } from "../../lib/quranRange";
 import { Badge } from "./Badge";
 
 /** One type's answer to «ماذا حفظ اليوم؟» on an open-ward plan. */
@@ -11,7 +11,7 @@ export type OpenWardValue =
 /** Saving is allowed once the teacher picked a valid range or chose «لم يُسمِّع». */
 export function openWardComplete(v?: OpenWardValue): boolean {
   if (!v) return false;
-  return v.status === "none" || toFlatIndex(v.from) <= toFlatIndex(v.to);
+  return v.status === "none" || isValidWardRange(v.from, v.to);
 }
 
 type SurahAyahProps = { value: RangePoint; onChange: (p: RangePoint) => void; disabled?: boolean };
@@ -36,7 +36,9 @@ export function OpenWardPicker({
   const none = value?.status === "none";
   const from = value?.status === "recorded" ? value.from : suggestedFrom;
   const to = value?.status === "recorded" ? value.to : suggestedFrom;
-  const invalid = value?.status === "recorded" && toFlatIndex(value.from) > toFlatIndex(value.to);
+  const invalid = value?.status === "recorded" && !isValidWardRange(value.from, value.to);
+  // Memorizing from the end of the Mushaf: surah by surah backwards.
+  const reverse = value?.status === "recorded" && isReverseWard(value.from, value.to);
 
   return (
     <div style={{ border: "1px dashed var(--border)", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
@@ -68,10 +70,16 @@ export function OpenWardPicker({
           حدّد المقطع أو اختر «لم يُسمِّع اليوم» قبل الحفظ
         </div>
       )}
+      {reverse && (
+        <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 6 }}>
+          <Badge tone="blue"><i className="ti ti-arrows-sort" style={{ marginLeft: 3 }} />حفظ معكوس</Badge>{" "}
+          من آخر المصحف — كل سورة تُقرأ من أولها بترتيب آياتها
+        </div>
+      )}
       {invalid && (
         <div style={{ fontSize: 11, color: "#ef4444", marginTop: 6 }}>
           <i className="ti ti-alert-triangle" style={{ marginLeft: 3 }} />
-          بداية المقطع بعد نهايته في ترتيب المصحف
+          داخل السورة الواحدة يجب أن تكون آية البداية قبل آية النهاية
         </div>
       )}
 

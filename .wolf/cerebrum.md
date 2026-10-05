@@ -13,6 +13,7 @@
 <!-- How the user likes things done. Code style, tools, patterns, communication. -->
 
 ## Key Learnings
+- **Open-ward (خطة بدون مقطع محدد) ranges may run BACKWARDS across surahs (2026-10-05).** User: memorizing «من آخر المصحف» must be allowed. «من الناس ١ إلى الإخلاص ٤» = الناس 1→end + الفلق + الإخلاص 1→4 (each surah still in ayah order). Backwards INSIDE one surah stays invalid (msg «داخل السورة الواحدة يجب أن تكون آية البداية قبل آية النهاية»). Helpers isReverseWard/isValidWardRange/wardPieces/countWardAyahs/wardPageRange/nextWardStart are appended to all THREE quranRange.ts (server/web/mobile, manual sync). Server open-ward.controller computes ayahs/pages/overlap from wardPieces — never min/max of from/to. suggestedFromFor in TeacherAttendance/TeacherTrackDetail/EvaluationRoster uses nextWardStart (backwards → surah before).
 - **Attendance status مستأذن (excused, 2026-10-02):** valid in Attendance.status and Evaluation.attendanceStatus. Rules: grades forced to 0 (server `!isPresent`), excluded from attendancePct numerator AND denominator (recalcAttendancePct, stats avg, client pct calcs) and from every score average (reports filter it out at the source), no parent notification, and treated like absent for open-ward/plan reflow (clients send occurrence status 'absent'). Client checks use `!== "حاضر"` for "not present" rather than `=== "غائب"`.
 
 ### Messages: `GET /messages` returns raw Message docs; student notes go via `POST /messages/to-supervisors` (2026-10-02)
