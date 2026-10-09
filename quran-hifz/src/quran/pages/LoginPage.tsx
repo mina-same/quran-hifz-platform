@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { ApiError, get } from "../../lib/api";
@@ -22,6 +23,7 @@ type TenantBranding = { name: string; slug: string };
 /** Sign-in for one organisation, reached at /<slug>. */
 export function LoginPage({ slug, onBack }: { slug: string; onBack?: () => void }) {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [branding, setBranding] = useState<TenantBranding | null>(null);
   const [notFound, setNotFound] = useState(false);
 
@@ -43,7 +45,9 @@ export function LoginPage({ slug, onBack }: { slug: string; onBack?: () => void 
   async function onSubmit(data: FormData) {
     setServerError("");
     try {
-      await login(data.email, data.password, slug);
+      const res = await login(data.email, data.password, slug);
+      // The platform owner can sign in from any login page.
+      if ("role" in res && res.role === "superadmin") navigate({ to: "/super" });
     } catch (err) {
       setServerError(err instanceof ApiError ? err.message : "حدث خطأ غير متوقع، حاول مرة أخرى");
     }

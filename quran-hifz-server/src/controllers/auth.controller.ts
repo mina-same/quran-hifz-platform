@@ -60,10 +60,10 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
     const { email, password, slug } = loginSchema.parse(req.body);
     const invalid = new AppError('البريد الإلكتروني أو كلمة المرور غير صحيحة', 401);
 
-    // One login page for every role: on the platform-wide /login (no slug) a
-    // super admin's credentials sign in to the platform console instead of an
-    // organisation. Checked first; any mismatch falls through to org users.
-    if (!slug) {
+    // One login for every role: on ANY login page (platform /login or an
+    // organisation's /<slug>), a super admin's credentials open the platform
+    // console instead. Checked first; any mismatch falls through to org users.
+    {
       const admin = await PlatformAdmin.findOne({ email: email.toLowerCase(), isActive: true }).select('+password');
       if (admin && (await admin.comparePassword(password))) {
         admin.lastLoginAt = new Date();
