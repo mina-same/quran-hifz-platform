@@ -7,6 +7,7 @@ import { useQuranPlans, segmentReversed, isSlice } from "../../api/quran-plans";
 import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
+import { EmptyState } from "../../components/common/EmptyState";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -181,22 +182,11 @@ export function TeacherTracks() {
       {isLoading && <SkeletonCardGrid count={3} lines={4} />}
 
       {!isLoading && tracks.length === 0 && (
-        <div style={{ textAlign: "center", padding: "52px 0" }}>
-          <div style={{
-            width: 64, height: 64, borderRadius: 16,
-            background: "var(--green-pale)", color: "var(--green)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 28, margin: "0 auto 16px",
-          }}>
-            <i className="ti ti-calendar-event" />
-          </div>
-          <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--text)" }}>
-            لا توجد مسارات مُسنَدة إليك
-          </p>
-          <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--text3)" }}>
-            عندما تُعيّنك الإدارة لمسار سيظهر هنا تلقائياً
-          </p>
-        </div>
+        <EmptyState
+          icon="ti-calendar-event"
+          title="لا توجد مسارات مُسنَدة إليك"
+          description="عندما تُعيّنك الإدارة لمسار سيظهر هنا تلقائياً"
+        />
       )}
 
       {!isLoading && tracks.length > 0 && (

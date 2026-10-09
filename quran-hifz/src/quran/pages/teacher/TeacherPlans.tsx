@@ -13,6 +13,7 @@ import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { AR_LOCALE } from "@/lib/format";
+import { EmptyState } from "../../components/common/EmptyState";
 
 /* ─── helpers ─────────────────────────────────────────────── */
 function surahName(n: number) {
@@ -84,21 +85,16 @@ export function TeacherPlans() {
       {isLoading && <SkeletonCardGrid count={3} lines={5} />}
 
       {!isLoading && plans.length === 0 && (
-        <div style={{ textAlign: "center", padding: "56px 0" }}>
-          <div style={{
-            width: 72, height: 72, borderRadius: 18,
-            background: "var(--green-pale)", color: "var(--green)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 32, margin: "0 auto 16px",
-          }}>
-            <i className="ti ti-target" />
-          </div>
-          <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--text)" }}>لا توجد خطط قرآنية بعد</p>
-          <p style={{ margin: "6px 0 20px", fontSize: 13, color: "var(--text3)" }}>أنشئ أول خطة حفظ أو مراجعة لحلقتك أو لطلابك</p>
-          <button className="topbar-btn btn-primary" style={{ padding: "10px 24px" }} onClick={openAdd}>
-            <i className="ti ti-plus" /> خطة جديدة
-          </button>
-        </div>
+        <EmptyState
+          icon="ti-target"
+          title="لا توجد خطط قرآنية بعد"
+          description="أنشئ أول خطة حفظ أو مراجعة لحلقتك أو لطلابك"
+          action={
+            <button className="topbar-btn btn-primary" style={{ padding: "10px 24px" }} onClick={openAdd}>
+              <i className="ti ti-plus" /> خطة جديدة
+            </button>
+          }
+        />
       )}
 
       {!isLoading && plans.length > 0 && (

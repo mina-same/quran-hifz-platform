@@ -15,6 +15,7 @@ import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCard } from "../../components/common/Skeleton";
 import { AR_LOCALE } from "@/lib/format";
+import { EmptyState } from "../../components/common/EmptyState";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -238,9 +239,7 @@ export function TeacherPlanDetail() {
       ) : (
       <Card icon="ti-calendar-stats" title="تقسيم الأجزاء على الأيام">
         {plan.schedule.length === 0 ? (
-          <p style={{ margin: "20px 0", fontSize: 13, color: "var(--text3)", textAlign: "center" }}>
-            لا يوجد جدول محسوب لهذه الخطة
-          </p>
+          <EmptyState compact icon="ti-calendar-off" title="لا يوجد جدول محسوب لهذه الخطة" />
         ) : (
           <div className="tbl-wrap">
             <table className="tbl">

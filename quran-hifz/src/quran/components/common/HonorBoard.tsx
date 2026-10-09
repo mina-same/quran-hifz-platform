@@ -1,3 +1,4 @@
+import { EmptyState } from "./EmptyState";
 const RANK_META = [
   { icon: "ti-crown", cls: "rank-1", height: 76 },
   { icon: "ti-medal", cls: "rank-2", height: 56 },
@@ -27,10 +28,7 @@ export function HonorBoard({
   const top3 = rows.slice(0, 3);
   if (top3.length === 0) {
     return (
-      <div className="honor-empty">
-        <i className="ti ti-award" />
-        <span>{emptyText}</span>
-      </div>
+      <EmptyState compact icon="ti-award" title={emptyText} />
     );
   }
 

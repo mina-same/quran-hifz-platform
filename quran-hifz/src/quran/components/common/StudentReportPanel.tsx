@@ -1,3 +1,4 @@
+import { EmptyState } from "./EmptyState";
 import { useMemo, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
 import {
@@ -373,9 +374,7 @@ export function StudentReportPanel({
                 </div>
               </div>
             ) : (
-              <div style={{ textAlign: "center", color: "var(--text3)", padding: 20 }}>
-                لا يوجد تقييمات بعد لهذا الطالب
-              </div>
+              <EmptyState compact icon="ti-chart-radar" title="لا توجد تقييمات بعد لهذا الطالب" />
             )}
 
             <div

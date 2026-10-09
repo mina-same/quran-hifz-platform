@@ -12,6 +12,7 @@ import {
 } from "../../api/masajid";
 import { toAr } from "../../../lib/format";
 import { usePortal } from "../../context/PortalContext";
+import { EmptyState } from "../../components/common/EmptyState";
 
 type ModalState = null | { mode: "add" } | { mode: "edit"; item: Masjid };
 
@@ -174,19 +175,14 @@ export function AdminMasajid() {
               </div>
             ))}
             {!m.tracks?.length && (
-              <div style={{ padding: "10px 16px", color: "var(--text3)", fontSize: 13 }}>
-                لا توجد مسارات مسجلة
-              </div>
+              <EmptyState compact icon="ti-route" title="لا توجد مسارات في هذا المسجد بعد" />
             )}
           </div>
         </div>
       ))}
 
       {masajid.length === 0 && (
-        <div style={{ textAlign: "center", padding: "40px 20px", color: "var(--text3)", fontSize: 14 }}>
-          <i className="ti ti-building-arch" style={{ fontSize: 36, display: "block", marginBottom: 12 }} />
-          لا توجد مساجد مسجلة بعد
-        </div>
+        <EmptyState icon="ti-building-mosque" title="لا توجد مساجد مسجلة بعد" description="أضف أول مسجد أو دار لتبدأ بتنظيم المسارات والحلقات" />
       )}
 
       {/* Add / Edit Modal */}

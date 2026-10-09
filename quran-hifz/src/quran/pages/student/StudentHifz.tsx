@@ -8,6 +8,7 @@ import { SkeletonTable } from "../../components/common/Skeleton";
 import { useHifz } from "../../api/hifz";
 import { useStudent } from "../../api/students";
 import { toAr, pct, AR_LOCALE } from "../../../lib/format";
+import { EmptyRow } from "../../components/common/EmptyState";
 
 function tone(status: string): BadgeTone {
   if (status === "مكتمل") return "green";
@@ -78,11 +79,7 @@ export function StudentHifz() {
                   </tr>
                 ))}
                 {hifzEntries.length === 0 && (
-                  <tr>
-                    <td colSpan={4} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                      لا توجد سور مسجلة بعد
-                    </td>
-                  </tr>
+                  <EmptyRow colSpan={4} icon="ti-book" title="لا توجد سور مسجلة بعد" />
                 )}
               </tbody>
             </table>

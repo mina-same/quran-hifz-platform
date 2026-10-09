@@ -1,6 +1,7 @@
 import { toAr } from "../../../lib/format";
 import type { BadgeTone } from "./Badge";
 import { Badge } from "./Badge";
+import { EmptyState } from "./EmptyState";
 
 export type LeaderRow = {
   id: string;
@@ -29,10 +30,7 @@ export function Leaderboard({
 }) {
   if (rows.length === 0) {
     return (
-      <div className="lb-empty">
-        <i className={`ti ${emptyIcon}`} />
-        <span>{emptyText}</span>
-      </div>
+      <EmptyState compact icon={emptyIcon} title={emptyText} />
     );
   }
 

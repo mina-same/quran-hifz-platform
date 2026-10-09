@@ -1,3 +1,4 @@
+import { EmptyState } from "./EmptyState";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAssignStudent, type Track } from "../../api/tracks";
@@ -93,10 +94,7 @@ export function TrackStudentsPanel({ track }: { track: Track }) {
       </div>
 
       {enrolledCnt === 0 ? (
-        <div style={{ textAlign: "center", padding: "24px 0", background: "var(--cream)", borderRadius: 10 }}>
-          <i className="ti ti-user-off" style={{ fontSize: 28, color: "var(--text3)", display: "block", marginBottom: 8 }} />
-          <p style={{ margin: 0, fontSize: 13, color: "var(--text3)" }}>لا يوجد طلاب مسجّلون بعد</p>
-        </div>
+        <EmptyState compact icon="ti-user-off" title="لا يوجد طلاب مسجّلون بعد" />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 260, overflowY: "auto" }}>
           {enrolledStudents

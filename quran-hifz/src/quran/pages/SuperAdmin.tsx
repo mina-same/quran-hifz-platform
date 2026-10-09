@@ -5,6 +5,7 @@ import { hasArabic } from "../../lib/latin";
 import { useTheme } from "../context/ThemeContext";
 import { LatinHint } from "../components/LatinHint";
 import { PLATFORM_LOGO, PLATFORM_NAME, PUBLIC_DOMAIN } from "../config/saas";
+import { EmptyState } from "../components/common/EmptyState";
 
 /**
  * `/super` — the platform owner's console (super admin). Separate account,
@@ -334,7 +335,7 @@ function SuperConsole({ token, onLogout }: { token: string; onLogout: () => void
         {rows === null ? (
           <div className="sa-empty"><i className="ti ti-loader-2 lp-spin" /> جارٍ التحميل…</div>
         ) : visible.length === 0 ? (
-          <div className="sa-empty"><i className="ti ti-building-off" /> لا توجد مؤسسات مطابقة</div>
+          <div className="card"><EmptyState icon="ti-building-off" title="لا توجد مؤسسات مطابقة" description="جرّب كلمة بحث أو تصفية مختلفة" tone="search" /></div>
         ) : (
           <div className="sa-list">
             {visible.map((t) => {

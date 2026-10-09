@@ -1,3 +1,4 @@
+import { EmptyState } from "./EmptyState";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { toAr } from "../../../lib/format";
 
@@ -24,9 +25,8 @@ export function Donut({
 
   if (total === 0) {
     return (
-      <div className="donut-empty" style={{ height: size }}>
-        <i className="ti ti-chart-donut" style={{ fontSize: 26, color: "var(--text3)", marginBottom: 8 }} />
-        <span>{emptyText}</span>
+      <div style={{ minHeight: size, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <EmptyState compact icon="ti-chart-donut" title={emptyText} />
       </div>
     );
   }

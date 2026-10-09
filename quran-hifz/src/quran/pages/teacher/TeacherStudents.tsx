@@ -6,6 +6,7 @@ import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { useStudents } from "../../api/students";
 import { useTracks } from "../../api/tracks";
 import { SkeletonTable } from "../../components/common/Skeleton";
+import { EmptyState, EmptyRow } from "../../components/common/EmptyState";
 
 const HW_TONE: Record<string, BadgeTone> = {
   submitted: "green",
@@ -67,10 +68,7 @@ export function TeacherStudents() {
   return (
     <Card>
       {!loading && !hasAny && (
-        <div style={{ textAlign: "center", padding: "32px 0", color: "var(--text3)", fontSize: 13 }}>
-          <i className="ti ti-school-off" style={{ fontSize: 32, display: "block", marginBottom: 10 }} />
-          لا توجد مسارات مسندة لهذا المعلم
-        </div>
+        <EmptyState icon="ti-school-off" title="لا توجد مسارات مسندة لهذا المعلم" description="تواصل مع الإدارة لإسنادك إلى مسار" />
       )}
 
       {loading && <SkeletonTable cols={7} rows={5} />}
@@ -134,11 +132,7 @@ export function TeacherStudents() {
                   </tr>
                 ))}
                 {visibleRows.length === 0 && (
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                      لا توجد بيانات
-                    </td>
-                  </tr>
+                  <EmptyRow colSpan={7} icon="ti-users" title="لا يوجد طلاب لعرضهم" />
                 )}
               </tbody>
             </table>

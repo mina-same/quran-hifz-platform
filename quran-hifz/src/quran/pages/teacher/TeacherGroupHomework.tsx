@@ -9,6 +9,7 @@ import { Alert } from "../../components/common/Alert";
 import { Badge } from "../../components/common/Badge";
 import { ContextPicker, trackToContext, type TeachingContext } from "../../components/common/ContextPicker";
 import { SkeletonCard, SkeletonList } from "../../components/common/Skeleton";
+import { EmptyState } from "../../components/common/EmptyState";
 
 const STUDENTS = ["عبدالله الحميداني", "يوسف الزهراني", "أحمد الشهري", "فارس العسيري", "سالم الدوسري"];
 
@@ -66,7 +67,7 @@ function IndividualHomeworkCard() {
         </div>
       )}
       {list.length === 0 ? (
-        <p style={{ color: "var(--text2)", textAlign: "center", padding: 20, fontSize: 13 }}>لا توجد واجبات فردية حتى الآن</p>
+        <EmptyState compact icon="ti-clipboard-list" title="لا توجد واجبات فردية حتى الآن" />
       ) : (
         list.map((hw, i) => (
           <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 0", borderTop: i ? "1px solid var(--border)" : undefined }}>
@@ -192,7 +193,7 @@ export function TeacherGroupHomework() {
         {isLoading ? (
           <SkeletonList rows={4} avatar={false} />
         ) : (homeworks ?? []).length === 0 ? (
-          <p style={{ color: "var(--text2)", padding: 16, textAlign: "center", fontSize: 13 }}>لا توجد واجبات جماعية بعد</p>
+          <EmptyState compact icon="ti-clipboard-list" title="لا توجد واجبات جماعية بعد" />
         ) : (
           (homeworks ?? []).map((hw, i) => (
             <div

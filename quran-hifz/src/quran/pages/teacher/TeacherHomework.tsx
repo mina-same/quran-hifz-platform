@@ -8,6 +8,7 @@ import { SkeletonTable } from "../../components/common/Skeleton";
 import { useHomework } from "../../api/homework";
 import { useGradeHomework } from "../../api/homework";
 import { AR_LOCALE } from "@/lib/format";
+import { EmptyState, EmptyRow } from "../../components/common/EmptyState";
 
 function getName(v: unknown): string {
   if (v && typeof v === "object" && "name" in v) return (v as { name: string }).name;
@@ -84,11 +85,7 @@ export function TeacherHomework() {
                     </tr>
                   ))}
                   {homework.length === 0 && (
-                    <tr>
-                      <td colSpan={6} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                        لا توجد واجبات
-                      </td>
-                    </tr>
+                    <EmptyRow colSpan={6} icon="ti-clipboard-off" title="لا توجد واجبات" />
                   )}
                 </tbody>
               </table>
@@ -133,9 +130,7 @@ export function TeacherHomework() {
                 </div>
               ))}
               {homework.length === 0 && (
-                <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                  لا توجد واجبات
-                </div>
+                <EmptyState compact icon="ti-clipboard-off" title="لا توجد واجبات" />
               )}
             </div>
           </>

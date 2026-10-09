@@ -9,6 +9,7 @@ import { useTracks } from "../../api/tracks";
 import { toAr } from "../../../lib/format";
 import { usePortal } from "../../context/PortalContext";
 import { teacherIdsInScope } from "../../lib/genderScope";
+import { EmptyRow } from "../../components/common/EmptyState";
 
 type ModalState = null | { mode: "add" } | { mode: "edit"; item: Teacher };
 
@@ -198,11 +199,7 @@ export function AdminTeachers() {
                   </tr>
                 ))}
                 {teachers.length === 0 && (
-                  <tr>
-                    <td colSpan={8} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                      لا يوجد معلمون مسجلون
-                    </td>
-                  </tr>
+                  <EmptyRow colSpan={8} icon="ti-chalkboard" title="لا يوجد معلمون مسجلون" description="أضف المعلمين ليتمكنوا من الدخول وتسجيل الحضور" />
                 )}
               </tbody>
             </table>

@@ -7,6 +7,7 @@ import { SkeletonTable } from "../../components/common/Skeleton";
 import { useAttendance } from "../../api/attendance";
 import { useStudent } from "../../api/students";
 import { toAr, pct, AR_LOCALE } from "../../../lib/format";
+import { EmptyState, EmptyRow } from "../../components/common/EmptyState";
 
 const STATUS_TONE: Record<string, BadgeTone> = {
   حاضر: "green",
@@ -62,11 +63,7 @@ export function StudentAttendance() {
                     </tr>
                   ))}
                   {records.length === 0 && (
-                    <tr>
-                      <td colSpan={4} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                        لا توجد سجلات حضور بعد
-                      </td>
-                    </tr>
+                    <EmptyRow colSpan={4} icon="ti-calendar-off" title="لا توجد سجلات حضور بعد" />
                   )}
                 </tbody>
               </table>
@@ -90,9 +87,7 @@ export function StudentAttendance() {
                 </div>
               ))}
               {records.length === 0 && (
-                <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                  لا توجد سجلات حضور بعد
-                </div>
+                <EmptyState compact icon="ti-calendar-off" title="لا توجد سجلات حضور بعد" />
               )}
             </div>
           </>

@@ -11,6 +11,7 @@ import { useStudents } from "../../api/students";
 import { useKpis } from "../../api/kpis";
 import { toAr, pct } from "../../../lib/format";
 import { matchesGenderScope } from "../../lib/genderScope";
+import { EmptyState } from "../../components/common/EmptyState";
 
 function PageLoading() {
   return (
@@ -84,7 +85,7 @@ export function AdminDashboard() {
       <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
         <Card icon="ti-chart-pie" title="توزيع المسارات">
           {masarRows.length === 0 ? (
-            <div className="page-loading">لا توجد بيانات</div>
+            <EmptyState compact icon="ti-chart-pie" title="لا توجد بيانات بعد" description="يظهر التوزيع بعد تسجيل الطلاب في المسارات" />
           ) : (
             masarRows.map((r) => (
               <div key={r.name} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, fontSize: 12 }}>

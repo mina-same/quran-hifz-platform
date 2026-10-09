@@ -9,6 +9,7 @@ import {
   useAdminSupervisors, useCreateSupervisor, useDeleteSupervisor,
   type SupervisorUser,
 } from "../../api/admin-supervisors";
+import { EmptyRow } from "../../components/common/EmptyState";
 
 type AddForm = { name: string; email: string; password: string; gender: "male" | "female" };
 const EMPTY_ADD: AddForm = { name: "", email: "", password: "", gender: "male" };
@@ -110,11 +111,7 @@ export function AdminSupervisors() {
                   </tr>
                 ))}
                 {supervisors.length === 0 && (
-                  <tr>
-                    <td colSpan={4} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                      لا يوجد مشرفون مسجلون بعد
-                    </td>
-                  </tr>
+                  <EmptyRow colSpan={4} icon="ti-eye-check" title="لا يوجد مشرفون مسجلون بعد" />
                 )}
               </tbody>
             </table>

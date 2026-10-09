@@ -12,6 +12,7 @@ import { useHomework } from "../../api/homework";
 import { useQuranPlans } from "../../api/quran-plans";
 import { useEvaluations } from "../../api/evaluations";
 import { toAr, pct, AR_LOCALE } from "../../../lib/format";
+import { EmptyState } from "../../components/common/EmptyState";
 
 function getField(v: unknown, field: string): string {
   if (v && typeof v === "object" && field in v) return String((v as Record<string, unknown>)[field]);
@@ -134,9 +135,7 @@ export function StudentDashboard() {
         headerExtra={gradeAvg !== null && <Badge tone="gold">المعدل العام: {pct(gradeAvg)}</Badge>}
       >
         {evaluations.length === 0 ? (
-          <div style={{ fontSize: 13, color: "var(--text2)", textAlign: "center", padding: "8px 0" }}>
-            لا توجد تقييمات بعد
-          </div>
+          <EmptyState compact icon="ti-star" title="لا توجد تقييمات بعد" description="تظهر درجاتك هنا بعد أول جلسة" />
         ) : (
           <div style={{ fontSize: 13, maxHeight: 360, overflowY: "auto" }}>
             {evaluations.map((e, i) => {

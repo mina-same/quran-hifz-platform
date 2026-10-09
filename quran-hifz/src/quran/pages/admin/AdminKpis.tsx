@@ -4,6 +4,7 @@ import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { SkeletonTable } from "../../components/common/Skeleton";
 import { useKpis } from "../../api/kpis";
 import { downloadCsv } from "../../../lib/csv";
+import { EmptyState } from "../../components/common/EmptyState";
 
 const RATING_TONE: Record<string, BadgeTone> = {
   ممتاز: "green",
@@ -44,10 +45,7 @@ export function AdminKpis() {
         </div>
       )}
       {!isLoading && !error && kpis.length === 0 && (
-        <div style={{ textAlign: "center", padding: "40px 20px", color: "var(--text3)", fontSize: 14 }}>
-          <i className="ti ti-target" style={{ fontSize: 36, display: "block", marginBottom: 12 }} />
-          لا توجد مؤشرات أداء مسجلة بعد
-        </div>
+        <EmptyState icon="ti-target" title="لا توجد مؤشرات أداء مسجلة بعد" />
       )}
       {!isLoading && !error && kpis.length > 0 && (
         <div className="tbl-wrap">

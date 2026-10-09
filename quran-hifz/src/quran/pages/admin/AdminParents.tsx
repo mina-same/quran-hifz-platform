@@ -12,6 +12,7 @@ import {
 } from "../../api/admin-parents";
 import { useStudents } from "../../api/students";
 import { toAr } from "../../../lib/format";
+import { EmptyState, EmptyRow } from "../../components/common/EmptyState";
 
 type AddForm = { name: string; email: string; password: string };
 const EMPTY_ADD: AddForm = { name: "", email: "", password: "" };
@@ -230,18 +231,10 @@ export function AdminParents() {
                     </tr>
                   ))}
                   {parents.length === 0 && (
-                    <tr>
-                      <td colSpan={5} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                        لا يوجد أولياء أمور مسجلون بعد
-                      </td>
-                    </tr>
+                    <EmptyRow colSpan={5} icon="ti-user-heart" title="لا يوجد أولياء أمور مسجلون بعد" />
                   )}
                   {parents.length > 0 && filtered.length === 0 && (
-                    <tr>
-                      <td colSpan={5} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                        لا توجد نتائج مطابقة لبحثك
-                      </td>
-                    </tr>
+                    <EmptyRow colSpan={5} icon="ti-search" title="لا توجد نتائج مطابقة لبحثك" description="جرّب كلمة بحث مختلفة" tone="search" />
                   )}
                 </tbody>
               </table>
@@ -293,14 +286,10 @@ export function AdminParents() {
                 </div>
               ))}
               {parents.length === 0 && (
-                <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                  لا يوجد أولياء أمور مسجلون بعد
-                </div>
+                <EmptyState icon="ti-user-heart" title="لا يوجد أولياء أمور مسجلون بعد" />
               )}
               {parents.length > 0 && filtered.length === 0 && (
-                <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                  لا توجد نتائج مطابقة لبحثك
-                </div>
+                <EmptyState icon="ti-search" title="لا توجد نتائج مطابقة لبحثك" description="جرّب كلمة بحث مختلفة" tone="search" />
               )}
             </div>
           </>

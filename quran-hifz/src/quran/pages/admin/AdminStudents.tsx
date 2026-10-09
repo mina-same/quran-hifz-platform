@@ -9,6 +9,7 @@ import { useTracks } from "../../api/tracks";
 import { useAdminParents, useStudentParent, useSetStudentParent } from "../../api/admin-parents";
 import { toAr } from "../../../lib/format";
 import { matchesGenderScope } from "../../lib/genderScope";
+import { EmptyRow } from "../../components/common/EmptyState";
 
 const PATH_TONE: Record<string, BadgeTone> = {
   "حفظ كامل": "gold",
@@ -264,11 +265,7 @@ export function AdminStudents() {
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                      لا توجد نتائج
-                    </td>
-                  </tr>
+                  <EmptyRow colSpan={7} icon="ti-search" title="لا توجد نتائج" description="جرّب كلمة بحث أو تصفية مختلفة" tone="search" />
                 )}
               </tbody>
             </table>

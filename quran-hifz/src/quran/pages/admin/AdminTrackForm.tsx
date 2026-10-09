@@ -12,6 +12,7 @@ import { useMasajid } from "../../api/masajid";
 import { Card } from "../../components/common/Card";
 import { FormSection } from "../../components/common/FormSection";
 import { TrackStudentsPanel } from "../../components/common/TrackStudentsPanel";
+import { EmptyState } from "../../components/common/EmptyState";
 
 function getTeacherId(v: TrackTeacher | string)   { return typeof v === "object" ? v._id  : v; }
 function avatarInitials(name: string) {
@@ -270,9 +271,7 @@ export function AdminTrackForm() {
             maxHeight: 160, overflowY: "auto",
           }}>
             {teachers.length === 0 && (
-              <div style={{ padding: 12, fontSize: 12, color: "var(--text3)", textAlign: "center" }}>
-                لا يوجد معلمون مسجّلون
-              </div>
+              <EmptyState compact icon="ti-chalkboard" title="لا يوجد معلمون مسجّلون" />
             )}
             {teachers.map((tc, i) => {
               const selected = form.teachers.includes(tc._id);

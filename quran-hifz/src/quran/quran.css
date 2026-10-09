@@ -5477,3 +5477,30 @@ a.blog-related-card:hover { transform: translateY(-2px); }
   .sa-toolbar select { width: 100%; }
   .sa-row { grid-template-columns: 1fr; gap: 10px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Empty states — one look everywhere (components/common/EmptyState.tsx)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 44px 20px; gap: 0;
+}
+.empty-state-icon {
+  width: 72px; height: 72px; border-radius: 50%; margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--green-pale); color: var(--green); font-size: 32px;
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--green-pale) 45%, transparent);
+}
+.empty-state-title { margin: 0; font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.6; }
+.empty-state-desc { margin: 4px 0 0; max-width: 420px; font-size: 13px; line-height: 1.8; color: var(--text3); }
+.empty-state-action { margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.empty-state.search .empty-state-icon { background: var(--cream); color: var(--text3); box-shadow: 0 0 0 8px color-mix(in srgb, var(--cream) 60%, transparent); }
+
+.empty-state.compact { padding: 22px 14px; }
+.empty-state.compact .empty-state-icon { width: 44px; height: 44px; font-size: 21px; margin-bottom: 8px; box-shadow: 0 0 0 5px color-mix(in srgb, var(--green-pale) 45%, transparent); }
+.empty-state.compact.search .empty-state-icon { box-shadow: 0 0 0 5px color-mix(in srgb, var(--cream) 60%, transparent); }
+.empty-state.compact .empty-state-title { font-size: 13.5px; }
+.empty-state.compact .empty-state-desc { font-size: 12px; }
+.empty-state.compact .empty-state-action { margin-top: 10px; }
+.empty-state-row > td { padding: 0 !important; border-bottom: 0 !important; }
+.empty-state-row:hover > td { background: transparent !important; }

@@ -5,6 +5,7 @@ import { Alert } from "../../components/common/Alert";
 import { SkeletonList } from "../../components/common/Skeleton";
 import { useMessages, useMarkRead, useSendNoteToSupervisors } from "../../api/messages";
 import { AR_LOCALE } from "@/lib/format";
+import { EmptyState } from "../../components/common/EmptyState";
 
 export function StudentMessages() {
   return <MessagesInbox compose={<NoteToSupervisors />} />;
@@ -34,9 +35,7 @@ export function MessagesInbox({ compose }: { compose?: ReactNode }) {
     {compose}
     <Card>
       {messages.length === 0 && (
-        <div style={{ textAlign: "center", color: "var(--text3)", padding: 32, fontSize: 14 }}>
-          لا توجد رسائل بعد
-        </div>
+        <EmptyState icon="ti-message-circle-off" title="لا توجد رسائل بعد" />
       )}
       {messages.map((msg, i) => (
         <div

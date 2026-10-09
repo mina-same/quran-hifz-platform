@@ -4,6 +4,7 @@ import { useChildHifz } from "../../api/parent";
 import { Card } from "../../components/common/Card";
 import { SkeletonList } from "../../components/common/Skeleton";
 import { AR_LOCALE } from "@/lib/format";
+import { EmptyState } from "../../components/common/EmptyState";
 
 const STATUS_COLOR: Record<string, string> = {
   "مكتمل": "var(--green)",
@@ -27,9 +28,7 @@ export function ParentTimeline() {
       {isLoading ? (
         <SkeletonList rows={5} avatar={true} />
       ) : (hifzEntries ?? []).length === 0 ? (
-        <p style={{ textAlign: "center", color: "var(--text2)", padding: 24, fontSize: 12 }}>
-          لا توجد سجلات حفظ بعد.
-        </p>
+        <EmptyState icon="ti-timeline" title="لا توجد سجلات حفظ بعد" />
       ) : (
         <div style={{ position: "relative", paddingRight: 28 }}>
           <div style={{ position: "absolute", right: 13, top: 0, bottom: 0, width: 2, background: "var(--border2)" }} />

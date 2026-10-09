@@ -15,6 +15,7 @@ import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { TrackStudentsPanel } from "../../components/common/TrackStudentsPanel";
 import { AR_LOCALE } from "@/lib/format";
 import { toast } from "sonner";
+import { EmptyState } from "../../components/common/EmptyState";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -116,23 +117,16 @@ export function AdminTracks() {
       {isLoading && <SkeletonCardGrid count={3} lines={4} />}
 
       {!isLoading && tracks.length === 0 && (
-        <div style={{ textAlign: "center", padding: "56px 0" }}>
-          <div style={{
-            width: 72, height: 72, borderRadius: 18,
-            background: "var(--green-pale)", color: "var(--green)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 32, margin: "0 auto 16px",
-          }}>
-            <i className="ti ti-calendar-event" />
-          </div>
-          <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--text)" }}>لا توجد مسارات بعد</p>
-          <p style={{ margin: "6px 0 20px", fontSize: 13, color: "var(--text3)" }}>أضف أول مسار</p>
-          {!readOnly && (
+        <EmptyState
+          icon="ti-calendar-event"
+          title="لا توجد مسارات بعد"
+          description="أضف أول مسار، ثم أسند إليه المعلمين والطلاب"
+          action={!readOnly && (
             <button className="topbar-btn btn-primary" style={{ padding: "10px 24px" }} onClick={openAdd}>
               <i className="ti ti-plus" /> مسار جديد
             </button>
           )}
-        </div>
+        />
       )}
 
       {!isLoading && tracks.length > 0 && (

@@ -64,6 +64,7 @@ import {
   nextPointAfter,
 } from "../../lib/quranRange";
 import { toAr, AR_LOCALE } from "../../../lib/format";
+import { EmptyState } from "../../components/common/EmptyState";
 
 /** Formats a schedule day's page position: a clean page boundary shows as a
  * plain integer, a partial (mid-page) position shows one decimal, e.g. `٢.٧`
@@ -303,9 +304,7 @@ function LinkPlanPanel({
       {isLoading && <p style={{ fontSize: 12, color: "var(--text3)" }}>جارٍ التحميل...</p>}
 
       {!isLoading && linkable.length === 0 && (
-        <p style={{ margin: "0 0 12px", fontSize: 12, color: "var(--text3)" }}>
-          لا توجد خطط أخرى يمكن ربطها بهذا المسار.
-        </p>
+        <EmptyState compact icon="ti-link-off" title="لا توجد خطط أخرى يمكن ربطها بهذا المسار" />
       )}
 
       {!isLoading && linkable.length > 0 && (
@@ -1141,9 +1140,7 @@ export function TeacherTrackDetail() {
           }
         >
           {track.teachers.length === 0 ? (
-            <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-              لا يوجد معلمون مُسنَدون لهذا المسار
-            </div>
+            <EmptyState compact icon="ti-chalkboard" title="لا يوجد معلمون مُسنَدون لهذا المسار" />
           ) : (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {track.teachers.map((tc, i) => {
@@ -1342,9 +1339,7 @@ export function TeacherTrackDetail() {
             }
           >
             {enrolled === 0 ? (
-              <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                لا يوجد طلاب مسجّلون بعد
-              </div>
+              <EmptyState compact icon="ti-users" title="لا يوجد طلاب مسجّلون بعد" />
             ) : (
               <div className="att-list">
                 {roster.map((s) => {

@@ -21,6 +21,7 @@ import { DaysOfWeekPicker } from "../../components/common/DaysOfWeekPicker";
 import { SurahPointFields } from "../../components/common/SurahRangePicker";
 import { IndividualPlanPanel } from "../../components/common/IndividualPlanPanel";
 import { countRangeAyahs, pageRangeOfAyahRange, computeMultiScheduleBreakdown, computeOpenScheduleDates, surahName, WEEK_DAYS, validateSegmentDays} from "../../lib/quranRange";
+import { EmptyState } from "../../components/common/EmptyState";
 
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString(AR_LOCALE, { year: "numeric", month: "short", day: "numeric" });
@@ -1206,7 +1207,7 @@ function StudentPicker({
       )}
       <div style={{ border: "1px solid var(--border)", borderRadius: 10, maxHeight: 160, overflowY: "auto" }}>
         {students.length === 0 && (
-          <div style={{ padding: 12, fontSize: 12, color: "var(--text3)", textAlign: "center" }}>لا يوجد طلاب مسجّلون</div>
+          <EmptyState compact icon="ti-users" title="لا يوجد طلاب مسجّلون" />
         )}
         {students.map((s, i) => {
           const isSel = selected.includes(s._id);

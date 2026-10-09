@@ -6,6 +6,7 @@ import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonList } from "../../components/common/Skeleton";
 import { AR_LOCALE } from "@/lib/format";
+import { EmptyState } from "../../components/common/EmptyState";
 
 export function ParentHomeworkView() {
   const { activeChild } = useParentContext();
@@ -24,9 +25,7 @@ export function ParentHomeworkView() {
         {isLoading ? (
           <SkeletonList rows={4} avatar={true} />
         ) : groupHWs.length === 0 ? (
-          <p style={{ color: "var(--text2)", padding: 16, textAlign: "center", fontSize: 12 }}>
-            لا توجد واجبات جماعية
-          </p>
+          <EmptyState compact icon="ti-clipboard-list" title="لا توجد واجبات جماعية" />
         ) : (
           groupHWs.map((hw, i) => (
             <div
@@ -54,9 +53,7 @@ export function ParentHomeworkView() {
 
       <Card icon="ti-user" title={`واجبات خاصة بـ ${activeChild?.name ?? "—"}`}>
         {individualHWs.length === 0 ? (
-          <p style={{ color: "var(--text2)", padding: 16, textAlign: "center", fontSize: 12 }}>
-            لا توجد واجبات فردية حالياً — ممتاز!
-          </p>
+          <EmptyState compact icon="ti-confetti" title="لا توجد واجبات فردية حالياً" description="ممتاز! لا شيء متأخر" />
         ) : (
           individualHWs.map((hw, i) => (
             <div

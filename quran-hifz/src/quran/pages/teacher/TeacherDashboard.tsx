@@ -9,6 +9,7 @@ import { useTracks } from "../../api/tracks";
 import { useHomework } from "../../api/homework";
 import { toAr } from "../../../lib/format";
 import { trackToContext } from "../../components/common/ContextPicker";
+import { EmptyState } from "../../components/common/EmptyState";
 
 export function TeacherDashboard() {
   const { showPage, user } = usePortal();
@@ -40,7 +41,7 @@ export function TeacherDashboard() {
       <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
         <Card icon="ti-school" title="حلقاتي ومساراتي">
           {contexts.length === 0 && (
-            <div className="page-loading">لا توجد حلقات أو مسارات مسجلة</div>
+            <EmptyState compact icon="ti-school-off" title="لا توجد حلقات أو مسارات مسجلة" />
           )}
           {contexts.map((c) => (
             <div key={c.id} className="halqa-row-item">
