@@ -456,3 +456,5 @@ Plan-level, immutable after creation (updatePlan rejects a change). Segments car
 
 ### Key Learning — student/parent scoping for GET /evaluations (2026-10-02)
 JWT `req.user` has only id/role/name/supervisorGender. A student's Student doc is `User.profileId` (look up via `User.findById(req.user.id).select('profileId')`); a parent's children are `ParentStudent.find({ parent: req.user.id })` (parent = User id). `getEvaluations` now forces `filter.student` to those for role student/parent — follow the same pattern for any other student-data GET that is open to all authenticated roles.
+
+- 2026-10-09: Daily report «متعثر» rule (user decision): present student with score **0** in الحفظ or المراجعة criterion only; composer chips are الحفظ/المراجعة only. Draft is a suggestion — teacher edits then presses send.

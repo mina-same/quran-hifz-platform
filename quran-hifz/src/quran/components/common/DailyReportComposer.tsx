@@ -7,7 +7,7 @@ import { toAr } from "../../../lib/format";
 
 type ListKey = "struggling" | "absent" | "excused";
 
-const AREAS = ["الحفظ", "المراجعة", "التجويد", "التلاوة"];
+const AREAS = ["الحفظ", "المراجعة"];
 
 const SECTIONS: { key: ListKey; icon: string; title: string; notePlaceholder: string }[] = [
   { key: "struggling", icon: "⚠️", title: "المتعثرون", notePlaceholder: "ملاحظة (اختياري)" },

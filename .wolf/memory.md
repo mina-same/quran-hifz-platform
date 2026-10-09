@@ -4478,3 +4478,5 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 18:24 | daily report struggling area chips → الحفظ/المراجعة only | DailyReportComposer.tsx | done | ~300 |
+| 18:27 | daily report draft: struggling = score 0 in الحفظ/المراجعة only | daily-report.controller.ts | done | ~400 |

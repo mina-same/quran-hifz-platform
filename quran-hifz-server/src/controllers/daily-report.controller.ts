@@ -21,6 +21,9 @@ function dayRange(date: string): { $gte: Date; $lt: Date } {
 }
 
 /** «حفظ» → «الحفظ» (criteria labels are stored bare). */
+/** The only areas a daily report flags — matches the composer's chips. */
+const STRUGGLE_AREAS = ['الحفظ', 'المراجعة'];
+
 function withAl(label: string): string {
   return label.startsWith('ال') ? label : `ال${label}`;
 }
@@ -52,8 +55,8 @@ async function assertCanWrite(req: Request, trackId: string): Promise<void> {
 /**
  * GET /daily-reports/draft?track=&date= — the day's report pre-filled from
  * what the teacher already recorded: absent/excused from attendance (reason =
- * the evaluation note) and «متعثر» for any present student who scored under
- * half in a graded criterion. Returns the saved report instead if one exists.
+ * the evaluation note) and «متعثر» for any present student who scored zero
+ * in the حفظ or مراجعة criterion. Returns the saved report instead if one exists.
  */
 export async function getDraft(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -92,8 +95,9 @@ export async function getDraft(req: Request, res: Response, next: NextFunction):
       else if (status === 'مستأذن') excused.push(line(id, { note }));
       else {
         const weak = (evalOf.get(id)?.criteria ?? [])
-          .filter((c) => c.key !== 'attendance' && c.max > 0 && c.value < c.max / 2)
-          .map((c) => withAl(c.label));
+          .filter((c) => c.max > 0 && c.value === 0)
+          .map((c) => withAl(c.label))
+          .filter((a) => STRUGGLE_AREAS.includes(a));
         if (weak.length) struggling.push(line(id, { area: weak.join('، '), note }));
       }
     }
