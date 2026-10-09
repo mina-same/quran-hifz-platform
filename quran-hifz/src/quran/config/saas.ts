@@ -11,8 +11,8 @@ export const TRIAL_DAYS = 7;
  *  Vercel's free domains are *.vercel.app — vercel.com is Vercel's own site. */
 export const PUBLIC_DOMAIN = "wardi-app.vercel.app";
 
-/** Wardi logo: gold drop + two leaves over an open Mushaf. PNG twins for touch icons / social cards. */
-export const PLATFORM_LOGO = "/brand/logo.svg";
+/** Wardi logo, cut from the original artwork (docs/brand/wardi-logo-original.png). */
+export const PLATFORM_LOGO = "/brand/logo.png";
 export const PLATFORM_LOGO_PNG = "/brand/logo-512.png";
 /** 1200×630 social preview (logo + «وردي / WARDI»). */
 export const PLATFORM_OG_IMAGE = "/brand/og.png";
