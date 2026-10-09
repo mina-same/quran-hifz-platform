@@ -5334,28 +5334,28 @@ a.blog-related-card:hover { transform: translateY(-2px); }
 .su-card .latin-hint, .su-layout .latin-hint { margin: -6px 0 14px; }
 .saas-goto-on-video .latin-hint { justify-content: center; }
 
-/* ── Sidebar trial countdown (compact) ──────────────────────────────────── */
+/* ── Sidebar trial countdown ────────────────────────────────────────────── */
 .trial-cd {
-  display: flex; align-items: center; gap: 10px; margin: 8px 12px 10px; padding: 10px 12px;
-  border-radius: 14px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff; flex-shrink: 0;
+  margin: 8px 12px 10px; padding: 11px 13px 10px; border-radius: 14px; flex-shrink: 0; color: #fff;
+  background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex; flex-direction: column; gap: 6px;
 }
-.trial-cd-ring { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
-.trial-cd-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.trial-cd-ring circle { fill: none; stroke-width: 3.5; }
-.trial-cd-ring .track { stroke: rgba(255, 255, 255, 0.15); }
-.trial-cd-ring .fill { stroke: #f3d77e; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
-.trial-cd-ring span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; }
-.trial-cd-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; }
-.trial-cd-label { font-size: 11.5px; color: rgba(255, 255, 255, 0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.trial-cd-time { font-size: 14px; font-weight: 700; letter-spacing: 0.5px; font-variant-numeric: tabular-nums; text-align: right; }
+.trial-cd-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.trial-cd-label { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; color: rgba(255, 255, 255, 0.72); }
+.trial-cd-label i { font-size: 14px; color: #f3d77e; }
+.trial-cd-left { font-size: 13px; color: rgba(255, 255, 255, 0.85); line-height: 1.5; }
+.trial-cd-left b { font-size: 14.5px; font-weight: 800; color: #fff; }
+.trial-cd-bar { height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); overflow: hidden; }
+.trial-cd-bar i { display: block; height: 100%; border-radius: inherit; background: #f3d77e; transition: width 0.6s ease; }
+.trial-cd-end { font-size: 11px; color: rgba(255, 255, 255, 0.58); }
 .trial-cd-cta {
-  flex-shrink: 0; display: inline-flex; align-items: center; gap: 3px; padding: 5px 9px; border-radius: 8px;
+  display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px; border-radius: 7px;
   background: #fff; color: #1a5c2a; font-size: 11.5px; font-weight: 800; text-decoration: none; transition: opacity 0.15s;
 }
 .trial-cd-cta:hover { opacity: 0.88; }
-.trial-cd.urgent .trial-cd-ring .fill { stroke: #ffb4a8; }
-.trial-cd.urgent .trial-cd-time { color: #ffd2cb; }
+.trial-cd.urgent { background: rgba(255, 120, 100, 0.12); border-color: rgba(255, 180, 168, 0.35); }
+.trial-cd.urgent .trial-cd-label i, .trial-cd.urgent .trial-cd-left b { color: #ffc4ba; }
+.trial-cd.urgent .trial-cd-bar i { background: #ff9d8c; }
 
 /* ── Sign-in links ──────────────────────────────────────────────────────── */
 .saas-nav-login { color: var(--green); font-weight: 700; font-size: 14px; text-decoration: none; padding: 6px 4px; }

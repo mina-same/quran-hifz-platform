@@ -91,57 +91,76 @@ export function SubscriptionEnded() {
   );
 }
 
-/** Remaining ms until `iso`, refreshed every second (null until mounted, so
+/** Remaining ms until `iso`, refreshed every 30s (null until mounted, so
  *  SSR and the first client render agree). */
 function useRemaining(iso: string): number | null {
   const [left, setLeft] = useState<number | null>(null);
   useEffect(() => {
     const tick = () => setLeft(Math.max(0, new Date(iso).getTime() - Date.now()));
     tick();
-    const id = setInterval(tick, 1000);
+    const id = setInterval(tick, 30_000);
     return () => clearInterval(id);
   }, [iso]);
   return left;
 }
 
-const pad = (n: number) => toAr(String(n).padStart(2, "0"));
+/** Arabic count + noun with the right plural form (١ يوم، يومان، ٣ أيام، ١١ يوماً). */
+function countWord(n: number, one: string, two: string, few: string, many: string): string {
+  if (n === 1) return one;
+  if (n === 2) return two;
+  if (n <= 10) return `${toAr(n)} ${few}`;
+  return `${toAr(n)} ${many}`;
+}
+const daysWord = (n: number) => countWord(n, "يوم واحد", "يومان", "أيام", "يوماً");
+const hoursWord = (n: number) => countWord(n, "ساعة", "ساعتان", "ساعات", "ساعة");
+const minutesWord = (n: number) => countWord(n, "دقيقة", "دقيقتان", "دقائق", "دقيقة");
 
-/** Sidebar: compact live countdown to the end of the free trial — a progress
- *  ring with the days left, and the hours:minutes:seconds beside it. */
+/** «٦ أيام و٢٣ ساعة» — or, on the last day, «٥ ساعات و٢٠ دقيقة». */
+function remainingText(ms: number): string {
+  const days = Math.floor(ms / 86_400_000);
+  const hours = Math.floor((ms % 86_400_000) / 3_600_000);
+  const minutes = Math.floor((ms % 3_600_000) / 60_000);
+  if (days > 0) return hours > 0 ? `${daysWord(days)} و${hoursWord(hours)}` : daysWord(days);
+  if (hours > 0) return minutes > 0 ? `${hoursWord(hours)} و${minutesWord(minutes)}` : hoursWord(hours);
+  return minutes > 0 ? minutesWord(minutes) : "أقل من دقيقة";
+}
+
+/** «اليوم الساعة ١٠:٣٠ م» / «غداً الساعة …» / «الجمعة، ١٦ أكتوبر». */
+function endLabel(end: Date): string {
+  const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const time = end.toLocaleTimeString("ar-EG", { hour: "numeric", minute: "2-digit" });
+  if (dayKey(end) === dayKey(new Date())) return `اليوم الساعة ${time}`;
+  if (dayKey(end) === dayKey(tomorrow)) return `غداً الساعة ${time}`;
+  return end.toLocaleDateString("ar-EG", { weekday: "long", day: "numeric", month: "long" });
+}
+
+/** Sidebar card: how much of the free trial is left, in words. */
 export function TrialCountdown() {
   const { tenant, user } = useAuth();
   const left = useRemaining(tenant?.trialEndsAt ?? new Date(0).toISOString());
   if (!tenant || tenant.status !== "trial" || left === null) return null;
 
-  const days = Math.floor(left / 86_400_000);
-  const hours = Math.floor((left % 86_400_000) / 3_600_000);
-  const minutes = Math.floor((left % 3_600_000) / 60_000);
-  const seconds = Math.floor((left % 60_000) / 1000);
   const remaining = Math.min(1, left / (TRIAL_DAYS * 86_400_000));
-  const urgent = left <= 2 * 86_400_000;
+  const lastDay = left < 86_400_000;
+  const ended = left === 0;
+  const endsOn = endLabel(new Date(tenant.trialEndsAt));
   const message = `السلام عليكم، أرغب في تفعيل اشتراك ${tenant.name} (/${tenant.slug}) في ${PLATFORM_NAME}`;
 
-  const R = 19;
-  const C = 2 * Math.PI * R;
-
   return (
-    <div className={`trial-cd ${urgent ? "urgent" : ""}`} role="timer" aria-label={`متبقٍّ على الفترة التجريبية ${days} يوم و${hours} ساعة`}>
-      <div className="trial-cd-ring" aria-hidden="true">
-        <svg viewBox="0 0 44 44">
-          <circle cx="22" cy="22" r={R} className="track" />
-          <circle cx="22" cy="22" r={R} className="fill" strokeDasharray={C} strokeDashoffset={C * (1 - remaining)} />
-        </svg>
-        <span>{toAr(days)}</span>
+    <div className={`trial-cd ${lastDay ? "urgent" : ""}`} role="status">
+      <div className="trial-cd-top">
+        <span className="trial-cd-label"><i className={`ti ${lastDay ? "ti-hourglass-low" : "ti-hourglass-high"}`} /> الفترة التجريبية</span>
+        {user?.role === "admin" && (
+          <a className="trial-cd-cta" href={salesWhatsappLink(message)} target="_blank" rel="noreferrer" title="فعّل الاشتراك عبر واتساب">
+            اشترك <i className="ti ti-arrow-left" />
+          </a>
+        )}
       </div>
-      <div className="trial-cd-text">
-        <span className="trial-cd-label">{days > 0 ? "متبقٍّ على التجربة" : "آخر يوم في التجربة"}</span>
-        <span className="trial-cd-time" dir="ltr">{pad(hours)}:{pad(minutes)}:{pad(seconds)}</span>
-      </div>
-      {user?.role === "admin" && (
-        <a className="trial-cd-cta" href={salesWhatsappLink(message)} target="_blank" rel="noreferrer" title="فعّل الاشتراك عبر واتساب">
-          اشترك <i className="ti ti-arrow-left" />
-        </a>
-      )}
+      <div className="trial-cd-left">{ended ? "انتهت الفترة التجريبية" : <>متبقٍّ <b>{remainingText(left)}</b></>}</div>
+      <div className="trial-cd-bar" aria-hidden="true"><i style={{ width: `${remaining * 100}%` }} /></div>
+      {!ended && <div className="trial-cd-end">تنتهي {endsOn}</div>}
     </div>
   );
 }
