@@ -14,6 +14,7 @@ import {
   type StoredTenant,
 } from "../../lib/auth-storage";
 import { tenantHasAccess } from "../config/saas";
+import { setPlatformToken } from "../../lib/platformSession";
 
 export type AuthUser = StoredUser;
 export type AuthTenant = StoredTenant;
@@ -34,6 +35,14 @@ export type SessionResponse = {
   tenant: AuthTenant;
 };
 
+/** /auth/login answer when the credentials belong to the platform owner. */
+export type PlatformSessionResponse = {
+  success: boolean;
+  role: "superadmin";
+  token: string;
+  admin: { id: string; name: string; email: string };
+};
+
 type MeResponse = {
   success: boolean;
   user: ApiUser & { _id: string };
@@ -47,7 +56,7 @@ type AuthContextValue = {
   /** False once the organisation's trial/subscription has ended. */
   hasAccess: boolean;
   /** Resolves with the session so callers can route to `/<tenant.slug>`. */
-  login: (email: string, password: string, slug?: string) => Promise<SessionResponse>;
+  login: (email: string, password: string, slug?: string) => Promise<SessionResponse | PlatformSessionResponse>;
   /** Adopt a session the server already issued (signup). */
   startSession: (res: SessionResponse) => void;
   logout: () => void;
@@ -119,8 +128,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string, slug?: string) => {
-      const res = await post<SessionResponse>("/auth/login", { email, password, slug });
-      startSession(res);
+      const res = await post<SessionResponse | PlatformSessionResponse>("/auth/login", { email, password, slug });
+      if ("role" in res && res.role === "superadmin") {
+        // Platform owner: a console session, not an organisation one.
+        setPlatformToken(res.token);
+        return res;
+      }
+      startSession(res as SessionResponse);
       return res;
     },
     [startSession],

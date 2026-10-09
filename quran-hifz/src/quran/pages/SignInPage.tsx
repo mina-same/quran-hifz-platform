@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "../context/AuthContext";
 import { useRedirectIfSignedIn } from "../context/useRedirectIfSignedIn";
@@ -7,6 +7,7 @@ import { ApiError } from "../../lib/api";
 import { hasArabic } from "../../lib/latin";
 import { LatinHint } from "../components/LatinHint";
 import { LoginIntro } from "../components/LoginIntro";
+import { getPlatformToken } from "../../lib/platformSession";
 import { PLATFORM_LOGO, PLATFORM_NAME, PUBLIC_DOMAIN } from "../config/saas";
 
 /**
@@ -19,6 +20,10 @@ export function SignInPage() {
   const redirecting = useRedirectIfSignedIn();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  // Already signed in as the platform owner → straight to the console.
+  useEffect(() => {
+    if (getPlatformToken()) navigate({ to: "/super", replace: true });
+  }, [navigate]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [slug, setSlug] = useState("");
@@ -36,7 +41,8 @@ export function SignInPage() {
     setError("");
     try {
       const res = await login(email.trim(), password, needSlug ? slug.trim().toLowerCase() : undefined);
-      navigate({ to: "/$slug", params: { slug: res.tenant.slug } });
+      if ("role" in res && res.role === "superadmin") navigate({ to: "/super" });
+      else if ("tenant" in res) navigate({ to: "/$slug", params: { slug: res.tenant.slug } });
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setNeedSlug(true);

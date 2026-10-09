@@ -7,6 +7,8 @@ import { Student } from '../models/Student.model';
 import { Tenant, type ITenant } from '../models/Tenant.model';
 import { ENV } from '../config/env';
 import { AppError } from '../middleware/error';
+import { PlatformAdmin } from '../models/PlatformAdmin.model';
+import { signPlatformToken } from '../middleware/platformAuth';
 
 const loginSchema = z.object({
   email:    z.string().email('بريد إلكتروني غير صالح'),
@@ -57,6 +59,24 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
   try {
     const { email, password, slug } = loginSchema.parse(req.body);
     const invalid = new AppError('البريد الإلكتروني أو كلمة المرور غير صحيحة', 401);
+
+    // One login page for every role: on the platform-wide /login (no slug) a
+    // super admin's credentials sign in to the platform console instead of an
+    // organisation. Checked first; any mismatch falls through to org users.
+    if (!slug) {
+      const admin = await PlatformAdmin.findOne({ email: email.toLowerCase(), isActive: true }).select('+password');
+      if (admin && (await admin.comparePassword(password))) {
+        admin.lastLoginAt = new Date();
+        await admin.save();
+        res.json({
+          success: true,
+          role: 'superadmin',
+          token: signPlatformToken(String(admin._id), admin.name),
+          admin: { id: admin._id, name: admin.name, email: admin.email },
+        });
+        return;
+      }
+    }
 
     // Login runs outside any tenant context, so the tenant filter is explicit here.
     let user;

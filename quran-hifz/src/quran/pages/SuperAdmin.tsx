@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ApiError, get, patch, post } from "../../lib/api";
+import { useNavigate } from "@tanstack/react-router";
+import { ApiError, get, patch } from "../../lib/api";
+import { getPlatformToken, setPlatformToken } from "../../lib/platformSession";
 import { toAr } from "../../lib/format";
-import { hasArabic } from "../../lib/latin";
 import { useTheme } from "../context/ThemeContext";
 import { LatinHint } from "../components/LatinHint";
 import { PLATFORM_LOGO, PLATFORM_NAME, PUBLIC_DOMAIN } from "../config/saas";
@@ -13,14 +14,6 @@ import { EmptyState } from "../components/common/EmptyState";
  * mixes with an organisation session in the same browser.
  */
 
-const TOKEN_KEY = "qh_platform_token";
-
-function readToken(): string | null {
-  try { return localStorage.getItem(TOKEN_KEY); } catch { return null; }
-}
-function writeToken(t: string | null): void {
-  try { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); } catch { /* private mode */ }
-}
 const auth = (token: string) => ({ headers: { Authorization: `Bearer ${token}` } });
 
 type OrgType = "association" | "masjid" | "school" | "center" | "individual";
@@ -84,73 +77,6 @@ function StatusBadge({ t }: { t: TenantRow }) {
   if (s === "active") return <span className="sa-badge active">مشترك {t.paidUntil ? `حتى ${fmtDate(t.paidUntil)}` : "— مفتوح"}</span>;
   if (s === "suspended") return <span className="sa-badge suspended">موقوف</span>;
   return <span className="sa-badge expired">{t.status === "active" ? "انتهى الاشتراك" : "انتهت التجربة"}</span>;
-}
-
-/* ── Login ──────────────────────────────────────────────────────────────── */
-
-function SuperLogin({ onToken }: { onToken: (t: string) => void }) {
-  const { theme, toggleTheme } = useTheme();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    if (hasArabic(email) || hasArabic(password)) return;
-    setBusy(true);
-    setError("");
-    try {
-      const res = await post<{ token: string }>("/platform/login", { email, password });
-      writeToken(res.token);
-      onToken(res.token);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "تعذّر تسجيل الدخول");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="login-page">
-      <div className="login-topbar">
-        <a className="login-back-btn" href="/"><i className="ti ti-arrow-right" /><span>الرئيسية</span></a>
-        <div style={{ flex: 1 }} />
-        <button className="login-theme-btn" onClick={toggleTheme} aria-label="تبديل المظهر">
-          <i className={`ti ${theme === "dark" ? "ti-sun" : "ti-moon"}`} />
-        </button>
-      </div>
-      <div className="login-center">
-        <form className="login-card" onSubmit={submit} noValidate>
-          <div className="login-card-header">
-            <div className="login-logo-wrap"><img src={PLATFORM_LOGO} alt="" className="login-logo" /></div>
-            <h1 className="login-org-name">لوحة مالك المنصة</h1>
-            <p className="login-org-sub">{PLATFORM_NAME} — دخول المشرف العام</p>
-          </div>
-          <div className="login-field">
-            <label className="login-label" htmlFor="sa-email">البريد الإلكتروني</label>
-            <div className="login-input-wrap">
-              <i className="ti ti-mail login-input-icon" />
-              <input id="sa-email" className="login-input" type="email" dir="ltr" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <LatinHint value={email} />
-          </div>
-          <div className="login-field">
-            <label className="login-label" htmlFor="sa-pass">كلمة المرور</label>
-            <div className="login-input-wrap">
-              <i className="ti ti-lock login-input-icon" />
-              <input id="sa-pass" className="login-input" type="password" dir="ltr" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            </div>
-            <LatinHint value={password} />
-          </div>
-          {error && <div className="login-server-error" role="alert"><i className="ti ti-shield-x" /> {error}</div>}
-          <button type="submit" className="login-submit" disabled={busy || !email || !password}>
-            {busy ? <><i className="ti ti-loader-2 lp-spin" /> جارٍ التحقق...</> : <>دخول <i className="ti ti-arrow-left" /></>}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
 }
 
 /* ── Action dialog ──────────────────────────────────────────────────────── */
@@ -408,10 +334,18 @@ function SuperConsole({ token, onLogout }: { token: string; onLogout: () => void
 }
 
 export function SuperAdmin() {
+  const navigate = useNavigate();
   const [token, setToken] = useState<string | null>(null);
-  const [ready, setReady] = useState(false);
-  useEffect(() => { setToken(readToken()); setReady(true); }, []);
-  const logout = useCallback(() => { writeToken(null); setToken(null); }, []);
-  if (!ready) return null;
-  return token ? <SuperConsole token={token} onLogout={logout} /> : <SuperLogin onToken={setToken} />;
+  useEffect(() => {
+    const t = getPlatformToken();
+    // One login page for every role: not signed in as super admin → /login.
+    if (!t) navigate({ to: "/login", replace: true });
+    else setToken(t);
+  }, [navigate]);
+  const logout = useCallback(() => {
+    setPlatformToken(null);
+    navigate({ to: "/login", replace: true });
+  }, [navigate]);
+  if (!token) return null;
+  return <SuperConsole token={token} onLogout={logout} />;
 }
