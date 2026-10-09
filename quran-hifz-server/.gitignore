@@ -2,3 +2,6 @@ node_modules/
 dist/
 .env
 *.js.map
+
+# SaaS branch database settings — holds credentials, never commit
+.env.saas
