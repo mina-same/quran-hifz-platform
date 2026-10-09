@@ -1,4 +1,4 @@
-import { PLATFORM_LOGO_PNG, PLATFORM_NAME, PUBLIC_DOMAIN } from "@/quran/config/saas";
+import { PLATFORM_NAME, PLATFORM_OG_IMAGE, PUBLIC_DOMAIN } from "@/quran/config/saas";
 
 /** Absolute site origin for canonical/OG URLs. VITE_PUBLIC_URL overrides it
  *  (e.g. a preview deployment or a custom domain later). */
@@ -26,7 +26,7 @@ type SeoInput = {
   tags?: string[];
 };
 
-const DEFAULT_IMAGE: SeoImage = { src: PLATFORM_LOGO_PNG, alt: `شعار ${PLATFORM_NAME}`, width: 512, height: 512 };
+const DEFAULT_IMAGE: SeoImage = { src: PLATFORM_OG_IMAGE, alt: `شعار ${PLATFORM_NAME}`, width: 1200, height: 630 };
 
 /** Per-route `head()` meta + links: title, description, canonical, OG, Twitter. */
 export function seo({

@@ -49,7 +49,7 @@ export type BlogPost = {
   faq: BlogFaq[];
 };
 
-export const BLOG_AUTHOR = "فريق تحرير منصة حِفظ";
+export const BLOG_AUTHOR = "فريق تحرير وردي";
 
 export const BLOG_POSTS: BlogPost[] = [
   // ────────────────────────────────────────────────────────────────────────

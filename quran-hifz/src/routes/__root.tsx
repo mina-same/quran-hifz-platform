@@ -73,12 +73,12 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   );
 }
 
-const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL || "https://hifz-platform.vercel.app";
-const SITE_TITLE = "منصة حِفظ";
+const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL || "https://wardi-app.vercel.app";
+const SITE_TITLE = "وردي — منصة إدارة حلقات تحفيظ القرآن الكريم";
 const SITE_DESCRIPTION =
   "منصة متكاملة لإدارة حلقات تحفيظ القرآن الكريم — بوابات للطلاب والمعلمين وأولياء الأمور والإدارة";
 const SITE_URL = `${PUBLIC_URL}/`;
-const OG_IMAGE = `${PUBLIC_URL}/brand/logo-512.png`;
+const OG_IMAGE = `${PUBLIC_URL}/brand/og.png`;
 
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -95,9 +95,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:url", content: SITE_URL },
       { property: "og:image", content: OG_IMAGE },
-      { property: "og:image:width", content: "512" },
-      { property: "og:image:height", content: "512" },
-      { property: "og:image:alt", content: "شعار منصة حِفظ" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "شعار وردي" },
       { property: "og:locale", content: "ar_SA" },
       // Twitter / X
       { name: "twitter:card", content: "summary_large_image" },

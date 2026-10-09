@@ -31,8 +31,11 @@ const app = express();
 
 // ── Security & utilities ──────────────────────────────────────────────────────
 app.use(helmet());
+// CLIENT_URL may list several origins, comma-separated (production domain,
+// custom domain, …) — e.g. "https://wardi-app.vercel.app,https://wardi.app".
+const allowedOrigins = ENV.CLIENT_URL.split(',').map((o) => o.trim()).filter(Boolean);
 app.use(cors({
-  origin:      ENV.CLIENT_URL,
+  origin:      allowedOrigins.length > 1 ? allowedOrigins : allowedOrigins[0],
   credentials: true,
   methods:     ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 }));

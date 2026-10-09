@@ -1,18 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="حِفظ">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="وردي">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1f6b32"/>
-      <stop offset="1" stop-color="#123f1d"/>
-    </linearGradient>
+    <linearGradient id="wb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f7d68"/><stop offset="1" stop-color="#1d5c55"/></linearGradient>
+    <linearGradient id="wl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f8a5c"/><stop offset="1" stop-color="#2f7458"/></linearGradient>
+    <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9b678"/><stop offset="1" stop-color="#c49a55"/></linearGradient>
   </defs>
-  <rect width="64" height="64" rx="16" fill="url(#g)"/>
-  <!-- Rub el Hizb (۞) -->
-  <g transform="translate(32 21)" fill="#e0b840">
-    <rect x="-8" y="-8" width="16" height="16"/>
-    <rect x="-8" y="-8" width="16" height="16" transform="rotate(45)"/>
+  <rect width="64" height="64" rx="15" fill="#fbf8ef"/>
+  <g transform="translate(-4 8.6) scale(0.6)">
+    <path d="M60 2 C64 8 70 13 68 20 C66 25 62 26 60 31 C58 26 54 25 52 20 C50 13 56 8 60 2 Z" fill="url(#wg)"/>
+    <g fill="url(#wb)">
+      <path d="M34 47 L38.5 40 C50 42 56 50 59 61 C52 53 44 49 34 47 Z"/>
+      <path d="M86 47 L81.5 40 C70 42 64 50 61 61 C68 53 76 49 86 47 Z"/>
+      <path d="M23 59 L28 51 C44 52 54 60 60 69 C66 60 76 52 92 51 L97 59 C80 59 68 65 60 76 C52 65 40 59 23 59 Z"/>
+    </g>
+    <path d="M58.6 57 C58.8 46 55 37 46 29 C42.5 40 46 50 58.6 57 Z" fill="url(#wl)" stroke="#fbf8ef" stroke-width="2" stroke-linejoin="round" paint-order="stroke"/>
+    <path d="M61.4 57 C61.2 46 65 37 74 29 C77.5 40 74 50 61.4 57 Z" fill="url(#wl)" stroke="#fbf8ef" stroke-width="2" stroke-linejoin="round" paint-order="stroke"/>
   </g>
-  <circle cx="32" cy="21" r="3.2" fill="#1a5c2a"/>
-  <!-- open book -->
-  <path d="M10 39c8-4.5 15-4 20.5 1v14c-5.5-4.6-12.5-5-20.5-1z" fill="#ffffff"/>
-  <path d="M54 39c-8-4.5-15-4-20.5 1v14c5.5-4.6 12.5-5 20.5-1z" fill="#ffffff" opacity="0.88"/>
 </svg>

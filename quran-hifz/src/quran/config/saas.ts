@@ -2,17 +2,20 @@
  * SaaS-level constants (quran-hifz-sass branch). The organisation's own name
  * comes from the signed-in tenant; these describe the platform itself.
  */
-export const PLATFORM_NAME = "منصة حِفظ";
+export const PLATFORM_NAME = "وردي";
+export const PLATFORM_NAME_EN = "Wardi";
 export const PLATFORM_TAGLINE = "منصة سحابية لإدارة حلقات تحفيظ القرآن الكريم";
 export const TRIAL_DAYS = 7;
 
 /** Public domain organisations' links live on (shown as "<domain>/<slug>").
  *  Vercel's free domains are *.vercel.app — vercel.com is Vercel's own site. */
-export const PUBLIC_DOMAIN = "hifz-platform.vercel.app";
+export const PUBLIC_DOMAIN = "wardi-app.vercel.app";
 
-/** Platform logo (۞ over an open Mushaf). PNG twin for social cards / touch icons. */
+/** Wardi logo: gold drop + two leaves over an open Mushaf. PNG twins for touch icons / social cards. */
 export const PLATFORM_LOGO = "/brand/logo.svg";
 export const PLATFORM_LOGO_PNG = "/brand/logo-512.png";
+/** 1200×630 social preview (logo + «وردي / WARDI»). */
+export const PLATFORM_OG_IMAGE = "/brand/og.png";
 
 /** Mobile app store pages. Leave empty until the app is published — the
  *  home page then shows the badge as "قريباً" instead of a dead link.
