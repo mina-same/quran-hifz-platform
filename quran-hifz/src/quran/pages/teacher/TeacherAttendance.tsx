@@ -60,6 +60,7 @@ import {
   nextPointAfter,
 } from "../../lib/quranRange";
 import { toAr, pct, AR_LOCALE } from "../../../lib/format";
+import { EmptyState } from "../../components/common/EmptyState";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -920,9 +921,7 @@ export function TeacherAttendance() {
           {loadingStudents ? (
             <SkeletonTable cols={3} rows={5} />
           ) : students.length === 0 ? (
-            <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-              لا يوجد طلاب
-            </div>
+            <EmptyState compact icon="ti-users" title="لا يوجد طلاب في هذا المسار" />
           ) : (
             <div className="att-list">
               {students.map((s) => {
