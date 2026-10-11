@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import {
@@ -11,6 +11,8 @@ import { SURAHS } from "../../data/surahs";
 import { isReversedRange, orientSlice } from "../../lib/quranRange";
 import { matchesGenderScope } from "../../lib/genderScope";
 import { Badge } from "../../components/common/Badge";
+import { Card } from "../../components/common/Card";
+import { Pagination } from "../../components/common/Pagination";
 import { SkeletonCardGrid } from "../../components/common/Skeleton";
 import { TrackStudentsPanel } from "../../components/common/TrackStudentsPanel";
 import { AR_LOCALE } from "@/lib/format";
@@ -60,6 +62,8 @@ const STATUS_CFG = {
   ended:    { label: "منتهي",  tone: "gray"  as const, color: "var(--text3)",  bg: "var(--cream)",      bar: "var(--border)" },
 };
 /* ════════════════════════════════════════════════════════════ */
+const PAGE_SIZE = 12;
+
 export function AdminTracks() {
   const { data: allTracks = [], isLoading } = useTracks();
   const { showPage, genderScope, readOnly } = usePortal();
@@ -106,10 +110,65 @@ export function AdminTracks() {
     ),
   );
 
-  /* ── group by status ── */
-  const active   = tracks.filter((t) => t.status === "active");
-  const upcoming = tracks.filter((t) => t.status === "upcoming");
-  const ended    = tracks.filter((t) => t.status === "ended");
+  /* ── search + filters ── */
+  const [search,        setSearch]        = useState("");
+  const [masjidFilter,  setMasjidFilter]  = useState("");
+  const [teacherFilter, setTeacherFilter] = useState("");
+  const [typeFilter,    setTypeFilter]    = useState("");
+  const [modeFilter,    setModeFilter]    = useState<"" | "online" | "onsite">("");
+  const [statusFilter,  setStatusFilter]  = useState<"" | Track["status"]>("");
+
+  const masjidNameOf = (t: Track) => (typeof t.masjid === "object" && t.masjid ? t.masjid.name : "");
+  const options = useMemo(() => {
+    const masajid = new Set<string>(), teachers = new Map<string, string>(), types = new Set<string>();
+    for (const t of tracks) {
+      const m = masjidNameOf(t);
+      if (m) masajid.add(m);
+      if (t.type) types.add(t.type);
+      for (const tc of t.teachers) teachers.set(getTeacherId(tc), getTeacherName(tc));
+    }
+    const ar = (a: string, b: string) => a.localeCompare(b, "ar");
+    return {
+      masajid: [...masajid].sort(ar),
+      teachers: [...teachers].sort((a, b) => ar(a[1], b[1])),
+      types: [...types].sort(ar),
+    };
+  }, [tracks]);
+
+  const q = search.trim();
+  const filtered = tracks.filter((t) =>
+    (!q || [t.title, masjidNameOf(t), ...t.teachers.map(getTeacherName)].some((v) => v?.includes(q)))
+    && (!masjidFilter  || masjidNameOf(t) === masjidFilter)
+    && (!teacherFilter || t.teachers.some((tc) => getTeacherId(tc) === teacherFilter))
+    && (!typeFilter    || t.type === typeFilter)
+    && (!modeFilter    || (modeFilter === "online") === !!t.isOnline)
+    && (!statusFilter  || t.status === statusFilter));
+  const isFiltered = !!(q || masjidFilter || teacherFilter || typeFilter || modeFilter || statusFilter);
+  function clearFilters() {
+    setSearch(""); setMasjidFilter(""); setTeacherFilter(""); setTypeFilter(""); setModeFilter(""); setStatusFilter("");
+  }
+
+  /* ── pagination — over the status-ordered list, then grouped ── */
+  const [page, setPage] = useState(1);
+  const filterKey = [q, masjidFilter, teacherFilter, typeFilter, modeFilter, statusFilter].join("|");
+  const [lastFilterKey, setLastFilterKey] = useState(filterKey);
+  if (filterKey !== lastFilterKey) { setLastFilterKey(filterKey); setPage(1); }
+
+  const STATUS_ORDER: Track["status"][] = ["active", "upcoming", "ended"];
+  const ordered  = STATUS_ORDER.flatMap((st) => filtered.filter((t) => t.status === st));
+  const pageCount = Math.max(1, Math.ceil(ordered.length / PAGE_SIZE));
+  const curPage  = Math.min(page, pageCount);
+  const pageRows = ordered.slice((curPage - 1) * PAGE_SIZE, curPage * PAGE_SIZE);
+  function goToPage(p: number) {
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* ── group by status (section headers keep the full filtered counts) ── */
+  const countOf  = (st: Track["status"]) => filtered.filter((t) => t.status === st).length;
+  const active   = pageRows.filter((t) => t.status === "active");
+  const upcoming = pageRows.filter((t) => t.status === "upcoming");
+  const ended    = pageRows.filter((t) => t.status === "ended");
 
   /* ════════════════════ RENDER ════════════════════════════ */
   return (
@@ -130,11 +189,64 @@ export function AdminTracks() {
       )}
 
       {!isLoading && tracks.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+        <Card>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
+            <div style={{ position: "relative", flex: "1 1 240px" }}>
+              <i className="ti ti-search" style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text3)", pointerEvents: "none" }} />
+              <input
+                className="form-input"
+                style={{ width: "100%", paddingRight: 36 }}
+                placeholder="ابحث باسم المسار أو المسجد أو المعلم..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                aria-label="بحث في المسارات"
+              />
+            </div>
+            <select className="form-input" style={{ flex: "0 1 170px" }} value={masjidFilter} onChange={(e) => setMasjidFilter(e.target.value)} aria-label="تصفية حسب المسجد">
+              <option value="">كل المساجد</option>
+              {options.masajid.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+            <select className="form-input" style={{ flex: "0 1 170px" }} value={teacherFilter} onChange={(e) => setTeacherFilter(e.target.value)} aria-label="تصفية حسب المعلم">
+              <option value="">كل المعلمين</option>
+              {options.teachers.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+            </select>
+            <select className="form-input" style={{ flex: "0 1 150px" }} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} aria-label="تصفية حسب النوع">
+              <option value="">كل الأنواع</option>
+              {options.types.map((ty) => <option key={ty} value={ty}>{ty}</option>)}
+            </select>
+            <select className="form-input" style={{ flex: "0 1 130px" }} value={modeFilter} onChange={(e) => setModeFilter(e.target.value as typeof modeFilter)} aria-label="حضوري أو أونلاين">
+              <option value="">حضوري وأونلاين</option>
+              <option value="onsite">حضوري</option>
+              <option value="online">أونلاين</option>
+            </select>
+            <select className="form-input" style={{ flex: "0 1 130px" }} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} aria-label="تصفية حسب الحالة">
+              <option value="">كل الحالات</option>
+              <option value="active">نشط</option>
+              <option value="upcoming">قادم</option>
+              <option value="ended">منتهي</option>
+            </select>
+            {isFiltered && (
+              <button type="button" className="topbar-btn btn-ghost" onClick={clearFilters}>
+                <i className="ti ti-x" /> مسح ({filtered.length} من {tracks.length})
+              </button>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {!isLoading && tracks.length > 0 && filtered.length === 0 && (
+        <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text3)", fontSize: 14 }}>
+          <i className="ti ti-search-off" style={{ fontSize: 28, display: "block", marginBottom: 8 }} />
+          لا توجد مسارات مطابقة للبحث
+        </div>
+      )}
+
+      {!isLoading && tracks.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 32, marginTop: 16 }}>
           {active.length > 0 && (
             <section>
-              <SectionHeader label="المسارات النشطة" count={active.length} color="var(--green)" />
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14 }}>
+              <SectionHeader label="المسارات النشطة" count={countOf("active")} color="var(--green)" />
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(270px,1fr))", gap: 12, alignItems: "start" }}>
                 {active.map((t) => (
                   <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} onOpen={openDetail} readOnly={readOnly} />
                 ))}
@@ -143,8 +255,8 @@ export function AdminTracks() {
           )}
           {upcoming.length > 0 && (
             <section>
-              <SectionHeader label="المسارات القادمة" count={upcoming.length} color="#d97706" />
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14 }}>
+              <SectionHeader label="المسارات القادمة" count={countOf("upcoming")} color="#d97706" />
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(270px,1fr))", gap: 12, alignItems: "start" }}>
                 {upcoming.map((t) => (
                   <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} onOpen={openDetail} readOnly={readOnly} />
                 ))}
@@ -153,14 +265,15 @@ export function AdminTracks() {
           )}
           {ended.length > 0 && (
             <section>
-              <SectionHeader label="المسارات المنتهية" count={ended.length} color="var(--text3)" />
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 14, opacity: 0.75 }}>
+              <SectionHeader label="المسارات المنتهية" count={countOf("ended")} color="var(--text3)" />
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(270px,1fr))", gap: 12, alignItems: "start", opacity: 0.75 }}>
                 {ended.map((t) => (
                   <TrackCard key={t._id} t={t} onManageStudents={openStudents} onEdit={openEdit} onDelete={setDeleteId} onOpen={openDetail} readOnly={readOnly} />
                 ))}
               </div>
             </section>
           )}
+          <Pagination page={curPage} pageSize={PAGE_SIZE} total={ordered.length} onChange={goToPage} />
         </div>
       )}
 
@@ -324,6 +437,7 @@ function TrackCard({
   const { data: linkedPlans = [] } = useQuranPlans({ track: t._id });
   const linkedPlan = linkedPlans[0];
   const [planOpen, setPlanOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   function getName(v: unknown): string {
     if (v && typeof v === "object" && "name" in v) return (v as { name: string }).name;
@@ -341,7 +455,7 @@ function TrackCard({
     >
       <div style={{ height: 4, background: cfg.bar }} />
 
-      <div style={{ padding: "16px 18px" }}>
+      <div style={{ padding: "12px 14px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, flex: 1 }}>
             <Badge tone={cfg.tone}>{cfg.label}</Badge>
@@ -386,8 +500,42 @@ function TrackCard({
           )}
         </div>
 
-        <h3 style={{ margin: "10px 0 12px", fontSize: 15, fontWeight: 800, color: "var(--text)" }}>{t.title}</h3>
+        <h3 style={{ margin: "8px 0 6px", fontSize: 15, fontWeight: 800, color: "var(--text)" }}>{t.title}</h3>
 
+        {/* Compact summary — the full card is one click on «التفاصيل» away. */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 12px", fontSize: 12, color: "var(--text2)" }}>
+          <span><i className={`ti ${t.isOnline ? "ti-video" : "ti-map-pin"}`} style={{ marginLeft: 4, color: "var(--text3)" }} />{t.isOnline ? "أونلاين" : getName(t.masjid) || "—"}</span>
+          {t.timeSlot && <span><i className="ti ti-clock" style={{ marginLeft: 4, color: "var(--text3)" }} />{t.timeSlot}</span>}
+          <span>
+            <i className="ti ti-user" style={{ marginLeft: 4, color: "var(--text3)" }} />
+            {t.teachers.length ? t.teachers.map(getTeacherName).join("، ") : "لا يوجد معلم"}
+          </span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
+          <div style={{ flex: 1, height: 5, background: "var(--border)", borderRadius: 99, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${pct}%`, background: barClr, borderRadius: 99, transition: "width .4s" }} />
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 700, color: barClr, whiteSpace: "nowrap" }}>{enrolled} / {t.maxStudents} طالب</span>
+          {linkedPlan?.progress && (
+            <span style={{ fontSize: 10, background: "var(--green)", color: "#fff", borderRadius: 99, padding: "1px 8px", fontWeight: 700 }}>
+              {linkedPlan.progress.percent}%
+            </span>
+          )}
+        </div>
+
+        <button
+          type="button"
+          className="topbar-btn btn-ghost"
+          aria-expanded={expanded}
+          onClick={(e) => { e.stopPropagation(); setExpanded((o) => !o); }}
+          style={{ marginTop: 10, width: "100%", justifyContent: "center", padding: "5px 10px", fontSize: 12 }}
+        >
+          {expanded ? "إخفاء التفاصيل" : "التفاصيل"}
+          <i className={`ti ti-chevron-${expanded ? "up" : "down"}`} />
+        </button>
+
+        {expanded && (<div style={{ marginTop: 12 }}>
         <div className="grid-collapse" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12, color: "var(--text2)", marginBottom: 12 }}>
           <InfoRow icon="ti-clock"    label="الوقت"    val={t.timeSlot} />
           <InfoRow icon="ti-calendar-repeat" label="الأيام" val={linkedPlan ? (linkedPlan.days.join("، ") || "—") : "لم تُحدَّد خطة بعد"} />
@@ -426,20 +574,6 @@ function TrackCard({
             {t.teachers.length === 0 && (
               <span style={{ fontSize: 12, color: "var(--text3)" }}>— لا يوجد معلم —</span>
             )}
-          </div>
-        </div>
-
-        <div style={{ background: "var(--cream)", borderRadius: 10, padding: "10px 12px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-            <span style={{ fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>
-              <i className="ti ti-user-check" style={{ marginLeft: 4 }} />الطاقة الاستيعابية
-            </span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: barClr }}>
-              {enrolled} / {t.maxStudents}
-            </span>
-          </div>
-          <div style={{ height: 6, background: "var(--border)", borderRadius: 99, overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${pct}%`, background: barClr, borderRadius: 99, transition: "width .4s" }} />
           </div>
         </div>
 
@@ -523,6 +657,7 @@ function TrackCard({
             <i className="ti ti-video" /> انضم للجلسة
           </a>
         )}
+        </div>)}
       </div>
     </div>
   );

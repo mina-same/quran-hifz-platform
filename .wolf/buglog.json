@@ -7159,5 +7159,60 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-10-03T20:40:00Z"
+  },
+  {
+    "id": "bug-423",
+    "timestamp": "2026-07-27T23:45:00.000Z",
+    "error_message": "الورد الفعلي/الورد المقرر غلط لما الخطة ماشية بالعكس (من ورا لقدام) — a reverse-direction plan always recorded the day as complete and showed the wrong leftover ayah count",
+    "file": "quran-hifz/src/quran/pages/teacher/TeacherAttendance.tsx",
+    "root_cause": "A day's slice is always stored low->high, but a reverse plan works it from its HIGH end downward, so the day's finish point is the slice's START, not its END. The attendance UI hardcoded the forward assumption in 4 places: the completion picker defaulted to {surahEnd, ayahEnd} (= 'nothing done' in reverse, yet treated as full), 'الورد كامل' set the same wrong point, isFull was actualFlat >= assignmentEndFlat, and shortfall was assignmentEndFlat - actualFlat (measured from the wrong end). Net effect: every reverse-plan day saved as status 'done', so no shortfall was ever redistributed. The server's reflowStudentPlan was already direction-aware (isForwardDoc), so only the client's framing was wrong — plus recordOccurrence's 'done' branch stamping completedThrough = entry.surahEnd for reverse docs. Direction was also taken from the shared plan only, ignoring that a student's own overlay can run the opposite way (custom-range individual plan).",
+    "fix": "Added isReversedSchedule (mirrors server isForwardDoc, infers direction from a student's own occurrences), dayFinishPoint and dayShortfallAyahs to quran-hifz/src/quran/lib/quranRange.ts, and used them for the default completion point, the 'الورد كامل' button, isFull/shortfall display and the done-vs-partial decision in both TeacherAttendance.tsx and TeacherTrackDetail.tsx; per-student direction now overrides the base plan's. Server: exported isForwardDoc and made recordOccurrence's 'done' branch stamp completedThrough = entry.surahStart/ayahStart for a reverse doc. IndividualPlanPanel now reads direction from the student's own schedule too.",
+    "tags": [
+      "reverse-plan",
+      "direction",
+      "attendance",
+      "student-plan-progress",
+      "reflow",
+      "quranRange"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-07-27T23:45:00.000Z"
+  },
+  {
+    "id": "bug-421",
+    "timestamp": "2026-10-05T14:30:00Z",
+    "error_message": "Daily report pop-up re-opened every time a finished (already sent) day was reloaded",
+    "file": "quran-hifz/src/quran/components/common/DailyReportPrompt.tsx",
+    "root_cause": "While the day's evaluations were loading, `recorded` was a placeholder 0, so loading→loaded looked like a real 'not done → all done' transition.",
+    "fix": "Prompt takes `ready` (useEvaluations isFetched) and ignores transitions until ready; it also defers opening until the draft query says whether the report was already sent.",
+    "tags": [
+      "react",
+      "loading-state",
+      "modal",
+      "daily-report"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-05T14:30:00Z"
+  },
+  {
+    "id": "bug-422",
+    "timestamp": "2026-10-11T11:38:44.707219",
+    "error_message": "POST /api/evaluations/bulk 400 (بيانات غير صالحة) when admin saves attendance/evaluation on web",
+    "file": "quran-hifz-server/src/controllers/evaluation.controller.ts",
+    "root_cause": "bulkSchema required teacher; web TeacherTrackDetail/TeacherAttendance send user.profileId, which admins don't have, so teacher was omitted and Zod rejected it. Mobile had a client-side workaround (track's first teacher), web didn't.",
+    "fix": "teacher now optional in bulkSchema; new resolveTeacher(): teacher role -> own profileId, admin -> given or track.teachers[0]; clear 400 if track has no teacher.",
+    "tags": [
+      "admin",
+      "evaluation",
+      "bulk",
+      "zod",
+      "400",
+      "teacher-id"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-11T11:38:44.707219"
   }
 ]

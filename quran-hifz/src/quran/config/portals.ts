@@ -55,6 +55,7 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "tracks",        icon: "ti-calendar-event",  label: "مساراتي" },
         { id: "students",      icon: "ti-users",           label: "طلابي" },
         { id: "attendance",    icon: "ti-calendar-check",  label: "الحضور والتقييم",    dot: true },
+        { id: "dailyreport",   icon: "ti-report",          label: "التقرير اليومي" },
         { id: "recordlesson",  icon: "ti-player-record",   label: "سجّل درس المسار",   dot: true },
         { id: "grouphomework", icon: "ti-list-check",      label: "واجبات المسار" },
       ]},
@@ -87,6 +88,7 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "tracks",  icon: "ti-calendar-event",  label: "المسارات", dot: true },
       ]},
       { group: "التقارير", items: [
+        { id: "dailyreports", icon: "ti-report", label: "التقارير اليومية" },
         { id: "kpis",    icon: "ti-target",    label: "مؤشرات الأداء" },
         { id: "reports", icon: "ti-chart-bar", label: "التقارير" },
       ]},
@@ -112,6 +114,7 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "tracks",  icon: "ti-calendar-event",  label: "المسارات" },
       ]},
       { group: "التقارير", items: [
+        { id: "dailyreports", icon: "ti-report", label: "التقارير اليومية" },
         { id: "kpis",    icon: "ti-target",    label: "مؤشرات الأداء" },
         { id: "reports", icon: "ti-chart-bar", label: "التقارير" },
       ]},

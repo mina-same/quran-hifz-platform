@@ -24,7 +24,7 @@ import {
 } from '@/lib/evaluationRubric';
 import {
   dayFinishPoint, dayDeltaAyahs, planFinishPoint, toFlatIndex, fromFlatIndex,
-  isReversedSchedule, surahName, nextPointAfter, type PlanType, type RangePoint, type ScheduleEntry,
+  isReversedSchedule, surahName, nextWardStart, type PlanType, type RangePoint, type ScheduleEntry,
 } from '@/lib/quranRange';
 import { toDateOnly } from '@/lib/date';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -156,7 +156,8 @@ export default function EvaluationRoster({
     const last = openEntries.find(
       (e) => entryStudentId(e) === studentId && e.type === type && e.status === 'recorded' && e.date < effectiveDate,
     );
-    return last?.to ? nextPointAfter(last.to) : { surahNumber: 1, ayah: 1 };
+    // Continues in the last record's direction (backwards → the surah before).
+    return last?.from && last?.to ? nextWardStart(last.from, last.to) : { surahNumber: 1, ayah: 1 };
   }
 
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);

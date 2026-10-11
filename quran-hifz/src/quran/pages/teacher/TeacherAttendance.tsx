@@ -57,10 +57,11 @@ import {
   dayFinishPoint,
   dayDeltaAyahs,
   planFinishPoint,
-  nextPointAfter,
+  nextWardStart,
 } from "../../lib/quranRange";
 import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 import { EmptyState } from "../../components/common/EmptyState";
+import { DailyReportPrompt } from "../../components/common/DailyReportPrompt";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -234,7 +235,7 @@ function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
 }
 
 export function TeacherAttendance() {
-  const { user } = usePortal();
+  const { user, readOnly } = usePortal();
   const teacherId = user?.profileId as string | undefined;
   const [selected, setSelected] = useState<TeachingContext | null>(null);
 
@@ -373,7 +374,8 @@ export function TeacherAttendance() {
     const last = openEntries.find(
       (e) => entryStudentId(e) === studentId && e.type === type && e.status === "recorded" && e.date < effectiveDate,
     );
-    return last?.to ? nextPointAfter(last.to) : { surahNumber: 1, ayah: 1 };
+    // Continues in the last record's direction (backwards → the surah before).
+    return last?.from && last?.to ? nextWardStart(last.from, last.to) : { surahNumber: 1, ayah: 1 };
   }
 
   // Each covered student can have their own effective schedule (absence/
@@ -434,7 +436,7 @@ export function TeacherAttendance() {
 
   // Already-saved evaluations for the selected day, so re-opening the same
   // halqa/track/day shows what was actually recorded.
-  const { data: savedToday = [] } = useEvaluations(
+  const { data: savedToday = [], isFetched: savedTodayReady } = useEvaluations(
     contextFilter ? { ...contextFilter, from: effectiveDate, to: effectiveDate } : undefined,
   );
   const savedById: Record<string, StudentEval> = {};
@@ -908,6 +910,17 @@ export function TeacherAttendance() {
         <Alert tone="warning" icon="ti-clock">
           هذا اليوم لم يحن بعد — لا يمكن تسجيل الحضور والتقييم مسبقًا لجلسة لم تُعقد.
         </Alert>
+      )}
+
+      {!readOnly && scheduledSorted.length > 0 && (
+        <DailyReportPrompt
+          trackId={selected.id}
+          date={effectiveDate}
+          total={students.length}
+          recorded={students.filter((st) => !!savedById[st._id]).length}
+          ready={savedTodayReady}
+          disabled={isFutureDay}
+        />
       )}
 
       {(loadingPlans || scheduledSorted.length > 0) && (

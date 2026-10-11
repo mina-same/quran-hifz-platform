@@ -4437,11 +4437,27 @@
 | 10:59 | Vercel web deploy blocked by vulnerable @tanstack/react-start; upgraded + fixed __root ErrorComponent type (bug-414) | quran-hifz/package*.json, __root.tsx | build ok, not pushed | ~6k |
 
 ## Session: 2026-10-03 19:14
+| 13:12 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/c83ccfa0-ddd0-46a8-9642-121f904eb562/scratchpad/sass-wt/quran-hifz-server/src/config/env.ts | — | ~644 |
+| 13:16 | Edited ../../../.claude/projects/-Users-xontel-Downloads-mina-work-quran-hifz-platform/memory/saas-branch-never-merge-main.md | modified separation() | ~253 |
+| 13:16 | Session end: 2 writes across 2 files (env.ts, saas-branch-never-merge-main.md) | 0 reads | ~915 tok |
+| 13:20 | Open-ward plans: allow backwards (من آخر المصحف) ranges across surahs; correct ayah/page/overlap counts; next-start continues backwards | 3x quranRange.ts, open-ward.controller.ts, 2x OpenWardPicker, TeacherAttendance, TeacherTrackDetail, EvaluationRoster | 11/11 logic checks, tsc clean | ~25k |
+| 13:20 | Session end: 2 writes across 2 files (env.ts, saas-branch-never-merge-main.md) | 0 reads | ~915 tok |
+| 13:44 | Created quran-hifz-server/src/models/DailyReport.model.ts | — | ~762 |
+| 13:45 | Created quran-hifz-server/src/controllers/daily-report.controller.ts | — | ~2417 |
+| 13:47 | Created quran-hifz/src/quran/pages/teacher/TeacherDailyReport.tsx | — | ~2659 |
+| 13:51 | Daily halqa report: teacher sends after session (auto-filled struggling/absent/excused), supervisor+admin view by date, copy/WhatsApp/PDF | server model+controller+routes, web pages+lib+component, html-to-image+jspdf | API + 10/10 browser checks on local test DB, PDF verified | ~60k |
+| 13:51 | Session end: 5 writes across 5 files (env.ts, saas-branch-never-merge-main.md, DailyReport.model.ts, daily-report.controller.ts, TeacherDailyReport.tsx) | 3 reads | ~6753 tok |
+| 14:00 | Created quran-hifz/src/quran/components/common/DailyReportComposer.tsx | — | ~2241 |
+| 14:05 | Daily report auto-opens when the last student is saved on #trackdetail and الحضور والتقييم; progress strip; shared DailyReportComposer | DailyReportPrompt.tsx, DailyReportComposer.tsx, TeacherTrackDetail, TeacherAttendance, TeacherDailyReport | 8/8 E2E incl. reload | ~30k |
+| 14:05 | Session end: 6 writes across 6 files (env.ts, saas-branch-never-merge-main.md, DailyReport.model.ts, daily-report.controller.ts, TeacherDailyReport.tsx) | 6 reads | ~8994 tok |
+
+## Session: 2026-10-09 17:14
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 
 ## Session: 2026-10-03 19:14
+## Session: 2026-10-09 17:14
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
@@ -4482,16 +4498,19 @@
 | 20:15 | Found :5001 SaaS backend writing to Atlas; switched branch to local DB via .env.saas; restarted local mongod; created super admin; verified /super on :8080 | config/env.ts, .env.saas, .gitignore | verified | ~15k |
 
 ## Session: 2026-10-04 22:51
+## Session: 2026-10-09 17:23
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 
 ## Session: 2026-10-04 22:51
+## Session: 2026-10-09 17:24
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 
 ## Session: 2026-10-05 13:10
+## Session: 2026-10-09 17:25
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
@@ -4513,3 +4532,19 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+## Session: 2026-10-09 17:27
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 18:24 | daily report struggling area chips → الحفظ/المراجعة only | DailyReportComposer.tsx | done | ~300 |
+| 18:27 | daily report draft: struggling = score 0 in الحفظ/المراجعة only | daily-report.controller.ts | done | ~400 |
+
+## Session: 2026-10-11 11:37
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:38 | fix admin evaluation save 400: server resolves teacher (admin→track first teacher) | evaluation.controller.ts | done | ~3000 |
+| 11:54 | dailyreports: compact clickable cards + modal + teacher filter; tracks: compact cards w/ details toggle | AdminDailyReports.tsx, AdminTracks.tsx, quran.css | done | ~6000 |
+| 11:58 | Created quran-hifz/src/quran/components/common/Pagination.tsx | — | ~570 |
+| 11:58 | tracks page: search+filters bar (masjid/teacher/type/mode/status) + Pagination (12/page) | AdminTracks.tsx, Pagination.tsx, quran.css | done | ~5000 |
+| 11:58 | Session end: 1 writes across 1 files (Pagination.tsx) | 0 reads | ~570 tok |

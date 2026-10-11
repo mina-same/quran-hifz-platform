@@ -5,6 +5,8 @@
 
 ## (repo root, quran-hifz-sass only)
 
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-11T08:58:15.775Z
+> Files: 740 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -144,6 +146,10 @@
 
 - `append_bug.py` — , quran-hifz-mobile/lib/queries/*.ts", (~546 tok)
 
+## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/c83ccfa0-ddd0-46a8-9642-121f904eb562/scratchpad/sass-wt/quran-hifz-server/src/config/
+
+- `env.ts` — quran-hifz-sass: the multi-tenant code must NEVER touch main's (~644 tok)
+
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/d9ad3c02-3ebc-4983-830f-edb85405fd09/scratchpad/pw-test/
 
 - `driver.mjs` — BASE: shot (~341 tok)
@@ -170,6 +176,7 @@
 
 - `saas-branch-never-merge-main.md` (~279 tok)
 - `wardi-vercel-deployment.md` (~478 tok)
+- `saas-branch-never-merge-main.md` (~480 tok)
 
 ## ./
 
@@ -484,6 +491,16 @@
 - `quran-hifz/src/quran/data/blog.ts` — now long-form posts with seoTitle/keywords/cover/inline images/FAQ + readMinutes/wordCount/tableOfContents (~9000 tok)
 - `quran-hifz/src/quran/pages/SignInPage.tsx` — /login by email, slug only when ambiguous (~1200 tok)
 - `quran-hifz/src/quran/pages/SuperAdmin.tsx` — /super console: login, KPI tiles, org list, action dialog (~3500 tok)
+## Daily halqa report (2026-10-05)
+
+- `quran-hifz-server/src/controllers/daily-report.controller.ts` — getDraft (auto-fill from attendance+evaluation), sendReport, listReports (role-scoped) (~1900 tok)
+- `quran-hifz-server/src/models/DailyReport.model.ts` — per (track,date) report: struggling/absent/excused lines (name snapshots), counts, notes (~700 tok)
+- `quran-hifz-server/src/routes/daily-report.routes.ts` — /api/daily-reports (~150 tok)
+- `quran-hifz/src/quran/api/daily-reports.ts` — useDailyReportDraft / useSendDailyReport / useDailyReports (~450 tok)
+- `quran-hifz/src/quran/components/common/DailyReportCard.tsx` — DailyReportSheet / DailyReportActions / DailyReportCard (~900 tok)
+- `quran-hifz/src/quran/lib/dailyReport.ts` — hijriDate, weekdayAr, reportText (WhatsApp), downloadReportPdf (~800 tok)
+- `quran-hifz/src/quran/pages/admin/AdminDailyReports.tsx` — admin/supervisor list by date, missing halqat, all-in-one PDF (~1300 tok)
+- `quran-hifz/src/quran/pages/teacher/TeacherDailyReport.tsx` — teacher editor + live preview + send (~2000 tok)
 
 ## docs/superpowers/plans/
 
@@ -773,6 +790,7 @@
 - `admin.controller.ts` — Zod schemas: updateParentSchema, createParentSchema, createSupervisorSchema. getParents() is gender-scoped for supervisor via supervisorGenderOf/trackIdsForGender (parents of children in the supervisor's masajid gender only). (~2360 tok)
 - `attendance.controller.ts` — Upserts one Attendance doc per {student, date} and recalculates each (~1495 tok)
 - `auth.controller.ts` — Zod schemas: loginSchema, updateProfileSchema, changePasswordSchema, pushTokenSchema (~1216 tok)
+- `daily-report.controller.ts` — Evaluations/attendance store the day as `new Date('YYYY-MM-DD')` (UTC midnight). (~2417 tok)
 - `evaluation.controller.ts` — The rubric is no longer platform-wide — each plan carries its own (~2871 tok)
 - `group-homework.controller.ts` — Zod schemas: groupHomeworkSchema (~500 tok)
 - `halqa.controller.ts` — Zod schemas: halqaSchema (~904 tok)
@@ -822,6 +840,7 @@
 ## quran-hifz-server/src/models/
 
 - `Attendance.model.ts` — Exports IAttendance, Attendance (~263 tok)
+- `DailyReport.model.ts` — One student line in a daily report (struggling / absent / excused). (~762 tok)
 - `Evaluation.model.ts` — Legacy fixed-shape scores. Still written whenever the plan's rubric uses (~927 tok)
 - `GroupHomework.model.ts` — Exports IGroupHomework, GroupHomework (~258 tok)
 - `Halqa.model.ts` — Exports IHalqa, Halqa (~366 tok)
@@ -1056,6 +1075,7 @@
 - `BentoTile.tsx` — Bento-grid tile: a flatter, lighter-weight alternative to `Card` — small (~313 tok)
 - `Card.tsx` — Card (~181 tok)
 - `ContextPicker.tsx` — Unified shape for "teaching context" — always a Track now that Halqa is (~1067 tok)
+- `DailyReportComposer.tsx` — The daily report editor + live preview + send button for one (track, date). (~2241 tok)
 - `DaysOfWeekPicker.tsx` — WEEK_DAYS (~481 tok)
 - `Donut.tsx` — Reusable donut chart with a centered label and optional legend. (~766 tok)
 - `FormSection.tsx` — FormSection (~195 tok)
@@ -1064,8 +1084,10 @@
 - `IndividualPlanPanel.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~4567 tok)
 - `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
+- `Pagination.tsx` — Pagination({page,pageSize,total,onChange}): numbered pager w/ gaps, hidden when 1 page; styles .pager* in quran.css (~450 tok)
 - `OpenWardLog.tsx` — Log table of an open-ward plan's recorded days (optionally one student) (~700 tok)
 - `OpenWardPicker.tsx` — «ماذا حفظ الطالب اليوم؟» من/إلى + «لم يُسمِّع اليوم»; SurahAyah control injected; exports OpenWardValue, openWardComplete (~1000 tok)
+- `Pagination.tsx` — Page numbers to show: always first/last, a window around the current page, (~570 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
 - `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~8630 tok)
 - `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)
@@ -1157,6 +1179,7 @@
 ## quran-hifz/src/quran/pages/teacher/
 
 - `TeacherAttendance.tsx` — Compact surah+ayah picker for the "actual completion" input — duplicated (~16646 tok)
+- `TeacherDailyReport.tsx` — AREAS (~2659 tok)
 - `TeacherDashboard.tsx` — TeacherDashboard — renders table (~1348 tok)
 - `TeacherEvaluate.tsx` — STUDENTS (~1006 tok)
 - `TeacherGroupHomework.tsx` — STUDENTS (~2859 tok)

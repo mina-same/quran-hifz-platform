@@ -8,6 +8,7 @@ import { deriveDayAndTime, upsertAttendanceRecords } from './attendance.controll
 import { supervisorGenderOf, trackIdsForGender, restrictTrackFilter } from '../lib/supervisorScope';
 import { User } from '../models/User.model';
 import { ParentStudent } from '../models/ParentStudent.model';
+import { Track } from '../models/Track.model';
 
 /**
  * The rubric is no longer platform-wide — each plan carries its own
@@ -60,7 +61,8 @@ const recordSchema = z.object({
 });
 
 const bulkSchema = z.object({
-  teacher: z.string().min(1),
+  /** Optional: an admin has no teacher profile — see `resolveTeacher`. */
+  teacher: z.string().min(1).optional(),
   track:   z.string().min(1),
   plan:    z.string().min(1).optional(),
   date:    z.string().refine((d) => !isNaN(Date.parse(d)), 'تاريخ غير صالح'),
@@ -138,9 +140,27 @@ export async function getEvaluations(req: Request, res: Response, next: NextFunc
   }
 }
 
+/** Whose name the day's grades go under. A teacher records as themself; an
+ *  admin has no teacher profile, so their save is recorded against the
+ *  track's first teacher (the mobile app already does this client-side). */
+async function resolveTeacher(req: Request, track: string, given?: string): Promise<string | null> {
+  if (req.user?.role === 'teacher') {
+    const me = await User.findById(req.user.id).select('profileId');
+    return me?.profileId ? String(me.profileId) : given ?? null;
+  }
+  if (given) return given;
+  const t = await Track.findById(track).select('teachers').lean();
+  return t?.teachers?.length ? String(t.teachers[0]) : null;
+}
+
 export async function bulkEvaluate(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { teacher, track, plan, date, records } = bulkSchema.parse(req.body);
+    const { teacher: givenTeacher, track, plan, date, records } = bulkSchema.parse(req.body);
+    const teacher = await resolveTeacher(req, track, givenTeacher);
+    if (!teacher) {
+      res.status(400).json({ success: false, message: 'لا يوجد معلم مسند لهذه الحلقة — أضف معلماً أولاً' });
+      return;
+    }
     const dateObj = new Date(date);
     const { day } = deriveDayAndTime(dateObj);
     const trackId = new Types.ObjectId(track);

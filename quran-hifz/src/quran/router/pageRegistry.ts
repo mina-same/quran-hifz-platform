@@ -12,6 +12,7 @@ import { AdminTracks }        from "../pages/admin/AdminTracks";
 import { AdminTrackForm }     from "../pages/admin/AdminTrackForm";
 import { AdminParents }       from "../pages/admin/AdminParents";
 import { AdminSupervisors }   from "../pages/admin/AdminSupervisors";
+import { AdminDailyReports }  from "../pages/admin/AdminDailyReports";
 
 import { TeacherDashboard }      from "../pages/teacher/TeacherDashboard";
 import { TeacherStudents }       from "../pages/teacher/TeacherStudents";
@@ -25,6 +26,7 @@ import { TeacherRecordLesson }   from "../pages/teacher/TeacherRecordLesson";
 import { TeacherGroupHomework }  from "../pages/teacher/TeacherGroupHomework";
 import { TeacherTracks }         from "../pages/teacher/TeacherTracks";
 import { TeacherTrackDetail }    from "../pages/teacher/TeacherTrackDetail";
+import { TeacherDailyReport }    from "../pages/teacher/TeacherDailyReport";
 
 import { StudentDashboard }      from "../pages/student/StudentDashboard";
 import { StudentHifz }           from "../pages/student/StudentHifz";
@@ -58,6 +60,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     trackform:   AdminTrackForm,
     parents:     AdminParents,
     supervisors: AdminSupervisors,
+    dailyreports: AdminDailyReports,
     // Admin reuses the teacher's track detail (and the pages it navigates to).
     trackdetail: TeacherTrackDetail,
     planform:    TeacherPlanForm,
@@ -69,6 +72,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     tracks:        TeacherTracks,
     students:      TeacherStudents,
     attendance:    TeacherAttendance,
+    dailyreport:   TeacherDailyReport,
     homework:      TeacherHomework,
     plans:         TeacherPlans,
     planform:      TeacherPlanForm,
@@ -99,6 +103,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     masajid:   AdminMasajid,
     kpis:      AdminKpis,
     reports:   AdminReports,
+    dailyreports: AdminDailyReports,
     tracks:    AdminTracks,
     // Reused for viewing a track's detail if a supervisor drills in from AdminTracks.
     trackdetail: TeacherTrackDetail,

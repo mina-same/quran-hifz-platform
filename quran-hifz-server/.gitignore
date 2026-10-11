@@ -3,5 +3,5 @@ dist/
 .env
 *.js.map
 
-# SaaS branch local database settings
+# SaaS branch database settings — holds credentials, never commit
 .env.saas

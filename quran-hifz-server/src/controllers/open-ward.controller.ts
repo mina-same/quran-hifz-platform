@@ -5,7 +5,7 @@ import { OpenWardEntry } from '../models/OpenWardEntry.model';
 import { AppError } from '../middleware/error';
 import { SURAHS } from '../data/surahs';
 import { isStudentInPlan } from '../lib/planStudents';
-import { toFlatIndex, pageRangeOfAyahRange, countRangeAyahs, dateKey } from '../lib/quranRange';
+import { toFlatIndex, dateKey, isValidWardRange, wardPieces, wardPageRange, countWardAyahs } from '../lib/quranRange';
 
 const SURAH_BY_NUMBER = new Map(SURAHS.map((s) => [s.number, s]));
 
@@ -46,8 +46,10 @@ export function validateOpenWardBody(
       throw new AppError(`سورة ${surah.name} تحتوي على ${surah.ayahCount} آية فقط`, 400);
     }
   }
-  if (toFlatIndex(data.from) > toFlatIndex(data.to)) {
-    throw new AppError('بداية المقطع يجب أن تكون قبل نهايته في ترتيب المصحف', 400);
+  // Backwards across surahs is allowed (memorizing from the end of the
+  // Mushaf); backwards inside a single surah is not.
+  if (!isValidWardRange(data.from, data.to)) {
+    throw new AppError('داخل السورة الواحدة يجب أن تكون آية البداية قبل آية النهاية', 400);
   }
   return data;
 }
@@ -69,12 +71,12 @@ export async function upsertOpenWard(req: Request, res: Response, next: NextFunc
     const key = { plan: planId, student: studentId, type: data.type, date: data.date };
     let update: Record<string, unknown>;
     if (data.status === 'recorded') {
-      const pr = pageRangeOfAyahRange(data.from!, data.to!);
+      const pr = wardPageRange(data.from!, data.to!);
       update = {
         $set: {
           ...key, status: data.status, from: data.from, to: data.to,
           pageStart: pr.pageStart, pageEnd: pr.pageEnd, pages: pr.pageCount,
-          ayahs: countRangeAyahs(data.from!, data.to!),
+          ayahs: countWardAyahs(data.from!, data.to!),
           recordedBy: req.user!.id,
         },
       };
@@ -88,13 +90,16 @@ export async function upsertOpenWard(req: Request, res: Response, next: NextFunc
 
     let overlapWarning = false;
     if (data.status === 'recorded') {
-      const lo = toFlatIndex(data.from!);
-      const hi = toFlatIndex(data.to!);
+      // Compare the pieces actually read — a backwards record skips the
+      // parts of its first/last surah outside the range.
+      const flat = (a: { surahNumber: number; ayah: number }, b: { surahNumber: number; ayah: number }) =>
+        wardPieces(a, b).map((p) => [toFlatIndex(p.from), toFlatIndex(p.to)] as const);
+      const mine = flat(data.from!, data.to!);
       const others = await OpenWardEntry.find({
         plan: planId, student: studentId, type: data.type, status: 'recorded', date: { $ne: data.date },
       }).lean();
       overlapWarning = others.some((o) =>
-        o.from && o.to && toFlatIndex(o.from) <= hi && toFlatIndex(o.to) >= lo);
+        o.from && o.to && flat(o.from, o.to).some(([lo2, hi2]) => mine.some(([lo, hi]) => lo2 <= hi && hi2 >= lo)));
     }
 
     res.json({ success: true, data: entry, overlapWarning });

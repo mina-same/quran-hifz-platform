@@ -4,7 +4,7 @@ import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
 import Badge from '@/components/ui/Badge';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
-import { toFlatIndex, type RangePoint } from '@/lib/quranRange';
+import { isReverseWard, isValidWardRange, type RangePoint } from '@/lib/quranRange';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 /** One type's answer to «ماذا حفظ اليوم؟» on an open-ward plan. */
@@ -15,7 +15,7 @@ export type OpenWardValue =
 /** Saving is allowed once the teacher picked a valid range or chose «لم يُسمِّع». */
 export function openWardComplete(v?: OpenWardValue): boolean {
   if (!v) return false;
-  return v.status === 'none' || toFlatIndex(v.from) <= toFlatIndex(v.to);
+  return v.status === 'none' || isValidWardRange(v.from, v.to);
 }
 
 /**
@@ -39,7 +39,9 @@ export default function OpenWardPicker({
   const none = value?.status === 'none';
   const from = value?.status === 'recorded' ? value.from : suggestedFrom;
   const to = value?.status === 'recorded' ? value.to : suggestedFrom;
-  const invalid = value?.status === 'recorded' && toFlatIndex(value.from) > toFlatIndex(value.to);
+  const invalid = value?.status === 'recorded' && !isValidWardRange(value.from, value.to);
+  // Memorizing from the end of the Mushaf: surah by surah backwards.
+  const reverse = value?.status === 'recorded' && isReverseWard(value.from, value.to);
 
   return (
     <View style={s.box}>
@@ -62,8 +64,11 @@ export default function OpenWardPicker({
       {!value && !disabled && (
         <Text style={[s.hint, { color: theme.gold }]}>حدّد المقطع أو اختر «لم يُسمِّع اليوم» قبل الحفظ</Text>
       )}
+      {reverse && (
+        <Text style={[s.hint, { color: theme.textMuted }]}>حفظ معكوس — من آخر المصحف، وكل سورة تُقرأ من أولها بترتيب آياتها</Text>
+      )}
       {invalid && (
-        <Text style={[s.hint, { color: theme.red }]}>بداية المقطع بعد نهايته في ترتيب المصحف</Text>
+        <Text style={[s.hint, { color: theme.red }]}>داخل السورة الواحدة يجب أن تكون آية البداية قبل آية النهاية</Text>
       )}
 
       {!disabled && (
