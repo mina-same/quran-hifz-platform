@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { tenantPlugin } from '../lib/tenancy';
 
 /** One student line in a daily report (struggling / absent / excused). */
 export interface IDailyReportLine {
@@ -67,5 +68,7 @@ const dailyReportSchema = new Schema<IDailyReport>(
 
 dailyReportSchema.index({ track: 1, date: 1 }, { unique: true });
 dailyReportSchema.index({ date: -1 });
+
+dailyReportSchema.plugin(tenantPlugin);
 
 export const DailyReport = model<IDailyReport>('DailyReport', dailyReportSchema);
