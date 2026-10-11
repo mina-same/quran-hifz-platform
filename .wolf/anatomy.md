@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-05T11:00:18.582Z
-> Files: 739 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-11T08:58:15.775Z
+> Files: 740 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -1029,8 +1029,10 @@
 - `IndividualPlanPanel.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~4567 tok)
 - `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
+- `Pagination.tsx` — Pagination({page,pageSize,total,onChange}): numbered pager w/ gaps, hidden when 1 page; styles .pager* in quran.css (~450 tok)
 - `OpenWardLog.tsx` — Log table of an open-ward plan's recorded days (optionally one student) (~700 tok)
 - `OpenWardPicker.tsx` — «ماذا حفظ الطالب اليوم؟» من/إلى + «لم يُسمِّع اليوم»; SurahAyah control injected; exports OpenWardValue, openWardComplete (~1000 tok)
+- `Pagination.tsx` — Page numbers to show: always first/last, a window around the current page, (~570 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
 - `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~8630 tok)
 - `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)

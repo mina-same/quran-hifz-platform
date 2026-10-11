@@ -2,14 +2,41 @@ import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useTopbar } from "../../context/useTopbar";
 import { useTracks, type Track } from "../../api/tracks";
-import { useDailyReports } from "../../api/daily-reports";
-import { DailyReportCard } from "../../components/common/DailyReportCard";
+import { useDailyReports, type DailyReport } from "../../api/daily-reports";
+import { DailyReportCard, DailyReportSheet } from "../../components/common/DailyReportCard";
+import { Modal } from "../../components/common/Modal";
 import { Alert } from "../../components/common/Alert";
 import { downloadReportPdf, gregorianAr, hijriDate, shiftDay, todayKey, weekdayAr } from "../../lib/dailyReport";
 import { toAr } from "../../../lib/format";
 
 function masjidOf(t: Track): { id: string; name: string } {
   return typeof t.masjid === "string" ? { id: t.masjid, name: "" } : { id: t.masjid._id, name: t.masjid.name };
+}
+
+function teacherNamesOf(t: Track): string[] {
+  return t.teachers.flatMap((x) => (typeof x === "string" || !x.name ? [] : [x.name]));
+}
+
+/** One line per report — opens the full sheet on click. */
+function ReportSummary({ report: r, onOpen }: { report: DailyReport; onOpen: () => void }) {
+  return (
+    <button type="button" className="drl-item" onClick={onOpen}>
+      <div className="drl-item-head">
+        <b>{r.trackTitle}</b>
+        <i className="ti ti-chevron-left" aria-hidden="true" />
+      </div>
+      <div className="drl-item-meta">
+        {r.masjidName && <span><i className="ti ti-building-mosque" /> {r.masjidName}</span>}
+        {r.teacherName && <span><i className="ti ti-user" /> {r.teacherName}</span>}
+      </div>
+      <div className="drl-item-counts">
+        <span className="present">الحضور {toAr(r.presentCount)}/{toAr(r.totalCount)}</span>
+        <span className={`warn ${r.struggling.length ? "" : "zero"}`}>⚠️ {toAr(r.struggling.length)}</span>
+        <span className={`absent ${r.absent.length ? "" : "zero"}`}>❌ {toAr(r.absent.length)}</span>
+        <span className={`excused ${r.excused.length ? "" : "zero"}`}>🙋 {toAr(r.excused.length)}</span>
+      </div>
+    </button>
+  );
 }
 
 /**
@@ -21,6 +48,8 @@ export function AdminDailyReports() {
   const today = todayKey();
   const [date, setDate] = useState(today);
   const [masjid, setMasjid] = useState("");
+  const [teacher, setTeacher] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
   const { data: reports = [], isLoading, isError, error } = useDailyReports({ date });
   const { data: tracks = [] } = useTracks("active");
   const allRef = useRef<HTMLDivElement>(null);
@@ -34,10 +63,23 @@ export function AdminDailyReports() {
     return [...m].sort((a, b) => a[1].localeCompare(b[1], "ar"));
   }, [tracks]);
 
+  // Reports only carry the teacher's name, so the filter keys on names.
+  const teachers = useMemo(() => {
+    const names = new Set<string>();
+    for (const t of tracks) for (const n of teacherNamesOf(t)) names.add(n);
+    for (const r of reports) if (r.teacherName) names.add(r.teacherName);
+    return [...names].sort((a, b) => a.localeCompare(b, "ar"));
+  }, [tracks, reports]);
+
   const masjidName = masajid.find(([id]) => id === masjid)?.[1];
-  const visible = reports.filter((r) => !masjid || r.masjidName === masjidName);
+  const visible = reports.filter((r) =>
+    (!masjid || r.masjidName === masjidName) && (!teacher || r.teacherName === teacher));
   const reportedTracks = new Set(reports.map((r) => r.track));
-  const missing = tracks.filter((t) => !reportedTracks.has(t._id) && (!masjid || masjidOf(t).id === masjid));
+  const missing = tracks.filter((t) =>
+    !reportedTracks.has(t._id)
+    && (!masjid || masjidOf(t).id === masjid)
+    && (!teacher || teacherNamesOf(t).includes(teacher)));
+  const opened = visible.find((r) => (r._id ?? r.track) === openId);
 
   const totals = visible.reduce(
     (a, r) => ({ s: a.s + r.struggling.length, ab: a.ab + r.absent.length, ex: a.ex + r.excused.length }),
@@ -72,6 +114,10 @@ export function AdminDailyReports() {
           <option value="">كل المساجد</option>
           {masajid.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
         </select>
+        <select className="form-input drl-masjid" value={teacher} onChange={(e) => setTeacher(e.target.value)} aria-label="تصفية حسب المعلم">
+          <option value="">كل المعلمين</option>
+          {teachers.map((n) => <option key={n} value={n}>{n}</option>)}
+        </select>
         {visible.length > 0 && (
           <button type="button" className="topbar-btn btn-ghost" onClick={downloadAll} disabled={pdfBusy}>
             <i className={`ti ${pdfBusy ? "ti-loader-2 lp-spin" : "ti-file-type-pdf"}`} /> تحميل الكل PDF
@@ -104,10 +150,21 @@ export function AdminDailyReports() {
       ) : visible.length === 0 ? (
         <div className="card drl-empty"><i className="ti ti-report-off" /> لا توجد تقارير مرسلة في هذا اليوم</div>
       ) : (
-        <div className="drl-grid" ref={allRef}>
-          {visible.map((r) => <DailyReportCard key={r._id ?? r.track} report={r} />)}
+        <div className="drl-grid">
+          {visible.map((r) => <ReportSummary key={r._id ?? r.track} report={r} onOpen={() => setOpenId(r._id ?? r.track)} />)}
         </div>
       )}
+
+      {/* Full sheets, off-screen — the source for «تحميل الكل PDF». */}
+      {visible.length > 0 && (
+        <div className="drl-pdf-source" ref={allRef} aria-hidden="true">
+          {visible.map((r) => <DailyReportSheet key={r._id ?? r.track} report={r} />)}
+        </div>
+      )}
+
+      <Modal open={!!opened} onClose={() => setOpenId(null)} title={opened?.trackTitle} maxWidth={620}>
+        {opened && <DailyReportCard report={opened} />}
+      </Modal>
     </div>
   );
 }

@@ -7073,5 +7073,24 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-10-05T14:30:00Z"
+  },
+  {
+    "id": "bug-422",
+    "timestamp": "2026-10-11T11:38:44.707219",
+    "error_message": "POST /api/evaluations/bulk 400 (بيانات غير صالحة) when admin saves attendance/evaluation on web",
+    "file": "quran-hifz-server/src/controllers/evaluation.controller.ts",
+    "root_cause": "bulkSchema required teacher; web TeacherTrackDetail/TeacherAttendance send user.profileId, which admins don't have, so teacher was omitted and Zod rejected it. Mobile had a client-side workaround (track's first teacher), web didn't.",
+    "fix": "teacher now optional in bulkSchema; new resolveTeacher(): teacher role -> own profileId, admin -> given or track.teachers[0]; clear 400 if track has no teacher.",
+    "tags": [
+      "admin",
+      "evaluation",
+      "bulk",
+      "zod",
+      "400",
+      "teacher-id"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-11T11:38:44.707219"
   }
 ]
