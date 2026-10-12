@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-11T08:58:15.775Z
-> Files: 740 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-12T08:33:11.812Z
+> Files: 742 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -104,6 +104,10 @@
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/acf85922-ed88-4311-85f5-cdc043cf61d7/scratchpad/
 
 - `driver.mjs` — Declares BASE (~816 tok)
+
+## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/b398874b-ead1-4d4e-9041-e45f083e8be2/scratchpad/pw/
+
+- `check.mjs` — Declares OUT (~614 tok)
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/b9799155-a8b0-4166-8993-e6f0a4d10143/scratchpad/
 
@@ -1029,9 +1033,9 @@
 - `IndividualPlanPanel.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~4567 tok)
 - `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
-- `Pagination.tsx` — Pagination({page,pageSize,total,onChange}): numbered pager w/ gaps, hidden when 1 page; styles .pager* in quran.css (~450 tok)
 - `OpenWardLog.tsx` — Log table of an open-ward plan's recorded days (optionally one student) (~700 tok)
 - `OpenWardPicker.tsx` — «ماذا حفظ الطالب اليوم؟» من/إلى + «لم يُسمِّع اليوم»; SurahAyah control injected; exports OpenWardValue, openWardComplete (~1000 tok)
+- `Pagination.tsx` — Pagination({page,pageSize,total,onChange}): numbered pager w/ gaps, hidden when 1 page; styles .pager* in quran.css (~450 tok)
 - `Pagination.tsx` — Page numbers to show: always first/last, a window around the current page, (~570 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
 - `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~8630 tok)

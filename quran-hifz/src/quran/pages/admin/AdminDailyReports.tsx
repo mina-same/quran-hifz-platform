@@ -3,7 +3,8 @@ import { toast } from "sonner";
 import { useTopbar } from "../../context/useTopbar";
 import { useTracks, type Track } from "../../api/tracks";
 import { useDailyReports, type DailyReport } from "../../api/daily-reports";
-import { DailyReportCard, DailyReportSheet } from "../../components/common/DailyReportCard";
+import { DailyReportCard, DailyReportCombinedCard, DailyReportSheet } from "../../components/common/DailyReportCard";
+import { ScopeTabs } from "../../components/common/ScopeTabs";
 import { Modal } from "../../components/common/Modal";
 import { Alert } from "../../components/common/Alert";
 import { downloadReportPdf, gregorianAr, hijriDate, shiftDay, todayKey, weekdayAr } from "../../lib/dailyReport";
@@ -50,6 +51,8 @@ export function AdminDailyReports() {
   const [masjid, setMasjid] = useState("");
   const [teacher, setTeacher] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
+  // Only meaningful with a teacher picked: their reports side by side, or merged into one sheet.
+  const [view, setView] = useState<"split" | "combined">("split");
   const { data: reports = [], isLoading, isError, error } = useDailyReports({ date });
   const { data: tracks = [] } = useTracks("active");
   const allRef = useRef<HTMLDivElement>(null);
@@ -79,6 +82,7 @@ export function AdminDailyReports() {
     !reportedTracks.has(t._id)
     && (!masjid || masjidOf(t).id === masjid)
     && (!teacher || teacherNamesOf(t).includes(teacher)));
+  const combined = !!teacher && view === "combined";
   const opened = visible.find((r) => (r._id ?? r.track) === openId);
 
   const totals = visible.reduce(
@@ -118,7 +122,17 @@ export function AdminDailyReports() {
           <option value="">كل المعلمين</option>
           {teachers.map((n) => <option key={n} value={n}>{n}</option>)}
         </select>
-        {visible.length > 0 && (
+        {teacher && (
+          <ScopeTabs
+            value={view}
+            onChange={(v) => setView(v as "split" | "combined")}
+            options={[
+              { value: "split", label: "كل تقرير منفصل", icon: "ti-layout-grid" },
+              { value: "combined", label: "تقرير مجمّع", icon: "ti-file-text" },
+            ]}
+          />
+        )}
+        {visible.length > 0 && !combined && (
           <button type="button" className="topbar-btn btn-ghost" onClick={downloadAll} disabled={pdfBusy}>
             <i className={`ti ${pdfBusy ? "ti-loader-2 lp-spin" : "ti-file-type-pdf"}`} /> تحميل الكل PDF
           </button>
@@ -149,6 +163,10 @@ export function AdminDailyReports() {
         <div className="card dre-loading"><i className="ti ti-loader-2 lp-spin" /> جارٍ التحميل…</div>
       ) : visible.length === 0 ? (
         <div className="card drl-empty"><i className="ti ti-report-off" /> لا توجد تقارير مرسلة في هذا اليوم</div>
+      ) : combined ? (
+        <div className="drl-combined">
+          <DailyReportCombinedCard teacher={teacher} date={date} reports={visible} pending={missing.map((t) => t.title)} />
+        </div>
       ) : (
         <div className="drl-grid">
           {visible.map((r) => <ReportSummary key={r._id ?? r.track} report={r} onOpen={() => setOpenId(r._id ?? r.track)} />)}
@@ -156,7 +174,7 @@ export function AdminDailyReports() {
       )}
 
       {/* Full sheets, off-screen — the source for «تحميل الكل PDF». */}
-      {visible.length > 0 && (
+      {visible.length > 0 && !combined && (
         <div className="drl-pdf-source" ref={allRef} aria-hidden="true">
           {visible.map((r) => <DailyReportSheet key={r._id ?? r.track} report={r} />)}
         </div>

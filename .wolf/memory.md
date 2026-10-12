@@ -4496,3 +4496,26 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 10:05 | struggling: match criteria by word (حفظ/مراجع, key hifz), value 0 | daily-report.controller.ts | done | ~1500 |
+
+## Session: 2026-10-12 10:55
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-12 11:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-12 11:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-12 11:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:35 | Daily reports: teacher-filter toggle «كل تقرير منفصل / تقرير مجمّع» + merged sheet (grouped by halqa) with copy/WhatsApp/single PDF; DailyReportActions now takes text+fileName | AdminDailyReports.tsx, DailyReportCard.tsx, DailyReportComposer.tsx, lib/dailyReport.ts, quran.css | tsc clean | ~6k |
+| 11:33 | Created ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/b398874b-ead1-4d4e-9041-e45f083e8be2/scratchpad/pw/check.mjs | — | ~614 |
+| 11:41 | Session end: 1 writes across 1 files (check.mjs) | 2 reads | ~658 tok |

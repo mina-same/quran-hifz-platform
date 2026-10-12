@@ -4775,6 +4775,13 @@ textarea.form-input {
 .drl-item-counts .absent { color: #c0392b; background: rgba(192,57,43,.08); }
 .drl-item-counts .excused { color: #2563eb; background: rgba(37,99,235,.08); }
 .drl-item-counts .zero { opacity: .45; }
+.drl-bar .scope-tabs { margin-bottom: 0; }
+.drl-combined { max-width: 760px; width: 100%; margin: 0 auto; }
+.dr-group + .dr-group { margin-top: 6px; }
+.dr-group-title { font-size: 13px; font-weight: 800; color: #1a5c2a; display: flex; align-items: center; gap: 6px; }
+.dr-tracks { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 8px; margin-top: 8px; }
+.dr-tracks span { padding: 1px 10px; border-radius: 999px; background: rgba(26, 92, 42, 0.07); color: #1a5c2a; font-size: 12.5px; font-weight: 600; }
+.dr-pending { margin-top: 6px; font-size: 12.5px; color: #a0522d; font-weight: 700; }
 .drl-pdf-source { position: fixed; top: 0; left: -10000px; width: 720px; display: flex; flex-direction: column; gap: 16px; pointer-events: none; }
 
 @media (max-width: 1000px) { .dre-grid { grid-template-columns: 1fr; } .dre-preview { position: static; } }

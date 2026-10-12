@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useDailyReportDraft, useSendDailyReport, type DailyReport, type ReportLine } from "../../api/daily-reports";
-import { DailyReportActions, DailyReportSheet } from "./DailyReportCard";
+import { DailyReportActions, DailyReportSheet, reportFileName } from "./DailyReportCard";
+import { reportText } from "../../lib/dailyReport";
 import { Alert } from "./Alert";
 import { toAr } from "../../../lib/format";
 
@@ -178,7 +179,7 @@ export function DailyReportComposer({ trackId, date, onSent, onGoRecord }: {
         <div className="dre-preview">
           <div className="dre-preview-label">معاينة التقرير</div>
           <DailyReportSheet ref={sheetRef} report={report} />
-          <DailyReportActions report={report} sheetRef={sheetRef} />
+          <DailyReportActions text={reportText(report)} fileName={reportFileName(report)} sheetRef={sheetRef} />
         </div>
       </div>
     </div>

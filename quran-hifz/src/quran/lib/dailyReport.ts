@@ -65,6 +65,41 @@ export function reportText(r: DailyReport): string {
   return lines.join("\n");
 }
 
+/** All of one teacher's reports for a day as a single WhatsApp-ready text. */
+export function combinedReportText(teacher: string, date: string, reports: DailyReport[], pending: string[] = []): string {
+  const present = reports.reduce((n, r) => n + r.presentCount, 0);
+  const total = reports.reduce((n, r) => n + r.totalCount, 0);
+  const lines: string[] = [];
+  lines.push(`📖 التَّقْرِيرُ الْيَوْمِيُّ الْمُجَمَّعُ لِحَلَقَاتِ الْمُعَلِّمِ ${teacher}.`);
+  lines.push("");
+  lines.push(`التاريخ: ${hijriDate(date)} اليوم: ${weekdayAr(date)}`);
+  lines.push(`عدد الحلقات: ${reports.length} — الحضور: ${present} من ${total}`);
+  if (pending.length) lines.push(`لم تُرسل بعد: ${pending.join("، ")}`);
+  const section = (title: string, key: "struggling" | "absent" | "excused") => {
+    lines.push("");
+    lines.push(title);
+    const withRows = reports.filter((r) => r[key].length);
+    if (!withRows.length) lines.push("لا يوجد");
+    for (const r of withRows) {
+      lines.push(`— حلقة ${r.trackTitle}:`);
+      for (const row of r[key]) lines.push([row.name, row.area, row.note].filter(Boolean).join(" — "));
+    }
+  };
+  section("⚠️ المتعثرون", "struggling");
+  section("❌ الغائبون", "absent");
+  section("🙋 المعتذرون", "excused");
+  const notes = reports.filter((r) => r.notes);
+  if (notes.length) {
+    lines.push("");
+    lines.push("📝 ملاحظات:");
+    for (const r of notes) lines.push(`${r.trackTitle}: ${r.notes}`);
+  }
+  lines.push("");
+  lines.push("");
+  lines.push(REPORT_CLOSING);
+  return lines.join("\n");
+}
+
 /**
  * Downloads `el` as an A4 PDF. Rendered via html-to-image (SVG foreignObject),
  * so the Arabic shaping, RTL layout and webfonts are exactly what's on screen
