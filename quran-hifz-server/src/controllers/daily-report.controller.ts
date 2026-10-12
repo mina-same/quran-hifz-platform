@@ -20,12 +20,17 @@ function dayRange(date: string): { $gte: Date; $lt: Date } {
   return { $gte: start, $lt: new Date(start.getTime() + 86_400_000) };
 }
 
-/** «حفظ» → «الحفظ» (criteria labels are stored bare). */
-/** The only areas a daily report flags — matches the composer's chips. */
-const STRUGGLE_AREAS = ['الحفظ', 'المراجعة'];
-
-function withAl(label: string): string {
-  return label.startsWith('ال') ? label : `ال${label}`;
+/**
+ * Which «متعثر» area a rubric criterion belongs to, if any. Rubrics are
+ * per plan and their labels are free text («حفظ», «الحفظ الجديد», «مراجعة
+ * بعيدة»…), so this matches on the word, not the exact label. A rubric with
+ * neither criterion simply never flags anyone. Areas match the composer chips.
+ */
+function struggleArea(c: { key: string; label: string }): 'الحفظ' | 'المراجعة' | null {
+  const label = c.label.replace(/[\u064B-\u0652\u0670\u0640]/g, ''); // tashkeel / tatweel
+  if (c.key === 'hifz' || label.includes('حفظ')) return 'الحفظ';
+  if (label.includes('مراجع')) return 'المراجعة';
+  return null;
 }
 
 /** Tracks the caller may read: admin = all, supervisor = their gender's
@@ -94,10 +99,10 @@ export async function getDraft(req: Request, res: Response, next: NextFunction):
       if (status === 'غائب') absent.push(line(id, { note }));
       else if (status === 'مستأذن') excused.push(line(id, { note }));
       else {
-        const weak = (evalOf.get(id)?.criteria ?? [])
+        const weak = [...new Set((evalOf.get(id)?.criteria ?? [])
           .filter((c) => c.max > 0 && c.value === 0)
-          .map((c) => withAl(c.label))
-          .filter((a) => STRUGGLE_AREAS.includes(a));
+          .map(struggleArea)
+          .filter((a) => a !== null))];
         if (weak.length) struggling.push(line(id, { area: weak.join('، '), note }));
       }
     }
