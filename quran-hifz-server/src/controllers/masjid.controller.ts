@@ -16,14 +16,19 @@ export async function getMasajid(req: Request, res: Response, next: NextFunction
     const supervisorGender = supervisorGenderOf(req);
     const masajid = await Masjid.find(supervisorGender ? { gender: supervisorGender } : {}).sort({ name: 1 });
 
-    const enriched = await Promise.all(
-      masajid.map(async (m) => {
-        const tracks = await Track.find({ masjid: m._id, deletedAt: null })
-          .populate('teachers', 'name')
-          .select('title daysPerWeek timeSlot maxStudents status');
-        return { ...m.toObject(), tracks };
-      }),
-    );
+    // One query for every masjid's tracks, grouped here — `masjid` is selected
+    // only to group by and stripped again so each track keeps its old shape.
+    const allTracks = await Track.find({ masjid: { $in: masajid.map((m) => m._id) }, deletedAt: null })
+      .populate('teachers', 'name')
+      .select('title daysPerWeek timeSlot maxStudents status masjid');
+    const tracksByMasjid = new Map<string, Record<string, unknown>[]>();
+    for (const tr of allTracks) {
+      const { masjid, ...rest } = tr.toObject();
+      const key = String(masjid);
+      if (!tracksByMasjid.has(key)) tracksByMasjid.set(key, []);
+      tracksByMasjid.get(key)!.push(rest);
+    }
+    const enriched = masajid.map((m) => ({ ...m.toObject(), tracks: tracksByMasjid.get(String(m._id)) ?? [] }));
 
     res.json({ success: true, count: enriched.length, data: enriched });
   } catch (err) {

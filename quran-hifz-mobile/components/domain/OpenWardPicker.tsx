@@ -6,6 +6,7 @@ import Badge from '@/components/ui/Badge';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import { isReverseWard, isValidWardRange, type RangePoint } from '@/lib/quranRange';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import type { WardDirection } from '@/lib/openWard';
 
 /** One type's answer to «ماذا حفظ اليوم؟» on an open-ward plan. */
 export type OpenWardValue =
@@ -24,7 +25,7 @@ export function openWardComplete(v?: OpenWardValue): boolean {
  * components/common/OpenWardPicker.tsx.
  */
 export default function OpenWardPicker({
-  type, showType, value, suggestedFrom, onChange, disabled,
+  type, showType, value, suggestedFrom, onChange, disabled, direction, onDirectionChange,
 }: {
   type: string;
   showType: boolean;
@@ -33,6 +34,10 @@ export default function OpenWardPicker({
   suggestedFrom: RangePoint;
   onChange: (v: OpenWardValue) => void;
   disabled?: boolean;
+  /** The student's direction through the Mushaf — decides where the next day
+   * starts once a surah is finished. */
+  direction: WardDirection;
+  onDirectionChange: (d: WardDirection) => void;
 }) {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
@@ -42,6 +47,8 @@ export default function OpenWardPicker({
   const invalid = value?.status === 'recorded' && !isValidWardRange(value.from, value.to);
   // Memorizing from the end of the Mushaf: surah by surah backwards.
   const reverse = value?.status === 'recorded' && isReverseWard(value.from, value.to);
+  // A range spanning surahs already shows its direction; otherwise the teacher can flip it.
+  const spansSurahs = value?.status === 'recorded' && value.from.surahNumber !== value.to.surahNumber;
 
   return (
     <View style={s.box}>
@@ -66,6 +73,23 @@ export default function OpenWardPicker({
       )}
       {reverse && (
         <Text style={[s.hint, { color: theme.textMuted }]}>حفظ معكوس — من آخر المصحف، وكل سورة تُقرأ من أولها بترتيب آياتها</Text>
+      )}
+      {!none && !spansSurahs && (
+        <View style={s.dirRow}>
+          <Text style={s.muted}>
+            اتجاه الحفظ: <Text style={s.dirValue}>{direction === 'reverse' ? 'من آخر المصحف' : 'من أول المصحف'}</Text>
+          </Text>
+          {!disabled && (
+            <Pressable
+              haptic="select"
+              onPress={() => onDirectionChange(direction === 'reverse' ? 'forward' : 'reverse')}
+              style={s.chip}
+              accessibilityRole="button"
+            >
+              <Text style={s.chipText}>عكس الاتجاه</Text>
+            </Pressable>
+          )}
+        </View>
       )}
       {invalid && (
         <Text style={[s.hint, { color: theme.red }]}>داخل السورة الواحدة يجب أن تكون آية البداية قبل آية النهاية</Text>
@@ -98,6 +122,8 @@ function createS(theme: ReturnType<typeof useAppTheme>) {
       alignSelf: 'flex-start', borderWidth: 1, borderColor: theme.border, borderRadius: 999,
       paddingHorizontal: 12, paddingVertical: 6,
     },
+    dirRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 },
+    dirValue: { fontFamily: theme.fontCairoBold, color: theme.text },
     chipOn: { backgroundColor: theme.greenPale, borderColor: theme.green },
     chipText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
     chipTextOn: { color: theme.green, fontFamily: theme.fontCairoBold },

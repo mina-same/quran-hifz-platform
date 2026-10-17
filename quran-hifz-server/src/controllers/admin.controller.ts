@@ -41,9 +41,16 @@ export async function getParents(req: Request, res: Response, next: NextFunction
     }
 
     const parents = await User.find(parentFilter).sort({ name: 1 });
-    const enriched = await Promise.all(
-      parents.map(async (p) => {
-        const links = await ParentStudent.find({ parent: p._id }).populate('student', 'name path');
+    // One query for every parent's links instead of one per parent.
+    const allLinks = await ParentStudent.find({ parent: { $in: parents.map((p) => p._id) } }).populate('student', 'name path');
+    const linksByParent = new Map<string, typeof allLinks>();
+    for (const l of allLinks) {
+      const key = String(l.parent);
+      if (!linksByParent.has(key)) linksByParent.set(key, []);
+      linksByParent.get(key)!.push(l);
+    }
+    const enriched = parents.map((p) => {
+        const links = linksByParent.get(String(p._id)) ?? [];
         return {
           _id:      p._id,
           name:     p.name,
@@ -54,8 +61,7 @@ export async function getParents(req: Request, res: Response, next: NextFunction
           // sending null into a list the client renders `.name` off of.
           children: links.map((l) => l.student).filter(Boolean),
         };
-      }),
-    );
+    });
     res.json({ success: true, count: enriched.length, data: enriched });
   } catch (err) {
     next(err);

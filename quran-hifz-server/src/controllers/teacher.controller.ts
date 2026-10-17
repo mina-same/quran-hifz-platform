@@ -31,16 +31,36 @@ export async function getTeachers(req: Request, res: Response, next: NextFunctio
     }
     const teachers = await Teacher.find(teacherFilter).sort({ name: 1 });
 
-    const enriched = await Promise.all(
-      teachers.map(async (t) => {
-        let trackIds = await Track.find({ teachers: t._id, deletedAt: null }).select('_id');
-        if (allowedTrackIdSet) trackIds = trackIds.filter((tr) => allowedTrackIdSet!.has(String(tr._id)));
-        const tracksCount  = trackIds.length;
-        const studentCount = await Student.countDocuments({ track: { $in: trackIds.map((tr) => tr._id) } });
-        const userDoc      = await User.findOne({ role: 'teacher', profileId: t._id }).select('email');
-        return { ...t.toObject(), tracksCount, studentCount, email: userDoc?.email ?? null };
-      }),
-    );
+    // Batched: one query each for tracks, per-track student counts and login
+    // emails, instead of three queries per teacher.
+    const teacherIds = teachers.map((t) => t._id);
+    const [allTracks, userDocs] = await Promise.all([
+      Track.find({ teachers: { $in: teacherIds }, deletedAt: null }).select('_id teachers').lean(),
+      User.find({ role: 'teacher', profileId: { $in: teacherIds } }).select('profileId email').lean(),
+    ]);
+    const scopedTracks = allowedTrackIdSet
+      ? allTracks.filter((tr) => allowedTrackIdSet!.has(String(tr._id)))
+      : allTracks;
+    const counts = await Student.aggregate<{ _id: unknown; n: number }>([
+      { $match: { track: { $in: scopedTracks.map((tr) => tr._id) } } },
+      { $group: { _id: '$track', n: { $sum: 1 } } },
+    ]);
+    const countByTrack = new Map(counts.map((c) => [String(c._id), c.n]));
+    const emailByTeacher = new Map<string, string>();
+    for (const u of userDocs) {
+      const key = String(u.profileId);
+      if (!emailByTeacher.has(key)) emailByTeacher.set(key, u.email);
+    }
+
+    const enriched = teachers.map((t) => {
+      const own = scopedTracks.filter((tr) => tr.teachers.some((id) => String(id) === String(t._id)));
+      return {
+        ...t.toObject(),
+        tracksCount:  own.length,
+        studentCount: own.reduce((sum, tr) => sum + (countByTrack.get(String(tr._id)) ?? 0), 0),
+        email:        emailByTeacher.get(String(t._id)) ?? null,
+      };
+    });
 
     res.json({ success: true, count: enriched.length, data: enriched });
   } catch (err) {

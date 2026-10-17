@@ -38,7 +38,11 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 // splash and first paint.
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-const queryClient = new QueryClient();
+// Each request to the API is slow (far-away DB), so don't refetch data that
+// was loaded moments ago on every mount. Saves still invalidate their keys.
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 30_000 } },
+});
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({

@@ -154,16 +154,22 @@ export async function sendReport(req: Request, res: Response, next: NextFunction
     if (data.date > latest) throw new AppError('لا يمكن إرسال تقرير ليوم في المستقبل', 400);
     await assertCanWrite(req, data.track);
 
-    const trackDoc = await Track.findById(data.track).select('title masjid').lean();
+    // The track→masjid and user→teacher lookup chains are independent.
+    const [trackInfo, teacherName] = await Promise.all([
+      (async () => {
+        const t = await Track.findById(data.track).select('title masjid').lean();
+        const m = t ? await Masjid.findById(t.masjid).select('name').lean() : null;
+        return { trackDoc: t, masjid: m };
+      })(),
+      (async () => {
+        if (req.user!.role !== 'teacher') return req.user!.name;
+        const me = await User.findById(req.user!.id).select('profileId name');
+        const t = me?.profileId ? await Teacher.findById(me.profileId).select('name').lean() : null;
+        return t?.name ?? me?.name ?? req.user!.name;
+      })(),
+    ]);
+    const { trackDoc, masjid } = trackInfo;
     if (!trackDoc) throw new AppError('الحلقة غير موجودة', 404);
-    const masjid = await Masjid.findById(trackDoc.masjid).select('name').lean();
-
-    let teacherName = req.user!.name;
-    if (req.user!.role === 'teacher') {
-      const me = await User.findById(req.user!.id).select('profileId name');
-      const t = me?.profileId ? await Teacher.findById(me.profileId).select('name').lean() : null;
-      teacherName = t?.name ?? me?.name ?? teacherName;
-    }
 
     const report = await DailyReport.findOneAndUpdate(
       { track: data.track, date: data.date },

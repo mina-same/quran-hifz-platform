@@ -58,7 +58,7 @@ export async function upsertAttendanceRecords(
   }));
 
   await Attendance.bulkWrite(ops);
-  await Promise.all(records.map((r) => recalcAttendancePct(r.student)));
+  await recalcAttendancePct(records.map((r) => r.student));
 }
 
 export async function getAttendance(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -97,12 +97,13 @@ export async function recordAttendance(req: Request, res: Response, next: NextFu
     if (existing) {
       existing.status = data.status;
       await existing.save();
+      await recalcAttendancePct([data.student]);
       res.json({ success: true, data: existing });
       return;
     }
     const { day, time } = deriveDayAndTime(dateObj);
     const record = await Attendance.create({ ...data, date: dateObj, day, time });
-    await recalcAttendancePct(data.student);
+    await recalcAttendancePct([data.student]);
     res.status(201).json({ success: true, data: record });
   } catch (err) {
     next(err);
@@ -129,11 +130,30 @@ export async function bulkAttendance(req: Request, res: Response, next: NextFunc
   }
 }
 
-async function recalcAttendancePct(studentId: string): Promise<void> {
+// Every DB round trip is expensive here (the API and Atlas are far apart), so
+// this recounts all the given students in one aggregate + one bulk write
+// instead of three sequential queries per student.
+async function recalcAttendancePct(studentIds: string[]): Promise<void> {
+  const ids = [...new Set(studentIds)].map((id) => new Types.ObjectId(id));
+  if (ids.length === 0) return;
+
   // Excused (مستأذن) sessions don't count against the student — excluded from
   // both numerator and denominator.
-  const total   = await Attendance.countDocuments({ student: studentId, status: { $ne: 'مستأذن' } });
-  const present = await Attendance.countDocuments({ student: studentId, status: 'حاضر' });
-  const pct = total > 0 ? Math.round((present / total) * 100) : 0;
-  await Student.findByIdAndUpdate(studentId, { attendancePct: pct });
+  const counts = await Attendance.aggregate<{ _id: Types.ObjectId; total: number; present: number }>([
+    { $match: { student: { $in: ids } } },
+    {
+      $group: {
+        _id: '$student',
+        total:   { $sum: { $cond: [{ $ne: ['$status', 'مستأذن'] }, 1, 0] } },
+        present: { $sum: { $cond: [{ $eq: ['$status', 'حاضر'] }, 1, 0] } },
+      },
+    },
+  ]);
+  const byId = new Map(counts.map((c) => [String(c._id), c]));
+
+  await Student.bulkWrite(ids.map((id) => {
+    const c = byId.get(String(id));
+    const pct = c && c.total > 0 ? Math.round((c.present / c.total) * 100) : 0;
+    return { updateOne: { filter: { _id: id }, update: { $set: { attendancePct: pct } } } };
+  }), { ordered: false });
 }

@@ -16,7 +16,7 @@ import {
   useStudentPlanProgressList, useRecordStudentOccurrence, segmentReversed, type QuranPlan,
   isOpenPlan, useOpenWardEntries, useUpsertOpenWard, useDeleteOpenWard, entryStudentId, type OpenWardType,
 } from '@/lib/queries/quranPlan';
-import { savedOpenWardTypes } from '@/lib/openWard';
+import { inferWardDirection, savedOpenWardTypes, type WardDirection } from '@/lib/openWard';
 import OpenWardPicker, { openWardComplete, type OpenWardValue } from '@/components/domain/OpenWardPicker';
 import {
   MAX_SCORES, TOTAL_MAX, legacyScoresOf, totalMaxOf,
@@ -136,6 +136,8 @@ export default function EvaluationRoster({
   const deleteOpenWard = useDeleteOpenWard();
   // Unsaved per-student edits, keyed `${studentId}::${type}`.
   const [openWardEdits, setOpenWardEdits] = useState<Record<string, OpenWardValue>>({});
+  // Direction the teacher flipped to by hand, same keys — beats any guess.
+  const [wardDirEdits, setWardDirEdits] = useState<Record<string, WardDirection>>({});
 
   /** The teacher's unsaved edit, else what was already saved for this day. */
   function openWardFor(studentId: string, type: OpenWardType): OpenWardValue | undefined {
@@ -150,14 +152,33 @@ export default function EvaluationRoster({
       : { status: 'recorded', from: saved.from, to: saved.to };
   }
 
-  /** Continue from where this student last stopped for this type. Entries
-   * arrive newest first, so the first earlier recorded one is the latest. */
-  function suggestedFromFor(studentId: string, type: OpenWardType): RangePoint {
-    const last = openEntries.find(
-      (e) => entryStudentId(e) === studentId && e.type === type && e.status === 'recorded' && e.date < effectiveDate,
+  /** This student's earlier records of this type, newest first. */
+  function wardHistory(studentId: string, type: OpenWardType) {
+    return openEntries.filter((e) => entryStudentId(e) === studentId && e.type === type && e.date < effectiveDate);
+  }
+
+  /** Which way the student goes through the Mushaf: the teacher's flip, else
+   * guessed from the records (today's range included once there is one). */
+  function wardDirectionFor(studentId: string, type: OpenWardType, withToday = false): WardDirection | undefined {
+    const chosen = wardDirEdits[`${studentId}::${type}`];
+    if (chosen) return chosen;
+    const history = wardHistory(studentId, type);
+    if (!withToday) return inferWardDirection(history);
+    const v = openWardFor(studentId, type);
+    const saved = openEntries.find(
+      (e) => entryStudentId(e) === studentId && e.type === type && e.date === effectiveDate,
     );
-    // Continues in the last record's direction (backwards → the surah before).
-    return last?.from && last?.to ? nextWardStart(last.from, last.to) : { surahNumber: 1, ayah: 1 };
+    const today = v?.status === 'recorded' ? { ...v, direction: openWardEdits[`${studentId}::${type}`] ? undefined : saved?.direction } : undefined;
+    return inferWardDirection(today ? [today, ...history] : history);
+  }
+
+  /** Continue from where this student last stopped for this type, in their
+   * direction — a finished surah leads to the one before it when reverse. */
+  function suggestedFromFor(studentId: string, type: OpenWardType): RangePoint {
+    const reverse = wardDirectionFor(studentId, type) === 'reverse';
+    const last = wardHistory(studentId, type).find((e) => e.status === 'recorded');
+    if (last?.from && last?.to) return nextWardStart(last.from, last.to, reverse);
+    return reverse ? { surahNumber: 114, ayah: 1 } : { surahNumber: 1, ayah: 1 };
   }
 
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
@@ -188,6 +209,7 @@ export default function EvaluationRoster({
     setOverrides({});
     setCompletionOverrides({});
     setOpenWardEdits({});
+    setWardDirEdits({});
     setUnlockedIds(new Set());
     setExpandedStudentId(null);
   }, [effectiveDate]);
@@ -347,7 +369,9 @@ export default function EvaluationRoster({
                 try {
                   const r = await upsertOpenWard.mutateAsync({
                     planId: linkedPlan._id, studentId, type: t, date: effectiveDate, status: v.status,
-                    ...(v.status === 'recorded' ? { from: v.from, to: v.to } : {}),
+                    ...(v.status === 'recorded'
+                      ? { from: v.from, to: v.to, direction: wardDirectionFor(studentId, t, true) }
+                      : {}),
                   });
                   if (r.overlapWarning) {
                     warning();
@@ -361,6 +385,11 @@ export default function EvaluationRoster({
                     }]);
                   }
                   setOpenWardEdits((prev) => {
+                    const next = { ...prev };
+                    delete next[`${studentId}::${t}`];
+                    return next;
+                  });
+                  setWardDirEdits((prev) => {
                     const next = { ...prev };
                     delete next[`${studentId}::${t}`];
                     return next;
@@ -626,6 +655,8 @@ export default function EvaluationRoster({
                     suggestedFrom={suggestedFromFor(st._id, t)}
                     disabled={locked}
                     onChange={(v) => setOpenWardEdits((prev) => ({ ...prev, [`${st._id}::${t}`]: v }))}
+                    direction={wardDirectionFor(st._id, t, true) ?? 'forward'}
+                    onDirectionChange={(d) => setWardDirEdits((prev) => ({ ...prev, [`${st._id}::${t}`]: d }))}
                   />
                 ))}
 

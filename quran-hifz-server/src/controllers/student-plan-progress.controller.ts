@@ -46,6 +46,22 @@ async function getOrInitProgress(planId: string, studentId: string, plan: Instan
   return doc;
 }
 
+/** loadPlanAndValidateStudent + getOrInitProgress for the write paths, with
+ * the membership check and the overlay read issued together — the overlay
+ * almost always exists already, so this saves a full DB round trip per save. */
+async function loadPlanAndProgress(planId: string, studentId: string) {
+  const plan = await QuranPlan.findById(planId);
+  if (!plan) throw new AppError('الخطة غير موجودة', 404);
+  const [covered, existing] = await Promise.all([
+    isStudentInPlan(plan, studentId),
+    StudentPlanProgress.findOne({ plan: planId, student: studentId }),
+  ]);
+  if (!covered) throw new AppError('هذا الطالب غير مشمول بهذه الخطة', 404);
+  assertFixedPlan(plan);
+  const doc = existing ?? await getOrInitProgress(planId, studentId, plan);
+  return { plan, doc };
+}
+
 function withIso(doc: InstanceType<typeof StudentPlanProgress>) {
   const obj = doc.toObject();
   return { ...obj, occurrences: obj.occurrences.map((o: { date: Date }) => ({ ...o, date: new Date(o.date).toISOString() })) };
@@ -110,9 +126,7 @@ export async function recordOccurrence(req: Request, res: Response, next: NextFu
     const { id: planId, studentId } = req.params;
     const data = recordOccurrenceSchema.parse(req.body);
 
-    const plan = await loadPlanAndValidateStudent(planId, studentId);
-    assertFixedPlan(plan);
-    const doc = await getOrInitProgress(planId, studentId, plan);
+    const { doc } = await loadPlanAndProgress(planId, studentId);
 
     // Backfill: overlays written before segments existed carry no type.
     const presentTypes = Array.from(new Set(doc.occurrences.map((o) => o.type)));
@@ -207,9 +221,7 @@ export async function updateStudentScheduleEntry(req: Request, res: Response, ne
       throw new AppError('صفحة البداية يجب أن تسبق صفحة النهاية', 400);
     }
 
-    const plan = await loadPlanAndValidateStudent(planId, studentId);
-    assertFixedPlan(plan);
-    const doc = await getOrInitProgress(planId, studentId, plan);
+    const { doc } = await loadPlanAndProgress(planId, studentId);
 
     const entry = doc.occurrences.find((o) => o.occurrenceIndex === occurrenceIndex);
     if (!entry) throw new AppError('لم يتم العثور على هذا اليوم في خطة الطالب', 404);
@@ -334,9 +346,7 @@ export async function initStudentProgress(req: Request, res: Response, next: Nex
 export async function reflowNow(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id: planId, studentId } = req.params;
-    const plan = await loadPlanAndValidateStudent(planId, studentId);
-    assertFixedPlan(plan);
-    const doc = await getOrInitProgress(planId, studentId, plan);
+    const { doc } = await loadPlanAndProgress(planId, studentId);
 
     reflowAll(doc);
     await doc.save();

@@ -338,6 +338,8 @@ export type OpenWardEntry = {
   status: OpenWardStatus;
   from?: RangePoint;
   to?: RangePoint;
+  /** The student's direction as of this day, when known. */
+  direction?: 'forward' | 'reverse';
   pageStart?: number;
   pageEnd?: number;
   pages?: number;
@@ -379,7 +381,7 @@ export function useUpsertOpenWard() {
   return useMutation({
     mutationFn: ({ planId, studentId, ...body }: {
       planId: string; studentId: string; type: OpenWardType; date: string;
-      status: OpenWardStatus; from?: RangePoint; to?: RangePoint;
+      status: OpenWardStatus; from?: RangePoint; to?: RangePoint; direction?: 'forward' | 'reverse';
     }) => put<OpenWardUpsertResponse>(`/quran-plans/${planId}/students/${studentId}/open-ward`, body),
     onSuccess: (_d, v) => qc.invalidateQueries({ queryKey: ['open-ward', v.planId] }),
   });

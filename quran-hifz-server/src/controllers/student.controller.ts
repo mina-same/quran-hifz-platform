@@ -64,10 +64,12 @@ export async function getStudents(req: Request, res: Response, next: NextFunctio
       .sort({ createdAt: -1 });
 
     const studentIds = students.map((s) => s._id);
-    const userDocs = await User.find({ role: 'student', profileId: { $in: studentIds } }).select('profileId email');
+    const [userDocs, links] = await Promise.all([
+      User.find({ role: 'student', profileId: { $in: studentIds } }).select('profileId email'),
+      ParentStudent.find({ student: { $in: studentIds } }).select('parent student'),
+    ]);
     const emailMap = new Map(userDocs.map((u) => [String(u.profileId), u.email]));
 
-    const links = await ParentStudent.find({ student: { $in: studentIds } }).select('parent student');
     const parentUserDocs = await User.find({ role: 'parent', _id: { $in: links.map((l) => l.parent) } }).select('name email');
     const parentUserMap = new Map(parentUserDocs.map((u) => [String(u._id), { name: u.name, email: u.email }]));
     const parentMap = new Map(

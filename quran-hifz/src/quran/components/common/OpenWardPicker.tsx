@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { RangePoint } from "../../api/quran-plans";
 import { isReverseWard, isValidWardRange } from "../../lib/quranRange";
+import type { WardDirection } from "../../lib/openWard";
 import { Badge } from "./Badge";
 
 /** One type's answer to «ماذا حفظ اليوم؟» on an open-ward plan. */
@@ -22,7 +23,7 @@ type SurahAyahProps = { value: RangePoint; onChange: (p: RangePoint) => void; di
  * because each page keeps its own CompactSurahAyah copy (file convention).
  */
 export function OpenWardPicker({
-  type, showType, value, suggestedFrom, onChange, disabled, SurahAyah,
+  type, showType, value, suggestedFrom, onChange, disabled, SurahAyah, direction, onDirectionChange,
 }: {
   type: string;
   showType: boolean;
@@ -32,6 +33,10 @@ export function OpenWardPicker({
   onChange: (v: OpenWardValue) => void;
   disabled?: boolean;
   SurahAyah: ComponentType<SurahAyahProps>;
+  /** The student's direction through the Mushaf — decides where the next day
+   * starts once a surah is finished. */
+  direction: WardDirection;
+  onDirectionChange: (d: WardDirection) => void;
 }) {
   const none = value?.status === "none";
   const from = value?.status === "recorded" ? value.from : suggestedFrom;
@@ -39,6 +44,8 @@ export function OpenWardPicker({
   const invalid = value?.status === "recorded" && !isValidWardRange(value.from, value.to);
   // Memorizing from the end of the Mushaf: surah by surah backwards.
   const reverse = value?.status === "recorded" && isReverseWard(value.from, value.to);
+  // A range spanning surahs already shows its direction; otherwise the teacher can flip it.
+  const spansSurahs = value?.status === "recorded" && value.from.surahNumber !== value.to.surahNumber;
 
   return (
     <div style={{ border: "1px dashed var(--border)", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
@@ -74,6 +81,22 @@ export function OpenWardPicker({
         <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 6 }}>
           <Badge tone="blue"><i className="ti ti-arrows-sort" style={{ marginLeft: 3 }} />حفظ معكوس</Badge>{" "}
           من آخر المصحف — كل سورة تُقرأ من أولها بترتيب آياتها
+        </div>
+      )}
+      {!none && !spansSurahs && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", fontSize: 11, color: "var(--text2)", marginTop: 6 }}>
+          <i className="ti ti-arrows-sort" />
+          اتجاه الحفظ: <b>{direction === "reverse" ? "من آخر المصحف" : "من أول المصحف"}</b>
+          {!disabled && (
+            <button
+              type="button"
+              className="topbar-btn btn-ghost"
+              style={{ fontSize: 11, padding: "2px 8px" }}
+              onClick={() => onDirectionChange(direction === "reverse" ? "forward" : "reverse")}
+            >
+              <i className="ti ti-arrows-exchange" /> عكس الاتجاه
+            </button>
+          )}
         </div>
       )}
       {invalid && (

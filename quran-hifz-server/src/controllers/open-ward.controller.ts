@@ -20,6 +20,7 @@ const openWardSchema = z.object({
   status: z.enum(['recorded', 'none']),
   from:   pointSchema.optional(),
   to:     pointSchema.optional(),
+  direction: z.enum(['forward', 'reverse']).optional(),
 });
 
 export type OpenWardBody = z.infer<typeof openWardSchema>;
@@ -51,6 +52,10 @@ export function validateOpenWardBody(
   if (!isValidWardRange(data.from, data.to)) {
     throw new AppError('داخل السورة الواحدة يجب أن تكون آية البداية قبل آية النهاية', 400);
   }
+  // A range spanning surahs shows its own direction; it beats what was sent.
+  if (data.from.surahNumber !== data.to.surahNumber) {
+    return { ...data, direction: data.from.surahNumber > data.to.surahNumber ? 'reverse' : 'forward' };
+  }
   return data;
 }
 
@@ -78,12 +83,14 @@ export async function upsertOpenWard(req: Request, res: Response, next: NextFunc
           pageStart: pr.pageStart, pageEnd: pr.pageEnd, pages: pr.pageCount,
           ayahs: countWardAyahs(data.from!, data.to!),
           recordedBy: req.user!.id,
+          ...(data.direction ? { direction: data.direction } : {}),
         },
+        ...(data.direction ? {} : { $unset: { direction: 1 } }),
       };
     } else {
       update = {
         $set: { ...key, status: data.status, recordedBy: req.user!.id },
-        $unset: { from: 1, to: 1, pageStart: 1, pageEnd: 1, pages: 1, ayahs: 1 },
+        $unset: { from: 1, to: 1, direction: 1, pageStart: 1, pageEnd: 1, pages: 1, ayahs: 1 },
       };
     }
     const entry = await OpenWardEntry.findOneAndUpdate(key, update, { upsert: true, new: true, runValidators: true });

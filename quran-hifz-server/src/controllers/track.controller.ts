@@ -49,12 +49,13 @@ export async function getTracks(req: Request, res: Response, next: NextFunction)
       .populate('masjid', 'name location gender')
       .sort({ createdAt: -1 });
 
-    const enriched = await Promise.all(
-      tracks.map(async (t) => {
-        const studentCount = await Student.countDocuments({ track: t._id });
-        return { ...t.toObject(), studentCount };
-      }),
-    );
+    // One grouped count for every track instead of a countDocuments per track.
+    const counts = await Student.aggregate<{ _id: unknown; n: number }>([
+      { $match: { track: { $in: tracks.map((t) => t._id) } } },
+      { $group: { _id: '$track', n: { $sum: 1 } } },
+    ]);
+    const countByTrack = new Map(counts.map((c) => [String(c._id), c.n]));
+    const enriched = tracks.map((t) => ({ ...t.toObject(), studentCount: countByTrack.get(String(t._id)) ?? 0 }));
 
     res.json({ success: true, count: enriched.length, data: enriched });
   } catch (err) {

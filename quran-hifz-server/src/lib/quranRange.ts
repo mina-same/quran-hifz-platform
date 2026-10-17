@@ -642,10 +642,12 @@ export function wardPageRange(from: RangePoint, to: RangePoint): { pageStart: nu
   return { pageStart: Math.min(...all), pageEnd: Math.max(...all), pageCount: all.length };
 }
 
-/** Where the next ward should start: forward → the next ayah; backwards →
- *  rest of the surah if it stopped mid-surah, else the surah BEFORE it. */
-export function nextWardStart(from: RangePoint, to: RangePoint): RangePoint {
-  if (!isReverseWard(from, to)) {
+/** Where the next day continues. `reverse` is the student's direction
+ * (memorizing from the end of the Mushaf); a single-surah day carries no
+ * direction of its own, so callers pass the one they know. Backwards → once a
+ * surah is finished, the next day starts at the surah before it. */
+export function nextWardStart(from: RangePoint, to: RangePoint, reverse = isReverseWard(from, to)): RangePoint {
+  if (!reverse) {
     const last = toFlatIndex({ surahNumber: 114, ayah: 6 });
     return fromFlatIndex(Math.min(last, toFlatIndex(to) + 1));
   }

@@ -18,8 +18,9 @@ const AVATAR_COLORS = [
  * array) and offers "نقل طالب" (moves a student's `track` field here), never
  * "add" alongside an existing track. Self-contained (fetches its own students
  * list and owns its own picker/search state) so it can be embedded both in
- * the quick roster modal and the full track form page. */
-export function TrackStudentsPanel({ track }: { track: Track }) {
+ * the quick roster modal and the full track form page. `canTransfer={false}`
+ * makes it a read-only roster (the teacher's halqa page). */
+export function TrackStudentsPanel({ track, canTransfer = true }: { track: Track; canTransfer?: boolean }) {
   const { data: allStudents = [] } = useStudents();
   const assignStudent = useAssignStudent();
   const [addStudentId, setAddStudentId] = useState("");
@@ -53,7 +54,7 @@ export function TrackStudentsPanel({ track }: { track: Track }) {
         {isFull && <p style={{ margin: "8px 0 0", fontSize: 11, color: "#ef4444", fontWeight: 600 }}><i className="ti ti-alert-circle" style={{ marginLeft: 4 }} />وصل المسار للحد الأقصى</p>}
       </div>
 
-      {!isFull && (
+      {canTransfer && !isFull && (
         <div style={{ border: "1.5px dashed var(--border2)", borderRadius: 10, padding: 14, marginBottom: 16 }}>
           <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 700, color: "var(--text2)" }}>
             <i className="ti ti-user-plus" style={{ marginLeft: 5, color: "var(--green)" }} />نقل طالب إلى هذا المسار
@@ -127,10 +128,12 @@ export function TrackStudentsPanel({ track }: { track: Track }) {
         </div>
       )}
 
-      <p style={{ margin: "12px 0 0", fontSize: 11, color: "var(--text3)" }}>
-        <i className="ti ti-info-circle" style={{ marginLeft: 4 }} />
-        لإزالة طالب من المسار، انقله إلى مسار آخر من صفحة إدارة الطلاب.
-      </p>
+      {canTransfer && (
+        <p style={{ margin: "12px 0 0", fontSize: 11, color: "var(--text3)" }}>
+          <i className="ti ti-info-circle" style={{ marginLeft: 4 }} />
+          لإزالة طالب من المسار، انقله إلى مسار آخر من صفحة إدارة الطلاب.
+        </p>
+      )}
     </>
   );
 }

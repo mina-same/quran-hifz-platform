@@ -1,6 +1,8 @@
 import { User } from '../models/User.model';
 
 const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
+/** A slow Expo endpoint must never hold up the save that triggered the push. */
+const PUSH_TIMEOUT_MS = 3000;
 
 type PushRecipient = { userId: string; title: string; body: string };
 
@@ -28,6 +30,7 @@ export async function sendPushToUsers(recipients: PushRecipient[]): Promise<void
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(messages),
+      signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
     });
   } catch {
     // best-effort only

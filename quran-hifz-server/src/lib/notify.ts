@@ -48,12 +48,15 @@ export async function notifyParents(
   });
 
   if (messages.length) {
-    await Message.insertMany(messages);
-    await sendPushToUsers(messages.map((m) => ({
-      userId: String(m.recipient),
-      title: ctx.senderName,
-      body: m.body,
-    })));
+    // The push lookup/send doesn't depend on the insert — run them together.
+    await Promise.all([
+      Message.insertMany(messages),
+      sendPushToUsers(messages.map((m) => ({
+        userId: String(m.recipient),
+        title: ctx.senderName,
+        body: m.body,
+      }))),
+    ]);
   }
   return { notified: messages.length, unnotified };
 }

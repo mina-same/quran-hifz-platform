@@ -7092,5 +7092,41 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-10-11T11:38:44.707219"
+  },
+  {
+    "id": "bug-423",
+    "timestamp": "2026-10-17T12:00:00Z",
+    "error_message": "خطة بدون مقطع محدد: طالب بيحفظ من آخر المصحف، لما يخلّص سورة في يوم كله جوه سورة واحدة، اليوم اللي بعده يقترح السورة اللي بعدها (للأمام) بدل اللي قبلها",
+    "file": "quran-hifz/src/quran/pages/teacher/TeacherTrackDetail.tsx, TeacherAttendance.tsx, quran-hifz-mobile/components/domain/EvaluationRoster.tsx, */quranRange.ts, */openWard.ts, open-ward.controller.ts, OpenWardEntry.model.ts",
+    "root_cause": "suggestedFromFor guessed direction only from the LAST record via isReverseWard (from.surah > to.surah); a single-surah day has no direction, so it fell back to forward",
+    "fix": "nextWardStart takes an explicit reverse flag; inferWardDirection(history) reads saved direction / cross-surah range / surah move between consecutive days; teacher can flip via «عكس الاتجاه» in OpenWardPicker; OpenWardEntry stores optional direction (server forces it from cross-surah ranges); first day reverse suggests الناس ١",
+    "tags": [
+      "open-ward",
+      "reverse",
+      "direction",
+      "suggestion"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-17T12:00:00Z"
+  },
+  {
+    "id": "bug-424",
+    "timestamp": "2026-10-17T00:00:00Z",
+    "error_message": "User: saving/adding anything on the server takes too long",
+    "file": "quran-hifz-server/src/controllers/attendance.controller.ts",
+    "root_cause": "Each Mongo round trip is ~260ms (Egypt->Tokyo M0 locally; wardi-api runs in Vercel iad1 while its Atlas M0 is in Mumbai ap-south-1). Save handlers chained ~10 sequential queries; recalcAttendancePct did 3 sequential queries PER student (40 students = 6.0s); Expo push fetch had no timeout.",
+    "fix": "recalcAttendancePct -> one aggregate + one Student.bulkWrite (6.0s->0.27s, 0 mismatches verified read-only); bulkEvaluate runs resolveTeacher||resolveRubric and Evaluation.bulkWrite||upsertAttendanceRecords in parallel; notifyParents runs insertMany||push; push fetch 3s AbortSignal timeout; sendReport lookups parallel; plan-progress writes read overlay in parallel with membership check. Also recordAttendance now recalcs pct when updating an existing record (was stale). Infra fix (Vercel region bom1 / Atlas region) pending user decision.",
+    "tags": [
+      "performance",
+      "latency",
+      "mongodb",
+      "vercel",
+      "region",
+      "n+1"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-17T00:00:00Z"
   }
 ]

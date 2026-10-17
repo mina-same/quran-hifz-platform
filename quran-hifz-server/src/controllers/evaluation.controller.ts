@@ -156,7 +156,11 @@ async function resolveTeacher(req: Request, track: string, given?: string): Prom
 export async function bulkEvaluate(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { teacher: givenTeacher, track, plan, date, records } = bulkSchema.parse(req.body);
-    const teacher = await resolveTeacher(req, track, givenTeacher);
+    // Independent lookups — run together rather than paying two round trips.
+    const [teacher, { rubric, planId }] = await Promise.all([
+      resolveTeacher(req, track, givenTeacher),
+      resolveRubric({ track, plan }),
+    ]);
     if (!teacher) {
       res.status(400).json({ success: false, message: 'لا يوجد معلم مسند لهذه الحلقة — أضف معلماً أولاً' });
       return;
@@ -164,8 +168,6 @@ export async function bulkEvaluate(req: Request, res: Response, next: NextFuncti
     const dateObj = new Date(date);
     const { day } = deriveDayAndTime(dateObj);
     const trackId = new Types.ObjectId(track);
-
-    const { rubric, planId } = await resolveRubric({ track, plan });
     const totalMax = rubric.reduce((a, c) => a + c.max, 0);
 
     // Reject out-of-range input against THIS plan's rubric before writing.
@@ -237,16 +239,18 @@ export async function bulkEvaluate(req: Request, res: Response, next: NextFuncti
         upsert: true,
       },
     }));
-    await Evaluation.bulkWrite(ops);
-
     // The same "الحضور والتقييم" save also drives the Attendance collection
     // (attendancePct, absence tracking, ParentAttendance) — one Save button,
-    // both records kept in sync.
-    await upsertAttendanceRecords(
-      track,
-      dateObj,
-      records.map((r) => ({ student: r.student, status: r.attendanceStatus })),
-    );
+    // both records kept in sync. The two writes are independent, so they run
+    // concurrently.
+    await Promise.all([
+      Evaluation.bulkWrite(ops),
+      upsertAttendanceRecords(
+        track,
+        dateObj,
+        records.map((r) => ({ student: r.student, status: r.attendanceStatus })),
+      ),
+    ]);
 
     const scoredByStudentId = new Map(scored.map((r) => [r.student, r]));
     // Excused (مستأذن) students get no parent notification.

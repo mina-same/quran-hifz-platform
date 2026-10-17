@@ -2,6 +2,8 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 export type OpenWardType = 'حفظ' | 'مراجعة';
 export type OpenWardStatus = 'recorded' | 'none';
+/** forward = from the start of the Mushaf; reverse = «من آخر المصحف». */
+export type OpenWardDirection = 'forward' | 'reverse';
 
 export interface IOpenWardPoint { surahNumber: number; ayah: number }
 
@@ -20,6 +22,9 @@ export interface IOpenWardEntry extends Document {
   status: OpenWardStatus;
   from?: IOpenWardPoint;
   to?: IOpenWardPoint;
+  /** The student's direction as of this day, when known — a single-surah day
+   * doesn't show it, and the next day's suggested «من» depends on it. */
+  direction?: OpenWardDirection;
   pageStart?: number;
   pageEnd?: number;
   pages?: number;
@@ -46,6 +51,7 @@ const openWardEntrySchema = new Schema<IOpenWardEntry>(
     status:     { type: String, enum: ['recorded', 'none'], required: true },
     from:       { type: pointSchema },
     to:         { type: pointSchema },
+    direction:  { type: String, enum: ['forward', 'reverse'] },
     pageStart:  { type: Number },
     pageEnd:    { type: Number },
     pages:      { type: Number },
