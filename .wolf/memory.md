@@ -4538,3 +4538,24 @@
 | 21:04 | Open-ward reverse direction fix: infer + «عكس الاتجاه» toggle + stored direction (web, mobile, server) | quranRange.ts x3, openWard.ts x2, OpenWardPicker x2, TeacherTrackDetail, TeacherAttendance, EvaluationRoster, open-ward.controller, OpenWardEntry.model | tsc clean x3, mobile jest 94/94 | ~25k |
 | 21:06 | Perf: batched attendance recalc, parallelized eval/attendance/notify/daily-report/plan-progress saves, push timeout | attendance/evaluation/daily-report/student-plan-progress controllers, lib/notify.ts, lib/push.ts | tsc OK, recalc 6.0s->0.27s verified | ~40k |
 | 21:13 | Perf pass 2: batched getTracks/getMasajid/getTeachers/getParents (N+1 -> grouped queries), parallel getStudents lookups, react-query staleTime 30s web+mobile; outputs verified byte-identical (15 snapshots). wardi-api bom1 region change blocked by permissions — left to user | track/masjid/teacher/admin/student controllers, quran-hifz/src/router.tsx, quran-hifz-mobile/app/_layout.tsx | tsc OK | ~30k |
+
+## Session: 2026-10-18 14:07
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-18 14:07
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-18 14:07
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-18 14:07
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:08 | Restored plan edit/link + student transfer on #trackdetail for admin only (isAdmin gate) | TeacherTrackDetail.tsx | tsc clean | ~2k |

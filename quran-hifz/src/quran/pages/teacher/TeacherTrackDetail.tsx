@@ -363,6 +363,9 @@ function LinkPlanPanel({
 
 export function TeacherTrackDetail() {
   const { user, showPage, readOnly } = usePortal();
+  // Changing the plan or moving students into the halqa is the admin's call;
+  // teachers (and read-only supervisors) only see the roster and the plan.
+  const isAdmin = user?.role === "admin";
   const teacherId = user?.profileId as string | undefined;
   const [trackId] = useState(() => sessionStorage.getItem(TRACK_DETAIL_ID_KEY));
 
@@ -985,6 +988,11 @@ export function TeacherTrackDetail() {
   // A track's students are always exactly its own roster now (single-track-
   // per-student), so there's no per-student ambiguity to resolve — the
   // handoff is identical to createNewPlan's.
+  function editLinkedPlan() {
+    if (!linkedPlan) return;
+    sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "edit", plan: linkedPlan }));
+    showPage("planform");
+  }
   function createPlanForStudent(_studentId: string) {
     if (!track) return;
     sessionStorage.setItem(PLAN_FORM_HANDOFF_KEY, JSON.stringify({ mode: "create", trackId: track._id }));
@@ -1272,7 +1280,7 @@ export function TeacherTrackDetail() {
               </span>
             }
           >
-            <TrackStudentsPanel track={track} canTransfer={false} />
+            <TrackStudentsPanel track={track} canTransfer={isAdmin} />
           </Card>
 
           {scheduledSorted.length > 0 && (
@@ -1915,6 +1923,17 @@ export function TeacherTrackDetail() {
                 )}
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {isAdmin && (
+                  <>
+                    <button className="topbar-btn btn-primary" onClick={editLinkedPlan}>
+                      <i className="ti ti-pencil" /> تعديل الخطة
+                    </button>
+                    <button className="topbar-btn btn-ghost" onClick={() => togglePlanSection("link")}>
+                      <i className={`ti ${openPlanSection === "link" ? "ti-x" : "ti-refresh"}`} />{" "}
+                      {openPlanSection === "link" ? "إلغاء" : "ربط خطة أخرى"}
+                    </button>
+                  </>
+                )}
                 {!openPlan && linkedPlan.schedule.length > 0 && (
                   <button className="topbar-btn btn-ghost" onClick={handleScheduleToggle}>
                     <i
