@@ -30,6 +30,7 @@ import {
 import { useOpenWardEntries, useUpsertOpenWard, useDeleteOpenWard, entryStudentId, type OpenWardType } from "../../api/open-ward";
 import { inferWardDirection, savedOpenWardTypes, type WardDirection } from "../../lib/openWard";
 import { OpenWardPicker, openWardComplete, type OpenWardValue } from "../../components/common/OpenWardPicker";
+import { ScoreInput } from "../../components/common/ScoreInput";
 import { OpenWardLog } from "../../components/common/OpenWardLog";
 import {
   useEvaluations,
@@ -230,7 +231,8 @@ function blankEval(rubric: GradeCriterion[]): StudentEval {
  *  takes whatever the teacher entered, mirroring the server's bulkEvaluate. */
 function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
   if (e.attendanceStatus !== "حاضر") return 0;
-  return rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0);
+  // Rounded: fractional grades (2.5 + 1.1) mustn't show float noise.
+  return Math.round(rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0) * 100) / 100;
 }
 
 export function TeacherAttendance() {
@@ -1286,19 +1288,13 @@ export function TeacherAttendance() {
                           {rubric.map((cat) => (
                             <div key={cat.key} className="eval-cat">
                               <span className="eval-cat-label">{cat.label}</span>
-                              <div className="eval-chip-group">
-                                {Array.from({ length: cat.max + 1 }, (_, n) => n).map((n) => (
-                                  <button
-                                    key={n}
-                                    type="button"
-                                    className={`eval-chip ${!isAbsent && (e.scores[cat.key] ?? 0) === n ? "active" : ""}`}
-                                    disabled={isAbsent || controlsLocked}
-                                    onClick={() => setScore(s._id, cat.key, n)}
-                                  >
-                                    {toAr(n)}
-                                  </button>
-                                ))}
-                              </div>
+                              <ScoreInput
+                                value={isAbsent ? 0 : (e.scores[cat.key] ?? 0)}
+                                max={cat.max}
+                                label={cat.label}
+                                disabled={isAbsent || controlsLocked}
+                                onChange={(n) => setScore(s._id, cat.key, n)}
+                              />
                             </div>
                           ))}
                           <span className={`eval-total ${total === 0 ? "zero" : ""}`}>

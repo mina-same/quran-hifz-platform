@@ -56,7 +56,7 @@ const recordSchema = z.object({
   attendanceStatus: z.enum(['حاضر', 'غائب', 'مستأذن']),
   /** Keyed by rubric criterion key. Bounds are checked against the resolved
    *  rubric in `bulkEvaluate` — they are per plan, so not expressible here. */
-  scores:  z.record(z.string(), z.number().int().min(0)).optional(),
+  scores:  z.record(z.string(), z.number().min(0)).optional(),
   note:    z.string().optional(),
 });
 
@@ -87,7 +87,7 @@ export async function getRubric(req: Request, res: Response, next: NextFunction)
         rubric,
         planId,
         ambiguous,
-        totalMax: rubric.reduce((a, c) => a + c.max, 0),
+        totalMax: Math.round(rubric.reduce((a, c) => a + c.max, 0) * 100) / 100,
         plans: choices.map((p) => ({ _id: String(p._id), name: p.name, gradeRubric: p.gradeRubric })),
       },
     });
@@ -168,7 +168,7 @@ export async function bulkEvaluate(req: Request, res: Response, next: NextFuncti
     const dateObj = new Date(date);
     const { day } = deriveDayAndTime(dateObj);
     const trackId = new Types.ObjectId(track);
-    const totalMax = rubric.reduce((a, c) => a + c.max, 0);
+    const totalMax = Math.round(rubric.reduce((a, c) => a + c.max, 0) * 100) / 100;
 
     // Reject out-of-range input against THIS plan's rubric before writing.
     for (const r of records) {
@@ -193,15 +193,17 @@ export async function bulkEvaluate(req: Request, res: Response, next: NextFuncti
     // `auto` included, takes whatever the teacher typed (bounded by its max) —
     // `auto` no longer means "always full marks", it's just a rubric-builder
     // hint that a criterion is attendance-linked.
+    // Grades may be fractional; kept to two decimals so sums stay clean.
+    const round2 = (n: number) => Math.round(n * 100) / 100;
     const scored = records.map((r) => {
       const isPresent = r.attendanceStatus === 'حاضر';
       const criteria: IEvaluationCriterion[] = rubric.map((c) => ({
         key: c.key,
         label: c.label,
         max: c.max,
-        value: !isPresent ? 0 : Math.min(r.scores?.[c.key] ?? 0, c.max),
+        value: !isPresent ? 0 : Math.min(round2(r.scores?.[c.key] ?? 0), c.max),
       }));
-      const total = criteria.reduce((a, c) => a + c.value, 0);
+      const total = round2(criteria.reduce((a, c) => a + c.value, 0));
 
       // Mirror into the legacy fixed shape when the rubric still uses the four
       // original keys, so existing reports and CSV exports keep working.

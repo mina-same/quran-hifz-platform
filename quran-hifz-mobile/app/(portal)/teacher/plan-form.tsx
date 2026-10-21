@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
 import FormGroup from '@/components/forms/FormGroup';
 import FormInput from '@/components/forms/FormInput';
+import DecimalInput from '@/components/forms/DecimalInput';
 import FormTextarea from '@/components/forms/FormTextarea';
 import FormSelect from '@/components/forms/FormSelect';
 import FormDatePicker from '@/components/forms/FormDatePicker';
@@ -291,7 +292,7 @@ export default function TeacherPlanForm() {
     if (form.endType === 'date' && form.endDate < form.startDate) return setFormError('تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية');
     if (form.gradeRubric.length === 0) return setFormError('يرجى إضافة بند واحد على الأقل لتقسيمة الدرجات');
     if (form.gradeRubric.some((c) => !c.label.trim())) return setFormError('يرجى تسمية كل بنود تقسيمة الدرجات');
-    if (form.gradeRubric.some((c) => !Number.isFinite(Number(c.max)) || Number(c.max) < 1)) return setFormError('درجة كل بند يجب أن تكون رقماً أكبر من صفر');
+    if (form.gradeRubric.some((c) => !Number.isFinite(Number(c.max)) || Number(c.max) <= 0)) return setFormError('درجة كل بند يجب أن تكون رقماً أكبر من صفر');
     if (totalMaxOf(form.gradeRubric) !== RUBRIC_TOTAL_DEGREES) return setFormError(`مجموع درجات البنود يجب أن يساوي ${RUBRIC_TOTAL_DEGREES} بالضبط (الحالي ${totalMaxOf(form.gradeRubric)})`);
 
     const body: Record<string, unknown> = {
@@ -623,15 +624,14 @@ export default function TeacherPlanForm() {
                 </View>
 
                 <View style={{ width: 64 }}>
-                  <FormInput
+                  <DecimalInput
                     placeholder="0"
-                    keyboardType="number-pad"
-                    value={String(c.max)}
+                    value={c.max}
                     accessibilityLabel={`درجة بند ${c.label || i + 1}`}
                     style={{ textAlign: 'center' }}
-                    onChangeText={(v) => {
+                    onChange={(n) => {
                       const next = [...form.gradeRubric];
-                      next[i] = { ...next[i], max: Number(v.replace(/[^0-9]/g, '')) || 0 };
+                      next[i] = { ...next[i], max: n };
                       sf('gradeRubric', next);
                     }}
                   />
@@ -731,7 +731,7 @@ export default function TeacherPlanForm() {
 
             {(() => {
               const sum = totalMaxOf(form.gradeRubric);
-              const diff = sum - RUBRIC_TOTAL_DEGREES;
+              const diff = Math.round((sum - RUBRIC_TOTAL_DEGREES) * 100) / 100;
               const ok = diff === 0;
               return (
                 // Status reads from wording + colour together, never colour alone.

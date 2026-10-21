@@ -277,7 +277,7 @@ export function TeacherPlanForm() {
     if (form.endType === "date" && form.endDate && form.endDate < form.startDate) { setFormError("تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية"); return; }
     if (form.gradeRubric.length === 0) { setFormError("يرجى إضافة بند واحد على الأقل لتقسيمة الدرجات"); return; }
     if (form.gradeRubric.some((c) => !c.label.trim())) { setFormError("يرجى تسمية كل بنود تقسيمة الدرجات"); return; }
-    if (form.gradeRubric.some((c) => !Number.isFinite(c.max) || c.max < 1)) { setFormError("درجة كل بند يجب أن تكون رقماً أكبر من صفر"); return; }
+    if (form.gradeRubric.some((c) => !Number.isFinite(c.max) || c.max <= 0)) { setFormError("درجة كل بند يجب أن تكون رقماً أكبر من صفر"); return; }
     if (totalMaxOf(form.gradeRubric) !== RUBRIC_TOTAL_DEGREES) {
       setFormError(`مجموع درجات البنود يجب أن يساوي ${RUBRIC_TOTAL_DEGREES} بالضبط (الحالي ${totalMaxOf(form.gradeRubric)})`);
       return;
@@ -876,7 +876,9 @@ export function TeacherPlanForm() {
               <input
                 className="form-input"
                 type="number"
-                min={1}
+                min={0.01}
+                step={0.01}
+                inputMode="decimal"
                 value={c.max}
                 aria-label={`درجة بند ${c.label || i + 1}`}
                 // Tabular figures keep the column from jittering as digits change.
@@ -1007,7 +1009,7 @@ export function TeacherPlanForm() {
 
           {(() => {
             const sum = totalMaxOf(form.gradeRubric);
-            const diff = sum - RUBRIC_TOTAL_DEGREES;
+            const diff = Math.round((sum - RUBRIC_TOTAL_DEGREES) * 100) / 100;
             const ok = diff === 0;
             return (
               <div

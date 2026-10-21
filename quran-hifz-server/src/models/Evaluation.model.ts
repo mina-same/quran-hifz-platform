@@ -45,7 +45,7 @@ const criterionSchema = new Schema<IEvaluationCriterion>(
   {
     key:   { type: String, required: true, trim: true },
     label: { type: String, required: true, trim: true },
-    max:   { type: Number, required: true, min: 1 },
+    max:   { type: Number, required: true, min: 0.01 },
     value: { type: Number, required: true, min: 0 },
   },
   { _id: false },

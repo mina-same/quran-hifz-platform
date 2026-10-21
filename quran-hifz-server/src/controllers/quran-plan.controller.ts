@@ -21,11 +21,14 @@ const pointRuleSchema = z.object({
   kind:   z.enum(['خصم', 'زيادة']),
 });
 
+/** Degrees may be fractional (e.g. 2.5) — at most two decimal places. */
+const hasTwoDecimals = (n: number) => Math.abs(n * 100 - Math.round(n * 100)) < 1e-6;
+
 /** One line of the plan's daily grading rubric: a label and its degrees. */
 const gradeCriterionSchema = z.object({
   key:   z.string().min(1),
   label: z.string().min(1),
-  max:   z.number().int().positive(),
+  max:   z.number().positive().refine(hasTwoDecimals, 'درجة البند تقبل منزلتين عشريتين على الأكثر'),
   auto:  z.boolean().default(false),
 });
 
@@ -37,7 +40,8 @@ const gradeRubricSchema = z
     message: 'مفاتيح بنود التقييم يجب أن تكون فريدة',
   })
   // Totals are compared across plans and reports, so the denominator is fixed.
-  .refine((r) => r.reduce((a, c) => a + c.max, 0) === RUBRIC_TOTAL_DEGREES, {
+  // Compared in hundredths so 3.3 + 3.3 + 3.4 isn't lost to float error.
+  .refine((r) => Math.round(r.reduce((a, c) => a + c.max, 0) * 100) === RUBRIC_TOTAL_DEGREES * 100, {
     message: `مجموع درجات البنود يجب أن يساوي ${RUBRIC_TOTAL_DEGREES} بالضبط`,
   });
 

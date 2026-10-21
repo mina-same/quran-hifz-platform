@@ -35,7 +35,8 @@ export const MAX_SCORES = { attendance: 3, hifz: 4, tajweed: 2, talawah: 1 } as 
 export const TOTAL_MAX = 10;
 
 export function totalMaxOf(rubric: GradeCriterion[]): number {
-  return rubric.reduce((a, c) => a + c.max, 0);
+  // Degrees may be fractional (2.5); round so 3.3 + 3.3 + 3.4 reads as 10.
+  return Math.round(rubric.reduce((a, c) => a + c.max, 0) * 100) / 100;
 }
 
 /** Slug for a teacher-authored criterion. Arabic labels are kept verbatim —

@@ -142,7 +142,7 @@ const gradeCriterionSchema = new Schema<IGradeCriterion>(
   {
     key:   { type: String, required: true, trim: true },
     label: { type: String, required: true, trim: true },
-    max:   { type: Number, required: true, min: 1 },
+    max:   { type: Number, required: true, min: 0.01 },
     auto:  { type: Boolean, default: false },
   },
   { _id: false },

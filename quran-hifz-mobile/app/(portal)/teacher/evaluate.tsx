@@ -23,6 +23,7 @@ import { useQuranPlans, isOpenPlan } from '@/lib/queries/quranPlan';
 import { resolveLinkedPlan } from '@/lib/trackSchedule';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { success, error } from '@/lib/haptics';
+import DecimalInput from '@/components/forms/DecimalInput';
 
 /** Scores are keyed by the active plan's rubric, so categories are not known
  * at compile time any more. */
@@ -44,7 +45,8 @@ function blankEval(rubric: GradeCriterion[]): StudentEval {
  * teacher entered, mirroring the server's bulkEvaluate. */
 function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
   if (e.attendanceStatus !== 'حاضر') return 0;
-  return rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0);
+  // Rounded: fractional grades (2.5 + 1.1) mustn't show float noise.
+  return Math.round(rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0) * 100) / 100;
 }
 
 export default function TeacherEvaluate() {
@@ -165,17 +167,7 @@ export default function TeacherEvaluate() {
     },
     categoryBlock: { gap: 6 },
     categoryLabel: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.textMuted },
-    chipRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
-    chip: {
-      minWidth: 32,
-      alignItems: 'center',
-      paddingVertical: 6,
-      paddingHorizontal: 10,
-      borderRadius: theme.radiusSm,
-      borderWidth: 1,
-      borderColor: theme.border,
-    },
-    chipText: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    scoreInput: { width: 88, minHeight: 40, paddingVertical: 8, textAlign: 'center' },
     totalRow: { flexDirection: 'row', justifyContent: 'flex-end' },
     totalText: { fontSize: 14, fontFamily: theme.fontCairoBold, color: theme.green },
   }), [theme]);
@@ -284,22 +276,13 @@ export default function TeacherEvaluate() {
                     {rubric.map((cat) => (
                       <View key={cat.key} style={styles.categoryBlock}>
                         <Text style={styles.categoryLabel}>{cat.label} (٠-{cat.max})</Text>
-                        <View style={styles.chipRow}>
-                          {Array.from({ length: cat.max + 1 }, (_, n) => n).map((n) => {
-                            const active = (e.scores[cat.key] ?? 0) === n;
-                            return (
-                              <Pressable
-                                haptic="select"
-                                key={n}
-                                disabled={alreadySubmitted}
-                                onPress={() => setScore(st._id, cat.key, n)}
-                                style={[styles.chip, active && { backgroundColor: theme.greenAccent, borderColor: theme.green }]}
-                              >
-                                <Text style={[styles.chipText, active && { color: theme.white }]}>{n}</Text>
-                              </Pressable>
-                            );
-                          })}
-                        </View>
+                        <DecimalInput
+                          value={e.scores[cat.key] ?? 0}
+                          editable={!alreadySubmitted}
+                          accessibilityLabel={`درجة ${cat.label} من ${cat.max}`}
+                          style={styles.scoreInput}
+                          onChange={(n) => setScore(st._id, cat.key, Math.min(n, cat.max))}
+                        />
                       </View>
                     ))}
                     <View style={styles.totalRow}>

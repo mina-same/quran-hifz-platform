@@ -29,6 +29,7 @@ import {
 import { toDateOnly } from '@/lib/date';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { success, warning, error } from '@/lib/haptics';
+import DecimalInput from '@/components/forms/DecimalInput';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
@@ -52,7 +53,8 @@ function blankEval(rubric: GradeCriterion[]): StudentEval {
  * teacher entered, mirroring the server's bulkEvaluate. */
 function totalOf(e: StudentEval, rubric: GradeCriterion[]): number {
   if (e.attendanceStatus !== 'حاضر') return 0;
-  return rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0);
+  // Rounded: fractional grades (2.5 + 1.1) mustn't show float noise.
+  return Math.round(rubric.reduce((a, c) => a + Math.min(e.scores[c.key] ?? 0, c.max), 0) * 100) / 100;
 }
 
 export interface RosterContext {
@@ -713,26 +715,13 @@ export default function EvaluationRoster({
                 {rubric.map((cat) => (
                   <View key={cat.key}>
                     <Text style={styles.catLabel}>{cat.label} (0-{cat.max})</Text>
-                    <View style={styles.scoreChipRow}>
-                      {Array.from({ length: cat.max + 1 }, (_, n) => n).map((n) => {
-                        const active = !isAbsent && (e.scores[cat.key] ?? 0) === n;
-                        return (
-                          <Pressable
-                            haptic="select"
-                            key={n}
-                            disabled={isAbsent || locked}
-                            onPress={() => setScore(st._id, cat.key, n)}
-                            style={[
-                              styles.scoreChip,
-                              active && { backgroundColor: theme.greenAccent, borderColor: theme.green },
-                              (isAbsent || locked) && styles.disabled,
-                            ]}
-                          >
-                            <Text style={[styles.scoreChipText, active && { color: theme.white }]}>{n}</Text>
-                          </Pressable>
-                        );
-                      })}
-                    </View>
+                    <DecimalInput
+                      value={isAbsent ? 0 : (e.scores[cat.key] ?? 0)}
+                      editable={!(isAbsent || locked)}
+                      accessibilityLabel={`درجة ${cat.label} من ${cat.max}`}
+                      style={[styles.scoreInput, (isAbsent || locked) && styles.disabled]}
+                      onChange={(n) => setScore(st._id, cat.key, Math.min(n, cat.max))}
+                    />
                   </View>
                 ))}
                 <Text style={styles.totalLine}>المجموع {total}/{rubricTotalMax}</Text>
@@ -817,12 +806,7 @@ function createS(theme: AppTheme) {
     wardRange: { fontSize: 10, fontFamily: theme.fontCairo, color: theme.textMuted },
 
     catLabel: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.textMuted, marginBottom: 4 },
-    scoreChipRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
-    scoreChip: {
-      minWidth: 34, paddingVertical: 6, alignItems: 'center',
-      borderRadius: theme.radiusSm, borderWidth: 1, borderColor: theme.border, backgroundColor: theme.card,
-    },
-    scoreChipText: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    scoreInput: { width: 88, minHeight: 40, paddingVertical: 8, textAlign: 'center' },
     totalLine: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.green, textAlign: 'left' },
     disabled: { opacity: 0.5 },
   });
