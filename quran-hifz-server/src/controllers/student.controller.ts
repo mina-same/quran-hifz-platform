@@ -19,6 +19,8 @@ const studentSchema = z.object({
   track:            z.string().min(1, 'المسار مطلوب'),
   guardian:         z.string().optional(),
   guardianPhone:    z.string().optional(),
+  /** The student's own mobile — optional; blank clears it. */
+  phone:            z.union([z.literal(''), z.string().trim().regex(/^05\d{8}$/, 'صيغة جوال الطالب: 05XXXXXXXX')]).optional(),
   lastMemorization: z.string().optional(),
   level:            z.coerce.number().int().min(1, 'المستوى بين ١ و١٠').max(10, 'المستوى بين ١ و١٠').optional(),
   totalPages:       z.number().optional(),

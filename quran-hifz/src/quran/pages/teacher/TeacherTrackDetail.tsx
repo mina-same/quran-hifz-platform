@@ -48,6 +48,7 @@ import {
 } from "../../components/common/IndividualPlanPanel";
 import { TrackStudentsPanel } from "../../components/common/TrackStudentsPanel";
 import { ScoreInput } from "../../components/common/ScoreInput";
+import { MessageParentsModal } from "../../components/common/MessageParentsModal";
 import {
   MAX_SCORES, TOTAL_MAX, legacyScoresOf, totalMaxOf,
   DEFAULT_GRADE_RUBRIC, type GradeCriterion,
@@ -387,6 +388,7 @@ export function TeacherTrackDetail() {
     { enabled: !!track },
   );
   const roster: Student[] = rosterStudents;
+  const [messageParentsOpen, setMessageParentsOpen] = useState(false);
 
   const [tab, setTab] = useState<TabKey>("students");
   // Only one of the plan tab's expandable sections (link-another-plan /
@@ -1277,13 +1279,31 @@ export function TeacherTrackDetail() {
             icon="ti-user-check"
             title="عدد الطلاب"
             headerExtra={
-              <span style={{ fontSize: 12, fontWeight: 700, color: barClr }}>
-                {enrolled} / {track.maxStudents}
+              <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                {!readOnly && roster.length > 0 && (
+                  <button
+                    type="button"
+                    className="topbar-btn btn-ghost"
+                    style={{ fontSize: 12, padding: "5px 10px" }}
+                    onClick={() => setMessageParentsOpen(true)}
+                  >
+                    <i className="ti ti-message-2" /> مراسلة أولياء الأمور
+                  </button>
+                )}
+                <span style={{ fontSize: 12, fontWeight: 700, color: barClr }}>
+                  {enrolled} / {track.maxStudents}
+                </span>
               </span>
             }
           >
             <TrackStudentsPanel track={track} canTransfer={isAdmin} />
           </Card>
+          <MessageParentsModal
+            open={messageParentsOpen}
+            onClose={() => setMessageParentsOpen(false)}
+            trackId={track._id}
+            students={roster}
+          />
 
           {scheduledSorted.length > 0 && (
             <div className="day-slider" role="tablist" aria-label="اختر اليوم">

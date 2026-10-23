@@ -13,6 +13,11 @@ import {
 import { useStudents } from "../../api/students";
 import { toAr } from "../../../lib/format";
 
+/** A student's halqa title (the track may come back as just an id). */
+function trackTitleOf(s: { track?: string | { title: string } }): string {
+  return typeof s.track === "object" && s.track ? s.track.title : "";
+}
+
 type AddForm = { name: string; email: string; password: string };
 const EMPTY_ADD: AddForm = { name: "", email: "", password: "" };
 
@@ -58,6 +63,7 @@ export function AdminParents() {
 
   const [linkParent, setLinkParent]           = useState<ParentUser | null>(null);
   const [selectedStudent, setSelectedStudent] = useState("");
+  const [linkQuery, setLinkQuery] = useState("");
 
   const [search, setSearch] = useState("");
 
@@ -219,7 +225,7 @@ export function AdminParents() {
                             <button
                               className="topbar-btn btn-ghost"
                               style={{ padding: "3px 9px", fontSize: 12 }}
-                              onClick={() => { setLinkParent(p); setSelectedStudent(""); }}
+                              onClick={() => { setLinkParent(p); setSelectedStudent(""); setLinkQuery(""); }}
                               title="ربط ابن"
                             >
                               <i className="ti ti-user-plus" /> ربط
@@ -284,7 +290,7 @@ export function AdminParents() {
                       <button
                         className="topbar-btn btn-ghost"
                         style={{ flex: 1, justifyContent: "center" }}
-                        onClick={() => { setLinkParent(p); setSelectedStudent(""); }}
+                        onClick={() => { setLinkParent(p); setSelectedStudent(""); setLinkQuery(""); }}
                       >
                         <i className="ti ti-user-plus" /> ربط
                       </button>
@@ -428,12 +434,35 @@ export function AdminParents() {
         )}
         <div className="form-group">
           <label className="form-label">اختر الطالب</label>
-          <select className="form-input" value={selectedStudent} onChange={(e) => setSelectedStudent(e.target.value)}>
-            <option value="">— اختر طالباً —</option>
-            {availableStudents.map((s) => (
-              <option key={s._id} value={s._id}>{s.name}</option>
-            ))}
-          </select>
+          <input
+            className="form-input"
+            autoFocus
+            placeholder="ابحث باسم الطالب أو الحلقة…"
+            value={linkQuery}
+            onChange={(e) => setLinkQuery(e.target.value)}
+            aria-label="بحث عن طالب"
+          />
+          <div className="link-pick" role="listbox" aria-label="الطلاب">
+            {(() => {
+              const q = linkQuery.trim();
+              const matches = availableStudents.filter((s) =>
+                !q || s.name.includes(q) || trackTitleOf(s).includes(q));
+              if (!matches.length) return <p className="link-pick-empty">لا يوجد طالب بهذا الاسم</p>;
+              return matches.slice(0, 50).map((s) => (
+                <button
+                  key={s._id}
+                  type="button"
+                  role="option"
+                  aria-selected={selectedStudent === s._id}
+                  className={`link-pick-row ${selectedStudent === s._id ? "on" : ""}`}
+                  onClick={() => setSelectedStudent(s._id)}
+                >
+                  <b>{s.name}</b>
+                  {trackTitleOf(s) && <span>{trackTitleOf(s)}</span>}
+                </button>
+              ));
+            })()}
+          </div>
         </div>
         <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
           <button

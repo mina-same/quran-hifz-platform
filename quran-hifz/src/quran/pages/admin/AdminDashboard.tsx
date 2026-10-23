@@ -6,7 +6,7 @@ import { Card } from "../../components/common/Card";
 import { ProgressBar } from "../../components/common/ProgressBar";
 import { Alert } from "../../components/common/Alert";
 import { SkeletonStatsRow, SkeletonCard } from "../../components/common/Skeleton";
-import { useStats } from "../../api/stats";
+import { useDashboardAlerts, useStats, type DashboardAlerts } from "../../api/stats";
 import { useStudents } from "../../api/students";
 import { useKpis } from "../../api/kpis";
 import { toAr, pct } from "../../../lib/format";
@@ -30,6 +30,7 @@ export function AdminDashboard() {
   const { data: stats, isLoading: statsLoading } = useStats(genderScope);
   const { data: students } = useStudents();
   const { data: kpis } = useKpis();
+  const { data: alerts } = useDashboardAlerts(genderScope);
   const scopedStudents = (students ?? []).filter((s) =>
     matchesGenderScope(typeof s.track === "string" ? undefined : s.track.masjid, genderScope),
   );
@@ -38,9 +39,6 @@ export function AdminDashboard() {
     "ti-layout-dashboard",
     "لوحة التحكم الرئيسية",
     <>
-      <button className="topbar-btn btn-ghost">
-        <i className="ti ti-download" /> تصدير تقرير
-      </button>
       {!readOnly && (
         <button className="topbar-btn btn-primary" onClick={() => showPage("register")}>
           <i className="ti ti-user-plus" /> طالب جديد
@@ -110,16 +108,58 @@ export function AdminDashboard() {
         </Card>
       </div>
       <Card icon="ti-bell" title="آخر التنبيهات">
-        <Alert tone="warning">
-          <b>٣ طلاب</b> تجاوزت نسبة غيابهم ٢٥٪ — يُنصح بالتواصل مع أولياء الأمور
-        </Alert>
-        <Alert tone="info">
-          حلقة عمر بن الخطاب وصلت لـ <b>٩٠٪</b> من طاقتها الاستيعابية
-        </Alert>
-        <Alert tone="success">
-          <b>٥ طلاب</b> أنهوا ربع القرآن هذا الشهر
-        </Alert>
+        <DashboardAlertList alerts={alerts} />
       </Card>
+    </>
+  );
+}
+
+/** Arabic counted noun: ١ طالب، ٢ طالبان، ٣–١٠ طلاب، ١١+ طالباً. */
+function countOf(n: number, forms: [one: string, two: string, few: string, many: string]): string {
+  if (n === 1) return forms[0];
+  if (n === 2) return forms[1];
+  return `${toAr(n)} ${n <= 10 ? forms[2] : forms[3]}`;
+}
+const STUDENTS: [string, string, string, string] = ["طالب واحد", "طالبان", "طلاب", "طالباً"];
+const HALQAS: [string, string, string, string] = ["حلقة واحدة", "حلقتان", "حلقات", "حلقة"];
+
+/** Up to three names, then «و N آخرون». */
+function namesPreview(names: string[]): string {
+  const shown = names.slice(0, 3).join("، ");
+  return names.length > 3 ? `${shown} و${toAr(names.length - 3)} آخرين` : shown;
+}
+
+function DashboardAlertList({ alerts }: { alerts?: DashboardAlerts }) {
+  if (!alerts) return <SkeletonCard lines={2} />;
+  const { absent, nearCapacity, excellent, reportMissing } = alerts;
+  if (!absent.length && !nearCapacity.length && !excellent.length && !reportMissing.length) {
+    return <p style={{ margin: 0, color: "var(--text3)", fontSize: 13 }}>لا توجد تنبيهات حالياً</p>;
+  }
+  return (
+    <>
+      {absent.length > 0 && (
+        <Alert tone="warning">
+          <b>{countOf(absent.length, STUDENTS)}</b> تجاوزت نسبة غيابهم ٢٥٪ — يُنصح بالتواصل
+          مع أولياء الأمور ({namesPreview(absent.map((a) => `${a.name} ${pct(a.pct)}`))})
+        </Alert>
+      )}
+      {reportMissing.length > 0 && (
+        <Alert tone="info" icon="ti-report">
+          <b>{countOf(reportMissing.length, HALQAS)}</b> سجّلت تقييم اليوم ولم
+          ترسل التقرير اليومي بعد ({namesPreview(reportMissing)})
+        </Alert>
+      )}
+      {nearCapacity.map((t) => (
+        <Alert key={t.title} tone="info">
+          حلقة {t.title} وصلت لـ <b>{pct(t.pct)}</b> من طاقتها الاستيعابية
+        </Alert>
+      ))}
+      {excellent.length > 0 && (
+        <Alert tone="success">
+          <b>{countOf(excellent.length, STUDENTS)}</b> متوسط تقييمهم ٩ من ١٠ فأكثر هذا الشهر (
+          {namesPreview(excellent)})
+        </Alert>
+      )}
     </>
   );
 }

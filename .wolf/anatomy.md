@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-12T08:33:11.812Z
-> Files: 742 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-23T08:49:43.113Z
+> Files: 747 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -492,6 +492,7 @@
 - `2026-09-05-halqa-track-restructure-phase2-web.md` — Halqa/Track Restructure — Phase 2 (Web) Implementation Plan (~35198 tok)
 - `2026-09-06-halqa-track-restructure-phase3-mobile.md` — Halqa/Track Restructure — Phase 3 (Mobile) Implementation Plan (~62709 tok)
 - `2026-09-26-open-ward-plans.md` — Open-ward Plans (خطة بدون مقطع محدد) Implementation Plan (~16787 tok)
+- `2026-10-23-messaging.md` — One-to-One Messaging (all roles) Implementation Plan (~4557 tok)
 
 ## docs/superpowers/specs/
 
@@ -800,12 +801,14 @@
 
 ## quran-hifz-server/src/lib/
 
+- `dailyReportDiff.ts` — The daily report's lines as they follow from the recorded attendance and (~1283 tok)
 - `notify.ts` — Builds one Message per student (skipping students with no linked parent (~655 tok)
 - `planStudents.ts` — Resolves which students are covered by a plan, branching on `targetType`: (~315 tok)
 - `push.ts` — Best-effort Expo push notification send — looks up each recipient's stored (~389 tok)
 - `quranRange.ts` — Standard 604-page Madani mushaf boundary table (surah:ayah each page starts at). (~6552 tok)
 - `studentPlanReflow.ts` — Per-student plan overlay: builds the occurrence array, then redistributes what's still owed (cursor → pinned finish line) whenever a day is absent, short, or over-recited; flags `noWard` days (~3376 tok)
 - `supervisorScope.ts` — The supervisor's fixed gender assignment, or null for every other role. (~502 tok)
+- `teacherParent.ts` — Live (non-archived) track ids a teacher user teaches. (~971 tok)
 
 ## quran-hifz-server/src/middleware/
 
@@ -1032,6 +1035,7 @@
 - `HonorBoard.tsx` — Podium-style top-3 showcase (crown/medal icons, RTL-correct rank order via array index not DOM order) — visually distinct from `Leaderboard`'s ranked-row list. Degrades gracefully with <3 rows (~584 tok)
 - `IndividualPlanPanel.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~4567 tok)
 - `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
+- `MessageParentsModal.tsx` — «مراسلة أولياء الأمور» — a teacher writes once to the parents of the whole (~916 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
 - `OpenWardLog.tsx` — Log table of an open-ward plan's recorded days (optionally one student) (~700 tok)
 - `OpenWardPicker.tsx` — «ماذا حفظ الطالب اليوم؟» من/إلى + «لم يُسمِّع اليوم»; SurahAyah control injected; exports OpenWardValue, openWardComplete (~1000 tok)
@@ -1096,6 +1100,7 @@
 
 - `AccountSettings.tsx` — profileSchema — renders form (~2016 tok)
 - `AccountSettings.tsx` — profileSchema — renders form (~1966 tok)
+- `ConversationsPage.tsx` — «الرسائل» for teachers and parents: two-way, one thread per person. A (~2228 tok)
 
 ## quran-hifz/src/quran/pages/parent/
 

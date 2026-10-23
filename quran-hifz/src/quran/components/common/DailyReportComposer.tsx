@@ -4,6 +4,7 @@ import { useDailyReportDraft, useSendDailyReport, type DailyReport, type ReportL
 import { DailyReportActions, DailyReportSheet, reportFileName } from "./DailyReportCard";
 import { reportText } from "../../lib/dailyReport";
 import { Alert } from "./Alert";
+import { ReportChangesBox } from "./ReportChangesBox";
 import { toAr } from "../../../lib/format";
 
 type ListKey = "struggling" | "absent" | "excused";
@@ -110,6 +111,25 @@ export function DailyReportComposer({ trackId, date, onSent, onGoRecord }: {
     <div className="dre-composer">
       {data?.saved && (
         <div className="dre-sent"><i className="ti ti-circle-check" /> أُرسل التقرير — يمكنك تعديله وإعادة الإرسال</div>
+      )}
+      {data?.saved?.changes && (
+        <ReportChangesBox changes={data.saved.changes}>
+          <div>عدّلت التقييم أو الحضور بعد إرسال التقرير — حدّث التقرير ثم أعد إرساله ليصل التعديل للمشرف والإدارة.</div>
+          <button
+            type="button"
+            className="topbar-btn btn-ghost"
+            onClick={() => setReport((r) => (r && data ? {
+              ...r,
+              struggling: data.draft.struggling,
+              absent: data.draft.absent,
+              excused: data.draft.excused,
+              presentCount: data.draft.presentCount,
+              totalCount: data.draft.totalCount,
+            } : r))}
+          >
+            <i className="ti ti-refresh" /> تحديث التقرير من التقييمات
+          </button>
+        </ReportChangesBox>
       )}
       {data && !data.recorded && !data.saved && (
         <Alert tone="warning">

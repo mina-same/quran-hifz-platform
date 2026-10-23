@@ -63,7 +63,7 @@ export function LoginPage({ onBack }: { onBack?: () => void }) {
               <img src={LOGO_SRC} alt="شعار الجمعية" className="login-logo" />
             </div>
             <div className="login-bismillah">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
-            <h2 className="login-org-name">الجمعية الخيرية لتحفيظ القرآن الكريم</h2>
+            <h2 className="login-org-name">المنصة التعليمية لجمعية التحفيظ</h2>
             <p className="login-org-sub">بالعماير</p>
           </div>
 

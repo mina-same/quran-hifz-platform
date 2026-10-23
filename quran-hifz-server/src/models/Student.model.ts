@@ -21,6 +21,8 @@ export interface IStudent extends Document {
   totalPages: number;
   guardian: string;
   guardianPhone: string;
+  /** The student's own mobile (optional). */
+  phone?: string;
   lastMemorization: string;
   status: 'active' | 'inactive' | 'new';
   homeworkStatus: 'submitted' | 'pending' | 'late';
@@ -46,6 +48,7 @@ const studentSchema = new Schema<IStudent>(
     totalPages:       { type: Number, default: 604, min: 1 },
     guardian:         { type: String, trim: true, default: '' },
     guardianPhone:    { type: String, trim: true, default: '' },
+    phone:            { type: String, trim: true, default: '' },
     lastMemorization: { type: String, default: '' },
     status:           { type: String, enum: ['active', 'inactive', 'new'], default: 'new' },
     homeworkStatus:   { type: String, enum: ['submitted', 'pending', 'late'], default: 'pending' },

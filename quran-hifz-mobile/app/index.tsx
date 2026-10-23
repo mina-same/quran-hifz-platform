@@ -182,7 +182,7 @@ export default function LoginScreen() {
 
           <View style={styles.header}>
             <Image source={require('@/assets/logo.png')} style={styles.logo} resizeMode="contain" />
-            <Text style={styles.title}>الجمعية الخيرية لتحفيظ القرآن الكريم بالعماير</Text>
+            <Text style={styles.title}>المنصة التعليمية لجمعية التحفيظ بالعماير</Text>
             <Text style={styles.sub}>منصة حفظ القرآن</Text>
           </View>
 
@@ -271,7 +271,7 @@ export default function LoginScreen() {
             />
           </View>
 
-          <Text style={styles.footer}>منصة تحفيظ القرآن • مصممة بواسطة The Bright Station</Text>
+          <Text style={styles.footer}>المنصة التعليمية لجمعية التحفيظ بالعماير • مصممة بواسطة The Bright Station</Text>
         </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>

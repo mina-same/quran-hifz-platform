@@ -19,6 +19,8 @@ export type Student = {
   totalPages: number;
   guardian: string;
   guardianPhone: string;
+  /** The student's own mobile (optional). */
+  phone?: string;
   /** Saudi national ID — 10 digits, leading 1 (مواطن) or 2 (مقيم). */
   nationalId?: string;
   lastMemorization: string;

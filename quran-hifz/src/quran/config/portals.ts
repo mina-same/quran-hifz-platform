@@ -64,6 +64,9 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
         { id: "plans",    icon: "ti-target",     label: "الخطط القرآنية" },
         { id: "reports",  icon: "ti-chart-bar",  label: "تقارير الطلاب" },
       ]},
+      { group: "التواصل", items: [
+        { id: "messages", icon: "ti-message", label: "الرسائل" },
+      ]},
       { group: "الحساب", items: [
         { id: "account", icon: "ti-user-circle", label: "الملف الشخصي" },
       ]},

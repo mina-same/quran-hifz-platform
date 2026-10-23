@@ -143,7 +143,7 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
           <div className="lnd-brand">
             <img src={LOGO_SRC} alt="شعار الجمعية" className="lnd-logo" />
             <div className="lnd-brand-text">
-              <span className="lnd-brand-main">الجمعية الخيرية لتحفيظ القرآن الكريم</span>
+              <span className="lnd-brand-main">المنصة التعليمية لجمعية التحفيظ</span>
               <span className="lnd-brand-sub">بالعماير</span>
             </div>
           </div>
@@ -397,7 +397,7 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
           <img src={LOGO_SRC} alt="شعار" className="lnd-footer-logo" />
           <div>
             <div className="lnd-footer-name">الجمعية الخيرية لتحفيظ القرآن الكريم بالعماير</div>
-            <div className="lnd-footer-copy">منصة تحفيظ القرآن الكريم • جميع الحقوق محفوظة</div>
+            <div className="lnd-footer-copy">المنصة التعليمية لجمعية التحفيظ بالعماير • جميع الحقوق محفوظة</div>
           </div>
         </div>
       </footer>

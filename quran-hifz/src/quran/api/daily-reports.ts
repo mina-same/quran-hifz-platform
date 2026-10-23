@@ -19,6 +19,19 @@ export type DailyReport = {
   totalCount: number;
   notes?: string;
   updatedAt?: string;
+  /** Set by the server when the day's attendance/evaluations were edited
+   *  after the report was sent: what the records say now vs. the report. */
+  changes?: ReportChanges | null;
+};
+
+export type ReportChanges = {
+  sections: {
+    key: "struggling" | "absent" | "excused";
+    added: string[];
+    removed: string[];
+    changed: { name: string; from: string; to: string }[];
+  }[];
+  present?: { from: number; to: number };
 };
 
 type DraftResponse = {

@@ -44,7 +44,7 @@ import { ParentDashboard }    from "../pages/parent/ParentDashboard";
 import { ParentTimeline }     from "../pages/parent/ParentTimeline";
 import { ParentRecordings }   from "../pages/parent/ParentRecordings";
 import { ParentAttendance }   from "../pages/parent/ParentAttendance";
-import { ParentMessages }     from "../pages/parent/ParentMessages";
+import { ConversationsPage }  from "../pages/common/ConversationsPage";
 import { ParentHomeworkView } from "../pages/parent/ParentHomeworkView";
 
 export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
@@ -82,6 +82,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     grouphomework: TeacherGroupHomework,
     trackdetail:   TeacherTrackDetail,
     account:       AccountSettings,
+    messages:      ConversationsPage,
   },
   student: {
     dashboard: StudentDashboard,
@@ -115,7 +116,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     timeline:     ParentTimeline,
     recordings:   ParentRecordings,
     attendance:   ParentAttendance,
-    messages:     ParentMessages,
+    messages:     ConversationsPage,
     homework_view: ParentHomeworkView,
   },
 };

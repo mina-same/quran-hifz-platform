@@ -15,7 +15,7 @@ export function supervisorGenderOf(req: Request): 'male' | 'female' | null {
 export async function trackIdsForGender(gender: 'male' | 'female'): Promise<Types.ObjectId[]> {
   const masajid = await Masjid.find({ gender }).select('_id').lean();
   const masjidIds = masajid.map((m) => m._id);
-  const tracks = await Track.find({ masjid: { $in: masjidIds } }).select('_id').lean();
+  const tracks = await Track.find({ masjid: { $in: masjidIds }, deletedAt: null }).select('_id').lean();
   return tracks.map((t) => t._id);
 }
 

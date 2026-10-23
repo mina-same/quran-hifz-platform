@@ -11,6 +11,7 @@ import { User } from '../models/User.model';
 import { Attendance } from '../models/Attendance.model';
 import { Evaluation } from '../models/Evaluation.model';
 import { supervisorGenderOf, trackIdsForGender } from '../lib/supervisorScope';
+import { draftLines, reportChanges, type ReportChanges, type ReportLists } from '../lib/dailyReportDiff';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -20,17 +21,18 @@ function dayRange(date: string): { $gte: Date; $lt: Date } {
   return { $gte: start, $lt: new Date(start.getTime() + 86_400_000) };
 }
 
-/**
- * Which «متعثر» area a rubric criterion belongs to, if any. Rubrics are
- * per plan and their labels are free text («حفظ», «الحفظ الجديد», «مراجعة
- * بعيدة»…), so this matches on the word, not the exact label. A rubric with
- * neither criterion simply never flags anyone. Areas match the composer chips.
- */
-function struggleArea(c: { key: string; label: string }): 'الحفظ' | 'المراجعة' | null {
-  const label = c.label.replace(/[\u064B-\u0652\u0670\u0640]/g, ''); // tashkeel / tatweel
-  if (c.key === 'hifz' || label.includes('حفظ')) return 'الحفظ';
-  if (label.includes('مراجع')) return 'المراجعة';
-  return null;
+/** Students whose attendance/evaluation for the day changed after `since`. */
+function editedSince(since: Date, records: { student: unknown; updatedAt?: Date }[]): Set<string> {
+  return new Set(records.filter((r) => r.updatedAt && r.updatedAt > since).map((r) => String(r.student)));
+}
+
+/** How a sent report differs from the day's records edited after sending. */
+function changesSince(
+  saved: ReportLists & { updatedAt?: Date },
+  current: ReportLists,
+  records: { student: unknown; updatedAt?: Date }[],
+): ReportChanges | null {
+  return saved.updatedAt ? reportChanges(saved, current, editedSince(saved.updatedAt, records)) : null;
 }
 
 /** Tracks the caller may read: admin = all, supervisor = their gender's
@@ -43,7 +45,7 @@ async function readableTrackIds(req: Request): Promise<Types.ObjectId[] | null> 
   if (role === 'teacher') {
     const me = await User.findById(req.user!.id).select('profileId');
     if (!me?.profileId) return [];
-    return (await Track.find({ teachers: me.profileId }).select('_id').lean()).map((t) => t._id as Types.ObjectId);
+    return (await Track.find({ teachers: me.profileId, deletedAt: null }).select('_id').lean()).map((t) => t._id as Types.ObjectId);
   }
   return [];
 }
@@ -81,42 +83,18 @@ export async function getDraft(req: Request, res: Response, next: NextFunction):
     const masjid = await Masjid.findById(trackDoc.masjid).select('name').lean();
 
     const nameOf = new Map(students.map((s) => [String(s._id), s.name]));
-    const statusOf = new Map<string, string>();
-    for (const a of attendance) statusOf.set(String(a.student), a.status);
-    const evalOf = new Map(evaluations.map((e) => [String(e.student), e]));
-    for (const e of evaluations) if (!statusOf.has(String(e.student))) statusOf.set(String(e.student), e.attendanceStatus);
-
-    const line = (id: string, extra: { area?: string; note?: string } = {}) => ({
-      student: id, name: nameOf.get(id) ?? 'طالب', ...extra,
-    });
-
-    const absent: ReturnType<typeof line>[] = [];
-    const excused: ReturnType<typeof line>[] = [];
-    const struggling: ReturnType<typeof line>[] = [];
-    for (const [id, status] of statusOf) {
-      if (!nameOf.has(id)) continue; // moved out of the track since
-      const note = evalOf.get(id)?.note || undefined;
-      if (status === 'غائب') absent.push(line(id, { note }));
-      else if (status === 'مستأذن') excused.push(line(id, { note }));
-      else {
-        const weak = [...new Set((evalOf.get(id)?.criteria ?? [])
-          .filter((c) => c.max > 0 && c.value === 0)
-          .map(struggleArea)
-          .filter((a) => a !== null))];
-        if (weak.length) struggling.push(line(id, { area: weak.join('، '), note }));
-      }
-    }
+    const current = draftLines(nameOf, attendance, evaluations);
 
     res.json({
       success: true,
-      recorded: statusOf.size > 0,
-      saved,
+      recorded: attendance.length + evaluations.length > 0,
+      // `changes`: what the records say now vs. what was sent (edits after sending).
+      saved: saved ? { ...saved, changes: changesSince(saved, current, [...attendance, ...evaluations]) } : null,
       draft: {
         track, date,
         trackTitle: trackDoc.title,
         masjidName: masjid?.name ?? '',
-        struggling, absent, excused,
-        presentCount: [...statusOf.values()].filter((s) => s === 'حاضر' || s === 'متأخر').length,
+        ...current,
         totalCount: students.length,
       },
       students: students.map((s) => ({ _id: s._id, name: s.name })),
@@ -211,6 +189,25 @@ export async function listReports(req: Request, res: Response, next: NextFunctio
     }
 
     const reports = await DailyReport.find(filter).sort({ date: -1, masjidName: 1, trackTitle: 1 }).limit(500).lean();
+    // For one day (the supervisor/admin page) flag reports whose attendance or
+    // evaluations were edited after sending, with what changed.
+    if (date && DATE_RE.test(date) && reports.length) {
+      const trackIds = reports.map((r) => r.track);
+      const [students, attendance, evaluations] = await Promise.all([
+        Student.find({ track: { $in: trackIds } }).select('name track').lean(),
+        Attendance.find({ track: { $in: trackIds }, date: dayRange(date) }).lean(),
+        Evaluation.find({ track: { $in: trackIds }, date: dayRange(date) }).lean(),
+      ]);
+      const data = reports.map((r) => {
+        const t = String(r.track);
+        const nameOf = new Map(students.filter((s) => String(s.track) === t).map((s) => [String(s._id), s.name]));
+        const att = attendance.filter((a) => String(a.track) === t);
+        const evs = evaluations.filter((e) => String(e.track) === t);
+        return { ...r, changes: changesSince(r, draftLines(nameOf, att, evs), [...att, ...evs]) };
+      });
+      res.json({ success: true, count: data.length, data });
+      return;
+    }
     res.json({ success: true, count: reports.length, data: reports });
   } catch (err) {
     next(err);

@@ -20,10 +20,10 @@ const schema = z.object({
     .string()
     .min(1, "جوال ولي الأمر مطلوب")
     .regex(/^05\d{8}$/, "صيغة الجوال: 05XXXXXXXX"),
-  studentLevel: z
+  studentPhone: z
     .string()
     .optional()
-    .refine((v) => !v || (Number(v) >= 1 && Number(v) <= 10), "المستوى بين ١ و١٠"),
+    .refine((v) => !v || /^05\d{8}$/.test(v.trim()), "صيغة جوال الطالب: 05XXXXXXXX"),
   track: z.string().min(1, "يرجى اختيار المسار"),
   email: z.string().email("البريد الإلكتروني غير صحيح").optional().or(z.literal("")),
   password: z.string().optional(),
@@ -74,7 +74,7 @@ export function AdminRegister() {
       path:          "حفظ كامل",
       status:        "new",
     };
-    if (data.studentLevel)  body.level    = Number(data.studentLevel);
+    if (data.studentPhone?.trim()) body.phone = data.studentPhone.trim();
     if (data.email?.trim()) body.email    = data.email.trim();
     if (data.password)      body.password = data.password;
 
@@ -118,14 +118,11 @@ export function AdminRegister() {
               <input className="form-input" type="tel" placeholder="05XXXXXXXX" dir="ltr" {...register("guardianPhone")} />
               <FieldError msg={errors.guardianPhone?.message} />
             </div>
-          </div>
-
-          <hr className="divider" />
-
-          <div className="form-group" style={{ marginBottom: 14 }}>
-            <label className="form-label">المستوى (رقم من ١ إلى ١٠)</label>
-            <input className="form-input" type="number" min={1} max={10} placeholder="مثال: ٣" {...register("studentLevel")} />
-            <FieldError msg={errors.studentLevel?.message} />
+            <div className="form-group">
+              <label className="form-label">جوال الطالب <small style={{ color: "var(--text3)", fontWeight: 400 }}>(اختياري)</small></label>
+              <input className="form-input" type="tel" placeholder="05XXXXXXXX" dir="ltr" {...register("studentPhone")} />
+              <FieldError msg={errors.studentPhone?.message} />
+            </div>
           </div>
 
           <hr className="divider" />

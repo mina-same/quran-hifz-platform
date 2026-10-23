@@ -281,7 +281,8 @@ export default function TeacherEvaluate() {
                           editable={!alreadySubmitted}
                           accessibilityLabel={`درجة ${cat.label} من ${cat.max}`}
                           style={styles.scoreInput}
-                          onChange={(n) => setScore(st._id, cat.key, Math.min(n, cat.max))}
+                          max={cat.max}
+                          onChange={(n) => setScore(st._id, cat.key, n)}
                         />
                       </View>
                     ))}

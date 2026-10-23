@@ -4574,3 +4574,35 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 20:29 | Fractional rubric degrees + typed decimal grades (server, web, mobile) | see bug log | tsc x3 clean, mobile jest 98/98, plan form verified in browser | ~30k |
+| 20:46 | Verified teacher decimal grading in browser (test teacher تجربة, #attendance): 1.5 / ٢٫٥→2.5 / 99→clamped, total ٤/١٠; writes blocked | — | pass | ~8k |
+
+## Session: 2026-10-23 11:01
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-23 11:01
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:11 | Decimal grade fix: Arabic-keyboard «ز» as decimal point + visible over-max state (web+mobile); verified on :8080 as test teacher | decimal.ts x2, ScoreInput, DecimalInput, evaluate, EvaluationRoster, quran.css | web tsc/eslint clean; mobile tsc not runnable (node_modules missing) | ~12k |
+| 11:12 | Grade box: «/ max» label 11px→15px bold, input text 13→15px (user: too small) | quran.css | screenshot ok | ~2k |
+| 11:22 | Archived tracks excluded from plans/homework/stats/scopes (server); platform renamed to «المنصة التعليمية لجمعية التحفيظ بالعماير» (web+mobile) | deletedTracks.ts, quran-plan/homework/stats/daily-report controllers, supervisorScope, Sidebar, PortalScreen, Login/Landing, routes, app.json, mobile index | tsc clean; verified on :8080 | ~20k |
+| 11:32 | Created docs/superpowers/plans/2026-10-23-messaging.md | — | ~4823 |
+| 11:32 | Edited docs/superpowers/plans/2026-10-23-messaging.md | inline fix | ~55 |
+| 11:32 | Messaging plan written (5 tasks: rules+jest, conversations API, writers+backfill, web page, mobile) | docs/superpowers/plans/2026-10-23-messaging.md | awaiting review | ~15k |
+| 11:33 | Session end: 2 writes across 1 files (2026-10-23-messaging.md) | 3 reads | ~5226 tok |
+| 11:37 | Created quran-hifz/src/quran/components/common/MessageParentsModal.tsx | — | ~916 |
+| 11:39 | Created quran-hifz-server/src/lib/teacherParent.ts | — | ~971 |
+| 11:42 | Created quran-hifz/src/quran/pages/common/ConversationsPage.tsx | — | ~2228 |
+| 11:44 | Teacher↔parent two-way messaging (server endpoints + web ConversationsPage + MessageParentsModal broadcast); removed spoofable POST /messages | message.controller/routes, lib/teacherParent.ts, api/messages.ts, ConversationsPage, MessageParentsModal, portals, pageRegistry, quran.css | tsc clean; read-only API + browser checks; no real send yet | ~40k |
+| 11:44 | Session end: 5 writes across 4 files (2026-10-23-messaging.md, MessageParentsModal.tsx, teacherParent.ts, ConversationsPage.tsx) | 4 reads | ~9341 tok |
+| 11:47 | Fixed parent header child switch (dropdown on every parent page); created test parent test.parent@tahfeez.com linked to 2 «تجربة» students | ParentChildSwitch, Topbar, ParentDashboard, quran.css | browser-verified | ~12k |
+| 11:47 | Session end: 5 writes across 4 files (2026-10-23-messaging.md, MessageParentsModal.tsx, teacherParent.ts, ConversationsPage.tsx) | 5 reads | ~9341 tok |
+| 11:48 | Session end: 5 writes across 4 files (2026-10-23-messaging.md, MessageParentsModal.tsx, teacherParent.ts, ConversationsPage.tsx) | 5 reads | ~9341 tok |
+| 11:49 | Created quran-hifz-server/src/lib/dailyReportDiff.ts | — | ~1283 |
+| 11:53 | Daily report «edited after send» flag + diff (server+web); admin parents link-student search | dailyReportDiff.ts, daily-report.controller, ReportChangesBox, AdminDailyReports, DailyReportComposer, AdminParents, quran.css | tsc clean; diff cases 5/5; browser-verified admin side | ~25k |
+| 11:53 | Session end: 6 writes across 5 files (2026-10-23-messaging.md, MessageParentsModal.tsx, teacherParent.ts, ConversationsPage.tsx, dailyReportDiff.ts) | 8 reads | ~13041 tok |
+| 12:03 | Export menu opens inward; student level/path removed + student phone added (server/web/mobile); real dashboard alerts endpoint + UI; removed «تصدير تقرير» header button | quran.css, AdminStudents, AdminRegister, mobile register/student-form, Student model/controller, stats.controller/routes, api/stats, AdminDashboard | web+server tsc clean; browser-verified; mobile not typecheckable | ~30k |
+| 12:03 | Session end: 6 writes across 5 files (2026-10-23-messaging.md, MessageParentsModal.tsx, teacherParent.ts, ConversationsPage.tsx, dailyReportDiff.ts) | 8 reads | ~13041 tok |

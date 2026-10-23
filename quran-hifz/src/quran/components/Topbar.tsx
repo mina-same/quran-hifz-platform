@@ -1,7 +1,8 @@
 import { usePortal, useTopbarValue } from "../context/PortalContext";
+import { ParentChildSwitch } from "./ParentChildSwitch";
 
 export function Topbar() {
-  const { toggleSidebar } = usePortal();
+  const { toggleSidebar, portal } = usePortal();
   const topbar = useTopbarValue();
   return (
     <div className="topbar">
@@ -12,7 +13,10 @@ export function Topbar() {
         <i className={`ti ${topbar.icon}`} />
         <span>{topbar.title}</span>
       </div>
-      <div className="topbar-actions">{topbar.actions}</div>
+      <div className="topbar-actions">
+        {portal === "parent" && <ParentChildSwitch />}
+        {topbar.actions}
+      </div>
     </div>
   );
 }

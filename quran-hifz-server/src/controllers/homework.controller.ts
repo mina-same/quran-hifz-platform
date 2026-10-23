@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { Homework } from '../models/Homework.model';
 import { AppError } from '../middleware/error';
+import { deletedTrackIds } from '../lib/deletedTracks';
 
 const homeworkSchema = z.object({
   student:      z.string().min(1),
@@ -28,6 +29,9 @@ export async function getHomework(req: Request, res: Response, next: NextFunctio
     if (teacher) filter.teacher = teacher;
     if (track)   filter.track   = track;
     if (status)  filter.status  = status;
+    // Homework of an archived track is history, not something to act on.
+    const archived = await deletedTrackIds();
+    if (archived.length) filter.$and = [{ track: { $nin: archived } }];
 
     const homework = await Homework.find(filter)
       .populate('student', 'name')

@@ -5,6 +5,7 @@ import { useTracks, type Track } from "../../api/tracks";
 import { useDailyReports, type DailyReport } from "../../api/daily-reports";
 import { DailyReportCard, DailyReportCombinedCard, DailyReportSheet } from "../../components/common/DailyReportCard";
 import { ScopeTabs } from "../../components/common/ScopeTabs";
+import { ReportChangesBox } from "../../components/common/ReportChangesBox";
 import { Modal } from "../../components/common/Modal";
 import { Alert } from "../../components/common/Alert";
 import { downloadReportPdf, gregorianAr, hijriDate, shiftDay, todayKey, weekdayAr } from "../../lib/dailyReport";
@@ -26,6 +27,9 @@ function ReportSummary({ report: r, onOpen }: { report: DailyReport; onOpen: () 
         <b>{r.trackTitle}</b>
         <i className="ti ti-chevron-left" aria-hidden="true" />
       </div>
+      {r.changes && (
+        <span className="drl-item-edited"><i className="ti ti-alert-triangle" /> عُدّل بعد الإرسال</span>
+      )}
       <div className="drl-item-meta">
         {r.masjidName && <span><i className="ti ti-building-mosque" /> {r.masjidName}</span>}
         {r.teacherName && <span><i className="ti ti-user" /> {r.teacherName}</span>}
@@ -181,6 +185,7 @@ export function AdminDailyReports() {
       )}
 
       <Modal open={!!opened} onClose={() => setOpenId(null)} title={opened?.trackTitle} maxWidth={620}>
+        {opened?.changes && <ReportChangesBox changes={opened.changes} />}
         {opened && <DailyReportCard report={opened} />}
       </Modal>
     </div>

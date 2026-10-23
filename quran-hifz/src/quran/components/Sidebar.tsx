@@ -30,7 +30,7 @@ export function Sidebar() {
       <div className="sidebar">
       <div className="sidebar-brand">
         <img className="sidebar-logo" src={LOGO_SRC} alt="شعار" />
-        <div className="sidebar-name">جمعية تحفيظ القرآن الكريم بالعماير</div>
+        <div className="sidebar-name">المنصة التعليمية لجمعية التحفيظ بالعماير</div>
         <span className="sidebar-portal-badge">{cfg.badge}</span>
       </div>
       {portal === "admin" && (

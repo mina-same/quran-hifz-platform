@@ -7128,5 +7128,58 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-10-17T00:00:00Z"
+  },
+  {
+    "id": "bug-425",
+    "timestamp": "2026-10-21T12:00:00Z",
+    "error_message": "User wants fractional rubric degrees (e.g. 2.5) and fractional grades; grade chips Array.from({length: max+1}) can't represent 2.5 (length 3.5 → chips 0,1,2)",
+    "file": "quran-plan.controller.ts, evaluation.controller.ts, QuranPlan/Evaluation models, TeacherPlanForm, plan-form.tsx, TeacherAttendance, TeacherTrackDetail, evaluate.tsx, EvaluationRoster.tsx",
+    "root_cause": "zod .int() on gradeRubric max and scores; model min:1 on max; integer chip UI",
+    "fix": "server: max positive with ≤2 decimals, sum compared in hundredths, grades/total/totalMax rounded to 2dp, model min 0.01. Clients: typed decimal inputs (web ScoreInput, mobile DecimalInput; parseDecimalText accepts Arabic digits + ٫), totals rounded",
+    "tags": [
+      "rubric",
+      "decimal",
+      "float",
+      "grading"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-21T12:00:00Z"
+  },
+  {
+    "id": "bug-426",
+    "timestamp": "2026-10-23T12:00:00Z",
+    "error_message": "User: grade boxes (حضور / ٢ …) don't allow writing a decimal number",
+    "file": "quran-hifz/src/quran/lib/decimal.ts, ScoreInput.tsx, quran-hifz-mobile/lib/decimal.ts, DecimalInput.tsx, evaluate.tsx, EvaluationRoster.tsx",
+    "root_cause": "(1) On an Arabic keyboard the '.' key types «ز», which parseDecimalText stripped, so the dot never appeared; (2) a value above the criterion max (2.5 in a /2 box) was silently snapped to the max, looking like decimals were refused",
+    "fix": "parser maps ٫ , ، ز to '.'; ScoreInput/DecimalInput keep the typed text, show red «الحد الأقصى N» when over max, pass only min(value,max) upward",
+    "tags": [
+      "decimal",
+      "arabic-keyboard",
+      "grading",
+      "ux"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-23T12:00:00Z"
+  },
+  {
+    "id": "bug-427",
+    "timestamp": "2026-10-23T15:00:00Z",
+    "error_message": "Parent header child switch doesn't list the other children and can't switch (web)",
+    "file": "quran-hifz/src/quran/pages/parent/ParentDashboard.tsx, components/Topbar.tsx, components/ParentChildSwitch.tsx",
+    "root_cause": "«تغيير الابن» topbar button only called showPage('dashboard') — never cleared/changed activeChild, so the ChildSelector never reappeared; and it existed only on the dashboard",
+    "fix": "New ParentChildSwitch <select> rendered by Topbar for portal==='parent' on every page (hidden for 1 child), calls setActiveChild; removed the broken button",
+    "tags": [
+      "parent",
+      "child-switch",
+      "topbar",
+      "web"
+    ],
+    "related_bugs": [
+      "bug-383"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-10-23T15:00:00Z"
   }
 ]

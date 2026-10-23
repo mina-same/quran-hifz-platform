@@ -18,12 +18,12 @@ type AppTheme = ReturnType<typeof useAppTheme>;
 
 type Fields = {
   name: string; guardianPhone: string; nationalId: string;
-  studentLevel: string;
+  studentPhone: string;
   track: string;
   email: string; password: string;
 };
 const EMPTY: Fields = {
-  name: '', guardianPhone: '', nationalId: '', studentLevel: '',
+  name: '', guardianPhone: '', nationalId: '', studentPhone: '',
   track: '', email: '', password: '',
 };
 
@@ -33,7 +33,7 @@ function validate(f: Fields): string | null {
   if (!/^05\d{8}$/.test(f.guardianPhone.trim())) return 'صيغة الجوال: 05XXXXXXXX';
   if (!f.nationalId.trim()) return 'رقم الهوية مطلوب';
   if (!/^[12]\d{9}$/.test(f.nationalId.trim())) return 'رقم الهوية ١٠ أرقام ويبدأ بـ ١ أو ٢';
-  if (f.studentLevel.trim() && (Number(f.studentLevel) < 1 || Number(f.studentLevel) > 10)) return 'المستوى بين ١ و١٠';
+  if (f.studentPhone.trim() && !/^05\d{8}$/.test(f.studentPhone.trim())) return 'صيغة جوال الطالب: 05XXXXXXXX';
   if (!f.track) return 'يرجى اختيار المسار';
   if (f.email.trim() && !/^\S+@\S+\.\S+$/.test(f.email.trim())) return 'البريد الإلكتروني غير صحيح';
   return null;
@@ -68,7 +68,7 @@ export default function AdminRegister() {
       path: 'حفظ كامل',
       status: 'new',
     };
-    if (form.studentLevel.trim()) body.level = Number(form.studentLevel);
+    if (form.studentPhone.trim()) body.phone = form.studentPhone.trim();
     if (form.email.trim()) body.email = form.email.trim();
     if (form.password) body.password = form.password;
 
@@ -116,14 +116,14 @@ export default function AdminRegister() {
                   onChangeText={(v) => sf('guardianPhone', v)}
                 />
               </FormGroup>
-            </View>
-          </Card>
-
-          <Card>
-            <CardHeader title="المستوى" />
-            <View style={s.formCol}>
-              <FormGroup label="المستوى (رقم من ١ إلى ١٠)">
-                <FormInput placeholder="مثال: ٣" keyboardType="number-pad" value={form.studentLevel} onChangeText={(v) => sf('studentLevel', v)} />
+              <FormGroup label="جوال الطالب (اختياري)">
+                <FormInput
+                  placeholder="05XXXXXXXX"
+                  keyboardType="phone-pad"
+                  style={s.ltr}
+                  value={form.studentPhone}
+                  onChangeText={(v) => sf('studentPhone', v)}
+                />
               </FormGroup>
             </View>
           </Card>

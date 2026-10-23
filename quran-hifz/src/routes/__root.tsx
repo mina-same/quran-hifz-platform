@@ -74,7 +74,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL ?? "";
-const SITE_TITLE = "منصة تحفيظ القرآن الكريم";
+const SITE_TITLE = "المنصة التعليمية لجمعية التحفيظ بالعماير";
 const SITE_DESCRIPTION =
   "منصة متكاملة لإدارة حلقات تحفيظ القرآن الكريم — بوابات للطلاب والمعلمين وأولياء الأمور والإدارة";
 const SITE_URL = `${PUBLIC_URL}/`;
@@ -107,7 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image", content: OG_IMAGE },
       { property: "og:image:width", content: "512" },
       { property: "og:image:height", content: "512" },
-      { property: "og:image:alt", content: "شعار منصة تحفيظ القرآن الكريم" },
+      { property: "og:image:alt", content: "شعار المنصة التعليمية لجمعية التحفيظ بالعماير" },
       { property: "og:locale", content: "ar_SA" },
       // Twitter / X
       { name: "twitter:card", content: "summary_large_image" },

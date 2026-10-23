@@ -17,7 +17,7 @@ export function PortalScreen({ onSelect }: { onSelect: (key: PortalKey) => void 
           <img className="portal-logo" src={LOGO_SRC} alt="شعار الجمعية" />
         </div>
         <div className="portal-bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
-        <div className="portal-title">الجمعية الخيرية لتحفيظ القرآن الكريم بالعماير</div>
+        <div className="portal-title">المنصة التعليمية لجمعية التحفيظ بالعماير</div>
         <div className="portal-sub">منصة متكاملة لإدارة حلقات التحفيظ ومتابعة الطلاب</div>
       </div>
 
@@ -36,7 +36,7 @@ export function PortalScreen({ onSelect }: { onSelect: (key: PortalKey) => void 
       </div>
 
       <div className="portal-footer">
-        منصة تحفيظ القرآن الكريم • جميع الحقوق محفوظة
+        المنصة التعليمية لجمعية التحفيظ بالعماير • جميع الحقوق محفوظة
       </div>
     </div>
   );

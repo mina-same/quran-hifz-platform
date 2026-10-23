@@ -9,6 +9,10 @@ describe('parseDecimalText', () => {
     expect(parseDecimalText('٢٫٥')).toEqual({ text: '2.5', value: 2.5 });
     expect(parseDecimalText('1,25')).toEqual({ text: '1.25', value: 1.25 });
   });
+  it('takes the "." key of an Arabic keyboard («ز») and the Arabic comma «،»', () => {
+    expect(parseDecimalText('١ز٥')).toEqual({ text: '1.5', value: 1.5 });
+    expect(parseDecimalText('2،5')).toEqual({ text: '2.5', value: 2.5 });
+  });
   it('caps at two decimals and one dot', () => {
     expect(parseDecimalText('3.456')).toEqual({ text: '3.45', value: 3.45 });
     expect(parseDecimalText('1.2.3')).toEqual({ text: '1.23', value: 1.23 });

@@ -12,6 +12,7 @@ import {
 } from '../lib/quranRange';
 import type { IPlanSegment, IQuranPlan } from '../models/QuranPlan.model';
 import { OpenWardEntry } from '../models/OpenWardEntry.model';
+import { deletedTrackIds } from '../lib/deletedTracks';
 
 const SURAH_BY_NUMBER = new Map(SURAHS.map((s) => [s.number, s]));
 
@@ -352,6 +353,9 @@ export async function getPlans(req: Request, res: Response, next: NextFunction):
     if (teacher) filter.teacher  = teacher;
     if (student) filter.students = student;
     if (track)   filter.track    = track;
+    // Plans of an archived track stay in the DB for history, never in lists.
+    const archived = await deletedTrackIds();
+    if (archived.length) filter.$and = [{ track: { $nin: archived } }];
 
     const plans = await QuranPlan.find(filter)
       .populate('teacher', 'name')

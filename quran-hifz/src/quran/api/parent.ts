@@ -3,7 +3,6 @@ import { get } from "../../lib/api";
 import type { AttendanceRecord } from "./attendance";
 import type { HifzEntry } from "./hifz";
 import type { Homework } from "./homework";
-import type { Message } from "./messages";
 
 export type ParentChild = {
   _id: string;
@@ -71,10 +70,3 @@ export function useChildRecordings(studentId: string | undefined) {
   });
 }
 
-export function useChildMessages(studentId: string | undefined) {
-  return useQuery({
-    queryKey: ["parent", "messages", studentId],
-    queryFn: () => get<ListResponse<Message[]>>(`/parent/children/${studentId}/messages`).then((r) => r.data),
-    enabled: !!studentId,
-  });
-}

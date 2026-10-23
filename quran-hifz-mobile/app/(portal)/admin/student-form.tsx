@@ -8,7 +8,6 @@ import FormSelect from '@/components/forms/FormSelect';
 import { useStudents, useUpdateStudent, type Student } from '@/lib/queries/students';
 import { useTracks } from '@/lib/queries/tracks';
 import { useAdminParents, useStudentParent, useSetStudentParent } from '@/lib/queries/adminParents';
-import { SERVER_PATHS } from '@/lib/constants/masarMap';
 
 function getId(v: unknown): string {
   if (v && typeof v === 'object' && '_id' in v) return (v as { _id: string })._id;
@@ -33,10 +32,9 @@ export default function AdminStudentForm() {
   const setStudentParent = useSetStudentParent();
 
   const [name, setName] = useState('');
-  const [path, setPath] = useState('');
-  const [level, setLevel] = useState('');
   const [track, setTrack] = useState('');
   const [guardianPhone, setGuardianPhone] = useState('');
+  const [phone, setPhone] = useState('');
   const [nationalId, setNationalId] = useState('');
   const [status, setStatus] = useState<Student['status']>('active');
   const [email, setEmail] = useState('');
@@ -48,10 +46,9 @@ export default function AdminStudentForm() {
   useEffect(() => {
     if (!existing) return;
     setName(existing.name);
-    setPath(existing.path);
-    setLevel(existing.level != null ? String(existing.level) : '');
     setTrack(getId(existing.track));
     setGuardianPhone(existing.guardianPhone ?? '');
+    setPhone(existing.phone ?? '');
     setNationalId(existing.nationalId ?? '');
     setStatus(existing.status);
     setEmail(existing.email ?? '');
@@ -69,12 +66,11 @@ export default function AdminStudentForm() {
       await updateStudent.mutateAsync({
         id,
         name: name.trim(),
-        path,
         track: track || undefined,
         guardianPhone: guardianPhone.trim(),
+        phone: phone.trim(),
         nationalId: nationalId.trim() || undefined,
         status,
-        ...(level.trim() && { level: Number(level) }),
         ...(email.trim() && { email: email.trim() }),
         ...(password && { password }),
       });
@@ -104,18 +100,6 @@ export default function AdminStudentForm() {
 
       <Text style={s.label}>المسار</Text>
       <FormSelect
-        value={path}
-        onChange={setPath}
-        options={SERVER_PATHS.map((p) => ({ value: p, label: p }))}
-        placeholder="اختر المسار"
-        title="المسار"
-      />
-
-      <Text style={s.label}>المستوى (رقم من ١ إلى ١٠)</Text>
-      <FormInput placeholder="مثال: ٣" keyboardType="number-pad" value={level} onChangeText={setLevel} />
-
-      <Text style={s.label}>المسار</Text>
-      <FormSelect
         value={track}
         onChange={setTrack}
         options={tracks.map((t) => ({ value: t._id, label: t.title }))}
@@ -130,6 +114,15 @@ export default function AdminStudentForm() {
         style={s.ltr}
         value={guardianPhone}
         onChangeText={setGuardianPhone}
+      />
+
+      <Text style={s.label}>جوال الطالب (اختياري)</Text>
+      <FormInput
+        placeholder="05XXXXXXXX"
+        keyboardType="phone-pad"
+        style={s.ltr}
+        value={phone}
+        onChangeText={setPhone}
       />
 
       <Text style={s.label}>رقم الهوية</Text>

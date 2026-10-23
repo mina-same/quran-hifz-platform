@@ -7,7 +7,6 @@ import { SkeletonTable } from "../../components/common/Skeleton";
 import { useStudents, useUpdateStudent, useDeleteStudent, type Student } from "../../api/students";
 import { useTracks } from "../../api/tracks";
 import { useAdminParents, useStudentParent, useSetStudentParent } from "../../api/admin-parents";
-import { toAr } from "../../../lib/format";
 import { matchesGenderScope } from "../../lib/genderScope";
 
 const PATH_TONE: Record<string, BadgeTone> = {
@@ -36,10 +35,9 @@ function getObjId(h: unknown): string {
 
 type EditFormFields = {
   name: string;
-  path: string;
-  level: string;
   track: string;
   guardianPhone: string;
+  phone: string;
   nationalId: string;
   status: "active" | "inactive" | "new";
   email: string;
@@ -74,7 +72,7 @@ export function AdminStudents() {
   const [pathFilter, setPathFilter] = useState("");
   const [editItem, setEditItem] = useState<Student | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [form, setForm] = useState<EditFormFields>({ name: "", path: "", level: "", track: "", guardianPhone: "", nationalId: "", status: "active", email: "", password: "" });
+  const [form, setForm] = useState<EditFormFields>({ name: "", track: "", guardianPhone: "", phone: "", nationalId: "", status: "active", email: "", password: "" });
   const [formError, setFormError] = useState("");
   const [selectedParentId, setSelectedParentId] = useState<string>("");
 
@@ -83,10 +81,9 @@ export function AdminStudents() {
   function openEdit(s: Student) {
     setForm({
       name:          s.name,
-      path:          s.path,
-      level:         s.level != null ? String(s.level) : "",
       track:         getObjId(s.track),
       guardianPhone: s.guardianPhone,
+      phone:         s.phone ?? "",
       nationalId:    s.nationalId ?? "",
       status:        s.status,
       email:         s.email ?? "",
@@ -112,13 +109,12 @@ export function AdminStudents() {
       await updateStudent.mutateAsync({
         id:            editItem!._id,
         name:          form.name.trim(),
-        path:          form.path,
         track:         form.track || undefined,
         guardianPhone: form.guardianPhone.trim(),
+        phone:         form.phone.trim(),
         // Blank clears the field rather than failing the 10-digit check.
         nationalId:    form.nationalId.trim() || undefined,
         status:        form.status,
-        ...(form.level.trim() && { level: Number(form.level) }),
         ...(form.email.trim()  && { email:    form.email.trim() }),
         ...(form.password      && { password: form.password }),
       });
@@ -193,7 +189,7 @@ export function AdminStudents() {
           </select>
         </div>
 
-        {isLoading && <SkeletonTable cols={7} rows={6} />}
+        {isLoading && <SkeletonTable cols={6} rows={6} />}
         {error && (
           <div style={{ color: "#ef4444", padding: 12, fontSize: 13 }}>تعذّر تحميل بيانات الطلاب</div>
         )}
@@ -205,7 +201,6 @@ export function AdminStudents() {
                 <tr>
                   <th>الاسم</th>
                   <th>المسار</th>
-                  <th>المستوى</th>
                   <th>المسجد</th>
                   <th>ولي الأمر</th>
                   <th>الحالة</th>
@@ -224,7 +219,6 @@ export function AdminStudents() {
                         return <span style={{ color: "var(--text3)" }}>—</span>;
                       })()}
                     </td>
-                    <td>{s.level != null ? toAr(s.level) : "—"}</td>
                     <td>{getTrackMasjidName(s.track)}</td>
                     <td style={{ fontSize: 12 }}>
                       {(() => {
@@ -265,7 +259,7 @@ export function AdminStudents() {
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                    <td colSpan={6} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
                       لا توجد نتائج
                     </td>
                   </tr>
@@ -301,31 +295,7 @@ export function AdminStudents() {
                 <input className="form-input" value={form.name} onChange={(e) => setField("name", e.target.value)} />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">المسار</label>
-                <select className="form-input" value={form.path} onChange={(e) => setField("path", e.target.value)}>
-                  <option value="">اختر المسار</option>
-                  <option value="حفظ كامل">حفظ كامل</option>
-                  <option value="عشرون جزءاً">عشرون جزءاً</option>
-                  <option value="عشرة أجزاء">عشرة أجزاء</option>
-                  <option value="خمسة أجزاء">خمسة أجزاء</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">المستوى (رقم من ١ إلى ١٠)</label>
-                <input
-                  className="form-input"
-                  type="number"
-                  min={1}
-                  max={10}
-                  placeholder="مثال: ٣"
-                  value={form.level}
-                  onChange={(e) => setField("level", e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
+              <div className="form-group" style={{ gridColumn: "1 / -1" }}>
                 <label className="form-label">الحالة</label>
                 <select className="form-input" value={form.status} onChange={(e) => setField("status", e.target.value as EditFormFields["status"])}>
                   <option value="active">نشط</option>
@@ -347,6 +317,11 @@ export function AdminStudents() {
               <div className="form-group" style={{ gridColumn: "1 / -1" }}>
                 <label className="form-label">جوال ولي الأمر</label>
                 <input className="form-input" type="tel" dir="ltr" placeholder="05XXXXXXXX" value={form.guardianPhone} onChange={(e) => setField("guardianPhone", e.target.value)} />
+              </div>
+
+              <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+                <label className="form-label">جوال الطالب <small style={{ color: "var(--text3)", fontWeight: 400 }}>(اختياري)</small></label>
+                <input className="form-input" type="tel" dir="ltr" placeholder="05XXXXXXXX" value={form.phone} onChange={(e) => setField("phone", e.target.value)} />
               </div>
 
               <div className="form-group" style={{ gridColumn: "1 / -1" }}>

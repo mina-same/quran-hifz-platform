@@ -4,12 +4,12 @@ import QuranApp from "@/quran/QuranApp";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "جمعية تحفيظ القرآن الكريم بالعماير" },
+      { title: "المنصة التعليمية لجمعية التحفيظ بالعماير" },
       {
         name: "description",
         content: "منصة الجمعية الخيرية لتحفيظ القرآن الكريم بالعماير — لإدارة الحلقات والطلاب والمعلمين.",
       },
-      { property: "og:title", content: "جمعية تحفيظ القرآن الكريم بالعماير" },
+      { property: "og:title", content: "المنصة التعليمية لجمعية التحفيظ بالعماير" },
       {
         property: "og:description",
         content: "منصة الجمعية الخيرية لتحفيظ القرآن الكريم بالعماير.",

@@ -720,7 +720,8 @@ export default function EvaluationRoster({
                       editable={!(isAbsent || locked)}
                       accessibilityLabel={`درجة ${cat.label} من ${cat.max}`}
                       style={[styles.scoreInput, (isAbsent || locked) && styles.disabled]}
-                      onChange={(n) => setScore(st._id, cat.key, Math.min(n, cat.max))}
+                      max={cat.max}
+                      onChange={(n) => setScore(st._id, cat.key, n)}
                     />
                   </View>
                 ))}

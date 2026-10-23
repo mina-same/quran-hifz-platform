@@ -1,4 +1,3 @@
-import { usePortal } from "../../context/PortalContext";
 import { useTopbar } from "../../context/useTopbar";
 import { useParentContext } from "../../context/ParentContext";
 import { useChildHifz } from "../../api/parent";
@@ -17,7 +16,6 @@ const NOTIFICATIONS = [
 ];
 
 export function ParentDashboard() {
-  const { showPage } = usePortal();
   const { activeChild } = useParentContext();
   const childId = activeChild?._id;
   const { data: hifzEntries } = useChildHifz(childId);
@@ -38,17 +36,8 @@ export function ParentDashboard() {
 
   const level = progressPct >= 80 ? "نجم ⭐" : progressPct >= 50 ? "متميز" : "ناشط";
 
-  useTopbar(
-    "ti-home",
-    `لوحتي — متابعة ${childName}`,
-    <button
-      className="topbar-btn btn-ghost"
-      style={{ fontSize: 11 }}
-      onClick={() => showPage("dashboard")}
-    >
-      <i className="ti ti-users" /> تغيير الابن
-    </button>,
-  );
+  // Switching child lives in the header for every parent page (ParentChildSwitch).
+  useTopbar("ti-home", `لوحتي — متابعة ${childName}`, <></>);
 
   return (
     <>
