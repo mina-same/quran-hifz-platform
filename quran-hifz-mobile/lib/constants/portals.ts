@@ -72,6 +72,12 @@ export const PORTALS: Record<string, PortalConfig> = {
             desc: "نقاطك وترتيبك بين الطلاب",
           },
           {
+            id: "leaderboard",
+            icon: "trophy",
+            label: "لوحة الشرف",
+            desc: "ترتيبك في حلقتك وبين كل الحلقات",
+          },
+          {
             id: "store",
             icon: "gift",
             label: "متجر المكافآت",

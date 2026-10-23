@@ -34,7 +34,8 @@ function trackIdOf(v: Student['track']): string {
  * "add" alongside an existing track. Self-contained (fetches its own students
  * list and owns its own picker/search state) so it can be embedded both in
  * the admin tracks list and the shared TrackDetail screen. */
-export default function TrackStudentsPanel({ track }: { track: Track }) {
+/** `canTransfer={false}` makes it a read-only roster (the teacher's halqa screen). */
+export default function TrackStudentsPanel({ track, canTransfer = true }: { track: Track; canTransfer?: boolean }) {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
   const readOnly = usePortalStore((st) => st.readOnly);
@@ -73,7 +74,7 @@ export default function TrackStudentsPanel({ track }: { track: Track }) {
         )}
       </View>
 
-      {!isFull && !readOnly && (
+      {!isFull && !readOnly && canTransfer && (
         <View style={s.addStudentBox}>
           <Text style={s.addStudentLabel}>نقل طالب إلى هذا المسار</Text>
           <View style={s.row}>

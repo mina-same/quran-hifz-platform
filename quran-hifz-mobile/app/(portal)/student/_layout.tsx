@@ -47,6 +47,7 @@ export default function StudentTabLayout() {
       {/* Reachable from the "المزيد" sheet only. */}
       <Tabs.Screen name="schedule" options={{ href: null, title: 'المواعيد' }} />
       <Tabs.Screen name="points"   options={{ href: null, title: 'نقاطي' }} />
+      <Tabs.Screen name="leaderboard" options={{ href: null, title: 'لوحة الشرف' }} />
       <Tabs.Screen name="store"    options={{ href: null, title: 'المكافآت' }} />
       <Tabs.Screen name="tracks" options={{ href: null, title: 'مساري' }} />
       <Tabs.Screen name="settings" options={{ href: null, title: 'الملف الشخصي' }} />

@@ -187,9 +187,25 @@ export default function ReportsScreen({ baseFilter, tracks, scopeAllLabel, showA
     const n = students.length;
     const avgAtt = n ? Math.round(avg(students.map((s) => s.attendancePct ?? 0))) : 0;
     const avgProg = n ? Math.round(avg(students.map((s) => s.progressPct ?? 0))) : 0;
-    const atRisk = students.filter((s) => (s.attendancePct ?? 0) < 75 || (s.progressPct ?? 0) < 50);
+    // Needs follow-up: ≥ 3 evaluated days in scope and either absent > 25% of
+    // them or averaging < 5/10 on the days present. (Student.progressPct is not
+    // maintained — it is 0 for everyone — so it can't drive this; web parity.)
+    const per = new Map<string, { days: number; absent: number; score: number; max: number }>();
+    for (const e of evaluations) {
+      const id = studentIdOf(e);
+      const a = per.get(id) ?? { days: 0, absent: 0, score: 0, max: 0 };
+      a.days += 1;
+      if (e.attendanceStatus === 'غائب') a.absent += 1;
+      else { a.score += e.total; a.max += e.totalMax ?? 10; }
+      per.set(id, a);
+    }
+    const atRisk = students.filter((st) => {
+      const a = per.get(st._id);
+      if (!a || a.days < 3) return false;
+      return a.absent / a.days > 0.25 || (a.max > 0 && a.score / a.max < 0.5);
+    });
     return { n, avgAtt, avgProg, atRisk };
-  }, [students]);
+  }, [students, evaluations]);
   const progBuckets = useMemo(() => bucket(students.map((s) => s.progressPct ?? 0)), [students]);
 
   /* ── evaluation rubric aggregate ──────────────────────────────────── */

@@ -35,6 +35,7 @@ import { StudentAttendance }     from "../pages/student/StudentAttendance";
 import { StudentSchedule }       from "../pages/student/StudentSchedule";
 import { StudentMessages, MessagesInbox } from "../pages/student/StudentMessages";
 import { StudentPoints }         from "../pages/student/StudentPoints";
+import { StudentLeaderboard } from "../pages/student/StudentLeaderboard";
 import { StudentStore }          from "../pages/student/StudentStore";
 import { StudentTracks }         from "../pages/student/StudentTracks";
 
@@ -92,6 +93,7 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     schedule:  StudentSchedule,
     messages:  StudentMessages,
     points:    StudentPoints,
+    leaderboard: StudentLeaderboard,
     store:     StudentStore,
     tracks:    StudentTracks,
     account:   AccountSettings,

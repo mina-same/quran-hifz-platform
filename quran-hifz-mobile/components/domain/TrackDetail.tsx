@@ -89,6 +89,9 @@ export default function TrackDetail({ trackId, role }: Props) {
   // A supervisor (reusing this same screen) never manages plans — every
   // mutating route already 403s them server-side; this just hides the UI.
   const canManagePlan = !readOnly;
+  // Editing / swapping the linked plan and moving students into the halqa are
+  // the admin's call (web parity); teachers only see the plan and roster.
+  const canChangePlan = role === 'admin' && !readOnly;
 
   // Scope the list exactly the way the calling list screen does, so this
   // resolves out of the same react-query cache instead of refetching: a
@@ -365,7 +368,7 @@ export default function TrackDetail({ trackId, role }: Props) {
 
           <Card>
             <CardHeader title="إدارة طلاب المسار" />
-            <TrackStudentsPanel track={track} />
+            <TrackStudentsPanel track={track} canTransfer={role === 'admin'} />
           </Card>
         </>
       )}
@@ -408,7 +411,7 @@ export default function TrackDetail({ trackId, role }: Props) {
               </View>
 
               <View style={s.actionsRow}>
-                {canManagePlan && (
+                {canChangePlan && (
                   <Button
                     label="تعديل الخطة"
                     variant="secondary"
@@ -416,7 +419,7 @@ export default function TrackDetail({ trackId, role }: Props) {
                     onPress={() => router.push({ pathname: planFormPath, params: { mode: 'edit', id: linkedPlan._id } } as any)}
                   />
                 )}
-                {canManagePlan && (
+                {canChangePlan && (
                   <Button label="ربط خطة أخرى" variant="ghost" style={{ flex: 1 }} onPress={() => setShowLinkPanel((v) => !v)} />
                 )}
               </View>

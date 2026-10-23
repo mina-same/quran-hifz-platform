@@ -1,4 +1,5 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { toast } from "sonner";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, LabelList } from "recharts";
 import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 import { downloadCsv } from "../../../lib/csv";
@@ -12,15 +13,17 @@ import type { Track } from "../../api/tracks";
 import { useTopbar } from "../../context/useTopbar";
 import { Card } from "./Card";
 import { StatsRow } from "./StatsRow";
-import { Alert } from "./Alert";
 import { Badge, type BadgeTone } from "./Badge";
 import { ProgressBar } from "./ProgressBar";
 import { Donut, type DonutSlice } from "./Donut";
 import { BentoTile } from "./BentoTile";
 import { HonorBoard } from "./HonorBoard";
 import { Leaderboard, type LeaderRow } from "./Leaderboard";
-import { ScopeTabs } from "./ScopeTabs";
 import { StudentReportPanel } from "./StudentReportPanel";
+import { PromoReport } from "./PromoReport";
+import { PromoReportSection } from "./PromoReportSection";
+import { useRankings, PERIOD_LABEL, type RankPeriod } from "../../api/rankings";
+import { downloadPagesPdf } from "../../lib/pdfPages";
 
 /* ── helpers ──────────────────────────────────────────────────────────── */
 
@@ -30,6 +33,13 @@ function trackIdOf(s: Student): string {
 function trackNameOf(s: Student): string {
   return typeof s.track === "object" ? s.track.title : (s.track ?? "");
 }
+/** «طالب واحد / طالبان / ٣ طلاب / ١١ طالباً» — Arabic counted-noun agreement. */
+function studentsCount(n: number): string {
+  if (n === 1) return "طالب واحد";
+  if (n === 2) return "طالبان";
+  return `${toAr(n)} ${n >= 3 && n <= 10 ? "طلاب" : "طالباً"}`;
+}
+
 function studentIdOf(e: EvaluationRecord): string {
   return typeof e.student === "string" ? e.student : e.student._id;
 }
@@ -158,9 +168,25 @@ export function ReportsDashboard({
     const n = students.length;
     const avgAtt = n ? Math.round(avg(students.map((s) => s.attendancePct ?? 0))) : 0;
     const avgProg = n ? Math.round(avg(students.map((s) => s.progressPct ?? 0))) : 0;
-    const atRisk = students.filter((s) => s.attendancePct < 75 || s.progressPct < 50);
+    // Needs follow-up: ≥ 3 evaluated days in scope and either absent > 25% of
+    // them or averaging < 5/10 on the days present. (Student.progressPct is not
+    // maintained — it is 0 for everyone — so it can't drive this.)
+    const per = new Map<string, { days: number; absent: number; score: number; max: number }>();
+    for (const e of evaluations) {
+      const id = studentIdOf(e);
+      const a = per.get(id) ?? { days: 0, absent: 0, score: 0, max: 0 };
+      a.days += 1;
+      if (e.attendanceStatus === "غائب") a.absent += 1;
+      else { a.score += e.total; a.max += e.totalMax ?? 10; }
+      per.set(id, a);
+    }
+    const atRisk = students.filter((s) => {
+      const a = per.get(s._id);
+      if (!a || a.days < 3) return false;
+      return a.absent / a.days > 0.25 || (a.max > 0 && a.score / a.max < 0.5);
+    });
     return { n, avgAtt, avgProg, atRisk };
-  }, [students]);
+  }, [students, evaluations]);
   const progBuckets = useMemo(() => bucket(students.map((s) => s.progressPct)), [students]);
 
   /* ── evaluation rubric aggregate (the new centerpiece) ── */
@@ -315,43 +341,31 @@ export function ReportsDashboard({
   );
 
   /* ── auto insights ──────────────────────────────────────────────────── */
-  const insights: ReactNode[] = [];
+  type Insight = { key: string; tone: "warning" | "success" | "danger" | "info"; icon: string; text: ReactNode };
+  const insights: Insight[] = [];
   if (!isLoading) {
     if (evalStats && evalStats.weakest.pctVal < 70) {
-      insights.push(
-        <Alert key="weak" tone="warning" icon="ti-focus-2">
-          <b>{evalStats.weakest.label}</b> هو الأضعف بين معايير التقييم — متوسط{" "}
-          <b>{pct(evalStats.weakest.pctVal)}</b>، يُنصح بالتركيز عليه في الحلقات القادمة
-        </Alert>,
-      );
+      insights.push({
+        key: "weak", tone: "warning", icon: "ti-focus-2",
+        text: <>«<b>{evalStats.weakest.label}</b>» أضعف معايير التقييم — متوسطه <b>{pct(evalStats.weakest.pctVal)}</b>، يُنصح بالتركيز عليه في الحلقات القادمة</>,
+      });
     }
     if (halfSplit && halfSplit.total >= 0.3) {
-      insights.push(
-        <Alert key="trend-up" tone="success" icon="ti-trending-up">
-          متوسط التقييم في تحسّن مستمر خلال آخر الجلسات
-        </Alert>,
-      );
+      insights.push({ key: "trend-up", tone: "success", icon: "ti-trending-up", text: <>متوسط التقييم في تحسّن مستمر خلال آخر الجلسات</> });
     } else if (halfSplit && halfSplit.total <= -0.3) {
-      insights.push(
-        <Alert key="trend-down" tone="danger" icon="ti-trending-down">
-          متوسط التقييم في تراجع خلال آخر الجلسات — يستحق المتابعة
-        </Alert>,
-      );
+      insights.push({ key: "trend-down", tone: "danger", icon: "ti-trending-down", text: <>متوسط التقييم في تراجع خلال آخر الجلسات — يستحق المتابعة</> });
     }
     if (scope === "" && trackEvalStats.length > 1) {
-      insights.push(
-        <Alert key="top-track" tone="info" icon="ti-trophy">
-          مسار <b>{trackEvalStats[0].name}</b> متصدّرة في التقييم بمتوسط{" "}
-          <b>{toAr(trackEvalStats[0].avgTotal)}/{toAr(10)}</b>
-        </Alert>,
-      );
+      insights.push({
+        key: "top-track", tone: "info", icon: "ti-trophy",
+        text: <>حلقة «<b>{trackEvalStats[0].name}</b>» تتصدّر التقييم بمتوسط <b>{toAr(trackEvalStats[0].avgTotal)}/{toAr(10)}</b></>,
+      });
     }
     if (m.atRisk.length > 0) {
-      insights.push(
-        <Alert key="risk" tone="warning" icon="ti-alert-triangle">
-          <b>{toAr(m.atRisk.length)}</b> طالب يحتاجون متابعة — نسبة الحضور أو الإنجاز دون المستهدف
-        </Alert>,
-      );
+      insights.push({
+        key: "risk", tone: "danger", icon: "ti-user-exclamation",
+        text: <><b>{studentsCount(m.atRisk.length)}</b> {m.atRisk.length === 1 ? "يحتاج" : "يحتاجون"} متابعة — غياب أكثر من ٢٥٪ أو متوسط دون ٥ من ١٠</>,
+      });
     }
   }
 
@@ -400,6 +414,39 @@ export function ReportsDashboard({
   }
 
   const [exportOpen, setExportOpen] = useState(false);
+
+  // «تقرير الإنجاز والتميّز» PDF (admin / supervisor): rankings are fetched only
+  // once the menu is opened; the pages render off-screen, then get captured.
+  const [pdfPeriod, setPdfPeriod] = useState<RankPeriod>("month");
+  const [pdfTarget, setPdfTarget] = useState<"male" | "female" | "both" | null>(null);
+  const pdfRef = useRef<HTMLDivElement>(null);
+  const rankingsQuery = useRankings(pdfPeriod, showAdmin && (exportOpen || !!pdfTarget));
+  const rankings = rankingsQuery.data;
+  const pdfSections = rankings
+    ? (["male", "female"] as const).filter((g) => rankings.sections[g] && (pdfTarget === "both" || pdfTarget === g))
+    : [];
+  useEffect(() => {
+    if (!pdfTarget || !rankings || !pdfRef.current) return;
+    let cancelled = false;
+    const toastId = toast.loading("جارٍ تجهيز التقرير… ٠٪");
+    (async () => {
+      try {
+        await document.fonts.ready;
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const pages = Array.from(pdfRef.current?.querySelectorAll<HTMLElement>(".pr-page") ?? []);
+        const label = pdfTarget === "both" ? "القسمان" : pdfTarget === "male" ? "البنين" : "البنات";
+        await downloadPagesPdf(pages, `تقرير-الإنجاز-${label}-${rankings.to}`, (done) =>
+          toast.loading(`جارٍ تجهيز التقرير… ${toAr(Math.round((done / pages.length) * 100))}٪`, { id: toastId }));
+        if (!cancelled) toast.success("تم تنزيل التقرير", { id: toastId });
+      } catch {
+        if (!cancelled) toast.error("تعذّر إنشاء ملف PDF", { id: toastId });
+      } finally {
+        if (!cancelled) setPdfTarget(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [pdfTarget, rankings]);
+
   const exportItems = [
     { label: "تقرير التقييمات", icon: "ti-star", fn: exportEvaluations, disabled: evaluations.length === 0 },
     { label: "مقارنة المسارات (تقييم)", icon: "ti-school", fn: exportTrackEval, disabled: trackEvalStats.length === 0 },
@@ -407,8 +454,8 @@ export function ReportsDashboard({
   ];
   const exportMenu = (
     <div className="export-menu">
-      <button className="topbar-btn btn-primary" onClick={() => setExportOpen((o) => !o)} disabled={students.length === 0}>
-        <i className="ti ti-download" /> تصدير <i className="ti ti-chevron-down" style={{ fontSize: 10 }} />
+      <button className="topbar-btn btn-primary" onClick={() => setExportOpen((o) => !o)} disabled={students.length === 0 || !!pdfTarget}>
+        <i className={`ti ${pdfTarget ? "ti-loader-2 lp-spin" : "ti-download"}`} /> تصدير <i className="ti ti-chevron-down" style={{ fontSize: 10 }} />
       </button>
       {exportOpen && (
         <>
@@ -427,6 +474,47 @@ export function ReportsDashboard({
                 <i className={`ti ${it.icon}`} /> {it.label}
               </button>
             ))}
+            {showAdmin && (
+              <>
+                <div className="export-menu-divider" />
+                <div className="export-menu-head">تقرير الإنجاز والتميّز (PDF)</div>
+                <div className="export-menu-periods" role="radiogroup" aria-label="الفترة">
+                  {(["week", "month", "all"] as const).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      role="radio"
+                      aria-checked={pdfPeriod === p}
+                      className={pdfPeriod === p ? "on" : ""}
+                      onClick={() => setPdfPeriod(p)}
+                    >
+                      {PERIOD_LABEL[p]}
+                    </button>
+                  ))}
+                </div>
+                {rankingsQuery.isLoading ? (
+                  <div className="export-menu-skel" aria-label="جارٍ التحميل">
+                    <span className="skl" /><span className="skl" />
+                  </div>
+                ) : (
+                  ([
+                    ["male", "قسم البنين", "ti-user"],
+                    ["female", "قسم البنات", "ti-user-heart"],
+                    ["both", "القسمان معاً", "ti-users"],
+                  ] as const)
+                    .filter(([g]) => g === "both" ? !!(rankings?.sections.male && rankings?.sections.female) : !!rankings?.sections[g])
+                    .map(([g, label, icon]) => (
+                      <button
+                        key={g}
+                        className="export-menu-item"
+                        onClick={() => { setPdfTarget(g); setExportOpen(false); }}
+                      >
+                        <i className={`ti ${icon}`} /> PDF — {label}
+                      </button>
+                    ))
+                )}
+              </>
+            )}
           </div>
         </>
       )}
@@ -434,13 +522,29 @@ export function ReportsDashboard({
   );
 
   useTopbar(topbarIcon, topbarTitle, exportMenu);
+  const pdfSource = pdfTarget && rankings ? (
+    <div className="pr-source" ref={pdfRef} aria-hidden="true">
+      {pdfSections.map((g) => (
+        <PromoReport key={g} section={g} data={rankings.sections[g]!} period={rankings.period} from={rankings.from} to={rankings.to} />
+      ))}
+    </div>
+  ) : null;
 
   /* ── scope options ────────────────────────────────────────────────── */
-  const scopeOptions = useMemo(() => {
-    const opts: { value: string; label: string; icon?: string }[] = [{ value: "", label: scopeAllLabel, icon: "ti-users" }];
-    scopedTracks.forEach((t) => opts.push({ value: `track:${t._id}`, label: t.title, icon: "ti-route" }));
-    return opts;
-  }, [scopedTracks, scopeAllLabel]);
+  // Halqas grouped under their masjid for the scope picker; the masjid suffix
+  // in a halqa's title («الإتقان أ - جامع النور») is dropped inside its group.
+  const scopeGroups = useMemo(() => {
+    const groups = new Map<string, { label: string; tracks: { value: string; label: string }[] }>();
+    for (const t of scopedTracks) {
+      const mj = typeof t.masjid === "object" ? t.masjid : null;
+      const name = mj?.name ?? "حلقات أخرى";
+      const label = mj?.gender && genderScope === "all" ? `${name} — ${mj.gender === "female" ? "بنات" : "بنين"}` : name;
+      const short = mj?.name ? t.title.replace(new RegExp(`\\s*-\\s*${mj.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`), "") : t.title;
+      if (!groups.has(label)) groups.set(label, { label, tracks: [] });
+      groups.get(label)!.tracks.push({ value: `track:${t._id}`, label: short || t.title });
+    }
+    return [...groups.values()].sort((a, b) => a.label.localeCompare(b.label, "ar"));
+  }, [scopedTracks, genderScope]);
 
   const selectedTrack = scopedTracks.find((t) => `track:${t._id}` === scope);
   const aggregateTitle = selectedTrack
@@ -455,6 +559,8 @@ export function ReportsDashboard({
   /* ── render ────────────────────────────────────────────────────────── */
   return (
     <>
+      {pdfSource}
+      {showAdmin && <PromoReportSection />}
       <StatsRow
         items={[
           {
@@ -474,9 +580,36 @@ export function ReportsDashboard({
         ]}
       />
 
-      {scopeOptions.length > 1 && <ScopeTabs options={scopeOptions} value={scope} onChange={setScope} />}
+      {scopeGroups.length > 0 && (
+        <div className="rs-toolbar">
+          <label className="rs-label" htmlFor="report-scope"><i className="ti ti-filter" /> نطاق التقرير</label>
+          <select id="report-scope" className="form-input rs-select" value={scope} onChange={(e) => setScope(e.target.value)}>
+            <option value="">{scopeAllLabel}</option>
+            {scopeGroups.map((g) => (
+              <optgroup key={g.label} label={g.label}>
+                {g.tracks.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </optgroup>
+            ))}
+          </select>
+          {scope && (
+            <button type="button" className="topbar-btn btn-ghost rs-clear" onClick={() => setScope("")}>
+              <i className="ti ti-x" /> عرض كل الطلاب
+            </button>
+          )}
+          <span className="rs-count">{studentsCount(students.length)} في هذا النطاق</span>
+        </div>
+      )}
 
-      {insights.length > 0 && <div className="reports-insights">{insights}</div>}
+      {insights.length > 0 && (
+        <ul className="ri-list" aria-label="ملاحظات تلقائية">
+          {insights.map((it) => (
+            <li key={it.key} className={`ri ri-${it.tone}`}>
+              <span className="ri-icon" aria-hidden="true"><i className={`ti ${it.icon}`} /></span>
+              <p>{it.text}</p>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {empty ? (
         <Card icon="ti-chart-bar" title="لا توجد بيانات">

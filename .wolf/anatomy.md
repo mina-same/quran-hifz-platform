@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-23T08:49:43.113Z
-> Files: 747 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-23T13:03:29.750Z
+> Files: 750 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -1042,6 +1042,8 @@
 - `Pagination.tsx` — Pagination({page,pageSize,total,onChange}): numbered pager w/ gaps, hidden when 1 page; styles .pager* in quran.css (~450 tok)
 - `Pagination.tsx` — Page numbers to show: always first/last, a window around the current page, (~570 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
+- `PromoReport.tsx` — 2.5 → «٢٫٥», 120 → «١٢٠» (points may carry decimals since grades can). (~2625 tok)
+- `PromoReportSection.tsx` — «تقرير الإنجاز والتميّز» on the reports page itself: pick the section (~1059 tok)
 - `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~8630 tok)
 - `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)
 - `Skeleton.tsx` — Skeleton — renders table (~816 tok)
@@ -1117,6 +1119,7 @@
 - `StudentDashboard.tsx` — getField (~1869 tok)
 - `StudentHifz.tsx` — tone — renders table (~1058 tok)
 - `StudentHomework.tsx` — AR_DIGITS — uses useState, useEffect (~1000 tok)
+- `StudentLeaderboard.tsx` — 2.5 → «٢٫٥». (~1598 tok)
 - `StudentMessages.tsx` — StudentMessages (~768 tok)
 - `StudentPoints.tsx` — MY_POINTS (~1322 tok)
 - `StudentSchedule.tsx` — getId (~954 tok)

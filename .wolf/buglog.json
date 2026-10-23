@@ -7181,5 +7181,22 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-10-23T15:00:00Z"
+  },
+  {
+    "id": "bug-428",
+    "timestamp": "2026-10-23T18:00:00Z",
+    "error_message": "Reports page insight «٨٠ طالب يحتاجون متابعة» — every student flagged",
+    "file": "quran-hifz/src/quran/components/common/ReportsDashboard.tsx",
+    "root_cause": "atRisk = attendancePct < 75 || progressPct < 50, but Student.progressPct is never maintained (0 for all)",
+    "fix": "atRisk from in-scope evaluations: ≥3 days and (absent > 25% or present avg < 5/10); also fixed counted-noun grammar and «مسار…متصدّرة»",
+    "tags": [
+      "reports",
+      "insights",
+      "at-risk",
+      "progressPct"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-23T18:00:00Z"
   }
 ]

@@ -4606,3 +4606,22 @@
 | 11:53 | Session end: 6 writes across 5 files (2026-10-23-messaging.md, MessageParentsModal.tsx, teacherParent.ts, ConversationsPage.tsx, dailyReportDiff.ts) | 8 reads | ~13041 tok |
 | 12:03 | Export menu opens inward; student level/path removed + student phone added (server/web/mobile); real dashboard alerts endpoint + UI; removed «تصدير تقرير» header button | quran.css, AdminStudents, AdminRegister, mobile register/student-form, Student model/controller, stats.controller/routes, api/stats, AdminDashboard | web+server tsc clean; browser-verified; mobile not typecheckable | ~30k |
 | 12:03 | Session end: 6 writes across 5 files (2026-10-23-messaging.md, MessageParentsModal.tsx, teacherParent.ts, ConversationsPage.tsx, dailyReportDiff.ts) | 8 reads | ~13041 tok |
+| 12:09 | Created quran-hifz/src/quran/components/common/PromoReport.tsx | — | ~2625 |
+| 12:14 | Created quran-hifz/src/quran/pages/student/StudentLeaderboard.tsx | — | ~1598 |
+| 12:18 | Rankings API + promo PDF (boys/girls/both, 3 A4 pages each) + student «لوحة الشرف» with skeleton loading | rankings.ts, rankings.controller/routes, app.ts, api/rankings, PromoReport, pdfPages, ReportsDashboard, StudentLeaderboard, portals, pageRegistry, quran.css | 11/11 rank checks; tsc clean; PDFs + page verified in browser | ~60k |
+| 12:19 | Session end: 8 writes across 7 files (2026-10-23-messaging.md, MessageParentsModal.tsx, teacherParent.ts, ConversationsPage.tsx, dailyReportDiff.ts) | 14 reads | ~25894 tok |
+| 16:03 | Created quran-hifz/src/quran/components/common/PromoReportSection.tsx | — | ~1059 |
+| 16:05 | In-page promo report section (بنين/بنات + period filters, live preview, PDF); measured performance baseline (bundle + API) | PromoReportSection, ReportsDashboard, pdfPages, quran.css | browser-verified; PDF full-size | ~25k |
+| 16:07 | Reports page: grouped scope select toolbar, redesigned insights, real at-risk (19 not 80) | ReportsDashboard.tsx, quran.css | tsc clean; browser-verified | ~20k |
+| 16:08 | Session end: 9 writes across 8 files (2026-10-23-messaging.md, MessageParentsModal.tsx, teacherParent.ts, ConversationsPage.tsx, dailyReportDiff.ts) | 17 reads | ~26953 tok |
+| 16:14 | Session end: 9 writes across 8 files (2026-10-23-messaging.md, MessageParentsModal.tsx, teacherParent.ts, ConversationsPage.tsx, dailyReportDiff.ts) | 17 reads | ~26953 tok |
+
+## Session: 2026-10-23 16:14
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-23 16:14
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
