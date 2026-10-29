@@ -4,7 +4,10 @@ import { ParentStudent } from '../models/ParentStudent.model';
 import { Message } from '../models/Message.model';
 import { sendPushToUsers } from './push';
 
-export type NotifySenderCtx = { senderId: string; senderName: string; senderRole: string };
+export type NotifySenderCtx = { senderId: string; senderName: string; senderRole: string; system?: boolean };
+
+/** Automatic notices are signed by the platform, not the teacher who saved. */
+export const SYSTEM_SENDER = { name: 'مدير النظام', role: 'system', initials: 'م' } as const;
 
 /**
  * Builds one Message per student (skipping students with no linked parent
@@ -26,7 +29,9 @@ export async function notifyParents(
   ]);
   const nameById = new Map(students.map((s) => [String(s._id), s.name]));
   const parentByStudent = new Map(links.map((l) => [String(l.student), String(l.parent)]));
-  const initials = ctx.senderName.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('') || 'م';
+  const initials = ctx.system
+    ? SYSTEM_SENDER.initials
+    : ctx.senderName.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('') || 'م';
 
   const unnotified: { id: string; name: string }[] = [];
   const messages = studentIds.flatMap((id) => {
@@ -37,11 +42,11 @@ export async function notifyParents(
       return [];
     }
     return [{
-      sender: new Types.ObjectId(ctx.senderId),
+      ...(ctx.system ? { system: true } : { sender: new Types.ObjectId(ctx.senderId) }),
       recipient: new Types.ObjectId(parentId),
       student: new Types.ObjectId(id),
-      senderRole: ctx.senderRole,
-      senderName: ctx.senderName,
+      senderRole: ctx.system ? SYSTEM_SENDER.role : ctx.senderRole,
+      senderName: ctx.system ? SYSTEM_SENDER.name : ctx.senderName,
       senderInitials: initials,
       body: bodyFor(name, id),
     }];
@@ -53,7 +58,7 @@ export async function notifyParents(
       Message.insertMany(messages),
       sendPushToUsers(messages.map((m) => ({
         userId: String(m.recipient),
-        title: ctx.senderName,
+        title: ctx.system ? SYSTEM_SENDER.name : ctx.senderName,
         body: m.body,
       }))),
     ]);

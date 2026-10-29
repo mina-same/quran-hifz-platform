@@ -69,7 +69,6 @@ export function AdminStudents() {
   const setStudentParent = useSetStudentParent();
 
   const [search, setSearch] = useState("");
-  const [pathFilter, setPathFilter] = useState("");
   const [editItem, setEditItem] = useState<Student | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<EditFormFields>({ name: "", track: "", guardianPhone: "", phone: "", nationalId: "", status: "active", email: "", password: "" });
@@ -152,9 +151,7 @@ export function AdminStudents() {
   );
 
   const filtered = students.filter((s) => {
-    const matchSearch = !search || s.name.includes(search);
-    const matchPath = !pathFilter || s.path === pathFilter;
-    return matchSearch && matchPath;
+    return !search || s.name.includes(search);
   });
 
   // Map each student id → its linked parent account (from the parents list,
@@ -175,18 +172,6 @@ export function AdminStudents() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <select
-            className="form-input"
-            style={{ width: 170 }}
-            value={pathFilter}
-            onChange={(e) => setPathFilter(e.target.value)}
-          >
-            <option value="">كل المسارات</option>
-            <option>حفظ كامل</option>
-            <option>عشرون جزءاً</option>
-            <option>عشرة أجزاء</option>
-            <option>خمسة أجزاء</option>
-          </select>
         </div>
 
         {isLoading && <SkeletonTable cols={6} rows={6} />}

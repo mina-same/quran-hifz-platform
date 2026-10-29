@@ -25,6 +25,7 @@ export function TrackStudentsPanel({ track, canTransfer = true }: { track: Track
   const assignStudent = useAssignStudent();
   const [addStudentId, setAddStudentId] = useState("");
   const [studentsSearch, setStudentsSearch] = useState("");
+  const [transferQuery, setTransferQuery] = useState("");
 
   const enrolledStudents = allStudents.filter((s) => {
     const tId = typeof s.track === "object" ? s.track._id : s.track;
@@ -34,9 +35,12 @@ export function TrackStudentsPanel({ track, canTransfer = true }: { track: Track
   const capPct = Math.min(100, Math.round((enrolledCnt / track.maxStudents) * 100));
   const barClr = capPct >= 90 ? "#ef4444" : capPct >= 70 ? "#f59e0b" : "var(--green)";
   const isFull = enrolledCnt >= track.maxStudents;
+  // Students in other halqas, searchable by name or by their current halqa.
   const available = allStudents.filter((s) => {
     const tId = typeof s.track === "object" ? s.track._id : s.track;
-    return tId !== track._id && (!studentsSearch.trim() || s.name.includes(studentsSearch.trim()));
+    const from = typeof s.track === "object" ? s.track.title : "";
+    const q = transferQuery.trim();
+    return tId !== track._id && (!q || s.name.includes(q) || from.includes(q));
   });
 
   return (
@@ -59,20 +63,44 @@ export function TrackStudentsPanel({ track, canTransfer = true }: { track: Track
           <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 700, color: "var(--text2)" }}>
             <i className="ti ti-user-plus" style={{ marginLeft: 5, color: "var(--green)" }} />نقل طالب إلى هذا المسار
           </p>
-          <div style={{ display: "flex", gap: 8 }}>
-            <select className="form-input" style={{ flex: 1, fontSize: 13 }} value={addStudentId} onChange={(e) => setAddStudentId(e.target.value)}>
-              <option value="">— اختر طالباً —</option>
-              {available.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
-            </select>
+          <input
+            className="form-input"
+            style={{ fontSize: 13 }}
+            placeholder="ابحث باسم الطالب أو حلقته الحالية…"
+            value={transferQuery}
+            onChange={(e) => setTransferQuery(e.target.value)}
+            aria-label="بحث عن طالب لنقله"
+          />
+          <div className="link-pick" role="listbox" aria-label="الطلاب" style={{ marginBottom: 10 }}>
+            {available.length === 0 ? (
+              <p className="link-pick-empty">لا يوجد طالب بهذا الاسم</p>
+            ) : (
+              available.slice(0, 50).map((s) => (
+                <button
+                  key={s._id}
+                  type="button"
+                  role="option"
+                  aria-selected={addStudentId === s._id}
+                  className={`link-pick-row ${addStudentId === s._id ? "on" : ""}`}
+                  onClick={() => setAddStudentId(s._id)}
+                >
+                  <b>{s.name}</b>
+                  {typeof s.track === "object" && s.track.title && <span>حالياً في: {s.track.title}</span>}
+                </button>
+              ))
+            )}
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <button
               className="topbar-btn btn-primary"
-              style={{ padding: "0 16px", whiteSpace: "nowrap", fontSize: 13 }}
+              style={{ padding: "8px 18px", whiteSpace: "nowrap", fontSize: 13 }}
               disabled={!addStudentId || assignStudent.isPending}
               onClick={async () => {
                 if (!addStudentId) return;
                 try {
                   await assignStudent.mutateAsync({ id: track._id, studentId: addStudentId });
                   setAddStudentId("");
+                  setTransferQuery("");
                 } catch (e) {
                   toast.error((e as Error).message);
                 }

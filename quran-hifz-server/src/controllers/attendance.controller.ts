@@ -121,7 +121,7 @@ export async function bulkAttendance(req: Request, res: Response, next: NextFunc
     const { notified, unnotified } = await notifyParents(
       records.filter((r) => r.status === 'غائب').map((r) => r.student),
       (name) => `الطالب ${name} غائب اليوم (${day}، ${date}).`,
-      { senderId: req.user!.id, senderName: req.user!.name, senderRole: req.user!.role },
+      { senderId: req.user!.id, senderName: req.user!.name, senderRole: req.user!.role, system: true },
     );
 
     res.json({ success: true, message: 'تم تسجيل الحضور بنجاح', notified, unnotified });

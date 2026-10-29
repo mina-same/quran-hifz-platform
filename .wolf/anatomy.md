@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-23T13:03:29.750Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-29T10:47:43.376Z
 > Files: 750 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
@@ -1086,7 +1086,7 @@
 
 - `AdminDashboard.tsx` — PageLoading (~1372 tok)
 - `AdminHalqat.tsx` — OVERLAY — renders modal (~3688 tok)
-- `AdminKpis.tsx` — RATING_TONE — renders table (~743 tok)
+- `AdminKpis.tsx` — «مؤشرات الأداء» — this month's indicators, computed by the server from real (~975 tok)
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~3234 tok)
 - `AdminParents.tsx` — EMPTY_ADD — renders table (~5605 tok)
 - `AdminRegister.tsx` — Create-student form. No reading-level select or auto-suggested track/masar block (removed 2026-09-26) — `path` always defaults to "حفظ كامل". (~2450 tok)

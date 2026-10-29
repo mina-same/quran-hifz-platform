@@ -109,3 +109,27 @@ export function useBulkEvaluate() {
     },
   });
 }
+
+/** «سجل تعديل الدرجات» — a saved day re-saved with different values. */
+export type GradeChange = {
+  _id: string;
+  track: string;
+  trackTitle: string;
+  student: string;
+  studentName: string;
+  date: string;
+  editedByName: string;
+  editedByRole: string;
+  changes: { label: string; from: string; to: string }[];
+  createdAt: string;
+};
+
+export function useGradeChanges(filters: { from?: string; to?: string; track?: string }) {
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(filters)) if (v) params.set(k, v);
+  return useQuery({
+    queryKey: ["grade-changes", params.toString()],
+    queryFn: () =>
+      get<{ success: boolean; data: GradeChange[] }>(`/evaluations/changes?${params}`).then((r) => r.data),
+  });
+}

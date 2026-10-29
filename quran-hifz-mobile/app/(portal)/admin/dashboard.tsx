@@ -12,14 +12,12 @@ import Badge from '@/components/ui/Badge';
 import ProgressBar from '@/components/ui/ProgressBar';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useStats } from '@/lib/queries/stats';
-import { useKpis } from '@/lib/queries/kpis';
+import { useKpis, KPI_STATUS } from '@/lib/queries/kpis';
 import { useStudents, type Student } from '@/lib/queries/students';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { matchesGenderScope } from '@/lib/constants/genderScope';
 
-const kpiVariant = (r: string) =>
-  r === 'ممتاز' ? 'green' : r === 'جيد' ? 'gold' : r === 'مقبول' ? 'blue' : 'red';
 
 /** المسار: real track lives one hop away via `Student.track` — same fallback chain as admin/students.tsx. */
 function trackLabel(s: Student): string | null {
@@ -135,7 +133,7 @@ export default function AdminDashboard() {
               <View key={k._id} style={[styles.row, i > 0 && styles.rowBorder]}>
                 <View style={styles.rowHead}>
                   <Text style={styles.bold} numberOfLines={2}>{k.indicator}</Text>
-                  <Badge label={k.rating} variant={kpiVariant(k.rating) as any} />
+                  <Badge label={KPI_STATUS[k.status].label} variant={KPI_STATUS[k.status].variant} />
                 </View>
                 <View style={styles.infoGrid}>
                   <Text style={styles.infoItem}>المستهدف: {k.target}</Text>

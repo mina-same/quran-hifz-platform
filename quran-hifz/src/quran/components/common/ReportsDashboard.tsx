@@ -7,7 +7,7 @@ import { useStudents, type Student, type StudentFilters } from "../../api/studen
 import { useEvaluations, type EvaluationRecord } from "../../api/evaluations";
 import { matchesGenderScope, teacherIdsInScope, type GenderScope } from "../../lib/genderScope";
 import { MAX_SCORES, TOTAL_MAX, legacyScoresOf } from "../../lib/evaluationRubric";
-import type { Kpi } from "../../api/kpis";
+import { KPI_STATUS, type Kpi } from "../../api/kpis";
 import type { Teacher } from "../../api/teachers";
 import type { Track } from "../../api/tracks";
 import { useTopbar } from "../../context/useTopbar";
@@ -74,20 +74,6 @@ const BUCKET_SLICES = (b: ReturnType<typeof bucket>): DonutSlice[] => [
   { name: "متوسط (٥٠–٧٥٪)", value: b.low, color: "var(--gold)" },
   { name: "دون ٥٠٪", value: b.risk, color: "#ef4444" },
 ];
-
-const KPI_TONE: Record<string, BadgeTone> = {
-  ممتاز: "green",
-  جيد: "blue",
-  مقبول: "gold",
-  ضعيف: "red",
-};
-
-function pctOf(actual: string, target: string): number {
-  const a = parseFloat(actual);
-  const t = parseFloat(target);
-  if (!isFinite(a) || !isFinite(t) || t === 0) return 0;
-  return Math.max(0, Math.min(100, Math.round((a / t) * 100)));
-}
 
 const DIM_META = [
   { key: "attendance", label: "حضور", icon: "ti-calendar-check", color: "var(--brown)" },
@@ -823,13 +809,13 @@ export function ReportsDashboard({
                       <div className="kpi-head">
                         <span className="kpi-name">{k.indicator}</span>
                         <span className="kpi-actual">
-                          {toAr(k.actual)} / {toAr(k.target)}
+                          {k.actual} / {k.target}
                         </span>
                       </div>
-                      <ProgressBar pct={pctOf(k.actual, k.target)} />
+                      <ProgressBar pct={k.progress} />
                       <div className="kpi-meta">
-                        <Badge tone={KPI_TONE[k.rating] ?? "gray"}>{k.rating}</Badge>
-                        <span>النسبة من الهدف: {pct(pctOf(k.actual, k.target))}</span>
+                        <Badge tone={KPI_STATUS[k.status].tone}>{KPI_STATUS[k.status].label}</Badge>
+                        <span>{k.hint}</span>
                       </div>
                     </div>
                   ))}

@@ -30,6 +30,8 @@ export type DashboardAlerts = {
   nearCapacity: { title: string; pct: number }[];
   excellent: string[];
   reportMissing: string[];
+  /** Grades/attendance changed after being saved, today. */
+  gradeEdits: number;
 };
 
 /** «آخر التنبيهات» — computed server-side from real records. */

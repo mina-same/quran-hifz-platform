@@ -14,11 +14,9 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import IconButton from '@/components/ui/IconButton';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import FormInput from '@/components/forms/FormInput';
-import FormSelect from '@/components/forms/FormSelect';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import { useStudents, useDeleteStudent, type Student } from '@/lib/queries/students';
 import { useAdminParents } from '@/lib/queries/adminParents';
-import { SERVER_PATHS } from '@/lib/constants/masarMap';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { matchesGenderScope } from '@/lib/constants/genderScope';
@@ -69,7 +67,6 @@ export default function AdminStudents() {
   const deleteStudent = useDeleteStudent();
 
   const [search, setSearch] = useState('');
-  const [pathFilter, setPathFilter] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   async function handleDelete() {
@@ -91,7 +88,7 @@ export default function AdminStudents() {
   ];
 
   const q = search.trim();
-  const filtered = students.filter((st) => (!q || st.name.includes(q)) && (!pathFilter || st.path === pathFilter));
+  const filtered = students.filter((st) => !q || st.name.includes(q));
 
   // Each student id → the parent account that holds them, for the row's ولي الأمر line.
   const parentByStudentId = new Map<string, { name: string; email: string }>();
@@ -117,17 +114,8 @@ export default function AdminStudents() {
           </Pressable>
         )}
 
-        {/* Search + path filter, stacked so neither field gets squeezed on a phone. */}
         <Card>
           <FormInput placeholder="البحث باسم الطالب..." value={search} onChangeText={setSearch} />
-          <View style={{ marginTop: 10 }}>
-            <FormSelect
-              value={pathFilter}
-              onChange={setPathFilter}
-              options={[{ value: '', label: 'كل المسارات' }, ...SERVER_PATHS.map((p) => ({ value: p, label: p }))]}
-              placeholder="كل المسارات"
-            />
-          </View>
         </Card>
 
         <Card noPadding>

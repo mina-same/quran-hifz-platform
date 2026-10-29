@@ -93,6 +93,7 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
       ]},
       { group: "التقارير", items: [
         { id: "dailyreports", icon: "ti-report", label: "التقارير اليومية" },
+        { id: "gradechanges", icon: "ti-history", label: "سجل تعديل الدرجات" },
         { id: "kpis",    icon: "ti-target",    label: "مؤشرات الأداء" },
         { id: "reports", icon: "ti-chart-bar", label: "التقارير" },
       ]},
@@ -119,6 +120,7 @@ export const PORTALS: Record<PortalKey, PortalConfig> = {
       ]},
       { group: "التقارير", items: [
         { id: "dailyreports", icon: "ti-report", label: "التقارير اليومية" },
+        { id: "gradechanges", icon: "ti-history", label: "سجل تعديل الدرجات" },
         { id: "kpis",    icon: "ti-target",    label: "مؤشرات الأداء" },
         { id: "reports", icon: "ti-chart-bar", label: "التقارير" },
       ]},

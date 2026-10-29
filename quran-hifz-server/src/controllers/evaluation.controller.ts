@@ -3,12 +3,18 @@ import { z } from 'zod';
 import { Types } from 'mongoose';
 import { Evaluation, type IEvaluationCriterion } from '../models/Evaluation.model';
 import { QuranPlan, DEFAULT_GRADE_RUBRIC, type IGradeCriterion } from '../models/QuranPlan.model';
-import { notifyParents } from '../lib/notify';
+import { notifyParents, SYSTEM_SENDER } from '../lib/notify';
 import { deriveDayAndTime, upsertAttendanceRecords } from './attendance.controller';
 import { supervisorGenderOf, trackIdsForGender, restrictTrackFilter } from '../lib/supervisorScope';
 import { User } from '../models/User.model';
 import { ParentStudent } from '../models/ParentStudent.model';
 import { Track } from '../models/Track.model';
+import { Masjid } from '../models/Masjid.model';
+import { Student } from '../models/Student.model';
+import { Message } from '../models/Message.model';
+import { EvaluationChange } from '../models/EvaluationChange.model';
+import { gradeChanges } from '../lib/gradeChanges';
+import { sendPushToUsers } from '../lib/push';
 
 /**
  * The rubric is no longer platform-wide — each plan carries its own
@@ -241,6 +247,12 @@ export async function bulkEvaluate(req: Request, res: Response, next: NextFuncti
         upsert: true,
       },
     }));
+    // Snapshot what was saved before, so edits can be logged (سجل تعديل الدرجات).
+    const previous = await Evaluation.find({
+      student: { $in: scored.map((r) => new Types.ObjectId(r.student)) },
+      date: dateObj,
+    }).select('student attendanceStatus criteria').lean();
+
     // The same "الحضور والتقييم" save also drives the Attendance collection
     // (attendancePct, absence tracking, ParentAttendance) — one Save button,
     // both records kept in sync. The two writes are independent, so they run
@@ -254,6 +266,13 @@ export async function bulkEvaluate(req: Request, res: Response, next: NextFuncti
       ),
     ]);
 
+    await logGradeChanges({
+      previous: previous.map((p) => ({ student: String(p.student), attendanceStatus: p.attendanceStatus, criteria: p.criteria ?? [] })),
+      scored: scored.map((r) => ({ student: r.student, attendanceStatus: r.attendanceStatus, criteria: r.criteria })),
+      trackId, date, dateObj,
+      editor: { id: req.user!.id, name: req.user!.name, role: req.user!.role },
+    });
+
     const scoredByStudentId = new Map(scored.map((r) => [r.student, r]));
     // Excused (مستأذن) students get no parent notification.
     const { notified, unnotified } = await notifyParents(
@@ -264,10 +283,88 @@ export async function bulkEvaluate(req: Request, res: Response, next: NextFuncti
         const breakdown = r.criteria.map((c) => `${c.label} ${c.value}/${c.max}`).join('، ');
         return `تقييم اليوم لـ ${name}: ${r.total}/${r.totalMax} (${breakdown}).`;
       },
-      { senderId: req.user!.id, senderName: req.user!.name, senderRole: req.user!.role },
+      { senderId: req.user!.id, senderName: req.user!.name, senderRole: req.user!.role, system: true },
     );
 
     res.json({ success: true, message: 'تم حفظ الحضور والتقييم بنجاح', notified, unnotified });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Logs every student whose already-saved day was changed by this save, and on
+ * a halqa's FIRST edit of that day notifies the admins and the section's
+ * supervisors (one message per halqa per day — not one per keystroke).
+ * Edits by an admin are logged but not notified.
+ */
+async function logGradeChanges(args: {
+  previous: { student: string; attendanceStatus: string; criteria: { key: string; label: string; value: number }[] }[];
+  scored: { student: string; attendanceStatus: string; criteria: { key: string; label: string; value: number }[] }[];
+  trackId: Types.ObjectId;
+  date: string;
+  dateObj: Date;
+  editor: { id: string; name: string; role: string };
+}): Promise<void> {
+  const before = new Map(args.previous.map((p) => [p.student, p]));
+  const edited = args.scored
+    .map((r) => ({ student: r.student, changes: gradeChanges(before.get(r.student) ?? null, r) }))
+    .filter((x) => x.changes.length > 0);
+  if (!edited.length) return;
+
+  const [track, students, earlier] = await Promise.all([
+    Track.findById(args.trackId).select('title masjid').lean(),
+    Student.find({ _id: { $in: edited.map((e) => e.student) } }).select('name').lean(),
+    EvaluationChange.exists({ track: args.trackId, date: args.dateObj }),
+  ]);
+  const nameOf = new Map(students.map((s) => [String(s._id), s.name]));
+  await EvaluationChange.insertMany(edited.map((e) => ({
+    track: args.trackId,
+    trackTitle: track?.title ?? '',
+    student: e.student,
+    studentName: nameOf.get(e.student) ?? '',
+    date: args.dateObj,
+    editedBy: args.editor.id,
+    editedByName: args.editor.name,
+    editedByRole: args.editor.role,
+    changes: e.changes,
+  })));
+
+  if (earlier || args.editor.role === 'admin') return;
+  const masjid = track?.masjid ? await Masjid.findById(track.masjid).select('gender').lean() : null;
+  const or: Record<string, unknown>[] = [{ role: 'admin' }];
+  if (masjid?.gender) or.push({ role: 'supervisor', supervisorGender: masjid.gender });
+  const recipients = await User.find({ $or: or }).select('_id').lean();
+  if (!recipients.length) return;
+  const n = edited.length;
+  const who = n === 1 ? (nameOf.get(edited[0].student) ?? 'طالب') : `${n} طلاب`;
+  const body = `عدّل ${args.editor.name} درجات ${who} في حلقة ${track?.title ?? ''} ليوم ${args.date} — التفاصيل في «سجل تعديل الدرجات».`;
+  await Promise.all([
+    Message.insertMany(recipients.map((r) => ({
+      system: true, recipient: r._id, senderRole: SYSTEM_SENDER.role,
+      senderName: SYSTEM_SENDER.name, senderInitials: SYSTEM_SENDER.initials, body,
+    }))),
+    sendPushToUsers(recipients.map((r) => ({ userId: String(r._id), title: SYSTEM_SENDER.name, body }))),
+  ]);
+}
+
+/** GET /evaluations/changes?from=&to=&track= — «سجل تعديل الدرجات» (admin; supervisor = own section). */
+export async function getGradeChanges(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { from, to, track } = req.query as Record<string, string | undefined>;
+    const filter: Record<string, unknown> = {};
+    const re = /^\d{4}-\d{2}-\d{2}$/;
+    if ((from && re.test(from)) || (to && re.test(to))) {
+      filter.createdAt = {
+        ...(from && re.test(from) ? { $gte: new Date(from) } : {}),
+        ...(to && re.test(to) ? { $lt: new Date(new Date(to).getTime() + 86_400_000) } : {}),
+      };
+    }
+    if (track) filter.track = track;
+    const gender = supervisorGenderOf(req);
+    if (gender) filter.track = restrictTrackFilter(filter.track, await trackIdsForGender(gender));
+    const data = await EvaluationChange.find(filter).sort({ createdAt: -1 }).limit(500).lean();
+    res.json({ success: true, count: data.length, data });
   } catch (err) {
     next(err);
   }

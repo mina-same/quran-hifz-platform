@@ -8,7 +8,7 @@ import { Alert } from "../../components/common/Alert";
 import { SkeletonStatsRow, SkeletonCard } from "../../components/common/Skeleton";
 import { useDashboardAlerts, useStats, type DashboardAlerts } from "../../api/stats";
 import { useStudents } from "../../api/students";
-import { useKpis } from "../../api/kpis";
+import { useKpis, KPI_STATUS } from "../../api/kpis";
 import { toAr, pct } from "../../../lib/format";
 import { matchesGenderScope } from "../../lib/genderScope";
 
@@ -29,7 +29,7 @@ export function AdminDashboard() {
   const { showPage, genderScope, readOnly } = usePortal();
   const { data: stats, isLoading: statsLoading } = useStats(genderScope);
   const { data: students } = useStudents();
-  const { data: kpis } = useKpis();
+  const { data: kpis } = useKpis(genderScope);
   const { data: alerts } = useDashboardAlerts(genderScope);
   const scopedStudents = (students ?? []).filter((s) =>
     matchesGenderScope(typeof s.track === "string" ? undefined : s.track.masjid, genderScope),
@@ -61,12 +61,6 @@ export function AdminDashboard() {
     pct: Math.round((count / total) * 100),
   }));
 
-  const ratingTone: Record<string, string> = {
-    ممتاز: "var(--green)",
-    جيد: "var(--text2)",
-    مقبول: "var(--gold)",
-    ضعيف: "var(--red, #c0392b)",
-  };
 
   return (
     <>
@@ -100,15 +94,17 @@ export function AdminDashboard() {
             <div key={k._id} style={{ marginBottom: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, fontSize: 12 }}>
                 <span style={{ color: "var(--text2)" }}>{k.indicator}</span>
-                <span style={{ fontWeight: 700, color: ratingTone[k.rating] ?? "var(--green)" }}>{k.actual}</span>
+                <span style={{ fontWeight: 700, color: KPI_STATUS[k.status].color }}>
+                  {k.actual} <small style={{ color: "var(--text3)", fontWeight: 600 }}>/ {k.target}</small>
+                </span>
               </div>
-              <ProgressBar pct={parseInt(k.actual) || 0} />
+              <ProgressBar pct={k.progress} />
             </div>
           ))}
         </Card>
       </div>
       <Card icon="ti-bell" title="آخر التنبيهات">
-        <DashboardAlertList alerts={alerts} />
+        <DashboardAlertList alerts={alerts} onOpenChanges={() => showPage("gradechanges")} />
       </Card>
     </>
   );
@@ -129,10 +125,10 @@ function namesPreview(names: string[]): string {
   return names.length > 3 ? `${shown} و${toAr(names.length - 3)} آخرين` : shown;
 }
 
-function DashboardAlertList({ alerts }: { alerts?: DashboardAlerts }) {
+function DashboardAlertList({ alerts, onOpenChanges }: { alerts?: DashboardAlerts; onOpenChanges: () => void }) {
   if (!alerts) return <SkeletonCard lines={2} />;
   const { absent, nearCapacity, excellent, reportMissing } = alerts;
-  if (!absent.length && !nearCapacity.length && !excellent.length && !reportMissing.length) {
+  if (!absent.length && !nearCapacity.length && !excellent.length && !reportMissing.length && !alerts.gradeEdits) {
     return <p style={{ margin: 0, color: "var(--text3)", fontSize: 13 }}>لا توجد تنبيهات حالياً</p>;
   }
   return (
@@ -141,6 +137,12 @@ function DashboardAlertList({ alerts }: { alerts?: DashboardAlerts }) {
         <Alert tone="warning">
           <b>{countOf(absent.length, STUDENTS)}</b> تجاوزت نسبة غيابهم ٢٥٪ — يُنصح بالتواصل
           مع أولياء الأمور ({namesPreview(absent.map((a) => `${a.name} ${pct(a.pct)}`))})
+        </Alert>
+      )}
+      {alerts.gradeEdits > 0 && (
+        <Alert tone="info" icon="ti-history">
+          <b>{toAr(alerts.gradeEdits)}</b> {alerts.gradeEdits === 1 ? "تعديل" : "تعديلات"} على درجات أو حضور بعد حفظها اليوم —{" "}
+          <button type="button" className="dre-link" onClick={onOpenChanges}>عرض سجل التعديلات</button>
         </Alert>
       )}
       {reportMissing.length > 0 && (

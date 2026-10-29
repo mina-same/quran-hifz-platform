@@ -7,7 +7,10 @@ import { Track } from '../models/Track.model';
 import { Masjid } from '../models/Masjid.model';
 import { AppError } from '../middleware/error';
 import { sendPushToUsers } from '../lib/push';
-import { notifyParents } from '../lib/notify';
+import { notifyParents, SYSTEM_SENDER } from '../lib/notify';
+
+/** Pseudo user id of the read-only «مدير النظام» notices thread. */
+const SYSTEM_THREAD = 'system';
 import { contactsFor, linkingStudent } from '../lib/teacherParent';
 import { Types } from 'mongoose';
 
@@ -141,7 +144,8 @@ export async function getConversations(req: Request, res: Response, next: NextFu
     const rows = await Message.aggregate<{
       _id: Types.ObjectId; body: string; createdAt: Date; fromMe: boolean; unread: number;
     }>([
-      { $match: { $or: [{ sender: me }, { recipient: me }] } },
+      // Person-to-person only; automatic notices live in the «مدير النظام» thread.
+      { $match: { system: { $ne: true }, $or: [{ sender: me }, { recipient: me }] } },
       { $sort: { createdAt: -1 } },
       { $group: {
         _id: { $cond: [{ $eq: ['$sender', me] }, '$recipient', '$sender'] },
@@ -166,6 +170,19 @@ export async function getConversations(req: Request, res: Response, next: NextFu
         canReply: Boolean(await pairLink(req.user!, String(r._id))),
       };
     }));
+
+    // One read-only «مدير النظام» thread for automatic notices sent to me.
+    const [lastSystem] = await Message.find({ system: true, recipient: me }).sort({ createdAt: -1 }).limit(1).lean();
+    if (lastSystem) {
+      const unread = await Message.countDocuments({ system: true, recipient: me, readAt: null });
+      const row = {
+        userId: SYSTEM_THREAD, name: SYSTEM_SENDER.name, role: 'system',
+        last: { body: lastSystem.body, createdAt: lastSystem.createdAt, fromMe: false },
+        unread, canReply: false,
+      };
+      const at = data.findIndex((d) => new Date(d.last.createdAt) < new Date(lastSystem.createdAt));
+      data.splice(at === -1 ? data.length : at, 0, row);
+    }
     res.json({ success: true, data });
   } catch (err) {
     next(err);
@@ -177,8 +194,14 @@ export async function getThread(req: Request, res: Response, next: NextFunction)
   try {
     const me = req.user!.id;
     const other = req.params.userId;
+    if (other === SYSTEM_THREAD) {
+      const messages = await Message.find({ system: true, recipient: me }).sort({ createdAt: -1 }).limit(200).lean();
+      res.json({ success: true, data: { messages: messages.reverse(), canReply: false } });
+      return;
+    }
     if (!Types.ObjectId.isValid(other)) throw new AppError('المستخدم غير موجود', 404);
     const messages = await Message.find({
+      system: { $ne: true },
       $or: [{ sender: me, recipient: other }, { sender: other, recipient: me }],
     }).sort({ createdAt: -1 }).limit(200).lean();
     const canReply = Boolean(await pairLink(req.user!, other));
@@ -217,9 +240,12 @@ export async function sendInThread(req: Request, res: Response, next: NextFuncti
 /** Marks everything the other person sent me as read. */
 export async function markThreadRead(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    if (!Types.ObjectId.isValid(req.params.userId)) throw new AppError('المستخدم غير موجود', 404);
+    const fromSystem = req.params.userId === SYSTEM_THREAD;
+    if (!fromSystem && !Types.ObjectId.isValid(req.params.userId)) throw new AppError('المستخدم غير موجود', 404);
     const r = await Message.updateMany(
-      { sender: req.params.userId, recipient: req.user!.id, readAt: null },
+      fromSystem
+        ? { system: true, recipient: req.user!.id, readAt: null }
+        : { sender: req.params.userId, recipient: req.user!.id, readAt: null },
       { readAt: new Date() },
     );
     res.json({ success: true, data: { updated: r.modifiedCount } });

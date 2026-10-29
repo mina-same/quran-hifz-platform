@@ -10,6 +10,7 @@ import { supervisorGenderOf } from '../lib/supervisorScope';
 import { deletedTrackIds } from '../lib/deletedTracks';
 import { Evaluation } from '../models/Evaluation.model';
 import { DailyReport } from '../models/DailyReport.model';
+import { EvaluationChange } from '../models/EvaluationChange.model';
 
 export async function getDashboardStats(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -168,7 +169,13 @@ export async function getDashboardAlerts(req: Request, res: Response, next: Next
     const titleOf = new Map(tracks.map((t) => [String(t._id), t.title]));
     const reportMissing = recordedToday.filter((t) => !sent.has(String(t))).map((t) => titleOf.get(String(t)) ?? '—');
 
-    res.json({ success: true, data: { absent, nearCapacity, excellent, reportMissing } });
+    // 5. Grades edited after being saved, today.
+    const gradeEdits = await EvaluationChange.countDocuments({
+      track: { $in: trackIds },
+      createdAt: { $gte: todayStart, $lt: dayEnd },
+    });
+
+    res.json({ success: true, data: { absent, nearCapacity, excellent, reportMissing, gradeEdits } });
   } catch (err) {
     next(err);
   }

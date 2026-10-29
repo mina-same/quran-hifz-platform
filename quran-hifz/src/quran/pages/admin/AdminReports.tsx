@@ -10,7 +10,7 @@ import { usePortal } from "../../context/PortalContext";
 export function AdminReports() {
   const { genderScope } = usePortal();
   const { data: teachers = [] } = useTeachers();
-  const { data: kpis = [] } = useKpis();
+  const { data: kpis = [] } = useKpis(genderScope);
   const { data: tracks = [] } = useTracks();
   // Pre-warm the full students query so the StatsRow/KPIs render instantly
   // once the user lands — ReportsDashboard re-queries under the active scope.

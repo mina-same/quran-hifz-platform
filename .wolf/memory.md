@@ -4625,3 +4625,17 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-10-29 13:40
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:47 | Created quran-hifz/src/quran/pages/admin/AdminKpis.tsx | — | ~975 |
+| 13:50 | Path filter removed; searchable transfer picker; KPIs computed from real data (server+web+mobile) | AdminStudents, mobile students, TrackStudentsPanel x2, lib/kpis.ts, kpi.controller, api/kpis, AdminKpis, AdminDashboard, ReportsDashboard, mobile kpis/dashboard | tsc x3 clean, kpi cases 10/10, mobile jest 99/99, browser-verified | ~40k |
+| 13:50 | Session end: 1 writes across 1 files (AdminKpis.tsx) | 1 reads | ~975 tok |
+| 13:56 | Grade-edit log (EvaluationChange), one notice per halqa/day to admin+supervisor, dashboard alert, «سجل تعديل الدرجات» page | gradeChanges.ts, EvaluationChange.model, evaluation.controller/routes, stats.controller, api/stats, api/evaluations, AdminGradeChanges, AdminDashboard, portals, pageRegistry, quran.css | diff cases 7/7; tsc web+server clean; page browser-verified | ~25k |
+| 13:56 | Session end: 1 writes across 1 files (AdminKpis.tsx) | 2 reads | ~975 tok |
+| 14:02 | Auto notices (absence/evaluation/grade-edit) sent as «مدير النظام» system messages; chats human-only; system thread in conversations | Message.model, notify.ts, attendance/evaluation/message controllers, ConversationsPage, quran.css | tsc server+web clean; 806 old auto msgs still teacher-sent (migration pending approval) | ~15k |
+| 14:02 | Session end: 1 writes across 1 files (AdminKpis.tsx) | 2 reads | ~975 tok |
+| 14:41 | Migrated 806 auto notices (teacher-sent) to system «مدير النظام» messages; backup scratchpad/messages-system-migration-backup.json | Atlas messages | verified: 0 left, 16 human untouched, parent sees system thread | ~6k |
+| 14:41 | Session end: 1 writes across 1 files (AdminKpis.tsx) | 2 reads | ~975 tok |

@@ -82,7 +82,11 @@ export default function TrackStudentsPanel({ track, canTransfer = true }: { trac
               <FormSelect
                 value={addStudentId}
                 onChange={setAddStudentId}
-                options={available.map((st) => ({ value: st._id, label: st.name }))}
+                options={available.map((st) => ({
+                  value: st._id,
+                  // The current halqa makes same-name students distinguishable and searchable.
+                  label: typeof st.track === 'object' && st.track?.title ? `${st.name} — ${st.track.title}` : st.name,
+                }))}
                 placeholder="اختر طالباً"
               />
             </View>

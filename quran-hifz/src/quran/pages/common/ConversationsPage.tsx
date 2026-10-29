@@ -159,7 +159,9 @@ export function ConversationsPage() {
                 className={`conv-row ${r.userId === openId ? "active" : ""}`}
                 onClick={() => setOpenId(r.userId)}
               >
-                <span className="conv-avatar">{initials(r.name)}</span>
+                <span className={`conv-avatar ${r.role === "system" ? "system" : ""}`}>
+                  {r.role === "system" ? <i className="ti ti-bell" /> : initials(r.name)}
+                </span>
                 <span className="conv-row-main">
                   <span className="conv-row-top">
                     <b>{r.name}</b>
@@ -193,7 +195,9 @@ export function ConversationsPage() {
               >
                 <i className="ti ti-arrow-right" />
               </button>
-              <span className="conv-avatar">{initials(openName)}</span>
+              <span className={`conv-avatar ${openRow?.role === "system" ? "system" : ""}`}>
+                {openRow?.role === "system" ? <i className="ti ti-bell" /> : initials(openName)}
+              </span>
               <b>{openName}</b>
             </header>
             <div className="conv-messages">
@@ -213,7 +217,10 @@ export function ConversationsPage() {
             </div>
             {thread && !thread.canReply ? (
               <p className="conv-readonly">
-                <i className="ti ti-lock" /> لا يمكنك مراسلة هذا المستخدم حالياً
+                <i className="ti ti-lock" />{" "}
+                {openRow?.role === "system"
+                  ? "إشعارات تلقائية من النظام — لا يمكن الرد عليها"
+                  : "لا يمكنك مراسلة هذا المستخدم حالياً"}
               </p>
             ) : (
               <div className="conv-compose">

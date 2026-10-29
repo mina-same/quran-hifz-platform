@@ -9,20 +9,11 @@ import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import { SkeletonRows } from '@/components/ui/Skeleton';
-import { useKpis } from '@/lib/queries/kpis';
+import { useKpis, KPI_STATUS } from '@/lib/queries/kpis';
+import ProgressBar from '@/components/ui/ProgressBar';
 import { shareCsv } from '@/lib/csv';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
-const ratingVariant = (r: string) =>
-  r === 'ممتاز' ? 'green' : r === 'جيد' ? 'gold' : r === 'مقبول' ? 'blue' : 'red';
-
-/** The web reports a KPI against its target rather than echoing the raw rating. */
-const RATING_LABEL: Record<string, string> = {
-  'ممتاز': 'محقق',
-  'جيد': 'محقق',
-  'مقبول': 'قريب من الهدف',
-  'ضعيف': 'دون الهدف',
-};
 
 export default function AdminKpis() {
   const theme = useAppTheme();
@@ -47,15 +38,11 @@ export default function AdminKpis() {
     exportText: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.green },
   }), [theme]);
 
-  const excellent = kpis.filter((k) => k.rating === 'ممتاز').length;
-  const good      = kpis.filter((k) => k.rating === 'جيد').length;
-  const poor      = kpis.filter((k) => k.rating === 'ضعيف').length;
-
   const STATS = [
-    { label: 'إجمالي المؤشرات', value: kpis.length,    color: theme.green },
-    { label: 'ممتاز',            value: excellent,       color: theme.gold },
-    { label: 'جيد',              value: good,            color: theme.blue },
-    { label: 'يحتاج تحسين',     value: poor,            color: theme.red },
+    { label: 'محقق',           value: kpis.filter((k) => k.status === 'achieved').length, color: theme.green },
+    { label: 'قريب من الهدف',  value: kpis.filter((k) => k.status === 'near').length,     color: theme.gold },
+    { label: 'دون الهدف',      value: kpis.filter((k) => k.status === 'below').length,    color: theme.red },
+    { label: 'إجمالي المؤشرات', value: kpis.length,                                        color: theme.blue },
   ];
 
   return (
@@ -74,7 +61,7 @@ export default function AdminKpis() {
             shareCsv(
               'تقرير مؤشرات الأداء',
               ['المؤشر', 'المستهدف', 'الفعلي', 'التقييم'],
-              kpis.map((k) => [k.indicator, k.target, k.actual, RATING_LABEL[k.rating] ?? k.rating]),
+              kpis.map((k) => [k.indicator, k.target, k.actual, KPI_STATUS[k.status].label]),
             )
           }
         >
@@ -91,13 +78,15 @@ export default function AdminKpis() {
               <View key={k._id} style={[styles.row, i > 0 && styles.rowBorder]}>
                 <View style={styles.rowHead}>
                   <Text style={styles.bold} numberOfLines={2}>{k.indicator}</Text>
-                  <Badge label={RATING_LABEL[k.rating] ?? k.rating} variant={ratingVariant(k.rating) as any} />
+                  <Badge label={KPI_STATUS[k.status].label} variant={KPI_STATUS[k.status].variant} />
                 </View>
                 <View style={styles.infoGrid}>
-                  <Text style={styles.infoItem}>المستهدف: {k.target}</Text>
-                  <Text style={styles.infoItem}>·</Text>
                   <Text style={styles.infoItem}>الفعلي: {k.actual}</Text>
+                  <Text style={styles.infoItem}>·</Text>
+                  <Text style={styles.infoItem}>المستهدف: {k.target}</Text>
                 </View>
+                <ProgressBar value={k.progress} showPercent={false} />
+                <Text style={styles.infoItem}>{k.hint}</Text>
               </View>
             ))}
           </View>
