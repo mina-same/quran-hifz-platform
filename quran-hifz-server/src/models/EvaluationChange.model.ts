@@ -2,8 +2,8 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 /**
  * One re-save of a student's day that changed something (attendance and/or
- * grades) — «سجل تعديل الدرجات». Written by bulkEvaluate; read by the admin /
- * supervisor. Names are snapshotted so the log reads the same later.
+ * grades). Written by bulkEvaluate; the edits made after a halqa's daily
+ * report was sent are shown on that report. Names are snapshotted.
  */
 export interface IEvaluationChange extends Document {
   track: Types.ObjectId;

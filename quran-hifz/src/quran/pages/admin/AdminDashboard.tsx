@@ -104,7 +104,7 @@ export function AdminDashboard() {
         </Card>
       </div>
       <Card icon="ti-bell" title="آخر التنبيهات">
-        <DashboardAlertList alerts={alerts} onOpenChanges={() => showPage("gradechanges")} />
+        <DashboardAlertList alerts={alerts} onOpenChanges={() => showPage("dailyreports")} />
       </Card>
     </>
   );
@@ -141,8 +141,8 @@ function DashboardAlertList({ alerts, onOpenChanges }: { alerts?: DashboardAlert
       )}
       {alerts.gradeEdits > 0 && (
         <Alert tone="info" icon="ti-history">
-          <b>{toAr(alerts.gradeEdits)}</b> {alerts.gradeEdits === 1 ? "تعديل" : "تعديلات"} على درجات أو حضور بعد حفظها اليوم —{" "}
-          <button type="button" className="dre-link" onClick={onOpenChanges}>عرض سجل التعديلات</button>
+          <b>{toAr(alerts.gradeEdits)}</b> {alerts.gradeEdits === 1 ? "تعديل" : "تعديلات"} على درجات أو حضور بعد إرسال تقرير اليوم —{" "}
+          <button type="button" className="dre-link" onClick={onOpenChanges}>عرض التقارير اليومية</button>
         </Alert>
       )}
       {reportMissing.length > 0 && (

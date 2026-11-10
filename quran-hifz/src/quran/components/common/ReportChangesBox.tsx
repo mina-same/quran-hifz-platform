@@ -1,5 +1,8 @@
 import type { ReportChanges } from "../../api/daily-reports";
-import { toAr } from "../../../lib/format";
+import { AR_LOCALE, toAr } from "../../../lib/format";
+
+/** "2.5" → «٢٫٥»; words (e.g. attendance) unchanged. */
+const val = (v: string) => (v && /^\d+(\.\d+)?$/.test(v) ? toAr(Number(v)).replace(".", "٫") : v || "—");
 
 const SECTION: Record<ReportChanges["sections"][number]["key"], string> = {
   struggling: "المتعثرون",
@@ -37,6 +40,25 @@ export function ReportChangesBox({ changes, children }: { changes: ReportChanges
           </li>
         )}
       </ul>
+      {!!changes.grades?.length && (
+        <div className="drc-grades">
+          {changes.grades.map((g, i) => (
+            <div key={i}>
+              <span className="drc-section">{g.studentName}:</span>
+              {g.changes.map((c) => (
+                <span key={c.label}>
+                  {c.label} <span className="drc-from">{val(c.from)}</span> ←{" "}
+                  <span className="drc-to">{val(c.to)}</span>
+                </span>
+              ))}
+              <small>
+                ({g.editedByName} ·{" "}
+                {new Date(g.at).toLocaleString(AR_LOCALE, { hour: "numeric", minute: "2-digit", day: "numeric", month: "short" })})
+              </small>
+            </div>
+          ))}
+        </div>
+      )}
       {children}
     </div>
   );

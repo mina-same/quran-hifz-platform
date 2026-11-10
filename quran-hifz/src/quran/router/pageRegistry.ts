@@ -13,7 +13,6 @@ import { AdminTrackForm }     from "../pages/admin/AdminTrackForm";
 import { AdminParents }       from "../pages/admin/AdminParents";
 import { AdminSupervisors }   from "../pages/admin/AdminSupervisors";
 import { AdminDailyReports }  from "../pages/admin/AdminDailyReports";
-import { AdminGradeChanges } from "../pages/admin/AdminGradeChanges";
 
 import { TeacherDashboard }      from "../pages/teacher/TeacherDashboard";
 import { TeacherStudents }       from "../pages/teacher/TeacherStudents";
@@ -63,7 +62,6 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     parents:     AdminParents,
     supervisors: AdminSupervisors,
     dailyreports: AdminDailyReports,
-    gradechanges: AdminGradeChanges,
     // Admin reuses the teacher's track detail (and the pages it navigates to).
     trackdetail: TeacherTrackDetail,
     planform:    TeacherPlanForm,
@@ -109,7 +107,6 @@ export const PAGE_REGISTRY: Record<PortalKey, Record<string, ComponentType>> = {
     kpis:      AdminKpis,
     reports:   AdminReports,
     dailyreports: AdminDailyReports,
-    gradechanges: AdminGradeChanges,
     tracks:    AdminTracks,
     // Reused for viewing a track's detail if a supervisor drills in from AdminTracks.
     trackdetail: TeacherTrackDetail,

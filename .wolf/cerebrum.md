@@ -5,6 +5,7 @@
 > Last updated: 2026-09-17
 
 ## User Preferences
+- (2026-11-10) No separate grade-edit log page. Admin/supervisors see ONLY edits made after a daily report was sent, inside that report's popup («عُدّلت … بعد إرسال التقرير»); edits before sending stay private to the teacher (no notice, no dashboard count).
 - Reports page (2026-11-10): show the «تقرير الإنجاز والتميّز» content as a normal fast web page (not A4 PDF pages); build the PDF only when «تنزيل PDF» is clicked; only the filter bar sticky; on-screen honor board = all students, PDF = top 15.
 - Mobile-first is the standing bar for quran-hifz-mobile: "make sure the design match the mobile vibe and mobile frandlly". Wide multi-column tables are NOT acceptable on the phone — a horizontally scrolling DataTable nested inside an already-scrolling page reads as broken. Move that content into a bottom sheet of compact cards (see ScheduleSheet.tsx) fronted by a SheetTriggerRow, rather than expanding it inline.
 - The user wants pickers to *feel* physical: a selection-tick haptic as rows scroll past, not just on tap ("this vibrations of the picker to fell live").

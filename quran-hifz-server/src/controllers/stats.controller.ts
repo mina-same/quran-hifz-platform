@@ -169,11 +169,16 @@ export async function getDashboardAlerts(req: Request, res: Response, next: Next
     const titleOf = new Map(tracks.map((t) => [String(t._id), t.title]));
     const reportMissing = recordedToday.filter((t) => !sent.has(String(t))).map((t) => titleOf.get(String(t)) ?? '—');
 
-    // 5. Grades edited after being saved, today.
-    const gradeEdits = await EvaluationChange.countDocuments({
-      track: { $in: trackIds },
-      createdAt: { $gte: todayStart, $lt: dayEnd },
-    });
+    // 5. Today's edits made after the halqa's daily report was sent.
+    const [sentToday, editsToday] = await Promise.all([
+      DailyReport.find({ date: today, track: { $in: trackIds } }).select('track updatedAt').lean(),
+      EvaluationChange.find({ track: { $in: trackIds }, date: { $gte: todayStart, $lt: dayEnd } }).select('track createdAt').lean(),
+    ]);
+    const sentAt = new Map(sentToday.map((r) => [String(r.track), r.updatedAt]));
+    const gradeEdits = editsToday.filter((e) => {
+      const at = sentAt.get(String(e.track));
+      return !!at && e.createdAt > at;
+    }).length;
 
     res.json({ success: true, data: { absent, nearCapacity, excellent, reportMissing, gradeEdits } });
   } catch (err) {

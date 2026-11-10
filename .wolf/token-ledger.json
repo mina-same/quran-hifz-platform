@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-06-27T12:42:49.696Z",
   "lifetime": {
-    "total_tokens_estimated": 24568772,
-    "total_reads": 8424,
-    "total_writes": 11172,
+    "total_tokens_estimated": 24574898,
+    "total_reads": 8430,
+    "total_writes": 11173,
     "total_sessions": 198,
-    "anatomy_hits": 6489,
-    "anatomy_misses": 1760,
+    "anatomy_hits": 6491,
+    "anatomy_misses": 1764,
     "repeated_reads_blocked": 7087,
-    "estimated_savings_vs_bare_cli": 52535200
+    "estimated_savings_vs_bare_cli": 52535600
   },
   "sessions": [
     {
@@ -112857,6 +112857,64 @@
       "id": "session-2026-11-10-1015",
       "started": "2026-11-10T08:15:31.802Z",
       "ended": "2026-11-10T08:37:50.253Z",
+      "reads": [
+        {
+          "file": "/private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/b398874b-ead1-4d4e-9041-e45f083e8be2/scratchpad/track2.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/components/common/PromoReportSection.tsx",
+          "tokens_estimated": 1059,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/b398874b-ead1-4d4e-9041-e45f083e8be2/scratchpad/تقرير-الإنجاز-الإتقان ب - مسجد شرق الرفايع-2026-11-10.pdf",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/b398874b-ead1-4d4e-9041-e45f083e8be2/scratchpad/تقرير-الإنجاز-الإتقان ب - مسجد شرق الرفايع-2026-11-10.pdf.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/components/common/PromoReport.tsx",
+          "tokens_estimated": 2625,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/b398874b-ead1-4d4e-9041-e45f083e8be2/scratchpad/web1.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/components/common/PromoReportSection.tsx",
+          "tokens_estimated": 2442,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 3684,
+        "output_tokens_estimated": 2442,
+        "reads_count": 6,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-11-10-1015",
+      "started": "2026-11-10T08:15:31.802Z",
+      "ended": "2026-11-10T08:51:34.060Z",
       "reads": [
         {
           "file": "/private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/b398874b-ead1-4d4e-9041-e45f083e8be2/scratchpad/track2.png",

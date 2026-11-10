@@ -11,7 +11,8 @@ import { User } from '../models/User.model';
 import { Attendance } from '../models/Attendance.model';
 import { Evaluation } from '../models/Evaluation.model';
 import { supervisorGenderOf, trackIdsForGender } from '../lib/supervisorScope';
-import { draftLines, reportChanges, type ReportChanges, type ReportLists } from '../lib/dailyReportDiff';
+import { draftLines, reportChanges, type GradeEdit, type ReportChanges, type ReportLists } from '../lib/dailyReportDiff';
+import { EvaluationChange } from '../models/EvaluationChange.model';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -193,17 +194,24 @@ export async function listReports(req: Request, res: Response, next: NextFunctio
     // evaluations were edited after sending, with what changed.
     if (date && DATE_RE.test(date) && reports.length) {
       const trackIds = reports.map((r) => r.track);
-      const [students, attendance, evaluations] = await Promise.all([
+      const [students, attendance, evaluations, edits] = await Promise.all([
         Student.find({ track: { $in: trackIds } }).select('name track').lean(),
         Attendance.find({ track: { $in: trackIds }, date: dayRange(date) }).lean(),
         Evaluation.find({ track: { $in: trackIds }, date: dayRange(date) }).lean(),
+        EvaluationChange.find({ track: { $in: trackIds }, date: dayRange(date) }).sort({ createdAt: 1 }).lean(),
       ]);
       const data = reports.map((r) => {
         const t = String(r.track);
         const nameOf = new Map(students.filter((s) => String(s.track) === t).map((s) => [String(s._id), s.name]));
         const att = attendance.filter((a) => String(a.track) === t);
         const evs = evaluations.filter((e) => String(e.track) === t);
-        return { ...r, changes: changesSince(r, draftLines(nameOf, att, evs), [...att, ...evs]) };
+        const base = changesSince(r, draftLines(nameOf, att, evs), [...att, ...evs]);
+        // The exact grade edits saved after the report was sent.
+        const grades: GradeEdit[] = edits
+          .filter((e) => String(e.track) === t && r.updatedAt && e.createdAt > r.updatedAt)
+          .map((e) => ({ studentName: e.studentName, editedByName: e.editedByName, at: e.createdAt, changes: e.changes }));
+        const changes = grades.length ? { ...(base ?? { sections: [] }), grades } : base;
+        return { ...r, changes };
       });
       res.json({ success: true, count: data.length, data });
       return;

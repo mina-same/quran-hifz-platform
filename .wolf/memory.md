@@ -4680,3 +4680,5 @@
 | 10:27 | Session end: 1 writes across 1 files (PromoReportSection.tsx) | 4 reads | ~3501 tok |
 | 10:37 | Reports page: report shown as web cards (PromoReport web prop), PDF off-screen on download only, loading chip on refetch, only filters sticky, on-screen honor board lists all students (PDF keeps 15) | PromoReport.tsx, PromoReportSection.tsx, quran.css | verified in browser | ~5k |
 | 10:37 | Session end: 1 writes across 1 files (PromoReportSection.tsx) | 6 reads | ~6126 tok |
+| 10:51 | Removed «سجل تعديل الدرجات» page (web page/nav/hook/CSS + GET /evaluations/changes); daily report popup now lists exact grade edits saved after send; admin notice + dashboard count only for edits after the report was sent | daily-report.controller.ts, evaluation.controller.ts, stats.controller.ts, dailyReportDiff.ts, ReportChangesBox.tsx, portals.ts, pageRegistry.ts | verified API + browser | ~6k |
+| 10:51 | Session end: 1 writes across 1 files (PromoReportSection.tsx) | 6 reads | ~6126 tok |

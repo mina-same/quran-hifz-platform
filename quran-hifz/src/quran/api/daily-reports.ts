@@ -32,6 +32,13 @@ export type ReportChanges = {
     changed: { name: string; from: string; to: string }[];
   }[];
   present?: { from: number; to: number };
+  /** Grade/attendance edits saved after the report was sent, per student. */
+  grades?: {
+    studentName: string;
+    editedByName: string;
+    at: string;
+    changes: { label: string; from: string; to: string }[];
+  }[];
 };
 
 type DraftResponse = {

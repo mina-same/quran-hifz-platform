@@ -63,7 +63,9 @@ export type SectionChange = {
   removed: string[];
   changed: { name: string; from: string; to: string }[];
 };
-export type ReportChanges = { sections: SectionChange[]; present?: { from: number; to: number } };
+/** A grade/attendance re-save of one student after the report was sent. */
+export type GradeEdit = { studentName: string; editedByName: string; at: Date; changes: { label: string; from: string; to: string }[] };
+export type ReportChanges = { sections: SectionChange[]; present?: { from: number; to: number }; grades?: GradeEdit[] };
 
 /**
  * What changed between the sent report and the records, limited to students
