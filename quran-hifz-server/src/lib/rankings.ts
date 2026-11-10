@@ -6,18 +6,20 @@
  * Pure — the controller feeds it one gender section at a time.
  */
 
-export type Period = 'week' | 'month' | 'all';
+export type Period = 'week' | 'month' | 'lastMonth' | 'all' | 'custom';
 
-type EvalIn = { student: string; track: string; total: number; totalMax: number; attendanceStatus: string };
+/** One evaluation — or, with `count`, several of the same student/track/status already summed. */
+export type EvalIn = { student: string; track: string; total: number; totalMax: number; attendanceStatus: string; count?: number };
 type Agg = { points: number; presentScore: number; presentMax: number; present: number; counted: number };
 
 const blank = (): Agg => ({ points: 0, presentScore: 0, presentMax: 0, present: 0, counted: 0 });
 function add(a: Agg, e: EvalIn): void {
+  const n = e.count ?? 1;
   a.points += e.total;
   if (e.attendanceStatus === 'مستأذن') return;
-  a.counted += 1;
+  a.counted += n;
   if (e.attendanceStatus === 'حاضر') {
-    a.present += 1;
+    a.present += n;
     a.presentScore += e.total;
     a.presentMax += e.totalMax;
   }
@@ -43,7 +45,12 @@ export function rankOf(allPoints: number[], points: number): number {
 
 /** First day (YYYY-MM-DD) of the period ending `today`; null = since the start. */
 export function periodStart(period: Period, today: string): string | null {
-  if (period === 'all') return null;
+  if (period === 'all' || period === 'custom') return null;
+  if (period === 'lastMonth') {
+    const d = new Date(`${today.slice(0, 7)}-01T12:00:00Z`);
+    d.setUTCMonth(d.getUTCMonth() - 1);
+    return d.toISOString().slice(0, 10);
+  }
   if (period === 'month') return `${today.slice(0, 7)}-01`;
   const d = new Date(`${today}T12:00:00Z`);
   d.setUTCDate(d.getUTCDate() - 6);

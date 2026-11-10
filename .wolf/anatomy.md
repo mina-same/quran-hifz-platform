@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-29T10:47:43.376Z
-> Files: 750 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-10T08:25:57.142Z
+> Files: 751 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -1043,11 +1043,12 @@
 - `Pagination.tsx` — Page numbers to show: always first/last, a window around the current page, (~570 tok)
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
 - `PromoReport.tsx` — 2.5 → «٢٫٥», 120 → «١٢٠» (points may carry decimals since grades can). (~2625 tok)
-- `PromoReportSection.tsx` — «تقرير الإنجاز والتميّز» on the reports page itself: pick the section (~1059 tok)
+- `PromoReportSection.tsx` — «تقرير الإنجاز والتميّز»: pick the section, period, masjid and halqa, then (~2442 tok)
 - `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~8630 tok)
 - `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)
 - `Skeleton.tsx` — Skeleton — renders table (~816 tok)
 - `StatsRow.tsx` — StatsRow (~146 tok)
+- `StudentPointsModal.tsx` — Where a student's numbers in «لوحة الشرف» come from: every evaluated day in (~1253 tok)
 - `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from a student's plans — no dedicated (~5066 tok)
 - `SurahRangePicker.tsx` — SurahPointFields (~439 tok)
 - `TrackStudentsPanel.tsx` — Track roster management — transfer-only, since a student's track is (~2003 tok)

@@ -7198,5 +7198,22 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-10-23T18:00:00Z"
+  },
+  {
+    "id": "bug-423",
+    "timestamp": "2026-11-10T10:27:10.627770",
+    "error_message": "Reports page slow: rankings API 3–13s, page re-renders full PDF preview on every visit/filter change with no loading state",
+    "file": "quran-hifz-server/src/controllers/rankings.controller.ts",
+    "root_cause": "Every Evaluation doc fetched from remote Atlas and summed in Node; withAll=1 reloaded everything a second time; client rendered all report pages live",
+    "fix": "loadScope loads once with Evaluation.aggregate \\$group by student/track/status (EvalIn.count); sections split in memory; client renders PromoReport off-screen only during download",
+    "tags": [
+      "performance",
+      "rankings",
+      "reports",
+      "pdf"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-11-10T10:27:10.627770"
   }
 ]

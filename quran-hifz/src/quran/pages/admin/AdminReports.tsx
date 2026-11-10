@@ -1,32 +1,9 @@
-import { useStudents } from "../../api/students";
-import { useTeachers } from "../../api/teachers";
-import { useKpis } from "../../api/kpis";
-import { useTracks } from "../../api/tracks";
-import { ReportsDashboard } from "../../components/common/ReportsDashboard";
-import { usePortal } from "../../context/PortalContext";
+import { useTopbar } from "../../context/useTopbar";
+import { PromoReportSection } from "../../components/common/PromoReportSection";
 
-/** Admin reports — full school cohort. KPIs + teachers are org-wide widgets
- *  surfaced in addition to the student analytics. */
+/** Admin / supervisor reports — the page IS «تقرير الإنجاز والتميّز»: section +
+ *  period filters, the report pages at full size, and the PDF download. */
 export function AdminReports() {
-  const { genderScope } = usePortal();
-  const { data: teachers = [] } = useTeachers();
-  const { data: kpis = [] } = useKpis(genderScope);
-  const { data: tracks = [] } = useTracks();
-  // Pre-warm the full students query so the StatsRow/KPIs render instantly
-  // once the user lands — ReportsDashboard re-queries under the active scope.
-  useStudents();
-
-  return (
-    <ReportsDashboard
-      topbarIcon="ti-chart-bar"
-      topbarTitle="التقارير والتحليلات"
-      baseFilter={{}}
-      tracks={tracks}
-      kpis={kpis}
-      teachers={teachers}
-      showAdmin
-      scopeAllLabel="كل طلاب المدرسة"
-      genderScope={genderScope}
-    />
-  );
+  useTopbar("ti-chart-bar", "التقارير");
+  return <PromoReportSection />;
 }

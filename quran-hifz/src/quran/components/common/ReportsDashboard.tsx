@@ -21,7 +21,6 @@ import { HonorBoard } from "./HonorBoard";
 import { Leaderboard, type LeaderRow } from "./Leaderboard";
 import { StudentReportPanel } from "./StudentReportPanel";
 import { PromoReport } from "./PromoReport";
-import { PromoReportSection } from "./PromoReportSection";
 import { useRankings, PERIOD_LABEL, type RankPeriod } from "../../api/rankings";
 import { downloadPagesPdf } from "../../lib/pdfPages";
 
@@ -546,7 +545,6 @@ export function ReportsDashboard({
   return (
     <>
       {pdfSource}
-      {showAdmin && <PromoReportSection />}
       <StatsRow
         items={[
           {

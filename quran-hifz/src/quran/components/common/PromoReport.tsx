@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { RankPeriod, RankSection, RankStudent } from "../../api/rankings";
 import { PERIOD_LABEL } from "../../api/rankings";
 import { gregorianAr } from "../../lib/dailyReport";
@@ -5,7 +6,7 @@ import { toAr } from "../../../lib/format";
 
 const LOGO_SRC = "/quran/logo.png";
 const PLATFORM = "المنصة التعليمية لجمعية التحفيظ بالعماير";
-const SECTION_LABEL = { male: "قسم البنين", female: "قسم البنات" } as const;
+const SECTION_LABEL = { male: "قسم البنين", female: "قسم البنات", all: "البنين والبنات" } as const;
 const MEDALS = ["🥇", "🥈", "🥉"];
 
 /** Wording per section — the girls' report speaks of «الطالبات». */
@@ -15,7 +16,7 @@ const WORDS = {
     registered: "الطلاب المسجّلون",
     stars: "🏆 فرسان الفترة",
     student: "الطالب",
-    excellent: "طلاب بمتوسط ٩ من ١٠ فأكثر",
+    excellent: "طلاب بمتوسط ٩٠٪ فأكثر",
     days: "يوم تقييم مسجّل للطلاب",
     board: "🌟 لوحة شرف الطلاب",
     teacher: "⭐ المعلم المتميز",
@@ -28,13 +29,26 @@ const WORDS = {
     registered: "الطالبات المسجّلات",
     stars: "🏆 نجمات الفترة",
     student: "الطالبة",
-    excellent: "طالبات بمتوسط ٩ من ١٠ فأكثر",
+    excellent: "طالبات بمتوسط ٩٠٪ فأكثر",
     days: "يوم تقييم مسجّل للطالبات",
     board: "🌟 لوحة شرف الطالبات",
     teacher: "⭐ المعلمة المتميزة",
     teacherAvg: "متوسط طالباتها",
     teachers: "👩‍🏫 ترتيب المعلمات",
     count: "عدد الطالبات",
+  },
+  all: {
+    students: "الطلاب",
+    registered: "الطلاب والطالبات المسجّلون",
+    stars: "🏆 أوائل الفترة",
+    student: "الاسم",
+    excellent: "طلاب بمتوسط ٩٠٪ فأكثر",
+    days: "يوم تقييم مسجّل",
+    board: "🌟 لوحة الشرف",
+    teacher: "⭐ المعلم المتميز",
+    teacherAvg: "متوسط طلابه",
+    teachers: "👨‍🏫 ترتيب المعلمين والمعلمات",
+    count: "عدد الطلاب",
   },
 } as const;
 
@@ -50,6 +64,11 @@ function pointsWord(n: number): string {
   return n >= 3 && n <= 10 ? "نقاط" : "نقطة";
 }
 
+/** An average out of 10 shown as a percentage: 8.8 → «٨٨٪». */
+function pct10(avg10: number): string {
+  return `${toAr(Math.round(avg10 * 10))}٪`;
+}
+
 /** Competition ranking: ties share a place. */
 function ranks(rows: { points: number }[]): number[] {
   return rows.map((r) => 1 + rows.filter((x) => x.points > r.points).length);
@@ -61,12 +80,14 @@ function Header({
   from,
   to,
   page,
+  scopeName,
 }: {
-  section: "male" | "female";
+  section: "male" | "female" | "all";
   period: RankPeriod;
   from: string | null;
   to: string;
   page: number;
+  scopeName?: string;
 }) {
   return (
     <header className={`pr-head ${page === 1 ? "cover" : ""}`}>
@@ -77,13 +98,13 @@ function Header({
           <>
             <h1>تقرير الإنجاز والتميّز</h1>
             <div className="pr-sub">
-              {SECTION_LABEL[section]} · {PERIOD_LABEL[period]}
+              {scopeName ?? SECTION_LABEL[section]} · {PERIOD_LABEL[period]}
               {from ? ` (${gregorianAr(from)} — ${gregorianAr(to)})` : ` (حتى ${gregorianAr(to)})`}
             </div>
           </>
         ) : (
           <div className="pr-sub strong">
-            تقرير الإنجاز والتميّز · {SECTION_LABEL[section]} · {PERIOD_LABEL[period]}
+            تقرير الإنجاز والتميّز · {scopeName ?? SECTION_LABEL[section]} · {PERIOD_LABEL[period]}
           </div>
         )}
       </div>
@@ -92,7 +113,9 @@ function Header({
   );
 }
 
-function Podium({ top, topRanks }: { top: RankStudent[]; topRanks: number[] }) {
+function Podium({ top, topRanks, onStudent }: {
+  top: RankStudent[]; topRanks: number[]; onStudent?: (s: RankStudent) => void;
+}) {
   // Visual order 2 · 1 · 3 (RTL puts the first child on the right). The block
   // height follows the position; the medal follows the shared rank (ties).
   const order = [top[1], top[0], top[2]];
@@ -102,7 +125,11 @@ function Podium({ top, topRanks }: { top: RankStudent[]; topRanks: number[] }) {
     <div className="pr-podium">
       {order.map((s, i) =>
         s ? (
-          <div key={s.id} className={`pr-step p${place[i]}`}>
+          <div
+            key={s.id}
+            className={`pr-step p${place[i]} ${onStudent ? "clickable" : ""}`}
+            onClick={onStudent ? () => onStudent(s) : undefined}
+          >
             <div className="pr-medal">{MEDALS[Math.min(medalOf[i], 3) - 1]}</div>
             <div className="pr-step-name">{s.name}</div>
             <div className="pr-step-track">{s.trackTitle}</div>
@@ -125,7 +152,7 @@ function Bars({
 }: {
   rows: { label: string; sub?: string; value: number; display: string }[];
 }) {
-  const max = Math.max(10, ...rows.map((r) => r.value));
+  const max = Math.max(100, ...rows.map((r) => r.value));
   return (
     <div className="pr-bars">
       {rows.map((r) => (
@@ -154,31 +181,51 @@ export function PromoReport({
   period,
   from,
   to,
+  scopeName,
+  onStudent,
+  web = false,
 }: {
-  section: "male" | "female";
+  section: "male" | "female" | "all";
   data: RankSection;
   period: RankPeriod;
   from: string | null;
   to: string;
+  /** Shown instead of «قسم البنين/البنات» when the report covers one masjid. */
+  scopeName?: string;
+  /** On-screen only: open a student's breakdown when their row is clicked. */
+  onStudent?: (s: RankStudent) => void;
+  /** On-screen version: the same sections as plain cards, no A4 pages. */
+  web?: boolean;
 }) {
   const studentsWithPoints = data.students.filter((s) => s.points > 0);
   const top = studentsWithPoints.slice(0, 15);
   const topRanks = ranks(top);
+  // On screen the honor board lists every student; the PDF keeps the top 15.
+  const board = web ? data.students : top;
+  const boardRanks = web ? ranks(board) : topRanks;
   const rankedTracks = data.tracks.filter((t) => t.ranked);
   const rankedTeachers = data.teachers.filter((t) => t.ranked);
   const bestTrack = rankedTracks[0];
   const bestTeacher = rankedTeachers[0];
   const champions = data.tracks.filter((t) => t.champion).slice(0, 9);
-  const head = { section, period, from, to };
+  const head = { section, period, from, to, scopeName };
   const w = WORDS[section];
   const excellentCount = data.students.filter((s) => s.days >= 5 && s.avg10 >= 9).length;
   const fullAttendance = rankedTracks.filter((t) => t.attendancePct === 100).length;
+  const page = (n: number, body: ReactNode) =>
+    web ? (
+      <section className="card prw-sec">{body}</section>
+    ) : (
+      <div className="pr-page" dir="rtl">
+        <Header {...head} page={n} />
+        {body}
+      </div>
+    );
 
   return (
-    <>
+    <div className={web ? "prw" : "pr-pages"} dir="rtl">
       {/* ── Page 1: cover, headline numbers, podium, stars ── */}
-      <div className="pr-page" dir="rtl">
-        <Header {...head} page={1} />
+      {page(1, <>
         <div className="pr-kpis">
           <div className="pr-kpi">
             <b>{num(data.totals.students)}</b>
@@ -190,8 +237,8 @@ export function PromoReport({
           </div>
           <div className="pr-kpi">
             <b>
-              {num(data.totals.avg10)}
-              <small>/١٠</small>
+              {toAr(Math.round(data.totals.avg10 * 10))}
+              <small>٪</small>
             </b>
             <span>متوسط التقييم اليومي</span>
           </div>
@@ -206,7 +253,7 @@ export function PromoReport({
 
         <h2 className="pr-h2">{w.stars}</h2>
         {top.length ? (
-          <Podium top={top} topRanks={topRanks} />
+          <Podium top={top} topRanks={topRanks} onStudent={onStudent} />
         ) : (
           <p className="pr-empty">لا توجد تقييمات مسجّلة في هذه الفترة</p>
         )}
@@ -235,7 +282,7 @@ export function PromoReport({
                 <div className="pr-star-name">{bestTrack.title}</div>
                 <div className="pr-star-facts">
                   <span>
-                    متوسط <b>{num(bestTrack.avg10)}/١٠</b>
+                    متوسط <b>{pct10(bestTrack.avg10)}</b>
                   </span>
                   <span>
                     حضور <b>{num(bestTrack.attendancePct)}٪</b>
@@ -258,7 +305,7 @@ export function PromoReport({
                 <div className="pr-star-name">{bestTeacher.name}</div>
                 <div className="pr-star-facts">
                   <span>
-                    {w.teacherAvg} <b>{num(bestTeacher.avg10)}/١٠</b>
+                    {w.teacherAvg} <b>{pct10(bestTeacher.avg10)}</b>
                   </span>
                   <span>
                     حضور <b>{num(bestTeacher.attendancePct)}٪</b>
@@ -271,19 +318,18 @@ export function PromoReport({
             )}
           </div>
         </div>
-        <p className="pr-closing">﴿وَفِي ذَٰلِكَ فَلْيَتَنَافَسِ الْمُتَنَافِسُونَ﴾</p>
-      </div>
+        {!web && <p className="pr-closing">﴿وَفِي ذَٰلِكَ فَلْيَتَنَافَسِ الْمُتَنَافِسُونَ﴾</p>}
+      </>)}
 
       {/* ── Page 2: halqas + teachers ── */}
-      <div className="pr-page" dir="rtl">
-        <Header {...head} page={2} />
+      {page(2, <>
         <h2 className="pr-h2">📊 ترتيب الحلقات حسب متوسط التقييم</h2>
         <Bars
           rows={rankedTracks.slice(0, 10).map((t) => ({
             label: t.title,
             sub: `${w.count} ${num(t.students)} · حضور ${num(t.attendancePct)}٪`,
-            value: t.avg10,
-            display: `${num(t.avg10)}/١٠`,
+            value: t.avg10 * 10,
+            display: pct10(t.avg10),
           }))}
         />
         {data.tracks.length > rankedTracks.length && (
@@ -318,18 +364,17 @@ export function PromoReport({
                 <td>{t.tracks.join("، ")}</td>
                 <td>{num(t.students)}</td>
                 <td>
-                  <b>{num(t.avg10)}</b>/١٠
+                  <b>{pct10(t.avg10)}</b>
                 </td>
                 <td>{num(t.attendancePct)}٪</td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </>)}
 
       {/* ── Page 3: top students + halqa champions ── */}
-      <div className="pr-page" dir="rtl">
-        <Header {...head} page={3} />
+      {page(3, <>
         <h2 className="pr-h2">{w.board}</h2>
         <table className="pr-table">
           <thead>
@@ -343,9 +388,14 @@ export function PromoReport({
             </tr>
           </thead>
           <tbody>
-            {top.map((s, i) => (
-              <tr key={s.id} className={topRanks[i] <= 3 ? "top" : ""}>
-                <td>{topRanks[i] <= 3 ? MEDALS[topRanks[i] - 1] : num(topRanks[i])}</td>
+            {board.map((s, i) => (
+              <tr
+                key={s.id}
+                className={`${boardRanks[i] <= 3 && s.points > 0 ? "top" : ""} ${onStudent ? "clickable" : ""}`}
+                onClick={onStudent ? () => onStudent(s) : undefined}
+                title={onStudent ? "اضغط لعرض تفاصيل النقاط" : undefined}
+              >
+                <td>{boardRanks[i] <= 3 && s.points > 0 ? MEDALS[boardRanks[i] - 1] : num(boardRanks[i])}</td>
                 <td>
                   <b>{s.name}</b>
                 </td>
@@ -353,7 +403,7 @@ export function PromoReport({
                 <td>
                   <b>{num(s.points)}</b>
                 </td>
-                <td>{num(s.avg10)}/١٠</td>
+                <td>{pct10(s.avg10)}</td>
                 <td>{num(s.attendancePct)}٪</td>
               </tr>
             ))}
@@ -373,10 +423,12 @@ export function PromoReport({
             </div>
           </>
         )}
-        <p className="pr-closing">
-          «خيركم من تعلّم القرآن وعلّمه» — بارك الله في الجهود، وإلى مزيد من التميّز.
-        </p>
-      </div>
-    </>
+        {!web && (
+          <p className="pr-closing">
+            «خيركم من تعلّم القرآن وعلّمه» — بارك الله في الجهود، وإلى مزيد من التميّز.
+          </p>
+        )}
+      </>)}
+    </div>
   );
 }

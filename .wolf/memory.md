@@ -4639,3 +4639,44 @@
 | 14:02 | Session end: 1 writes across 1 files (AdminKpis.tsx) | 2 reads | ~975 tok |
 | 14:41 | Migrated 806 auto notices (teacher-sent) to system «مدير النظام» messages; backup scratchpad/messages-system-migration-backup.json | Atlas messages | verified: 0 left, 16 human untouched, parent sees system thread | ~6k |
 | 14:41 | Session end: 1 writes across 1 files (AdminKpis.tsx) | 2 reads | ~975 tok |
+
+## Session: 2026-10-29 23:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-29 23:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-11-10 09:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-11-10 09:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:01 | Promo report: pages shown full-size on reports page (scale to card width, max 1:1) instead of tiny preview; all eval averages shown as % (8.8/10 → ٨٨٪) | PromoReportSection, PromoReport, quran.css | tsc clean; browser-verified on :8080 | ~10k |
+| 10:07 | Reports page = only the promo report (fills page width, sticky filter bar); new filters: الشهر الماضي, فترة مخصصة (from/to), single masjid/دار (server rankings: lastMonth/custom/masjid) | AdminReports, PromoReportSection, PromoReport, api/rankings, rankings.ts, rankings.controller, quran.css | tsc web+server clean; browser-verified | ~25k |
+| 10:08 | Created quran-hifz/src/quran/components/common/StudentPointsModal.tsx | — | ~1253 |
+| 10:10 | Reports: «الكل» section (server withAll=1 combined section, admin only; default follows sidebar scope) + clickable honor-board rows/podium → StudentPointsModal (per-day attendance, criteria, totals; sum = points) | rankings.controller, api/rankings, PromoReport, PromoReportSection, StudentPointsModal, quran.css | tsc clean; browser-verified (59 = 59) | ~20k |
+| 10:10 | Session end: 1 writes across 1 files (StudentPointsModal.tsx) | 7 reads | ~2312 tok |
+
+## Session: 2026-11-10 10:13
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-11-10 10:15
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:17 | Reports page: «المسار» (track) filter — server ?track= on /api/rankings, select in PromoReportSection (resets on section/masjid change), header+filename use halqa title | rankings.controller.ts, api/rankings.ts, PromoReportSection.tsx | verified in browser | ~3k |
+| 10:25 | Created quran-hifz/src/quran/components/common/PromoReportSection.tsx | — | ~2442 |
+| 10:27 | Reports page: no in-page preview (PDF rendered off-screen only on download); track select grouped by masjid (optgroup); rankings API single load + Mongo $group (7.7–13s → ~1.6s, totals identical) | PromoReportSection.tsx, quran.css, rankings.controller.ts, lib/rankings.ts | verified in browser + API | ~6k |
+| 10:27 | Session end: 1 writes across 1 files (PromoReportSection.tsx) | 4 reads | ~3501 tok |
+| 10:37 | Reports page: report shown as web cards (PromoReport web prop), PDF off-screen on download only, loading chip on refetch, only filters sticky, on-screen honor board lists all students (PDF keeps 15) | PromoReport.tsx, PromoReportSection.tsx, quran.css | verified in browser | ~5k |
+| 10:37 | Session end: 1 writes across 1 files (PromoReportSection.tsx) | 6 reads | ~6126 tok |

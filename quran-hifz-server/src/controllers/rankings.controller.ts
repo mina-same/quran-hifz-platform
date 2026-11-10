@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../middleware/error';
 import { Masjid, type MasjidGender } from '../models/Masjid.model';
@@ -15,47 +16,95 @@ const MIN_EVALS = 10;
 
 function parsePeriod(req: Request): { period: Period; from: string | null; to: string } {
   const p = String(req.query.period ?? 'month');
-  const period: Period = p === 'week' || p === 'all' ? p : 'month';
+  const period: Period = (['week', 'month', 'lastMonth', 'all', 'custom'] as const).find((x) => x === p) ?? 'month';
   const t = String(req.query.today ?? '');
-  const to = DATE_RE.test(t) ? t : new Date().toISOString().slice(0, 10);
-  return { period, from: periodStart(period, to), to };
+  const today = DATE_RE.test(t) ? t : new Date().toISOString().slice(0, 10);
+  if (period === 'custom') {
+    const f = String(req.query.from ?? '');
+    const e = String(req.query.to ?? '');
+    if (!DATE_RE.test(f) || !DATE_RE.test(e) || f > e) throw new AppError('حدّد بداية ونهاية الفترة بشكل صحيح', 400);
+    return { period, from: f, to: e };
+  }
+  if (period === 'lastMonth') {
+    // the whole previous calendar month
+    const end = new Date(`${today.slice(0, 7)}-01T12:00:00Z`);
+    end.setUTCDate(0);
+    return { period, from: periodStart(period, today), to: end.toISOString().slice(0, 10) };
+  }
+  return { period, from: periodStart(period, today), to: today };
 }
 
-/** One gender section's leaderboards for [from, to] (archived halqas excluded). */
-async function loadSection(gender: MasjidGender, from: string | null, to: string): Promise<Section> {
-  const masjidIds = (await Masjid.find({ gender }).select('_id').lean()).map((m) => m._id);
-  const tracks = await Track.find({ masjid: { $in: masjidIds }, deletedAt: null }).select('title teachers').lean();
+type Scope = Awaited<ReturnType<typeof loadScope>>;
+
+/**
+ * Everything the leaderboards need for [from, to], loaded once (archived
+ * halqas excluded). Evaluations are summed in the database per
+ * student/halqa/status, so only a few hundred rows cross the wire.
+ */
+async function loadScope(gender: MasjidGender | null, from: string | null, to: string, masjid?: string, track?: string) {
+  const masjidFilter: Record<string, unknown> = gender ? { gender } : {};
+  if (masjid && Types.ObjectId.isValid(masjid)) masjidFilter._id = masjid;
+  const masajid = await Masjid.find(masjidFilter).select('gender').lean();
+  const trackFilter: Record<string, unknown> = { masjid: { $in: masajid.map((m) => m._id) }, deletedAt: null };
+  if (track && Types.ObjectId.isValid(track)) trackFilter._id = track;
+  const tracks = await Track.find(trackFilter).select('title teachers masjid').lean();
   const trackIds = tracks.map((t) => t._id);
   const end = new Date(new Date(to).getTime() + 86_400_000);
   const [students, teachers, evals] = await Promise.all([
     Student.find({ track: { $in: trackIds } }).select('name track').lean(),
     Teacher.find({ _id: { $in: tracks.flatMap((t) => t.teachers) } }).select('name').lean(),
-    Evaluation.find({
-      track: { $in: trackIds },
-      date: from ? { $gte: new Date(from), $lt: end } : { $lt: end },
-    }).select('student track total totalMax attendanceStatus').lean(),
+    Evaluation.aggregate<{ _id: { student: unknown; track: unknown; status: string }; total: number; totalMax: number; count: number }>([
+      { $match: { track: { $in: trackIds }, date: from ? { $gte: new Date(from), $lt: end } : { $lt: end } } },
+      {
+        $group: {
+          _id: { student: '$student', track: '$track', status: '$attendanceStatus' },
+          total: { $sum: { $ifNull: ['$total', 0] } },
+          totalMax: { $sum: { $ifNull: ['$totalMax', 10] } },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
   ]);
-  return computeSection({
-    tracks: tracks.map((t) => ({ id: String(t._id), title: t.title, teacherIds: t.teachers.map(String) })),
+  const genderOf = new Map(masajid.map((m) => [String(m._id), m.gender]));
+  return {
+    tracks: tracks.map((t) => ({
+      id: String(t._id), title: t.title, teacherIds: t.teachers.map(String), gender: genderOf.get(String(t.masjid)),
+    })),
     teachers: teachers.map((t) => ({ id: String(t._id), name: t.name })),
     students: students.map((s) => ({ id: String(s._id), name: s.name, trackId: String(s.track) })),
     evals: evals.map((e) => ({
-      student: String(e.student), track: String(e.track),
-      total: e.total ?? 0, totalMax: e.totalMax ?? 10, attendanceStatus: e.attendanceStatus,
+      student: String(e._id.student), track: String(e._id.track), attendanceStatus: e._id.status,
+      total: e.total, totalMax: e.totalMax, count: e.count,
     })),
+  };
+}
+
+/** One section's leaderboards out of a loaded scope; `gender` null = both («الكل»). */
+function sectionOf(scope: Scope, gender: MasjidGender | null): Section {
+  const tracks = gender ? scope.tracks.filter((t) => t.gender === gender) : scope.tracks;
+  const ids = new Set(tracks.map((t) => t.id));
+  const teacherIds = new Set(tracks.flatMap((t) => t.teacherIds));
+  return computeSection({
+    tracks,
+    teachers: scope.teachers.filter((t) => teacherIds.has(t.id)),
+    students: scope.students.filter((s) => ids.has(s.trackId)),
+    evals: scope.evals.filter((e) => ids.has(e.track)),
     minEvals: MIN_EVALS,
   });
 }
 
-/** GET /rankings?period=week|month|all&today= — admin: both sections; supervisor: their own. */
+/** GET /rankings?period=…&masjid=&track=&withAll=1 — admin: both sections (+ «الكل»); supervisor: their own. */
 export async function getRankings(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { period, from, to } = parsePeriod(req);
+    const masjid = typeof req.query.masjid === 'string' ? req.query.masjid : undefined;
+    const track = typeof req.query.track === 'string' ? req.query.track : undefined;
     const own = supervisorGenderOf(req);
+    const scope = await loadScope(own ?? null, from, to, masjid, track);
     const genders: MasjidGender[] = own ? [own] : ['male', 'female'];
-    const sections = Object.fromEntries(
-      await Promise.all(genders.map(async (g) => [g, await loadSection(g, from, to)] as const)),
-    );
+    const sections: Record<string, Section> = Object.fromEntries(genders.map((g) => [g, sectionOf(scope, g)]));
+    // «الكل» — both sections in one report (admin only; asked for on demand).
+    if (!own && req.query.withAll === '1') sections.all = sectionOf(scope, null);
     res.json({ success: true, data: { period, from, to, sections } });
   } catch (err) {
     next(err);
@@ -77,7 +126,7 @@ export async function getMyRanking(req: Request, res: Response, next: NextFuncti
     const masjid = track ? await Masjid.findById(track.masjid).select('gender').lean() : null;
     if (!track || !masjid) throw new AppError('لست مسجلاً في حلقة حالياً', 404);
 
-    const section = await loadSection(masjid.gender, from, to);
+    const section = sectionOf(await loadScope(masjid.gender, from, to), masjid.gender);
     const myId = String(student._id);
     const mine = section.students.find((s) => s.id === myId);
     const inTrack = section.students.filter((s) => s.trackId === String(track._id));
