@@ -4682,3 +4682,12 @@
 | 10:37 | Session end: 1 writes across 1 files (PromoReportSection.tsx) | 6 reads | ~6126 tok |
 | 10:51 | Removed «سجل تعديل الدرجات» page (web page/nav/hook/CSS + GET /evaluations/changes); daily report popup now lists exact grade edits saved after send; admin notice + dashboard count only for edits after the report was sent | daily-report.controller.ts, evaluation.controller.ts, stats.controller.ts, dailyReportDiff.ts, ReportChangesBox.tsx, portals.ts, pageRegistry.ts | verified API + browser | ~6k |
 | 10:51 | Session end: 1 writes across 1 files (PromoReportSection.tsx) | 6 reads | ~6126 tok |
+
+## Session: 2026-11-15 10:52
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:58 | Edited quran-hifz-server/src/lib/rankings.ts | 6→5 lines | ~65 |
+| 10:58 | Edited quran-hifz-server/src/lib/rankings.ts | excused() → days() | ~62 |
+| 10:59 | rankings avg10 now counts absent days in max (excused excluded) per user | quran-hifz-server/src/lib/rankings.ts | verified 280/300→93% via tsx | ~2k |
+| 10:59 | Session end: 2 writes across 1 files (rankings.ts) | 0 reads | ~127 tok |

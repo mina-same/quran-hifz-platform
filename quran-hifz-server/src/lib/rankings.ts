@@ -2,7 +2,8 @@
  * Leaderboards for the promotional report and the student «لوحة الشرف».
  * Points = the sum of a student's daily grades in the period (an absent day
  * adds 0, so regular attendance is rewarded). Averages are out of 10 and
- * taken over PRESENT days only; attendance % ignores excused (مستأذن) days.
+ * taken over present + absent days (absent = 0 out of its max); excused
+ * (مستأذن) days are left out of both the average and attendance %.
  * Pure — the controller feeds it one gender section at a time.
  */
 
@@ -18,11 +19,10 @@ function add(a: Agg, e: EvalIn): void {
   a.points += e.total;
   if (e.attendanceStatus === 'مستأذن') return;
   a.counted += n;
-  if (e.attendanceStatus === 'حاضر') {
-    a.present += n;
-    a.presentScore += e.total;
-    a.presentMax += e.totalMax;
-  }
+  // Absent days count toward the max (scoring 0), so the average is out of every expected day.
+  a.presentScore += e.total;
+  a.presentMax += e.totalMax;
+  if (e.attendanceStatus === 'حاضر') a.present += n;
 }
 const round1 = (n: number) => Math.round(n * 10) / 10;
 const avg10 = (a: Agg) => (a.presentMax > 0 ? round1((a.presentScore / a.presentMax) * 10) : 0);

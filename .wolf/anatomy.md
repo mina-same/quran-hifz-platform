@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-10T08:25:57.142Z
-> Files: 751 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-15T08:58:50.243Z
+> Files: 752 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -806,6 +806,7 @@
 - `planStudents.ts` — Resolves which students are covered by a plan, branching on `targetType`: (~315 tok)
 - `push.ts` — Best-effort Expo push notification send — looks up each recipient's stored (~389 tok)
 - `quranRange.ts` — Standard 604-page Madani mushaf boundary table (surah:ayah each page starts at). (~6552 tok)
+- `rankings.ts` — Leaderboards for the promotional report and the student «لوحة الشرف». (~1712 tok)
 - `studentPlanReflow.ts` — Per-student plan overlay: builds the occurrence array, then redistributes what's still owed (cursor → pinned finish line) whenever a day is absent, short, or over-recited; flags `noWard` days (~3376 tok)
 - `supervisorScope.ts` — The supervisor's fixed gender assignment, or null for every other role. (~502 tok)
 - `teacherParent.ts` — Live (non-archived) track ids a teacher user teaches. (~971 tok)
