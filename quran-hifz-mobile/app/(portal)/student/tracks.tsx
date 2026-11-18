@@ -222,8 +222,8 @@ export default function StudentTracks() {
 
         {!isLoading && tracks.length === 0 && (
           <>
-            <Text style={s.muted}>لم تُسجَّل في أي مسار بعد</Text>
-            <Text style={s.mutedSmall}>تواصل مع معلمك أو الإدارة للانضمام إلى أحد البرامج</Text>
+            <Text style={s.muted}>لم تُسجَّل في أي مسار</Text>
+            <Text style={s.mutedSmall}>تواصل مع معلمك أو الإدارة للانضمام إلى أحد البرامج الاستثنائية</Text>
           </>
         )}
 

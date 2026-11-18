@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
+import { toast } from '@/components/ui/Toast';
 import { useRouter } from 'expo-router';
 import { IconBuildingArch, IconPencil, IconTrash } from '@tabler/icons-react-native';
 import Text from '@/components/ui/Text';
@@ -34,8 +35,9 @@ export default function AdminMasajid() {
     if (!deleteId) return;
     try {
       await deleteMasjid.mutateAsync(deleteId);
-    } finally {
       setDeleteId(null);
+    } catch (e) {
+      toast.error((e as Error).message);
     }
   }
 

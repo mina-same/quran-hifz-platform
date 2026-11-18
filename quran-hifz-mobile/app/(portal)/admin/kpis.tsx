@@ -53,6 +53,9 @@ export default function AdminKpis() {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         {!isLoading && <StatsRow stats={STATS} />}
+        {!isLoading && !isError && kpis.length > 0 && (
+          <Text style={styles.infoItem}>تُحسب تلقائياً من الحضور والتقييمات والتقارير منذ بداية الشهر</Text>
+        )}
 
         <Pressable
           style={[styles.exportBtn, kpis.length === 0 && styles.exportBtnDisabled]}
@@ -60,8 +63,8 @@ export default function AdminKpis() {
           onPress={() =>
             shareCsv(
               'تقرير مؤشرات الأداء',
-              ['المؤشر', 'المستهدف', 'الفعلي', 'التقييم'],
-              kpis.map((k) => [k.indicator, k.target, k.actual, KPI_STATUS[k.status].label]),
+              ['المؤشر', 'الفعلي', 'المستهدف', 'الحالة', 'طريقة الحساب'],
+              kpis.map((k) => [k.indicator, k.actual, k.target, KPI_STATUS[k.status].label, k.hint]),
             )
           }
         >
@@ -69,7 +72,7 @@ export default function AdminKpis() {
           <Text style={[styles.exportText, kpis.length === 0 && { color: theme.textMuted }]}>تصدير</Text>
         </Pressable>
         <Card noPadding>
-          <CardHeader title="المؤشرات السنوية" style={{ padding: 16, paddingBottom: 8 }} />
+          <CardHeader title="مؤشرات الأداء — هذا الشهر" style={{ padding: 16, paddingBottom: 8 }} />
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
             {isLoading && <SkeletonRows count={5} />}
             {isError && <Text style={styles.error}>تعذّر تحميل المؤشرات</Text>}
@@ -86,7 +89,7 @@ export default function AdminKpis() {
                   <Text style={styles.infoItem}>المستهدف: {k.target}</Text>
                 </View>
                 <ProgressBar value={k.progress} showPercent={false} />
-                <Text style={styles.infoItem}>{k.hint}</Text>
+                <Text style={styles.infoItem}>طريقة الحساب: {k.hint}</Text>
               </View>
             ))}
           </View>

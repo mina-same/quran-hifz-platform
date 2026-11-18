@@ -123,6 +123,7 @@ export default function StudentSchedule() {
                   ["المعلمون", getTeacherNames(track.teachers)],
                   ["المسجد", getName(track.masjid)],
                   ["الوقت", track.timeSlot || "—"],
+                  ["الموعد القادم", "الثلاثاء — بعد غد"],
                 ].map(([k, v]) => (
                   <View key={k} style={styles.gridItem}>
                     <Text style={styles.gridLabel}>{k}</Text>
@@ -180,7 +181,7 @@ export default function StudentSchedule() {
                     style={[
                       styles.legendDot,
                       {
-                        backgroundColor: "#F9FAF5",
+                        backgroundColor: theme.cardAlt,
                         borderWidth: 1,
                         borderColor: theme.border,
                       },
@@ -233,7 +234,7 @@ function createStyles(theme: AppTheme) {
       minWidth: 40,
     },
     dayCellActive: { backgroundColor: theme.greenAccent },
-    dayCellInactive: { backgroundColor: "#F9FAF5" },
+    dayCellInactive: { backgroundColor: theme.cardAlt },
     dayName: {
       fontSize: 10,
       fontFamily: theme.fontCairo,

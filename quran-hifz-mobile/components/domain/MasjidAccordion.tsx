@@ -60,7 +60,7 @@ export default function MasjidAccordion({ masjid, actions }: Props) {
 
       {open && (
         <View style={styles.content}>
-          {tracks.length === 0 && <Text style={styles.trackMeta}>لا توجد مسارات في هذا المسجد</Text>}
+          {tracks.length === 0 && <Text style={styles.trackMeta}>لا توجد مسارات مسجلة</Text>}
           {tracks.map((track) => (
             <View key={track._id} style={styles.trackRow}>
               <Text style={styles.trackName}>{track.title}</Text>

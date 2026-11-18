@@ -5,23 +5,36 @@ import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
 import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
-import ScheduleSheet, { fmtShortDate, fmtPages, type ScheduleItem } from '@/components/domain/ScheduleSheet';
+import { fmtShortDate, type ScheduleItem } from '@/components/domain/ScheduleSheet';
+import PlanStudentScheduleSheet from '@/components/domain/PlanStudentScheduleSheet';
+import FormGroup from '@/components/forms/FormGroup';
+import FormInput from '@/components/forms/FormInput';
+import { toast } from '@/components/ui/Toast';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import {
-  useStudentPlanProgress, useInitStudentPlanProgress, useReflowStudentPlan, planSegment, isOpenPlan,
+  useStudentPlanProgress, useInitStudentPlanProgress, useReflowStudentPlan, useUpdateStudentScheduleEntry, planSegment, isOpenPlan,
   type QuranPlan, type StudentOccurrenceStatus,
 } from '@/lib/queries/quranPlan';
 import OpenWardLogSheet from '@/components/domain/OpenWardLogSheet';
 import type { PlanType } from '@/lib/quranRange';
 import { IconCalendarEvent } from '@tabler/icons-react-native';
-import { isReversedRange, isReversedSchedule, orientSlice, surahName, type RangePoint } from '@/lib/quranRange';
+import { fractionalPage, isReversedRange, isReversedSchedule, orientSlice, surahName, type RangePoint } from '@/lib/quranRange';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
 const STATUS_LABEL: Record<StudentOccurrenceStatus, string> = {
-  pending: 'قيد الانتظار', done: 'مكتمل', partial: 'جزئي', absent: 'غائب',
+  pending: 'قادم', done: 'منجَز', partial: 'جزئي', absent: 'غياب',
 };
+
+/** A clean page boundary shows as an integer, a mid-page position with one
+ *  decimal (e.g. 2.7) — same as web's pageLabel. */
+function pageLabel(point: RangePoint, edge: 'start' | 'end'): string {
+  const { value, isPartial } = fractionalPage(point, edge);
+  return isPartial ? value.toFixed(1) : String(value);
+}
+
+const clampInt = (v: string, max: number) => Math.max(1, Math.min(max, Number(v) || 1));
 const STATUS_VARIANT: Record<StudentOccurrenceStatus, 'gray' | 'green' | 'gold' | 'red'> = {
   pending: 'gray', done: 'green', partial: 'gold', absent: 'red',
 };
@@ -56,6 +69,7 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
   const { data: progress, isLoading } = useStudentPlanProgress(planId, studentId);
   const initProgress = useInitStudentPlanProgress();
   const reflow = useReflowStudentPlan();
+  const updateEntry = useUpdateStudentScheduleEntry();
 
   // The segment this panel covers, and the range it seeds the pickers with.
   const segment = planSegment(basePlan, type);
@@ -68,6 +82,14 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
     segment?.rangeEnd ?? { surahNumber: 114, ayah: 6 },
   );
   const [showSchedule, setShowSchedule] = useState(false);
+  // Web's per-row inline edit of one occurrence.
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [rangeStart, setRangeStart] = useState<RangePoint>({ surahNumber: 1, ayah: 1 });
+  const [rangeEnd, setRangeEnd] = useState<RangePoint>({ surahNumber: 1, ayah: 1 });
+  const [pageStart, setPageStart] = useState(1);
+  const [pageEnd, setPageEnd] = useState(1);
+  const [juz, setJuz] = useState(1);
+  const [error, setError] = useState('');
 
   // Only this type's days — a multi-type plan's overlay holds every type's
   // occurrences in one array, and mixing them would read as one jumbled
@@ -100,19 +122,59 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
     return <Text style={s.muted}>جارٍ التحميل...</Text>;
   }
 
+  function startEdit(index: number) {
+    const entry = ownSchedule.find((o) => o.occurrenceIndex === index);
+    if (!entry) return;
+    setShowSchedule(false);
+    setEditingIndex(index);
+    setRangeStart({ surahNumber: entry.surahStart, ayah: entry.ayahStart });
+    setRangeEnd({ surahNumber: entry.surahEnd, ayah: entry.ayahEnd });
+    setPageStart(entry.pageStart);
+    setPageEnd(entry.pageEnd);
+    setJuz(entry.juz);
+    setError('');
+  }
+
+  async function saveEdit() {
+    if (editingIndex == null) return;
+    const startsBeforeEnd =
+      rangeStart.surahNumber < rangeEnd.surahNumber ||
+      (rangeStart.surahNumber === rangeEnd.surahNumber && rangeStart.ayah <= rangeEnd.ayah);
+    if (!startsBeforeEnd) { setError('نقطة البداية يجب أن تسبق نقطة النهاية'); return; }
+    if (pageStart > pageEnd) { setError('صفحة البداية يجب أن تسبق صفحة النهاية'); return; }
+    setError('');
+    try {
+      await updateEntry.mutateAsync({
+        planId, studentId, occurrenceIndex: editingIndex,
+        surahStart: rangeStart.surahNumber, ayahStart: rangeStart.ayah,
+        surahEnd: rangeEnd.surahNumber, ayahEnd: rangeEnd.ayah,
+        pageStart, pageEnd, juz,
+      });
+      setEditingIndex(null);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
   if (!progress?.progressIsPersisted) {
     return (
       <View style={s.box}>
         <View style={s.headRow}>
-          <Text style={s.boxTitle}>لا توجد خطة فردية لـ{studentName} بعد</Text>
+          <Text style={s.boxTitle}>إنشاء خطة فردية لـ{studentName}</Text>
           {segType && <Badge label={segType} variant={segType === 'حفظ' ? 'green' : 'gold'} />}
         </View>
         {!readOnly && (
           <>
-            <Text style={s.label}>نطاق مخصص (اختياري — افتراضيًا نفس نطاق الخطة)</Text>
+            <Text style={s.label}>
+              اختر النطاق الذي سيحفظه {studentName} — سيُقسَّم على نفس أيام الخطة العامة. يمكن أن تكون نقطة "من" بعد نقطة "إلى" في المصحف (خطة بالعكس).
+            </Text>
             <View style={{ gap: 10 }}>
-              <SurahAyahPicker value={customStart} onChange={setCustomStart} />
-              <SurahAyahPicker value={customEnd} onChange={setCustomEnd} />
+              <FormGroup label="من">
+                <SurahAyahPicker value={customStart} onChange={setCustomStart} />
+              </FormGroup>
+              <FormGroup label="إلى">
+                <SurahAyahPicker value={customEnd} onChange={setCustomEnd} />
+              </FormGroup>
             </View>
             <Button
               label={initProgress.isPending ? 'جارٍ الإنشاء...' : 'إنشاء الخطة الفردية'}
@@ -148,7 +210,9 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
       range: occ.noWard
         ? 'لا يوجد ورد'
         : `${surahName(curOriented.surahStart)}:${curOriented.ayahStart} — ${surahName(curOriented.surahEnd)}:${curOriented.ayahEnd}`,
-      pages: occ.noWard ? '—' : fmtPages(curOriented.pageStart, curOriented.pageEnd),
+      pages: occ.noWard ? '—' : reversed
+        ? `${pageLabel({ surahNumber: occ.surahEnd, ayah: occ.ayahEnd }, 'end')} - ${pageLabel({ surahNumber: occ.surahStart, ayah: occ.ayahStart }, 'start')}`
+        : `${pageLabel({ surahNumber: occ.surahStart, ayah: occ.ayahStart }, 'start')} - ${pageLabel({ surahNumber: occ.surahEnd, ayah: occ.ayahEnd }, 'end')}`,
       strikeRange: changed
         ? `${surahName(baseOriented.surahStart)}:${baseOriented.ayahStart} — ${surahName(baseOriented.surahEnd)}:${baseOriented.ayahEnd}`
         : undefined,
@@ -167,9 +231,9 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
         </View>
         {!readOnly && (
           <Button
-            label={reflow.isPending ? '...' : 'إعادة حساب التوزيع'}
+            label={reflow.isPending ? 'جارٍ إعادة الحساب...' : 'إعادة حساب التوزيع'}
             variant="ghost"
-            onPress={() => reflow.mutate({ planId, studentId })}
+            onPress={() => reflow.mutate({ planId, studentId }, { onError: (e) => toast.error((e as Error).message) })}
             disabled={reflow.isPending}
           />
         )}
@@ -177,7 +241,7 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
 
       {progress.overflowPages > 0 && (
         <Alert variant="warning">
-          يحتاج {studentName} إلى {progress.overflowPages} صفحة إضافية — قد يتطلب الأمر يومًا إضافيًا لإكمال الورد.
+          يوجد {progress.overflowPages} صفحة متبقية بلا مكان في الأيام المتاحة — أضف يومًا جديدًا للخطة العامة لاستيعابها.
         </Alert>
       )}
 
@@ -188,11 +252,54 @@ export default function IndividualPlanPanel({ planId, studentId, studentName, ba
         onPress={() => setShowSchedule(true)}
       />
 
-      <ScheduleSheet
+      {editingIndex != null && (() => {
+        const entry = ownSchedule.find((o) => o.occurrenceIndex === editingIndex);
+        return (
+          <View style={s.editBox}>
+            <Text style={s.boxTitle}>{editingIndex}{entry ? ` · ${fmtShortDate(entry.date)}` : ''}</Text>
+            <FormGroup label="من">
+              <SurahAyahPicker value={rangeStart} onChange={setRangeStart} />
+            </FormGroup>
+            <FormGroup label="إلى">
+              <SurahAyahPicker value={rangeEnd} onChange={setRangeEnd} />
+            </FormGroup>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <View style={{ flex: 1 }}>
+                <FormGroup label="الصفحات">
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <View style={{ flex: 1 }}>
+                      <FormInput keyboardType="number-pad" value={String(pageStart)} onChangeText={(v) => setPageStart(clampInt(v, 604))} />
+                    </View>
+                    <Text style={s.label}>-</Text>
+                    <View style={{ flex: 1 }}>
+                      <FormInput keyboardType="number-pad" value={String(pageEnd)} onChangeText={(v) => setPageEnd(clampInt(v, 604))} />
+                    </View>
+                  </View>
+                </FormGroup>
+              </View>
+              <View style={{ width: 72 }}>
+                <FormGroup label="الجزء">
+                  <FormInput keyboardType="number-pad" value={String(juz)} onChangeText={(v) => setJuz(clampInt(v, 30))} />
+                </FormGroup>
+              </View>
+            </View>
+            {!!error && <Alert variant="error">{error}</Alert>}
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <View style={{ flex: 1 }}>
+                <Button label={updateEntry.isPending ? '...' : 'حفظ'} onPress={saveEdit} disabled={updateEntry.isPending} fullWidth />
+              </View>
+              <Button label="إلغاء" variant="ghost" onPress={() => setEditingIndex(null)} />
+            </View>
+          </View>
+        );
+      })()}
+
+      <PlanStudentScheduleSheet
         visible={showSchedule}
         onClose={() => setShowSchedule(false)}
         title={`توزيع ${studentName}`}
         items={items}
+        onEdit={readOnly ? undefined : startEdit}
       />
     </View>
   );
@@ -205,5 +312,6 @@ function createS(theme: AppTheme) {
     label: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
     muted: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 10 },
     headRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    editBox: { gap: 10, borderWidth: 1, borderColor: theme.green, backgroundColor: theme.greenPale, borderRadius: 10, padding: 10 },
   });
 }

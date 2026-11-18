@@ -7,6 +7,7 @@ import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import { SkeletonRows } from '@/components/ui/Skeleton';
+import ChildSelector from '@/components/domain/ChildSelector';
 import { useParentChildren, useChildAttendance } from '@/lib/queries/parent';
 import { useEvaluations } from '@/lib/queries/evaluations';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -31,13 +32,15 @@ export default function ParentAttendance() {
   const absent = records.filter((r) => r.status === 'غائب').length;
   // Excused (مستأذن) sessions don't count toward the attendance percentage.
   const counted = records.filter((r) => r.status !== 'مستأذن').length;
-  const pct = counted > 0 ? Math.round((present / counted) * 100) : 0;
+  const pct = counted > 0
+    ? Math.round((present / counted) * 100)
+    : (children.find((c) => c._id === childId)?.attendancePct ?? 0);
 
   const STATS = [
     { label: 'نسبة الحضور', value: `${pct}٪`, color: theme.green },
     { label: 'جلسة حضرها', value: present, color: theme.gold },
     { label: 'تأخر', value: late, color: theme.blue },
-    { label: 'غياب', value: absent, color: theme.red },
+    { label: 'غائب', value: absent, color: theme.red },
   ];
 
   const statusVariant = (status: string): 'green' | 'gold' | 'red' | 'blue' =>
@@ -65,6 +68,7 @@ export default function ParentAttendance() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.spinner} colors={[theme.spinner]} />
         }
       >
+        <ChildSelector />
         <StatsRow stats={STATS} />
         <Card>
           <CardHeader title="سجل الحضور" />
@@ -77,6 +81,7 @@ export default function ParentAttendance() {
                 <View style={s.left}>
                   <Text style={s.date}>{new Date(r.date).toLocaleDateString(AR_LOCALE)} — {r.day}</Text>
                   <Text style={s.note}>{r.time}</Text>
+                  {!!(r as { note?: string }).note && <Text style={s.note}>{(r as { note?: string }).note}</Text>}
                 </View>
                 <View style={s.right}>
                   <Badge label={r.status} variant={statusVariant(r.status)} />

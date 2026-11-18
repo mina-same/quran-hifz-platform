@@ -9,6 +9,7 @@ import { useAssignStudent, type Track } from '@/lib/queries/tracks';
 import { useStudents, type Student } from '@/lib/queries/students';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { usePortalStore } from '@/lib/store/portalStore';
+import { toast } from '@/components/ui/Toast';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
@@ -50,7 +51,9 @@ export default function TrackStudentsPanel({ track, canTransfer = true }: { trac
   const barClr = capacityColor(theme, capPct);
   const isFull = enrolledCnt >= track.maxStudents;
   const q = search.trim();
-  const available = allStudents.filter((st) => trackIdOf(st.track) !== track._id && (!q || st.name.includes(q)));
+  // Web keeps a separate transfer search; FormSelect's own search covers it here,
+  // so the enrolled-list search must not narrow the transfer candidates.
+  const available = allStudents.filter((st) => trackIdOf(st.track) !== track._id);
   const shown = enrolled.filter((st) => !q || st.name.includes(q));
 
   return (
@@ -85,17 +88,22 @@ export default function TrackStudentsPanel({ track, canTransfer = true }: { trac
                 options={available.map((st) => ({
                   value: st._id,
                   // The current halqa makes same-name students distinguishable and searchable.
-                  label: typeof st.track === 'object' && st.track?.title ? `${st.name} — ${st.track.title}` : st.name,
+                  label: typeof st.track === 'object' && st.track?.title ? `${st.name} — حالياً في: ${st.track.title}` : st.name,
                 }))}
                 placeholder="اختر طالباً"
               />
             </View>
             <Button
               label="نقل"
-              onPress={() => {
+              loading={assignStudent.isPending}
+              onPress={async () => {
                 if (!addStudentId) return;
-                assignStudent.mutate({ id: track._id, studentId: addStudentId });
-                setAddStudentId('');
+                try {
+                  await assignStudent.mutateAsync({ id: track._id, studentId: addStudentId });
+                  setAddStudentId('');
+                } catch (e) {
+                  toast.error((e as Error).message);
+                }
               }}
               disabled={!addStudentId || assignStudent.isPending}
             />
@@ -134,6 +142,10 @@ export default function TrackStudentsPanel({ track, canTransfer = true }: { trac
             </View>
           );
         })
+      )}
+
+      {canTransfer && (
+        <Text style={s.studentIndex}>لإزالة طالب من المسار، انقله إلى مسار آخر من صفحة إدارة الطلاب.</Text>
       )}
     </View>
   );

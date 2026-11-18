@@ -9,11 +9,11 @@ import { useAppTheme } from '@/lib/hooks/useAppTheme';
 type AppTheme = ReturnType<typeof useAppTheme>;
 
 /**
- * Post-login child picker for the parent portal — rendered once at the top
- * of the dashboard (reachable from every tab, so selecting there is enough
- * for the rest of the portal to read `selectedChildId` from portalStore).
+ * Child picker for the parent portal (web: ParentChildSwitch in the topbar of
+ * every parent page) — rendered at the top of each child-scoped parent screen;
+ * the choice lives in portalStore's `selectedChildId`.
  *
- * - Exactly one child: auto-selected silently, no picker UI.
+ * - No valid selection: first child auto-selected; one child: no picker UI.
  * - Multiple children: horizontal pill picker.
  * - Zero children / loading / error: lightweight inline states.
  */
@@ -25,7 +25,9 @@ export default function ChildSelector() {
   const setSelectedChild = usePortalStore((s) => s.setSelectedChild);
 
   useEffect(() => {
-    if (children && children.length === 1 && selectedChildId !== children[0]._id) {
+    // Web gates the parent portal behind a child pick; here we default to the
+    // first child so every screen shows the same child the pills highlight.
+    if (children?.length && !children.some((c) => c._id === selectedChildId)) {
       setSelectedChild(children[0]._id);
     }
   }, [children, selectedChildId, setSelectedChild]);
@@ -67,6 +69,7 @@ export default function ChildSelector() {
           <Pressable
             haptic="select"
             key={child._id}
+            accessibilityLabel="تغيير الابن"
             onPress={() => setSelectedChild(child._id)}
             style={[s.pill, active && s.pillActive]}
           >

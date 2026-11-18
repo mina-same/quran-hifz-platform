@@ -4691,3 +4691,101 @@
 | 10:58 | Edited quran-hifz-server/src/lib/rankings.ts | excused() → days() | ~62 |
 | 10:59 | rankings avg10 now counts absent days in max (excused excluded) per user | quran-hifz-server/src/lib/rankings.ts | verified 280/300→93% via tsx | ~2k |
 | 10:59 | Session end: 2 writes across 1 files (rankings.ts) | 0 reads | ~127 tok |
+
+## Session: 2026-11-18 08:40
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 08:42 | web-vs-mobile parity audit (read-only): gaps = daily reports, student leaderboard screen, admin promo/rankings report, admin dashboard alerts, teacher/parent conversations | quran-hifz, quran-hifz-mobile | reported to user | ~12k |
+| 08:48 | Created quran-hifz-mobile/lib/queries/dailyReports.ts | — | ~758 |
+| 08:49 | Created quran-hifz-mobile/components/domain/StudentPointsSheet.tsx | — | ~1617 |
+| 08:49 | Created quran-hifz-mobile/components/domain/ConversationsScreen.tsx | — | ~2152 |
+| 08:49 | Created quran-hifz-mobile/components/domain/DailyReportCard.tsx | — | ~4523 |
+| 08:49 | Created quran-hifz-mobile/app/(portal)/student/leaderboard.tsx | — | ~2598 |
+| 08:49 | Created quran-hifz-mobile/components/domain/ThreadScreen.tsx | — | ~2182 |
+| 08:49 | Session end: 6 writes across 6 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 0 reads | ~13830 tok |
+| 08:49 | Created quran-hifz-mobile/components/domain/PromoReportSection.tsx | — | ~4703 |
+| 08:50 | Created quran-hifz-mobile/components/domain/DailyReportComposer.tsx | — | ~3018 |
+| 08:50 | Ported student leaderboard screen + admin dashboard alerts (useDashboardAlerts) to mobile; tsc clean in scratch copy | quran-hifz-mobile/app/(portal)/student/leaderboard.tsx, app/(portal)/admin/dashboard.tsx, lib/queries/stats.ts | ok | ~9k |
+| 08:50 | Created quran-hifz-mobile/app/(portal)/teacher/dailyreport.tsx | — | ~892 |
+| 08:50 | mobile admin reports: ported «تقرير الإنجاز والتميّز» (useRankings + PromoReportSection + StudentPointsSheet); PDF export skipped (no expo-print); tsc NOT run — quran-hifz-mobile/node_modules missing | lib/queries/rankings.ts, components/domain/PromoReportSection.tsx, components/domain/StudentPointsSheet.tsx, app/(portal)/admin/reports.tsx | done, unverified by tsc | ~25k |
+| 08:50 | mobile teacher↔parent conversations: hooks + ConversationsScreen/ThreadScreen + teacher/parent messages+thread routes (tsc not run: no node_modules) | quran-hifz-mobile/lib/queries/messages.ts, components/domain/{ConversationsScreen,ThreadScreen}.tsx, app/(portal)/{teacher,parent}/{messages,thread}.tsx | done, unverified by tsc | ~25k |
+| 08:50 | Session end: 9 writes across 9 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 0 reads | ~22443 tok |
+| 08:50 | Session end: 9 writes across 9 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 0 reads | ~22443 tok |
+| 08:50 | Session end: 9 writes across 9 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 0 reads | ~22443 tok |
+| 08:50 | Created quran-hifz-mobile/app/(portal)/admin/dailyreports.tsx | — | ~2837 |
+| 00:00 | Ported daily reports to mobile (query hooks, teacher composer screen, admin/supervisor list screen, shared DailyReportCard/Composer); tsc clean; nav wiring left to coordinator | quran-hifz-mobile/lib/queries/dailyReports.ts, app/(portal)/{teacher/dailyreport,admin/dailyreports}.tsx, components/domain/DailyReport{Card,Composer}.tsx | done | ~40k |
+| 08:52 | Edited quran-hifz-mobile/app/(portal)/admin/dashboard.tsx | 3→5 lines | ~94 |
+| 08:52 | Edited quran-hifz-mobile/app/(portal)/admin/dashboard.tsx | 3→4 lines | ~38 |
+| 08:53 | ported 5 web-only features to mobile (daily reports, leaderboard, dashboard alerts, admin rankings report, teacher/parent conversations) + nav wiring; tsc 0 errors, jest 99/99 | quran-hifz-mobile | done, untested on device | ~60k |
+| 08:53 | Session end: 12 writes across 11 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 1 reads | ~27790 tok |
+| 09:00 | Created quran-hifz-mobile/lib/pdf.ts | — | ~317 |
+| 09:01 | Session end: 13 writes across 12 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 1 reads | ~28107 tok |
+| 09:03 | Created quran-hifz-mobile/lib/promoReportPdf.ts | — | ~3890 |
+| 09:03 | Created quran-hifz-mobile/components/domain/MessageParentsSheet.tsx | — | ~1368 |
+| 09:03 | Ported web promo-report A4 PDF export to mobile (تحميل PDF button, HTML builder) | quran-hifz-mobile/lib/promoReportPdf.ts, components/domain/PromoReportSection.tsx | tsc clean | ~9k |
+| 09:03 | Mobile daily reports: ported web PDF (single/combined/all) via lib/pdf sharePdf + نسخ النص/واتساب actions | quran-hifz-mobile/components/domain/DailyReportCard.tsx, DailyReportComposer.tsx, app/(portal)/admin/dailyreports.tsx | tsc clean | ~9k |
+| 09:03 | Created quran-hifz-mobile/components/domain/DailyReportPrompt.tsx | — | ~1395 |
+| 09:04 | Mobile port: DailyReportPrompt (teacher attendance + TrackDetail), MessageParentsSheet + useSendToParents, dailyreport track/date params | quran-hifz-mobile/components/domain/{DailyReportPrompt,MessageParentsSheet}.tsx, TrackDetail.tsx, teacher/{attendance,dailyreport}.tsx, lib/queries/messages.ts | tsc clean | ~15k |
+| 09:06 | Edited quran-hifz-mobile/components/domain/DailyReportCard.tsx | CSS: web, https | ~94 |
+| 09:06 | Edited quran-hifz-mobile/lib/pdf.ts | inline fix | ~20 |
+| 09:07 | Session end: 18 writes across 15 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 3 reads | ~39714 tok |
+| 09:08 | parity sweep student/parent (partial, budget stop): tracks empty-state labels aligned to web | quran-hifz-mobile/app/(portal)/student/tracks.tsx | done | ~25k |
+| 09:08 | Created quran-hifz-mobile/components/domain/AdminDeleteStudentDialog.tsx | — | ~926 |
+| 09:08 | admin parity: student delete now offers web's keep/delete-parent choice (AdminDeleteStudentDialog + useDeleteStudentWithParent) | quran-hifz-mobile/app/(portal)/admin/students.tsx, components/domain/AdminDeleteStudentDialog.tsx, lib/queries/students.ts | tsc clean | ~3k |
+| 09:08 | Created quran-hifz-mobile/components/domain/ReportPromoPdfExport.tsx | — | ~948 |
+| 09:08 | Session end: 20 writes across 17 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 6 reads | ~57286 tok |
+| 09:09 | Session end: 20 writes across 17 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 6 reads | ~57286 tok |
+| 09:10 | Reports parity sweep (mobile): promo PDF export (male/female/both) in ReportsScreen export card, logo in promo PDF, insights/tier/dim deltas/KPI status+hint/teacher bars, juz range tap | ReportsScreen.tsx, ReportPromoPdfExport.tsx, StudentReportPanel.tsx, promoReportPdf.ts, reportLogo.ts | tsc clean for owned files | ~60k |
+| 09:10 | parity admin parents/messages/dashboard (unlink error, track search, labels, full msg body+جديد, dashboard stats/KPI progress/path grouping, Western digits) | admin/{parents,dashboard}.tsx, MessagesScreen.tsx | tsc clean for these files | ~9k |
+| 09:10 | Created quran-hifz-mobile/app/(portal)/admin/track-form.tsx | — | ~2668 |
+| 09:11 | parity sweep student+parent: ChildSelector on all parent screens + auto-select first child; parent attendance/recordings labels; myhifz page math = web | mobile parent/*, student/myhifz,attendance, ChildSelector | tsc clean for owned files | ~40k |
+| 09:11 | Session end: 21 writes across 18 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 9 reads | ~82994 tok |
+| 09:11 | Session end: 21 writes across 18 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 9 reads | ~82994 tok |
+| 09:11 | Session end: 21 writes across 18 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 9 reads | ~82994 tok |
+| 09:11 | Admin people/masajid/kpis mobile parity pass (masjid chip, KPI subtitle/CSV, supervisors scope note, empty states, delete error alerts) | mobile admin students/student-form/register/teachers/teacher-form/supervisors/masajid/masjid-form/kpis, MasjidAccordion | tsc clean in owned files | ~25k |
+| 09:13 | Created quran-hifz-mobile/app/(portal)/admin/tracks.tsx | — | ~10886 |
+| 09:13 | Created quran-hifz-mobile/components/domain/TeacherStudentPlanToggle.tsx | — | ~660 |
+| 09:13 | admin tracks parity: list filters/search/pagination/compact card/archive-delete; new track-form route; useDeleteOrArchiveTrack | quran-hifz-mobile/app/(portal)/admin/{tracks,track-form}.tsx, lib/queries/tracks.ts | tsc clean | ~25k |
+| 09:14 | Teacher-area web→mobile parity sweep (dashboard, students, homework, grouphomework, tracks, plans, plan-detail, plan-form roster+admin teacher picker, attendance per-student plan toggle, TrackDetail schedule persist + admin DailyReportPrompt inline, settings confirm validation) | quran-hifz-mobile teacher/* + TrackDetail/DailyReportPrompt/TeacherStudentPlanToggle | tsc clean, jest 99/99 | ~90k |
+| 09:22 | Created quran-hifz-server/.vercelignore | — | ~12 |
+| 09:22 | Created quran-hifz-mobile/eas.json | — | ~118 |
+| 09:23 | full web→mobile parity sweep (admin/teacher/student/parent/reports) + PDFs/clipboard/WhatsApp; eas.json preview APK profile; server .vercelignore. Vercel project creation denied by permission classifier — user to run | quran-hifz-mobile, quran-hifz-server | tsc 0 err, jest 99/99; not run on device | ~large |
+| 09:23 | Session end: 25 writes across 22 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 9 reads | ~94671 tok |
+| 09:24 | Created quran-hifz-mobile/components/ui/Toast.tsx | — | ~727 |
+| 09:24 | Edited quran-hifz-mobile/app/_layout.tsx | 3→4 lines | ~29 |
+| 09:24 | Edited quran-hifz-mobile/app/_layout.tsx | added 1 import(s) | ~36 |
+| 09:26 | Created ../../../.claude/projects/-Users-xontel-Downloads-mina-work-quran-hifz-platform/memory/mobile-parity-content-not-design.md | — | ~275 |
+| 09:26 | Session end: 29 writes across 25 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 19 reads | ~190202 tok |
+| 09:26 | Created quran-hifz-mobile/app/(portal)/admin/reports.tsx | — | ~473 |
+| 09:27 | Created quran-hifz-mobile/components/domain/ReportChartLine.tsx | — | ~1447 |
+| 09:27 | Edited quran-hifz-mobile/components/domain/ReportChartLine.tsx | inline fix | ~7 |
+| 09:28 | Created quran-hifz-mobile/app/(portal)/student/points.tsx | — | ~1343 |
+| 09:28 | Created quran-hifz-mobile/components/domain/TrackDetailScheduleSheet.tsx | — | ~3390 |
+| 09:28 | Edited quran-hifz-mobile/components/domain/StudentReportPanel.tsx | inline fix | ~35 |
+| 09:28 | Teacher attendance parity: roster save flow -> web toasts, no-plan alert text, card gating, history date, picker action btn, reverse-ward text, readOnly gate | EvaluationRoster.tsx, attendance.tsx, OpenWardPicker.tsx | tsc 1 foreign err, jest 99 pass | ~60k |
+| 09:28 | Reports parity: masjid-grouped scope chips + clear btn, panels hidden w/o evals, web panel order, ReportChartLine svg trend chart (tap value), full juz from/to rows, comparison fields /max + avg bar, PDF export toasts | quran-hifz-mobile/components/domain/{ReportsScreen,StudentReportPanel,ReportPromoPdfExport,ReportChartLine}.tsx | tsc clean for these files | ~60k |
+| 09:29 | Session end: 35 writes across 30 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 22 reads | ~206293 tok |
+| 09:29 | Edited quran-hifz-mobile/app/(portal)/teacher/attendance.tsx | CSS: display | ~36 |
+| 09:29 | Edited quran-hifz-mobile/app/(portal)/teacher/attendance.tsx | CSS: display | ~33 |
+| 09:29 | Edited quran-hifz-mobile/components/domain/ReportsScreen.tsx | "${s.count} جلسة تقييم" → "${s.avgTotal}/${TOTAL_MAX" | ~30 |
+| 09:29 | Edited quran-hifz-mobile/components/domain/ReportsScreen.tsx | "${s.count} جلسة تقييم · ت" → "${s.avgTotal}/${TOTAL_MAX" | ~34 |
+| 09:29 | Session end: 39 writes across 32 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 23 reads | ~207096 tok |
+| 09:29 | Mobile content/nav parity with web: portals.ts nav mirrors web, removed teacher/evaluate route, admin reports promo-only, static mock content (student dashboard/points/store/schedule, parent notifs, teacher top students/individual HW/سجّل), removed admin آخر التسجيلات | quran-hifz-mobile/app/(portal)/**, lib/constants/portals.ts | tsc clean in owned files | ~40k |
+| 09:30 | Session end: 39 writes across 32 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 24 reads | ~210486 tok |
+| 09:30 | Quran-plan mobile parity: plan-form stays on form after save (toast), web defaults/texts/preview/targetType students, plans/plan-detail texts+delete toast, IndividualPlanPanel per-row edit | teacher/plan-form.tsx, plans.tsx, plan-detail.tsx, IndividualPlanPanel.tsx, +PlanStudentPicker.tsx, +PlanStudentScheduleSheet.tsx | tsc clean for these files, jest 99 pass | ~60k |
+| 09:31 | Edited quran-hifz-mobile/components/domain/TrackStudentsPanel.tsx | 5→9 lines | ~52 |
+| 09:31 | Session end: 40 writes across 33 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 25 reads | ~212744 tok |
+| 09:31 | Mobile TrackDetail parity: day-split row editing (TrackDetailScheduleSheet), web texts/toasts, ContextCard/TrackStudentsPanel/MessageParentsSheet alignment | quran-hifz-mobile/components/domain/{TrackDetail,TrackDetailScheduleSheet,TrackStudentsPanel,MessageParentsSheet,ContextCard}.tsx | tsc+jest pass | ~60k |
+| 09:32 | Session end: 40 writes across 33 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 26 reads | ~214112 tok |
+| 09:34 | Track-detail parity: «تسجيل الحضور» button (teacher→attendance?trackId&ts, admin→students tab), attendance.tsx trackId prefill, EvaluationRoster noActivePlan gate, ContextCard drop status/capacity | TrackDetail.tsx, attendance.tsx, EvaluationRoster.tsx, ContextCard.tsx | tsc+jest pass | ~25k |
+| 09:35 | Session end: 40 writes across 33 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 26 reads | ~214112 tok |
+| 09:35 | toast parity: admin people/tracks/track-form/dailyreports, DailyReportCard/Composer, homework/grouphomework, ThreadScreen, PromoReportSection → toast; CredentialsDialog subtitle; AccountSettings per-field pw errors | ~16 files | tsc+jest pass | ~25k |
+| 09:36 | mobile content parity 100% pass (attendance, track detail incl. day-split edit, plans, reports charts, content/nav, toasts via components/ui/Toast, credentials subtitle) | quran-hifz-mobile (~95 files) | tsc 0, jest 99/99, not run on device | ~large |
+| 09:36 | Session end: 40 writes across 33 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 26 reads | ~214112 tok |
+| 09:38 | Session end: 40 writes across 33 files (dailyReports.ts, StudentPointsSheet.tsx, ConversationsScreen.tsx, DailyReportCard.tsx, leaderboard.tsx) | 26 reads | ~214112 tok |
+
+## Session: 2026-11-18 09:41
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

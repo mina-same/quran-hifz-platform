@@ -71,11 +71,11 @@ export default function MessagesScreen({ compose }: { compose?: ReactNode }) {
                     <Text style={styles.sender}>{msg.senderName}</Text>
                     <View style={styles.timeRow}>
                       <Text style={styles.time}>{new Date(msg.createdAt).toLocaleDateString(AR_LOCALE)}</Text>
-                      {unread && <View style={styles.unreadDot} />}
                     </View>
                   </View>
                   <Badge label={ROLE_AR[msg.senderRole] ?? msg.senderRole} variant="gray" />
-                  <Text style={styles.preview} numberOfLines={2}>{msg.body}</Text>
+                  <Text style={styles.preview}>{msg.body}</Text>
+                  {unread && <View style={styles.newBadge}><Badge label="جديد" variant="green" /></View>}
                 </View>
               </Pressable>
             );
@@ -104,7 +104,7 @@ function createStyles(theme: AppTheme) {
     sender: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
     timeRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     time: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
-    unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: theme.red },
+    newBadge: { alignSelf: 'flex-start' },
     preview: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted, lineHeight: 18 },
   });
 }

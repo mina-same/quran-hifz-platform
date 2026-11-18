@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
+import { SURAHS } from '@/lib/data/surahs';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
@@ -13,7 +14,7 @@ import { useEvaluations, type EvaluationRecord } from '@/lib/queries/evaluations
 import { MAX_SCORES, legacyScoresOf } from '@/lib/evaluationRubric';
 import { toFlatIndex, fromFlatIndex, juzFlatRange, coveredFlatRanges } from '@/lib/quranRange';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
-import { AR_LOCALE } from '@/lib/date';
+import ReportChartLine from '@/components/domain/ReportChartLine';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 type ReportStudent = { _id: string; name: string };
@@ -24,6 +25,10 @@ const JUZ_VARIANT: Record<JuzStatus, 'green' | 'gold' | 'gray'> = {
   'قيد الحفظ': 'gold',
   'غير مخصص': 'gray',
 };
+
+function surahName(n: number) {
+  return SURAHS.find((x) => x.number === n)?.name ?? '';
+}
 
 function studentIdOf(e: EvaluationRecord): string {
   return typeof e.student === 'string' ? e.student : e.student._id;
@@ -144,11 +149,11 @@ export default function StudentReportPanel({ students, aggregateFilter, aggregat
     () =>
       [...studentEvals]
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-        .slice(-8)
-        .map((e) => ({
-          date: new Date(e.date).toLocaleDateString(AR_LOCALE, { month: 'numeric', day: 'numeric' }),
-          total: e.total,
-        })),
+        .map((e) => {
+          const d = new Date(e.date);
+          // Western digits on screen (user decision) — same m/d form ReportsScreen uses.
+          return { label: `${d.getMonth() + 1}/${d.getDate()}`, value: e.total };
+        }),
     [studentEvals],
   );
 
@@ -198,8 +203,6 @@ export default function StudentReportPanel({ students, aggregateFilter, aggregat
       sessionsLogged: allEvals.length,
     };
   }, [comparisonRows, allEvals]);
-
-  const maxTrend = trend.length ? Math.max(...trend.map((t) => t.total), 10) : 10;
 
   return (
     <>
@@ -254,22 +257,8 @@ export default function StudentReportPanel({ students, aggregateFilter, aggregat
               </View>
             ))}
 
-            {trend.length > 1 && (
-              <>
-                <Text style={s.sectionTitle}>تطور المجموع عبر الزمن</Text>
-                {/* Bars, not a line chart: a handful of sessions reads better as
-                    labelled rows than as a sparkline squeezed into a phone width. */}
-                {trend.map((t, i) => (
-                  <View key={`${t.date}-${i}`} style={s.trendRow}>
-                    <Text style={s.trendDate}>{t.date}</Text>
-                    <View style={s.trendTrack}>
-                      <View style={[s.trendFill, { width: `${(t.total / maxTrend) * 100}%` }]} />
-                    </View>
-                    <Text style={s.trendValue}>{t.total}</Text>
-                  </View>
-                ))}
-              </>
-            )}
+            <Text style={s.sectionTitle}>تطور المجموع عبر الزمن</Text>
+            <ReportChartLine data={trend} color={theme.greenAccent} />
           </>
         )}
 
@@ -283,15 +272,17 @@ export default function StudentReportPanel({ students, aggregateFilter, aggregat
                 <Badge label={`غير مخصص: ${juzSummary.notAssigned}`} variant="gray" />
               </View>
             </View>
-            <View style={s.juzGrid}>
-              {juzRows.map((r) => {
-                const tone = theme.tone[JUZ_VARIANT[r.status]];
-                return (
-                  <View key={r.juz} style={[s.juzCell, { backgroundColor: tone.bg, borderColor: tone.border }]}>
-                    <Text style={[s.juzNum, { color: tone.text }]}>{r.juz}</Text>
-                  </View>
-                );
-              })}
+            {/* Web's الجزء / من / إلى / الحالة table as compact rows. */}
+            <View style={s.juzList}>
+              {juzRows.map((r) => (
+                <View key={r.juz} style={[s.juzRow, r.juz > 1 && s.cmpBorder]}>
+                  <Text style={s.juzNum}>{r.juz}</Text>
+                  <Text style={s.juzRange}>
+                    من {surahName(r.from.surahNumber)} : {r.from.ayah} · إلى {surahName(r.to.surahNumber)} : {r.to.ayah}
+                  </Text>
+                  <Badge label={r.status} variant={JUZ_VARIANT[r.status]} />
+                </View>
+              ))}
             </View>
           </>
         )}
@@ -299,20 +290,22 @@ export default function StudentReportPanel({ students, aggregateFilter, aggregat
 
       {comparisonRows.length > 0 && (
         <Card>
-          <CardHeader title={aggregateTitle} subtitle={`${comparisonRows.length} طالب`} />
+          <CardHeader title={aggregateTitle} />
           {comparisonRows.map((r, i) => (
             <View key={r.name} style={[s.cmpRow, i > 0 && s.cmpBorder]}>
               <View style={s.cmpHead}>
                 <Text style={s.cmpRank}>#{i + 1}</Text>
                 <Text style={s.cmpName} numberOfLines={1}>{r.name}</Text>
-                <Badge label={`${r.avgTotal}/10`} variant={r.avgTotal >= 8 ? 'green' : r.avgTotal >= 6 ? 'gold' : 'red'} />
+                <Text style={s.cmpTotal}>{r.avgTotal}/10</Text>
               </View>
+              {/* Web's per-student average bar chart (0–10). */}
+              <ProgressBar value={r.avgTotal} max={10} color={theme.greenAccent} showPercent={false} />
               <View style={s.cmpChips}>
-                <View style={s.chip}><Text style={s.chipText}>الحضور {r.attendancePct}٪</Text></View>
-                <View style={s.chip}><Text style={s.chipText}>حفظ {r.avgHifz}</Text></View>
-                <View style={s.chip}><Text style={s.chipText}>تجويد {r.avgTajweed}</Text></View>
-                <View style={s.chip}><Text style={s.chipText}>تلاوة {r.avgTalawah}</Text></View>
-                <View style={s.chip}><Text style={s.chipText}>{r.count} جلسة</Text></View>
+                <View style={s.chip}><Text style={s.chipText}>نسبة الحضور {r.attendancePct}٪</Text></View>
+                <View style={s.chip}><Text style={s.chipText}>متوسط الحفظ {r.avgHifz}/{MAX_SCORES.hifz}</Text></View>
+                <View style={s.chip}><Text style={s.chipText}>متوسط التجويد {r.avgTajweed}/{MAX_SCORES.tajweed}</Text></View>
+                <View style={s.chip}><Text style={s.chipText}>متوسط التلاوة {r.avgTalawah}/{MAX_SCORES.talawah}</Text></View>
+                <View style={s.chip}><Text style={s.chipText}>عدد الجلسات {r.count}</Text></View>
               </View>
             </View>
           ))}
@@ -341,26 +334,19 @@ function createS(theme: AppTheme) {
     dimLabel: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
     dimValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
 
-    trendRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
-    trendDate: { width: 46, fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted },
-    trendTrack: { flex: 1, height: 8, backgroundColor: theme.border, borderRadius: 999, overflow: 'hidden' },
-    trendFill: { height: '100%', borderRadius: 999, backgroundColor: theme.mode === 'dark' ? theme.greenLight : theme.green },
-    trendValue: { width: 26, fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.text, textAlign: 'center' },
-
     juzHead: { gap: 8, marginTop: 4 },
     juzBadges: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-    juzGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
-    juzCell: {
-      width: 38, height: 34, borderRadius: theme.radiusSm, borderWidth: 1,
-      alignItems: 'center', justifyContent: 'center',
-    },
-    juzNum: { fontSize: 12, fontFamily: theme.fontCairoBold },
+    juzList: { marginTop: 10 },
+    juzRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 7 },
+    juzNum: { width: 22, fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, textAlign: 'center' },
+    juzRange: { flex: 1, fontSize: 12, fontFamily: theme.fontCairo, color: theme.text },
 
     cmpRow: { paddingVertical: 10, gap: 6 },
     cmpBorder: { borderTopWidth: 1, borderTopColor: theme.border },
     cmpHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     cmpRank: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.textMuted },
     cmpName: { flex: 1, fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    cmpTotal: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
     cmpChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     chip: { backgroundColor: theme.tone.gray.bg, borderRadius: theme.radiusSm, paddingHorizontal: 8, paddingVertical: 3 },
     chipText: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.tone.gray.text },

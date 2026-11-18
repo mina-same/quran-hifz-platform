@@ -14,8 +14,8 @@ import { createMoreTabButton } from '@/components/layout/MoreTabButton';
 // Nav items with no tab of their own — the "المزيد" sheet lists exactly these.
 // A supervisor (who reuses this same tab layout) never sees "register" (a
 // pure-create page, gated by readOnly anyway) or "supervisors" (admin-only).
-const ADMIN_MORE_IDS = ['register', 'teachers', 'parents', 'masajid', 'supervisors', 'messages'];
-const SUPERVISOR_MORE_IDS = ['teachers', 'parents', 'masajid', 'messages'];
+const ADMIN_MORE_IDS = ['register', 'teachers', 'parents', 'masajid', 'supervisors', 'messages', 'dailyreports'];
+const SUPERVISOR_MORE_IDS = ['teachers', 'parents', 'masajid', 'messages', 'dailyreports'];
 
 export default function AdminTabLayout() {
   const theme = useAppTheme();
@@ -58,6 +58,7 @@ export default function AdminTabLayout() {
       <Tabs.Screen name="parents" options={{ href: null, title: 'أولياء الأمور' }} />
       <Tabs.Screen name="supervisors" options={{ href: null, title: 'المشرفون' }} />
       <Tabs.Screen name="messages" options={{ href: null, title: 'الرسائل' }} />
+      <Tabs.Screen name="dailyreports" options={{ href: null, title: 'التقارير اليومية' }} />
       {/* Add/edit forms are full pages, not modals: their <FormSelect> pickers are
           bottom sheets from the app-root host, which an RN Modal would cover. */}
       <Tabs.Screen name="masjid-form"  options={{ href: null, title: 'بيانات المسجد' }} />
@@ -66,6 +67,7 @@ export default function AdminTabLayout() {
       {/* Pushed from the track drill-down's plan tab (تعديل الخطة / إنشاء خطة جديدة).
           Must live in this navigator — see the note in admin/plan-form.tsx. */}
       <Tabs.Screen name="plan-form"    options={{ href: null, title: 'خطة الحفظ' }} />
+      <Tabs.Screen name="track-form"   options={{ href: null, title: 'بيانات المسار' }} />
     </Tabs>
 
     <MoreSheet

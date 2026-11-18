@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Tabs } from 'expo-router';
 import {
-  IconHome, IconBook, IconMicrophone, IconMessage, IconCalendarCheck, IconDots,
+  IconHome, IconBook, IconMessage, IconCalendarCheck, IconDots,
 } from '@tabler/icons-react-native';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -11,7 +11,7 @@ import MoreSheet from '@/components/layout/MoreSheet';
 import { createMoreTabButton } from '@/components/layout/MoreTabButton';
 
 // Nav items with no tab of their own — the "المزيد" sheet lists exactly these.
-const MORE_IDS = ['schedule', 'tracks', 'points', 'store', 'settings'];
+const MORE_IDS = ['schedule', 'tracks', 'points', 'leaderboard', 'store', 'settings'];
 
 export default function StudentTabLayout() {
   const theme = useAppTheme();
@@ -36,7 +36,6 @@ export default function StudentTabLayout() {
     >
       <Tabs.Screen name="dashboard"  options={{ title: 'لوحتي',   tabBarIcon: ({ color, size }) => <IconHome          size={size} color={color} /> }} />
       <Tabs.Screen name="myhifz"     options={{ title: 'حفظي',    tabBarIcon: ({ color, size }) => <IconBook          size={size} color={color} /> }} />
-      <Tabs.Screen name="homework"   options={{ title: 'الواجب',  tabBarIcon: ({ color, size }) => <IconMicrophone    size={size} color={color} />, tabBarBadge: '!' }} />
       <Tabs.Screen name="attendance" options={{ title: 'الحضور',  tabBarIcon: ({ color, size }) => <IconCalendarCheck size={size} color={color} /> }} />
       <Tabs.Screen name="messages"   options={{ title: 'الرسائل', tabBarIcon: ({ color, size }) => <IconMessage       size={size} color={color} /> }} />
       {/* Opens the sheet instead of navigating to the (empty) more route. */}
@@ -45,6 +44,8 @@ export default function StudentTabLayout() {
         options={{ title: 'المزيد', tabBarIcon: ({ color, size }) => <IconDots size={size} color={color} />, tabBarButton: MoreTabButton }}
       />
       {/* Reachable from the "المزيد" sheet only. */}
+      {/* Not in web's student nav — route kept for deep links only. */}
+      <Tabs.Screen name="homework" options={{ href: null, title: 'الواجب' }} />
       <Tabs.Screen name="schedule" options={{ href: null, title: 'المواعيد' }} />
       <Tabs.Screen name="points"   options={{ href: null, title: 'نقاطي' }} />
       <Tabs.Screen name="leaderboard" options={{ href: null, title: 'لوحة الشرف' }} />

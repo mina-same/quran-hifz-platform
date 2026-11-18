@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
+import { toast } from '@/components/ui/Toast';
 import { useRouter } from 'expo-router';
 import { IconPencil, IconTrash } from '@tabler/icons-react-native';
 import Text from '@/components/ui/Text';
@@ -41,8 +42,9 @@ export default function AdminTeachers() {
     if (!deleteId) return;
     try {
       await deleteTeacher.mutateAsync(deleteId);
-    } finally {
       setDeleteId(null);
+    } catch (e) {
+      toast.error((e as Error).message);
     }
   }
 
@@ -64,7 +66,7 @@ export default function AdminTeachers() {
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
             {isLoading && <SkeletonRows count={5} />}
             {isError && <Text style={s.error}>تعذّر تحميل بيانات المعلمين</Text>}
-            {!isLoading && teachers.length === 0 && <Text style={s.muted}>لا يوجد معلمون مسجلون بعد</Text>}
+            {!isLoading && !isError && teachers.length === 0 && <Text style={s.muted}>لا يوجد معلمون مسجلون</Text>}
 
             {teachers.map((t, i) => (
               <View key={t._id} style={[s.row, i > 0 && s.rowBorder]}>

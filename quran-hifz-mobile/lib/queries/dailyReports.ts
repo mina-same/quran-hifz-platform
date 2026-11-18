@@ -1,0 +1,80 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { get, post } from '@/lib/api';
+
+/** One student line in the daily halqa report. */
+export type ReportLine = { student: string; name: string; area?: string; note?: string };
+
+/** «التقرير اليومي للحلقة» — sent by the teacher after the session. */
+export type DailyReport = {
+  _id?: string;
+  track: string;
+  date: string;
+  trackTitle: string;
+  masjidName: string;
+  teacherName?: string;
+  struggling: ReportLine[];
+  absent: ReportLine[];
+  excused: ReportLine[];
+  presentCount: number;
+  totalCount: number;
+  notes?: string;
+  updatedAt?: string;
+  /** Set by the server when the day's attendance/evaluations were edited
+   *  after the report was sent: what the records say now vs. the report. */
+  changes?: ReportChanges | null;
+};
+
+export type ReportChanges = {
+  sections: {
+    key: 'struggling' | 'absent' | 'excused';
+    added: string[];
+    removed: string[];
+    changed: { name: string; from: string; to: string }[];
+  }[];
+  present?: { from: number; to: number };
+  grades?: {
+    studentName: string;
+    editedByName: string;
+    at: string;
+    changes: { label: string; from: string; to: string }[];
+  }[];
+};
+
+type DraftResponse = {
+  success: boolean;
+  /** False when nothing was recorded for that day yet (attendance/evaluation). */
+  recorded: boolean;
+  saved: DailyReport | null;
+  draft: DailyReport;
+  students: { _id: string; name: string }[];
+};
+
+export function useDailyReportDraft(track: string | undefined, date: string) {
+  return useQuery({
+    queryKey: ['daily-report-draft', track ?? '', date],
+    queryFn: () => get<DraftResponse>(`/daily-reports/draft?track=${track}&date=${date}`),
+    enabled: !!track && !!date,
+  });
+}
+
+export function useSendDailyReport() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Omit<DailyReport, '_id' | 'trackTitle' | 'masjidName' | 'teacherName' | 'updatedAt'>) =>
+      post<{ success: boolean; data: DailyReport }>('/daily-reports', body).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['daily-reports'] });
+      qc.invalidateQueries({ queryKey: ['daily-report-draft'] });
+    },
+  });
+}
+
+export function useDailyReports(filter: { date?: string; from?: string; to?: string; track?: string }) {
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(filter)) if (v) params.set(k, v);
+  const qs = params.toString();
+  return useQuery({
+    queryKey: ['daily-reports', qs],
+    queryFn: () => get<{ success: boolean; data: DailyReport[] }>(`/daily-reports?${qs}`).then((r) => r.data),
+  });
+}

@@ -13,7 +13,8 @@ import {
   type Track,
   type TrackTeacher,
 } from '@/lib/queries/tracks';
-import { useQuranPlans } from '@/lib/queries/quranPlan';
+import { useQuranPlans, isSlice, segmentReversed } from '@/lib/queries/quranPlan';
+import { orientSlice, surahName } from '@/lib/quranRange';
 import { planScheduleDays, planScheduleRange, resolveLinkedPlan, NO_PLAN_SCHEDULE_TEXT } from '@/lib/trackSchedule';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -93,6 +94,23 @@ function TrackCard({ track, onOpenDetail }: { track: Track; onOpenDetail: () => 
         <ProgressBar value={pct} showPercent={false} />
       </View>
 
+      {!!linkedPlan?.todayAssignments?.length && (
+        <View style={s.todayBox}>
+          <Text style={s.todayLabel}>الجزء المطلوب اليوم</Text>
+          {linkedPlan.todayAssignments.map((entry, idx) => {
+            const prefix = linkedPlan.todayAssignments.length > 1 ? `${entry.type} · ` : '';
+            if (!isSlice(entry)) {
+              return <Text key={idx} style={s.todayText}>{prefix}ورد حر — يُسجَّل في الحلقة</Text>;
+            }
+            const a = orientSlice(entry, segmentReversed(linkedPlan, entry.type));
+            return (
+              <Text key={idx} style={s.todayText}>
+                {prefix}{surahName(a.surahStart)} : {a.ayahStart} — {surahName(a.surahEnd)} : {a.ayahEnd}
+              </Text>
+            );
+          })}
+        </View>
+      )}
       {track.isOnline && track.meetLink && (
         <Text style={s.meetLink}>رابط الجلسة: {track.meetLink}</Text>
       )}
@@ -127,7 +145,10 @@ export default function TeacherTracks() {
         {isLoading && <SkeletonRows count={3} rowHeight={220} gap={14} />}
 
         {!isLoading && tracks.length === 0 && (
-          <Text style={s.muted}>لا توجد مسارات مُسنَدة إليك</Text>
+          <>
+            <Text style={s.muted}>لا توجد مسارات مُسنَدة إليك</Text>
+            <Text style={s.muted}>عندما تُعيّنك الإدارة لمسار سيظهر هنا تلقائياً</Text>
+          </>
         )}
 
         {active.length > 0 && (
@@ -171,6 +192,9 @@ function createS(theme: AppTheme) {
     capacityRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
     capacityLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
     capacityValue: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.text },
+    todayBox: { borderRadius: 10, padding: 10, backgroundColor: theme.greenPale, gap: 3, marginBottom: 10 },
+    todayLabel: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.green },
+    todayText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
     meetLink: { fontSize: 11, color: theme.blue, fontFamily: theme.fontCairo, marginBottom: 10 },
   });
 }

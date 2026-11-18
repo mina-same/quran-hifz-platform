@@ -10,6 +10,8 @@ export interface LeaderboardRow {
   value: number;
   max?: number;
   sub?: string;
+  /** Text shown instead of the bare value, e.g. "8.5/10" or "92%" (web parity). */
+  display?: string;
 }
 
 interface Props {
@@ -52,7 +54,7 @@ export default function Leaderboard({ rows, variant = 'leader' }: Props) {
             {row.sub && <Text style={styles.sub} numberOfLines={1}>{row.sub}</Text>}
             <ProgressBar value={row.value} max={row.max ?? 100} color={tone} showPercent={false} />
           </View>
-          <Text style={[styles.value, { color: tone }]}>{row.value}</Text>
+          <Text style={[styles.value, { color: tone }]}>{row.display ?? row.value}</Text>
         </View>
       ))}
     </View>

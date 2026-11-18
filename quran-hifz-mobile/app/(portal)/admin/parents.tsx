@@ -8,6 +8,7 @@ import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
+import { toast } from '@/components/ui/Toast';
 import Button from '@/components/ui/Button';
 import BottomSheet from '@/components/ui/BottomSheet';
 import { SkeletonRows } from '@/components/ui/Skeleton';
@@ -175,7 +176,12 @@ export default function AdminParents() {
   }
 
   async function handleUnlink(parentId: string, studentId: string) {
-    await unlinkChild.mutateAsync({ parentId, studentId });
+    try {
+      await unlinkChild.mutateAsync({ parentId, studentId });
+    } catch (e) {
+      toast.error((e as ApiError).message);
+      return;
+    }
     setLinkParent((p) => (p && p._id === parentId ? { ...p, children: p.children.filter((c) => c._id !== studentId) } : p));
   }
 
@@ -187,7 +193,11 @@ export default function AdminParents() {
 
   const linkedIds = new Set(linkParent?.children.map((c) => c._id) ?? []);
   const availableStudents = students.filter((s) => !linkedIds.has(s._id));
-  const studentOptions = availableStudents.map((s) => ({ value: s._id, label: s.name }));
+  // Label carries the halqa so the picker's search matches name OR track, like web.
+  const studentOptions = availableStudents.map((s) => {
+    const track = typeof s.track === 'object' && s.track ? s.track.title : '';
+    return { value: s._id, label: track ? `${s.name} — ${track}` : s.name };
+  });
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -196,7 +206,7 @@ export default function AdminParents() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
-        {isError && <Alert variant="error">تعذر تحميل بيانات أولياء الأمور</Alert>}
+        {isError && <Alert variant="error">تعذّر تحميل بيانات أولياء الأمور</Alert>}
 
         <Card>
           <FormInput
@@ -219,10 +229,10 @@ export default function AdminParents() {
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
             {isLoading && <SkeletonRows count={4} />}
 
-            {!isLoading && parents.length === 0 && (
+            {!isLoading && !isError && parents.length === 0 && (
               <Text style={styles.empty}>لا يوجد أولياء أمور مسجلون بعد</Text>
             )}
-            {!isLoading && parents.length > 0 && filtered.length === 0 && (
+            {!isLoading && !isError && parents.length > 0 && filtered.length === 0 && (
               <Text style={styles.empty}>لا توجد نتائج مطابقة لبحثك</Text>
             )}
 
@@ -251,7 +261,7 @@ export default function AdminParents() {
                 {!readOnly && (
                   <View style={styles.actionsRow}>
                     <Button label="تعديل" variant="ghost" icon={<IconPencil size={14} color={theme.green} />} onPress={() => openEdit(p)} />
-                    <Button label="ربط ابن" variant="ghost" icon={<IconLink size={14} color={theme.green} />} onPress={() => openLink(p)} />
+                    <Button label="ربط" variant="ghost" icon={<IconLink size={14} color={theme.green} />} onPress={() => openLink(p)} />
                   </View>
                 )}
               </View>
@@ -272,7 +282,7 @@ export default function AdminParents() {
             <FormInput value={addForm.email} onChangeText={(v) => setAddField('email', v)} placeholder="parent@example.com" autoCapitalize="none" keyboardType="email-address" />
           </FormGroup>
           <FormGroup label="كلمة المرور" required>
-            <FormInput value={addForm.password} onChangeText={(v) => setAddField('password', v)} placeholder="٦ أحرف على الأقل" secureTextEntry />
+            <FormInput value={addForm.password} onChangeText={(v) => setAddField('password', v)} placeholder="6 أحرف على الأقل" secureTextEntry />
           </FormGroup>
           <Button
             label={createParent.isPending ? 'جارٍ الإنشاء...' : 'إنشاء الحساب'}
@@ -290,7 +300,7 @@ export default function AdminParents() {
             <IconCircleCheck size={40} color={theme.green} />
             <Text style={[styles.sheetTitle, { paddingHorizontal: 0, marginTop: 10 }]}>تم إنشاء حساب ولي الأمر</Text>
             <Text style={{ fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted, textAlign: 'center', marginTop: 4 }}>
-              احتفظ ببيانات الدخول وأرسلها لولي الأمر — لن تظهر مرة أخرى
+              احتفظ ببيانات الدخول وأرسلها لولي الأمر
             </Text>
           </View>
           {credentials && (
@@ -338,7 +348,7 @@ export default function AdminParents() {
         <View style={styles.sheetBody}>
           {linkParent && linkParent.children.length > 0 && (
             <View style={{ gap: 6 }}>
-              <Text style={styles.childLabel}>الأبناء الحاليون</Text>
+              <Text style={styles.childLabel}>الأبناء الحاليون:</Text>
               <View style={styles.childrenWrap}>
                 {linkParent.children.map((c) => (
                   <ChildChip key={c._id} name={c.name} theme={theme} onRemove={readOnly ? undefined : () => handleUnlink(linkParent._id, c._id)} />
@@ -351,7 +361,8 @@ export default function AdminParents() {
               options={studentOptions}
               value={selectedStudentId}
               onChange={setSelectedStudentId}
-              placeholder="— اختر طالباً —"
+              placeholder="ابحث باسم الطالب أو الحلقة…"
+              searchable
             />
           </FormGroup>
           <Button

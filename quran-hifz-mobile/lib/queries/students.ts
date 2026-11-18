@@ -93,3 +93,16 @@ export function useDeleteStudent() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['students'] }),
   });
 }
+
+/** Same as useDeleteStudent, plus web's «حذف الطالب وولي أمره معاً» option (?withParent=true). */
+export function useDeleteStudentWithParent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, withParent }: { id: string; withParent?: boolean }) =>
+      del(`/students/${id}${withParent ? '?withParent=true' : ''}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['students'] });
+      qc.invalidateQueries({ queryKey: ['admin-parents'] });
+    },
+  });
+}

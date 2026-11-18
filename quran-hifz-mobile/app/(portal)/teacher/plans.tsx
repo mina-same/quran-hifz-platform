@@ -15,10 +15,11 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import IconButton from '@/components/ui/IconButton';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import Alert from '@/components/ui/Alert';
+import Button from '@/components/ui/Button';
+import { toast } from '@/components/ui/Toast';
 import { useQuranPlans, useDeleteQuranPlan, segmentReversed, isOpenPlan, isSlice, type QuranPlan } from '@/lib/queries/quranPlan';
 import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
-import { fmtDate } from '@/lib/date';
+import { fmtDateShort } from '@/lib/date';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
@@ -32,9 +33,9 @@ const STATUS_VARIANT: Record<QuranPlan['status'], 'green' | 'gold' | 'gray'> = {
 
 function targetLabel(plan: QuranPlan): string {
   if (plan.targetType === 'track') {
-    return typeof plan.track === 'object' ? plan.track?.title ?? '—' : '—';
+    return plan.track ? (typeof plan.track === 'object' ? plan.track.title : plan.track) : '—';
   }
-  return `${plan.students?.length ?? 0} طالب محدد`;
+  return `${plan.students?.length ?? 0} طالب`;
 }
 
 function pointLabel(p: { surahNumber: number; ayah: number }) {
@@ -42,8 +43,8 @@ function pointLabel(p: { surahNumber: number; ayah: number }) {
 }
 
 /** One label/value line in the plan card's detail grid. */
-function InfoRow({ icon, label, value, full }: {
-  icon: React.ReactNode; label: string; value: string; full?: boolean;
+function InfoRow({ icon, label, value, full, onPress }: {
+  icon: React.ReactNode; label: string; value: string; full?: boolean; onPress?: () => void;
 }) {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
@@ -52,14 +53,21 @@ function InfoRow({ icon, label, value, full }: {
       {icon}
       <View style={{ flex: 1 }}>
         <Text style={s.infoLabel}>{label}</Text>
-        <Text style={s.infoValue} numberOfLines={2}>{value}</Text>
+        {onPress ? (
+          <Pressable onPress={onPress} hitSlop={6} accessibilityRole="link">
+            <Text style={[s.infoValue, s.infoLink]} numberOfLines={2}>{value} ←</Text>
+          </Pressable>
+        ) : (
+          <Text style={s.infoValue} numberOfLines={2}>{value}</Text>
+        )}
       </View>
     </View>
   );
 }
 
-function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
+function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete, onViewTrack }: {
   plan: QuranPlan;
+  onViewTrack: () => void;
   onPress: () => void;
   onEdit: () => void;
   onDuplicate: () => void;
@@ -67,14 +75,7 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
 }) {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
-  // Direction is per segment — today's ward is oriented by the type due today.
-  const assignments = plan.todayAssignments.filter(isSlice).map((a) => ({
-    ...orientSlice(a, segmentReversed(plan, a.type)),
-    type: a.type,
-    reversed: segmentReversed(plan, a.type),
-  }));
-  // Open-ward days: due, but nothing fixed to show.
-  const openDue = plan.todayAssignments.filter((a) => !isSlice(a)).map((a) => a.type);
+  const hasToday = plan.todayAssignments.length > 0;
   const progressLabel = plan.juzProgress
     ? `${plan.juzProgress.completed} / ${plan.juzProgress.total} جزء`
     : `${plan.progress?.percent ?? 0}%`;
@@ -90,11 +91,7 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
         <View style={s.headRow}>
           <View style={s.headBadges}>
             <Badge label={plan.status} variant={STATUS_VARIANT[plan.status]} />
-            {/* One chip per type — a plan can carry several, each on its own
-                days and its own stretch of the mushaf. */}
-            {plan.segments.map((seg) => (
-              <Text key={seg.type} style={s.typeTag}>{seg.type}</Text>
-            ))}
+            <Text style={s.typeTag}>{plan.type}</Text>
             {isOpenPlan(plan) && <Badge label="ورد حر" variant="gold" />}
           </View>
           <View style={s.rowActions}>
@@ -114,10 +111,15 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
         {!!plan.description && <Text style={s.description}>{plan.description}</Text>}
 
         <View style={s.infoGrid}>
-          <InfoRow icon={targetIcon} label="الهدف" value={targetLabel(plan)} />
+          <InfoRow
+            icon={targetIcon}
+            label="الهدف"
+            value={targetLabel(plan)}
+            onPress={plan.targetType === 'track' ? onViewTrack : undefined}
+          />
 
           {plan.endType === 'date' && plan.endDate ? (
-            <InfoRow icon={<IconCalendarDue size={15} color={theme.textMuted} />} label="ينتهي في" value={fmtDate(plan.endDate)} full />
+            <InfoRow icon={<IconCalendarDue size={15} color={theme.textMuted} />} label="ينتهي في" value={fmtDateShort(plan.endDate)} full />
           ) : (
             <InfoRow
               icon={<IconCalendarDue size={15} color={theme.textMuted} />}
@@ -127,6 +129,32 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
             />
           )}
         </View>
+
+        {/* Each type gets its own days, range and page count. */}
+        {plan.segments.map((seg) => (
+          <View key={seg.type} style={s.segBox}>
+            <Text style={s.segTitle}>{seg.type}</Text>
+            <View style={s.infoGrid}>
+              <InfoRow icon={<IconCalendarWeek size={15} color={theme.textMuted} />} label="الأيام" value={seg.days.join('، ')} full />
+              {seg.rangeStart && seg.rangeEnd && seg.pageRange ? (
+                <>
+                  <InfoRow icon={<IconBook size={15} color={theme.textMuted} />} label="من" value={pointLabel(seg.rangeStart)} />
+                  <InfoRow icon={<IconBook2 size={15} color={theme.textMuted} />} label="إلى" value={pointLabel(seg.rangeEnd)} />
+                  <InfoRow
+                    icon={<IconFiles size={15} color={theme.textMuted} />}
+                    label="عدد الصفحات"
+                    value={seg.pageRange.pageCount === 1
+                      ? `صفحة ${seg.pageRange.pageStart}`
+                      : `${seg.pageRange.pageCount} (${seg.pageRange.pageStart}-${seg.pageRange.pageEnd})`}
+                    full
+                  />
+                </>
+              ) : (
+                <InfoRow icon={<IconBook size={15} color={theme.textMuted} />} label="الورد" value="يُسجَّل ما حفظه الطالب في الحلقة" full />
+              )}
+            </View>
+          </View>
+        ))}
 
         {!!plan.progress && (
           <View style={{ marginTop: 4 }}>
@@ -144,33 +172,33 @@ function PlanCard({ plan, onPress, onEdit, onDuplicate, onDelete }: {
           </View>
         )}
 
-        {openDue.length > 0 ? (
-        <View style={s.assignmentBox}>
+        <View style={[s.assignmentBox, !hasToday && { backgroundColor: theme.cream }]}>
           <View style={s.progressLabelRow}>
-            <IconCalendarStar size={14} color={theme.green} />
-            <Text style={s.assignmentLabel}>الجزء المطلوب اليوم · {openDue.join('، ')}</Text>
+            <IconCalendarStar size={14} color={hasToday ? theme.green : theme.textMuted} />
+            <Text style={[s.assignmentLabel, !hasToday && { color: theme.textMuted }]}>الجزء المطلوب اليوم</Text>
           </View>
-          <Text style={s.assignmentText}>ورد حر — يُسجَّل في الحلقة</Text>
-        </View>
-        ) : (
-        <View style={[s.assignmentBox, assignments.length === 0 && { backgroundColor: theme.cream }]}>
-          <View style={s.progressLabelRow}>
-            <IconCalendarStar size={14} color={assignments.length > 0 ? theme.green : theme.textMuted} />
-            <Text style={[s.assignmentLabel, assignments.length === 0 && { color: theme.textMuted }]}>
-              الجزء المطلوب اليوم{assignments.length === 1 ? ` · ${assignments[0].type}` : ''}
-            </Text>
-          </View>
-          {assignments.length > 0 ? assignments.map((a, idx) => (
-            <Text key={a.type} style={[s.assignmentText, idx > 0 && { marginTop: 2 }]}>
-              {assignments.length > 1 ? `${a.type} · ` : ''}
-              {surahName(a.surahStart)}:{a.ayahStart} — {surahName(a.surahEnd)}:{a.ayahEnd}
-              {a.reversed ? ' · بالعكس' : ''}
-            </Text>
-          )) : (
-            <Text style={s.muted}>لا يوجد جزء مخصص لليوم</Text>
+          {hasToday ? plan.todayAssignments.map((entry, idx) => {
+            if (!isSlice(entry)) {
+              return (
+                <Text key={idx} style={s.assignmentText}>
+                  <Text style={s.assignmentType}>{entry.type} · </Text>
+                  ورد حر — يُسجَّل في الحلقة
+                </Text>
+              );
+            }
+            // Direction is per segment — orient by the type actually due today.
+            const a = orientSlice(entry, segmentReversed(plan, entry.type));
+            return (
+              <Text key={idx} style={s.assignmentText}>
+                <Text style={s.assignmentType}>{entry.type} · </Text>
+                {surahName(a.surahStart)} : {a.ayahStart} — {surahName(a.surahEnd)} : {a.ayahEnd}
+                <Text style={s.assignmentType}> (صفحة {a.pageStart}{a.pageEnd !== a.pageStart ? ` - ${a.pageEnd}` : ''})</Text>
+              </Text>
+            );
+          }) : (
+            <Text style={s.mutedSm}>لا يوجد جزء مخصص لليوم</Text>
           )}
         </View>
-        )}
       </Card>
     </Pressable>
   );
@@ -184,6 +212,7 @@ export default function TeacherPlans() {
   const { data: plans = [], isLoading, isRefetching, refetch } = useQuranPlans({ teacher: profileId });
   const deletePlan = useDeleteQuranPlan();
   const [pendingDelete, setPendingDelete] = useState<QuranPlan | null>(null);
+  const openAdd = () => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'create' } } as any);
 
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
@@ -193,10 +222,10 @@ export default function TeacherPlans() {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         <View style={s.topRow}>
-          <Text style={s.pageTitle}>خطط الحفظ</Text>
+          <Text style={s.pageTitle}>الخطط القرآنية</Text>
           <Pressable
             style={s.addBtn}
-            onPress={() => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'create' } } as any)}
+            onPress={openAdd}
           >
             <IconPlus size={16} color={theme.white} />
             <Text style={s.addBtnText}>خطة جديدة</Text>
@@ -205,12 +234,11 @@ export default function TeacherPlans() {
 
         {isLoading && <SkeletonRows count={3} rowHeight={140} />}
 
-        {deletePlan.isError && <Alert variant="error">{(deletePlan.error as Error).message}</Alert>}
-
         {!isLoading && plans.length === 0 && (
           <View style={s.emptyBox}>
             <Text style={s.muted}>لا توجد خطط قرآنية بعد</Text>
-            <Text style={s.mutedSm}>أنشئ أول خطة حفظ أو مراجعة لحلقتك أو لطلابك.</Text>
+            <Text style={s.mutedSm}>أنشئ أول خطة حفظ أو مراجعة لحلقتك أو لطلابك</Text>
+            <Button label="+ خطة جديدة" onPress={openAdd} style={{ marginTop: 12 }} />
           </View>
         )}
 
@@ -222,6 +250,7 @@ export default function TeacherPlans() {
             onEdit={() => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'edit', id: p._id } } as any)}
             onDuplicate={() => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'duplicate', id: p._id } } as any)}
             onDelete={() => setPendingDelete(p)}
+            onViewTrack={() => router.push('/(portal)/teacher/tracks' as any)}
           />
         ))}
       </ScrollView>
@@ -232,10 +261,14 @@ export default function TeacherPlans() {
         message="ستُحذف الخطة نهائياً ولا يمكن التراجع."
         pending={deletePlan.isPending}
         pendingLabel="جارٍ الحذف..."
+        confirmLabel="حذف"
         onCancel={() => setPendingDelete(null)}
         onConfirm={() => {
           if (!pendingDelete) return;
-          deletePlan.mutate(pendingDelete._id, { onSuccess: () => setPendingDelete(null) });
+          deletePlan.mutate(pendingDelete._id, {
+            onSuccess: () => setPendingDelete(null),
+            onError: (e) => toast.error((e as Error).message),
+          });
         }}
       />
     </SafeAreaView>
@@ -250,16 +283,19 @@ function createS(theme: AppTheme) {
     pageTitle: { fontSize: 16, fontFamily: theme.fontCairoBold, color: theme.text },
     addBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.greenAccent, borderRadius: theme.radiusSm, paddingHorizontal: 14, paddingVertical: 10 },
     addBtnText: { color: theme.white, fontFamily: theme.fontCairoBold, fontSize: 13 },
-    muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center' },
+    muted: { fontSize: 15, color: theme.text, fontFamily: theme.fontCairoBold, textAlign: 'center' },
     headRow: { flexDirection: 'row', gap: 6, marginBottom: 8, justifyContent: 'space-between', alignItems: 'flex-start' },
     headBadges: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', flex: 1 },
     rowActions: { flexDirection: 'row', gap: 6 },
+    segBox: { marginTop: 4, paddingTop: 10, borderTopWidth: 1, borderTopColor: theme.border },
     description: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 6 },
     infoGrid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 8, columnGap: 12, marginVertical: 12 },
     infoRow: { flexDirection: 'row', gap: 7, alignItems: 'flex-start' },
     infoRowHalf: { width: '46%' },
     infoRowFull: { width: '100%' },
     infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
+    infoLink: { color: theme.green, textDecorationLine: 'underline' },
+    assignmentType: { fontFamily: theme.fontCairo, color: theme.textMuted },
     infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
     progressHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 },
     progressLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },

@@ -19,12 +19,17 @@ import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
 import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
 import ScheduleSheet, { scheduleItems, fmtShortDate } from '@/components/domain/ScheduleSheet';
 import { useTracks } from '@/lib/queries/tracks';
-import { useQuranPlan, useCreateQuranPlan, useUpdateQuranPlan } from '@/lib/queries/quranPlan';
+import { useQuranPlan, useCreateQuranPlan, type QuranPlan, useUpdateQuranPlan, useStudentPlanProgressList } from '@/lib/queries/quranPlan';
+import { useTeachersWhen } from '@/lib/queries/teachers';
+import { useStudents } from '@/lib/queries/students';
+import IndividualPlanPanel from '@/components/domain/IndividualPlanPanel';
+import { toast } from '@/components/ui/Toast';
+import PlanStudentPicker from '@/components/domain/PlanStudentPicker';
 import {
   DEFAULT_GRADE_RUBRIC, RUBRIC_TOTAL_DEGREES, totalMaxOf, criterionKey, type GradeCriterion,
 } from '@/lib/evaluationRubric';
 import {
-  computeMultiScheduleBreakdown, computeOpenScheduleDates, isReversedRange, validateSegmentDays, WEEK_DAYS,
+  computeMultiScheduleBreakdown, computeOpenScheduleDates, isReversedRange, countRangeAyahs, pageRangeOfAyahRange, validateSegmentDays, WEEK_DAYS,
   type PlanType, type RangePoint,
 } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -61,7 +66,10 @@ type FormSegment = {
 type FormFields = {
   name: string;
   description: string;
+  /** 'track' (the only option offered) or a pre-existing 'students' plan. */
+  targetType: 'track' | 'students';
   track: string;
+  students: string[];
   /** One per selected type, max four. Their days must not overlap. */
   segments: FormSegment[];
   holidays: string[];
@@ -89,10 +97,10 @@ function emptySegment(type: PlanType): FormSegment {
 const RUBRIC_BAR_COLORS = ['#1B5E20', '#1d4ed8', '#c2410c', '#7c3aed', '#0891b2', '#b45309'];
 
 const EMPTY: FormFields = {
-  name: '', description: '', track: '',
+  name: '', description: '', targetType: 'track', track: '', students: [],
   segments: [emptySegment('حفظ')],
   holidays: [], startDate: todayISO(),
-  endType: 'activeDays', activeDaysCount: '', endDate: '',
+  endType: 'activeDays', activeDaysCount: '10', endDate: '',
   gradeRubric: DEFAULT_GRADE_RUBRIC.map((c) => ({ ...c })),
   openWard: false,
 };
@@ -114,6 +122,10 @@ export default function TeacherPlanForm() {
 
   const createPlan = useCreateQuranPlan();
   const updatePlan = useUpdateQuranPlan();
+  // Admin only (no profileId of their own): web's «المعلم» picker.
+  const { data: allTeachers = [] } = useTeachersWhen(!profileId);
+  const [teacherSel, setTeacherSel] = useState('');
+  const [panelStudentId, setPanelStudentId] = useState<string | null>(null);
 
   const [form, setForm] = useState<FormFields>(() => ({
     ...EMPTY,
@@ -122,21 +134,20 @@ export default function TeacherPlanForm() {
   const [formError, setFormError] = useState('');
   const [prefilled, setPrefilled] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
-  // A plan linked to a track via the track-detail "link plan" action always
-  // shows this form's track picker unlocked (targetType is only 'track' or
-  // 'students' now — no more special-casing a track-targeted plan). Only a
-  // plan explicitly targeting an explicit student list locks the target,
-  // matching the web form's "targetType editing not offered here" convention.
-  const [lockedTarget, setLockedTarget] = useState<{ targetType: string; label: string } | null>(null);
+  // Web parity: after a save the form stays open in edit mode on the saved
+  // plan (so the «طلاب الخطة» roster becomes usable) instead of navigating back.
+  const [savedPlan, setSavedPlan] = useState<QuranPlan | null>(null);
 
   useEffect(() => {
     if (prefillFrom && existingPlan && !prefilled) {
       setForm({
         name: isDuplicate ? `${existingPlan.name} (نسخة)` : existingPlan.name,
         description: existingPlan.description ?? '',
-        track: existingPlan.targetType === 'track'
-          ? (typeof existingPlan.track === 'object' ? existingPlan.track?._id ?? '' : existingPlan.track ?? '')
+        targetType: existingPlan.targetType === 'students' ? 'students' : 'track',
+        track: existingPlan.track
+          ? (typeof existingPlan.track === 'object' ? existingPlan.track?._id ?? '' : existingPlan.track)
           : '',
+        students: (existingPlan.students ?? []).map((st) => (typeof st === 'object' ? st._id : st)),
         // The server always returns segments, migrating a legacy single-type
         // plan into a one-element array, so there is no old shape to handle.
         // An open-ward plan's segments carry no range — the defaults are never
@@ -156,12 +167,29 @@ export default function TeacherPlanForm() {
           ? existingPlan.gradeRubric.map((c) => ({ ...c }))
           : DEFAULT_GRADE_RUBRIC.map((c) => ({ ...c })),
       });
-      if (existingPlan.targetType === 'students') {
-        setLockedTarget({ targetType: existingPlan.targetType, label: `${existingPlan.students?.length ?? 0} طالب محدد` });
+      if (!profileId && existingPlan.teacher) {
+        setTeacherSel(typeof existingPlan.teacher === 'object' ? existingPlan.teacher._id : existingPlan.teacher);
       }
       setPrefilled(true);
     }
-  }, [prefillFrom, isDuplicate, existingPlan, prefilled]);
+  }, [prefillFrom, isDuplicate, existingPlan, prefilled, profileId]);
+
+  // «طلاب الخطة» — the saved plan's roster, each with its individual plan.
+  const planRecord = savedPlan ?? (isEdit ? existingPlan : undefined);
+  const { data: allStudents = [] } = useStudents();
+  const { data: trackStudents = [] } = useStudents({ track: form.track }, { enabled: form.targetType === 'track' && !!form.track });
+  const rosterStudents = form.targetType === 'track'
+    ? trackStudents
+    : allStudents.filter((st) => form.students.includes(st._id));
+  const progressByStudentId = useStudentPlanProgressList(planRecord?._id, rosterStudents.map((st) => st._id));
+
+  const teacherOptions = useMemo(() => {
+    const picked = tracks.find((t) => t._id === form.track);
+    const trackTeachers = (picked?.teachers ?? [])
+      .map((tc) => (typeof tc === 'object' ? tc : allTeachers.find((at) => at._id === tc)))
+      .filter((tc): tc is { _id: string; name: string } => !!tc);
+    return (trackTeachers.length > 0 ? trackTeachers : allTeachers).map((t) => ({ value: t._id, label: t.name }));
+  }, [tracks, form.track, allTeachers]);
 
   function sf<K extends keyof FormFields>(k: K, v: FormFields[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -201,6 +229,16 @@ export default function TeacherPlanForm() {
         ? [emptySegment(type)]
         : [...f.segments.filter((sg) => sg.type !== 'ختمة'), emptySegment(type)];
       return { ...f, segments };
+    });
+  }
+
+  /** ختمة is a fixed range by definition, so turning the plan open drops it
+   * (falling back to حفظ if it was the only type). */
+  function setOpenWard(openWard: boolean) {
+    setForm((f) => {
+      if (!openWard) return { ...f, openWard };
+      const kept = f.segments.filter((sg) => sg.type !== 'ختمة');
+      return { ...f, openWard, segments: kept.length > 0 ? kept : [emptySegment('حفظ')] };
     });
   }
 
@@ -285,16 +323,19 @@ export default function TeacherPlanForm() {
     // and no weekday claimed twice.
     const segmentError = validateSegmentDays(form.segments);
     if (segmentError) return setFormError(segmentError);
-    if (!lockedTarget && !form.track) return setFormError('يرجى اختيار مسار');
+    if (form.targetType === 'track' && !form.track) return setFormError('يرجى اختيار مسار');
+    if (form.targetType === 'students' && form.students.length === 0) return setFormError('يرجى اختيار طالب واحد على الأقل');
+    if (!profileId && !teacherSel) return setFormError('يرجى اختيار معلم');
     if (!form.startDate) return setFormError('يرجى تحديد تاريخ البداية');
     if (form.endType === 'activeDays' && !form.activeDaysCount) return setFormError('يرجى تحديد عدد الأيام النشطة');
     if (form.endType === 'date' && !form.endDate) return setFormError('يرجى تحديد تاريخ الانتهاء');
-    if (form.endType === 'date' && form.endDate < form.startDate) return setFormError('تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية');
+    if (form.endType === 'date' && form.endDate && form.endDate < form.startDate) return setFormError('تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية');
     if (form.gradeRubric.length === 0) return setFormError('يرجى إضافة بند واحد على الأقل لتقسيمة الدرجات');
     if (form.gradeRubric.some((c) => !c.label.trim())) return setFormError('يرجى تسمية كل بنود تقسيمة الدرجات');
     if (form.gradeRubric.some((c) => !Number.isFinite(Number(c.max)) || Number(c.max) <= 0)) return setFormError('درجة كل بند يجب أن تكون رقماً أكبر من صفر');
     if (totalMaxOf(form.gradeRubric) !== RUBRIC_TOTAL_DEGREES) return setFormError(`مجموع درجات البنود يجب أن يساوي ${RUBRIC_TOTAL_DEGREES} بالضبط (الحالي ${totalMaxOf(form.gradeRubric)})`);
 
+    setFormError('');
     const body: Record<string, unknown> = {
       name: form.name.trim(),
       description: form.description.trim() || undefined,
@@ -302,37 +343,26 @@ export default function TeacherPlanForm() {
         ? form.segments.map((sg) => ({ type: sg.type, days: sg.days }))
         : form.segments,
       // Immutable server-side — only sent on create (and duplicate).
-      openWard: isEdit ? undefined : form.openWard,
+      openWard: planRecord ? undefined : form.openWard,
+      // `teacher` is required by the server on create; an admin picks it.
+      teacher: profileId ?? teacherSel,
+      targetType: form.targetType,
+      track: form.targetType === 'track' ? form.track : undefined,
+      students: form.targetType === 'students' ? form.students : undefined,
       holidays: form.holidays,
-      startDate: form.startDate,
+      startDate: form.startDate || undefined,
       endType: form.endType,
       activeDaysCount: form.endType === 'activeDays' ? Number(form.activeDaysCount) : undefined,
       endDate: form.endType === 'date' ? form.endDate : undefined,
       gradeRubric: form.gradeRubric.map((c) => ({ ...c, label: c.label.trim(), max: Number(c.max) })),
     };
-    if (!lockedTarget) {
-      body.targetType = 'track';
-      body.track = form.track;
-    }
-    if (!isEdit) {
-      // `teacher` is required by the server on create. An admin reaching this
-      // form from the track drill-down has no profileId of their own, so fall
-      // back to the teacher who owns the track the plan targets.
-      const trackTeacher = tracks.find((t) => t._id === form.track)?.teachers[0];
-      body.teacher = profileId
-        ?? (typeof trackTeacher === 'object' ? trackTeacher?._id : trackTeacher);
-      if (!body.teacher) {
-        setFormError('تعذّر تحديد المعلم لهذه الخطة — اختر مسارًا له معلم مُسنَد.');
-        return;
-      }
-    }
-
     try {
-      setFormError('');
-      if (isEdit && params.id) await updatePlan.mutateAsync({ id: params.id, ...body });
-      else await createPlan.mutateAsync(body);
+      const result = planRecord
+        ? await updatePlan.mutateAsync({ id: planRecord._id, ...body })
+        : await createPlan.mutateAsync(body);
+      setSavedPlan(result.data);
       success();
-      router.back();
+      toast.success('تم حفظ الخطة');
     } catch (e) {
       error();
       setFormError((e as Error).message);
@@ -347,7 +377,7 @@ export default function TeacherPlanForm() {
         <Pressable onPress={() => router.back()} hitSlop={10}>
           <IconArrowRight size={22} color={theme.text} />
         </Pressable>
-        <Text style={s.headerTitle}>{isEdit ? 'تعديل الخطة' : isDuplicate ? 'نسخ الخطة' : 'خطة حفظ جديدة'}</Text>
+        <Text style={s.headerTitle}>{isEdit ? 'تعديل الخطة' : isDuplicate ? 'نسخ الخطة' : 'خطة قرآنية جديدة'}</Text>
         <View style={{ width: 22 }} />
       </View>
 
@@ -365,11 +395,11 @@ export default function TeacherPlanForm() {
           <View style={{ height: 12 }} />
           <Pressable
             haptic="select"
-            disabled={isEdit}
-            onPress={() => sf('openWard', !form.openWard)}
-            style={[s.openToggle, form.openWard && s.openToggleOn, isEdit && { opacity: 0.7 }]}
+            disabled={!!planRecord}
+            onPress={() => setOpenWard(!form.openWard)}
+            style={[s.openToggle, form.openWard && s.openToggleOn, !!planRecord && { opacity: 0.75 }]}
             accessibilityRole="checkbox"
-            accessibilityState={{ checked: form.openWard, disabled: isEdit }}
+            accessibilityState={{ checked: form.openWard, disabled: !!planRecord }}
           >
             <View style={[s.openBox, form.openWard && s.openBoxOn]}>
               {form.openWard && <Text style={s.openTick}>✓</Text>}
@@ -378,7 +408,7 @@ export default function TeacherPlanForm() {
               <Text style={s.openTitle}>بدون مقطع محدد</Text>
               <Text style={s.typeHint}>
                 لا يُحدَّد ورد مسبقاً؛ يُسجِّل المعلم في كل حلقة ما حفظه الطالب من أين إلى أين، ثم يقيّمه.
-                {isEdit ? ' (لا يمكن تغيير هذا الخيار بعد إنشاء الخطة)' : ''}
+                {planRecord ? ' (لا يمكن تغيير هذا الخيار بعد إنشاء الخطة)' : ''}
               </Text>
             </View>
           </Pressable>
@@ -410,27 +440,95 @@ export default function TeacherPlanForm() {
           </FormGroup>
 
           <View style={{ height: 12 }} />
-          {lockedTarget ? (
-            <FormGroup label="الفئة المستهدفة">
-              <Text style={s.lockedText}>{lockedTarget.label} (لا يمكن تغييرها من هنا)</Text>
-            </FormGroup>
-          ) : (
+          <FormGroup label="الهدف">
+            <View style={s.chipRow}>
+              <Pressable haptic="select" style={[s.chip, form.targetType === 'track' && s.chipActive]} onPress={() => sf('targetType', 'track')}>
+                <Text style={[s.chipText, form.targetType === 'track' && s.chipTextActive]}>مسار كامل</Text>
+              </Pressable>
+            </View>
+          </FormGroup>
+          <View style={{ height: 12 }} />
+          {form.targetType === 'track' && (
             <FormGroup label="المسار" required>
               <FormSelect
                 value={form.track}
-                onChange={(v) => sf('track', v)}
+                onChange={(v) => {
+                  sf('track', v);
+                  // A sole track teacher seeds the admin's teacher picker.
+                  const picked = tracks.find((t) => t._id === v);
+                  const sole = picked?.teachers.length === 1 ? picked.teachers[0] : undefined;
+                  if (!profileId && sole) setTeacherSel(typeof sole === 'object' ? sole._id : sole);
+                }}
                 options={tracks.map((t) => ({ value: t._id, label: t.title }))}
-                placeholder="اختر مسارًا"
+                placeholder="— اختر مساراً —"
               />
             </FormGroup>
           )}
+          {form.targetType === 'students' && (
+            <PlanStudentPicker
+              students={allStudents}
+              selected={form.students}
+              onChange={(ids) => sf('students', ids)}
+            />
+          )}
+          {!profileId && (
+            <>
+              <View style={{ height: 12 }} />
+              <FormGroup label="المعلم" required>
+                <FormSelect
+                  value={teacherSel}
+                  onChange={setTeacherSel}
+                  title="المعلم"
+                  options={teacherOptions}
+                  placeholder="— اختر معلماً —"
+                />
+              </FormGroup>
+            </>
+          )}
         </Card>
+
+        {rosterStudents.length > 0 && (
+          <Card>
+            <CardHeader title="طلاب الخطة" />
+            {!planRecord && (
+              <Text style={s.rosterNote}>احفظ الخطة أولاً لتتمكن من إدارة خطط الطلاب الفردية</Text>
+            )}
+            <View style={{ gap: 8 }}>
+              {rosterStudents.map((st) => (
+                <View key={st._id} style={s.rosterRow}>
+                  <View style={s.rosterHead}>
+                    <Text style={s.rosterName}>{st.name}</Text>
+                    {st.level != null && <Text style={s.rosterLevel}>المستوى {st.level}</Text>}
+                  </View>
+                  {planRecord && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      label={panelStudentId === st._id
+                        ? 'إخفاء الخطة الفردية'
+                        : progressByStudentId[st._id]?.progressIsPersisted ? 'عرض الخطة الفردية' : 'أنشئ خطة فردية'}
+                      onPress={() => setPanelStudentId((cur) => (cur === st._id ? null : st._id))}
+                    />
+                  )}
+                  {planRecord && panelStudentId === st._id && (
+                    planRecord.segments.length > 1
+                      ? planRecord.segments.map((seg) => (
+                        <IndividualPlanPanel key={seg.type} planId={planRecord._id} studentId={st._id} studentName={st.name} basePlan={planRecord} type={seg.type} />
+                      ))
+                      : <IndividualPlanPanel planId={planRecord._id} studentId={st._id} studentName={st.name} basePlan={planRecord} />
+                  )}
+                </View>
+              ))}
+            </View>
+          </Card>
+        )}
 
         {/* One card per selected type: its own days and its own range. حفظ
             and مراجعة may now share the same weekday — each segment's days
             are picked independently, with no cross-segment restriction. */}
         {form.segments.map((seg) => {
           const segReversed = isReversedRange(seg.rangeStart, seg.rangeEnd);
+          const segPages = pageRangeOfAyahRange(seg.rangeStart, seg.rangeEnd);
           return (
             <Card key={seg.type}>
               <CardHeader title={seg.type} />
@@ -455,6 +553,7 @@ export default function TeacherPlanForm() {
 
               {!form.openWard && (<>
               <View style={{ height: 12 }} />
+              <Text style={s.segRangeLabel}>نطاق {seg.type} (من - إلى)</Text>
               <FormGroup label="من">
                 <SurahAyahPicker
                   value={seg.rangeStart}
@@ -468,9 +567,15 @@ export default function TeacherPlanForm() {
                   onChange={(v) => updateSegment(seg.type, { rangeEnd: v })}
                 />
               </FormGroup>
-              {segReversed && (
-                <Text style={s.reverseHint}>⟲ هذا النطاق بالعكس (من نهاية المصحف نحو البداية) — سيُعرض كل يوم بترتيبه الصحيح.</Text>
-              )}
+              <View style={s.segInfo}>
+                <Text style={s.segInfoText}>
+                  عدد الآيات: {countRangeAyahs(seg.rangeStart, seg.rangeEnd)} — عدد الصفحات: {segPages.pageCount}
+                  {' '}(صفحة {segPages.pageStart}{segPages.pageEnd !== segPages.pageStart ? ` إلى ${segPages.pageEnd}` : ''})
+                </Text>
+                {segReversed && (
+                  <Text style={s.reverseHint}>⟲ نطاق بالعكس — من نهاية المصحف نحو البداية.</Text>
+                )}
+              </View>
               </>)}
             </Card>
           );
@@ -564,26 +669,28 @@ export default function TeacherPlanForm() {
           <CardHeader title="مدة الخطة" />
           <FormGroup label="تاريخ البداية" required>
             <FormDatePicker value={form.startDate} onChange={(v) => sf('startDate', v)} />
+            <Text style={s.typeHint}>يمكن اختيار تاريخ في الماضي إذا كانت الخطة قد بدأت بالفعل</Text>
           </FormGroup>
 
           <View style={{ height: 12 }} />
+          <Text style={s.segRangeLabel}>نهاية الخطة</Text>
           <View style={s.rowGroup}>
             <Pressable haptic="select" style={[s.toggleBtn, form.endType === 'activeDays' && s.toggleBtnActive]} onPress={() => sf('endType', 'activeDays')}>
-              <Text style={[s.toggleBtnText, form.endType === 'activeDays' && s.toggleBtnTextActive]}>عدد أيام نشطة</Text>
+              <Text style={[s.toggleBtnText, form.endType === 'activeDays' && s.toggleBtnTextActive]}>عدد الأيام النشطة</Text>
             </Pressable>
             <Pressable haptic="select" style={[s.toggleBtn, form.endType === 'date' && s.toggleBtnActive]} onPress={() => sf('endType', 'date')}>
-              <Text style={[s.toggleBtnText, form.endType === 'date' && s.toggleBtnTextActive]}>تاريخ انتهاء محدد</Text>
+              <Text style={[s.toggleBtnText, form.endType === 'date' && s.toggleBtnTextActive]}>تاريخ محدد</Text>
             </Pressable>
           </View>
 
           <View style={{ height: 12 }} />
           {form.endType === 'activeDays' ? (
             <FormGroup label="عدد الأيام النشطة" required>
-              <FormInput placeholder="مثال: 30" keyboardType="number-pad" value={form.activeDaysCount} onChangeText={(v) => sf('activeDaysCount', v)} />
+              <FormInput keyboardType="number-pad" value={form.activeDaysCount} onChangeText={(v) => sf('activeDaysCount', v)} />
             </FormGroup>
           ) : (
             <FormGroup label="تاريخ الانتهاء" required>
-              <FormDatePicker value={form.endDate} onChange={(v) => sf('endDate', v)} minimumDate={form.startDate ? new Date(form.startDate) : undefined} />
+              <FormDatePicker value={form.endDate} onChange={(v) => sf('endDate', v)} />
             </FormGroup>
           )}
         </Card>
@@ -748,7 +855,7 @@ export default function TeacherPlanForm() {
                   }}
                 >
                   <Text style={{ fontSize: 11.5, fontWeight: '600', color: ok ? theme.green : '#b91c1c' }}>
-                    مجموع الدرجة
+                    مجموع الدرجة اليومية
                   </Text>
                   <Text style={{ fontSize: 18, fontWeight: '800', color: ok ? theme.green : '#b91c1c' }}>
                     {sum}/{RUBRIC_TOTAL_DEGREES}
@@ -764,12 +871,26 @@ export default function TeacherPlanForm() {
           </View>
         </Card>
 
-        {previewCount > 0 && (
-          <Card>
-            <CardHeader title="التقسيمة اليومية (معاينة)" />
+        <Card>
+          <CardHeader title="التقسيمة اليومية (معاينة)" />
+          {previewCount === 0 ? (
+            <Text style={s.previewEmpty}>
+              {form.openWard
+                ? 'اختر الأيام وتاريخ البداية والانتهاء لعرض أيام الخطة'
+                : 'اختر النطاق والأيام وتاريخ البداية والانتهاء لعرض تقسيمة الوِرد على الأيام'}
+            </Text>
+          ) : (<>
+            <View style={s.previewInfo}>
+              <Text style={s.previewInfoText}>
+                عدد الأيام: <Text style={{ fontFamily: theme.fontCairoBold }}>{previewDayCount}</Text>
+                {form.openWard
+                  ? ' · يُسجَّل ما يحفظه الطالب في كل حلقة'
+                  : form.segments.length > 1 ? ` · ${form.segments.map((sg) => sg.type).join('، ')}` : ''}
+              </Text>
+            </View>
             {previewShortfall && (
               <View style={{ paddingBottom: 8 }}>
-                <Alert variant="warning">عدد الأيام المطلوب أكبر من عدد الصفحات المتاحة للتوزيع.</Alert>
+                <Alert variant="warning">عدد الأيام المطلوب أكبر من عدد صفحات النطاق — بعض الأيام لن يكون لها نصيب. قلّل عدد الأيام أو وسّع النطاق.</Alert>
               </View>
             )}
             <SheetTriggerRow
@@ -778,8 +899,8 @@ export default function TeacherPlanForm() {
               icon={<IconCalendarEvent size={17} color={theme.green} />}
               onPress={() => setShowSchedule(true)}
             />
-          </Card>
-        )}
+          </>)}
+        </Card>
 
         <ScheduleSheet
           visible={showSchedule}
@@ -793,7 +914,7 @@ export default function TeacherPlanForm() {
                 type: e.type,
                 // Local-calendar parse — the entry's UTC suffix is only a carrier.
                 date: fmtShortDate(`${e.date.slice(0, 10)}T00:00:00`),
-                range: 'يُسجَّل ما يحفظه الطالب في الحلقة',
+                range: 'يُسجَّل في الحلقة',
                 pages: '',
               }))
             : scheduleItems(schedulePreview, (e) => {
@@ -802,12 +923,12 @@ export default function TeacherPlanForm() {
               })}
         />
 
-        <Button
-          label={isPending ? 'جارٍ الحفظ...' : isEdit ? 'حفظ التعديلات' : isDuplicate ? 'إنشاء النسخة' : 'إنشاء الخطة'}
-          onPress={handleSubmit}
-          disabled={isPending}
-          fullWidth
-        />
+        <View style={s.rowGroup}>
+          <View style={s.flex1}>
+            <Button label={isPending ? 'جارٍ الحفظ...' : 'حفظ الخطة'} onPress={handleSubmit} disabled={isPending} fullWidth />
+          </View>
+          <Button label="إلغاء" variant="ghost" onPress={() => router.back()} />
+        </View>
       </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -816,6 +937,11 @@ export default function TeacherPlanForm() {
 
 function createS(theme: AppTheme) {
   return StyleSheet.create({
+    rosterNote: { marginBottom: 10, padding: 10, borderRadius: 10, backgroundColor: theme.cream, fontSize: 12, color: theme.textMuted },
+    rosterRow: { borderWidth: 1, borderColor: theme.border, borderRadius: 10, padding: 10, gap: 8 },
+    rosterHead: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 },
+    rosterName: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    rosterLevel: { fontSize: 10, fontFamily: theme.fontCairoBold, color: theme.green, backgroundColor: theme.greenPale, borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2 },
     safe: { flex: 1, backgroundColor: theme.bg },
     // No background and no divider: the header sits directly on the page surface
     // rather than reading as a separate white bar over it.
@@ -845,7 +971,12 @@ function createS(theme: AppTheme) {
     chipActive: { backgroundColor: theme.greenPale, borderColor: theme.green },
     chipText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
     chipTextActive: { color: theme.green, fontFamily: theme.fontCairoBold },
-    lockedText: { fontSize: 13, fontFamily: theme.fontCairo, color: theme.textMuted },
+    segRangeLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairoBold, marginBottom: 8 },
+    segInfo: { marginTop: 12, borderRadius: 10, padding: 10, backgroundColor: theme.cream },
+    segInfoText: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo },
+    previewEmpty: { marginVertical: 16, fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center' },
+    previewInfo: { marginBottom: 12, padding: 10, borderRadius: 10, backgroundColor: theme.cream },
+    previewInfoText: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo },
     holidayHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
     holidayTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
     holidayCount: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 1, backgroundColor: theme.goldPale },
@@ -863,7 +994,7 @@ function createS(theme: AppTheme) {
       backgroundColor: 'rgba(0, 0, 0, 0.06)',
     },
     holidayHint: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, marginTop: 10, lineHeight: 18 },
-    reverseHint: { fontSize: 11, color: theme.gold, fontFamily: theme.fontCairo, marginTop: 10 },
+    reverseHint: { fontSize: 12, color: theme.brown, fontFamily: theme.fontCairoBold, marginTop: 6 },
     rowGroup: { flexDirection: 'row', gap: 8 },
     toggleBtn: { flex: 1, borderWidth: 1, borderColor: theme.border, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },
     toggleBtnActive: { backgroundColor: theme.greenPale, borderColor: theme.green },

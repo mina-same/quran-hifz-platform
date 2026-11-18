@@ -18,7 +18,9 @@ import OpenWardLogSheet from '@/components/domain/OpenWardLogSheet';
 import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
-import { AR_LOCALE } from '@/lib/date';
+import { fmtDateShort } from '@/lib/date';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { toast } from '@/components/ui/Toast';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
@@ -29,8 +31,8 @@ const STATUS_VARIANT: Record<QuranPlan['status'], 'green' | 'gold' | 'gray'> = {
 };
 
 function targetLabel(plan: QuranPlan): string {
-  if (plan.targetType === 'track') return typeof plan.track === 'object' ? plan.track?.title ?? '—' : '—';
-  return `${plan.students?.length ?? 0} طالب محدد`;
+  if (plan.targetType === 'track') return plan.track ? (typeof plan.track === 'object' ? plan.track.title : plan.track) : '—';
+  return `${plan.students?.length ?? 0} طالب`;
 }
 
 export default function TeacherPlanDetail() {
@@ -45,7 +47,13 @@ export default function TeacherPlanDetail() {
 
   async function handleDelete() {
     if (!id) return;
-    await deletePlan.mutateAsync(id);
+    try {
+      await deletePlan.mutateAsync(id);
+    } catch (e) {
+      toast.error((e as Error).message);
+      return;
+    }
+    setConfirmDelete(false);
     router.back();
   }
 
@@ -66,7 +74,8 @@ export default function TeacherPlanDetail() {
       >
         {isLoading && <SkeletonRows count={3} rowHeight={80} />}
 
-        {!isLoading && !plan && <Text style={s.muted}>تعذّر العثور على الخطة</Text>}
+        {!id && <Text style={s.muted}>لم يتم تحديد خطة</Text>}
+        {!!id && !isLoading && !plan && <Text style={s.muted}>تعذّر العثور على الخطة</Text>}
 
         {plan && (() => {
           // Direction is per segment — orient today's ward by the type due.
@@ -85,11 +94,10 @@ export default function TeacherPlanDetail() {
               <Card>
                 <View style={s.headRow}>
                   <Badge label={plan.status} variant={STATUS_VARIANT[plan.status]} />
-                  {plan.segments.map((seg) => (
-                    <Text key={seg.type} style={s.typeTag}>{seg.type}</Text>
-                  ))}
+                  <Text style={s.typeTag}>{plan.type}</Text>
                   {openPlan && <Badge label="ورد حر" variant="gold" />}
                 </View>
+                {!!plan.description && <Text style={s.infoValue}>{plan.description}</Text>}
 
                 <View style={s.infoGrid}>
                   <View style={s.infoItem}>
@@ -100,24 +108,24 @@ export default function TeacherPlanDetail() {
                     <Text style={s.infoLabel}>{plan.endType === 'date' ? 'ينتهي في' : 'عدد الأيام النشطة'}</Text>
                     <Text style={s.infoValue}>
                       {plan.endType === 'date'
-                        ? (plan.endDate ? new Date(plan.endDate).toLocaleDateString(AR_LOCALE) : '—')
-                        : (plan.activeDaysCount ?? '—')}
+                        ? fmtDateShort(plan.endDate)
+                        : String(plan.activeDaysCount ?? '—')}
                     </Text>
                   </View>
                 </View>
 
+                {!!plan.progress && (
                 <View style={{ marginTop: 12 }}>
                   <View style={s.progressHead}>
                     <Text style={s.progressLabel}>تقدّم الخطة</Text>
                     <Text style={s.progressValue}>{progressLabel ?? `${progressPct}%`}</Text>
                   </View>
                   <ProgressBar value={progressPct} showPercent={false} />
-                  {!!plan.progress && (
-                    <Text style={s.progressSub}>
-                      {plan.progress.completed} / {plan.progress.total} يوم ({plan.progress.percent}%)
-                    </Text>
-                  )}
+                  <Text style={s.progressSub}>
+                    {plan.progress.completed} / {plan.progress.total} يوم ({plan.progress.percent}%)
+                  </Text>
                 </View>
+                )}
 
                 {/* One block per type: its own days, its own range, its own
                     page count — independent divisions of different content
@@ -133,7 +141,11 @@ export default function TeacherPlanDetail() {
                       {seg.rangeStart && seg.rangeEnd && seg.pageRange ? (<>
                       <View style={s.infoItem}>
                         <Text style={s.infoLabel}>عدد الصفحات</Text>
-                        <Text style={s.infoValue}>{seg.pageRange.pageCount}</Text>
+                        <Text style={s.infoValue}>
+                          {seg.pageRange.pageCount === 1
+                            ? `صفحة ${seg.pageRange.pageStart}`
+                            : `${seg.pageRange.pageCount} (${seg.pageRange.pageStart}-${seg.pageRange.pageEnd})`}
+                        </Text>
                       </View>
                       <View style={s.infoItem}>
                         <Text style={s.infoLabel}>من</Text>
@@ -146,7 +158,7 @@ export default function TeacherPlanDetail() {
                       </>) : (
                       <View style={s.infoItem}>
                         <Text style={s.infoLabel}>الورد</Text>
-                        <Text style={s.infoValue}>يُسجَّل ما حفظه الطالب في الحلقة</Text>
+                        <Text style={s.infoValue}>بدون مقطع محدد — يُسجَّل ما حفظه الطالب في الحلقة</Text>
                       </View>
                       )}
                     </View>
@@ -155,18 +167,19 @@ export default function TeacherPlanDetail() {
               </Card>
 
               <Card>
-                <CardHeader title="الورد المقرر اليوم" />
+                <CardHeader title="الجزء المطلوب اليوم" />
                 <View style={[s.assignmentBox, { backgroundColor: assignments.length + openDue.length > 0 ? theme.greenPale : theme.cream }]}>
-                  {openDue.length > 0 ? (
-                    <Text style={s.assignmentText}>
-                      {openDue.join('، ')} · ورد حر — يُسجَّل في الحلقة
+                  {openDue.map((type) => (
+                    <Text key={type} style={s.assignmentText}>{type} · ورد حر — يُسجَّل في الحلقة</Text>
+                  ))}
+                  {assignments.map((a, idx) => (
+                    <Text key={a.type} style={[s.assignmentText, (idx > 0 || openDue.length > 0) && { marginTop: 4 }]}>
+                      {`${a.type} · `}
+                      {surahName(a.surahStart)} : {a.ayahStart} — {surahName(a.surahEnd)} : {a.ayahEnd}
+                      {` (صفحة ${a.pageStart}${a.pageEnd !== a.pageStart ? ` - ${a.pageEnd}` : ''})`}
                     </Text>
-                  ) : assignments.length > 0 ? assignments.map((a, idx) => (
-                    <Text key={a.type} style={[s.assignmentText, idx > 0 && { marginTop: 4 }]}>
-                      {assignments.length > 1 ? `${a.type} · ` : ''}
-                      {surahName(a.surahStart)}:{a.ayahStart} — {surahName(a.surahEnd)}:{a.ayahEnd}
-                    </Text>
-                  )) : (
+                  ))}
+                  {assignments.length + openDue.length === 0 && (
                     <Text style={s.muted}>لا يوجد جزء مخصص لليوم</Text>
                   )}
                 </View>
@@ -180,13 +193,16 @@ export default function TeacherPlanDetail() {
               ) : (<>
               <Card>
                 <CardHeader title="تقسيم الأجزاء على الأيام" />
+                {plan.schedule.length === 0 ? (
+                  <Text style={[s.muted, { marginVertical: 20 }]}>لا يوجد جدول محسوب لهذه الخطة</Text>
+                ) : (
                 <SheetTriggerRow
                   label="عرض التوزيع اليومي"
                   value={`${plan.schedule.length} يوم`}
                   icon={<IconCalendarEvent size={17} color={theme.green} />}
                   onPress={() => setShowSchedule(true)}
-                  disabled={plan.schedule.length === 0}
                 />
+                )}
               </Card>
 
               <ScheduleSheet
@@ -197,41 +213,36 @@ export default function TeacherPlanDetail() {
               />
               </>)}
 
-              {!confirmDelete ? (
-                <View style={s.actionsRow}>
-                  <Button
-                    label="تعديل"
-                    variant="secondary"
-                    style={{ flex: 1 }}
-                    onPress={() => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'edit', id: plan._id } } as any)}
-                  />
-                  <Button
-                    label="نسخ"
-                    variant="ghost"
-                    style={{ flex: 1 }}
-                    onPress={() => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'duplicate', id: plan._id } } as any)}
-                  />
-                  <Button label="حذف" variant="danger" style={{ flex: 1 }} onPress={() => setConfirmDelete(true)} />
-                </View>
-              ) : (
-                <Card>
-                  <Text style={s.confirmText}>هل أنت متأكد من حذف هذه الخطة؟ لا يمكن التراجع عن هذا الإجراء.</Text>
-                  <View style={s.actionsRow}>
-                    <Button label="إلغاء" variant="ghost" style={{ flex: 1 }} onPress={() => setConfirmDelete(false)} />
-                    <Button
-                      label={deletePlan.isPending ? 'جارٍ الحذف...' : 'تأكيد الحذف'}
-                      variant="danger"
-                      style={{ flex: 1 }}
-                      disabled={deletePlan.isPending}
-                      onPress={handleDelete}
-                    />
-                  </View>
-                </Card>
-              )}
+              <View style={s.actionsRow}>
+                <Button
+                  label="تعديل"
+                  variant="secondary"
+                  style={{ flex: 1 }}
+                  onPress={() => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'edit', id: plan._id } } as any)}
+                />
+                <Button
+                  label="نسخ"
+                  variant="ghost"
+                  style={{ flex: 1 }}
+                  onPress={() => router.push({ pathname: '/(portal)/teacher/plan-form', params: { mode: 'duplicate', id: plan._id } } as any)}
+                />
+                <Button label="حذف" variant="danger" style={{ flex: 1 }} onPress={() => setConfirmDelete(true)} />
+              </View>
             </>
           );
         })()}
       </ScrollView>
+
+      <ConfirmDialog
+        visible={confirmDelete}
+        title="حذف الخطة"
+        message="ستُحذف الخطة نهائياً ولا يمكن التراجع."
+        confirmLabel="حذف"
+        pending={deletePlan.isPending}
+        pendingLabel="جارٍ الحذف..."
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={handleDelete}
+      />
     </SafeAreaView>
   );
 }

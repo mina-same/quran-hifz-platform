@@ -12,6 +12,7 @@ type AppTheme = ReturnType<typeof useAppTheme>;
 interface Props {
   credentials: { email: string; password: string } | null;
   title: string;
+  subtitle?: string;
   onClose: () => void;
 }
 
@@ -19,7 +20,7 @@ interface Props {
  * Shown once after an account is created — the generated password is never
  * readable again, so the admin has to copy it from here.
  */
-export default function CredentialsDialog({ credentials, title, onClose }: Props) {
+export default function CredentialsDialog({ credentials, title, subtitle = 'احتفظ ببيانات الدخول وأرسلها له', onClose }: Props) {
   const theme = useAppTheme();
   const s = useMemo(() => createS(theme), [theme]);
 
@@ -29,7 +30,7 @@ export default function CredentialsDialog({ credentials, title, onClose }: Props
         <Pressable haptic="none" style={s.dialog} onPress={() => {}}>
           <IconCircleCheck size={44} color={theme.mode === 'dark' ? theme.greenLight : theme.green} />
           <Text style={s.title}>{title}</Text>
-          <Text style={s.sub}>احتفظ ببيانات الدخول وأرسلها له</Text>
+          <Text style={s.sub}>{subtitle}</Text>
 
           <View style={s.box}>
             <Text style={s.fieldLabel}>البريد الإلكتروني</Text>

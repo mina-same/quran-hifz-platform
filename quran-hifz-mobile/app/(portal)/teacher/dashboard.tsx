@@ -16,12 +16,13 @@ import { useTracks } from '@/lib/queries/tracks';
 import { useHomework } from '@/lib/queries/homework';
 import { useStats } from '@/lib/queries/stats';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
+import { trackToContext } from '@/components/domain/ContextCard';
 
-function getName(v: { _id: string; name: string } | string | undefined): string {
-  if (v && typeof v === 'object' && 'name' in v) return v.name;
-  if (typeof v === 'string') return v;
-  return '';
-}
+const TOP_STUDENTS = [
+  { rank: '١', name: 'عبدالله الحميداني', track: 'عمر بن الخطاب', pages: '٥ صفحات', attend: '١٠٠٪' },
+  { rank: '٢', name: 'فيصل العمري',       track: 'عثمان بن عفان', pages: '٤ صفحات', attend: '١٠٠٪' },
+  { rank: '٣', name: 'سعد الشهري',        track: 'عمر بن الخطاب', pages: '٣ صفحات', attend: '٧٥٪' },
+];
 
 export default function TeacherDashboard() {
   const theme = useAppTheme();
@@ -75,6 +76,9 @@ export default function TeacherDashboard() {
       borderBottomWidth: 1,
       borderBottomColor: theme.border,
     },
+    topRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10 },
+    topBorder: { borderTopWidth: 1, borderTopColor: theme.border },
+    topRank: { minWidth: 18, fontSize: 15, fontFamily: theme.fontCairoBold, color: theme.gold },
   }), [theme]);
 
   return (
@@ -89,21 +93,27 @@ export default function TeacherDashboard() {
 
         {isError && <Alert variant="error">تعذر تحميل بيانات لوحة التحكم</Alert>}
 
+        <Button
+          label="تسجيل الحضور"
+          onPress={() => router.push('/(portal)/teacher/attendance' as any)}
+          fullWidth
+        />
+
         {/* My tracks */}
         <Card>
-          <CardHeader title="مساراتي" />
+          <CardHeader title="حلقاتي ومساراتي" />
           {tracksLoading ? (
             <SkeletonRows count={2} rowHeight={40} />
           ) : tracks.length === 0 ? (
-            <Text style={styles.muted}>لا توجد مسارات مسجلة</Text>
+            <Text style={styles.muted}>لا توجد حلقات أو مسارات مسجلة</Text>
           ) : (
             <View style={{ gap: 10 }}>
-              {tracks.map((t) => (
-                <View key={t._id} style={styles.halqaRow}>
-                  <Text style={styles.bold}>{t.title}</Text>
-                  <Badge label={getName(t.masjid) || '—'} variant="gold" />
-                  <Text style={styles.muted}>{t.timeSlot}</Text>
-                  <Text style={styles.muted}>{t.studentCount ?? 0} طالب</Text>
+              {tracks.map((t) => trackToContext(t)).map((c) => (
+                <View key={c.id} style={styles.halqaRow}>
+                  <Text style={styles.bold}>{c.title}</Text>
+                  <Badge label={c.subtitle || '—'} variant="gold" />
+                  <Text style={styles.muted}>{c.scheduleLabel || '—'}</Text>
+                  <Text style={styles.muted}>{c.studentCount ?? 0} طالب</Text>
                 </View>
               ))}
             </View>
@@ -126,6 +136,21 @@ export default function TeacherDashboard() {
             fullWidth
             style={{ marginTop: 12 }}
           />
+        </Card>
+
+        {/* Top students this week — static content, same rows as web. */}
+        <Card>
+          <CardHeader title="أفضل الطلاب هذا الأسبوع" />
+          {TOP_STUDENTS.map((st, i) => (
+            <View key={st.rank} style={[styles.topRow, i > 0 && styles.topBorder]}>
+              <Text style={styles.topRank}>{st.rank}</Text>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={styles.bold}>{st.name}</Text>
+                <Text style={styles.muted}>مسار {st.track} · الحضور {st.attend}</Text>
+              </View>
+              <Badge label={st.pages} variant="gold" />
+            </View>
+          ))}
         </Card>
       </ScrollView>
     </SafeAreaView>

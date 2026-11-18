@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
+import { toast } from '@/components/ui/Toast';
 import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconUserPlus, IconTrash, IconCircleCheck } from '@tabler/icons-react-native';
@@ -27,8 +28,8 @@ const GENDER_OPTIONS = [
   { value: 'female', label: 'بنات' },
 ];
 
-type AddForm = { name: string; email: string; password: string; gender: 'male' | 'female' | '' };
-const EMPTY_ADD: AddForm = { name: '', email: '', password: '', gender: '' };
+type AddForm = { name: string; email: string; password: string; gender: 'male' | 'female' };
+const EMPTY_ADD: AddForm = { name: '', email: '', password: '', gender: 'male' };
 
 type Credentials = { email: string; password: string };
 
@@ -43,6 +44,7 @@ export default function AdminSupervisors() {
   const [addError, setAddError] = useState('');
   const [credentials, setCredentials] = useState<Credentials | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const deleteName = supervisors.find((s) => s._id === deleteId)?.name ?? '';
 
   const styles = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },
@@ -80,7 +82,6 @@ export default function AdminSupervisors() {
     if (!addForm.name.trim()) { setAddError('الاسم مطلوب'); return; }
     if (!addForm.email.trim()) { setAddError('البريد الإلكتروني مطلوب'); return; }
     if (!addForm.password) { setAddError('كلمة المرور مطلوبة'); return; }
-    if (!addForm.gender) { setAddError('يرجى تحديد الفئة (بنين/بنات)'); return; }
     setAddError('');
     try {
       const res = await createSupervisor.mutateAsync({
@@ -100,8 +101,9 @@ export default function AdminSupervisors() {
     if (!deleteId) return;
     try {
       await deleteSupervisor.mutateAsync(deleteId);
-    } finally {
       setDeleteId(null);
+    } catch (e) {
+      toast.error((e as Error).message);
     }
   }
 
@@ -112,7 +114,7 @@ export default function AdminSupervisors() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
-        {isError && <Alert variant="error">تعذر تحميل بيانات المشرفين</Alert>}
+        {isError && <Alert variant="error">تعذّر تحميل بيانات المشرفين</Alert>}
 
         <View>
           <Button label="إضافة مشرف" icon={<IconUserPlus size={16} color={theme.white} />} onPress={openAdd} fullWidth />
@@ -122,7 +124,7 @@ export default function AdminSupervisors() {
           <CardHeader title={`المشرفون (${supervisors.length})`} style={{ padding: 16, paddingBottom: 8 }} />
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
             {isLoading && <SkeletonRows count={4} />}
-            {!isLoading && supervisors.length === 0 && (
+            {!isLoading && !isError && supervisors.length === 0 && (
               <Text style={styles.empty}>لا يوجد مشرفون مسجلون بعد</Text>
             )}
 
@@ -162,15 +164,18 @@ export default function AdminSupervisors() {
             <FormInput value={addForm.email} onChangeText={(v) => setAddField('email', v)} placeholder="supervisor@example.com" autoCapitalize="none" keyboardType="email-address" />
           </FormGroup>
           <FormGroup label="كلمة المرور" required>
-            <FormInput value={addForm.password} onChangeText={(v) => setAddField('password', v)} placeholder="٦ أحرف على الأقل" secureTextEntry />
+            <FormInput value={addForm.password} onChangeText={(v) => setAddField('password', v)} placeholder="6 أحرف على الأقل" secureTextEntry />
           </FormGroup>
-          <FormGroup label="الفئة" required>
+          <FormGroup label="النطاق" required>
             <FormSelect
               options={GENDER_OPTIONS}
               value={addForm.gender}
               onChange={(v) => setAddField('gender', v as 'male' | 'female')}
-              placeholder="اختر الفئة"
+              placeholder="اختر النطاق"
             />
+            <Text style={{ fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted, marginTop: 4 }}>
+              هذا النطاق ثابت ولا يمكن تغييره بعد إنشاء الحساب
+            </Text>
           </FormGroup>
           <Button
             label={createSupervisor.isPending ? 'جارٍ الإنشاء...' : 'إنشاء الحساب'}
@@ -188,7 +193,7 @@ export default function AdminSupervisors() {
             <IconCircleCheck size={40} color={theme.green} />
             <Text style={[styles.sheetTitle, { paddingHorizontal: 0, marginTop: 10 }]}>تم إنشاء حساب المشرف</Text>
             <Text style={{ fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted, textAlign: 'center', marginTop: 4 }}>
-              احتفظ ببيانات الدخول وأرسلها للمشرف — لن تظهر مرة أخرى
+              احتفظ ببيانات الدخول وأرسلها للمشرف
             </Text>
           </View>
           {credentials && (
@@ -210,7 +215,7 @@ export default function AdminSupervisors() {
       <ConfirmDialog
         visible={!!deleteId}
         title="حذف المشرف"
-        message="سيتم حذف حساب المشرف نهائياً. هذا الإجراء لا يمكن التراجع عنه."
+        message={`سيتم حذف حساب المشرف "${deleteName}" نهائياً. هذا الإجراء لا يمكن التراجع عنه.`}
         pending={deleteSupervisor.isPending}
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}

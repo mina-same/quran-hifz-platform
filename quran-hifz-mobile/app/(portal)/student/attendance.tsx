@@ -79,7 +79,7 @@ export default function StudentAttendance() {
                 <View style={styles.infoGrid}>
                   <Text style={styles.infoItem}>اليوم: {r.day}</Text>
                   <Text style={styles.infoItem}>·</Text>
-                  <Text style={styles.infoItem}>الوقت: {r.time}</Text>
+                  <Text style={styles.infoItem}>الوقت: {r.time || '—'}</Text>
                 </View>
               </View>
             ))}

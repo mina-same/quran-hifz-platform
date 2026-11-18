@@ -2,10 +2,12 @@ import { useMemo } from 'react';
 import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
 import Text from '@/components/ui/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Alert from '@/components/ui/Alert';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import CardHeader from '@/components/ui/CardHeader';
 import { SkeletonRows } from '@/components/ui/Skeleton';
+import ChildSelector from '@/components/domain/ChildSelector';
 import { useParentChildren, useChildRecordings } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -21,7 +23,7 @@ export default function ParentRecordings() {
 
   const s = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },
-    page: { padding: 16 },
+    page: { padding: 16, gap: 14 },
     muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 16 },
     item: { paddingVertical: 12 },
     border: { borderTopWidth: 1, borderTopColor: theme.border },
@@ -42,11 +44,10 @@ export default function ParentRecordings() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.spinner} colors={[theme.spinner]} />
         }
       >
+        <ChildSelector />
+        <Alert variant="info">جميع دروس ابنك مرتبة من الأحدث — سجّلها المعلم مباشرة في الحلقة.</Alert>
         <Card>
-          <CardHeader
-            title="الدروس المسجّلة"
-            subtitle="جميع دروس ابنك مرتبة من الأحدث — سجّلها المعلم مباشرة في الحلقة"
-          />
+          <CardHeader title="سجل الدروس" />
           {isLoading && <SkeletonRows count={4} rowHeight={56} />}
           {!isLoading && recordings.length === 0 && <Text style={s.muted}>لا توجد دروس مسجّلة</Text>}
           {recordings.map((r, i) => (
@@ -54,7 +55,7 @@ export default function ParentRecordings() {
               <View style={s.itemHead}>
                 {!!r.type && <Badge label={r.type} variant="blue" />}
                 <Text style={s.date}>{new Date(r.recordedAt).toLocaleDateString(AR_LOCALE)}</Text>
-                {r.points > 0 && <Text style={s.points}>{r.points} نقطة</Text>}
+                <Text style={s.points}>{r.points ?? 0} نقطة</Text>
               </View>
               {!!r.segment && <Text style={s.segment}>{r.segment}</Text>}
               {!!r.teacherNote && (

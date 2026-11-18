@@ -108,3 +108,14 @@ export function useAddTeacherToTrack() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['tracks'] }),
   });
 }
+
+/** Web-parity delete: `archive: true` hits `?archive=true`, the fallback for a
+ * track with historical records (server refuses a hard delete for those). */
+export function useDeleteOrArchiveTrack() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, archive }: { id: string; archive?: boolean }) =>
+      del(`/tracks/${id}${archive ? '?archive=true' : ''}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['tracks'] }),
+  });
+}

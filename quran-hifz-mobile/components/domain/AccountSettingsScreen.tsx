@@ -47,7 +47,7 @@ export default function AccountSettingsScreen() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [pwError, setPwError] = useState('');
+  const [pwErrors, setPwErrors] = useState<{ current?: string; next?: string; confirm?: string }>({});
   const [pwSaved, setPwSaved] = useState(false);
 
   useEffect(() => {
@@ -83,10 +83,15 @@ export default function AccountSettingsScreen() {
 
   async function handleChangePassword() {
     setPwSaved(false);
-    if (!currentPassword) { error(); setPwError('كلمة المرور الحالية مطلوبة'); return; }
-    if (newPassword.length < 6) { error(); setPwError('كلمة المرور الجديدة يجب أن تكون ٦ أحرف على الأقل'); return; }
-    if (newPassword !== confirmPassword) { error(); setPwError('كلمتا المرور غير متطابقتين'); return; }
-    setPwError('');
+    // Mirrors web's zod schema: each field's error under its own field; the
+    // mismatch check only runs once all three fields are individually valid.
+    const errs: { current?: string; next?: string; confirm?: string } = {};
+    if (!currentPassword) errs.current = 'كلمة المرور الحالية مطلوبة';
+    if (newPassword.length < 6) errs.next = 'كلمة المرور الجديدة يجب أن تكون ٦ أحرف على الأقل';
+    if (!confirmPassword) errs.confirm = 'تأكيد كلمة المرور مطلوب';
+    else if (!errs.current && !errs.next && newPassword !== confirmPassword) errs.confirm = 'كلمتا المرور غير متطابقتين';
+    setPwErrors(errs);
+    if (errs.current || errs.next || errs.confirm) { error(); return; }
     try {
       await changePassword.mutateAsync({ currentPassword, newPassword });
       setCurrentPassword('');
@@ -147,13 +152,13 @@ export default function AccountSettingsScreen() {
         <Card>
           <CardHeader title="تغيير كلمة المرور" />
           <View style={{ gap: 12 }}>
-            <FormGroup label="كلمة المرور الحالية" required>
+            <FormGroup label="كلمة المرور الحالية" required error={pwErrors.current}>
               <FormInput value={currentPassword} onChangeText={setCurrentPassword} secureTextEntry />
             </FormGroup>
-            <FormGroup label="كلمة المرور الجديدة" required>
+            <FormGroup label="كلمة المرور الجديدة" required error={pwErrors.next}>
               <FormInput value={newPassword} onChangeText={setNewPassword} secureTextEntry placeholder="٦ أحرف على الأقل" />
             </FormGroup>
-            <FormGroup label="تأكيد كلمة المرور الجديدة" required error={pwError}>
+            <FormGroup label="تأكيد كلمة المرور الجديدة" required error={pwErrors.confirm}>
               <FormInput value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry />
             </FormGroup>
             <Button

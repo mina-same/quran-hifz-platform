@@ -72,7 +72,10 @@ export default function OpenWardPicker({
         <Text style={[s.hint, { color: theme.gold }]}>حدّد المقطع أو اختر «لم يُسمِّع اليوم» قبل الحفظ</Text>
       )}
       {reverse && (
-        <Text style={[s.hint, { color: theme.textMuted }]}>حفظ معكوس — من آخر المصحف، وكل سورة تُقرأ من أولها بترتيب آياتها</Text>
+        <View style={s.dirRow}>
+          <Badge label="حفظ معكوس" variant="blue" />
+          <Text style={[s.hint, { color: theme.textMuted, flexShrink: 1 }]}>من آخر المصحف — كل سورة تُقرأ من أولها بترتيب آياتها</Text>
+        </View>
       )}
       {!none && !spansSurahs && (
         <View style={s.dirRow}>

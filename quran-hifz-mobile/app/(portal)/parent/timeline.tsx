@@ -7,6 +7,7 @@ import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import { SkeletonRows } from '@/components/ui/Skeleton';
+import ChildSelector from '@/components/domain/ChildSelector';
 import { useParentChildren, useChildHifz, type ChildHifzEntry } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -40,6 +41,7 @@ export default function ParentTimeline() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.spinner} colors={[theme.spinner]} />
         }
       >
+        <ChildSelector />
         <Card>
           <CardHeader
             title="رحلة الحفظ من البداية حتى الآن"
@@ -90,7 +92,7 @@ export default function ParentTimeline() {
 function createS(theme: AppTheme) {
   return StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.bg },
-    page: { padding: 16 },
+    page: { padding: 16, gap: 14 },
     muted: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
 
     timeline: { position: 'relative', paddingTop: 4 },

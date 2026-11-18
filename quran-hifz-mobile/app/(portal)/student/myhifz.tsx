@@ -122,10 +122,11 @@ export default function StudentHifz() {
   const completed = hifzEntries.filter((e) => e.status === "مكتمل").length;
   const total = hifzEntries.length;
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const remaining = student
-    ? Math.max(student.totalPages - student.progressPages, 0)
-    : 0;
+  // Same derivation as web StudentHifz: pages from progressPct over the
+  // track's page total (604 when the track doesn't set one).
   const totalPages = student?.totalPages || 604;
+  const pages = student ? Math.round((student.progressPct / 100) * totalPages) : 0;
+  const remaining = totalPages - pages;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
@@ -150,7 +151,7 @@ export default function StudentHifz() {
           <CardHeader title="هدفي السنوي" />
           {student && (
             <View style={styles.goalBlock}>
-              <Text style={styles.goalNumber}>{student.progressPages}</Text>
+              <Text style={styles.goalNumber}>{pages}</Text>
               <Text style={styles.goalCaption}>صفحة من أصل {totalPages}</Text>
               <View style={styles.goalBar}>
                 <ProgressBar value={student.progressPct} showPercent={false} />
@@ -166,7 +167,7 @@ export default function StudentHifz() {
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryLabel}>الصفحات المحفوظة</Text>
-                <Text style={styles.summaryValue}>{student.progressPages}</Text>
+                <Text style={styles.summaryValue}>{pages}</Text>
               </View>
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryLabel}>الصفحات المتبقية</Text>
@@ -233,7 +234,7 @@ export default function StudentHifz() {
                   </View>
                   <View style={styles.infoGrid}>
                     <Text style={styles.infoItem}>
-                      تاريخ الإكمال:{" "}
+                      تاريخ الختم:{" "}
                       {entry.completionDate
                         ? new Date(entry.completionDate).toLocaleDateString(
                             AR_LOCALE,

@@ -95,7 +95,7 @@ export default function AdminTeacherForm() {
         <FormInput placeholder="05XXXXXXXX" keyboardType="phone-pad" style={s.ltr} value={phone} onChangeText={setPhone} />
 
         <Text style={s.label}>التقييم</Text>
-        <FormInput placeholder="مثال: ممتاز" value={rating} onChangeText={setRating} />
+        <FormInput placeholder="مثال: 4.5/5" style={s.ltr} value={rating} onChangeText={setRating} />
 
         <Text style={s.label}>الحالة</Text>
         <FormSelect
@@ -137,6 +137,7 @@ export default function AdminTeacherForm() {
       <CredentialsDialog
         credentials={credentials}
         title="تم إنشاء حساب المعلم"
+        subtitle="احتفظ ببيانات الدخول وأرسلها للمعلم"
         onClose={() => { setCredentials(null); router.back(); }}
       />
     </>

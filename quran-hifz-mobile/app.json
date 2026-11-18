@@ -68,7 +68,15 @@
           "icon": "./assets/icon.png",
           "color": "#1B5E20"
         }
-      ]
-    ]
+      ],
+      "expo-sharing"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "611e15e7-fde1-4ac7-b13f-45701bfb34fc"
+      }
+    },
+    "owner": "mina-samy"
   }
 }

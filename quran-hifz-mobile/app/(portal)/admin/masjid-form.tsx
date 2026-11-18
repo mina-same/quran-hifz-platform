@@ -64,8 +64,8 @@ export default function AdminMasjidForm() {
         value={gender}
         onChange={(v) => setGender(v as 'male' | 'female')}
         options={[
-          { value: 'male', label: 'رجال (جامع)' },
-          { value: 'female', label: 'نساء (دار)' },
+          { value: 'male', label: 'جامع (رجال)' },
+          { value: 'female', label: 'دار (نساء)' },
         ]}
         title="الجنس"
       />

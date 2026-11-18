@@ -1,13 +1,12 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ReportsScreen from '@/components/domain/ReportsScreen';
-import { useTracks } from '@/lib/queries/tracks';
-import { useKpis } from '@/lib/queries/kpis';
-import { useTeachers } from '@/lib/queries/teachers';
+import { useQueryClient } from '@tanstack/react-query';
+import PromoReportSection from '@/components/domain/PromoReportSection';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { usePortalStore } from '@/lib/store/portalStore';
 
+/** Admin / supervisor reports — like web, the page IS «تقرير الإنجاز والتميّز». */
 export default function AdminReports() {
   const theme = useAppTheme();
   const genderScope = usePortalStore((st) => st.genderScope);
@@ -16,15 +15,16 @@ export default function AdminReports() {
     page: { padding: theme.pagePadding, gap: 14 },
   }), [theme]);
 
-  const { data: tracks = [], isRefetching: tracksRefetching, refetch: refetchTracks } = useTracks();
-  const { data: kpis = [], isRefetching: kpisRefetching, refetch: refetchKpis } = useKpis();
-  const { data: teachers = [], isRefetching: teachersRefetching, refetch: refetchTeachers } = useTeachers();
-
-  const refreshing = tracksRefetching || kpisRefetching || teachersRefetching;
-  const onRefresh = () => {
-    refetchTracks();
-    refetchKpis();
-    refetchTeachers();
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['rankings'] }),
+      queryClient.invalidateQueries({ queryKey: ['tracks'] }),
+      queryClient.invalidateQueries({ queryKey: ['masajid'] }),
+    ]);
+    setRefreshing(false);
   };
 
   return (
@@ -34,15 +34,7 @@ export default function AdminReports() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
-        <ReportsScreen
-          baseFilter={{}}
-          tracks={tracks}
-          scopeAllLabel="كل المدرسة"
-          showAdmin
-          kpis={kpis}
-          teachers={teachers}
-          genderScope={genderScope}
-        />
+        <PromoReportSection genderScope={genderScope} />
       </ScrollView>
     </SafeAreaView>
   );

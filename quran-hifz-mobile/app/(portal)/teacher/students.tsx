@@ -6,7 +6,8 @@ import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
-import ProgressBar from '@/components/ui/ProgressBar';
+import Button from '@/components/ui/Button';
+import { IconMicrophone } from '@tabler/icons-react-native';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import { usePortalStore } from '@/lib/store/portalStore';
 import ScopeTabs from '@/components/ui/ScopeTabs';
@@ -17,7 +18,7 @@ import { useAppTheme } from '@/lib/hooks/useAppTheme';
 const hwVariant = (s: string) =>
   s === 'submitted' ? 'green' : s === 'late' ? 'red' : 'gold';
 const hwLabel = (s: string) =>
-  s === 'submitted' ? 'مُسلَّم' : s === 'late' ? 'متأخر' : 'معلق';
+  s === 'submitted' ? 'سُجِّل' : 'لم يُسجَّل';
 
 function getTrackName(v: { title: string } | string | undefined): string {
   if (v && typeof v === 'object' && 'title' in v) return v.title;
@@ -31,22 +32,23 @@ export default function TeacherStudents() {
   // exactly one track (no more halqa-vs-track duality to filter across).
   const [filter, setFilter] = useState('all');
 
-  const { data: myTracks = [], refetch: refetchTracks, isRefetching: refetchingTracks } = useTracks(undefined, authUser?.profileId);
+  const { data: myTracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks } = useTracks(undefined, authUser?.profileId);
   // A teacher can run several tracks — fetch across all of them, not just the
   // first, or every student outside track #1 silently disappears.
   const trackIds = useMemo(() => myTracks.map((t) => t._id), [myTracks]);
   const {
     data: students = [],
-    isLoading,
+    isLoading: loadingStudents,
     isError,
     refetch: refetchStudents,
     isRefetching: refetchingStudents,
   } = useStudents({ track: trackIds.join(',') }, { enabled: trackIds.length > 0 });
 
+  const isLoading = loadingTracks || loadingStudents;
   const filterOptions = useMemo(() => [
-    { value: 'all', label: 'كل الطلاب' },
+    { value: 'all', label: `كل الطلاب (${students.length})` },
     ...myTracks.map((t) => ({ value: `track:${t._id}`, label: t.title })),
-  ], [myTracks]);
+  ], [myTracks, students.length]);
 
   const shown = useMemo(() => {
     if (filter.startsWith('track:')) {
@@ -73,7 +75,6 @@ export default function TeacherStudents() {
     infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     filterLabel: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.textMuted },
     infoItem: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
-    progressWrap: { gap: 4 },
     empty: { textAlign: 'center', color: theme.textMuted, fontFamily: theme.fontCairo, fontSize: 13, paddingVertical: 24 },
   }), [theme]);
 
@@ -86,6 +87,9 @@ export default function TeacherStudents() {
       >
         {isError && <Alert variant="error">تعذر تحميل الطلاب</Alert>}
 
+        {!isLoading && myTracks.length === 0 ? (
+          <Alert variant="info">لا توجد مسارات مسندة لهذا المعلم</Alert>
+        ) : (<>
         {filterOptions.length > 1 && (
           <View style={{ gap: 6 }}>
             <Text style={styles.filterLabel}>تصفية الطلاب</Text>
@@ -97,7 +101,7 @@ export default function TeacherStudents() {
           <CardHeader title={`الطلاب (${shown.length})`} style={{ padding: 16, paddingBottom: 8 }} />
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
             {isLoading && <SkeletonRows count={5} />}
-            {!isLoading && shown.length === 0 && <Text style={styles.empty}>لا يوجد طلاب</Text>}
+            {!isLoading && shown.length === 0 && <Text style={styles.empty}>لا توجد بيانات</Text>}
 
             {!isLoading && shown.map((s, i) => {
               const guardianName = s.parentName || s.guardian || '—';
@@ -105,7 +109,9 @@ export default function TeacherStudents() {
                 <View key={s._id} style={[styles.row, i < shown.length - 1 && styles.rowBorder]}>
                   <View style={styles.rowHead}>
                     <Text style={styles.name} numberOfLines={1}>{s.name}</Text>
-                    <Badge label={hwLabel(s.homeworkStatus)} variant={hwVariant(s.homeworkStatus) as any} />
+                    {!!s.homeworkStatus && (
+                      <Badge label={`الدرس: ${hwLabel(s.homeworkStatus)}`} variant={hwVariant(s.homeworkStatus) as any} />
+                    )}
                   </View>
 
                   <View style={styles.infoGrid}>
@@ -114,22 +120,24 @@ export default function TeacherStudents() {
                     <Text style={styles.infoItem}>آخر حفظ: {s.lastMemorization || '—'}</Text>
                   </View>
 
-                  <View style={styles.rowHead}>
-                    <Text style={[styles.muted, { color: s.attendancePct >= 90 ? theme.green : theme.red, fontFamily: theme.fontCairoBold }]}>
-                      الحضور {s.attendancePct}٪
-                    </Text>
-                    <Text style={styles.muted}>ولي الأمر: {guardianName}</Text>
-                  </View>
+                  <Text style={styles.muted}>ولي الأمر: {guardianName}</Text>
+                  <Text style={styles.muted}>
+                    التواصل: {s.parentEmail || s.guardianPhone || '—'}
+                  </Text>
 
-                  <View style={styles.progressWrap}>
-                    <Text style={styles.muted}>التقدم {s.progressPct}٪</Text>
-                    <ProgressBar value={s.progressPct} showPercent={false} />
-                  </View>
+                  {/* Inert on web too (no handler) — kept for content parity. */}
+                  <Button
+                    label="سجّل"
+                    size="sm"
+                    icon={<IconMicrophone size={14} color={theme.white} />}
+                    style={{ alignSelf: 'flex-start' }}
+                  />
                 </View>
               );
             })}
           </View>
         </Card>
+        </>)}
       </ScrollView>
     </SafeAreaView>
   );

@@ -58,3 +58,13 @@ export function useDeleteTeacher() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['teachers'] }),
   });
 }
+
+/** `useTeachers` that only fetches when `enabled` — for screens shared with
+ * roles that may not list teachers (e.g. the plan form's admin-only picker). */
+export function useTeachersWhen(enabled: boolean) {
+  return useQuery({
+    queryKey: ['teachers'],
+    queryFn: () => get<ListResponse>('/teachers').then((r) => r.data),
+    enabled,
+  });
+}

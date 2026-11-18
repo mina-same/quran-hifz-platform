@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { View, StyleSheet, Linking } from 'react-native';
+import { View, StyleSheet, Linking, Alert as RNAlert } from 'react-native';
 import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
 import Card from '@/components/ui/Card';
@@ -12,10 +12,13 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import ScopeTabs from '@/components/ui/ScopeTabs';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import SheetTriggerRow from '@/components/ui/SheetTriggerRow';
-import ScheduleSheet, { scheduleItems } from '@/components/domain/ScheduleSheet';
-import IndividualPlanPanel from '@/components/domain/IndividualPlanPanel';
+import TrackDetailScheduleSheet, { type DayEditState } from '@/components/domain/TrackDetailScheduleSheet';
+import { toast } from '@/components/ui/Toast';
+import TeacherStudentPlanToggle from '@/components/domain/TeacherStudentPlanToggle';
 import EvaluationRoster from '@/components/domain/EvaluationRoster';
 import TrackStudentsPanel from '@/components/domain/TrackStudentsPanel';
+import DailyReportPrompt from '@/components/domain/DailyReportPrompt';
+import MessageParentsSheet from '@/components/domain/MessageParentsSheet';
 import DaySlider, { useDaySchedule } from '@/components/domain/DaySlider';
 import FormSelect from '@/components/forms/FormSelect';
 import {
@@ -25,17 +28,19 @@ import { useTeachers } from '@/lib/queries/teachers';
 import { useStudents } from '@/lib/queries/students';
 import {
   useQuranPlans, useUpdateQuranPlan, segmentReversed, isOpenPlan, isSlice, type QuranPlan,
+  useGenerateSchedule, useUpdateScheduleEntry,
 } from '@/lib/queries/quranPlan';
 import OpenWardLogSheet from '@/components/domain/OpenWardLogSheet';
 import { planScheduleDays, planScheduleRange, resolveLinkedPlan, NO_PLAN_SCHEDULE_TEXT } from '@/lib/trackSchedule';
-import { isReversedRange, orientSlice, surahName } from '@/lib/quranRange';
+import { orientSlice, surahName } from '@/lib/quranRange';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 
-import { IconCalendarEvent, IconCalendarOff, IconClock, IconUserPlus, IconVideo } from '@tabler/icons-react-native';
+import { IconCalendarCheck, IconCalendarEvent, IconCalendarOff, IconCalendarStar, IconClock, IconLink, IconMessage2, IconPlus, IconUserPlus, IconVideo } from '@tabler/icons-react-native';
 import { AR_LOCALE, fmtDayLabel } from '@/lib/date';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
+type ScheduleEntry = QuranPlan['schedule'][number];
 
 function getTeacherName(v: TrackTeacher | string) { return typeof v === 'object' ? v.name : v; }
 function getTeacherId(v: TrackTeacher | string) { return typeof v === 'object' ? v._id : v; }
@@ -59,6 +64,18 @@ function planTargetsTrack(plan: QuranPlan, trackId: string): boolean {
   const id = typeof ref === 'object' ? ref?._id : ref;
   return id === trackId;
 }
+
+/** Same rule as web's `planCoversStudent`: a students-targeted plan covers
+ * only its listed students; a track plan covers the whole roster. */
+function planCoversStudent(plan: QuranPlan, studentId: string): boolean {
+  if (plan.targetType === 'students') {
+    return (plan.students ?? []).some((s) => (typeof s === 'string' ? s : s._id) === studentId);
+  }
+  return true;
+}
+
+const DIRTY_DAY_EDIT_MSG =
+  'لديك تعديل غير محفوظ على توزيع أحد الأيام — سيتم فقده إذا واصلت. هل تريد تجاهل التعديل والمتابعة؟';
 
 type TabKey = 'teachers' | 'students' | 'plan';
 const TABS = [
@@ -122,11 +139,12 @@ export default function TrackDetail({ trackId, role }: Props) {
   // Only the teacher-only "link another plan" panel reads this. An admin has no
   // profileId, so an ungated call would drop the `teacher` filter and pull every
   // plan in the system on each open, for a panel they never see.
-  const { data: myPlans = [] } = useQuranPlans(
+  const { data: myPlans = [], isLoading: loadingMyPlans } = useQuranPlans(
     canManagePlan ? { teacher: profileId } : undefined,
     { enabled: canManagePlan },
   );
   const updatePlan = useUpdateQuranPlan();
+  const generateSchedule = useGenerateSchedule();
 
   // `POST /evaluations/bulk` requires a teacher id, and admin users carry no
   // profileId — so an admin records against the track's own first teacher
@@ -145,8 +163,128 @@ export default function TrackDetail({ trackId, role }: Props) {
     : '/(portal)/teacher/plan-form';
 
   const [tab, setTab] = useState<TabKey>('students');
-  const [showLinkPanel, setShowLinkPanel] = useState(false);
-  const [showSchedule, setShowSchedule] = useState(false);
+  // Only one of the plan tab's sections (link-another-plan / schedule) is open
+  // at once — opening one closes the other (web parity).
+  const [openPlanSection, setOpenPlanSectionState] = useState<'link' | 'schedule' | null>(null);
+  // Mirrors `openPlanSection` synchronously: the sheet's onClose fires both on a
+  // swipe and again after a programmatic dismiss, so it must be idempotent.
+  const sectionRef = useRef<'link' | 'schedule' | null>(null);
+  function setOpenPlanSection(v: 'link' | 'schedule' | null) {
+    sectionRef.current = v;
+    setOpenPlanSectionState(v);
+  }
+  const [showMessageParents, setShowMessageParents] = useState(false);
+
+  // ── Day-split row editing (web: editingDay / dayRange* / dayPage* / dayJuz) ──
+  const updateScheduleEntry = useUpdateScheduleEntry();
+  const [editingDay, setEditingDay] = useState<ScheduleEntry | null>(null);
+  const [dayEdit, setDayEdit] = useState<DayEditState>({
+    rangeStart: { surahNumber: 1, ayah: 1 }, rangeEnd: { surahNumber: 1, ayah: 1 },
+    pageStart: 1, pageEnd: 1, juz: 1,
+  });
+  const [dayError, setDayError] = useState('');
+
+  function isDayEditDirty(): boolean {
+    if (!editingDay) return false;
+    return (
+      dayEdit.rangeStart.surahNumber !== editingDay.surahStart ||
+      dayEdit.rangeStart.ayah !== editingDay.ayahStart ||
+      dayEdit.rangeEnd.surahNumber !== editingDay.surahEnd ||
+      dayEdit.rangeEnd.ayah !== editingDay.ayahEnd ||
+      dayEdit.pageStart !== editingDay.pageStart ||
+      dayEdit.pageEnd !== editingDay.pageEnd ||
+      dayEdit.juz !== editingDay.juz
+    );
+  }
+  /** Web's `guardDiscardDayEdit` (window.confirm) as a native confirm: runs
+   * `proceed` straight away when nothing would be lost, else only once the
+   * teacher confirms discarding the unsaved day edit. */
+  function guardDiscardDayEdit(proceed: () => void, onKeep?: () => void) {
+    if (!isDayEditDirty()) { proceed(); return; }
+    RNAlert.alert(DIRTY_DAY_EDIT_MSG, undefined, [
+      { text: 'إلغاء', style: 'cancel', onPress: onKeep },
+      { text: 'متابعة', style: 'destructive', onPress: proceed },
+    ], { cancelable: false });
+  }
+  function togglePlanSection(section: 'link' | 'schedule') {
+    guardDiscardDayEdit(() => {
+      setOpenPlanSection(sectionRef.current === section ? null : section);
+      setEditingDay(null);
+    });
+  }
+  // First time anyone opens the schedule, freeze it into the DB automatically
+  // so it's a real record from then on (web's handleScheduleToggle).
+  function openSchedule() {
+    guardDiscardDayEdit(() => {
+      setOpenPlanSection('schedule');
+      setEditingDay(null);
+      if (linkedPlan && !linkedPlan.scheduleIsPersisted) {
+        generateSchedule.mutate(linkedPlan._id, { onError: (e) => toast.error((e as Error).message) });
+      }
+    });
+  }
+  function closeSchedule() {
+    if (sectionRef.current !== 'schedule') return;
+    setOpenPlanSection(null);
+    guardDiscardDayEdit(
+      () => setEditingDay(null),
+      // Kept editing → bring the sheet straight back with the edit intact.
+      () => setOpenPlanSection('schedule'),
+    );
+  }
+  function startEditDay(entry: ScheduleEntry) {
+    if (editingDay && editingDay.occurrenceIndex === entry.occurrenceIndex && editingDay.type === entry.type) return;
+    guardDiscardDayEdit(() => {
+      setEditingDay(entry);
+      setDayEdit({
+        rangeStart: { surahNumber: entry.surahStart, ayah: entry.ayahStart },
+        rangeEnd: { surahNumber: entry.surahEnd, ayah: entry.ayahEnd },
+        pageStart: entry.pageStart,
+        pageEnd: entry.pageEnd,
+        juz: entry.juz,
+      });
+      setDayError('');
+    });
+  }
+  function handleRegenerateSchedule() {
+    if (!linkedPlan) return;
+    guardDiscardDayEdit(() => {
+      setEditingDay(null);
+      generateSchedule.mutate(linkedPlan._id, { onError: (e) => toast.error((e as Error).message) });
+    });
+  }
+  async function saveEditDay() {
+    if (!linkedPlan || !editingDay) return;
+    const { rangeStart, rangeEnd, pageStart, pageEnd, juz } = dayEdit;
+    const startsBeforeEnd =
+      rangeStart.surahNumber < rangeEnd.surahNumber ||
+      (rangeStart.surahNumber === rangeEnd.surahNumber && rangeStart.ayah <= rangeEnd.ayah);
+    if (!startsBeforeEnd) {
+      setDayError('نقطة البداية يجب أن تسبق نقطة النهاية');
+      return;
+    }
+    if (pageStart > pageEnd) {
+      setDayError('صفحة البداية يجب أن تسبق صفحة النهاية');
+      return;
+    }
+    setDayError('');
+    try {
+      await updateScheduleEntry.mutateAsync({
+        id: linkedPlan._id,
+        occurrenceIndex: editingDay.occurrenceIndex,
+        surahStart: rangeStart.surahNumber,
+        ayahStart: rangeStart.ayah,
+        surahEnd: rangeEnd.surahNumber,
+        ayahEnd: rangeEnd.ayah,
+        pageStart,
+        pageEnd,
+        juz,
+      });
+      setEditingDay(null);
+    } catch (e) {
+      setDayError((e as Error).message);
+    }
+  }
 
   // ── Day slider ───────────────────────────────────────────────────────────
   const [selectedDate, setSelectedDate] = useState('');
@@ -160,11 +298,6 @@ export default function TrackDetail({ trackId, role }: Props) {
     [trackStudents],
   );
 
-  const scheduleRows = useMemo(
-    () => (linkedPlan ? scheduleItems(linkedPlan.schedule, (e) => segmentReversed(linkedPlan, e.type)) : []),
-    [linkedPlan],
-  );
-
   const unlinkedPlans = myPlans.filter((p) => !planTargetsTrack(p, trackId));
 
   if (loadingTrack) {
@@ -176,7 +309,25 @@ export default function TrackDetail({ trackId, role }: Props) {
   }
 
   const enrolledCount = roster.length;
-  const capacityPct = track.maxStudents > 0 ? Math.min(100, Math.round((enrolledCount / track.maxStudents) * 100)) : 0;
+  const capacityPct = Math.min(100, Math.round((enrolledCount / track.maxStudents) * 100));
+  const barClr = capacityPct >= 90 ? theme.tone.red.text : capacityPct >= 70 ? theme.tone.gold.text : theme.green;
+  const openPlan = isOpenPlan(linkedPlan);
+
+  function createNewPlan() {
+    router.push({ pathname: planFormPath, params: { mode: 'create', trackId } } as any);
+  }
+  // Web's topbar «تسجيل الحضور» (takeAttendance): hands this track off to the
+  // attendance page. Mobile has no admin attendance route, so an admin gets
+  // the same roster in place — the الطلاب tab below embeds it.
+  function takeAttendance() {
+    guardDiscardDayEdit(() => {
+      if (role === 'teacher') {
+        router.push({ pathname: '/(portal)/teacher/attendance', params: { trackId, ts: String(Date.now()) } } as any);
+      } else {
+        setTab('students');
+      }
+    });
+  }
 
   return (
     <View style={{ gap: 14 }}>
@@ -196,18 +347,18 @@ export default function TrackDetail({ trackId, role }: Props) {
             <Text style={s.infoValue}>{linkedPlan ? (planScheduleDays(linkedPlan).join('، ') || '—') : NO_PLAN_SCHEDULE_TEXT}</Text>
           </View>
           <View style={[s.infoItem, { width: '100%' }]}>
-            <Text style={s.infoLabel}>الفترة</Text>
+            <Text style={s.infoLabel}>مدة الخطة</Text>
             <Text style={s.infoValue}>{(() => {
               const range = planScheduleRange(linkedPlan);
               if (!range) return NO_PLAN_SCHEDULE_TEXT;
               return range.endType === 'date'
-                ? `${fmtDate(range.startDate)} – ${fmtDate(range.endDate)}`
+                ? `${fmtDate(range.startDate)} — ${fmtDate(range.endDate)}`
                 : `من ${fmtDate(range.startDate)} · ${range.activeDaysCount} يوم نشط`;
             })()}</Text>
           </View>
         </View>
 
-        <Text style={s.infoLabel}>المكان</Text>
+        <Text style={s.infoLabel}>المسجد</Text>
         <Text style={[s.infoValue, { marginBottom: 10 }]}>{track.isOnline ? 'أونلاين' : (typeof track.masjid === 'object' ? track.masjid.name : track.masjid)}</Text>
 
         {track.isOnline && !!track.meetLink && (
@@ -221,16 +372,16 @@ export default function TrackDetail({ trackId, role }: Props) {
           </Pressable>
         )}
 
-        <View style={s.capacityBox}>
-          <View style={s.capacityRow}>
-            <Text style={s.capacityLabel}>الطلاب</Text>
-            <Text style={s.capacityValue}>{enrolledCount} / {track.maxStudents}</Text>
-          </View>
-          <ProgressBar value={capacityPct} showPercent={false} />
-        </View>
+        <Button
+          label="تسجيل الحضور"
+          fullWidth
+          icon={<IconCalendarCheck size={16} color={theme.white} />}
+          onPress={takeAttendance}
+          style={{ marginTop: 10 }}
+        />
       </Card>
 
-      <ScopeTabs options={TABS} value={tab} onChange={(v) => setTab(v as TabKey)} />
+      <ScopeTabs options={TABS} value={tab} onChange={(v) => guardDiscardDayEdit(() => setTab(v as TabKey))} />
 
       {tab === 'teachers' && (
         <Card>
@@ -269,15 +420,22 @@ export default function TrackDetail({ trackId, role }: Props) {
                       value={addTeacherId}
                       onChange={setAddTeacherId}
                       options={availableTeachers.map((t) => ({ value: t._id, label: t.name }))}
-                      placeholder="اختر معلماً"
+                      placeholder="— اختر معلماً —"
                     />
                   </View>
                   <Button
                     label="إضافة"
-                    onPress={() => {
+                    icon={<IconPlus size={15} color={theme.white} />}
+                    loading={addTeacherToTrack.isPending}
+                    onPress={async () => {
                       if (!addTeacherId) return;
-                      addTeacherToTrack.mutate({ id: track._id, teacherId: addTeacherId });
-                      setAddTeacherId('');
+                      try {
+                        await addTeacherToTrack.mutateAsync({ id: track._id, teacherId: addTeacherId });
+                        setAddTeacherId('');
+                        toast.success('تمت إضافة المعلم');
+                      } catch (e) {
+                        toast.error((e as Error).message);
+                      }
                     }}
                     disabled={!addTeacherId || addTeacherToTrack.isPending}
                   />
@@ -293,6 +451,24 @@ export default function TrackDetail({ trackId, role }: Props) {
 
       {tab === 'students' && (
         <>
+          <Card>
+            <CardHeader
+              title="عدد الطلاب"
+              right={<Text style={[s.capacityValue, { color: barClr }]}>{enrolledCount} / {track.maxStudents}</Text>}
+            />
+            {!readOnly && roster.length > 0 && (
+              <Button
+                label="مراسلة أولياء الأمور"
+                variant="outline"
+                size="sm"
+                icon={<IconMessage2 size={15} color={theme.greenAccent} />}
+                onPress={() => setShowMessageParents(true)}
+                style={{ marginBottom: 10 }}
+              />
+            )}
+            <TrackStudentsPanel track={track} canTransfer={role === 'admin'} />
+          </Card>
+
           <DaySlider
             schedule={daySchedule}
             onSelect={(iso) => { setDayNotice(null); setSelectedDate(iso); }}
@@ -307,20 +483,30 @@ export default function TrackDetail({ trackId, role }: Props) {
 
           {scheduledSorted.length === 0 && (
             <Alert variant="warning">
-              لا يوجد خطة حفظ نشطة لهذا المسار — أضف خطة من تبويب "الخطة" أولاً لعرض الورد المقرر لكل يوم.
+              لا يوجد خطة حفظ نشطة لهذا المسار — لا يمكن تسجيل الحضور والتقييم قبل إضافة خطة. أضف خطة من تبويب "الخطة" أولاً لتفعيل التسجيل والتقويم.
             </Alert>
           )}
 
           {isFutureDay && (
             <Alert variant="warning" icon={<IconClock size={16} color={theme.tone.gold.text} />}>
-              هذا اليوم لم يحن بعد — الورد معروض للاطلاع فقط.
+              هذا اليوم لم يحن بعد — لا يمكن تسجيل الحضور والتقييم مسبقًا لجلسة لم تُعقد.
             </Alert>
+          )}
+
+          {!readOnly && (
+            <DailyReportPrompt
+              trackId={trackId}
+              date={effectiveDate}
+              studentIds={roster.map((st) => st._id)}
+              disabled={isFutureDay}
+              inline={role === 'admin'}
+            />
           )}
 
           <Card noPadding>
             <CardHeader
-              title={`طلاب المسار (${roster.length})`}
-              subtitle={scheduledSorted.length > 0 ? fmtDayLabel(effectiveDate) : undefined}
+              title="طلاب المسار"
+              subtitle={fmtDayLabel(effectiveDate)}
               style={{ padding: 16, paddingBottom: 8 }}
             />
             <View style={{ paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}>
@@ -332,135 +518,139 @@ export default function TrackDetail({ trackId, role }: Props) {
                 linkedPlan={linkedPlan}
                 daySchedule={daySchedule}
                 emptyLabel="لا يوجد طلاب مسجّلون بعد"
+                noActivePlan={scheduledSorted.length === 0}
                 renderExtra={(student) => (
-                  linkedPlan
-                    // One panel per segment type — a multi-segment plan needs
-                    // a separate حفظ overlay and مراجعة overlay, each with its
-                    // own custom range.
-                    ? <>
-                        {(linkedPlan.segments && linkedPlan.segments.length > 1
-                          ? linkedPlan.segments.map((seg) => (
-                              <IndividualPlanPanel
-                                key={seg.type}
-                                planId={linkedPlan._id}
-                                studentId={student._id}
-                                studentName={student.name}
-                                basePlan={linkedPlan}
-                                type={seg.type}
-                                readOnly={readOnly}
-                              />
-                            ))
-                          : (
-                            <IndividualPlanPanel
-                              planId={linkedPlan._id}
-                              studentId={student._id}
-                              studentName={student.name}
-                              basePlan={linkedPlan}
-                              readOnly={readOnly}
-                            />
-                          ))}
-                      </>
-                    : <Text style={s.muted}>اربط خطة حفظ بالمسار أولاً لعرض التوزيع الفردي</Text>
+                  linkedPlan && planCoversStudent(linkedPlan, student._id)
+                    ? <TeacherStudentPlanToggle plan={linkedPlan} studentId={student._id} studentName={student.name} readOnly={readOnly} />
+                    : !readOnly && (
+                      <Button
+                        label="أضف خطة للمسار"
+                        variant="ghost"
+                        size="sm"
+                        icon={<IconPlus size={15} color={theme.green} />}
+                        onPress={createNewPlan}
+                      />
+                    )
                 )}
               />
             </View>
-          </Card>
-
-          <Card>
-            <CardHeader title="إدارة طلاب المسار" />
-            <TrackStudentsPanel track={track} canTransfer={role === 'admin'} />
           </Card>
         </>
       )}
 
       {tab === 'plan' && (
         <Card>
-          <CardHeader title="خطة الحفظ المرتبطة" />
+          <CardHeader
+            title="الخطة القرآنية"
+            right={linkedPlan?.progress ? <Badge label={`${linkedPlan.progress.percent}%`} variant="green" /> : undefined}
+          />
           {linkedPlan ? (
             <>
               <Text style={s.title}>{linkedPlan.name}</Text>
-              <Text style={s.subInfo}>{linkedPlan.type}</Text>
-              <View style={{ marginTop: 10 }}>
-                <ProgressBar
-                  value={linkedPlan.progress?.percent ?? 0}
-                  label={linkedPlan.juzProgress ? `${linkedPlan.juzProgress.completed} / ${linkedPlan.juzProgress.total} جزء` : undefined}
-                />
-              </View>
+              {!!linkedPlan.progress && (
+                <View style={{ marginTop: 6 }}>
+                  <ProgressBar value={linkedPlan.progress.percent} showPercent={false} />
+                  <Text style={s.subInfo}>
+                    {linkedPlan.juzProgress ? `${linkedPlan.juzProgress.completed} / ${linkedPlan.juzProgress.total} جزء` : ''}
+                    {' · '}
+                    {linkedPlan.progress.completed} / {linkedPlan.progress.total} يوم
+                  </Text>
+                </View>
+              )}
               <View style={[s.assignmentBox, { backgroundColor: linkedPlan.todayAssignments.length > 0 ? theme.greenPale : theme.cream }]}>
+                <View style={[s.iconLabel, { marginBottom: linkedPlan.todayAssignments.length > 0 ? 4 : 0 }]}>
+                  <IconCalendarStar size={14} color={linkedPlan.todayAssignments.length > 0 ? theme.green : theme.textMuted} />
+                  <Text style={[s.todayLabel, { color: linkedPlan.todayAssignments.length > 0 ? theme.green : theme.textMuted }]}>
+                    الجزء المطلوب اليوم
+                  </Text>
+                </View>
                 {linkedPlan.todayAssignments.length > 0 ? linkedPlan.todayAssignments.map((entry, idx) => {
+                  const prefix = linkedPlan.todayAssignments.length > 1 ? `${entry.type} · ` : '';
                   if (!isSlice(entry)) {
                     return (
-                      <Text key={entry.type} style={[s.assignmentText, idx > 0 && { marginTop: 4 }]}>
-                        {linkedPlan.todayAssignments.length > 1 ? `${entry.type} · ` : ''}ورد حر — يُسجَّل في الحلقة
+                      <Text key={idx} style={[s.assignmentText, idx > 0 && { marginTop: 4 }]}>
+                        {prefix}ورد حر — يُسجَّل في الحلقة
                       </Text>
                     );
                   }
-                  // Direction is per segment — each type may span a different,
-                  // independently-reversed range.
-                  const reversed = segmentReversed(linkedPlan, entry.type);
-                  const a = orientSlice(entry, reversed);
+                  const a = orientSlice(entry, segmentReversed(linkedPlan, entry.type));
                   return (
-                    <Text key={entry.type} style={[s.assignmentText, idx > 0 && { marginTop: 4 }]}>
-                      {linkedPlan.todayAssignments.length > 1 ? `${entry.type} · ` : ''}
-                      {surahName(a.surahStart)}:{a.ayahStart} — {surahName(a.surahEnd)}:{a.ayahEnd}{reversed ? ' · بالعكس' : ''}
+                    <Text key={idx} style={[s.assignmentText, idx > 0 && { marginTop: 4 }]}>
+                      {prefix}
+                      {surahName(a.surahStart)} : {a.ayahStart} — {surahName(a.surahEnd)} : {a.ayahEnd} (صفحة {a.pageStart}{a.pageEnd !== a.pageStart ? ` - ${a.pageEnd}` : ''})
                     </Text>
                   );
                 }) : (
-                  <Text style={s.muted}>لا يوجد جزء مخصص لليوم</Text>
+                  <Text style={s.subInfo}>لا يوجد جزء مخصص لليوم</Text>
                 )}
               </View>
 
-              <View style={s.actionsRow}>
-                {canChangePlan && (
+              {canChangePlan && (
+                <View style={s.actionsRow}>
                   <Button
                     label="تعديل الخطة"
-                    variant="secondary"
                     style={{ flex: 1 }}
                     onPress={() => router.push({ pathname: planFormPath, params: { mode: 'edit', id: linkedPlan._id } } as any)}
                   />
-                )}
-                {canChangePlan && (
-                  <Button label="ربط خطة أخرى" variant="ghost" style={{ flex: 1 }} onPress={() => setShowLinkPanel((v) => !v)} />
-                )}
-              </View>
-              {isOpenPlan(linkedPlan) && (
+                  <Button
+                    label={openPlanSection === 'link' ? 'إلغاء' : 'ربط خطة أخرى'}
+                    variant="ghost"
+                    style={{ flex: 1 }}
+                    onPress={() => togglePlanSection('link')}
+                  />
+                </View>
+              )}
+              {!openPlan && linkedPlan.schedule.length > 0 && (
+                <SheetTriggerRow
+                  label="عرض توزيع الأيام والصفحات"
+                  icon={<IconCalendarEvent size={17} color={theme.green} />}
+                  onPress={openSchedule}
+                  style={{ marginTop: 12 }}
+                />
+              )}
+              {openPlan && (
                 <View style={{ marginTop: 12 }}>
                   <OpenWardLogSheet planId={linkedPlan._id} />
                 </View>
               )}
-              {!isOpenPlan(linkedPlan) && linkedPlan.schedule.length > 0 && (
-                <SheetTriggerRow
-                  label="توزيع الأيام والصفحات"
-                  value={`${linkedPlan.schedule.length} يوم`}
-                  icon={<IconCalendarEvent size={17} color={theme.green} />}
-                  onPress={() => setShowSchedule(true)}
-                  style={{ marginTop: 12 }}
-                />
-              )}
             </>
           ) : (
-            <>
-              <Text style={s.muted}>لا توجد خطة حفظ مرتبطة بهذا المسار</Text>
+            <View style={{ alignItems: 'center', paddingVertical: 16 }}>
+              <Text style={s.emptyTitle}>لا توجد خطة حفظ مرتبطة بهذا المسار بعد</Text>
+              <Text style={s.subInfo}>اربط خطة موجودة أو أنشئ خطة جديدة لتفعيل التقويم والتقييم</Text>
               {canManagePlan && (
-                <Button label="ربط خطة" onPress={() => setShowLinkPanel((v) => !v)} style={{ marginTop: 10 }} />
+                <Button
+                  label={openPlanSection === 'link' ? 'إلغاء' : 'ربط خطة'}
+                  onPress={() => togglePlanSection('link')}
+                  style={{ marginTop: 10 }}
+                />
               )}
-            </>
+            </View>
           )}
 
-          {canManagePlan && showLinkPanel && (
+          {canManagePlan && openPlanSection === 'link' && (
             <View style={s.linkPanel}>
-              <Text style={s.linkPanelTitle}>اختر خطة من خططك</Text>
-              {unlinkedPlans.length === 0 ? (
-                <Text style={s.muted}>لا توجد خطط متاحة للربط</Text>
+              <View style={s.iconLabel}>
+                <IconLink size={14} color={theme.text} />
+                <Text style={s.linkPanelTitle}>ربط خطة موجودة بـ"{track.title}"</Text>
+              </View>
+              {loadingMyPlans ? (
+                <Text style={s.subInfo}>جارٍ التحميل...</Text>
+              ) : unlinkedPlans.length === 0 ? (
+                <Text style={s.subInfo}>لا توجد خطط أخرى يمكن ربطها بهذا المسار.</Text>
               ) : (
                 unlinkedPlans.map((p) => (
                   <View key={p._id} style={s.linkRow}>
-                    <Text style={s.linkRowText}>{p.name} · {p.type}</Text>
+                    <View style={s.flex1}>
+                      <Text style={s.linkRowName}>{p.name}</Text>
+                      <Text style={s.subInfo}>{p.type}</Text>
+                    </View>
                     <Button
-                      label="ربط"
+                      size="sm"
+                      label={updatePlan.isPending ? 'جارٍ الربط...' : 'ربط'}
                       onPress={() => updatePlan.mutate(
                         { id: p._id, targetType: 'track', track: trackId },
-                        { onSuccess: () => setShowLinkPanel(false) },
+                        { onSuccess: () => setOpenPlanSection(null) },
                       )}
                       disabled={updatePlan.isPending}
                     />
@@ -470,7 +660,8 @@ export default function TrackDetail({ trackId, role }: Props) {
               <Button
                 label="إنشاء خطة جديدة بدلاً من ذلك"
                 variant="ghost"
-                onPress={() => router.push({ pathname: planFormPath, params: { mode: 'create' } } as any)}
+                icon={<IconPlus size={15} color={theme.text} />}
+                onPress={() => { setOpenPlanSection(null); createNewPlan(); }}
                 style={{ marginTop: 8 }}
                 fullWidth
               />
@@ -479,12 +670,34 @@ export default function TrackDetail({ trackId, role }: Props) {
         </Card>
       )}
 
-      <ScheduleSheet
-        visible={showSchedule}
-        onClose={() => setShowSchedule(false)}
-        title="توزيع الأيام والصفحات"
-        items={scheduleRows}
-      />
+      {!readOnly && (
+        <MessageParentsSheet
+          visible={showMessageParents}
+          onClose={() => setShowMessageParents(false)}
+          trackId={trackId}
+          students={roster}
+        />
+      )}
+
+      {linkedPlan && !openPlan && (
+        <TrackDetailScheduleSheet
+          visible={openPlanSection === 'schedule'}
+          onClose={closeSchedule}
+          plan={linkedPlan}
+          reversed={(e) => segmentReversed(linkedPlan, e.type)}
+          canEdit={!readOnly}
+          generating={generateSchedule.isPending}
+          onRegenerate={handleRegenerateSchedule}
+          editingDay={editingDay}
+          edit={dayEdit}
+          onEditChange={(patch) => setDayEdit((prev) => ({ ...prev, ...patch }))}
+          onStartEdit={startEditDay}
+          onSave={saveEditDay}
+          onCancel={() => guardDiscardDayEdit(() => setEditingDay(null))}
+          saving={updateScheduleEntry.isPending}
+          dayError={dayError}
+        />
+      )}
     </View>
   );
 }
@@ -501,9 +714,6 @@ function createS(theme: AppTheme) {
     infoItem: { width: '46%' },
     infoLabel: { fontSize: 10, color: theme.textMuted, fontFamily: theme.fontCairo },
     infoValue: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text, marginTop: 1 },
-    capacityBox: { backgroundColor: theme.bg, borderRadius: 10, padding: 10 },
-    capacityRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-    capacityLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo },
     capacityValue: { fontSize: 11, fontFamily: theme.fontCairoBold, color: theme.text },
     assignmentBox: { borderRadius: 10, padding: 10, marginTop: 10 },
     assignmentText: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.greenDark },
@@ -511,7 +721,9 @@ function createS(theme: AppTheme) {
     linkPanel: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: theme.border, gap: 8 },
     linkPanelTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
     linkRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: theme.border },
-    linkRowText: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.text, flex: 1 },
+    linkRowName: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
+    todayLabel: { fontSize: 11, fontFamily: theme.fontCairoBold },
+    emptyTitle: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text, textAlign: 'center', marginBottom: 4 },
     joinBtn: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
       backgroundColor: theme.bluePale, borderWidth: 1, borderColor: theme.blue,

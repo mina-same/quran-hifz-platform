@@ -7,6 +7,7 @@ import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge from '@/components/ui/Badge';
 import { SkeletonRows } from '@/components/ui/Skeleton';
+import ChildSelector from '@/components/domain/ChildSelector';
 import { useParentChildren, useChildHomework } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -44,6 +45,7 @@ export default function ParentHomeworkView() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.spinner} colors={[theme.spinner]} />
         }
       >
+        <ChildSelector />
         <Alert variant="info">واجبات ابنك الجماعية والفردية المُكلَّف بها من المعلم.</Alert>
 
         <Card>

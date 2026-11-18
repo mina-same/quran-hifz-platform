@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-15T08:58:50.243Z
-> Files: 752 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-18T07:31:12.094Z
+> Files: 787 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -173,6 +173,7 @@
 
 ## ../../../.claude/projects/-Users-xontel-Downloads-mina-work-quran-hifz-platform/memory/
 
+- `mobile-parity-content-not-design.md` (~286 tok)
 - `saas-branch-never-merge-main.md` (~480 tok)
 
 ## ./
@@ -373,9 +374,11 @@
 - `EvaluationRoster.tsx` — Scores are keyed by the active plan's rubric — not known at compile time. (~9224 tok)
 - `IndividualPlanPanel.tsx` — The shared track plan this student's overlay hangs off — used as the (~2214 tok)
 - `MasjidAccordion.tsx` — Admin edit/delete buttons — rendered in the header, beside the count badge. (~1554 tok)
+- `ReportChartLine.tsx` — react-native-svg line/area chart for report trends: 0–yMax grid+Y axis, thinned date X labels, dots, tap-a-point shows value (web recharts tooltip stand-in). (~1300 tok)
 - `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~6708 tok)
 - `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from the student's plans — the same (~4284 tok)
 - `TrackDetail.tsx` — First letter of the first two words — the same initials the web chips show. (~6732 tok)
+- `TrackDetailScheduleSheet.tsx` — Track day-split sheet (cards) with web-parity per-row edit (juz/من/إلى/pages, save/cancel, dirty guard owned by TrackDetail). (~2600 tok)
 - `TrackStudentsPanel.tsx` — Track roster management — transfer-only, since a student's track is (~2169 tok)
 
 ## .claude/worktrees/phase3-mobile/quran-hifz-mobile/components/ui/
@@ -507,6 +510,9 @@
 - `2026-09-20-supervisor-role-design.md` — Supervisor Role — Design (~2368 tok)
 - `2026-09-26-open-ward-plans-design.md` — Open-ward plans (خطة بدون مقطع محدد) — design (~2333 tok)
 
+## quran-hifz-mobile (conversations, 2026-11-18)
+
+
 ## quran-hifz-mobile/
 
 - `.gitignore` — Git ignore rules (~118 tok)
@@ -514,6 +520,7 @@
 - `app.json` (~548 tok)
 - `babel.config.js` — Babel configuration (~53 tok)
 - `CLAUDE.md` (~3 tok)
+- `eas.json` (~118 tok)
 - `global.css` — Styles: 3 rules (~17 tok)
 - `jest.config.js` (~33 tok)
 - `LICENSE` — Project license (~295 tok)
@@ -541,7 +548,7 @@
 ## quran-hifz-mobile/app/
 
 - `_devtest.tsx` — DevTest (~780 tok)
-- `_layout.tsx` — queryClient (~806 tok)
+- `_layout.tsx` — queryClient (~1078 tok)
 - `index.tsx` — Mobile login screen: light-bg design (logo + org title + "منصة حفظ القرآن"), white card with RTL right-aligned email/password inputs (leading icon, eye toggle), sun/moon theme toggle top-left, parent child-selector modal (~2600 tok)
 
 ## quran-hifz-mobile/app/(portal)/
@@ -551,18 +558,20 @@
 ## quran-hifz-mobile/app/(portal)/admin/
 
 - `_layout.tsx` — ADMIN_MORE_IDS — renders form (~1286 tok)
-- `dashboard.tsx` — المسار: real track lives one hop away via `Student.track` — same fallback chain as admin/students.ts (~2378 tok)
+- `dailyreports.tsx` — One card per report — tap to expand the full sheet (web opens it in a modal). (~2837 tok)
+- `dashboard.tsx` — المسار: real track lives one hop away via `Student.track` — same fallback chain as admin/students.ts (~3367 tok)
 - `halqat.tsx` — AdminHalqat (~423 tok)
 - `kpis.tsx` — ratingVariant (~1020 tok)
 - `masajid.tsx` — AdminMasajid (~1280 tok)
 - `parents.tsx` — EMPTY_ADD — renders form (~4709 tok)
 - `register.tsx` — Create-student form (mirrors web AdminRegister.tsx). No reading-level select or auto-suggested masar block (removed 2026-09-26) — `path` always "حفظ كامل". (~2100 tok)
-- `reports.tsx` — AdminReports (~540 tok)
+- `reports.tsx` — Admin / supervisor reports — like web, the page IS «تقرير الإنجاز والتميّز». (~473 tok)
 - `special_tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~12026 tok)
 - `students.tsx` — المسار: real track lives one hop away via `Student.track`, not the unused legacy `path` enum. (~3454 tok)
 - `teachers.tsx` — ratingVariant (~1903 tok)
 - `track-detail.tsx` — AdminTrackDetailRoute (~474 tok)
-- `tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~11281 tok)
+- `track-form.tsx` — Full-page create/edit form, mirroring web AdminTrackForm: save keeps you on (~2668 tok)
+- `tracks.tsx` — First letter of the first two words — the same initials the web cards show. (~10886 tok)
 
 ## quran-hifz-mobile/app/(portal)/parent/
 
@@ -580,9 +589,11 @@
 - `attendance.tsx` — StudentAttendance (~1082 tok)
 - `dashboard.tsx` — getName (~2591 tok)
 - `homework.tsx` — getTitle (~970 tok)
+- `leaderboard.tsx` — Student «لوحة الشرف»: period tabs (week/month/all), points hero + cheer, halqa/section rank lists via useMyRanking (web StudentLeaderboard parity) (~2200 tok)
+- `leaderboard.tsx` — 2.5 → «2٫5» (API-backed numbers stay Western digits on mobile). (~2598 tok)
 - `messages.tsx` — StudentMessages (~1185 tok)
 - `myhifz.tsx` — StudentHifz (~1688 tok)
-- `points.tsx` — MY_PTS (~989 tok)
+- `points.tsx` — LEVELS (~1343 tok)
 - `schedule.tsx` — DAYS (~2369 tok)
 - `settings.tsx` — StudentSettings (~47 tok)
 - `special_tracks.tsx` — getTeacherName (~3229 tok)
@@ -592,9 +603,9 @@
 ## quran-hifz-mobile/app/(portal)/teacher/
 
 - `_layout.tsx` — TeacherTabLayout (~681 tok)
-- `attendance.tsx` — TeacherAttendance (~4416 tok)
+- `attendance.tsx` — TeacherAttendance (~3942 tok)
+- `dailyreport.tsx` — «التقرير اليومي» — pick a halqa + day, then edit and send its report. (~892 tok)
 - `dashboard.tsx` — getName (~1383 tok)
-- `evaluate.tsx` — Scores are keyed by the active plan's rubric, so categories are not known (~3996 tok)
 - `grouphomework.tsx` — DAYS (~2777 tok)
 - `homework.tsx` — getName — renders form (~1264 tok)
 - `myhalqa.tsx` — TeacherHalqa (~1077 tok)
@@ -612,21 +623,35 @@
 ## quran-hifz-mobile/components/domain/
 
 - `AccountSettingsScreen.tsx` — Shared "الملف الشخصي" screen for student + teacher portals (admin/parent (~2117 tok)
+- `AdminDeleteStudentDialog.tsx` — Linked parent's name; when set, offers web's "keep parent" / "delete both" choice. (~926 tok)
 - `AudioRecorder.tsx` — AudioRecorder — uses useState, useEffect (~1336 tok)
 - `BiometricLockScreen.tsx` — Shown after a stored session resumes silently, when the user has opted into (~1123 tok)
 - `ContextCard.tsx` — Normalized shape for anything a teacher/student/admin can act on — always a (~1559 tok)
+- `ConversationsScreen.tsx` — «الرسائل» for teachers and parents (mirrors web ConversationsPage): one (~2152 tok)
+- `DailyReportCard.tsx` — Noon local time, so a YYYY-MM-DD key never slips a day across time zones. (~6965 tok)
+- `DailyReportComposer.tsx` — The daily report editor + preview + send button for one (track, date). (~3018 tok)
+- `DailyReportPrompt.tsx` — Progress strip «سُجّل X من Y» for a day's roster, and the daily report (~1395 tok)
 - `DaySlider.tsx` — A schedule day, carrying the segment it belongs to when the plan has more (~2042 tok)
 - `EvaluationRoster.tsx` — Scores are keyed by the active plan's rubric — not known at compile time. (~9467 tok)
 - `HalqaCard.tsx` — nameOf (~816 tok)
 - `IndividualPlanPanel.tsx` — The shared track plan this student's overlay hangs off — used as the (~2398 tok)
 - `MasjidAccordion.tsx` — This masjid's own halqat — the real /masajid endpoint doesn't nest them, (~1180 tok)
+- `MessageParentsSheet.tsx` — «مراسلة أولياء الأمور» — a teacher writes once to the parents of the whole (~1368 tok)
 - `OpenWardLogSheet.tsx` — «سجل الورد» for open-ward plans: SheetTriggerRow + ScheduleSheet of compact cards; exports openWardItems() (~650 tok)
 - `OpenWardPicker.tsx` — RN «ماذا حفظ الطالب اليوم؟» من/إلى + «لم يُسمِّع اليوم» chip; exports OpenWardValue, openWardComplete (~1000 tok)
-- `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~7068 tok)
+- `PromoReportSection.tsx` — Wording per section — the girls' report speaks of «الطالبات» (web PromoReport). (~4703 tok)
+- `ReportChartLine.tsx` — Line/area colour (pass a theme token). (~1428 tok)
+- `ReportPromoPdfExport.tsx` — The «تقرير الإنجاز والتميّز (PDF)» part of web ReportsDashboard's «تصدير» menu (~948 tok)
+- `ReportsScreen.tsx` — Buckets a 0–100 progress metric into 4 ranges for the distribution donut. (~9549 tok)
 - `ScheduleSheet.tsx` — Day-by-day plan breakdown as a bottom sheet of compact cards (replaced the 6-column ScheduleTable). Exports scheduleItems()/fmtShortDate()/fmtPages() + the ScheduleItem shape. (~1700 tok)
+- `StudentPointsSheet.tsx` — Where a student's numbers in «لوحة الشرف» come from (web: StudentPointsModal): (~1617 tok)
+- `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from the student's plans — the same (~4639 tok)
 - `SurahAyahPicker.tsx` — When given, restricts BOTH pickers to only the surahs/ayat that fall inside (~828 tok)
+- `TeacherStudentPlanToggle.tsx` — Per-student toggle under a roster row (web TeacherAttendance / (~660 tok)
+- `ThreadScreen.tsx` — One teacher ↔ parent thread (or the read-only «system» thread). Route (~2182 tok)
 - `TrackDetail.tsx` — First letter of the first two words — the same initials the web chips show. (~6971 tok)
-- `TrackStudentsPanel.tsx` — Track roster management — transfer-only, since a student's track is (~2206 tok)
+- `TrackDetailScheduleSheet.tsx` — A schedule day's page position: a clean page boundary as a plain integer, (~3390 tok)
+- `TrackStudentsPanel.tsx` — Track roster management — transfer-only, since a student's track is (~2462 tok)
 
 ## quran-hifz-mobile/components/forms/
 
@@ -670,6 +695,7 @@
 - `StatsRow.tsx` — StatsRow (~150 tok)
 - `Text.tsx` — Drop-in replacement for RN's <Text> that applies textStart (RN swaps left/right text alignment under forced RTL, so a bare <Text> or `textAlign: 'right'` renders visually LEFT). Import Text from here, never from 'react-native' (~300 tok)
 - `Tile.tsx` — 1 = half-width tile, 2 = full-width tile — mirrors the web BentoTile's span prop. (~477 tok)
+- `Toast.tsx` — Mobile counterpart of the web's sonner `toast` — same call shape (~727 tok)
 
 ## quran-hifz-mobile/ios/
 
@@ -681,6 +707,8 @@
 - `auth-storage.ts` — Exports getToken, setToken, clearToken (~229 tok)
 - `evaluationRubric.ts` — The daily grading split is per plan now (`QuranPlan.gradeRubric`), not a (~861 tok)
 - `haptics.ts` — App-wide haptic taxonomy over expo-haptics: tap/select/medium/success/warning/error + setHapticsEnabled. Native only, Android uses performAndroidHapticsAsync, every call fire-and-forget (~560 tok)
+- `pdf.ts` — Phone equivalent of the web's PDF download: render an RTL HTML document to a (~328 tok)
+- `promoReportPdf.ts` — A4 HTML of «تقرير الإنجاز والتميّز» for `sharePdf` — the same three pages, (~3890 tok)
 - `quranRange.test.ts` — / <reference types="jest" /> (~6882 tok)
 - `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~6244 tok)
 - `theme.ts` — Exports ThemeMode, buildTheme(mode), Theme, textStart/textEnd. Mode-independent `base` (brand/status ink, shape, spacing, fonts, shadow) merged with light/darkSurfaces (bg, card, cardAlt, inputBg, overlay, text*, border, greenAccent, the pastel tints, and the `tone` bg/border/text map). Deliberately exports NO frozen `theme` object — read colours via useAppTheme() (~1050 tok)
@@ -707,6 +735,7 @@
 - `adminSupervisors.ts` — Exports SupervisorUser, useAdminSupervisors, useCreateSupervisor, useDeleteSupervisor (~376 tok)
 - `attendance.ts` — Exports AttendanceRecord, AttendanceFilters, useAttendance, useRecordAttendance + 2 more (~699 tok)
 - `auth.ts` — Fixed at creation for a 'supervisor' user, undefined otherwise. (~342 tok)
+- `dailyReports.ts` — One student line in the daily halqa report. (~758 tok)
 - `evaluations.ts` — Pass `undefined` to skip fetching (e.g. before a context is selected); pass an (~692 tok)
 - `halqat.ts` — Exports Halqa, HalqaFilters, useHalqat, useHalqa (~366 tok)
 - `hifz.ts` — Exports HifzEntry, useHifz (~155 tok)
@@ -736,6 +765,7 @@
 ## quran-hifz-server/
 
 - `.gitignore` — Git ignore rules (~10 tok)
+- `.vercelignore` (~12 tok)
 - `package-lock.json` — npm lock file (~23821 tok)
 - `package.json` — Node.js package manifest (~452 tok)
 - `tsconfig.json` — TypeScript configuration (~128 tok)
@@ -1029,6 +1059,7 @@
 - `Card.tsx` — Card (~181 tok)
 - `ContextPicker.tsx` — Unified shape for "teaching context" — always a Track now that Halqa is (~1067 tok)
 - `DailyReportComposer.tsx` — The daily report editor + live preview + send button for one (track, date). (~2241 tok)
+- `DailyReportPrompt.tsx` — «سُجّل X من Y» progress card; when all recorded, button (and one-time auto-push) to teacher/dailyreport?track&date; shows sent state. (~1100 tok)
 - `DaysOfWeekPicker.tsx` — WEEK_DAYS (~481 tok)
 - `Donut.tsx` — Reusable donut chart with a centered label and optional legend. (~766 tok)
 - `FormSection.tsx` — FormSection (~195 tok)
@@ -1037,6 +1068,7 @@
 - `IndividualPlanPanel.tsx` — Formats a schedule day's page position: a clean page boundary shows as a (~4567 tok)
 - `Leaderboard.tsx` — Leaderboard — ranked student list with avatar + meter; variant leader|watch (~260 tok)
 - `MessageParentsModal.tsx` — «مراسلة أولياء الأمور» — a teacher writes once to the parents of the whole (~916 tok)
+- `MessageParentsSheet.tsx` — «مراسلة أولياء الأمور» BottomSheet (all/one student, BottomSheetTextInput, useSendToParents). (~1100 tok)
 - `Modal.tsx` — Modal, aria-labeled close btn (~296 tok)
 - `OpenWardLog.tsx` — Log table of an open-ward plan's recorded days (optionally one student) (~700 tok)
 - `OpenWardPicker.tsx` — «ماذا حفظ الطالب اليوم؟» من/إلى + «لم يُسمِّع اليوم»; SurahAyah control injected; exports OpenWardValue, openWardComplete (~1000 tok)
@@ -1158,7 +1190,14 @@
 - `__root.tsx` — Root: SEO head (Arabic OG, Twitter card, JSON-LD, favicon, lang=ar dir=rtl), RootShell, error/404 components (~1611 tok)
 - `index.tsx` — Landing page route with per-page Arabic SEO head overrides (~200 tok)
 - `MoreTabButton.tsx` — Factory for the "المزيد" tab-bar button; opens the MoreSheet on press instead of navigating. (~180 tok)
+- `quran-hifz-mobile/app/(portal)/admin/dailyreports.tsx` — Admin/supervisor «التقارير اليومية»: date, masjid/teacher filters, split/combined, tiles, missing list, expandable report cards. (~2600 tok)
 - `quran-hifz-mobile/app/(portal)/admin/messages.tsx` — Admin/supervisor inbox route (More sheet → الرسائل); renders MessagesScreen. (~60 tok)
+- `quran-hifz-mobile/app/(portal)/teacher/dailyreport.tsx` — Teacher «التقرير اليومي»: track FormSelect + date bar + composer. (~800 tok)
+- `quran-hifz-mobile/components/domain/DailyReportCard.tsx` — Daily report helpers (hijri/weekday/reportText/combinedReportText), DailyReportDateBar, DailyReportSheet/CombinedSheet/Card, ReportChangesBox, Share-sheet button. (~4000 tok)
+- `quran-hifz-mobile/components/domain/DailyReportComposer.tsx` — Editor for one (track,date) report: sections w/ FormSelect add-student, area chips, notes, send, preview. (~2600 tok)
 - `quran-hifz-mobile/components/domain/MessagesScreen.tsx` — Shared received-messages inbox screen (useMessages/useMarkRead, pull-to-refresh, optional `compose` slot). Used by student/messages.tsx (with NoteToSupervisors) and admin/messages.tsx (admin+supervisor). (~900 tok)
+- `quran-hifz-mobile/components/domain/PromoReportSection.tsx` — Admin «تقرير الإنجاز والتميّز» on-screen port (section/period/custom range/masjid/track filters, KPIs, podium, halqa/teacher rankings, honor board → StudentPointsSheet). Uses `useRankings` (admin) from lib/queries/rankings.ts. No PDF export. (~4000 tok)
+- `quran-hifz-mobile/components/domain/StudentPointsSheet.tsx` — BottomSheet: a ranked student's per-day evaluations (web StudentPointsModal as cards). (~1400 tok)
+- `quran-hifz-mobile/lib/queries/dailyReports.ts` — Daily report types + hooks: useDailyReportDraft, useSendDailyReport, useDailyReports (mirror of web api/daily-reports.ts). (~700 tok)
 - `README.md` — Project documentation (~207 tok)
 - `sitemap[.]xml.ts` — API route: serves /sitemap.xml dynamically from request origin (~159 tok)

@@ -32,6 +32,13 @@ function getTrackName(v: unknown): string {
   return '—';
 }
 
+const ACTIVITIES = [
+  { date: 'أمس',     text: 'أرسلت واجب الحفظ',              tone: 'green' as const },
+  { date: 'الأحد',   text: 'حضرت حلقة الفجر',               tone: 'green' as const },
+  { date: 'السبت',   text: 'تقييم الأستاذ: ممتاز ⭐⭐⭐⭐⭐', tone: 'gold'  as const },
+  { date: 'الخميس',  text: 'أرسلت واجب المراجعة البعيدة',    tone: 'blue'  as const },
+];
+
 export default function StudentDashboard() {
   const theme = useAppTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -91,12 +98,9 @@ export default function StudentDashboard() {
     { label: 'جزءاً محفوظاً', value: juz, color: theme.green },
     { label: 'نسبة حضوري', value: `${student.attendancePct}٪`, color: theme.gold },
     { label: 'واجبات أرسلتها', value: submittedCount, color: theme.blue },
-    { label: 'نسبة الإنجاز', value: `${student.progressPct}٪`, color: theme.red },
+    { label: 'أيام للموعد القادم', value: '٢', color: theme.green },
   ];
 
-  const recentHomework = [...homework]
-    .sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime())
-    .slice(0, 5);
 
   // Excused (مستأذن) sessions are left out of the average; absences count as 0.
   const graded = evaluations.filter((e) => (e.attendanceStatus as string) !== 'مستأذن');
@@ -127,12 +131,9 @@ export default function StudentDashboard() {
               <View style={styles.planBarWrap}>
                 <ProgressBar value={student.progressPct} showPercent={false} />
               </View>
-              <Text style={styles.planNote}>
-                {student.progressPages} صفحة من {student.totalPages} صفحة
-              </Text>
               <Text style={styles.planNote}>{juz} جزء من ٣٠ جزء المستهدف</Text>
               <View style={styles.planBadge}>
-                <Badge label={student.path} variant="green" />
+                <Badge label="في المسار" variant="green" />
               </View>
             </View>
             {!!student.lastMemorization && (
@@ -141,6 +142,10 @@ export default function StudentDashboard() {
                 <Text style={styles.infoVal}>{student.lastMemorization}</Text>
               </View>
             )}
+            <View style={styles.infoRow}>
+              <Text style={styles.infoKey}>الجلسة القادمة</Text>
+              <Text style={styles.infoVal}>الثلاثاء بعد الفجر</Text>
+            </View>
           </Card>
 
           {/* Track info */}
@@ -206,25 +211,16 @@ export default function StudentDashboard() {
           )}
         </Card>
 
-        {/* Recent homework */}
+        {/* Recent activity — static content, same as web's ACTIVITIES. */}
         <Card>
-          <CardHeader title="آخر الواجبات" />
-          {recentHomework.length === 0 ? (
-            <Text style={styles.emptyText}>لا توجد واجبات بعد</Text>
-          ) : (
-            recentHomework.map((row, i) => (
-              <View key={row._id} style={[styles.hwRow, i < recentHomework.length - 1 && styles.hwBorder]}>
-                <View>
-                  <Text style={styles.hwSegment}>{row.segment}</Text>
-                  <Text style={styles.hwDate}>{new Date(row.dueDate).toLocaleDateString(AR_LOCALE)}</Text>
-                </View>
-                <View style={styles.hwBadges}>
-                  {row.rating && <Badge label={row.rating} variant="gold" />}
-                  <Badge label={row.status} variant={row.status === 'مراجع' ? 'green' : row.status === 'متأخر' ? 'red' : 'gray'} />
-                </View>
-              </View>
-            ))
-          )}
+          <CardHeader title="آخر الأنشطة" />
+          {ACTIVITIES.map((a, i) => (
+            <View key={i} style={[styles.actRow, i < ACTIVITIES.length - 1 && styles.hwBorder]}>
+              <View style={[styles.actDot, { backgroundColor: a.tone === 'gold' ? theme.gold : a.tone === 'blue' ? theme.blue : theme.green }]} />
+              <Text style={styles.actText}>{a.text}</Text>
+              <Text style={styles.hwDate}>{a.date}</Text>
+            </View>
+          ))}
         </Card>
       </ScrollView>
     </SafeAreaView>
@@ -251,11 +247,11 @@ function createStyles(theme: AppTheme) {
     },
     infoKey: { fontSize: 12, fontFamily: theme.fontCairo, color: theme.textMuted },
     infoVal: { fontSize: 12, fontFamily: theme.fontCairoBold, color: theme.text },
-    hwRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 },
+    actRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10 },
+    actDot: { width: 8, height: 8, borderRadius: 4 },
+    actText: { flex: 1, fontSize: 13, fontFamily: theme.fontCairo, color: theme.text },
     hwBorder: { borderBottomWidth: 1, borderBottomColor: theme.border },
-    hwSegment: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.text },
     hwDate: { fontSize: 11, fontFamily: theme.fontCairo, color: theme.textMuted, marginTop: 2 },
-    hwBadges: { flexDirection: 'row', gap: 6 },
     gradeRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, gap: 10 },
     gradeMain: { flex: 1, minWidth: 0 },
     gradeTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },

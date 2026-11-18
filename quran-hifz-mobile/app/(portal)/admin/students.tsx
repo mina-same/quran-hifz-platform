@@ -12,10 +12,10 @@ import Badge from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import ProgressBar from '@/components/ui/ProgressBar';
 import IconButton from '@/components/ui/IconButton';
-import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import FormInput from '@/components/forms/FormInput';
 import { SkeletonRows } from '@/components/ui/Skeleton';
-import { useStudents, useDeleteStudent, type Student } from '@/lib/queries/students';
+import { useStudents, useDeleteStudentWithParent, type Student } from '@/lib/queries/students';
+import AdminDeleteStudentDialog from '@/components/domain/AdminDeleteStudentDialog';
 import { useAdminParents } from '@/lib/queries/adminParents';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { usePortalStore } from '@/lib/store/portalStore';
@@ -42,6 +42,14 @@ function getTrackName(v: { title: string } | string | undefined): string {
   return '—';
 }
 
+/** المسجد: the student's masjid is reached through its track (same as web). */
+function getTrackMasjidName(track: Student['track']): string {
+  if (!track || typeof track !== 'object') return '';
+  const m = (track as { masjid?: unknown }).masjid;
+  if (m && typeof m === 'object' && 'name' in m) return (m as { name: string }).name;
+  return '';
+}
+
 type Tone = 'green' | 'gold' | 'red';
 function attendanceTone(pct: number): Tone {
   if (pct >= 90) return 'green';
@@ -64,15 +72,15 @@ export default function AdminStudents() {
   );
   const { data: parents = [] } = useAdminParents();
 
-  const deleteStudent = useDeleteStudent();
+  const deleteStudent = useDeleteStudentWithParent();
 
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  async function handleDelete() {
+  async function handleDelete(withParent: boolean) {
     if (!deleteId) return;
     try {
-      await deleteStudent.mutateAsync(deleteId);
+      await deleteStudent.mutateAsync({ id: deleteId, withParent });
     } finally {
       setDeleteId(null);
     }
@@ -104,7 +112,7 @@ export default function AdminStudents() {
         keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
-        {isError && <Alert variant="error">تعذر تحميل بيانات الطلاب</Alert>}
+        {isError && <Alert variant="error">تعذّر تحميل بيانات الطلاب</Alert>}
 
         {!isLoading && <StatsRow stats={STATS} />}
 
@@ -147,6 +155,11 @@ export default function AdminStudents() {
                     <View style={s.chip}>
                       <Text style={s.chipText} numberOfLines={1}>المسار: {getTrackName(st.track)}</Text>
                     </View>
+                    {!!getTrackMasjidName(st.track) && (
+                      <View style={s.chip}>
+                        <Text style={s.chipText} numberOfLines={1}>المسجد: {getTrackMasjidName(st.track)}</Text>
+                      </View>
+                    )}
                     {typeof st.level === 'number' && (
                       <View style={s.chip}>
                         <Text style={s.chipText} numberOfLines={1}>المستوى: {st.level}</Text>
@@ -192,10 +205,9 @@ export default function AdminStudents() {
         </Card>
       </ScrollView>
 
-      <ConfirmDialog
+      <AdminDeleteStudentDialog
         visible={!!deleteId}
-        title="حذف الطالب"
-        message="سيتم حذف الطالب نهائياً. هذا الإجراء لا يمكن التراجع عنه."
+        linkedParent={students.find((st) => st._id === deleteId)?.parentName}
         pending={deleteStudent.isPending}
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}

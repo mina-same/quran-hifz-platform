@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Alert from '@/components/ui/Alert';
+import { toast } from '@/components/ui/Toast';
 import Button from '@/components/ui/Button';
 import CredentialsDialog from '@/components/ui/CredentialsDialog';
 import FormGroup from '@/components/forms/FormGroup';
@@ -80,7 +81,7 @@ export default function AdminRegister() {
       setTimeout(() => setSaved(false), 5000);
       if (res.credentials) setCredentials(res.credentials);
     } catch (e) {
-      setError((e as Error).message);
+      toast.error((e as Error).message);
     }
   }
 
@@ -106,6 +107,7 @@ export default function AdminRegister() {
                   value={form.nationalId}
                   onChangeText={(v) => sf('nationalId', v.replace(/[^0-9]/g, ''))}
                 />
+                <Text style={[s.note, { marginBottom: 0, marginTop: 4 }]}>هوية وطنية (تبدأ بـ ١) أو إقامة (تبدأ بـ ٢)</Text>
               </FormGroup>
               <FormGroup label="جوال ولي الأمر" required>
                 <FormInput
@@ -188,6 +190,7 @@ export default function AdminRegister() {
       <CredentialsDialog
         credentials={credentials}
         title="تم تسجيل الطالب وإنشاء حسابه"
+        subtitle="احتفظ ببيانات الدخول وأرسلها للطالب"
         onClose={() => setCredentials(null)}
       />
     </SafeAreaView>

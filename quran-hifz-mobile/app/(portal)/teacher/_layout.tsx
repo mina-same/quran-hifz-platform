@@ -12,7 +12,7 @@ import { createMoreTabButton } from '@/components/layout/MoreTabButton';
 
 // Nav items that have no tab of their own — the "المزيد" sheet lists exactly these.
 const MORE_IDS = [
-  'evaluate', 'recordlesson', 'grouphomework', 'plans', 'reports', 'settings',
+  'dailyreport', 'recordlesson', 'grouphomework', 'plans', 'reports', 'messages', 'settings',
 ];
 
 export default function TeacherTabLayout() {
@@ -47,14 +47,16 @@ export default function TeacherTabLayout() {
         options={{ title: 'المزيد', tabBarIcon: ({ color, size }) => <IconDots size={size} color={color} />, tabBarButton: MoreTabButton }}
       />
       {/* Reachable from the "المزيد" sheet only. */}
-      <Tabs.Screen name="plans"         options={{ href: null, title: 'الخطط' }} />
+      <Tabs.Screen name="plans"         options={{ href: null, title: 'الخطط القرآنية' }} />
       <Tabs.Screen name="plan-form"     options={{ href: null, title: 'خطة حفظ' }} />
       <Tabs.Screen name="plan-detail"   options={{ href: null, title: 'تفاصيل الخطة' }} />
       <Tabs.Screen name="reports"       options={{ href: null, title: 'التقارير' }} />
-      <Tabs.Screen name="evaluate"      options={{ href: null, title: 'تقييم الجلسة' }} />
-      <Tabs.Screen name="recordlesson"  options={{ href: null, title: 'تسجيل الدرس' }} />
-      <Tabs.Screen name="grouphomework" options={{ href: null, title: 'واجب جماعي' }} />
+      <Tabs.Screen name="recordlesson"  options={{ href: null, title: 'سجّل درس المسار' }} />
+      <Tabs.Screen name="grouphomework" options={{ href: null, title: 'واجبات المسار' }} />
       <Tabs.Screen name="track-detail"  options={{ href: null, title: 'تفاصيل المسار' }} />
+      <Tabs.Screen name="dailyreport" options={{ href: null, title: 'التقرير اليومي' }} />
+      <Tabs.Screen name="messages" options={{ href: null, title: 'الرسائل' }} />
+      <Tabs.Screen name="thread"   options={{ href: null, title: 'محادثة' }} />
       <Tabs.Screen name="settings" options={{ href: null, title: 'الملف الشخصي' }} />
     </Tabs>
 

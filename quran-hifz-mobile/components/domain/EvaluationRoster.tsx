@@ -6,7 +6,7 @@ import Alert from '@/components/ui/Alert';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import {
-  IconBook2, IconCheck, IconChevronDown, IconChevronUp, IconCircleCheck,
+  IconBook2, IconCheck, IconChevronDown, IconChevronUp,
   IconDeviceFloppy, IconEdit, IconLock, IconUserExclamation, IconX,
 } from '@tabler/icons-react-native';
 import SurahAyahPicker from '@/components/domain/SurahAyahPicker';
@@ -30,6 +30,7 @@ import { toDateOnly } from '@/lib/date';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
 import { success, warning, error } from '@/lib/haptics';
 import DecimalInput from '@/components/forms/DecimalInput';
+import { toast } from '@/components/ui/Toast';
 
 type AppTheme = ReturnType<typeof useAppTheme>;
 
@@ -85,6 +86,10 @@ interface Props {
    * at once, and the one current caller (the individual-plan panel) shows
    * every type's occurrences together rather than one panel per type. */
   renderExtra?: (student: { _id: string; name: string }) => React.ReactNode;
+  /** Track drill-down only (web TeacherTrackDetail's `noActivePlan`): the
+   * context has no scheduled days, so saving stays disabled until a plan is
+   * added. */
+  noActivePlan?: boolean;
 }
 
 /**
@@ -97,7 +102,7 @@ interface Props {
  * screen and the track drill-down can drop it in unchanged.
  */
 export default function EvaluationRoster({
-  students, context, teacherId, linkedPlan, daySchedule, emptyLabel, renderExtra, readOnly,
+  students, context, teacherId, linkedPlan, daySchedule, emptyLabel, renderExtra, readOnly, noActivePlan,
 }: Props) {
   const theme = useAppTheme();
   const styles = useMemo(() => createS(theme), [theme]);
@@ -188,24 +193,6 @@ export default function EvaluationRoster({
   const [completionOverrides, setCompletionOverrides] = useState<Record<string, RangePoint>>({});
   const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
   const [lastSavedId, setLastSavedId] = useState<string | null>(null);
-  // One entry per outcome, not one shared slot: a save can now fire up to two
-  // independent `recordOccurrence` calls (one per type due that day), each
-  // resolving on its own network timing — sharing a single string would let
-  // whichever call resolves last silently overwrite the other's message.
-  // `type` is only set when the student had more than one assignment, so a
-  // single-type day's text is unprefixed, unchanged from before this file
-  // supported more than one type per day.
-  const [saveNotices, setSaveNotices] = useState<{ type?: PlanType; tone: 'success' | 'warning'; text: string }[]>([]);
-  // Likewise for errors: `recordOccurrence`'s own reactive `isError`/`error`
-  // are shared across every `.mutate()` call on this one mutation instance,
-  // so a second (successful) call flips `isError` back to `false` and hides
-  // an earlier failure. Each call's `onError` records its own outcome here
-  // instead of relying on that shared state.
-  const [saveErrors, setSaveErrors] = useState<{ type?: PlanType; text: string }[]>([]);
-  // Absent students whose parent could not be notified — the save still went
-  // through, so this is a warning rather than an error.
-  const [unnotified, setUnnotified] = useState<{ id: string; name: string }[]>([]);
-
   // Monday's edits must not leak into Tuesday's roster for the same students.
   useEffect(() => {
     setOverrides({});
@@ -320,8 +307,7 @@ export default function EvaluationRoster({
       const missing = openTypes.filter((t) => !openWardComplete(openWardFor(studentId, t)));
       if (missing.length > 0) {
         error();
-        setSaveNotices([]);
-        setSaveErrors([{ text: `حدّد ما حفظه ${studentName} (${missing.join('، ')}) أو اختر «لم يُسمِّع اليوم»` }]);
+        toast.error(`حدّد ما حفظه ${studentName} (${missing.join('، ')}) أو اختر «لم يُسمِّع اليوم»`);
         return;
       }
     }
@@ -331,15 +317,12 @@ export default function EvaluationRoster({
       scores: e.scores,
     }];
     setLastSavedId(studentId);
-    setSaveNotices([]);
-    setSaveErrors([]);
-    setUnnotified([]);
+    const toastId = toast.loading('جاري حفظ الحضور والتقييم...');
     bulkEvaluate.mutate(
       { teacher: teacherId, ...contextFilter, date: effectiveDate, records },
       {
-        onSuccess: (res) => {
+        onSuccess: () => {
           success();
-          setUnnotified(res.unnotified);
           if (openPlan && linkedPlan) {
             // An absent student has no ward record — the evaluation holds the
             // absence. A day first saved as present and then switched to absent
@@ -352,22 +335,21 @@ export default function EvaluationRoster({
                     await deleteOpenWard.mutateAsync({ planId: linkedPlan._id, studentId, type: t, date: effectiveDate });
                   } catch (err) {
                     error();
-                    setSaveErrors((prev) => [...prev, { type: t, text: (err as Error).message }]);
+                    toast.error(`${t} — ${studentName}: ${(err as Error).message}`, { id: toastId });
                     return;
                   }
                 }
-                setSaveNotices([{ tone: 'success', text: `تم حفظ حضور وتقييم ${studentName}` }]);
+                toast.success('تم الحفظ بنجاح', { id: toastId });
               })();
               return;
             }
             if (e.attendanceStatus !== 'حاضر' || openTypes.length === 0 || !planCoversStudent(studentId)) {
-              setSaveNotices([{ tone: 'success', text: `تم حفظ حضور وتقييم ${studentName}` }]);
+              toast.success('تم الحفظ بنجاح', { id: toastId });
               return;
             }
             (async () => {
               for (const t of openTypes) {
                 const v = openWardFor(studentId, t)!;
-                const outcomeType = openTypes.length > 1 ? t : undefined;
                 try {
                   const r = await upsertOpenWard.mutateAsync({
                     planId: linkedPlan._id, studentId, type: t, date: effectiveDate, status: v.status,
@@ -377,31 +359,26 @@ export default function EvaluationRoster({
                   });
                   if (r.overlapWarning) {
                     warning();
-                    setSaveNotices((prev) => [...prev, {
-                      type: outcomeType, tone: 'warning',
-                      text: `تم الحفظ — هذا المقطع أو جزء منه مسجَّل من قبل لـ ${studentName}`,
-                    }]);
-                  } else {
-                    setSaveNotices((prev) => [...prev, {
-                      type: outcomeType, tone: 'success', text: `تم حفظ حضور وتقييم وورد ${studentName}`,
-                    }]);
+                    toast.warning(`${t}: هذا المقطع أو جزء منه مسجَّل من قبل لـ ${studentName}`);
                   }
-                  setOpenWardEdits((prev) => {
-                    const next = { ...prev };
-                    delete next[`${studentId}::${t}`];
-                    return next;
-                  });
-                  setWardDirEdits((prev) => {
-                    const next = { ...prev };
-                    delete next[`${studentId}::${t}`];
-                    return next;
-                  });
                 } catch (err) {
-                  // Leave the edit in place so the teacher can retry.
+                  // Leave the edits in place so the teacher can retry.
                   error();
-                  setSaveErrors((prev) => [...prev, { type: outcomeType, text: (err as Error).message }]);
+                  toast.error(`${t} — ${studentName}: ${(err as Error).message}`, { id: toastId });
+                  return;
                 }
               }
+              setOpenWardEdits((prev) => {
+                const next = { ...prev };
+                for (const t of openTypes) delete next[`${studentId}::${t}`];
+                return next;
+              });
+              setWardDirEdits((prev) => {
+                const next = { ...prev };
+                for (const t of openTypes) delete next[`${studentId}::${t}`];
+                return next;
+              });
+              toast.success('تم حفظ الحضور والتقييم والورد', { id: toastId });
             })();
             return;
           }
@@ -409,39 +386,48 @@ export default function EvaluationRoster({
           // overlays so an absence or a partial completion gets redistributed
           // across their remaining days — one `record` call per ward due
           // today (usually one, but up to two when حفظ/مراجعة share the
-          // weekday), only meaningful when there's an assigned portion.
+          // weekday), only meaningful when there's an assigned portion. The
+          // first assignment resolves through the save's own toast; any
+          // further one gets its own toast labeled by type.
           const studentAssignments = linkedPlan && planCoversStudent(studentId) ? assignmentsForStudent(studentId) : [];
           if (!linkedPlan || studentAssignments.length === 0) {
-            setSaveNotices([{ tone: 'success', text: `تم حفظ حضور وتقييم ${studentName}` }]);
+            toast.success('تم الحفظ بنجاح', { id: toastId });
             return;
           }
-          // `type` is attached to each outcome below only when more than one
-          // assignment exists — a single-type day's notice/error stays
-          // unlabeled and unprefixed, unchanged from before.
           // Awaited sequentially (not fired in parallel via .forEach) so that
           // two never-before-seen-progress-doc assignments for the same
           // student (e.g. حفظ + مراجعة sharing this weekday) don't race the
           // server's findOne→create init path in the same tick.
           (async () => {
-            for (const assignment of studentAssignments) {
-              const outcomeType = studentAssignments.length > 1 ? assignment.type : undefined;
+            for (let i = 0; i < studentAssignments.length; i++) {
+              const assignment = studentAssignments[i];
+              const thisToastId = i === 0 ? toastId : toast.loading('جاري حفظ الحضور والتقييم...');
+              const typeLabel = studentAssignments.length > 1 ? `${assignment.type} — ` : '';
               const completedPoint = completedPointFor(studentId, assignment);
               // Signed in the plan's own direction: negative = fell short of the
               // day's ward, positive = recited past it.
               const delta = dayDeltaAyahs(assignment, reversedForStudent(studentId, assignment.type), completedPoint);
               const status = e.attendanceStatus !== 'حاضر' ? 'absent' : delta < 0 ? 'partial' : 'done';
               if (status === 'done' && delta === 0) {
+                toast.success(`${typeLabel}تم حفظ الحضور والتقييم بنجاح`, { id: thisToastId });
                 try {
                   await recordOccurrence.mutateAsync(
                     { planId: linkedPlan._id, studentId, type: assignment.type, occurrenceIndex: assignment.occurrenceIndex, status },
                   );
-                  setSaveNotices((prev) => [...prev, { type: outcomeType, tone: 'success', text: `تم حفظ حضور وتقييم ${studentName}` }]);
-                } catch (err) {
-                  error();
-                  setSaveErrors((prev) => [...prev, { type: outcomeType, text: (err as Error).message }]);
+                } catch {
+                  // Same as web: a failure here is silent — it just mustn't
+                  // block recording the remaining assignments.
                 }
                 continue;
               }
+              toast.loading(
+                typeLabel + (status === 'absent'
+                  ? `جاري إضافة الورد الغائب إلى خطة ${studentName}...`
+                  : delta > 0
+                    ? `جاري تعديل باقي أيام خطة ${studentName} بعد التسميع الإضافي...`
+                    : `جاري إضافة الورد الناقص إلى خطة ${studentName}...`),
+                { id: thisToastId },
+              );
               try {
                 const res = await recordOccurrence.mutateAsync({
                   planId: linkedPlan._id, studentId, type: assignment.type, occurrenceIndex: assignment.occurrenceIndex, status,
@@ -450,30 +436,26 @@ export default function EvaluationRoster({
                   completedThroughSurah: status === 'absent' ? undefined : completedPoint.surahNumber,
                   completedThroughAyah: status === 'absent' ? undefined : completedPoint.ayah,
                 });
-                if (res.data.overflowPages > 0) {
-                  warning();
-                  setSaveNotices((prev) => [...prev, {
-                    type: outcomeType, tone: 'warning',
-                    text: `لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`,
-                  }]);
-                  continue;
-                }
-                setSaveNotices((prev) => [...prev, {
-                  type: outcomeType, tone: 'success',
-                  text: status === 'absent'
+                toast.success(
+                  typeLabel + (status === 'absent'
                     ? `تم الحفظ، وتم توزيع الورد الغائب على باقي أيام خطة ${studentName}`
                     : delta > 0
                       ? `تم الحفظ، وتم خصم الورد الإضافي من باقي أيام خطة ${studentName}`
-                      : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`,
-                }]);
+                      : `تم الحفظ، وتم توزيع الورد الناقص على باقي أيام خطة ${studentName}`),
+                  { id: thisToastId },
+                );
+                if (res.data.overflowPages > 0) {
+                  warning();
+                  toast.warning(`${typeLabel}لا يوجد مكان كافٍ لتوزيع كل الورد الناقص — أضف يومًا جديدًا لخطة ${studentName}`);
+                }
               } catch (err) {
                 error();
-                setSaveErrors((prev) => [...prev, { type: outcomeType, text: (err as Error).message }]);
+                toast.error((err as Error).message, { id: thisToastId });
               }
             }
           })();
         },
-        onError: () => error(),
+        onError: (err) => { error(); toast.error((err as Error).message, { id: toastId }); },
       },
     );
   }
@@ -484,27 +466,6 @@ export default function EvaluationRoster({
 
   return (
     <>
-      {/* One Alert per outcome — a two-type save can produce two independent
-          notices (or one notice and one error), and each must stay visible on
-          its own rather than sharing a slot the other overwrites. */}
-      {saveNotices.map((n, i) => (
-        <Alert
-          key={`notice-${i}`}
-          variant={n.tone}
-          icon={n.tone === 'success' ? <IconCircleCheck size={18} color={theme.tone.green.text} /> : undefined}
-        >
-          {n.type ? `${n.type} — ` : ''}{n.text}
-        </Alert>
-      ))}
-      {unnotified.length > 0 && (
-        <Alert variant="warning">
-          تعذر إرسال إشعار عن غياب: {unnotified.map((u) => u.name).join('، ')} — لا يوجد ولي أمر مرتبط بالحساب.
-        </Alert>
-      )}
-      {bulkEvaluate.isError && <Alert variant="error">{(bulkEvaluate.error as Error).message}</Alert>}
-      {saveErrors.map((er, i) => (
-        <Alert key={`error-${i}`} variant="error">{er.type ? `${er.type} — ` : ''}{er.text}</Alert>
-      ))}
       {readOnly ? (
         <Alert variant="warning">
           العرض للاطلاع فقط — لا يمكن للمشرف تسجيل الحضور أو التقييم.
@@ -746,7 +707,7 @@ export default function EvaluationRoster({
                     label={savingThis ? 'جارٍ الحفظ...' : isUnlocked ? 'حفظ التعديلات' : 'حفظ لهذا الطالب'}
                     fullWidth
                     loading={savingThis}
-                    disabled={bulkEvaluate.isPending || !teacherId}
+                    disabled={bulkEvaluate.isPending || !teacherId || noActivePlan}
                     icon={<IconDeviceFloppy size={16} color={theme.white} />}
                     onPress={() => saveStudent(st._id, st.name)}
                   />

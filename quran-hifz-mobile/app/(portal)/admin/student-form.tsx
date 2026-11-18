@@ -177,9 +177,9 @@ export default function AdminStudentForm() {
         onChangeText={setEmail}
       />
 
-      <Text style={s.label}>كلمة مرور جديدة</Text>
+      <Text style={s.label}>{existing?.email ? 'كلمة مرور جديدة' : 'كلمة المرور'}</Text>
       <FormInput
-        placeholder="اتركه فارغاً إن لم تُرد تغييرها"
+        placeholder={existing?.email ? 'اتركه فارغاً إن لم تُرد تغييرها' : '6 أحرف على الأقل'}
         secureTextEntry
         autoCapitalize="none"
         style={s.ltr}

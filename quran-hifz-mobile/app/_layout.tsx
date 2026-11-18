@@ -20,6 +20,7 @@ import {
 } from '@expo-google-fonts/amiri';
 import { usePortalStore } from '@/lib/store/portalStore';
 import BiometricLockScreen from '@/components/domain/BiometricLockScreen';
+import { ToastHost } from '@/components/ui/Toast';
 
 // Enable RTL for Arabic
 if (!I18nManager.isRTL) {
@@ -95,6 +96,7 @@ export default function RootLayout() {
                 </Stack.Protected>
               </Stack>
             )}
+            <ToastHost />
           </BottomSheetModalProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>

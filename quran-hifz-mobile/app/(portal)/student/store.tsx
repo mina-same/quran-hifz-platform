@@ -3,7 +3,7 @@ import { ScrollView, View, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { IconBook, IconStar, IconAward, IconGift } from '@tabler/icons-react-native';
+import { IconBook, IconStar, IconAward, IconCircle, IconPencil, IconMapPin, IconCertificate } from '@tabler/icons-react-native';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
@@ -14,10 +14,12 @@ type AppTheme = ReturnType<typeof useAppTheme>;
 
 const MY_PTS = 740;
 const ITEMS = [
-  { id: 1, name: 'كتاب تجويد مُصوَّر',    pts: 200, Icon: IconBook  },
-  { id: 2, name: 'قلم تخطيط للمصحف',     pts: 150, Icon: IconStar  },
-  { id: 3, name: 'دروع تقدير من الإدارة', pts: 500, Icon: IconAward },
-  { id: 4, name: 'اشتراك رحلة ترفيهية',  pts: 700, Icon: IconGift  },
+  { id: 1, name: 'كتاب تجويد مُصوَّر',     pts: 200, Icon: IconBook },
+  { id: 2, name: 'مسبحة إلكترونية',        pts: 350, Icon: IconCircle },
+  { id: 3, name: 'قلم تخطيط للمصحف',      pts: 150, Icon: IconPencil },
+  { id: 4, name: 'دروع تقدير من الإدارة', pts: 500, Icon: IconAward },
+  { id: 5, name: 'اشتراك رحلة ترفيهية',   pts: 700, Icon: IconMapPin },
+  { id: 6, name: 'شهادة تميز مُذهَّبة',    pts: 900, Icon: IconCertificate },
 ];
 
 export default function StudentStore() {
@@ -42,7 +44,7 @@ export default function StudentStore() {
             <Text style={s.balNum}>{MY_PTS} نقطة</Text>
           </View>
         </View>
-        {redeemed !== null && <Text style={s.successBanner}>تم الاستبدال! سيتواصل معك الأستاذ لتسليم المكافأة ✓</Text>}
+        {redeemed !== null && <Text style={s.successBanner}>تم الاستبدال بنجاح! سيتواصل معك الأستاذ لتسليم المكافأة ✓</Text>}
         {ITEMS.map((item) => {
           const canAfford = MY_PTS >= item.pts;
           return (
@@ -58,7 +60,7 @@ export default function StudentStore() {
                   disabled={!canAfford}
                   onPress={() => handleRedeem(item.id, item.pts)}
                 >
-                  <Text style={s.btnText}>{canAfford ? 'استبدال' : `تحتاج ${item.pts - MY_PTS}`}</Text>
+                  <Text style={s.btnText}>{canAfford ? 'استبدال' : `تحتاج ${item.pts - MY_PTS} نقطة`}</Text>
                 </Pressable>
               </View>
             </Card>

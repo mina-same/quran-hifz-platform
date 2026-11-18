@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, View, RefreshControl, StyleSheet } from 'react-native';
 import Text from '@/components/ui/Text';
 import Pressable from '@/components/ui/Pressable';
@@ -16,6 +17,8 @@ import { SkeletonRows } from '@/components/ui/Skeleton';
 import ContextCard, { trackToContext, type TeachingContext } from '@/components/domain/ContextCard';
 import DaySlider, { useDaySchedule, type DayEntry } from '@/components/domain/DaySlider';
 import EvaluationRoster from '@/components/domain/EvaluationRoster';
+import TeacherStudentPlanToggle from '@/components/domain/TeacherStudentPlanToggle';
+import DailyReportPrompt from '@/components/domain/DailyReportPrompt';
 import { useTracks } from '@/lib/queries/tracks';
 import { useStudents } from '@/lib/queries/students';
 import { useEvaluations } from '@/lib/queries/evaluations';
@@ -23,16 +26,35 @@ import { useQuranPlans } from '@/lib/queries/quranPlan';
 import { MAX_SCORES, TOTAL_MAX, legacyScoresOf } from '@/lib/evaluationRubric';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
-import { fmtDayLabel, toDateOnly } from '@/lib/date';
+import { fmtDate, fmtDayLabel, toDateOnly } from '@/lib/date';
 
 export default function TeacherAttendance() {
   const theme = useAppTheme();
   const profileId = usePortalStore((s) => s.authUser?.profileId);
+  const readOnly = usePortalStore((s) => s.readOnly);
   const [selected, setSelected] = useState<TeachingContext | null>(null);
 
   const {
     data: tracks = [], isLoading: loadingTracks, refetch: refetchTracks, isRefetching: refetchingTracks,
   } = useTracks(undefined, profileId);
+
+  // Deep link from TrackDetail's «تسجيل الحضور» (web: ATTENDANCE_PREFILL_TRACK_KEY).
+  // Tab screens stay mounted, so key on trackId + the per-tap `ts` param: each
+  // new hand-off is applied once, and the teacher's own «‹ المسارات» back isn't
+  // overridden by the effect re-running.
+  const { trackId: prefillTrackId, ts: prefillTs } = useLocalSearchParams<{ trackId?: string; ts?: string }>();
+  const appliedPrefill = useRef<string | null>(null);
+  useEffect(() => {
+    if (!prefillTrackId) return;
+    const key = `${prefillTrackId}|${prefillTs ?? ''}`;
+    if (appliedPrefill.current === key) return;
+    const track = tracks.find((t) => t._id === prefillTrackId);
+    if (!track) return;
+    appliedPrefill.current = key;
+    setSelected(trackToContext(track));
+    setSelectedDate('');
+    setDayNotice(null);
+  }, [prefillTrackId, prefillTs, tracks]);
 
   const contextFilter = selected ? { track: selected.id } : undefined;
 
@@ -104,6 +126,7 @@ export default function TeacherAttendance() {
         name: a.name,
         value: Math.round(a.totalSum / a.sessions),
         max: TOTAL_MAX,
+        display: `${Math.round(a.totalSum / a.sessions)}/${TOTAL_MAX}`,
         sub: a.sessions === 1 ? 'جلسة واحدة' : `متوسط ${a.sessions} جلسات`,
       }));
     const byAttendance: LeaderboardRow[] = [...all]
@@ -114,6 +137,7 @@ export default function TeacherAttendance() {
         name: a.name,
         value: Math.round((a.present / a.sessions) * 100),
         max: 100,
+        display: `${Math.round((a.present / a.sessions) * 100)}%`,
         sub: `${a.present} من ${a.sessions} جلسة`,
       }));
     return { topScoreRows: byScore, topAttendanceRows: byAttendance };
@@ -128,6 +152,7 @@ export default function TeacherAttendance() {
     safe: { flex: 1, backgroundColor: theme.bg },
     page: { padding: theme.pagePadding, gap: 14 },
     muted: { fontSize: 13, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 24 },
+    heading: { fontSize: 13, fontFamily: theme.fontCairoBold, color: theme.textMuted },
     backLink: { fontSize: 13, color: theme.green, fontFamily: theme.fontCairoBold, marginBottom: 4 },
 
     histRow: { paddingVertical: 9, gap: 4 },
@@ -152,11 +177,24 @@ export default function TeacherAttendance() {
         >
           {loadingTracks && <SkeletonRows count={3} rowHeight={92} />}
           {!loadingTracks && tracks.length === 0 && (
-            <Text style={styles.muted}>لا توجد مسارات مسندة إليك</Text>
+            <Text style={styles.muted}>لا توجد حلقات أو مسارات مسجلة لهذا المعلم</Text>
+          )}
+          {!loadingTracks && tracks.length > 0 && (
+            <Text style={styles.heading}>اختر الحلقة أو المسار لتسجيل حضور وتقييم اليوم</Text>
           )}
           {tracks.map((t) => (
             <Pressable key={t._id} onPress={() => setSelected(trackToContext(t))}>
-              <ContextCard context={trackToContext(t)} />
+              <ContextCard
+                context={trackToContext(t)}
+                actions={(
+                  <Button
+                    label="أخذ الحضور والتقييم"
+                    fullWidth
+                    icon={<IconCalendarCheck size={16} color={theme.white} />}
+                    onPress={() => setSelected(trackToContext(t))}
+                  />
+                )}
+              />
             </Pressable>
           ))}
         </ScrollView>
@@ -174,7 +212,7 @@ export default function TeacherAttendance() {
         refreshControl={<RefreshControl refreshing={isRefreshingDetail} onRefresh={onRefreshDetail} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
         <Pressable onPress={() => { setSelected(null); setSelectedDate(''); }}>
-          <Text style={styles.backLink}>‹ رجوع لاختيار المسار</Text>
+          <Text style={styles.backLink}>‹ المسارات</Text>
         </Pressable>
 
         {/* Day slider — only when this context has scheduled days */}
@@ -194,7 +232,7 @@ export default function TeacherAttendance() {
 
         {!loadingPlans && scheduledSorted.length === 0 && (
           <Alert variant="warning">
-            لا يوجد خطة حفظ نشطة لهذا المسار — أضف خطة من صفحة "الخطط الفردية" أولاً لتفعيل التقويم.
+            لا يوجد خطة حفظ نشطة لهذا المسار — لا يمكن تحديد يوم محدد لتسجيل الحضور والتقييم، لكن يمكنك تسجيل حضور اليوم مباشرة أدناه. أضف خطة من صفحة "الخطط القرآنية" أولاً لتفعيل التقويم.
           </Alert>
         )}
 
@@ -204,8 +242,18 @@ export default function TeacherAttendance() {
           </Alert>
         )}
 
+        {!readOnly && !loadingStudents && scheduledSorted.length > 0 && (
+          <DailyReportPrompt
+            trackId={selected.id}
+            date={effectiveDate}
+            studentIds={students.map((st) => st._id)}
+            disabled={isFutureDay}
+          />
+        )}
+
+        {(loadingPlans || scheduledSorted.length > 0) && (
         <Card>
-          <CardHeader title={`${selected.title} — ${fmtDayLabel(effectiveDate)}`} />
+          <CardHeader title={`الحضور والتقييم — ${selected.title}`} subtitle={fmtDayLabel(effectiveDate)} />
 
           {loadingStudents && <SkeletonRows count={4} />}
           {!loadingStudents && (
@@ -215,9 +263,13 @@ export default function TeacherAttendance() {
               teacherId={profileId}
               linkedPlan={linkedPlan}
               daySchedule={daySchedule}
+              renderExtra={linkedPlan
+                ? (st) => <TeacherStudentPlanToggle plan={linkedPlan} studentId={st._id} studentName={st.name} />
+                : undefined}
             />
           )}
         </Card>
+        )}
 
         {history.length > 0 && (
           <Card>
@@ -229,7 +281,7 @@ export default function TeacherAttendance() {
                     {typeof r.student === 'string' ? r.student : r.student.name}
                   </Text>
                   <Badge label={r.attendanceStatus} variant={r.attendanceStatus === 'حاضر' ? 'green' : r.attendanceStatus === 'مستأذن' ? 'blue' : 'red'} />
-                  <Text style={styles.histDate}>{toDateOnly(r.date)}</Text>
+                  <Text style={styles.histDate}>{fmtDate(r.date)}</Text>
                 </View>
                 <Text style={styles.histScores}>
                   حضور {legacyScoresOf(r).attendance}/{MAX_SCORES.attendance} · حفظ {legacyScoresOf(r).hifz}/{MAX_SCORES.hifz} ·

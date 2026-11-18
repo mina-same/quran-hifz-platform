@@ -46,6 +46,7 @@ export default function ParentTabLayout() {
       />
       {/* Reachable from the "المزيد" sheet only. */}
       <Tabs.Screen name="homework_view" options={{ href: null, title: 'واجبات ابني' }} />
+      <Tabs.Screen name="thread" options={{ href: null, title: 'محادثة' }} />
     </Tabs>
 
     <MoreSheet

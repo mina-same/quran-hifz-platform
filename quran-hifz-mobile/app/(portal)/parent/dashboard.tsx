@@ -10,10 +10,17 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import Badge from '@/components/ui/Badge';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import ChildSelector from '@/components/domain/ChildSelector';
-import { useParentChildren, useChildHifz, useChildMessages } from '@/lib/queries/parent';
+import { useParentChildren, useChildHifz } from '@/lib/queries/parent';
 import { usePortalStore } from '@/lib/store/portalStore';
 import { useAppTheme } from '@/lib/hooks/useAppTheme';
-import { AR_LOCALE } from '@/lib/date';
+
+// Static content — same list as web's ParentDashboard NOTIFICATIONS.
+const NOTIFICATIONS = [
+  { date: 'اليوم', text: 'أرسل الواجب اليومي بنجاح ✓' },
+  { date: 'أمس',   text: 'تقييم الأستاذ: ممتاز' },
+  { date: 'الأحد', text: 'حضر حلقة الفجر ✓' },
+  { date: 'السبت', text: 'الواجب القادم: مراجعة' },
+];
 
 export default function ParentDashboard() {
   const theme = useAppTheme();
@@ -28,19 +35,12 @@ export default function ParentDashboard() {
   const child = children.find((c) => c._id === childId);
 
   const { data: hifzEntries, isRefetching: hifzRefetching, refetch: refetchHifz } = useChildHifz(childId);
-  const {
-    data: messages = [],
-    isLoading: messagesLoading,
-    isRefetching: messagesRefetching,
-    refetch: refetchMessages,
-  } = useChildMessages(childId);
 
   const isLoading = childrenLoading;
-  const isRefetching = childrenRefetching || hifzRefetching || messagesRefetching;
+  const isRefetching = childrenRefetching || hifzRefetching;
   const onRefresh = () => {
     refetchChildren();
     refetchHifz();
-    refetchMessages();
   };
 
   const progressPct = child?.progressPct ?? 0;
@@ -62,7 +62,6 @@ export default function ParentDashboard() {
   const s = useMemo(() => StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.cream },
     page: { padding: 16, gap: 14 },
-    muted: { fontSize: 12, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center', paddingVertical: 8 },
     goalLabel: { fontSize: 11, color: theme.textMuted, fontFamily: theme.fontCairo, textAlign: 'center' },
     pctNum: { fontSize: 36, fontFamily: theme.fontCairoBold, color: theme.green, textAlign: 'center', marginTop: 2, marginBottom: 8 },
     juzBadgeWrap: { alignItems: 'center', marginTop: 10, marginBottom: 4 },
@@ -115,13 +114,11 @@ export default function ParentDashboard() {
           )}
         </Card>
         <Card>
-          <CardHeader title="آخر إشعارات" />
-          {messagesLoading && <SkeletonRows count={3} rowHeight={36} />}
-          {!messagesLoading && messages.length === 0 && <Text style={s.muted}>لا توجد إشعارات حديثة</Text>}
-          {messages.slice(0, 4).map((n, i) => (
-            <View key={n._id} style={[s.notifRow, i > 0 && s.borderTop]}>
-              <Text style={s.day}>{new Date(n.createdAt).toLocaleDateString(AR_LOCALE)}</Text>
-              <Text style={s.notifText}>{n.body}</Text>
+          <CardHeader title="آخر الإشعارات" />
+          {NOTIFICATIONS.map((n, i) => (
+            <View key={i} style={[s.notifRow, i > 0 && s.borderTop]}>
+              <Text style={s.day}>{n.date}</Text>
+              <Text style={s.notifText}>{n.text}</Text>
             </View>
           ))}
         </Card>

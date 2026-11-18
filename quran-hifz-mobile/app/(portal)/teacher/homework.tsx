@@ -5,6 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Card from '@/components/ui/Card';
 import CardHeader from '@/components/ui/CardHeader';
 import Badge, { type BadgeVariant } from '@/components/ui/Badge';
+import Alert from '@/components/ui/Alert';
+import { toast } from '@/components/ui/Toast';
 import { SkeletonRows } from '@/components/ui/Skeleton';
 import FormSelect from '@/components/forms/FormSelect';
 import { useHomework, useGradeHomework } from '@/lib/queries/homework';
@@ -55,11 +57,12 @@ export default function TeacherHomework() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} colors={[theme.spinner]} tintColor={theme.spinner} />}
       >
+        <Alert variant="info">يمكنك تقييم الواجبات المعلقة مباشرة من القائمة أدناه.</Alert>
         <Card noPadding>
           <CardHeader title={`واجبات الطلاب (${homework.length})`} style={{ padding: 16, paddingBottom: 8 }} />
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
             {isLoading && <SkeletonRows count={5} />}
-            {!isLoading && homework.length === 0 && <Text style={styles.empty}>لا توجد واجبات بعد</Text>}
+            {!isLoading && homework.length === 0 && <Text style={styles.empty}>لا توجد واجبات</Text>}
 
             {!isLoading && homework.map((h, i) => (
               <View key={h._id} style={[styles.row, i < homework.length - 1 && styles.rowBorder]}>
@@ -80,7 +83,12 @@ export default function TeacherHomework() {
 
                 <FormSelect
                   value={h.rating ?? ''}
-                  onChange={(v) => gradeHW.mutate({ id: h._id, rating: v, status: 'مراجع' })}
+                  onChange={(v) => {
+                    gradeHW.mutate(
+                      { id: h._id, rating: v, status: 'مراجع' },
+                      { onError: (err) => toast.error((err as Error).message) },
+                    );
+                  }}
                   options={RATING_OPTS}
                   placeholder="اختر التقييم"
                 />
