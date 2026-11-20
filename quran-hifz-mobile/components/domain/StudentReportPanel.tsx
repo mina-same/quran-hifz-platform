@@ -96,10 +96,10 @@ export default function StudentReportPanel({ students, aggregateFilter, aggregat
   const { data: plans = [] } = useQuranPlans(selectedId ? { student: selectedId } : { student: '__none__' });
   const { data: rawStudentEvals = [] } = useEvaluations(selectedId ? { student: selectedId } : { student: '__none__' });
   const { data: rawAllEvals = [] } = useEvaluations(aggregateFilter);
-  // Excused (مستأذن) sessions carry no grades and don't count against the
-  // student — excluded from every average and attendance percentage.
-  const studentEvals = useMemo(() => rawStudentEvals.filter((e) => e.attendanceStatus !== 'مستأذن'), [rawStudentEvals]);
-  const allEvals = useMemo(() => rawAllEvals.filter((e) => e.attendanceStatus !== 'مستأذن'), [rawAllEvals]);
+  // Excused (مستأذن) sessions score 0 like absent ones and stay in every
+  // average; only the attendance percentage leaves them out.
+  const studentEvals = rawStudentEvals;
+  const allEvals = rawAllEvals;
 
   // What the student recorded on each open-ward plan (حفظ only — مراجعة
   // revisits already-memorized text and must not inflate coverage).
@@ -162,27 +162,28 @@ export default function StudentReportPanel({ students, aggregateFilter, aggregat
     const byStudent = new Map<string, {
       name: string;
       sums: { hifz: number; tajweed: number; talawah: number; total: number };
-      count: number; present: number;
+      count: number; present: number; attCount: number;
     }>();
     for (const e of allEvals) {
       const id = studentIdOf(e);
       const entry = byStudent.get(id) ?? {
         name: studentNameOf(e),
         sums: { hifz: 0, tajweed: 0, talawah: 0, total: 0 },
-        count: 0, present: 0,
+        count: 0, present: 0, attCount: 0,
       };
       entry.sums.hifz += legacyScoresOf(e).hifz;
       entry.sums.tajweed += legacyScoresOf(e).tajweed;
       entry.sums.talawah += legacyScoresOf(e).talawah;
       entry.sums.total += e.total;
       entry.count += 1;
+      if (e.attendanceStatus !== 'مستأذن') entry.attCount += 1;
       if (e.attendanceStatus === 'حاضر') entry.present += 1;
       byStudent.set(id, entry);
     }
     return Array.from(byStudent.values())
       .map((st) => ({
         name: st.name,
-        attendancePct: Math.round((st.present / st.count) * 100),
+        attendancePct: st.attCount ? Math.round((st.present / st.attCount) * 100) : 0,
         avgHifz: Math.round((st.sums.hifz / st.count) * 10) / 10,
         avgTajweed: Math.round((st.sums.tajweed / st.count) * 10) / 10,
         avgTalawah: Math.round((st.sums.talawah / st.count) * 10) / 10,

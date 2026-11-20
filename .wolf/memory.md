@@ -4789,3 +4789,21 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-11-20 13:59
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:17 | Edited quran-hifz-server/src/lib/rankings.ts | days() → excused() | ~56 |
+| 15:17 | Edited quran-hifz-server/src/lib/rankings.ts | 7→7 lines | ~96 |
+| 15:17 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | 5→5 lines | ~81 |
+| 15:17 | Edited quran-hifz/src/quran/components/common/ReportsDashboard.tsx | added 1 condition(s) | ~64 |
+| 15:17 | Edited quran-hifz/src/quran/components/common/StudentReportPanel.tsx | reduced (-6 lines) | ~60 |
+| 15:17 | Edited quran-hifz/src/quran/components/common/StudentReportPanel.tsx | CSS: attCount | ~47 |
+| 15:17 | Edited quran-hifz/src/quran/components/common/StudentReportPanel.tsx | CSS: attCount | ~20 |
+| 15:17 | Edited quran-hifz/src/quran/components/common/StudentReportPanel.tsx | added 1 condition(s) | ~52 |
+| 15:17 | Edited quran-hifz/src/quran/components/common/StudentReportPanel.tsx | inline fix | ~24 |
+| 15:17 | Edited quran-hifz/src/quran/pages/student/StudentDashboard.tsx | 2→2 lines | ~30 |
+| 15:21 | excused = 0 in grade averages (server, web, mobile) | rankings.ts + 10 client files | tsc clean, jest 99/99 | ~15k |
+| 15:23 | Session end: 10 writes across 4 files (rankings.ts, ReportsDashboard.tsx, StudentReportPanel.tsx, StudentDashboard.tsx) | 2 reads | ~18888 tok |
+| 15:45 | Session end: 10 writes across 4 files (rankings.ts, ReportsDashboard.tsx, StudentReportPanel.tsx, StudentDashboard.tsx) | 3 reads | ~18888 tok |

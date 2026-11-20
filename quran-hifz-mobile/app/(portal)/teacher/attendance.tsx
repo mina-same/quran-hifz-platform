@@ -104,16 +104,17 @@ export default function TeacherAttendance() {
   const { data: history = [] } = useEvaluations(contextFilter);
 
   const { topScoreRows, topAttendanceRows } = useMemo(() => {
-    type Agg = { id: string; name: string; totalSum: number; sessions: number; present: number };
+    type Agg = { id: string; name: string; totalSum: number; sessions: number; present: number; attSessions: number };
     const byStudent = new Map<string, Agg>();
     for (const r of history) {
-      // Excused (مستأذن) sessions don't count — no grades, not held against attendance.
-      if (r.attendanceStatus === 'مستأذن') continue;
+      // Excused (مستأذن) sessions score 0 in the average (like absent) but
+      // are not held against attendance.
       const id = typeof r.student === 'string' ? r.student : r.student._id;
       const name = typeof r.student === 'string' ? r.student : r.student.name;
-      const agg = byStudent.get(id) ?? { id, name, totalSum: 0, sessions: 0, present: 0 };
+      const agg = byStudent.get(id) ?? { id, name, totalSum: 0, sessions: 0, present: 0, attSessions: 0 };
       agg.totalSum += r.total;
       agg.sessions += 1;
+      if (r.attendanceStatus !== 'مستأذن') agg.attSessions += 1;
       if (r.attendanceStatus === 'حاضر') agg.present += 1;
       byStudent.set(id, agg);
     }
@@ -129,15 +130,17 @@ export default function TeacherAttendance() {
         display: `${Math.round(a.totalSum / a.sessions)}/${TOTAL_MAX}`,
         sub: a.sessions === 1 ? 'جلسة واحدة' : `متوسط ${a.sessions} جلسات`,
       }));
+    const attRate = (a: Agg) => (a.attSessions ? a.present / a.attSessions : 0);
     const byAttendance: LeaderboardRow[] = [...all]
-      .sort((a, b) => b.present / b.sessions - a.present / a.sessions)
+      .filter((a) => a.attSessions > 0)
+      .sort((a, b) => attRate(b) - attRate(a))
       .slice(0, 3)
       .map((a) => ({
         id: a.id,
         name: a.name,
-        value: Math.round((a.present / a.sessions) * 100),
+        value: Math.round(attRate(a) * 100),
         max: 100,
-        display: `${Math.round((a.present / a.sessions) * 100)}%`,
+        display: `${Math.round(attRate(a) * 100)}%`,
         sub: `${a.present} من ${a.sessions} جلسة`,
       }));
     return { topScoreRows: byScore, topAttendanceRows: byAttendance };

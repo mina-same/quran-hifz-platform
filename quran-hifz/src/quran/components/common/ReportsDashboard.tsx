@@ -138,11 +138,11 @@ export function ReportsDashboard({
     () => rawStudents.filter((s) => matchesGenderScope(typeof s.track === "string" ? undefined : s.track.masjid, genderScope)),
     [rawStudents, genderScope],
   );
-  // Excused (مستأذن) sessions carry no grades — excluded from every average.
+  // Excused (مستأذن) sessions score 0 like absent ones — they stay in every
+  // average, so a student's percentage is never taken over fewer days.
   const evaluations = useMemo(() => {
-    const graded = rawEvaluations.filter((e) => e.attendanceStatus !== "مستأذن");
-    if (genderScope === "all") return graded;
-    return graded.filter((e) => {
+    if (genderScope === "all") return rawEvaluations;
+    return rawEvaluations.filter((e) => {
       const id = evalTrackId(e);
       return !id || scopedTrackIds.has(id);
     });
@@ -158,6 +158,7 @@ export function ReportsDashboard({
     // maintained — it is 0 for everyone — so it can't drive this.)
     const per = new Map<string, { days: number; absent: number; score: number; max: number }>();
     for (const e of evaluations) {
+      if (e.attendanceStatus === "مستأذن") continue; // excused is not an absence
       const id = studentIdOf(e);
       const a = per.get(id) ?? { days: 0, absent: 0, score: 0, max: 0 };
       a.days += 1;

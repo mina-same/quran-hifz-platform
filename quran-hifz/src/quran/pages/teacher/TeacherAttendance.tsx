@@ -477,16 +477,17 @@ export function TeacherAttendance() {
   // Per-student rollup from the same history — top score + best attendance,
   // no extra API calls.
   const { topScoreRows, topAttendanceRows } = useMemo(() => {
-    type Agg = { id: string; name: string; totalSum: number; sessions: number; present: number };
+    type Agg = { id: string; name: string; totalSum: number; sessions: number; present: number; attSessions: number };
     const byStudent = new Map<string, Agg>();
     for (const r of history) {
-      // Excused (مستأذن) sessions don't count — no grades, not held against attendance.
-      if (r.attendanceStatus === "مستأذن") continue;
+      // Excused (مستأذن) sessions score 0 in the average (like absent) but
+      // are not held against attendance.
       const id = typeof r.student === "string" ? r.student : r.student._id;
       const name = typeof r.student === "string" ? r.student : r.student.name;
-      const agg = byStudent.get(id) ?? { id, name, totalSum: 0, sessions: 0, present: 0 };
+      const agg = byStudent.get(id) ?? { id, name, totalSum: 0, sessions: 0, present: 0, attSessions: 0 };
       agg.totalSum += r.total;
       agg.sessions += 1;
+      if (r.attendanceStatus !== "مستأذن") agg.attSessions += 1;
       if (r.attendanceStatus === "حاضر") agg.present += 1;
       byStudent.set(id, agg);
     }
@@ -506,15 +507,17 @@ export function TeacherAttendance() {
         };
       });
 
+    const attRate = (a: Agg) => (a.attSessions ? a.present / a.attSessions : 0);
     const byAttendance = [...all]
-      .sort((a, b) => b.present / b.sessions - a.present / a.sessions)
+      .filter((a) => a.attSessions > 0)
+      .sort((a, b) => attRate(b) - attRate(a))
       .slice(0, 3)
       .map((a) => {
-        const rate = (a.present / a.sessions) * 100;
+        const rate = attRate(a) * 100;
         return {
           id: a.id,
           name: a.name,
-          subtitle: `${toAr(a.present)} من ${toAr(a.sessions)} جلسة`,
+          subtitle: `${toAr(a.present)} من ${toAr(a.attSessions)} جلسة`,
           meter: rate,
           display: pct(rate),
         };

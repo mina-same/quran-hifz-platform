@@ -44,7 +44,7 @@ export function StudentPointsModal({
             </div>
             <div>
               <b>{toAr(Math.round(student.avg10 * 10))}٪</b>
-              <span>المتوسط في أيام الحضور ({toAr(present)} يوم)</span>
+              <span>المتوسط من كل الأيام ({toAr(days.length)} يوم)</span>
             </div>
             <div>
               <b>{toAr(student.attendancePct)}٪</b>

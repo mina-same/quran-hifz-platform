@@ -102,8 +102,8 @@ export default function StudentDashboard() {
   ];
 
 
-  // Excused (مستأذن) sessions are left out of the average; absences count as 0.
-  const graded = evaluations.filter((e) => (e.attendanceStatus as string) !== 'مستأذن');
+  // Absent and excused (مستأذن) sessions both count as 0 in the average.
+  const graded = evaluations;
   const gradedMax = graded.reduce((a, e) => a + (e.totalMax ?? 10), 0);
   const gradeAvg = gradedMax > 0 ? Math.round((graded.reduce((a, e) => a + e.total, 0) / gradedMax) * 100) : null;
   const visibleGrades = showAllGrades ? evaluations : evaluations.slice(0, 5);

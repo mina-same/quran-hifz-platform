@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-18T07:31:12.094Z
-> Files: 787 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-20T13:17:39.735Z
+> Files: 788 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -836,7 +836,7 @@
 - `planStudents.ts` — Resolves which students are covered by a plan, branching on `targetType`: (~315 tok)
 - `push.ts` — Best-effort Expo push notification send — looks up each recipient's stored (~389 tok)
 - `quranRange.ts` — Standard 604-page Madani mushaf boundary table (surah:ayah each page starts at). (~6552 tok)
-- `rankings.ts` — Leaderboards for the promotional report and the student «لوحة الشرف». (~1712 tok)
+- `rankings.ts` — Leaderboards for the promotional report and the student «لوحة الشرف». (~1739 tok)
 - `studentPlanReflow.ts` — Per-student plan overlay: builds the occurrence array, then redistributes what's still owed (cursor → pinned finish line) whenever a day is absent, short, or over-recited; flags `noWard` days (~3376 tok)
 - `supervisorScope.ts` — The supervisor's fixed gender assignment, or null for every other role. (~502 tok)
 - `teacherParent.ts` — Live (non-archived) track ids a teacher user teaches. (~971 tok)
@@ -1077,12 +1077,12 @@
 - `ProgressBar.tsx` — ProgressBar (~68 tok)
 - `PromoReport.tsx` — 2.5 → «٢٫٥», 120 → «١٢٠» (points may carry decimals since grades can). (~2625 tok)
 - `PromoReportSection.tsx` — «تقرير الإنجاز والتميّز»: pick the section, period, masjid and halqa, then (~2442 tok)
-- `ReportsDashboard.tsx` — Buckets a 0–100 metric into 4 ranges for the hifz-progress distribution donut. (~8630 tok)
+- `ReportsDashboard.tsx` — «طالب واحد / طالبان / ٣ طلاب / ١١ طالباً» — Arabic counted-noun agreement. (~10564 tok)
 - `ScopeTabs.tsx` — ScopeTabs — segmented control to scope report widgets to all/halqa/track (~120 tok)
 - `Skeleton.tsx` — Skeleton — renders table (~816 tok)
 - `StatsRow.tsx` — StatsRow (~146 tok)
 - `StudentPointsModal.tsx` — Where a student's numbers in «لوحة الشرف» come from: every evaluated day in (~1253 tok)
-- `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from a student's plans — no dedicated (~5066 tok)
+- `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from a student's plans — no dedicated (~5580 tok)
 - `SurahRangePicker.tsx` — SurahPointFields (~439 tok)
 - `TrackStudentsPanel.tsx` — Track roster management — transfer-only, since a student's track is (~2003 tok)
 
@@ -1150,7 +1150,7 @@
 ## quran-hifz/src/quran/pages/student/
 
 - `StudentAttendance.tsx` — STATUS_TONE — renders table (~1101 tok)
-- `StudentDashboard.tsx` — getField (~1869 tok)
+- `StudentDashboard.tsx` — getField (~2534 tok)
 - `StudentHifz.tsx` — tone — renders table (~1058 tok)
 - `StudentHomework.tsx` — AR_DIGITS — uses useState, useEffect (~1000 tok)
 - `StudentLeaderboard.tsx` — 2.5 → «٢٫٥». (~1598 tok)

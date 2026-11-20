@@ -71,7 +71,7 @@ export default function StudentPointsSheet({
               </View>
               <View style={s.stat}>
                 <Text style={s.statVal}>{Math.round(student.avg10 * 10)}٪</Text>
-                <Text style={s.statLbl}>المتوسط في أيام الحضور ({present} يوم)</Text>
+                <Text style={s.statLbl}>المتوسط من كل الأيام ({days.length} يوم)</Text>
               </View>
               <View style={s.stat}>
                 <Text style={s.statVal}>{student.attendancePct}٪</Text>

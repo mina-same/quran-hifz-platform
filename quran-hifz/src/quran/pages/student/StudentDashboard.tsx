@@ -64,8 +64,8 @@ export function StudentDashboard() {
   const masjidName = getTrackMasjidName(student?.track);
   const trackDays = linkedPlans[0]?.days.join("، ") ?? "—";
   const trackTime = getField(student?.track, "timeSlot");
-  // Excused (مستأذن) sessions are left out of the average; absences count as 0.
-  const graded = evaluations.filter((e) => (e.attendanceStatus as string) !== "مستأذن");
+  // Absent and excused (مستأذن) sessions both count as 0 in the average.
+  const graded = evaluations;
   const gradedMax = graded.reduce((a, e) => a + (e.totalMax ?? 10), 0);
   const gradeAvg = gradedMax > 0 ? (graded.reduce((a, e) => a + e.total, 0) / gradedMax) * 100 : null;
   const isTopStudent = (student?.attendancePct ?? 0) >= 90 && (student?.progressPct ?? 0) >= 60;

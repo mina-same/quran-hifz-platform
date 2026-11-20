@@ -110,16 +110,10 @@ export function StudentReportPanel({
     selectedId ? { student: selectedId } : { student: "__none__" },
   );
   const { data: rawAllEvals = [] } = useEvaluations(aggregateFilter);
-  // Excused (مستأذن) sessions carry no grades and don't count against the
-  // student — excluded from every average and attendance percentage.
-  const studentEvals = useMemo(
-    () => rawStudentEvals.filter((e) => e.attendanceStatus !== "مستأذن"),
-    [rawStudentEvals],
-  );
-  const allEvals = useMemo(
-    () => rawAllEvals.filter((e) => e.attendanceStatus !== "مستأذن"),
-    [rawAllEvals],
-  );
+  // Excused (مستأذن) sessions score 0 like absent ones and stay in every
+  // average; only the attendance percentage leaves them out.
+  const studentEvals = rawStudentEvals;
+  const allEvals = rawAllEvals;
 
   // What the student recorded on each open-ward plan (حفظ only — مراجعة
   // revisits already-memorized text and must not inflate coverage).
@@ -185,6 +179,8 @@ export function StudentReportPanel({
         sums: { attendance: number; hifz: number; tajweed: number; talawah: number; total: number };
         count: number;
         present: number;
+        /** Sessions that count for attendance % (excused left out). */
+        attCount: number;
       }
     >();
     for (const e of allEvals) {
@@ -195,6 +191,7 @@ export function StudentReportPanel({
         sums: { attendance: 0, hifz: 0, tajweed: 0, talawah: 0, total: 0 },
         count: 0,
         present: 0,
+        attCount: 0,
       };
       entry.sums.attendance += legacyScoresOf(e).attendance;
       entry.sums.hifz += legacyScoresOf(e).hifz;
@@ -202,13 +199,14 @@ export function StudentReportPanel({
       entry.sums.talawah += legacyScoresOf(e).talawah;
       entry.sums.total += e.total;
       entry.count += 1;
+      if (e.attendanceStatus !== "مستأذن") entry.attCount += 1;
       if (e.attendanceStatus === "حاضر") entry.present += 1;
       byStudent.set(id, entry);
     }
     return Array.from(byStudent.values())
       .map((s) => ({
         name: s.name,
-        attendancePct: Math.round((s.present / s.count) * 100),
+        attendancePct: s.attCount ? Math.round((s.present / s.attCount) * 100) : 0,
         avgHifz: Math.round((s.sums.hifz / s.count) * 10) / 10,
         avgTajweed: Math.round((s.sums.tajweed / s.count) * 10) / 10,
         avgTalawah: Math.round((s.sums.talawah / s.count) * 10) / 10,
