@@ -37,7 +37,11 @@ import {
   useRubric,
   useBulkEvaluate,
   type BulkEvaluateRecord,
+  type EvaluationRecord,
 } from "../../api/evaluations";
+import { Pagination } from "../../components/common/Pagination";
+import { SortTh, TableToolbar, TableFilter } from "../../components/common/TableTools";
+import { useTableControls } from "../../lib/useTableControls";
 import {
   useRecordStudentOccurrence,
   useStudentPlanProgressList,
@@ -1415,52 +1419,7 @@ export function TeacherAttendance() {
 
       {history.length > 0 && (
         <Card icon="ti-history" title="سجل الجلسات">
-          <div className="tbl-wrap">
-            <table className="tbl">
-              <thead>
-                <tr>
-                  <th>التاريخ</th>
-                  <th>الطالب</th>
-                  <th>الحالة</th>
-                  <th>حضور</th>
-                  <th>حفظ</th>
-                  <th>تجويد</th>
-                  <th>تلاوة</th>
-                  <th>المجموع</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.map((r) => (
-                  <tr key={r._id}>
-                    <td>{toAr(new Date(r.date).toLocaleDateString(AR_LOCALE))}</td>
-                    <td>{typeof r.student === "string" ? r.student : r.student.name}</td>
-                    <td>
-                      <Badge tone={r.attendanceStatus === "حاضر" ? "green" : r.attendanceStatus === "مستأذن" ? "blue" : "red"}>
-                        {r.attendanceStatus}
-                      </Badge>
-                    </td>
-                    <td>
-                      {toAr(legacyScoresOf(r).attendance)}/{toAr(MAX_SCORES.attendance)}
-                    </td>
-                    <td>
-                      {toAr(legacyScoresOf(r).hifz)}/{toAr(MAX_SCORES.hifz)}
-                    </td>
-                    <td>
-                      {toAr(legacyScoresOf(r).tajweed)}/{toAr(MAX_SCORES.tajweed)}
-                    </td>
-                    <td>
-                      {toAr(legacyScoresOf(r).talawah)}/{toAr(MAX_SCORES.talawah)}
-                    </td>
-                    <td>
-                      <strong>
-                        {toAr(r.total)}/{toAr(TOTAL_MAX)}
-                      </strong>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <SessionHistoryTable history={history} />
         </Card>
       )}
 
@@ -1482,6 +1441,111 @@ export function TeacherAttendance() {
           </div>
         </Card>
       )}
+    </>
+  );
+}
+
+/** «سجل الجلسات» — every session in this context, searchable/sortable/paged. */
+function SessionHistoryTable({ history }: { history: EvaluationRecord[] }) {
+  const nameOf = (r: EvaluationRecord) => (typeof r.student === "string" ? r.student : r.student.name);
+  const t = useTableControls(history, {
+    search: (r) => [nameOf(r)],
+    sorters: {
+      date: (r) => new Date(r.date).getTime(),
+      student: nameOf,
+      status: (r) => r.attendanceStatus,
+      attendance: (r) => legacyScoresOf(r).attendance,
+      hifz: (r) => legacyScoresOf(r).hifz,
+      tajweed: (r) => legacyScoresOf(r).tajweed,
+      talawah: (r) => legacyScoresOf(r).talawah,
+      total: (r) => r.total,
+    },
+    filters: {
+      status: (r, v) => r.attendanceStatus === v,
+      student: (r, v) => nameOf(r) === v,
+    },
+    pageSize: 20,
+  });
+  const studentNames = useMemo(
+    () => [...new Set(history.map(nameOf))].sort((x, y) => x.localeCompare(y, "ar")),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [history],
+  );
+  return (
+    <>
+      <TableToolbar
+        t={t}
+        placeholder="البحث باسم الطالب..."
+        noun="جلسة"
+        sortOptions={[
+          { key: "date", label: "التاريخ" },
+          { key: "student", label: "الطالب" },
+          { key: "total", label: "المجموع" },
+        ]}
+      >
+        <TableFilter
+          t={t}
+          k="status"
+          label="كل الحالات"
+          options={[
+            { value: "حاضر", label: "حاضر" },
+            { value: "غائب", label: "غائب" },
+            { value: "مستأذن", label: "مستأذن" },
+          ]}
+        />
+        {studentNames.length > 1 && (
+          <TableFilter t={t} k="student" label="كل الطلاب" options={studentNames.map((n) => ({ value: n, label: n }))} />
+        )}
+      </TableToolbar>
+      <div className="tbl-wrap">
+        <table className="tbl">
+          <thead>
+            <tr>
+              <SortTh t={t} k="date">التاريخ</SortTh>
+              <SortTh t={t} k="student">الطالب</SortTh>
+              <SortTh t={t} k="status">الحالة</SortTh>
+              <SortTh t={t} k="attendance">حضور</SortTh>
+              <SortTh t={t} k="hifz">حفظ</SortTh>
+              <SortTh t={t} k="tajweed">تجويد</SortTh>
+              <SortTh t={t} k="talawah">تلاوة</SortTh>
+              <SortTh t={t} k="total">المجموع</SortTh>
+            </tr>
+          </thead>
+          <tbody>
+            {t.pageRows.map((r) => (
+              <tr key={r._id}>
+                <td>{toAr(new Date(r.date).toLocaleDateString(AR_LOCALE))}</td>
+                <td>{typeof r.student === "string" ? r.student : r.student.name}</td>
+                <td>
+                  <Badge tone={r.attendanceStatus === "حاضر" ? "green" : r.attendanceStatus === "مستأذن" ? "blue" : "red"}>
+                    {r.attendanceStatus}
+                  </Badge>
+                </td>
+                <td>
+                  {toAr(legacyScoresOf(r).attendance)}/{toAr(MAX_SCORES.attendance)}
+                </td>
+                <td>
+                  {toAr(legacyScoresOf(r).hifz)}/{toAr(MAX_SCORES.hifz)}
+                </td>
+                <td>
+                  {toAr(legacyScoresOf(r).tajweed)}/{toAr(MAX_SCORES.tajweed)}
+                </td>
+                <td>
+                  {toAr(legacyScoresOf(r).talawah)}/{toAr(MAX_SCORES.talawah)}
+                </td>
+                <td>
+                  <strong>
+                    {toAr(r.total)}/{toAr(TOTAL_MAX)}
+                  </strong>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="tbl-pager">
+        <Pagination page={t.page} pageSize={t.pageSize} total={t.total} onChange={t.setPage} />
+      </div>
     </>
   );
 }

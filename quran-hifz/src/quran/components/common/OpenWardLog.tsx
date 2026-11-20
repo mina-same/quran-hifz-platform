@@ -3,6 +3,9 @@ import type { RangePoint } from "../../api/quran-plans";
 import { surahName } from "../../lib/quranRange";
 import { Badge } from "./Badge";
 import { AR_LOCALE } from "@/lib/format";
+import { useTableControls } from "../../lib/useTableControls";
+import { Pagination } from "./Pagination";
+import { SortTh, TableToolbar, TableFilter } from "./TableTools";
 
 function pointLabel(p?: RangePoint) {
   return p ? `${surahName(p.surahNumber)} : ${p.ayah}` : "—";
@@ -19,6 +22,13 @@ function fmtDate(d: string) {
 export function OpenWardLog({ planId, studentId }: { planId: string; studentId?: string }) {
   const { data = [], isLoading } = useOpenWardEntries(planId, studentId ? { student: studentId } : undefined);
   const showStudent = !studentId;
+  const t = useTableControls(data, {
+    search: (e) => [fmtDate(e.date), studentName(e), e.type, pointLabel(e.from), pointLabel(e.to)],
+    sorters: { date: (e) => e.date, student: (e) => studentName(e), type: (e) => e.type },
+    filters: { type: (e, v) => e.type === v },
+    pageSize: 15,
+  });
+  const types = [...new Set(data.map((e) => e.type))];
 
   if (isLoading) {
     return <p style={{ margin: "20px 0", fontSize: 13, color: "var(--text3)", textAlign: "center" }}>جارٍ التحميل…</p>;
@@ -31,20 +41,35 @@ export function OpenWardLog({ planId, studentId }: { planId: string; studentId?:
     );
   }
   return (
+    <>
+    <TableToolbar
+      t={t}
+      placeholder={showStudent ? "بحث بالطالب أو السورة" : "بحث بالتاريخ أو السورة"}
+      noun="ورد"
+      sortOptions={[
+        { key: "date", label: "التاريخ" },
+        ...(showStudent ? [{ key: "student", label: "الطالب" }] : []),
+        { key: "type", label: "النوع" },
+      ]}
+    >
+      {types.length > 1 && (
+        <TableFilter t={t} k="type" label="كل الأنواع" options={types.map((v) => ({ value: v, label: v }))} />
+      )}
+    </TableToolbar>
     <div className="tbl-wrap">
       <table className="tbl">
         <thead>
           <tr>
-            <th>التاريخ</th>
-            {showStudent && <th>الطالب</th>}
-            <th>النوع</th>
+            <SortTh t={t} k="date">التاريخ</SortTh>
+            {showStudent && <SortTh t={t} k="student">الطالب</SortTh>}
+            <SortTh t={t} k="type">النوع</SortTh>
             <th>من</th>
             <th>إلى</th>
             <th>الصفحات</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((e) => (
+          {t.pageRows.map((e) => (
             <tr key={e._id} style={e.status === "none" ? { opacity: 0.55 } : undefined}>
               <td>{fmtDate(e.date)}</td>
               {showStudent && <td>{studentName(e)}</td>}
@@ -63,5 +88,9 @@ export function OpenWardLog({ planId, studentId }: { planId: string; studentId?:
         </tbody>
       </table>
     </div>
+    <div className="tbl-pager">
+      <Pagination page={t.page} pageSize={t.pageSize} total={t.total} onChange={t.setPage} />
+    </div>
+    </>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 export type SortDir = "asc" | "desc";
 type SortValue = string | number | null | undefined;
@@ -33,7 +33,10 @@ export function useTableControls<T>(
   const [sort, setSort] = useState<{ key: string; dir: SortDir } | null>(initialSort ?? null);
   const [page, setPage] = useState(1);
 
-  const filtered = useMemo(() => {
+  // Recomputed every render on purpose: callers pass inline callbacks that may
+  // read data outside `rows` (e.g. evaluations joined by date), so memoizing on
+  // `rows` alone would show stale results. Tables are small; this is cheap.
+  const filtered = (() => {
     const q = normalize(query);
     return rows.filter((r) => {
       if (q && search && !search(r).some((v) => v != null && normalize(String(v)).includes(q))) return false;
@@ -45,27 +48,21 @@ export function useTableControls<T>(
       }
       return true;
     });
-    // search/filters are inline lambdas in callers; rows/query/filterValues drive recompute.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows, query, filterValues]);
+  })();
 
-  const sorted = useMemo(() => {
+  const sorted = (() => {
     const get = sort && sorters?.[sort.key];
     if (!get) return filtered;
     const dir = sort!.dir === "asc" ? 1 : -1;
     return [...filtered].sort((a, b) => compare(get(a), get(b)) * dir);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtered, sort]);
+  })();
 
   const pages = Math.max(1, Math.ceil(sorted.length / pageSize));
   // Back to page 1 whenever the result set changes shape.
   useEffect(() => { setPage(1); }, [query, filterValues, sort]);
   useEffect(() => { if (page > pages) setPage(pages); }, [page, pages]);
 
-  const pageRows = useMemo(
-    () => sorted.slice((page - 1) * pageSize, page * pageSize),
-    [sorted, page, pageSize],
-  );
+  const pageRows = sorted.slice((page - 1) * pageSize, page * pageSize);
 
   return {
     query, setQuery,

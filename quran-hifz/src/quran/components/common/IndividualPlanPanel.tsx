@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "./Badge";
 import { Alert } from "./Alert";
@@ -14,6 +14,9 @@ import { OpenWardLog } from "./OpenWardLog";
 import { fractionalPage, isReversedRange, isReversedSchedule } from "../../lib/quranRange";
 import { SURAHS } from "../../data/surahs";
 import { toAr, AR_LOCALE } from "../../../lib/format";
+import { useTableControls } from "../../lib/useTableControls";
+import { Pagination } from "./Pagination";
+import { SortTh, TableToolbar, TableFilter } from "./TableTools";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -116,6 +119,29 @@ export function IndividualPlanPanel({
   const [juz, setJuz] = useState(1);
   const [error, setError] = useState("");
 
+  // Only this type's days — a multi-type plan's overlay holds every type's
+  // occurrences in one array, and mixing them would read as one jumbled
+  // schedule and infer the wrong direction. Computed before the early returns
+  // so the table-controls hook below always runs. Rows are keyed by the
+  // stable `occurrenceIndex`, so an inline edit survives paging/sorting.
+  const ownSchedule = useMemo(
+    () => (progress?.effectiveSchedule ?? []).filter((o) => !segType || o.type === segType),
+    [progress, segType],
+  );
+  const t = useTableControls(ownSchedule, {
+    search: (o) => [
+      o.occurrenceIndex, toAr(o.occurrenceIndex), fmtDayLabel(toDateOnly(o.date)),
+      surahName(o.surahStart), surahName(o.surahEnd), OCCURRENCE_STATUS_CFG[o.status].label,
+    ],
+    sorters: {
+      idx: (o) => o.occurrenceIndex,
+      date: (o) => toDateOnly(o.date),
+      status: (o) => OCCURRENCE_STATUS_CFG[o.status].label,
+    },
+    filters: { status: (o, v) => o.status === v },
+    pageSize: 15,
+  });
+
   // An open-ward plan has no per-student schedule to reshape — show what the
   // student actually recorded instead. Callers render one panel per segment,
   // so only the first segment's panel draws the (type-mixed) log.
@@ -136,10 +162,7 @@ export function IndividualPlanPanel({
   // Reverse schedule → display "من—إلى" in its own direction. This student's
   // overlay can run the opposite way to the base plan (a custom range they were
   // given), so read the direction off their own occurrences first.
-  // Only this type's days — a multi-type plan's overlay holds every type's
-  // occurrences in one array, and mixing them would read as one jumbled
-  // schedule and infer the wrong direction.
-  const ownSchedule = progress.effectiveSchedule.filter((o) => !segType || o.type === segType);
+  // (ownSchedule — this type's days only — is computed above the early returns.)
   const reversed = isReversedSchedule(ownSchedule)
     ?? (segment?.rangeStart && segment.rangeEnd ? isReversedRange(segment.rangeStart, segment.rangeEnd) : false);
 
@@ -234,15 +257,34 @@ export function IndividualPlanPanel({
         </Alert>
       )}
 
+      <TableToolbar
+        t={t}
+        placeholder="بحث بالتاريخ أو السورة"
+        noun="يوم"
+        sortOptions={[
+          { key: "idx", label: "#" },
+          { key: "date", label: "التاريخ" },
+          { key: "status", label: "الحالة" },
+        ]}
+      >
+        <TableFilter
+          t={t}
+          k="status"
+          label="كل الحالات"
+          options={(Object.keys(OCCURRENCE_STATUS_CFG) as StudentOccurrence["status"][]).map((k) => ({
+            value: k, label: OCCURRENCE_STATUS_CFG[k].label,
+          }))}
+        />
+      </TableToolbar>
       <div className="tbl-wrap" style={{ maxHeight: "40vh" }}>
         <table className="tbl">
           <thead>
             <tr>
-              <th>#</th><th>التاريخ</th><th>الأصلي</th><th>الحالي</th><th>الصفحات</th><th>الحالة</th><th></th>
+              <SortTh t={t} k="idx">#</SortTh><SortTh t={t} k="date">التاريخ</SortTh><th>الأصلي</th><th>الحالي</th><th>الصفحات</th><SortTh t={t} k="status">الحالة</SortTh><th></th>
             </tr>
           </thead>
           <tbody>
-            {ownSchedule.map((s) => {
+            {t.pageRows.map((s) => {
               const isEditingRow = editingIndex === s.occurrenceIndex;
               const changed =
                 s.baseSurahStart !== s.surahStart || s.baseAyahStart !== s.ayahStart ||
@@ -314,6 +356,9 @@ export function IndividualPlanPanel({
             })}
           </tbody>
         </table>
+      </div>
+      <div className="tbl-pager">
+        <Pagination page={t.page} pageSize={t.pageSize} total={t.total} onChange={t.setPage} />
       </div>
 
       {error && (

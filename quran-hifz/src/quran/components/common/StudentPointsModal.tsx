@@ -1,7 +1,20 @@
+import { useMemo } from "react";
 import { Modal } from "./Modal";
 import { useEvaluations } from "../../api/evaluations";
 import type { RankStudent } from "../../api/rankings";
 import { AR_LOCALE, toAr } from "../../../lib/format";
+import { useTableControls } from "../../lib/useTableControls";
+import { Pagination } from "./Pagination";
+import { SortTh, TableToolbar, TableFilter } from "./TableTools";
+
+function dayLabel(date: string): string {
+  return new Date(date).toLocaleDateString(AR_LOCALE, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+}
 
 function num(n: number): string {
   return toAr(Number.isInteger(n) ? n : Number(n.toFixed(2))).replace(".", "٫");
@@ -26,7 +39,13 @@ export function StudentPointsModal({
   const { data: rows = [], isLoading } = useEvaluations(
     student ? { student: student.id, ...(from ? { from } : {}), to } : undefined,
   );
-  const days = [...rows].sort((a, b) => a.date.localeCompare(b.date));
+  const days = useMemo(() => [...rows].sort((a, b) => a.date.localeCompare(b.date)), [rows]);
+  const t = useTableControls(days, {
+    search: (d) => [dayLabel(d.date), d.attendanceStatus],
+    sorters: { date: (d) => d.date, status: (d) => d.attendanceStatus, total: (d) => d.total },
+    filters: { status: (d, v) => d.attendanceStatus === v },
+    pageSize: 10,
+  });
   const criteria = days.find((d) => d.criteria?.length)?.criteria ?? [];
   const present = days.filter((d) => d.attendanceStatus === "حاضر").length;
   const absent = days.filter((d) => d.attendanceStatus === "غائب").length;
@@ -64,33 +83,44 @@ export function StudentPointsModal({
           ) : days.length === 0 ? (
             <p className="spm-empty">لا توجد تقييمات في هذه الفترة</p>
           ) : (
+            <>
+            <TableToolbar
+              t={t}
+              placeholder="بحث باليوم"
+              noun="يوم"
+              sortOptions={[
+                { key: "date", label: "اليوم" },
+                { key: "status", label: "الحالة" },
+                { key: "total", label: "المجموع" },
+              ]}
+            >
+              <TableFilter
+                t={t}
+                k="status"
+                label="كل الحالات"
+                options={["حاضر", "غائب", "مستأذن"].map((v) => ({ value: v, label: v }))}
+              />
+            </TableToolbar>
             <div className="tbl-wrap">
               <table className="tbl spm-table">
                 <thead>
                   <tr>
-                    <th>اليوم</th>
-                    <th>الحالة</th>
+                    <SortTh t={t} k="date">اليوم</SortTh>
+                    <SortTh t={t} k="status">الحالة</SortTh>
                     {criteria.map((c) => (
                       <th key={c.key}>
                         {c.label} <small>/{num(c.max)}</small>
                       </th>
                     ))}
-                    <th>المجموع</th>
+                    <SortTh t={t} k="total">المجموع</SortTh>
                   </tr>
                 </thead>
                 <tbody>
-                  {days.map((d) => {
+                  {t.pageRows.map((d) => {
                     const byKey = new Map((d.criteria ?? []).map((c) => [c.key, c.value]));
                     return (
                       <tr key={d._id} className={d.attendanceStatus !== "حاضر" ? "off" : ""}>
-                        <td>
-                          {new Date(d.date).toLocaleDateString(AR_LOCALE, {
-                            weekday: "short",
-                            day: "numeric",
-                            month: "short",
-                            timeZone: "UTC",
-                          })}
-                        </td>
+                        <td>{dayLabel(d.date)}</td>
                         <td>{d.attendanceStatus}</td>
                         {criteria.map((c) => (
                           <td key={c.key}>{byKey.has(c.key) ? num(byKey.get(c.key)!) : "—"}</td>
@@ -113,6 +143,10 @@ export function StudentPointsModal({
                 </tfoot>
               </table>
             </div>
+            <div className="tbl-pager">
+              <Pagination page={t.page} pageSize={t.pageSize} total={t.total} onChange={t.setPage} />
+            </div>
+            </>
           )}
         </div>
       )}

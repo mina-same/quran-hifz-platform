@@ -20,6 +20,9 @@ import { Badge } from "../../components/common/Badge";
 import { DaysOfWeekPicker } from "../../components/common/DaysOfWeekPicker";
 import { SurahPointFields } from "../../components/common/SurahRangePicker";
 import { IndividualPlanPanel } from "../../components/common/IndividualPlanPanel";
+import { Pagination } from "../../components/common/Pagination";
+import { SortTh } from "../../components/common/TableTools";
+import { useTableControls } from "../../lib/useTableControls";
 import { countRangeAyahs, pageRangeOfAyahRange, computeMultiScheduleBreakdown, computeOpenScheduleDates, surahName, WEEK_DAYS, validateSegmentDays} from "../../lib/quranRange";
 
 function fmtDate(d: string) {
@@ -363,6 +366,26 @@ export function TeacherPlanForm() {
       segments: form.segments.filter((sg) => sg.days.length > 0).map((sg) => ({ type: sg.type, days: sg.days })),
     });
   }, [form.openWard, form.segments, form.holidays, form.startDate, form.endType, form.activeDaysCount, form.endDate]);
+
+  // Sort + pagination for the two preview tables (no search — it's a live preview).
+  const previewTbl = useTableControls(schedulePreview, {
+    sorters: {
+      idx: (s) => s.occurrenceIndex,
+      type: (s) => s.type,
+      date: (s) => new Date(s.date).getTime(),
+      juz: (s) => s.juz,
+      pages: (s) => Math.min(s.pageStart, s.pageEnd),
+    },
+    pageSize: 20,
+  });
+  const openPreviewTbl = useTableControls(openPreview, {
+    sorters: {
+      idx: (s) => s.occurrenceIndex,
+      type: (s) => s.type,
+      date: (s) => new Date(s.date).getTime(),
+    },
+    pageSize: 20,
+  });
 
   // The header badge shows the plan's first type; the full set is listed in
   // the per-type cards below.
@@ -1061,10 +1084,15 @@ export function TeacherPlanForm() {
               <div className="tbl-wrap" style={{ maxHeight: 360, overflowY: "auto" }}>
                 <table className="tbl">
                   <thead>
-                    <tr><th>#</th><th>النوع</th><th>التاريخ</th><th>الورد</th></tr>
+                    <tr>
+                      <SortTh t={openPreviewTbl} k="idx">#</SortTh>
+                      <SortTh t={openPreviewTbl} k="type">النوع</SortTh>
+                      <SortTh t={openPreviewTbl} k="date">التاريخ</SortTh>
+                      <th>الورد</th>
+                    </tr>
                   </thead>
                   <tbody>
-                    {openPreview.map((s) => (
+                    {openPreviewTbl.pageRows.map((s) => (
                       <tr key={`${s.type}-${s.occurrenceIndex}`}>
                         <td>{s.occurrenceIndex}</td>
                         <td><Badge tone="gold">{s.type}</Badge></td>
@@ -1074,6 +1102,9 @@ export function TeacherPlanForm() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+              <div className="tbl-pager">
+                <Pagination page={openPreviewTbl.page} pageSize={openPreviewTbl.pageSize} total={openPreviewTbl.total} onChange={openPreviewTbl.setPage} />
               </div>
             </>
           )
@@ -1108,19 +1139,19 @@ export function TeacherPlanForm() {
               <table className="tbl">
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>النوع</th>
-                    <th>التاريخ</th>
-                    <th>الجزء</th>
+                    <SortTh t={previewTbl} k="idx">#</SortTh>
+                    <SortTh t={previewTbl} k="type">النوع</SortTh>
+                    <SortTh t={previewTbl} k="date">التاريخ</SortTh>
+                    <SortTh t={previewTbl} k="juz">الجزء</SortTh>
                     <th>من</th>
                     <th>إلى</th>
-                    <th>الصفحات</th>
+                    <SortTh t={previewTbl} k="pages">الصفحات</SortTh>
                   </tr>
                 </thead>
                 <tbody>
                   {/* occurrenceIndex restarts per segment, so a row's key
                       pairs it with the type. */}
-                  {schedulePreview.map((s) => {
+                  {previewTbl.pageRows.map((s) => {
                     // For a reverse plan, show "من" as the point nearer the plan's
                     // start (rangeStart side) and "إلى" nearer its end — i.e. swap
                     // the natural low→high slice endpoints so the columns read in
@@ -1153,6 +1184,9 @@ export function TeacherPlanForm() {
                   })}
                 </tbody>
               </table>
+            </div>
+            <div className="tbl-pager">
+              <Pagination page={previewTbl.page} pageSize={previewTbl.pageSize} total={previewTbl.total} onChange={previewTbl.setPage} />
             </div>
           </>
         )}

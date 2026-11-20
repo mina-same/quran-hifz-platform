@@ -9,6 +9,9 @@ import {
   useAdminSupervisors, useCreateSupervisor, useDeleteSupervisor,
   type SupervisorUser,
 } from "../../api/admin-supervisors";
+import { Pagination } from "../../components/common/Pagination";
+import { SortTh, TableToolbar, TableFilter } from "../../components/common/TableTools";
+import { useTableControls } from "../../lib/useTableControls";
 
 type AddForm = { name: string; email: string; password: string; gender: "male" | "female" };
 const EMPTY_ADD: AddForm = { name: "", email: "", password: "", gender: "male" };
@@ -61,6 +64,20 @@ export function AdminSupervisors() {
     }
   }
 
+  const t = useTableControls(supervisors, {
+    search: (s) => [s.name, s.email, GENDER_LABEL[s.gender]],
+    sorters: {
+      name: (s) => s.name,
+      email: (s) => s.email,
+      gender: (s) => GENDER_LABEL[s.gender],
+      status: (s) => (s.isActive ? 0 : 1),
+    },
+    filters: {
+      gender: (s, v) => s.gender === v,
+      status: (s, v) => (v === "active" ? s.isActive : !s.isActive),
+    },
+  });
+
   useTopbar(
     "ti-eye-check",
     "المشرفون",
@@ -72,24 +89,39 @@ export function AdminSupervisors() {
   return (
     <>
       <Card>
+        <TableToolbar
+          t={t}
+          placeholder="البحث بالاسم أو البريد الإلكتروني..."
+          noun="مشرف"
+          sortOptions={[
+            { key: "name", label: "الاسم" },
+            { key: "gender", label: "النطاق" },
+            { key: "status", label: "الحالة" },
+          ]}
+        >
+          <TableFilter t={t} k="gender" label="كل النطاقات" options={[{ value: "male", label: "بنين" }, { value: "female", label: "بنات" }]} />
+          <TableFilter t={t} k="status" label="كل الحالات" options={[{ value: "active", label: "نشط" }, { value: "inactive", label: "غير نشط" }]} />
+        </TableToolbar>
+
         {isLoading && <SkeletonTable cols={4} rows={5} />}
         {error && (
           <div style={{ color: "#ef4444", padding: 12, fontSize: 13 }}>تعذّر تحميل بيانات المشرفين</div>
         )}
         {!isLoading && !error && (
+          <>
           <div className="tbl-wrap">
             <table className="tbl">
               <thead>
                 <tr>
-                  <th>الاسم</th>
-                  <th>البريد الإلكتروني</th>
-                  <th>النطاق</th>
-                  <th>الحالة</th>
+                  <SortTh t={t} k="name">الاسم</SortTh>
+                  <SortTh t={t} k="email">البريد الإلكتروني</SortTh>
+                  <SortTh t={t} k="gender">النطاق</SortTh>
+                  <SortTh t={t} k="status">الحالة</SortTh>
                   <th />
                 </tr>
               </thead>
               <tbody>
-                {supervisors.map((s) => (
+                {t.pageRows.map((s) => (
                   <tr key={s._id}>
                     <td style={{ fontWeight: 600 }}>{s.name}</td>
                     <td style={{ fontSize: 12, direction: "ltr" }}>{s.email}</td>
@@ -111,14 +143,26 @@ export function AdminSupervisors() {
                 ))}
                 {supervisors.length === 0 && (
                   <tr>
-                    <td colSpan={4} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                    <td colSpan={5} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
                       لا يوجد مشرفون مسجلون بعد
+                    </td>
+                  </tr>
+                )}
+                {supervisors.length > 0 && t.total === 0 && (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                      لا توجد نتائج مطابقة لبحثك
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          <div className="tbl-pager">
+            <Pagination page={t.page} pageSize={t.pageSize} total={t.total} onChange={t.setPage} />
+          </div>
+          </>
         )}
       </Card>
 

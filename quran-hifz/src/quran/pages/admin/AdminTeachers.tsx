@@ -8,7 +8,10 @@ import { useTeachers, useCreateTeacher, useUpdateTeacher, useDeleteTeacher, type
 import { useTracks } from "../../api/tracks";
 import { toAr } from "../../../lib/format";
 import { usePortal } from "../../context/PortalContext";
-import { teacherIdsInScope } from "../../lib/genderScope";
+import { teacherIdsInScope, matchesGenderScope } from "../../lib/genderScope";
+import { Pagination } from "../../components/common/Pagination";
+import { SortTh, TableToolbar, TableFilter } from "../../components/common/TableTools";
+import { useTableControls } from "../../lib/useTableControls";
 
 type ModalState = null | { mode: "add" } | { mode: "edit"; item: Teacher };
 
@@ -137,40 +140,104 @@ export function AdminTeachers() {
 
   const isPending = createTeacher.isPending || updateTeacher.isPending;
 
+  // Teachers carry no masjid of their own — join through the tracks they teach.
+  const tracksByTeacher = new Map<string, { trackId: string; masjidId: string }[]>();
+  const masjidOptions = new Map<string, string>();
+  const trackOptions = new Map<string, string>();
+  for (const tr of tracks) {
+    const masjidId = typeof tr.masjid === "string" ? tr.masjid : tr.masjid._id;
+    const inScope = matchesGenderScope(tr.masjid, genderScope);
+    if (inScope && typeof tr.masjid !== "string") masjidOptions.set(tr.masjid._id, tr.masjid.name);
+    for (const teacher of tr.teachers) {
+      const id = typeof teacher === "string" ? teacher : teacher._id;
+      const list = tracksByTeacher.get(id) ?? [];
+      list.push({ trackId: tr._id, masjidId });
+      tracksByTeacher.set(id, list);
+      if (inScope) trackOptions.set(tr._id, tr.title);
+    }
+  }
+  const byLabel = (a: [string, string], b: [string, string]) => a[1].localeCompare(b[1], "ar");
+  const specialties = [...new Set(teachers.map((x) => x.specialty?.trim()).filter(Boolean) as string[])]
+    .sort((a, b) => a.localeCompare(b, "ar"));
+  const ratingNum = (r: string | undefined) => {
+    const n = parseFloat(String(r ?? "").replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))));
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const t = useTableControls(teachers, {
+    search: (x) => [x.name, x.specialty, x.phone, x.email],
+    sorters: {
+      name: (x) => x.name,
+      specialty: (x) => x.specialty,
+      phone: (x) => x.phone,
+      tracks: (x) => x.tracksCount ?? 0,
+      students: (x) => x.studentCount ?? 0,
+      rating: (x) => ratingNum(x.rating),
+      status: (x) => (x.status === "active" ? 0 : 1),
+    },
+    filters: {
+      masjid: (x, v) => (tracksByTeacher.get(x._id) ?? []).some((l) => l.masjidId === v),
+      track: (x, v) => (tracksByTeacher.get(x._id) ?? []).some((l) => l.trackId === v),
+      specialty: (x, v) => (x.specialty ?? "").trim() === v,
+      status: (x, v) => x.status === v,
+    },
+  });
+
   return (
     <>
       <Card>
+        <TableToolbar
+          t={t}
+          placeholder="البحث بالاسم أو التخصص أو الجوال أو البريد..."
+          noun="معلم"
+          sortOptions={[
+            { key: "name", label: "الاسم" },
+            { key: "tracks", label: "المسارات" },
+            { key: "students", label: "الطلاب" },
+            { key: "rating", label: "التقييم" },
+            { key: "status", label: "الحالة" },
+          ]}
+        >
+          <TableFilter t={t} k="masjid" label="كل المساجد" options={[...masjidOptions].sort(byLabel).map(([value, label]) => ({ value, label }))} />
+          <TableFilter t={t} k="track" label="كل المسارات" options={[...trackOptions].sort(byLabel).map(([value, label]) => ({ value, label }))} />
+          {specialties.length > 0 && (
+            <TableFilter t={t} k="specialty" label="كل التخصصات" options={specialties.map((v) => ({ value: v, label: v }))} />
+          )}
+          <TableFilter t={t} k="status" label="كل الحالات" options={[{ value: "active", label: "نشط" }, { value: "inactive", label: "غير نشط" }]} />
+        </TableToolbar>
+
         {isLoading && <SkeletonTable cols={8} rows={5} />}
         {error && (
           <div style={{ color: "#ef4444", padding: 12, fontSize: 13 }}>تعذّر تحميل بيانات المعلمين</div>
         )}
         {!isLoading && !error && (
+          <>
           <div className="tbl-wrap">
             <table className="tbl">
               <thead>
                 <tr>
-                  <th>الاسم</th>
-                  <th>التخصص</th>
-                  <th>الجوال</th>
-                  <th>المسارات</th>
-                  <th>الطلاب</th>
-                  <th>التقييم</th>
-                  <th>الحالة</th>
+                  <SortTh t={t} k="name">الاسم</SortTh>
+                  <SortTh t={t} k="specialty">التخصص</SortTh>
+                  <SortTh t={t} k="phone">الجوال</SortTh>
+                  <SortTh t={t} k="tracks">المسارات</SortTh>
+                  <SortTh t={t} k="students">الطلاب</SortTh>
+                  <SortTh t={t} k="rating">التقييم</SortTh>
+                  <SortTh t={t} k="status">الحالة</SortTh>
                   <th />
                 </tr>
               </thead>
               <tbody>
-                {teachers.map((t) => (
-                  <tr key={t._id}>
-                    <td style={{ fontWeight: 600 }}>{t.name}</td>
-                    <td><Badge tone="blue">{t.specialty || "—"}</Badge></td>
-                    <td style={{ fontSize: 12, direction: "ltr" }}>{t.phone || "—"}</td>
-                    <td>{toAr(t.tracksCount ?? 0)}</td>
-                    <td>{toAr(t.studentCount ?? 0)}</td>
-                    <td>{t.rating || "—"}</td>
+                {t.pageRows.map((tc) => (
+                  <tr key={tc._id}>
+                    <td style={{ fontWeight: 600 }}>{tc.name}</td>
+                    <td><Badge tone="blue">{tc.specialty || "—"}</Badge></td>
+                    <td style={{ fontSize: 12, direction: "ltr" }}>{tc.phone || "—"}</td>
+                    <td>{toAr(tc.tracksCount ?? 0)}</td>
+                    <td>{toAr(tc.studentCount ?? 0)}</td>
+                    <td>{tc.rating || "—"}</td>
                     <td>
-                      <Badge tone={t.status === "active" ? "green" : "gray"}>
-                        {t.status === "active" ? "نشط" : "غير نشط"}
+                      <Badge tone={tc.status === "active" ? "green" : "gray"}>
+                        {tc.status === "active" ? "نشط" : "غير نشط"}
                       </Badge>
                     </td>
                     <td>
@@ -179,7 +246,7 @@ export function AdminTeachers() {
                           <button
                             className="topbar-btn btn-ghost"
                             style={{ padding: "3px 9px", fontSize: 12 }}
-                            onClick={() => openEdit(t)}
+                            onClick={() => openEdit(tc)}
                             title="تعديل"
                           >
                             <i className="ti ti-pencil" />
@@ -187,7 +254,7 @@ export function AdminTeachers() {
                           <button
                             className="topbar-btn btn-ghost"
                             style={{ padding: "3px 9px", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}
-                            onClick={() => setDeleteId(t._id)}
+                            onClick={() => setDeleteId(tc._id)}
                             title="حذف"
                           >
                             <i className="ti ti-trash" />
@@ -204,9 +271,21 @@ export function AdminTeachers() {
                     </td>
                   </tr>
                 )}
+                {teachers.length > 0 && t.total === 0 && (
+                  <tr>
+                    <td colSpan={8} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                      لا توجد نتائج مطابقة لبحثك
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
+
+          <div className="tbl-pager">
+            <Pagination page={t.page} pageSize={t.pageSize} total={t.total} onChange={t.setPage} />
+          </div>
+          </>
         )}
       </Card>
 

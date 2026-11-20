@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useTopbar } from "../../context/useTopbar";
 import { usePortal } from "../../context/PortalContext";
 import { Card } from "../../components/common/Card";
@@ -6,6 +5,9 @@ import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { useStudents } from "../../api/students";
 import { useTracks } from "../../api/tracks";
 import { SkeletonTable } from "../../components/common/Skeleton";
+import { Pagination } from "../../components/common/Pagination";
+import { SortTh, TableToolbar, TableFilter } from "../../components/common/TableTools";
+import { useTableControls } from "../../lib/useTableControls";
 
 const HW_TONE: Record<string, BadgeTone> = {
   submitted: "green",
@@ -31,7 +33,6 @@ type Row = {
 
 export function TeacherStudents() {
   const { user } = usePortal();
-  const [filter, setFilter] = useState<string>("all"); // "all" | "track:<id>"
 
   const { data: myTracks = [], isLoading: loadingTracks } = useTracks(undefined, user?.profileId as string | undefined);
   const trackIds = myTracks.map((t) => t._id);
@@ -54,9 +55,23 @@ export function TeacherStudents() {
     };
   });
 
-  const visibleRows = rows.filter((r) => {
-    if (filter === "all") return true;
-    return r.trackId === filter.slice(6);
+  const t = useTableControls(rows, {
+    search: (r) => [r.name, r.trackName, r.guardian, r.guardianContact, r.lastMemorization],
+    sorters: {
+      name: (r) => r.name,
+      track: (r) => r.trackName,
+      guardian: (r) => (r.guardian === "—" ? "" : r.guardian),
+      contact: (r) => (r.guardianContact === "—" ? "" : r.guardianContact),
+      last: (r) => (r.lastMemorization === "—" ? "" : r.lastMemorization),
+      homework: (r) => (r.homeworkStatus ? (r.homeworkStatus === "submitted" ? 0 : 1) : null),
+    },
+    filters: {
+      track: (r, v) => r.trackId === v,
+      homework: (r, v) =>
+        v === "submitted" ? r.homeworkStatus === "submitted"
+        : v === "none" ? !r.homeworkStatus
+        : !!r.homeworkStatus && r.homeworkStatus !== "submitted",
+    },
   });
 
   useTopbar("ti-users", "طلابي");
@@ -77,42 +92,51 @@ export function TeacherStudents() {
 
       {!loading && hasAny && (
         <>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-            <label style={{ fontSize: 12, color: "var(--text2)", fontWeight: 600 }}>تصفية الطلاب</label>
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              style={{
-                padding: "6px 10px", borderRadius: 8, border: "1px solid var(--border)",
-                background: "var(--surface)", color: "var(--text)", fontSize: 13,
-              }}
-            >
-              <option value="all">كل الطلاب ({rows.length})</option>
-              {myTracks.length > 0 && (
-                <optgroup label="المسارات">
-                  {myTracks.map((t) => (
-                    <option key={t._id} value={`track:${t._id}`}>{t.title}</option>
-                  ))}
-                </optgroup>
-              )}
-            </select>
-          </div>
+          <TableToolbar
+            t={t}
+            placeholder="البحث باسم الطالب أو المسار أو ولي الأمر..."
+            noun="طالب"
+            sortOptions={[
+              { key: "name", label: "الطالب" },
+              { key: "track", label: "المسار" },
+              { key: "guardian", label: "ولي الأمر" },
+              { key: "last", label: "آخر حفظ" },
+              { key: "homework", label: "الدرس" },
+            ]}
+          >
+            <TableFilter
+              t={t}
+              k="track"
+              label="كل المسارات"
+              options={myTracks.map((tr) => ({ value: tr._id, label: tr.title }))}
+            />
+            <TableFilter
+              t={t}
+              k="homework"
+              label="الدرس: الكل"
+              options={[
+                { value: "submitted", label: "سُجِّل" },
+                { value: "pending", label: "لم يُسجَّل" },
+                { value: "none", label: "بدون درس" },
+              ]}
+            />
+          </TableToolbar>
 
           <div className="tbl-wrap">
             <table className="tbl">
               <thead>
                 <tr>
-                  <th>الطالب</th>
-                  <th>المسار</th>
-                  <th>ولي الأمر</th>
-                  <th>التواصل</th>
-                  <th>آخر حفظ</th>
-                  <th>الدرس</th>
+                  <SortTh t={t} k="name">الطالب</SortTh>
+                  <SortTh t={t} k="track">المسار</SortTh>
+                  <SortTh t={t} k="guardian">ولي الأمر</SortTh>
+                  <SortTh t={t} k="contact">التواصل</SortTh>
+                  <SortTh t={t} k="last">آخر حفظ</SortTh>
+                  <SortTh t={t} k="homework">الدرس</SortTh>
                   <th>إجراء</th>
                 </tr>
               </thead>
               <tbody>
-                {visibleRows.map((r) => (
+                {t.pageRows.map((r) => (
                   <tr key={r.id}>
                     <td style={{ fontWeight: 600 }}>{r.name}</td>
                     <td>{r.trackName ? <Badge tone="green">{r.trackName}</Badge> : "—"}</td>
@@ -133,15 +157,26 @@ export function TeacherStudents() {
                     </td>
                   </tr>
                 ))}
-                {visibleRows.length === 0 && (
+                {rows.length === 0 && (
                   <tr>
                     <td colSpan={7} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
                       لا توجد بيانات
                     </td>
                   </tr>
                 )}
+                {rows.length > 0 && t.total === 0 && (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                      لا توجد نتائج مطابقة لبحثك
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
+          </div>
+
+          <div className="tbl-pager">
+            <Pagination page={t.page} pageSize={t.pageSize} total={t.total} onChange={t.setPage} />
           </div>
         </>
       )}

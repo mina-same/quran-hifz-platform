@@ -9,12 +9,31 @@ import { useTracks } from "../../api/tracks";
 import { useHomework } from "../../api/homework";
 import { toAr } from "../../../lib/format";
 import { trackToContext } from "../../components/common/ContextPicker";
+import { SortTh } from "../../components/common/TableTools";
+import { useTableControls } from "../../lib/useTableControls";
+
+// Fixed top-3 list: sortable columns only (no search/filters/pagination).
+const TOP_STUDENTS = [
+  { rank: "١", name: "عبدالله الحميداني", track: "عمر بن الخطاب", pages: "٥ صفحات", attend: "١٠٠٪", rankN: 1, pagesN: 5, attendN: 100 },
+  { rank: "٢", name: "فيصل العمري",       track: "عثمان بن عفان", pages: "٤ صفحات", attend: "١٠٠٪", rankN: 2, pagesN: 4, attendN: 100 },
+  { rank: "٣", name: "سعد الشهري",        track: "عمر بن الخطاب", pages: "٣ صفحات", attend: "٧٥٪", rankN: 3, pagesN: 3, attendN: 75 },
+];
 
 export function TeacherDashboard() {
   const { showPage, user } = usePortal();
   const { data: stats } = useStats();
   const { data: tracks = [] } = useTracks(undefined, user?.profileId as string | undefined);
   const { data: pendingHW = [] } = useHomework({ teacher: user?.profileId, status: "معلق" });
+
+  const top = useTableControls(TOP_STUDENTS, {
+    sorters: {
+      rank: (s) => s.rankN,
+      name: (s) => s.name,
+      track: (s) => s.track,
+      pages: (s) => s.pagesN,
+      attend: (s) => s.attendN,
+    },
+  });
 
   const contexts = tracks.map(trackToContext);
   const totalStudents = contexts.reduce((sum, c) => sum + (c.studentCount ?? 0), 0);
@@ -83,19 +102,15 @@ export function TeacherDashboard() {
           <table className="tbl">
             <thead>
               <tr>
-                <th>#</th>
-                <th>الطالب</th>
-                <th>الحلقة</th>
-                <th>صفحات الحفظ</th>
-                <th>الحضور</th>
+                <SortTh t={top} k="rank">#</SortTh>
+                <SortTh t={top} k="name">الطالب</SortTh>
+                <SortTh t={top} k="track">الحلقة</SortTh>
+                <SortTh t={top} k="pages">صفحات الحفظ</SortTh>
+                <SortTh t={top} k="attend">الحضور</SortTh>
               </tr>
             </thead>
             <tbody>
-              {[
-                { rank: "١", name: "عبدالله الحميداني", track: "عمر بن الخطاب", pages: "٥ صفحات", attend: "١٠٠٪" },
-                { rank: "٢", name: "فيصل العمري",       track: "عثمان بن عفان", pages: "٤ صفحات", attend: "١٠٠٪" },
-                { rank: "٣", name: "سعد الشهري",        track: "عمر بن الخطاب", pages: "٣ صفحات", attend: "٧٥٪"  },
-              ].map((s) => (
+              {top.rows.map((s) => (
                 <tr key={s.rank}>
                   <td style={{ fontWeight: 700, color: "var(--gold)" }}>{s.rank}</td>
                   <td style={{ fontWeight: 600 }}>{s.name}</td>

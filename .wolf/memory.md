@@ -4821,3 +4821,12 @@
 | 16:23 | Edited quran-hifz/src/quran/components/common/TableTools.tsx | CSS: dir | ~227 |
 | 16:24 | Edited quran-hifz/src/quran/pages/admin/AdminParents.tsx | 1→3 lines | ~46 |
 | 16:25 | Session end: 20 writes across 10 files (rankings.ts, ReportsDashboard.tsx, StudentReportPanel.tsx, StudentDashboard.tsx, main-vercel-deployment.md) | 5 reads | ~28862 tok |
+| 16:26 | teacher tables: useTableControls search/filters/sort/pagination; removed rc-list in TeacherHomework; dashboard top-3 sort only | TeacherStudents/TeacherHomework/TeacherDashboard.tsx | tsc clean | ~6k |
+| 16:26 | Session end: 20 writes across 10 files (rankings.ts, ReportsDashboard.tsx, StudentReportPanel.tsx, StudentDashboard.tsx, main-vercel-deployment.md) | 5 reads | ~28862 tok |
+| 16:27 | Table controls (search/filters/SortTh/Pagination) on StudentAttendance, StudentHifz, ParentAttendance, ParentRecordings; rc-list removed | quran-hifz/src/quran/pages/{student,parent}/* | tsc clean | ~25k |
+| 16:27 | Session end: 20 writes across 10 files (rankings.ts, ReportsDashboard.tsx, StudentReportPanel.tsx, StudentDashboard.tsx, main-vercel-deployment.md) | 5 reads | ~28862 tok |
+| 16:27 | Session end: 20 writes across 10 files (rankings.ts, ReportsDashboard.tsx, StudentReportPanel.tsx, StudentDashboard.tsx, main-vercel-deployment.md) | 5 reads | ~28862 tok |
+| 16:28 | Table controls (sort/search/filter/pagination) on teacher schedule/history tables | TeacherAttendance, TeacherPlanDetail, TeacherPlanForm, TeacherTrackDetail | tsc clean | ~25k |
+| 16:28 | Session end: 20 writes across 10 files (rankings.ts, ReportsDashboard.tsx, StudentReportPanel.tsx, StudentDashboard.tsx, main-vercel-deployment.md) | 5 reads | ~28862 tok |
+| 16:28 | all 22 web tables: search/filters/sort/pagination + phone cards (fixed tables hidden <=900px, bug-429) | ~25 web files | tsc clean; partial commit a839696 pushed by user, rest uncommitted | ~40k |
+| 16:29 | Session end: 20 writes across 10 files (rankings.ts, ReportsDashboard.tsx, StudentReportPanel.tsx, StudentDashboard.tsx, main-vercel-deployment.md) | 5 reads | ~28862 tok |

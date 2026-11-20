@@ -23,6 +23,9 @@ import { StudentReportPanel } from "./StudentReportPanel";
 import { PromoReport } from "./PromoReport";
 import { useRankings, PERIOD_LABEL, type RankPeriod } from "../../api/rankings";
 import { downloadPagesPdf } from "../../lib/pdfPages";
+import { useTableControls } from "../../lib/useTableControls";
+import { Pagination } from "./Pagination";
+import { SortTh, TableToolbar } from "./TableTools";
 
 /* ── helpers ──────────────────────────────────────────────────────────── */
 
@@ -275,6 +278,20 @@ export function ReportsDashboard({
       }))
       .sort((a, b) => b.avgTotal - a.avgTotal);
   }, [evaluations, scopedTracks]);
+  // On-screen only (search/sort/paging) — exportTrackEval keeps using the full trackEvalStats.
+  const trackT = useTableControls(trackEvalStats, {
+    search: (h) => [h.name],
+    sorters: {
+      name: (h) => h.name,
+      attendance: (h) => h.avgAttendance,
+      hifz: (h) => h.avgHifz,
+      tajweed: (h) => h.avgTajweed,
+      talawah: (h) => h.avgTalawah,
+      total: (h) => h.avgTotal,
+      count: (h) => h.count,
+    },
+    pageSize: 10,
+  });
 
   /* ── per-student evaluation leaderboard (honor board top-3 + needs-attention) ── */
   const studentEvalStats = useMemo(() => {
@@ -732,21 +749,35 @@ export function ReportsDashboard({
                 label="مقارنة المسارات في التقييم"
                 badge={<Badge tone="green">{toAr(trackEvalStats.length)} مسار</Badge>}
               >
+                <TableToolbar
+                  t={trackT}
+                  placeholder="بحث باسم المسار"
+                  noun="مسار"
+                  sortOptions={[
+                    { key: "name", label: "المسار" },
+                    { key: "attendance", label: "حضور" },
+                    { key: "hifz", label: "حفظ" },
+                    { key: "tajweed", label: "تجويد" },
+                    { key: "talawah", label: "تلاوة" },
+                    { key: "total", label: "المتوسط الكلي" },
+                    { key: "count", label: "الجلسات" },
+                  ]}
+                />
                 <div className="tbl-wrap">
                   <table className="tbl">
                     <thead>
                       <tr>
-                        <th>المسار</th>
-                        <th>حضور</th>
-                        <th>حفظ</th>
-                        <th>تجويد</th>
-                        <th>تلاوة</th>
-                        <th>المتوسط الكلي</th>
-                        <th>الجلسات</th>
+                        <SortTh t={trackT} k="name">المسار</SortTh>
+                        <SortTh t={trackT} k="attendance">حضور</SortTh>
+                        <SortTh t={trackT} k="hifz">حفظ</SortTh>
+                        <SortTh t={trackT} k="tajweed">تجويد</SortTh>
+                        <SortTh t={trackT} k="talawah">تلاوة</SortTh>
+                        <SortTh t={trackT} k="total">المتوسط الكلي</SortTh>
+                        <SortTh t={trackT} k="count">الجلسات</SortTh>
                       </tr>
                     </thead>
                     <tbody>
-                      {trackEvalStats.map((h) => (
+                      {trackT.pageRows.map((h) => (
                         <tr key={h.name}>
                           <td style={{ fontWeight: 700 }}>{h.name}</td>
                           <td>{pct(h.avgAttendance)}</td>
@@ -763,6 +794,9 @@ export function ReportsDashboard({
                       ))}
                     </tbody>
                   </table>
+                </div>
+                <div className="tbl-pager">
+                  <Pagination page={trackT.page} pageSize={trackT.pageSize} total={trackT.total} onChange={trackT.setPage} />
                 </div>
               </BentoTile>
             )}

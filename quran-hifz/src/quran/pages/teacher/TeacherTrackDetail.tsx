@@ -49,6 +49,9 @@ import {
 import { TrackStudentsPanel } from "../../components/common/TrackStudentsPanel";
 import { ScoreInput } from "../../components/common/ScoreInput";
 import { MessageParentsModal } from "../../components/common/MessageParentsModal";
+import { Pagination } from "../../components/common/Pagination";
+import { SortTh, TableToolbar, TableFilter } from "../../components/common/TableTools";
+import { useTableControls } from "../../lib/useTableControls";
 import {
   MAX_SCORES, TOTAL_MAX, legacyScoresOf, totalMaxOf,
   DEFAULT_GRADE_RUBRIC, type GradeCriterion,
@@ -463,6 +466,31 @@ export function TeacherTrackDetail() {
   const [dayPageEnd, setDayPageEnd] = useState(1);
   const [dayJuz, setDayJuz] = useState(1);
   const [dayError, setDayError] = useState("");
+
+  // Search/filter/sort/pagination for the plan schedule table. Row editing is
+  // keyed by `editingDay.occurrenceIndex`, not by visible position, so an open
+  // edit survives paging/sorting.
+  const scheduleRows = useMemo(() => linkedPlan?.schedule ?? [], [linkedPlan]);
+  const scheduleTypes = useMemo(() => [...new Set(scheduleRows.map((s) => s.type))], [scheduleRows]);
+  const schedTbl = useTableControls(scheduleRows, {
+    search: (s) => [surahName(s.surahStart), surahName(s.surahEnd), s.juz, s.type],
+    sorters: {
+      idx: (s) => s.occurrenceIndex,
+      date: (s) => toDateOnly(s.date),
+      juz: (s) => s.juz,
+      pages: (s) => Math.min(s.pageStart, s.pageEnd),
+    },
+    filters: {
+      type: (s, v) => s.type === v,
+      when: (s, v) => {
+        const d = toDateOnly(s.date);
+        const nowD = new Date();
+        const todayIso = `${nowD.getFullYear()}-${String(nowD.getMonth() + 1).padStart(2, "0")}-${String(nowD.getDate()).padStart(2, "0")}`;
+        return v === "past" ? d < todayIso : v === "today" ? d === todayIso : d > todayIso;
+      },
+    },
+    pageSize: 20,
+  });
 
   // True while the day-edit panel is open and its fields differ from the day
   // it was opened with — i.e. there's something that would be silently lost
@@ -2017,21 +2045,51 @@ export function TeacherTrackDetail() {
                         : "حفظ التوزيع في قاعدة البيانات"}
                     </button>
                   </div>
+                  <TableToolbar
+                    t={schedTbl}
+                    placeholder="البحث باسم السورة أو رقم الجزء..."
+                    noun="يوم"
+                    sortOptions={[
+                      { key: "idx", label: "#" },
+                      { key: "date", label: "التاريخ" },
+                      { key: "juz", label: "الجزء" },
+                      { key: "pages", label: "الصفحات" },
+                    ]}
+                  >
+                    <TableFilter
+                      t={schedTbl}
+                      k="when"
+                      label="كل الأيام"
+                      options={[
+                        { value: "past", label: "أيام سابقة" },
+                        { value: "today", label: "اليوم" },
+                        { value: "upcoming", label: "قادمة" },
+                      ]}
+                    />
+                    {scheduleTypes.length > 1 && (
+                      <TableFilter
+                        t={schedTbl}
+                        k="type"
+                        label="كل الأنواع"
+                        options={scheduleTypes.map((ty) => ({ value: ty, label: ty }))}
+                      />
+                    )}
+                  </TableToolbar>
                   <div className="tbl-wrap" style={{ maxHeight: "50vh" }}>
                     <table className="tbl">
                       <thead>
                         <tr>
-                          <th>#</th>
-                          <th>التاريخ</th>
-                          <th>الجزء</th>
+                          <SortTh t={schedTbl} k="idx">#</SortTh>
+                          <SortTh t={schedTbl} k="date">التاريخ</SortTh>
+                          <SortTh t={schedTbl} k="juz">الجزء</SortTh>
                           <th>من</th>
                           <th>إلى</th>
-                          <th>الصفحات</th>
+                          <SortTh t={schedTbl} k="pages">الصفحات</SortTh>
                           <th></th>
                         </tr>
                       </thead>
                       <tbody>
-                        {linkedPlan.schedule.map((s) => {
+                        {schedTbl.pageRows.map((s) => {
                           const isEditingRow = editingDay?.occurrenceIndex === s.occurrenceIndex;
                           if (!isEditingRow) {
                             return (
@@ -2184,6 +2242,14 @@ export function TeacherTrackDetail() {
                         })}
                       </tbody>
                     </table>
+                  </div>
+                  <div className="tbl-pager">
+                    <Pagination
+                      page={schedTbl.page}
+                      pageSize={schedTbl.pageSize}
+                      total={schedTbl.total}
+                      onChange={schedTbl.setPage}
+                    />
                   </div>
 
                   {editingDay && dayError && (
