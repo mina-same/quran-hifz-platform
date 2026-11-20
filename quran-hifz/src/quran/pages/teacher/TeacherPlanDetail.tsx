@@ -15,6 +15,10 @@ import { Card } from "../../components/common/Card";
 import { Badge } from "../../components/common/Badge";
 import { SkeletonCard } from "../../components/common/Skeleton";
 import { AR_LOCALE } from "@/lib/format";
+import { Pagination } from "../../components/common/Pagination";
+import { SortTh, TableToolbar, TableFilter } from "../../components/common/TableTools";
+import { useTableControls } from "../../lib/useTableControls";
+import type { QuranPlan } from "../../api/quran-plans";
 
 function surahName(n: number) {
   return SURAHS.find((s) => s.number === n)?.name ?? "";
@@ -242,37 +246,7 @@ export function TeacherPlanDetail() {
             لا يوجد جدول محسوب لهذه الخطة
           </p>
         ) : (
-          <div className="tbl-wrap">
-            <table className="tbl">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>النوع</th>
-                  <th>التاريخ</th>
-                  <th>الجزء</th>
-                  <th>من</th>
-                  <th>إلى</th>
-                  <th>الصفحات</th>
-                </tr>
-              </thead>
-              <tbody>
-                {plan.schedule.map((s) => {
-                  const a = orientSlice(s, segmentReversed(plan, s.type));
-                  return (
-                  <tr key={`${s.type}-${s.occurrenceIndex}`}>
-                    <td>{s.occurrenceIndex}</td>
-                    <td><Badge tone={s.type === "حفظ" ? "green" : "gold"}>{s.type}</Badge></td>
-                    <td>{fmtDate(s.date)}</td>
-                    <td><Badge tone="green">جزء {s.juz}</Badge></td>
-                    <td>{surahName(a.surahStart)} : {a.ayahStart}</td>
-                    <td>{surahName(a.surahEnd)} : {a.ayahEnd}</td>
-                    <td>{a.pageStart === a.pageEnd ? a.pageStart : `${a.pageStart} - ${a.pageEnd}`}</td>
-                  </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <PlanScheduleTable plan={plan} />
         )}
       </Card>
       )}
@@ -331,5 +305,79 @@ function InfoRow({ icon, label, val }: { icon: string; label: string; val: strin
         <div style={{ fontWeight: 600, color: "var(--text)", marginTop: 2, fontSize: 13 }}>{val}</div>
       </div>
     </div>
+  );
+}
+
+/** The day-by-day schedule table, with its own search/sort/pagination state
+ *  (its own component so the hook isn't called below the page's early returns). */
+function PlanScheduleTable({ plan }: { plan: QuranPlan }) {
+  const t = useTableControls(plan.schedule, {
+    search: (s) => {
+      const a = orientSlice(s, segmentReversed(plan, s.type));
+      return [surahName(a.surahStart), surahName(a.surahEnd), s.juz, s.type];
+    },
+    sorters: {
+      idx: (s) => s.occurrenceIndex,
+      type: (s) => s.type,
+      date: (s) => new Date(s.date).getTime(),
+      juz: (s) => s.juz,
+      pages: (s) => Math.min(s.pageStart, s.pageEnd),
+    },
+    filters: { type: (s, v) => s.type === v },
+    pageSize: 20,
+  });
+  const types = [...new Set(plan.schedule.map((s) => s.type))];
+  return (
+    <>
+      <TableToolbar
+        t={t}
+        placeholder="البحث باسم السورة أو رقم الجزء..."
+        noun="يوم"
+        sortOptions={[
+          { key: "idx", label: "#" },
+          { key: "date", label: "التاريخ" },
+          { key: "juz", label: "الجزء" },
+          { key: "pages", label: "الصفحات" },
+        ]}
+      >
+        {types.length > 1 && (
+          <TableFilter t={t} k="type" label="كل الأنواع" options={types.map((ty) => ({ value: ty, label: ty }))} />
+        )}
+      </TableToolbar>
+      <div className="tbl-wrap">
+        <table className="tbl">
+          <thead>
+            <tr>
+              <SortTh t={t} k="idx">#</SortTh>
+              <SortTh t={t} k="type">النوع</SortTh>
+              <SortTh t={t} k="date">التاريخ</SortTh>
+              <SortTh t={t} k="juz">الجزء</SortTh>
+              <th>من</th>
+              <th>إلى</th>
+              <SortTh t={t} k="pages">الصفحات</SortTh>
+            </tr>
+          </thead>
+          <tbody>
+            {t.pageRows.map((s) => {
+              const a = orientSlice(s, segmentReversed(plan, s.type));
+              return (
+              <tr key={`${s.type}-${s.occurrenceIndex}`}>
+                <td>{s.occurrenceIndex}</td>
+                <td><Badge tone={s.type === "حفظ" ? "green" : "gold"}>{s.type}</Badge></td>
+                <td>{fmtDate(s.date)}</td>
+                <td><Badge tone="green">جزء {s.juz}</Badge></td>
+                <td>{surahName(a.surahStart)} : {a.ayahStart}</td>
+                <td>{surahName(a.surahEnd)} : {a.ayahEnd}</td>
+                <td>{a.pageStart === a.pageEnd ? a.pageStart : `${a.pageStart} - ${a.pageEnd}`}</td>
+              </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <div className="tbl-pager">
+        <Pagination page={t.page} pageSize={t.pageSize} total={t.total} onChange={t.setPage} />
+      </div>
+    </>
   );
 }

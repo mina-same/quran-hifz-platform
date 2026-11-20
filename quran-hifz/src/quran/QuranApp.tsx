@@ -12,6 +12,11 @@ import { Sidebar } from "./components/Sidebar";
 import { Topbar } from "./components/Topbar";
 import { PageOutlet } from "./components/PageOutlet";
 import type { PortalKey } from "./config/portals";
+import { useTableLabels } from "./lib/useTableLabels";
+
+// Stable getter so the observer is installed once; observes the whole
+// document body so modals (portalled outside .content) get labels too.
+const getContent = () => (typeof document === "undefined" ? null : document.body);
 
 function AppShell() {
   const { user } = useAuth();
@@ -22,6 +27,8 @@ function AppShell() {
       enterPortal(user.role as PortalKey);
     }
   }, [user, portal, enterPortal]);
+
+  useTableLabels(getContent);
 
   if (!portal) return null;
 

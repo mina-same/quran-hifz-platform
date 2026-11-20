@@ -3598,12 +3598,61 @@ textarea.form-input {
     margin: 10px auto 0;
   }
 
-  /* Tables → card list */
+  /* Tables → cards: every row becomes a card of «column: value» lines.
+     Labels come from the header via data-label (lib/useTableLabels.ts). */
   .tbl-wrap {
+    overflow: visible;
+  }
+  table.tbl,
+  table.tbl tbody,
+  table.tbl tr,
+  table.tbl td {
+    display: block;
+    width: 100%;
+  }
+  table.tbl thead {
     display: none;
   }
-  .rc-list {
+  table.tbl tr {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--cream);
+    padding: 4px 12px;
+    margin-bottom: 8px;
+  }
+  table.tbl td {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    min-height: 36px;
+  }
+  table.tbl td::before {
+    content: attr(data-label);
+    color: var(--text2);
+    font-weight: 600;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  table.tbl td[data-label=""]::before,
+  table.tbl td:not([data-label])::before {
+    display: none;
+  }
+  table.tbl td[colspan] {
+    justify-content: center;
+  }
+  table.tbl tr td:last-child {
+    border-bottom: none;
+  }
+  table.tbl tr:hover td,
+  .dark table.tbl tr:hover td {
+    background: transparent;
+  }
+  .tbl-sort-mobile {
+    display: inline-flex;
   }
 }
 
@@ -5117,3 +5166,25 @@ textarea.form-input {
 .spm-loading .skl { display: block; height: 30px; border-radius: 8px; }
 .spm-empty { color: var(--text3); text-align: center; padding: 20px; margin: 0; }
 @media (max-width: 600px) { .spm-stats { grid-template-columns: 1fr; } }
+
+/* ── Table tools (components/common/TableTools.tsx) ── */
+.tbl-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-bottom: 14px; }
+.tbl-search { position: relative; flex: 1 1 220px; max-width: 340px; }
+.tbl-search .ti { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); color: var(--text3); font-size: 15px; pointer-events: none; }
+.tbl-search .form-input { width: 100%; padding-right: 32px; }
+.tbl-filter { width: auto; min-width: 140px; max-width: 220px; flex: 0 1 auto; }
+.tbl-count { font-size: 12px; color: var(--text2); white-space: nowrap; }
+.tbl-clear { padding: 5px 10px; font-size: 12.5px; }
+.tbl-sort-mobile { display: none; align-items: center; gap: 6px; }
+.tbl-pager { margin-top: 12px; }
+th.th-sort { padding: 0; }
+.th-sort-btn {
+  all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 6px; width: 100%;
+  padding: 10px 14px; cursor: pointer; font: inherit; color: inherit; white-space: nowrap;
+}
+.th-sort-btn .ti { font-size: 14px; opacity: 0.45; }
+th.th-sort.is-active .th-sort-btn .ti { opacity: 1; }
+.th-sort-btn:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+@media (max-width: 600px) {
+  .tbl-search, .tbl-filter, .tbl-sort-mobile, .tbl-sort-mobile select { flex: 1 1 100%; max-width: none; }
+}

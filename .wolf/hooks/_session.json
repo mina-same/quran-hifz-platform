@@ -16,6 +16,16 @@
       "count": 1,
       "tokens": 0,
       "first_read": "2026-11-20T13:45:47.860Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/QuranApp.tsx": {
+      "count": 1,
+      "tokens": 880,
+      "first_read": "2026-11-20T14:23:08.028Z"
+    },
+    "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminParents.tsx": {
+      "count": 3,
+      "tokens": 5605,
+      "first_read": "2026-11-20T14:23:57.723Z"
     }
   },
   "files_written": [
@@ -84,6 +94,60 @@
       "action": "create",
       "tokens": 444,
       "at": "2026-11-20T14:18:32.928Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/lib/useTableControls.ts",
+      "action": "create",
+      "tokens": 1144,
+      "at": "2026-11-20T14:22:57.735Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/components/common/TableTools.tsx",
+      "action": "create",
+      "tokens": 794,
+      "at": "2026-11-20T14:22:57.884Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/lib/useTableLabels.ts",
+      "action": "create",
+      "tokens": 526,
+      "at": "2026-11-20T14:23:18.855Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/QuranApp.tsx",
+      "action": "edit",
+      "tokens": 20,
+      "at": "2026-11-20T14:23:19.001Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/QuranApp.tsx",
+      "action": "edit",
+      "tokens": 95,
+      "at": "2026-11-20T14:23:19.145Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/lib/useTableControls.ts",
+      "action": "edit",
+      "tokens": 16,
+      "at": "2026-11-20T14:23:52.357Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/components/common/TableTools.tsx",
+      "action": "edit",
+      "tokens": 177,
+      "at": "2026-11-20T14:23:52.526Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/components/common/TableTools.tsx",
+      "action": "edit",
+      "tokens": 227,
+      "at": "2026-11-20T14:23:52.672Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminParents.tsx",
+      "action": "edit",
+      "tokens": 46,
+      "at": "2026-11-20T14:24:20.479Z"
     }
   ],
   "edit_counts": {
@@ -91,11 +155,16 @@
     "quran-hifz/src/quran/components/common/ReportsDashboard.tsx": 2,
     "quran-hifz/src/quran/components/common/StudentReportPanel.tsx": 5,
     "quran-hifz/src/quran/pages/student/StudentDashboard.tsx": 1,
-    "../../../.claude/projects/-Users-xontel-Downloads-mina-work-quran-hifz-platform/memory/main-vercel-deployment.md": 1
+    "../../../.claude/projects/-Users-xontel-Downloads-mina-work-quran-hifz-platform/memory/main-vercel-deployment.md": 1,
+    "quran-hifz/src/quran/lib/useTableControls.ts": 2,
+    "quran-hifz/src/quran/components/common/TableTools.tsx": 3,
+    "quran-hifz/src/quran/lib/useTableLabels.ts": 1,
+    "quran-hifz/src/quran/QuranApp.tsx": 2,
+    "quran-hifz/src/quran/pages/admin/AdminParents.tsx": 1
   },
-  "anatomy_hits": 2,
+  "anatomy_hits": 4,
   "anatomy_misses": 1,
-  "repeated_reads_warned": 0,
+  "repeated_reads_warned": 2,
   "cerebrum_warnings": 0,
-  "stop_count": 4
+  "stop_count": 5
 }

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-20T14:18:32.914Z
-> Files: 789 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-20T14:24:20.468Z
+> Files: 792 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -1017,7 +1017,7 @@
 ## quran-hifz/src/quran/
 
 - `quran.css` — Styles: 70 rules, 18 vars (~26080 tok)
-- `QuranApp.tsx` — Quran Hifz platform — React entry. (~880 tok)
+- `QuranApp.tsx` — Quran Hifz platform — React entry. (~970 tok)
 
 ## quran-hifz/src/quran/api/
 
@@ -1085,6 +1085,7 @@
 - `StudentPointsModal.tsx` — Where a student's numbers in «لوحة الشرف» come from: every evaluated day in (~1253 tok)
 - `StudentReportPanel.tsx` — Per-juz' coverage derived client-side from a student's plans — no dedicated (~5580 tok)
 - `SurahRangePicker.tsx` — SurahPointFields (~439 tok)
+- `TableTools.tsx` — Clickable column header: asc → desc → off, with an arrow for the active one. (~1090 tok)
 - `TrackStudentsPanel.tsx` — Track roster management — transfer-only, since a student's track is (~2003 tok)
 
 ## quran-hifz/src/quran/config/
@@ -1110,6 +1111,8 @@
 - `evaluationRubric.ts` — The daily grading split is per plan now (`QuranPlan.gradeRubric`), not a (~817 tok)
 - `genderScope.ts` — Admin-wide "which masajid gender am I looking at" filter, selected from (~523 tok)
 - `quranRange.ts` — arr[i] = flat index where juz' (i+1) starts. (~6267 tok)
+- `useTableControls.ts` — One hook for every list table: text search, filters, column sort and (~1148 tok)
+- `useTableLabels.ts` — Copies each `table.tbl` column header onto its body cells as `data-label`, (~526 tok)
 
 ## quran-hifz/src/quran/pages/
 
@@ -1123,7 +1126,7 @@
 - `AdminHalqat.tsx` — OVERLAY — renders modal (~3688 tok)
 - `AdminKpis.tsx` — «مؤشرات الأداء» — this month's indicators, computed by the server from real (~975 tok)
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~3234 tok)
-- `AdminParents.tsx` — EMPTY_ADD — renders table (~5605 tok)
+- `AdminParents.tsx` — A student's halqa title (the track may come back as just an id). (~5340 tok)
 - `AdminRegister.tsx` — Create-student form. No reading-level select or auto-suggested track/masar block (removed 2026-09-26) — `path` always defaults to "حفظ كامل". (~2450 tok)
 - `AdminReports.tsx` — Admin reports — full school cohort. KPIs + teachers are org-wide widgets (~322 tok)
 - `AdminSpecialTracks.tsx` — surahName — renders form, modal (~13551 tok)

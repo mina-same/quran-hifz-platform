@@ -11,7 +11,9 @@ import {
   type ParentUser,
 } from "../../api/admin-parents";
 import { useStudents } from "../../api/students";
-import { toAr } from "../../../lib/format";
+import { Pagination } from "../../components/common/Pagination";
+import { SortTh, TableToolbar, TableFilter } from "../../components/common/TableTools";
+import { useTableControls } from "../../lib/useTableControls";
 
 /** A student's halqa title (the track may come back as just an id). */
 function trackTitleOf(s: { track?: string | { title: string } }): string {
@@ -65,7 +67,6 @@ export function AdminParents() {
   const [selectedStudent, setSelectedStudent] = useState("");
   const [linkQuery, setLinkQuery] = useState("");
 
-  const [search, setSearch] = useState("");
 
   function setAddField<K extends keyof AddForm>(key: K, value: string) {
     setAddForm((prev) => ({ ...prev, [key]: value }));
@@ -134,10 +135,18 @@ export function AdminParents() {
   const linkedStudentIds   = new Set(linkParent?.children.map((c) => c._id) ?? []);
   const availableStudents  = students.filter((s) => !linkedStudentIds.has(s._id));
 
-  const filtered = parents.filter((p) => {
-    const q = search.trim().toLowerCase();
-    if (!q) return true;
-    return p.name.toLowerCase().includes(q) || p.email.toLowerCase().includes(q);
+  const t = useTableControls(parents, {
+    search: (p) => [p.name, p.email, ...p.children.map((c) => c.name)],
+    sorters: {
+      name: (p) => p.name,
+      email: (p) => p.email,
+      children: (p) => p.children.length,
+      status: (p) => (p.isActive ? 0 : 1),
+    },
+    filters: {
+      status: (p, v) => (v === "active" ? p.isActive : !p.isActive),
+      children: (p, v) => (v === "linked" ? p.children.length > 0 : p.children.length === 0),
+    },
   });
 
   useTopbar(
@@ -153,20 +162,19 @@ export function AdminParents() {
   return (
     <>
       <Card>
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, marginBottom: 14 }}>
-          <input
-            className="form-input"
-            style={{ flex: 1, minWidth: 200, maxWidth: 320 }}
-            placeholder="البحث بالاسم أو البريد الإلكتروني..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          {!isLoading && !error && (
-            <span style={{ fontSize: 12, color: "var(--text2)", whiteSpace: "nowrap" }}>
-              {toAr(filtered.length)} من {toAr(parents.length)} ولي أمر
-            </span>
-          )}
-        </div>
+        <TableToolbar
+          t={t}
+          placeholder="البحث بالاسم أو البريد الإلكتروني أو اسم الابن..."
+          noun="ولي أمر"
+          sortOptions={[
+            { key: "name", label: "الاسم" },
+            { key: "children", label: "عدد الأبناء" },
+            { key: "status", label: "الحالة" },
+          ]}
+        >
+          <TableFilter t={t} k="status" label="كل الحالات" options={[{ value: "active", label: "نشط" }, { value: "inactive", label: "غير نشط" }]} />
+          <TableFilter t={t} k="children" label="الأبناء: الكل" options={[{ value: "linked", label: "لديه أبناء مرتبطون" }, { value: "none", label: "بدون أبناء" }]} />
+        </TableToolbar>
 
         {isLoading && <SkeletonTable cols={5} rows={5} />}
         {error && (
@@ -178,15 +186,15 @@ export function AdminParents() {
               <table className="tbl">
                 <thead>
                   <tr>
-                    <th>الاسم</th>
-                    <th>البريد الإلكتروني</th>
-                    <th>الأبناء المرتبطون</th>
-                    <th>الحالة</th>
+                    <SortTh t={t} k="name">الاسم</SortTh>
+                    <SortTh t={t} k="email">البريد الإلكتروني</SortTh>
+                    <SortTh t={t} k="children">الأبناء المرتبطون</SortTh>
+                    <SortTh t={t} k="status">الحالة</SortTh>
                     <th />
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((p) => (
+                  {t.pageRows.map((p) => (
                     <tr key={p._id}>
                       <td>
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -242,7 +250,7 @@ export function AdminParents() {
                       </td>
                     </tr>
                   )}
-                  {parents.length > 0 && filtered.length === 0 && (
+                  {parents.length > 0 && t.total === 0 && (
                     <tr>
                       <td colSpan={5} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
                         لا توجد نتائج مطابقة لبحثك
@@ -253,61 +261,8 @@ export function AdminParents() {
               </table>
             </div>
 
-            <div className="rc-list">
-              {filtered.map((p) => (
-                <div key={p._id} className="rc-card">
-                  <div className="rc-card-head">
-                    <div className="att-avatar" style={{ width: 32, height: 32, fontSize: 12 }}>
-                      {p.name.trim().charAt(0)}
-                    </div>
-                    <span className="rc-card-title">{p.name}</span>
-                    <Badge tone={p.isActive ? "green" : "gray"}>{p.isActive ? "نشط" : "غير نشط"}</Badge>
-                  </div>
-                  <div className="rc-row">
-                    <span className="rc-row-label">البريد الإلكتروني</span>
-                    <span style={{ direction: "ltr" }}>{p.email}</span>
-                  </div>
-                  <div className="rc-row">
-                    <span className="rc-row-label">الأبناء{p.children.length > 0 ? ` (${toAr(p.children.length)})` : ""}</span>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "flex-end" }}>
-                      {p.children.length === 0 && (
-                        <span style={{ fontSize: 12, color: "var(--text3)" }}>لا يوجد أبناء</span>
-                      )}
-                      {p.children.map((c) => (
-                        <ChildChip key={c._id} name={c.name} onRemove={readOnly ? undefined : () => handleUnlink(p._id, c._id)} />
-                      ))}
-                    </div>
-                  </div>
-                  {!readOnly && (
-                    <div className="rc-actions">
-                      <button
-                        className="topbar-btn btn-ghost"
-                        style={{ flex: 1, justifyContent: "center" }}
-                        onClick={() => openEdit(p)}
-                      >
-                        <i className="ti ti-pencil" /> تعديل
-                      </button>
-                      <button
-                        className="topbar-btn btn-ghost"
-                        style={{ flex: 1, justifyContent: "center" }}
-                        onClick={() => { setLinkParent(p); setSelectedStudent(""); setLinkQuery(""); }}
-                      >
-                        <i className="ti ti-user-plus" /> ربط
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-              {parents.length === 0 && (
-                <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                  لا يوجد أولياء أمور مسجلون بعد
-                </div>
-              )}
-              {parents.length > 0 && filtered.length === 0 && (
-                <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                  لا توجد نتائج مطابقة لبحثك
-                </div>
-              )}
+            <div className="tbl-pager">
+              <Pagination page={t.page} pageSize={t.pageSize} total={t.total} onChange={t.setPage} />
             </div>
           </>
         )}

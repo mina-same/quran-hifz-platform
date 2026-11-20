@@ -7215,5 +7215,23 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-11-10T10:27:10.627770"
+  },
+  {
+    "id": "bug-429",
+    "timestamp": "2026-11-20T16:25:38",
+    "error_message": "Tables (students, teachers, supervisors and ~15 others) vanish entirely on screens <=900px wide",
+    "file": "quran-hifz/src/quran/quran.css",
+    "root_cause": "The 900px media block hid every .tbl-wrap and showed .rc-list instead, but only 5 pages had an .rc-list card version; all other tables had no mobile markup so nothing rendered.",
+    "fix": "Replaced the hide/show swap with CSS that renders table.tbl rows as cards using data-label pseudo-labels; labels are copied from <th> text by a MutationObserver (lib/useTableLabels.ts) mounted in QuranApp. .rc-list now always hidden and duplicate markup removed.",
+    "tags": [
+      "css",
+      "responsive",
+      "mobile",
+      "tables",
+      "web"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-11-20T16:25:38"
   }
 ]

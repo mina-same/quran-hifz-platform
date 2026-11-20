@@ -6,6 +6,9 @@ import { Badge, type BadgeTone } from "../../components/common/Badge";
 import { SkeletonTable } from "../../components/common/Skeleton";
 import { useAttendance } from "../../api/attendance";
 import { useStudent } from "../../api/students";
+import { Pagination } from "../../components/common/Pagination";
+import { SortTh, TableToolbar, TableFilter } from "../../components/common/TableTools";
+import { useTableControls } from "../../lib/useTableControls";
 import { toAr, pct, AR_LOCALE } from "../../../lib/format";
 
 const STATUS_TONE: Record<string, BadgeTone> = {
@@ -14,6 +17,23 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   متأخر: "gold",
   مستأذن: "blue",
 };
+
+/** «YYYY-MM» of a date (local time) — the month filter's value. */
+function monthKey(d: string): string {
+  const x = new Date(d);
+  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/** Month options present in the data, newest first. */
+function monthOptions(dates: string[]): { value: string; label: string }[] {
+  return Array.from(new Set(dates.map(monthKey)))
+    .sort()
+    .reverse()
+    .map((k) => {
+      const [y, m] = k.split("-").map(Number);
+      return { value: k, label: new Date(y, m - 1, 1).toLocaleDateString(AR_LOCALE, { month: "long", year: "numeric" }) };
+    });
+}
 
 export function StudentAttendance() {
   const { user } = usePortal();
@@ -26,6 +46,21 @@ export function StudentAttendance() {
   const absentCount = records.filter((r) => r.status === "غائب").length;
   const lateCount = records.filter((r) => r.status === "متأخر").length;
 
+  const t = useTableControls(records, {
+    search: (r) => [new Date(r.date).toLocaleDateString(AR_LOCALE), r.day, r.time, r.status],
+    sorters: {
+      date: (r) => r.date,
+      day: (r) => r.day,
+      time: (r) => r.time,
+      status: (r) => r.status,
+    },
+    filters: {
+      status: (r, v) => r.status === v,
+      month: (r, v) => monthKey(r.date) === v,
+    },
+    initialSort: { key: "date", dir: "desc" },
+  });
+
   return (
     <>
       <StatsRow
@@ -37,6 +72,19 @@ export function StudentAttendance() {
         ]}
       />
       <Card>
+        <TableToolbar
+          t={t}
+          placeholder="البحث بالتاريخ أو اليوم أو الحالة..."
+          noun="جلسة"
+          sortOptions={[
+            { key: "date", label: "التاريخ" },
+            { key: "status", label: "الحالة" },
+          ]}
+        >
+          <TableFilter t={t} k="status" label="كل الحالات" options={[{ value: "حاضر", label: "حاضر" }, { value: "غائب", label: "غائب" }, { value: "متأخر", label: "متأخر" }, { value: "مستأذن", label: "مستأذن" }]} />
+          <TableFilter t={t} k="month" label="كل الأشهر" options={monthOptions(records.map((r) => r.date))} />
+        </TableToolbar>
+
         {isLoading && <SkeletonTable cols={4} rows={5} />}
         {!isLoading && (
           <>
@@ -44,14 +92,14 @@ export function StudentAttendance() {
               <table className="tbl">
                 <thead>
                   <tr>
-                    <th>التاريخ</th>
-                    <th>اليوم</th>
-                    <th>الوقت</th>
-                    <th>الحالة</th>
+                    <SortTh t={t} k="date">التاريخ</SortTh>
+                    <SortTh t={t} k="day">اليوم</SortTh>
+                    <SortTh t={t} k="time">الوقت</SortTh>
+                    <SortTh t={t} k="status">الحالة</SortTh>
                   </tr>
                 </thead>
                 <tbody>
-                  {records.map((r) => (
+                  {t.pageRows.map((r) => (
                     <tr key={r._id}>
                       <td>{new Date(r.date).toLocaleDateString(AR_LOCALE)}</td>
                       <td>{r.day}</td>
@@ -68,32 +116,19 @@ export function StudentAttendance() {
                       </td>
                     </tr>
                   )}
+                  {records.length > 0 && t.total === 0 && (
+                    <tr>
+                      <td colSpan={4} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                        لا توجد نتائج مطابقة لبحثك
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
 
-            <div className="rc-list">
-              {records.map((r) => (
-                <div key={r._id} className="rc-card">
-                  <div className="rc-card-head">
-                    <span className="rc-card-title">{new Date(r.date).toLocaleDateString(AR_LOCALE)}</span>
-                    <Badge tone={STATUS_TONE[r.status] ?? "gray"}>{r.status}</Badge>
-                  </div>
-                  <div className="rc-row">
-                    <span className="rc-row-label">اليوم</span>
-                    <span>{r.day}</span>
-                  </div>
-                  <div className="rc-row">
-                    <span className="rc-row-label">الوقت</span>
-                    <span>{r.time || "—"}</span>
-                  </div>
-                </div>
-              ))}
-              {records.length === 0 && (
-                <div style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
-                  لا توجد سجلات حضور بعد
-                </div>
-              )}
+            <div className="tbl-pager">
+              <Pagination page={t.page} pageSize={t.pageSize} total={t.total} onChange={t.setPage} />
             </div>
           </>
         )}

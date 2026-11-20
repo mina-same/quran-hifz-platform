@@ -21,6 +21,9 @@ import { Card } from "./Card";
 import { Badge, type BadgeTone } from "./Badge";
 import { SkeletonCard } from "./Skeleton";
 import { StatsRow } from "./StatsRow";
+import { Pagination } from "./Pagination";
+import { SortTh, TableToolbar, TableFilter } from "./TableTools";
+import { useTableControls } from "../../lib/useTableControls";
 import { useQuranPlans, type PlanSegment } from "../../api/quran-plans";
 import { openPlanIdsForReport } from "../../lib/openWard";
 import { openWardQueryOptions } from "../../api/open-ward";
@@ -235,6 +238,26 @@ export function StudentReportPanel({
     [comparisonRows],
   );
 
+  const juzT = useTableControls(juzRows, {
+    search: (r) => [r.juz, toAr(r.juz), surahName(r.from.surahNumber), surahName(r.to.surahNumber)],
+    sorters: { juz: (r) => r.juz, status: (r) => r.status },
+    filters: { status: (r, v) => r.status === v },
+    pageSize: 30,
+  });
+  const cmpT = useTableControls(comparisonRows, {
+    search: (r) => [r.name],
+    sorters: {
+      name: (r) => r.name,
+      attendance: (r) => r.attendancePct,
+      hifz: (r) => r.avgHifz,
+      tajweed: (r) => r.avgTajweed,
+      talawah: (r) => r.avgTalawah,
+      total: (r) => r.avgTotal,
+      count: (r) => r.count,
+    },
+    pageSize: 10,
+  });
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {overallStats && (
@@ -391,18 +414,31 @@ export function StudentReportPanel({
                 <Badge tone="gray">غير مخصص: {toAr(juzSummary.notAssigned)}</Badge>
               </div>
             </div>
+            <TableToolbar
+              t={juzT}
+              placeholder="بحث برقم الجزء أو السورة"
+              noun="جزء"
+              sortOptions={[{ key: "juz", label: "الجزء" }, { key: "status", label: "الحالة" }]}
+            >
+              <TableFilter
+                t={juzT}
+                k="status"
+                label="كل الحالات"
+                options={(["مكتمل", "قيد الحفظ", "غير مخصص"] as const).map((v) => ({ value: v, label: v }))}
+              />
+            </TableToolbar>
             <div className="tbl-wrap" style={{ maxHeight: 360, overflowY: "auto" }}>
               <table className="tbl">
                 <thead>
                   <tr>
-                    <th>الجزء</th>
+                    <SortTh t={juzT} k="juz">الجزء</SortTh>
                     <th>من</th>
                     <th>إلى</th>
-                    <th>الحالة</th>
+                    <SortTh t={juzT} k="status">الحالة</SortTh>
                   </tr>
                 </thead>
                 <tbody>
-                  {juzRows.map((r) => (
+                  {juzT.pageRows.map((r) => (
                     <tr key={r.juz}>
                       <td style={{ fontWeight: 700 }}>{toAr(r.juz)}</td>
                       <td>
@@ -465,21 +501,37 @@ export function StudentReportPanel({
             </BarChart>
           </ResponsiveContainer>
 
-          <div className="tbl-wrap" style={{ marginTop: 16 }}>
+          <div style={{ marginTop: 16 }}>
+            <TableToolbar
+              t={cmpT}
+              placeholder="بحث باسم الطالب"
+              noun="طالب"
+              sortOptions={[
+                { key: "name", label: "الطالب" },
+                { key: "attendance", label: "نسبة الحضور" },
+                { key: "hifz", label: "متوسط الحفظ" },
+                { key: "tajweed", label: "متوسط التجويد" },
+                { key: "talawah", label: "متوسط التلاوة" },
+                { key: "total", label: "المتوسط الكلي" },
+                { key: "count", label: "عدد الجلسات" },
+              ]}
+            />
+          </div>
+          <div className="tbl-wrap">
             <table className="tbl">
               <thead>
                 <tr>
-                  <th>الطالب</th>
-                  <th>نسبة الحضور</th>
-                  <th>متوسط الحفظ</th>
-                  <th>متوسط التجويد</th>
-                  <th>متوسط التلاوة</th>
-                  <th>المتوسط الكلي</th>
-                  <th>عدد الجلسات</th>
+                  <SortTh t={cmpT} k="name">الطالب</SortTh>
+                  <SortTh t={cmpT} k="attendance">نسبة الحضور</SortTh>
+                  <SortTh t={cmpT} k="hifz">متوسط الحفظ</SortTh>
+                  <SortTh t={cmpT} k="tajweed">متوسط التجويد</SortTh>
+                  <SortTh t={cmpT} k="talawah">متوسط التلاوة</SortTh>
+                  <SortTh t={cmpT} k="total">المتوسط الكلي</SortTh>
+                  <SortTh t={cmpT} k="count">عدد الجلسات</SortTh>
                 </tr>
               </thead>
               <tbody>
-                {comparisonRows.map((r) => (
+                {cmpT.pageRows.map((r) => (
                   <tr key={r.name}>
                     <td style={{ fontWeight: 700 }}>{r.name}</td>
                     <td>{pct(r.attendancePct)}</td>
@@ -502,6 +554,9 @@ export function StudentReportPanel({
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="tbl-pager">
+            <Pagination page={cmpT.page} pageSize={cmpT.pageSize} total={cmpT.total} onChange={cmpT.setPage} />
           </div>
         </Card>
       )}

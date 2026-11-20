@@ -8,6 +8,9 @@ import { useStudents, useUpdateStudent, useDeleteStudent, type Student } from ".
 import { useTracks } from "../../api/tracks";
 import { useAdminParents, useStudentParent, useSetStudentParent } from "../../api/admin-parents";
 import { matchesGenderScope } from "../../lib/genderScope";
+import { Pagination } from "../../components/common/Pagination";
+import { SortTh, TableToolbar, TableFilter } from "../../components/common/TableTools";
+import { useTableControls } from "../../lib/useTableControls";
 
 const PATH_TONE: Record<string, BadgeTone> = {
   "حفظ كامل": "gold",
@@ -26,6 +29,12 @@ function getTrackMasjidName(track: Student["track"]): string {
   const m = track.masjid;
   if (m && typeof m === "object" && "name" in m) return (m as { name: string }).name;
   return "";
+}
+/** The track's populated masjid (null when the ref is a bare id). */
+function getTrackMasjid(track: Student["track"]) {
+  if (!track || typeof track !== "object") return null;
+  const m = track.masjid;
+  return m && typeof m === "object" ? m : null;
 }
 function getObjId(h: unknown): string {
   if (h && typeof h === "object" && "_id" in h) return (h as { _id: string })._id;
@@ -68,7 +77,6 @@ export function AdminStudents() {
   const deleteStudent    = useDeleteStudent();
   const setStudentParent = useSetStudentParent();
 
-  const [search, setSearch] = useState("");
   const [editItem, setEditItem] = useState<Student | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<EditFormFields>({ name: "", track: "", guardianPhone: "", phone: "", nationalId: "", status: "active", email: "", password: "" });
@@ -150,10 +158,6 @@ export function AdminStudents() {
     </>,
   );
 
-  const filtered = students.filter((s) => {
-    return !search || s.name.includes(search);
-  });
-
   // Map each student id → its linked parent account (from the parents list,
   // where every parent carries its children).
   const parentByStudentId = new Map<string, { name: string; email: string }>();
@@ -161,18 +165,64 @@ export function AdminStudents() {
     for (const c of p.children) parentByStudentId.set(c._id, { name: p.name, email: p.email });
   }
 
+  const trackLabel = (s: Student) => getObjName(s.track) || s.path || "";
+
+  // Filter options come from the students actually listed (scope-aware).
+  const masjidOptions = new Map<string, string>();
+  const trackOptions = new Map<string, string>();
+  for (const s of students) {
+    const m = getTrackMasjid(s.track);
+    if (m) masjidOptions.set(m._id, m.name);
+    const tid = getObjId(s.track);
+    const title = getObjName(s.track);
+    if (tid && title) trackOptions.set(tid, title);
+  }
+  const byLabel = (a: [string, string], b: [string, string]) => a[1].localeCompare(b[1], "ar");
+
+  const t = useTableControls(students, {
+    search: (s) => [
+      s.name, getObjName(s.track), s.path, getTrackMasjidName(s.track),
+      parentByStudentId.get(s._id)?.email, parentByStudentId.get(s._id)?.name,
+      s.guardianPhone, s.phone, s.nationalId, s.email,
+    ],
+    sorters: {
+      name: (s) => s.name,
+      track: trackLabel,
+      masjid: (s) => getTrackMasjidName(s.track),
+      parent: (s) => parentByStudentId.get(s._id)?.email,
+      status: (s) => (s.status === "active" ? 0 : s.status === "new" ? 1 : 2),
+    },
+    filters: {
+      masjid: (s, v) => getTrackMasjid(s.track)?._id === v,
+      track: (s, v) => getObjId(s.track) === v,
+      gender: (s, v) => getTrackMasjid(s.track)?.gender === v,
+      status: (s, v) => s.status === v,
+      parent: (s, v) => (v === "linked" ? parentByStudentId.has(s._id) : !parentByStudentId.has(s._id)),
+    },
+  });
+
   return (
     <>
       <Card>
-        <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-          <input
-            className="form-input"
-            style={{ flex: 1 }}
-            placeholder="البحث باسم الطالب..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <TableToolbar
+          t={t}
+          placeholder="البحث باسم الطالب أو المسار أو المسجد أو ولي الأمر..."
+          noun="طالب"
+          sortOptions={[
+            { key: "name", label: "الاسم" },
+            { key: "track", label: "المسار" },
+            { key: "masjid", label: "المسجد" },
+            { key: "status", label: "الحالة" },
+          ]}
+        >
+          <TableFilter t={t} k="masjid" label="كل المساجد" options={[...masjidOptions].sort(byLabel).map(([value, label]) => ({ value, label }))} />
+          <TableFilter t={t} k="track" label="كل المسارات" options={[...trackOptions].sort(byLabel).map(([value, label]) => ({ value, label }))} />
+          {genderScope === "all" && (
+            <TableFilter t={t} k="gender" label="بنين وبنات" options={[{ value: "male", label: "بنين" }, { value: "female", label: "بنات" }]} />
+          )}
+          <TableFilter t={t} k="status" label="كل الحالات" options={[{ value: "active", label: "نشط" }, { value: "new", label: "جديد" }, { value: "inactive", label: "غير نشط" }]} />
+          <TableFilter t={t} k="parent" label="ولي الأمر: الكل" options={[{ value: "linked", label: "مرتبط بولي أمر" }, { value: "none", label: "بدون ولي أمر" }]} />
+        </TableToolbar>
 
         {isLoading && <SkeletonTable cols={6} rows={6} />}
         {error && (
@@ -180,20 +230,21 @@ export function AdminStudents() {
         )}
 
         {!isLoading && !error && (
+          <>
           <div className="tbl-wrap">
             <table className="tbl">
               <thead>
                 <tr>
-                  <th>الاسم</th>
-                  <th>المسار</th>
-                  <th>المسجد</th>
-                  <th>ولي الأمر</th>
-                  <th>الحالة</th>
+                  <SortTh t={t} k="name">الاسم</SortTh>
+                  <SortTh t={t} k="track">المسار</SortTh>
+                  <SortTh t={t} k="masjid">المسجد</SortTh>
+                  <SortTh t={t} k="parent">ولي الأمر</SortTh>
+                  <SortTh t={t} k="status">الحالة</SortTh>
                   <th />
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((s) => (
+                {t.pageRows.map((s) => (
                   <tr key={s._id}>
                     <td style={{ fontWeight: 600 }}>{s.name}</td>
                     <td>
@@ -242,7 +293,14 @@ export function AdminStudents() {
                     </td>
                   </tr>
                 ))}
-                {filtered.length === 0 && (
+                {students.length === 0 && (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
+                      لا يوجد طلاب مسجلون بعد
+                    </td>
+                  </tr>
+                )}
+                {students.length > 0 && t.total === 0 && (
                   <tr>
                     <td colSpan={6} style={{ textAlign: "center", color: "var(--text3)", padding: 24 }}>
                       لا توجد نتائج
@@ -252,6 +310,11 @@ export function AdminStudents() {
               </tbody>
             </table>
           </div>
+
+          <div className="tbl-pager">
+            <Pagination page={t.page} pageSize={t.pageSize} total={t.total} onChange={t.setPage} />
+          </div>
+          </>
         )}
       </Card>
 
