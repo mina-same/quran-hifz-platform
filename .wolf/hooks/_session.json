@@ -148,6 +148,18 @@
       "action": "edit",
       "tokens": 46,
       "at": "2026-11-20T14:24:20.479Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz/src/quran/pages/admin/AdminGradeChanges.tsx",
+      "action": "create",
+      "tokens": 1149,
+      "at": "2026-11-20T14:38:33.706Z"
+    },
+    {
+      "file": "/Users/xontel/Downloads/mina-work/quran-hifz-platform/quran-hifz-mobile/app/(portal)/admin/gradechanges.tsx",
+      "action": "create",
+      "tokens": 1777,
+      "at": "2026-11-20T14:39:16.402Z"
     }
   ],
   "edit_counts": {
@@ -160,11 +172,13 @@
     "quran-hifz/src/quran/components/common/TableTools.tsx": 3,
     "quran-hifz/src/quran/lib/useTableLabels.ts": 1,
     "quran-hifz/src/quran/QuranApp.tsx": 2,
-    "quran-hifz/src/quran/pages/admin/AdminParents.tsx": 1
+    "quran-hifz/src/quran/pages/admin/AdminParents.tsx": 1,
+    "quran-hifz/src/quran/pages/admin/AdminGradeChanges.tsx": 1,
+    "quran-hifz-mobile/app/(portal)/admin/gradechanges.tsx": 1
   },
   "anatomy_hits": 4,
   "anatomy_misses": 1,
   "repeated_reads_warned": 2,
   "cerebrum_warnings": 0,
-  "stop_count": 10
+  "stop_count": 11
 }

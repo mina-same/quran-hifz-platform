@@ -352,3 +352,45 @@ async function logGradeChanges(args: {
     sendPushToUsers(recipients.map((r) => ({ userId: String(r._id), title: SYSTEM_SENDER.name, body }))),
   ]);
 }
+
+/**
+ * GET /evaluations/changes?from=&to=&track= — «سجل تعديل الدرجات» (admin;
+ * supervisor = own section). Only edits saved AFTER the halqa's daily report
+ * for that day was sent (createdAt > report.updatedAt); edits before sending
+ * are the teacher's normal work and are not listed. `from`/`to` filter the
+ * evaluation day.
+ */
+export async function getGradeChanges(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { from, to, track } = req.query as Record<string, string | undefined>;
+    const re = /^\d{4}-\d{2}-\d{2}$/;
+    const filter: Record<string, unknown> = {};
+    if ((from && re.test(from)) || (to && re.test(to))) {
+      filter.date = {
+        ...(from && re.test(from) ? { $gte: new Date(from) } : {}),
+        ...(to && re.test(to) ? { $lt: new Date(new Date(to).getTime() + 86_400_000) } : {}),
+      };
+    }
+    if (track) filter.track = track;
+    const gender = supervisorGenderOf(req);
+    if (gender) filter.track = restrictTrackFilter(filter.track, await trackIdsForGender(gender));
+
+    const edits = await EvaluationChange.find(filter).sort({ createdAt: -1 }).limit(2000).lean();
+    const dayOf = (d: Date) => new Date(d).toISOString().slice(0, 10);
+    const reports = edits.length
+      ? await DailyReport.find({
+          track: { $in: [...new Set(edits.map((e) => String(e.track)))] },
+          date: { $in: [...new Set(edits.map((e) => dayOf(e.date)))] },
+        }).select('track date updatedAt').lean()
+      : [];
+    const sentAt = new Map(reports.map((r) => [`${String(r.track)}|${r.date}`, r.updatedAt]));
+
+    const data = edits
+      .map((e) => ({ ...e, reportSentAt: sentAt.get(`${String(e.track)}|${dayOf(e.date)}`) ?? null }))
+      .filter((e) => e.reportSentAt && e.createdAt > e.reportSentAt)
+      .slice(0, 500);
+    res.json({ success: true, count: data.length, data });
+  } catch (err) {
+    next(err);
+  }
+}

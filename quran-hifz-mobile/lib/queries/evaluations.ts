@@ -104,3 +104,30 @@ export function useBulkEvaluate() {
     },
   });
 }
+
+/** «سجل تعديل الدرجات» — a saved day re-saved with different values AFTER the
+ *  halqa's daily report for that day was sent (web parity). */
+export type GradeChange = {
+  _id: string;
+  track: string;
+  trackTitle: string;
+  student: string;
+  studentName: string;
+  date: string;
+  editedByName: string;
+  editedByRole: string;
+  changes: { label: string; from: string; to: string }[];
+  createdAt: string;
+  reportSentAt: string;
+};
+
+export function useGradeChanges(filters: { from?: string; to?: string; track?: string }) {
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(filters)) if (v) params.set(k, v);
+  const qs = params.toString();
+  return useQuery({
+    queryKey: ['grade-changes', qs],
+    queryFn: () =>
+      get<{ success: boolean; data: GradeChange[] }>(`/evaluations/changes${qs ? `?${qs}` : ''}`).then((r) => r.data),
+  });
+}

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-20T14:24:20.468Z
-> Files: 792 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-20T14:39:16.391Z
+> Files: 794 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -561,6 +561,7 @@
 - `_layout.tsx` — ADMIN_MORE_IDS — renders form (~1286 tok)
 - `dailyreports.tsx` — One card per report — tap to expand the full sheet (web opens it in a modal). (~2837 tok)
 - `dashboard.tsx` — المسار: real track lives one hop away via `Student.track` — same fallback chain as admin/students.ts (~3367 tok)
+- `gradechanges.tsx` — «سجل تعديل الدرجات» (web parity): grades / attendance changed AFTER the (~1777 tok)
 - `halqat.tsx` — AdminHalqat (~423 tok)
 - `kpis.tsx` — ratingVariant (~1020 tok)
 - `masajid.tsx` — AdminMasajid (~1280 tok)
@@ -1123,6 +1124,7 @@
 ## quran-hifz/src/quran/pages/admin/
 
 - `AdminDashboard.tsx` — PageLoading (~1372 tok)
+- `AdminGradeChanges.tsx` — «سجل تعديل الدرجات»: grades / attendance that were changed AFTER the halqa's (~1149 tok)
 - `AdminHalqat.tsx` — OVERLAY — renders modal (~3688 tok)
 - `AdminKpis.tsx` — «مؤشرات الأداء» — this month's indicators, computed by the server from real (~975 tok)
 - `AdminMasajid.tsx` — OVERLAY — renders modal (~3234 tok)

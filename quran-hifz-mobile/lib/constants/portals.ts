@@ -124,6 +124,7 @@ export const PORTALS: Record<string, PortalConfig> = {
         group: "التقارير",
         items: [
           { id: "dailyreports", icon: "report", label: "التقارير اليومية", desc: "تقارير الحلقات اليومية" },
+          { id: "gradechanges", icon: "history", label: "سجل تعديل الدرجات", desc: "التعديلات بعد إرسال التقرير" },
           { id: "kpis", icon: "target", label: "مؤشرات الأداء", desc: "مؤشرات أداء الجمعية" },
           { id: "reports", icon: "chart-bar", label: "التقارير", desc: "تقارير الحفظ والحضور" },
         ],
