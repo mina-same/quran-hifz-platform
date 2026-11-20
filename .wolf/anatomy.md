@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-20T13:17:39.735Z
-> Files: 788 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-20T14:18:32.914Z
+> Files: 789 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../private/tmp/claude-501/-Users-xontel-Downloads-mina-work-quran-hifz-platform/06b0f7da-a424-4530-8212-1878478c0fd4/scratchpad/
 
@@ -173,6 +173,7 @@
 
 ## ../../../.claude/projects/-Users-xontel-Downloads-mina-work-quran-hifz-platform/memory/
 
+- `main-vercel-deployment.md` (~416 tok)
 - `mobile-parity-content-not-design.md` (~286 tok)
 - `saas-branch-never-merge-main.md` (~480 tok)
 
